@@ -1,0 +1,21 @@
+{
+    "name": "@mosaiq/terrazzo-common",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "prepublishOnly": "echo 'publishing to mosaiq' && npm run build && npm run authVerdaccio",
+        "authVerdaccio": "npx verdaccio-github-oauth-ui --registry https://registry.mosaiq.dev",
+        "build": "tsc"
+    },
+    "publishConfig": {
+        "registry": "https://registry.mosaiq.dev"
+    },
+    "license": "UNLICENSED",
+    "dependencies": {
+        "typescript": "^5.7.2"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.2"
+    }
+}
