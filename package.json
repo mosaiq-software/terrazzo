@@ -1,0 +1,29 @@
+{
+  "name": "trz-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts"
+  },
+  "author": "",
+  "license": "UNLICENCED",
+  "dependencies": {
+    "@mosaiq/terrazzo-common": "^1.0.0",
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "query-string": "^9.1.1",
+    "sequelize": "^6.37.5",
+    "sqlite3": "^5.1.7",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.2"
+  }
+}
