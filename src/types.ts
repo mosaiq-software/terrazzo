@@ -1,6 +1,6 @@
 export interface Card {
     id: string;
-    cardCode: string;
+    cardNumber: string;
     name: string;
     description: string;
     priority: Priority;
@@ -11,12 +11,14 @@ export interface Card {
     checklists: Checklist[];
     labels: Label[];
     timesheetEntries: TimesheetEntry[];
+    archived: boolean;
 }
 
 export interface List {
     id: string;
     name: string;
     cards: Card[];
+    archived: boolean;
 }
 
 export interface Board {
@@ -27,6 +29,7 @@ export interface Board {
     members: BoardMember[];
     sprints: Sprint[];
     labels: Label[];
+    archived: boolean;
 }
 
 export interface Sprint {
@@ -41,7 +44,8 @@ export interface User {
     fullName: string;
     discordUserId: string;
     githubUserId: string;
-    timer: Timer;
+    activeTimerId: string;
+    archived: boolean;
 }
 
 export interface BoardMember extends User {
@@ -59,6 +63,7 @@ export interface Comment {
     content: string;
     postedAt: Date;
     postedBy: User;
+    archived: boolean;
 }
 
 export enum Priority {
@@ -73,6 +78,7 @@ export interface Checklist {
     id: string;
     name: string;
     items: ChecklistItem[];
+    archived: boolean;
 }
 
 export interface ChecklistItem {
@@ -93,11 +99,8 @@ export interface TimesheetEntry {
     endedAt: Date;
     description: string;
     userId: string;
-}
-
-export interface Timer {
-    running: boolean;
-    timesheetEntryId: string;
+    cardId: string;
+    archived: boolean;
 }
 
 export interface EventLog {
@@ -106,8 +109,8 @@ export interface EventLog {
     timestamp: Date;
     userId: string; // User who triggered the event
     itemId: string; // Board, List, Card, Sprint, User, Comment, Checklist, ChecklistItem, Label, TimesheetEntry
-    initialData: any;
-    updatedData: any;
+    oldValue: any;
+    newValue: any;
 }
 
 export enum EventType {
@@ -140,5 +143,6 @@ export enum EventType {
     TIMESHEET_ENTRY_UPDATED = 'TIMESHEET_ENTRY_UPDATED',
     TIMESHEET_ENTRY_ENDED = 'TIMESHEET_ENTRY_ENDED',
     TIMER_STARTED = 'TIMER_STARTED',
-    TIMER_STOPPED = 'TIMER_STOPPED'
+    TIMER_STOPPED = 'TIMER_STOPPED',
+    ROLLBACK_TO_EVENT = 'ROLLBACK_TO_EVENT'
 }
