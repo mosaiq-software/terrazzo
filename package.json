@@ -6,7 +6,10 @@
     "scripts": {
         "prepublishOnly": "echo 'publishing to mosaiq' && npm run build && npm run authVerdaccio",
         "authVerdaccio": "npx verdaccio-github-oauth-ui --registry https://registry.mosaiq.dev",
-        "build": "tsc"
+        "build": "tsc",
+        "prepare": "husky",
+        "after-push": "node ./scripts/after-push.mjs",
+        "before-push": "node ./scripts/before-push.mjs"
     },
     "publishConfig": {
         "registry": "https://registry.mosaiq.dev"
@@ -16,6 +19,7 @@
         "typescript": "^5.7.2"
     },
     "devDependencies": {
-        "@types/node": "^22.10.2"
+        "@types/node": "^22.10.2",
+        "husky": "^9.1.7"
     }
 }
