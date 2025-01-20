@@ -4,8 +4,6 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
-        "prepublishOnly": "echo 'publishing to mosaiq' && npm run build && npm run authVerdaccio",
-        "authVerdaccio": "npx verdaccio-github-oauth-ui --registry https://registry.mosaiq.dev",
         "build": "tsc",
         "prepare": "husky",
         "after-push": "node ./scripts/after-push.mjs",
