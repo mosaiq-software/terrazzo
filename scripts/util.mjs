@@ -18,6 +18,7 @@ export const getRepoName = () => {
     return new Promise((resolve, reject) => {
         fs.readFile('package.json', 'utf8', (err, data) => {
             if (err) {
+                console.error(err);
                 reject(err);
             } else {
                 const packageJson = JSON.parse(data);
