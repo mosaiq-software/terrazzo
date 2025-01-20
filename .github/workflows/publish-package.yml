@@ -20,4 +20,6 @@ jobs:
           node-version: 20
           registry-url: https://registry.mosaiq.dev
       - run: npm ci
+      - run: npm run build
+      - run: echo //registry.mosaiq.dev/:_authToken=${{ secrets.MOSAIQ_REGISTRY_AUTH_TOKEN }} > ~/.npmrc
       - run: npm publish
