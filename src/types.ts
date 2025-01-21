@@ -30,6 +30,8 @@ export interface Board {
     sprints: Sprint[];
     labels: Label[];
     archived: boolean;
+    createdAt: number;
+    totalCards: number;
 }
 
 export interface Sprint {
