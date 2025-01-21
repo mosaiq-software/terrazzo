@@ -2,7 +2,7 @@ import axios from "axios";
 import { Request, Response } from "express";
 import queryString from "query-string";
 
-export const githubLogin = async (req: Request, res: Response) => {
+export const githubAuth = async (req: Request, res: Response) => {
     const code = req.query.code as string;
     if (!code) {
         return res.status(400).send('No code provided');
@@ -11,10 +11,17 @@ export const githubLogin = async (req: Request, res: Response) => {
     if (!access_token) {
         return res.status(400).send('Invalid code');
     }
+    res.json({ access_token });
+};
+
+export const githubUserData = async (req: Request, res: Response) => {
+    const access_token = req.query.access_token as string;
+    if (!access_token) {
+        return res.status(400).send('No access token provided');
+    }
     const userData = await getGitHubUserData(access_token);
     res.json(userData);
-    
-};
+}
 
 async function getAccessTokenFromCode(code:string) {
     try{
