@@ -1,11 +1,20 @@
-import { githubLogin } from '@trz-api/controllers/userController';
+import { githubAuth, githubUserData } from '@trz-api/controllers/userController';
 import express from 'express';
 
 const router = express.Router();
 
-router.get('/githubLogin', (req, res) => {
+router.get('/github/auth', (req, res) => {
     try {
-        githubLogin(req, res);
+        githubAuth(req, res);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.get('/github/userdata', (req, res) => {
+    try {
+        githubUserData(req, res);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');
