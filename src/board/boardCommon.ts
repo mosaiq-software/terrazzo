@@ -1,42 +1,74 @@
-import {BoardType} from "@trz-api/board/boardType";
-import {ListType} from "@trz-api/board/lists/listType";
+import {Board, List} from "@mosaiq/terrazzo-common/dist/types";
+import {createBoard, getBoardById, getBoardMembers, updateBoard} from "@trz-api/persistence/boardPersistence";
+import {getListsByBoardIdDown} from "@trz-api/persistence/listPersistence";
+import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
 
-export function createBoard(title:string, abv:string, users:string[]) {
+export function createWholeBoard(name:string, boardCode:string) {
 
-    const newBoard: BoardType = {id:"", abv:"", nextCardNumber: 0, title:"", lists:[], users:[], createdAt:0};
-    if(title.length > 50) {
+    const newBoard: Board = {
+        id:"",
+        boardCode:boardCode,
+        name:name,
+        lists:[],
+        members:[],
+        sprints:[],
+        labels:[],
+        archived:false,
+        createdAt:0,
+        totalCards:0};
+
+    if(name.length > 50) {
         throw new Error("Title must be 50 characters or less");
     }
 
-    if(abv.length > 3) {
+    if(boardCode.length > 3) {
         throw new Error("Abbreviation must be 3 characters or less");
     }
 
     newBoard.id = crypto.randomUUID();
-    newBoard.abv = abv;
-    newBoard.nextCardNumber = 1;
-    newBoard.title = title;
-    newBoard.users.push(...users);
+    newBoard.boardCode = boardCode;
+    newBoard.totalCards = 0;
+    newBoard.name = name;
     newBoard.createdAt = Date.now();
 
     //save board before returning
     //add try statement for error handling
 
-    return {
-        board: newBoard
-    };
+    try{
+        return createBoard(newBoard);
+    }catch (e) {
+        throw new Error("Failed to save board" + e);
+    }
 }
 
-export function getBoard(boardID:string) {
-    return {
-        board: {} as BoardType
-    };
+export async function getWholeBoard(boardID:string) {
+    //pull board from db with ID
+    const board = await getBoardById(boardID);
+
+    if(board == null) {
+        throw new Error("Board not found");
+    }
+
+    try {
+        board.lists = await getListsByBoardIdDown(boardID);
+        board.members = await getBoardMembers(boardID);
+        board.sprints = [];
+        board.labels = await getLabelsByBoardId(boardID);
+
+        return board;
+    } catch (e) {
+        throw new Error("Failed to retrieve board" + e);
+    }
 }
 
-export function addingList(boardID:string, newLists:ListType) {
+export async function addingList(boardID:string, newLists:List) {
 
     //pull board from db with ID
-    const updatingBoard: BoardType = {id:"", abv:"", nextCardNumber: 0, title:"", lists:[], users:[], createdAt:0}; ///TODO: get board from db
+    const updatingBoard = await getBoardById(boardID);
+
+    if (updatingBoard == null) {
+        throw new Error("Board not found");
+    }
 
     if(updatingBoard.lists.length > 50) {
         throw new Error("Board cannot have more than 50 lists");
@@ -47,7 +79,7 @@ export function addingList(boardID:string, newLists:ListType) {
     //save board before returning
     //add try statement for error handling
     try {
-        //saving to db
+        await updateBoard(updatingBoard);
         return true;
     }catch (e) {
         throw new Error("Failed to save board" + e);
@@ -55,14 +87,22 @@ export function addingList(boardID:string, newLists:ListType) {
 }
 
 export function updateListPositions(boardID:string, newPosition:number[]) {
-    const updatingBoard: BoardType = {id:"", abv:"", nextCardNumber: 0, title:"", lists:[], users:[], createdAt:0}; ///TODO: get board from db
+    const updatingBoard: Board = {
+        id:"",
+        boardCode:"",
+        name:"",
+        lists:[],
+        members:[],
+        sprints:[],
+        labels:[],
+        archived:false,
+        createdAt:0,
+        totalCards: 0};
 
 
     if(newPosition[1] > updatingBoard.lists.length || newPosition[1] < updatingBoard.lists.length) {
         throw new Error("Position out of bounds");
     }
-
-
 
     //save board before returning
     //add try statement for error handling

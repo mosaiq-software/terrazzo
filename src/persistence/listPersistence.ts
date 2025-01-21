@@ -10,7 +10,8 @@ ListModel.init({
     },
     boardId: DataTypes.STRING,
     name: DataTypes.STRING,
-    archived: DataTypes.BOOLEAN
+    archived: DataTypes.BOOLEAN,
+    order: DataTypes.INTEGER
 }, { sequelize, modelName: 'listModel' });
 
 sequelize.sync();
@@ -22,6 +23,10 @@ export const getListById = async (id: string) => {
 
 export const getListsByBoardId = async (boardId: string) => {
     return (await ListModel.findAll({ where: { boardId } })).map(list => list.toJSON()) as List[];
+}
+
+export const getListsByBoardIdDown = async (boardId: string) => {
+    return (await ListModel.findAll({ where: { boardId }, order: [['order', 'DESC']] })).map(list => list.toJSON()) as List[];
 }
 
 export const createListOnBoard = async (list: List, boardId: string) => {

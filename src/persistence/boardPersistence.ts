@@ -10,7 +10,9 @@ BoardModel.init({
     },
     boardCode: DataTypes.STRING,
     name: DataTypes.STRING,
-    archived: DataTypes.BOOLEAN
+    archived: DataTypes.BOOLEAN,
+    createdAt: DataTypes.INTEGER,
+    totalCards: DataTypes.INTEGER,
 }, { sequelize, modelName: 'boardModel' });
 
 class BoardMemberModel extends Model {}

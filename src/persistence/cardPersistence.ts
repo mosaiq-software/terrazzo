@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Card } from '@mosaiq/terrazzo-common/dist/types';
+import {Card, List} from '@mosaiq/terrazzo-common/dist/types';
 
 class CardModel extends Model {}
 CardModel.init({
@@ -15,7 +15,8 @@ CardModel.init({
     priority: DataTypes.INTEGER,
     storyPoints: DataTypes.INTEGER,
     sprintId: DataTypes.STRING,
-    archived: DataTypes.BOOLEAN
+    archived: DataTypes.BOOLEAN,
+    order: DataTypes.INTEGER
 }, { sequelize, modelName: 'cardModel' });
 
 sequelize.sync();
@@ -53,6 +54,10 @@ export const updateCard = async (card: Card) => {
         archived: card.archived
     }, { where: { id: card.id } });
 };
+
+export const getCardsByBoardIdDown = async (listId: string) => {
+    return (await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] })).map(list => list.toJSON()) as List[];
+}
 
 export const setCardArchived = async (id: string, archived: boolean) => {
     return await CardModel.update({ archived }, { where: { id } });
