@@ -3,6 +3,7 @@
     "version": "1.1.2",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "repository": "https://github.com/mosaiq-software/terrazzo-common.git",
     "scripts": {
         "build": "tsc",
         "prepare": "husky",
