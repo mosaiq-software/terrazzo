@@ -14,6 +14,7 @@ export interface Card {
     labels: Label[];
     timesheetEntries: TimesheetEntry[];
     archived: boolean;
+    order: number;
 }
 
 export interface List {
@@ -21,6 +22,7 @@ export interface List {
     name: string;
     cards: Card[];
     archived: boolean;
+    order: number;
 }
 
 export interface Board {
@@ -89,7 +91,7 @@ export interface Label {
     id: string;
     name: string;
     color: string;
-};
+}
 
 export interface TimesheetEntry {
     id: string;
