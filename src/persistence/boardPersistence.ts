@@ -28,6 +28,9 @@ BoardMemberModel.init({
 
 sequelize.sync();
 
+export const getBoards = async () => {
+    return (await BoardModel.findAll()).map(board => board.toJSON()) as Board[];
+}
 
 export const getBoardById = async (id: string) => {
     return (await BoardModel.findByPk(id))?.toJSON() as Board | null;

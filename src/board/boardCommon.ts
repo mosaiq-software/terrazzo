@@ -26,12 +26,12 @@ export async function getWholeBoard(boardID:string) {
 }
 
 //Creates
-export function addBoard(name:string, boardCode:string) {
+export async function addBoard(name:string, boardCode:string) {
 
     const newBoard: Board = {
         id:"",
-        boardCode:boardCode,
-        name:name,
+        boardCode:"",
+        name:"",
         lists:[],
         members:[],
         sprints:[],
@@ -50,15 +50,13 @@ export function addBoard(name:string, boardCode:string) {
 
     newBoard.id = crypto.randomUUID();
     newBoard.boardCode = boardCode;
-    newBoard.totalCards = 0;
     newBoard.name = name;
+    newBoard.totalCards = 0;
     newBoard.createdAt = Date.now();
 
-    //save board before returning
-    //add try statement for error handling
-
     try{
-        return createBoard(newBoard);
+        await createBoard(newBoard);
+        return newBoard.id;
     }catch (e) {
         throw new Error("Failed to save board" + e);
     }
@@ -79,6 +77,7 @@ export async function addList(boardID:string, listName:string) {
 
     const newList: List = {
         id:crypto.randomUUID(),
+        boardId:boardID,
         name:listName,
         cards:[],
         archived:false,
@@ -104,9 +103,7 @@ export async function addCard(listID:string, cardName:string) {
         throw new Error("Board not found");
     }
 
-    //This is throwing error because board boardId is not in common repo
-    //const board = await getBoardById(updatingList.boardId);
-    const board = await getBoardById("temp for now");//TODO: FIX THIS
+    const board = await getBoardById(updatingList.boardId);
 
     if (board == null) {
         throw new Error("Board not found");
