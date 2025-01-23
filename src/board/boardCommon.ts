@@ -1,9 +1,32 @@
-import {Board, List} from "@mosaiq/terrazzo-common/dist/types";
+import {Board, Card, List, Priority} from "@mosaiq/terrazzo-common/dist/types";
 import {createBoard, getBoardById, getBoardMembers, updateBoard} from "@trz-api/persistence/boardPersistence";
-import {getListsByBoardIdDown} from "@trz-api/persistence/listPersistence";
+import {getListById, getListsByBoardIdDown, getNextListOrder, updateList} from "@trz-api/persistence/listPersistence";
 import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
+import {getNextCardOrder} from "@trz-api/persistence/cardPersistence";
 
-export function createWholeBoard(name:string, boardCode:string) {
+//Gets
+export async function getWholeBoard(boardID:string) {
+    //pull board from db with ID
+    const board = await getBoardById(boardID);
+
+    if(board == null) {
+        throw new Error("Board not found");
+    }
+
+    try {
+        board.lists = await getListsByBoardIdDown(boardID);
+        board.members = await getBoardMembers(boardID);
+        board.sprints = [];
+        board.labels = await getLabelsByBoardId(boardID);
+
+        return board;
+    } catch (e) {
+        throw new Error("Failed to retrieve board" + e);
+    }
+}
+
+//Creates
+export function addBoard(name:string, boardCode:string) {
 
     const newBoard: Board = {
         id:"",
@@ -41,27 +64,7 @@ export function createWholeBoard(name:string, boardCode:string) {
     }
 }
 
-export async function getWholeBoard(boardID:string) {
-    //pull board from db with ID
-    const board = await getBoardById(boardID);
-
-    if(board == null) {
-        throw new Error("Board not found");
-    }
-
-    try {
-        board.lists = await getListsByBoardIdDown(boardID);
-        board.members = await getBoardMembers(boardID);
-        board.sprints = [];
-        board.labels = await getLabelsByBoardId(boardID);
-
-        return board;
-    } catch (e) {
-        throw new Error("Failed to retrieve board" + e);
-    }
-}
-
-export async function addingList(boardID:string, newLists:List) {
+export async function addList(boardID:string, listName:string) {
 
     //pull board from db with ID
     const updatingBoard = await getBoardById(boardID);
@@ -74,7 +77,14 @@ export async function addingList(boardID:string, newLists:List) {
         throw new Error("Board cannot have more than 50 lists");
     }
 
-    updatingBoard.lists.push(newLists);
+    const newList: List = {
+        id:crypto.randomUUID(),
+        name:listName,
+        cards:[],
+        archived:false,
+        order:await getNextListOrder(boardID)};
+
+    updatingBoard.lists.push(newList);
 
     //save board before returning
     //add try statement for error handling
@@ -86,6 +96,59 @@ export async function addingList(boardID:string, newLists:List) {
     }
 }
 
+export async function addCard(listID:string, cardName:string) {
+    //pull board from db with ID
+    const updatingList = await getListById(listID);
+
+    if (updatingList == null) {
+        throw new Error("Board not found");
+    }
+
+    //This is throwing error because board boardId is not in common repo
+    //const board = await getBoardById(updatingList.boardId);
+    const board = await getBoardById("temp for now");//TODO: FIX THIS
+
+    if (board == null) {
+        throw new Error("Board not found");
+    }
+
+    if(updatingList.cards.length > 50) {
+        throw new Error("List cannot have more than 50 cards");
+    }
+
+    const newCard: Card = {
+        id:crypto.randomUUID(),
+        cardNumber:board.boardCode + "-" + (board.totalCards + 1),
+        name:cardName,
+        description:"",
+        priority:Priority.LOWEST,
+        storyPoints:0,
+        sprintId:"",
+        assignees:[],
+        comments:[],
+        checklists:[],
+        labels:[],
+        timesheetEntries:[],
+        archived:false,
+        order:await getNextCardOrder(listID)
+    };
+
+    updatingList.cards.push(newCard);
+
+    //save board before returning
+    //add try statement for error handling
+    try {
+        await updateList(updatingList).then(async () => {
+            board.totalCards++;
+            await updateBoard(board);
+        });
+        return true;
+    }catch (e) {
+        throw new Error("Failed to save Card" + e);
+    }
+}
+
+//Updates
 export function updateListPositions(boardID:string, newPosition:number[]) {
     const updatingBoard: Board = {
         id:"",
@@ -98,7 +161,6 @@ export function updateListPositions(boardID:string, newPosition:number[]) {
         archived:false,
         createdAt:0,
         totalCards: 0};
-
 
     if(newPosition[1] > updatingBoard.lists.length || newPosition[1] < updatingBoard.lists.length) {
         throw new Error("Position out of bounds");

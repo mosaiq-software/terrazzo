@@ -62,3 +62,8 @@ export const getCardsByBoardIdDown = async (listId: string) => {
 export const setCardArchived = async (id: string, archived: boolean) => {
     return await CardModel.update({ archived }, { where: { id } });
 };
+
+export const getNextCardOrder = async (listId: string) => {
+    const card = (await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] })).map(card => card.toJSON()) as Card[];
+    return card ? card.length + 1 : 1;
+}
