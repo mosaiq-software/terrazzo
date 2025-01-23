@@ -19,6 +19,7 @@ export interface Card {
 
 export interface List {
     id: string;
+    boardId: string;
     name: string;
     cards: Card[];
     archived: boolean;
