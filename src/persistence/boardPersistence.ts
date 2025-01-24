@@ -41,7 +41,8 @@ export const createBoard = async (board: Board) => {
         id: board.id,
         boardCode: board.boardCode,
         name: board.name,
-        archived: false
+        archived: false,
+        totalCards: board.totalCards,
     });
 }
 
@@ -49,7 +50,8 @@ export const updateBoard = async (board: Board) => {
     return await BoardModel.update({
         boardCode: board.boardCode,
         name: board.name,
-        archived: board.archived
+        archived: board.archived,
+        totalCards: board.totalCards
     }, { where: { id: board.id } });
 };
 

@@ -39,14 +39,16 @@ export const createListOnBoard = async (list: List, boardId: string) => {
         id: list.id,
         boardId,
         name: list.name,
-        archived: false
+        archived: false,
+        order: list.order
     });
 }
 
 export const updateList = async (list: List) => {
     return await ListModel.update({
         name: list.name,
-        archived: list.archived
+        archived: list.archived,
+        order: list.order
     }, { where: { id: list.id } });
 }
 

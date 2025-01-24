@@ -1,8 +1,13 @@
 import {Board, Card, List, Priority} from "@mosaiq/terrazzo-common/dist/types";
 import {createBoard, getBoardById, getBoardMembers, updateBoard} from "@trz-api/persistence/boardPersistence";
-import {getListById, getListsByBoardIdDown, getNextListOrder, updateList} from "@trz-api/persistence/listPersistence";
+import {
+    createListOnBoard,
+    getListById,
+    getListsByBoardIdDown,
+    getNextListOrder,
+} from "@trz-api/persistence/listPersistence";
 import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
-import {getNextCardOrder} from "@trz-api/persistence/cardPersistence";
+import {createCardOnList, getCardsByListIdDown, getNextCardOrder} from "@trz-api/persistence/cardPersistence";
 
 //Gets
 export async function getWholeBoard(boardID:string) {
@@ -14,7 +19,7 @@ export async function getWholeBoard(boardID:string) {
     }
 
     try {
-        board.lists = await getListsByBoardIdDown(boardID);
+        board.lists = await getAllListsOfBoard(boardID);
         board.members = await getBoardMembers(boardID);
         board.sprints = [];
         board.labels = await getLabelsByBoardId(boardID);
@@ -23,6 +28,26 @@ export async function getWholeBoard(boardID:string) {
     } catch (e) {
         throw new Error("Failed to retrieve board" + e);
     }
+}
+
+export async function getAllListsOfBoard(boardID:string) {
+
+    const lists = await getListsByBoardIdDown(boardID);
+
+    if(lists == null) {
+        return [];
+    }
+
+    for (const list of lists) {
+        list.cards = await getCardsByListIdDown(list.id);
+    }
+
+    try {
+        return lists;
+    } catch (e) {
+        throw new Error("Failed to retrieve board" + e);
+    }
+
 }
 
 //Creates
@@ -71,9 +96,13 @@ export async function addList(boardID:string, listName:string) {
         throw new Error("Board not found");
     }
 
-    if(updatingBoard.lists.length > 50) {
+    if(updatingBoard.lists && updatingBoard.lists.length > 50) {
         throw new Error("Board cannot have more than 50 lists");
     }
+
+    const newListOrder = await getNextListOrder(boardID);
+
+    console.log(newListOrder);
 
     const newList: List = {
         id:crypto.randomUUID(),
@@ -81,15 +110,14 @@ export async function addList(boardID:string, listName:string) {
         name:listName,
         cards:[],
         archived:false,
-        order:await getNextListOrder(boardID)};
-
-    updatingBoard.lists.push(newList);
+        order: newListOrder
+    };
 
     //save board before returning
     //add try statement for error handling
     try {
-        await updateBoard(updatingBoard);
-        return true;
+        await createListOnBoard(newList, boardID);
+        return newList.id;
     }catch (e) {
         throw new Error("Failed to save board" + e);
     }
@@ -109,7 +137,7 @@ export async function addCard(listID:string, cardName:string) {
         throw new Error("Board not found");
     }
 
-    if(updatingList.cards.length > 50) {
+    if(updatingList.cards && updatingList.cards.length > 50) {
         throw new Error("List cannot have more than 50 cards");
     }
 
@@ -130,16 +158,14 @@ export async function addCard(listID:string, cardName:string) {
         order:await getNextCardOrder(listID)
     };
 
-    updatingList.cards.push(newCard);
-
     //save board before returning
     //add try statement for error handling
     try {
-        await updateList(updatingList).then(async () => {
+        await createCardOnList(newCard, listID).then(async () => {
             board.totalCards++;
             await updateBoard(board);
         });
-        return true;
+        return newCard.id;
     }catch (e) {
         throw new Error("Failed to save Card" + e);
     }
