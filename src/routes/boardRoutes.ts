@@ -31,7 +31,7 @@ async function getBoard(req:Request, res:Response) {
         const board = await getWholeBoard(boardID);
         res.status(200).json(board);
     } catch (e: any) {
-        res.status(404).json({message: e.message});
+        res.status(400).json({message: e.message});
     }
 }
 
@@ -39,7 +39,7 @@ async function getBoard(req:Request, res:Response) {
  * Creates a new board
  * The request body must contain the board name [name] and code [boardCode]
  * The Response will return a 200 code with the ID of the new board on success
- * Otherwise, a 404 error will be returned
+ * Otherwise, a 400 error will be returned
  * @param req
  * @param res
  */
@@ -56,7 +56,7 @@ async function createBoard(req:Request, res:Response) {
         res.status(200).json({boardId: boardID});
     } catch (e: any) {
         console.log("Error creating board");
-        res.status(404).json({message: e.message});
+        res.status(400).json({message: e.message});
     }
 }
 
@@ -64,7 +64,7 @@ async function createBoard(req:Request, res:Response) {
  * Creates a new list
  * The Request body must contain the board ID [boardId] and the list name [name]
  * The Response will return a 200 code with the ID of the new list on success
- * Otherwise, a 404 error will be returned
+ * Otherwise, a 400 error will be returned
  * @param req
  * @param res
  */
@@ -81,7 +81,7 @@ async function createList(req:Request, res:Response) {
         res.status(200).json({listId: listID});
     } catch (e: any) {
         console.log("Error creating List");
-        res.status(404).json({message: e.message});
+        res.status(400).json({message: e.message});
     }
 }
 
@@ -89,7 +89,7 @@ async function createList(req:Request, res:Response) {
  * Creates a new card
  * The Request body must contain the list ID [listId] and the card name [name]
  * The Response will return a 200 code the ID of the new card on success
- * Otherwise, a 404 error will be returned
+ * Otherwise, a 400 error will be returned
  * @param req
  * @param res
  */
@@ -106,7 +106,7 @@ async function createCard(req:Request, res:Response) {
         res.status(200).json({cardId: cardID});
     } catch (e: any) {
         console.log("Error creating Card");
-        res.status(404).json({message: e.message});
+        res.status(400).json({message: e.message});
     }
 }
 
@@ -122,7 +122,7 @@ async function getAllBoards(req:Request, res:Response) {
         res.status(200).json(boards);
     } catch (e: any) {
         console.log("Error getting all boards");
-        res.status(404).json({message: e.message});
+        res.status(400).json({message: e.message});
     }
 }
 
