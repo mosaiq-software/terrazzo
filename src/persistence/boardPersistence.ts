@@ -10,7 +10,9 @@ BoardModel.init({
     },
     boardCode: DataTypes.STRING,
     name: DataTypes.STRING,
-    archived: DataTypes.BOOLEAN
+    archived: DataTypes.BOOLEAN,
+    createdAt: DataTypes.INTEGER,
+    totalCards: DataTypes.INTEGER,
 }, { sequelize, modelName: 'boardModel' });
 
 class BoardMemberModel extends Model {}
@@ -26,6 +28,9 @@ BoardMemberModel.init({
 
 sequelize.sync();
 
+export const getBoards = async () => {
+    return (await BoardModel.findAll()).map(board => board.toJSON()) as Board[];
+}
 
 export const getBoardById = async (id: string) => {
     return (await BoardModel.findByPk(id))?.toJSON() as Board | null;
@@ -36,7 +41,8 @@ export const createBoard = async (board: Board) => {
         id: board.id,
         boardCode: board.boardCode,
         name: board.name,
-        archived: false
+        archived: false,
+        totalCards: board.totalCards,
     });
 }
 
@@ -44,7 +50,8 @@ export const updateBoard = async (board: Board) => {
     return await BoardModel.update({
         boardCode: board.boardCode,
         name: board.name,
-        archived: board.archived
+        archived: board.archived,
+        totalCards: board.totalCards
     }, { where: { id: board.id } });
 };
 
