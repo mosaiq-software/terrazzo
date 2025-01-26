@@ -2,15 +2,20 @@ import { Router, Request, Response } from "express";
 import {addBoard, getWholeBoard} from "@trz-api/board/boardCommon";
 import {getBoards} from "@trz-api/persistence/boardPersistence";
 import {addList} from "@trz-api/board/listCommon";
-import {addCard} from "@trz-api/board/cardCommon";
+import {addCard, editDescription} from "@trz-api/board/cardCommon";
 
 const router = Router();
 
 router.get("/all", getAllBoards);
 router.get("/:id", getBoard);
+
+//create tasks
 router.post("/create", createBoard)
 router.post("/create/list", createList)
 router.post("/create/card", createCard)
+
+//update tasks
+router.patch("/update/card/description", updateCardDescription)
 
 /**
  * Gets all boards
@@ -122,6 +127,31 @@ async function getAllBoards(req:Request, res:Response) {
         res.status(200).json(boards);
     } catch (e: any) {
         console.log("Error getting all boards");
+        res.status(400).json({message: e.message});
+    }
+}
+
+/**
+ * Updates the description of a card
+ * The Request body must contain the card ID [cardId] and the new description [description]
+ * The Response will return a 200 code on success
+ * Otherwise, a 400 error will be returned with the error message
+ * @param req
+ * @param res
+ */
+async function updateCardDescription(req:Request, res:Response) {
+    console.log("Updating card description");
+
+    if(!req.body.cardId || !req.body.description) {
+        res.status(400).json({message: "Card ID and description are required"});
+        return;
+    }
+
+    try {
+        await editDescription(req.body.cardId, req.body.description);
+        res.status(200).json({message: "Description updated"});
+    } catch (e: any) {
+        console.log("Error updating card description");
         res.status(400).json({message: e.message});
     }
 }
