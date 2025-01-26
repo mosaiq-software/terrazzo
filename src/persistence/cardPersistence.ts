@@ -57,6 +57,10 @@ export const updateCard = async (card: Card) => {
     }, { where: { id: card.id } });
 };
 
+export const updateDescription = async (cardId: string, description: string) => {
+    return await CardModel.update({ description: description }, { where: { id: cardId } });
+};
+
 export const getCardsByListIdDown = async (listId: string) => {
     return (await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] })).map(list => list.toJSON()) as Card[];
 }
