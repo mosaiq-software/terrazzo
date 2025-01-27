@@ -2,7 +2,8 @@ import {
     createCardOnList,
     getCardsByListId,
     getNextCardOrder,
-    updateDescription
+    updateDescription,
+    updateName,
 } from "@trz-api/persistence/cardPersistence";
 import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
 import {getListById} from "@trz-api/persistence/listPersistence";
@@ -109,6 +110,25 @@ export async function editDescription(cardID:string, description:string) {
     //Add any checks here for any future use
     try {
         await updateDescription(cardID, description);
+        return true;
+    }catch (e) {
+        throw new Error("Failed to save Card" + e);
+    }
+}
+
+
+/**
+ * Updates the name of a card
+ * You must pass in the card ID and the new name
+ * Returns true if successful
+ * @param cardID
+ * @param name
+ */
+export async function editName(cardID:string, name:string) {
+
+    //Add any checks here for any future use
+    try {
+        await updateName(cardID, name);
         return true;
     }catch (e) {
         throw new Error("Failed to save Card" + e);
