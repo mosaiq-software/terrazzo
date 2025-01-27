@@ -16,6 +16,7 @@ router.post("/create/card", createCard)
 
 //update tasks
 router.patch("/update/card/description", updateCardDescription)
+router.patch("/update/card/name", updateCardName)
 
 /**
  * Gets all boards
