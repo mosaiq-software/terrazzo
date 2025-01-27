@@ -61,9 +61,13 @@ export const updateDescription = async (cardId: string, description: string) => 
     return await CardModel.update({ description: description }, { where: { id: cardId } });
 };
 
+export const updateName = async (cardId: string, name: string) => {
+    return await CardModel.update({ name: name }, { where: { id: cardId } });
+};
+
 export const getCardsByListIdDown = async (listId: string) => {
     return (await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] })).map(list => list.toJSON()) as Card[];
-}
+};
 
 export const setCardArchived = async (id: string, archived: boolean) => {
     return await CardModel.update({ archived }, { where: { id } });

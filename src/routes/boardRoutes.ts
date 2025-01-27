@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import {addBoard, getWholeBoard} from "@trz-api/board/boardCommon";
 import {getBoards} from "@trz-api/persistence/boardPersistence";
 import {addList} from "@trz-api/board/listCommon";
-import {addCard, editDescription} from "@trz-api/board/cardCommon";
+import {addCard, editDescription, editName} from "@trz-api/board/cardCommon";
 
 const router = Router();
 
@@ -16,6 +16,7 @@ router.post("/create/card", createCard)
 
 //update tasks
 router.patch("/update/card/description", updateCardDescription)
+router.patch("/update/card/name", updateCardName)
 
 /**
  * Gets all boards
@@ -152,6 +153,31 @@ async function updateCardDescription(req:Request, res:Response) {
         res.status(200).json({message: "Description updated"});
     } catch (e: any) {
         console.log("Error updating card description");
+        res.status(400).json({message: e.message});
+    }
+}
+
+/**
+ * Updates the name of a card
+ * The Request body must contain the card ID [cardId] and the new name [description]
+ * The Response will return a 200 code on success
+ * Otherwise, a 400 error will be returned with the error message
+ * @param req
+ * @param res
+ */
+async function updateCardName(req:Request, res:Response) {
+    console.log("Updating card name");
+
+    if(!req.body.cardId || !req.body.name) {
+        res.status(400).json({message: "Card ID and name are required"});
+        return;
+    }
+
+    try {
+        await editName(req.body.cardId, req.body.name);
+        res.status(200).json({message: "Name updated"});
+    } catch (e: any) {
+        console.log("Error updating card name");
         res.status(400).json({message: e.message});
     }
 }
