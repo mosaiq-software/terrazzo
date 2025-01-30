@@ -19,7 +19,7 @@ export const githubUserData = async (req: Request, res: Response) => {
     if (!access_token) {
         return res.status(400).send('No access token provided');
     }
-    const userData = await getGitHubUserData(access_token);
+    const userData = await getPrivateGitHubUserData(access_token);
     res.json(userData);
 }
 
@@ -44,13 +44,48 @@ async function getAccessTokenFromCode(code:string) {
     }
 };
 
-async function getGitHubUserData(access_token: string) {
+export async function getPrivateGitHubUserData(access_token: string) {
     try{
         const { data } = await axios({
             url: 'https://api.github.com/user',
             method: 'get',
             headers: {
                 Authorization: `token ${access_token}`,
+            },
+        });
+        return data;
+    } catch (error) {
+        return null;
+    }
+};
+
+export async function getPublicGithubUserDataFromGithubUserId(githubId: string) {
+    try {
+        const { data } = await axios({
+            url: `https://api.github.com/user/${githubId}`,
+            method: 'get',
+        });
+        return data;
+    } catch (error) {
+        return null;
+    }
+}
+
+export async function getOrgMemberIds(org: string, access_token: string) {
+    const members = await getOrgMembershipData(org, access_token);
+    if (!members) {
+        return [];
+    }
+    return members.map((member: any) => member.id);
+}
+export async function getOrgMembershipData(org: string, access_token: string) {
+    try {
+        const { data } = await axios({
+            url: `https://api.github.com/orgs/${org}/members`,
+            method: 'get',
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+                'X-GitHub-Api-Version': '2022-11-28',
             },
         });
         return data;
