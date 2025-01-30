@@ -21,7 +21,8 @@ jobs:
           registry-url: https://registry.mosaiq.dev
       - run: npm ci
       - run: npm run build
+      - run: npm run prepublish-cleanup
       - run: echo "//registry.mosaiq.dev/:_authToken=\${NODE_AUTH_TOKEN}" > .npmrc
-      - run: npm publish
+      - run: npm publish ./dist
     env:
       NODE_AUTH_TOKEN: ${{secrets.MOSAIQ_REGISTRY_AUTH_TOKEN}} 
