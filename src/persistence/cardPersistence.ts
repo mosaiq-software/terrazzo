@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import {Card} from '@mosaiq/terrazzo-common/dist/types';
+import {Card} from '@mosaiq/terrazzo-common/types';
 
 class CardModel extends Model {}
 CardModel.init({

@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { EventLog } from '@mosaiq/terrazzo-common/dist/types';
+import { EventLog } from '@mosaiq/terrazzo-common/types';
 
 class EventModel extends Model {}
 EventModel.init({

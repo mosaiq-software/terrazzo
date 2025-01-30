@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { User } from '@mosaiq/terrazzo-common/dist/types';
+import { User } from '@mosaiq/terrazzo-common/types';
 
 class UserModel extends Model {}
 UserModel.init({

@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Sprint } from '@mosaiq/terrazzo-common/dist/types';
+import { Sprint } from '@mosaiq/terrazzo-common/types';
 
 class SprintModel extends Model {}
 SprintModel.init({

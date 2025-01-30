@@ -1,4 +1,4 @@
-import {Board} from "@mosaiq/terrazzo-common/dist/types";
+import {Board} from "@mosaiq/terrazzo-common/types";
 import {createBoard, getBoardById, getBoardMembers} from "@trz-api/persistence/boardPersistence";
 import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
 import {getAllListsOfBoard} from "@trz-api/board/listCommon";

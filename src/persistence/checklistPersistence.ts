@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Checklist, ChecklistItem } from '@mosaiq/terrazzo-common/dist/types';
+import { Checklist, ChecklistItem } from '@mosaiq/terrazzo-common/types';
 
 class ChecklistModel extends Model {}
 ChecklistModel.init({

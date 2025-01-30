@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Label } from '@mosaiq/terrazzo-common/dist/types';
+import { Label } from '@mosaiq/terrazzo-common/types';
 
 class LabelModel extends Model {}
 LabelModel.init({
