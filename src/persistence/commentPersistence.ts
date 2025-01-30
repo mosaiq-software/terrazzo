@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Comment } from '@mosaiq/terrazzo-common/dist/types';
+import { Comment } from '@mosaiq/terrazzo-common/types';
 
 class CommentModel extends Model {}
 CommentModel.init({

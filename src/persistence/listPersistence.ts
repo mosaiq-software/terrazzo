@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { List } from '@mosaiq/terrazzo-common/dist/types';
+import { List } from '@mosaiq/terrazzo-common/types';
 
 class ListModel extends Model {}
 ListModel.init({

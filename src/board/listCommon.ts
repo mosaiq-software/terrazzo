@@ -1,6 +1,6 @@
 import {createListOnBoard, getListsByBoardIdDown, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
-import {Board, List} from "@mosaiq/terrazzo-common/dist/types";
+import {Board, List} from "@mosaiq/terrazzo-common/types";
 import {getAllCardsOfList} from "@trz-api/board/cardCommon";
 
 //Gets

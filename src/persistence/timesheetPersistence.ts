@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { TimesheetEntry } from '@mosaiq/terrazzo-common/dist/types';
+import { TimesheetEntry } from '@mosaiq/terrazzo-common/types';
 
 class TimeSheetModel extends Model {}
 TimeSheetModel.init({

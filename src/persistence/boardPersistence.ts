@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Board, BoardMember } from '@mosaiq/terrazzo-common/dist/types';
+import { Board, BoardMember } from '@mosaiq/terrazzo-common/types';
 
 class BoardModel extends Model {}
 BoardModel.init({
