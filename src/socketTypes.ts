@@ -1,3 +1,5 @@
+import {Board} from "./types";
+
 export enum ClientSocketIOEvent {
     CONNECT = "connect",
     DISCONNECT = "disconnect",
@@ -31,7 +33,7 @@ export interface UserData {
     }
 }
 export interface SocketEventPayload {
-    [SocketEventTypes.INITIALIZE]: { roomUsers: UserData[]; };
+    [SocketEventTypes.INITIALIZE]: { roomUsers: UserData[], board: Board };
     [SocketEventTypes.CLIENT_CONNECT]: UserData;
     [SocketEventTypes.CLIENT_DISCONNECT]: { sid: string, room: string };
     [SocketEventTypes.CHANGE_ROOM]: string;
