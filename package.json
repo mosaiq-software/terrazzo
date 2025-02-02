@@ -6,7 +6,7 @@
   "type": "module",
   "repository": "https://github.com/mosaiq-software/terrazzo-api",
   "scripts": {
-    "start": "tsx src/index.ts",
+    "start": "tsx watch src/index.ts",
     "prepare": "husky",
     "after-push": "node ./scripts/after-push.mjs",
     "before-push": "node ./scripts/before-push.mjs"
@@ -14,7 +14,7 @@
   "author": "",
   "license": "UNLICENCED",
   "dependencies": {
-    "@mosaiq/terrazzo-common": "1.1.6",
+    "@mosaiq/terrazzo-common": "1.2.0",
     "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
