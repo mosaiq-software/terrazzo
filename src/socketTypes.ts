@@ -1,7 +1,9 @@
 import { Board } from "./types";
 
+// SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
     CONNECT = "connect",
+    CONNECT_ERROR = "connect_error",
     DISCONNECT = "disconnect",
     RECONNECT = "reconnect",
     RECONNECT_ATTEMPT = "reconnect_attempt",
@@ -12,71 +14,60 @@ export enum ServerSocketIOEvent {
     DISCONNECTING = 'disconnecting',
 }
 
-// SE = Socket Event
+// CLIENT SOCKET EVENTS
 export enum ClientSE { // Client to Server
-    SET_ROOM = "C_SET_ROOM",
-    MOUSE_MOVE = "C_MOUSE_MOVE",
-    USER_IDLE = "C_USER_IDLE",
-    GET_BOARD = "C_GET_BOARD",
+    SET_ROOM = "SET_ROOM",
+    MOUSE_MOVE = "MOUSE_MOVE",
+    USER_IDLE = "USER_IDLE",
+    GET_BOARD = "GET_BOARD",
 }
-export enum ServerSE { // Server to Client
-    CLIENT_JOINED_ROOM = "S_CLIENT_JOINED_ROOM",
-    CLIENT_LEFT_ROOM = "S_CLIENT_LEFT_ROOM",
-    MOUSE_MOVE = "S_MOUSE_MOVE",
-    USER_IDLE = "S_USER_IDLE",
-}
-
-export interface SEPayload {
+export interface ClientSEPayload {
     // Client to Server
     [ClientSE.SET_ROOM]: RoomId;
     [ClientSE.MOUSE_MOVE]: Position;
     [ClientSE.USER_IDLE]: boolean;
     [ClientSE.GET_BOARD]: string;
-
-    // Server to Client
-    [ServerSE.CLIENT_JOINED_ROOM]: UserData;
-    [ServerSE.CLIENT_LEFT_ROOM]: SocketId;
-    [ServerSE.MOUSE_MOVE]: { sid: SocketId; data: MouseUserData };
-    [ServerSE.USER_IDLE]: { sid: SocketId; idle: boolean };
-
 }
-
-// types for the callback functions for each event type
-export interface SEReplies {
+export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
     [ClientSE.SET_ROOM]: { users: UserData[] };
     [ClientSE.MOUSE_MOVE]: undefined;
     [ClientSE.USER_IDLE]: undefined;
     [ClientSE.GET_BOARD]: { board: Board };
+}
+export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
 
+// SERVER SOCKET EVENTS
+export enum ServerSE { // Server to Client
+    READY = "READY",
+    CLIENT_JOINED_ROOM = "CLIENT_JOINED_ROOM",
+    CLIENT_LEFT_ROOM = "CLIENT_LEFT_ROOM",
+    MOUSE_MOVE = "MOUSE_MOVE",
+    USER_IDLE = "USER_IDLE",
+}
+export interface ServerSEPayload {
+    // Server to Client
+    [ServerSE.READY]: void;
+    [ServerSE.CLIENT_JOINED_ROOM]: UserData;
+    [ServerSE.CLIENT_LEFT_ROOM]: SocketId;
+    [ServerSE.MOUSE_MOVE]: { sid: SocketId; data: MouseRoomUserData };
+    [ServerSE.USER_IDLE]: { sid: SocketId; idle: boolean };
+}
+export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
-    [ServerSE.CLIENT_JOINED_ROOM]: undefined;
-    [ServerSE.CLIENT_LEFT_ROOM]: undefined;
-    [ServerSE.MOUSE_MOVE]: undefined;
-    [ServerSE.USER_IDLE]: undefined;
+    [ServerSE.READY]: void;
+    [ServerSE.CLIENT_JOINED_ROOM]: void;
+    [ServerSE.CLIENT_LEFT_ROOM]: void;
+    [ServerSE.MOUSE_MOVE]: void;
+    [ServerSE.USER_IDLE]: void;
 }
-export interface SEReply<T extends keyof SEReplies> {
-    type: T;
-    data: SEReplies[T];
-    error?: string;
-}
+export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
 
-export interface MouseUserData extends Position {};
+export interface MouseRoomUserData extends Position {};
 
-export interface TextUserData {
+export interface TextRoomUserData {
     cursor: number;
     highlight: number;
-}
-export interface UserGeneralData {
-    githubId: string;
-    username: string;
-    avatarUrl: string;
-    fullName: string;
-    idle: boolean;
-}
-export interface UserData extends UserGeneralData {
-    sid: SocketId;
-    data: MouseUserData | TextUserData;
 }
 
 export type Position = { x: number; y: number; }
@@ -84,9 +75,13 @@ export type Position = { x: number; y: number; }
 export type RoomId = string | null;
 export type SocketId = string;
 
-
-export interface SocketData {
-    connectedAt: Date;
-    access_token: string;
-    user: UserData;
+export interface UserData {
+    sid: SocketId;
+    githubId: string;
+    username: string;
+    avatarUrl: string;
+    fullName: string;
+    idle: boolean;
+    mouseRoomData?: MouseRoomUserData;
+    textRoomData?: TextRoomUserData;
 }
