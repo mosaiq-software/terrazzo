@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { broadcastToMyRoom, getSocketData, setSocketData, joinRoom, leaveRoom } from './socketUtils';
 import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-common/socketTypes';
 import { getBoardById } from '@trz-api/persistence/boardPersistence';
+import {getWholeBoard} from "@trz-api/board/boardCommon";
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SET_ROOM, async (room: ClientSEPayload[ClientSE.SET_ROOM], reply: ClientSEReply<ClientSE.SET_ROOM>) => {
@@ -43,10 +44,11 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No board id provided');
             }
-            const board = await getBoardById(data);
+            const board = await getWholeBoard(data);
             reply({ board });
         } catch (error: any) {
-            reply({ board: undefined }, error.message);
+            //TODO: handle error
+            //reply({ board: {undefined} }, error.message);
         }
     });
         

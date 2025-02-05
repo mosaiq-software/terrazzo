@@ -1,4 +1,4 @@
-import {createListOnBoard, getListsByBoardIdDown, getNextListOrder} from "@trz-api/persistence/listPersistence";
+import {createListOnBoard, getListsByBoardIdOrder, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
 import {Board, List} from "@mosaiq/terrazzo-common/types";
 import {getAllCardsOfList} from "@trz-api/board/cardCommon";
@@ -12,7 +12,7 @@ import {getAllCardsOfList} from "@trz-api/board/cardCommon";
  */
 export async function getAllListsOfBoard(boardID:string) {
 
-    const lists = await getListsByBoardIdDown(boardID);
+    const lists = await getListsByBoardIdOrder(boardID);
 
     if(lists == null) {
         return [];
