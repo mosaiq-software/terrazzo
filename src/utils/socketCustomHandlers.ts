@@ -1,8 +1,8 @@
 import { Server, Socket } from 'socket.io';
-import { broadcastToMyRoom, getSocketData, setSocketData, joinRoom, leaveRoom } from './socketUtils';
+import {broadcastToMyRoom, getSocketData, setSocketData, joinRoom, leaveRoom, broadcastToAll} from './socketUtils';
 import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-common/socketTypes';
-import { getBoardById } from '@trz-api/persistence/boardPersistence';
-import {getWholeBoard} from "@trz-api/board/boardCommon";
+import {addBoard, getWholeBoard} from "@trz-api/board/boardCommon";
+import {addList} from "@trz-api/board/listCommon";
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SET_ROOM, async (room: ClientSEPayload[ClientSE.SET_ROOM], reply: ClientSEReply<ClientSE.SET_ROOM>) => {
@@ -47,9 +47,36 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             const board = await getWholeBoard(data);
             reply({ board });
         } catch (error: any) {
-            //TODO: handle error
-            //reply({ board: {undefined} }, error.message);
+            reply({ board: undefined }, error.message);
         }
     });
-        
+
+    socket.on(ClientSE.CREATE_BOARD, async (data: ClientSEPayload[ClientSE.CREATE_BOARD], reply: ClientSEReply<ClientSE.CREATE_BOARD>) => {
+        try {
+            if (!data) {
+                throw new Error('No board data provided');
+            }
+            console.log("Creating board with data", data);
+            const boardID = await addBoard(data.name, data.boardCode);
+            reply({ boardID });
+        } catch (error: any) {
+            console.error("Error creating board", error);
+            reply({ boardID: "" }, error.message);
+        }
+    });
+
+    socket.on(ClientSE.CREATE_LIST, async (data: ClientSEPayload[ClientSE.CREATE_LIST], reply: ClientSEReply<ClientSE.CREATE_LIST>) => {
+        try {
+            if (!data) {
+                throw new Error('No list data provided');
+            }
+            console.log("Creating list with data", data);
+            const payload = await addList(data.boardID, data.listName);
+            broadcastToAll(io, ServerSE.ADD_LIST, payload);
+            reply({ success: true });
+        } catch (error: any) {
+            console.error("Error creating list", error);
+            reply({ success: false }, error.message);
+        }
+    });
 };

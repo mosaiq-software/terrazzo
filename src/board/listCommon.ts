@@ -42,6 +42,10 @@ export async function getAllListsOfBoard(boardID:string) {
 export async function addList(boardID:string, listName:string) {
 
     //pull board from db with ID
+
+    console.log("Adding list to board");
+    console.log(boardID);
+
     const updatingBoard = await getBoardById(boardID);
 
     if (updatingBoard == null) {
@@ -69,7 +73,7 @@ export async function addList(boardID:string, listName:string) {
     //add try statement for error handling
     try {
         await createListOnBoard(newList, boardID);
-        return newList.id;
+        return newList;
     }catch (e) {
         throw new Error("Failed to save board" + e);
     }
