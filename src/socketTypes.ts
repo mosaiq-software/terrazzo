@@ -1,4 +1,4 @@
-import {Board, List} from "./types";
+import {Board, Card, List} from "./types";
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -22,6 +22,7 @@ export enum ClientSE { // Client to Server
     GET_BOARD = "GET_BOARD",
     CREATE_BOARD = "CREATE_BOARD",
     CREATE_LIST = "CREATE_LIST",
+    CREATE_CARD = "CREATE_CARD",
 }
 export interface ClientSEPayload {
     // Client to Server
@@ -31,6 +32,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_BOARD]: string;
     [ClientSE.CREATE_BOARD]: CreateBoardType;
     [ClientSE.CREATE_LIST]: CreateListType;
+    [ClientSE.CREATE_CARD]: CreateCardType;
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
@@ -40,6 +42,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_BOARD]: { board: Board | undefined };
     [ClientSE.CREATE_BOARD]: {boardID: string};
     [ClientSE.CREATE_LIST]: {success: boolean};
+    [ClientSE.CREATE_CARD]: {success: boolean};
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
 
@@ -51,6 +54,7 @@ export enum ServerSE { // Server to Client
     MOUSE_MOVE = "MOUSE_MOVE",
     USER_IDLE = "USER_IDLE",
     ADD_LIST = "ADD_LIST",
+    ADD_CARD = "ADD_CARD",
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -60,6 +64,7 @@ export interface ServerSEPayload {
     [ServerSE.MOUSE_MOVE]: { sid: SocketId; data: MouseRoomUserData };
     [ServerSE.USER_IDLE]: { sid: SocketId; idle: boolean };
     [ServerSE.ADD_LIST]: List;
+    [ServerSE.ADD_CARD]: Card;
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -69,6 +74,7 @@ export interface ServerSEReplies {
     [ServerSE.MOUSE_MOVE]: void;
     [ServerSE.USER_IDLE]: void;
     [ServerSE.ADD_LIST]: void;
+    [ServerSE.ADD_CARD]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
 
@@ -85,7 +91,8 @@ export type RoomId = string | null;
 export type SocketId = string;
 
 export type CreateBoardType = { name:string; boardCode: string}
-export type CreateListType = { boardID: string; listName: string}
+export type CreateListType = {boardID: string; listName: string}
+export type CreateCardType = {listID: string; cardName: string}
 
 export interface UserData {
     sid: SocketId;
