@@ -3,7 +3,7 @@ import { Role, EventType } from './constants';
 export interface Card {
     id: string;
     listId: string;
-    cardNumber: string;
+    cardNumber: number;
     name: string;
     description: string;
     priority: Priority;
