@@ -68,6 +68,7 @@ export async function addCard(listID:string, cardName:string) {
 
     const newCard: Card = {
         id:crypto.randomUUID(),
+        listId:listID,
         cardNumber:board.boardCode + "-" + (board.totalCards + 1),
         name:cardName,
         description:"",
@@ -90,7 +91,7 @@ export async function addCard(listID:string, cardName:string) {
             board.totalCards++;
             await updateBoard(board);
         });
-        return newCard.id;
+        return newCard;
     }catch (e) {
         throw new Error("Failed to save Card" + e);
     }

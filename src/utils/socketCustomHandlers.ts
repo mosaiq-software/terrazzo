@@ -3,6 +3,7 @@ import {broadcastToMyRoom, getSocketData, setSocketData, joinRoom, leaveRoom, br
 import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-common/socketTypes';
 import {addBoard, getWholeBoard} from "@trz-api/board/boardCommon";
 import {addList} from "@trz-api/board/listCommon";
+import {addCard} from "@trz-api/board/cardCommon";
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SET_ROOM, async (room: ClientSEPayload[ClientSE.SET_ROOM], reply: ClientSEReply<ClientSE.SET_ROOM>) => {
@@ -70,12 +71,25 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No list data provided');
             }
-            console.log("Creating list with data", data);
             const payload = await addList(data.boardID, data.listName);
             broadcastToAll(io, ServerSE.ADD_LIST, payload);
             reply({ success: true });
         } catch (error: any) {
             console.error("Error creating list", error);
+            reply({ success: false }, error.message);
+        }
+    });
+
+    socket.on(ClientSE.CREATE_CARD, async (data: ClientSEPayload[ClientSE.CREATE_CARD], reply: ClientSEReply<ClientSE.CREATE_CARD>) => {
+        try {
+            if (!data) {
+                throw new Error('No card data provided');
+            }
+            const payload = await addCard(data.listID, data.cardName);
+            broadcastToAll(io, ServerSE.ADD_CARD, payload);
+            reply({ success: true });
+        } catch (error: any) {
+            console.error("Error creating card", error);
             reply({ success: false }, error.message);
         }
     });
