@@ -1,5 +1,12 @@
 import { Server, Socket } from 'socket.io';
-import {broadcastToMyRoom, getSocketData, setSocketData, joinRoom, leaveRoom, broadcastToAll} from './socketUtils';
+import {
+    broadcastToMyRoom,
+    getSocketData,
+    setSocketData,
+    joinRoom,
+    leaveRoom,
+    broadcastToMyselfAndMyRoom
+} from './socketUtils';
 import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
 import {addBoard, getWholeBoard} from "@trz-api/board/boardController";
 import {addList} from "@trz-api/board/listController";
@@ -71,7 +78,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
                 throw new Error('No list data provided');
             }
             const payload = await addList(data.boardID, data.listName);
-            broadcastToAll(io, ServerSE.ADD_LIST, payload);
+            broadcastToMyselfAndMyRoom(socket, ServerSE.ADD_LIST, payload);
             reply({ success: true });
         } catch (error: any) {
             console.error("Error creating list", error);
@@ -85,7 +92,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
                 throw new Error('No card data provided');
             }
             const payload = await addCard(data.listID, data.cardName);
-            broadcastToAll(io, ServerSE.ADD_CARD, payload);
+            broadcastToMyselfAndMyRoom(socket, ServerSE.ADD_CARD, payload);
             reply({ success: true });
         } catch (error: any) {
             console.error("Error creating card", error);

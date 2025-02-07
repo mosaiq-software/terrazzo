@@ -60,6 +60,14 @@ export const broadcastToAll = (io: Server, event: ServerSE, payload: ServerSEPay
     io.emit(event, payload);
 }
 
+export const broadcastToMyselfAndMyRoom = (socket: Socket, event: ServerSE, payload: ServerSEPayload[keyof ServerSEPayload]) => {
+    const room = getSocketRoom(socket);
+    if (room) {
+        socket.emit(event, payload);
+        socket.broadcast.to(room).emit(event, payload);
+    }
+}
+
 export const getSocketData = (socket: Socket) => {
     return socket.data as SocketData;
 }
