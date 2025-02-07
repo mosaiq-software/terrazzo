@@ -1,9 +1,9 @@
 import { Server, Socket } from 'socket.io';
 import {broadcastToMyRoom, getSocketData, setSocketData, joinRoom, leaveRoom, broadcastToAll} from './socketUtils';
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-common/socketTypes';
-import {addBoard, getWholeBoard} from "@trz-api/board/boardCommon";
-import {addList} from "@trz-api/board/listCommon";
-import {addCard} from "@trz-api/board/cardCommon";
+import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
+import {addBoard, getWholeBoard} from "@trz-api/board/boardController";
+import {addList} from "@trz-api/board/listController";
+import {addCard} from "@trz-api/board/cardController";
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SET_ROOM, async (room: ClientSEPayload[ClientSE.SET_ROOM], reply: ClientSEReply<ClientSE.SET_ROOM>) => {
@@ -57,7 +57,6 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No board data provided');
             }
-            console.log("Creating board with data", data);
             const boardID = await addBoard(data.name, data.boardCode);
             reply({ boardID });
         } catch (error: any) {

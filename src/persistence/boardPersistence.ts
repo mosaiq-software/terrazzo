@@ -33,7 +33,10 @@ export const getBoards = async () => {
 }
 
 export const getBoardById = async (id: string) => {
-    return (await BoardModel.findByPk(id))?.toJSON() as Board | undefined;
+    return (await BoardModel.findByPk(id, {
+        attributes:{
+            exclude:['createdAt', 'updatedAt']
+        }}))?.toJSON() as Board | undefined;
 }
 
 export const createBoard = async (board: Board) => {

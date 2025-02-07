@@ -1,7 +1,7 @@
 import {createListOnBoard, getListsByBoardIdOrder, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
 import {Board, List} from "@mosaiq/terrazzo-common/types";
-import {getAllCardsOfList} from "@trz-api/board/cardCommon";
+import {getAllCardsOfList} from "@trz-api/board/cardController";
 
 //Gets
 
@@ -42,10 +42,6 @@ export async function getAllListsOfBoard(boardID:string) {
 export async function addList(boardID:string, listName:string) {
 
     //pull board from db with ID
-
-    console.log("Adding list to board");
-    console.log(boardID);
-
     const updatingBoard = await getBoardById(boardID);
 
     if (updatingBoard == null) {
@@ -57,8 +53,6 @@ export async function addList(boardID:string, listName:string) {
     }
 
     const newListOrder = await getNextListOrder(boardID);
-
-    console.log(newListOrder);
 
     const newList: List = {
         id:crypto.randomUUID(),

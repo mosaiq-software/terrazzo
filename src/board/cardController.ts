@@ -1,6 +1,6 @@
 import {
     createCardOnList,
-    getCardsByListId,
+    getCardsByListIdShort,
     getNextCardOrder,
     updateDescription,
     updateName,
@@ -19,7 +19,7 @@ import {Card, Priority} from "@mosaiq/terrazzo-common/types";
  * @param listID
  */
 export async function getAllCardsOfList(listID:string) {
-    const cards = await getCardsByListId(listID);
+    const cards = await getCardsByListIdShort(listID);
 
     if(cards == null) {
         return [];
@@ -27,9 +27,6 @@ export async function getAllCardsOfList(listID:string) {
 
     for (const card of cards) {
         card.labels = await getLabelsByBoardId(card.id);
-        card.checklists = [];
-        card.comments = [];
-        card.timesheetEntries = [];
     }
 
     try {
@@ -69,7 +66,7 @@ export async function addCard(listID:string, cardName:string) {
     const newCard: Card = {
         id:crypto.randomUUID(),
         listId:listID,
-        cardNumber:board.boardCode + "-" + (board.totalCards + 1),
+        cardNumber:(board.totalCards + 1),
         name:cardName,
         description:"",
         priority:Priority.LOWEST,

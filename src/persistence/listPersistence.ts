@@ -26,7 +26,13 @@ export const getListsByBoardId = async (boardId: string) => {
 }
 
 export const getListsByBoardIdOrder = async (boardId: string) => {
-    return (await ListModel.findAll({ where: { boardId }, order: [['order', 'ASC']] })).map(list => list.toJSON()) as List[];
+    return (await ListModel.findAll({
+        where: { boardId },
+        order: [['order', 'ASC']],
+        attributes:{
+            exclude:['createdAt', 'updatedAt']
+        }
+    })).map(list => list.toJSON()) as List[];
 }
 
 export const getNextListOrder = async (boardId: string) => {
