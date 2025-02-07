@@ -99,4 +99,12 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             reply({ success: false }, error.message);
         }
     });
+
+    socket.on(ClientSE.GET_TEXT_BLOCK, async (data: ClientSEPayload[ClientSE.GET_TEXT_BLOCK], reply: ClientSEReply<ClientSE.GET_TEXT_BLOCK>) => {
+        
+    });
+
+    socket.on(ClientSE.UPDATE_TEXT_BLOCK, async (data: ClientSEPayload[ClientSE.UPDATE_TEXT_BLOCK], reply: ClientSEReply<ClientSE.UPDATE_TEXT_BLOCK>) => {
+        
+    });
 };
