@@ -1,3 +1,4 @@
+import { isValidTextBlockEvent } from "@mosaiq/terrazzo-common/utils/textUtils";
 import { handleTextBlockEvent } from "@trz-api/controllers/textBlockController";
 import { createTextBlock, getAllTextBlockIds, getTextBlockById, getTextBlockByParentId } from "@trz-api/persistence/textBlockPersistence";
 import { Router, Request, Response } from "express";
@@ -66,7 +67,7 @@ async function createTextBlockRoute(req:Request, res:Response) {
 }
 
 async function updateTextBlockRoute(req:Request, res:Response) {
-    if(!req.body.id || req.body.start === undefined || req.body.end === undefined || !req.body.inserted ) {
+    if(!isValidTextBlockEvent(req.body)) {
         res.status(400).json({message: "id, start, end, and inserted are required"});
         return;
     }

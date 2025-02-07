@@ -11,6 +11,9 @@ import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload } f
 import {addBoard, getWholeBoard} from "@trz-api/board/boardController";
 import {addList} from "@trz-api/board/listController";
 import {addCard} from "@trz-api/board/cardController";
+import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
+import { isValidTextBlockEvent } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { handleTextBlockEvent } from '@trz-api/controllers/textBlockController';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SET_ROOM, async (room: ClientSEPayload[ClientSE.SET_ROOM], reply: ClientSEReply<ClientSE.SET_ROOM>) => {
@@ -101,10 +104,43 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     });
 
     socket.on(ClientSE.GET_TEXT_BLOCK, async (data: ClientSEPayload[ClientSE.GET_TEXT_BLOCK], reply: ClientSEReply<ClientSE.GET_TEXT_BLOCK>) => {
-        
+        try {
+            if (!data) {
+                throw new Error("No id provided");
+            }
+            const textBlock = await getTextBlockById(data);
+            if (textBlock === null) {
+                throw new Error(`Text block ${data} not found`);
+            }
+            reply(textBlock);
+        } catch (error: any) {
+            console.error("Error getting text block",data,error);
+            reply(undefined, "Error getting text block");
+        }
     });
 
     socket.on(ClientSE.UPDATE_TEXT_BLOCK, async (data: ClientSEPayload[ClientSE.UPDATE_TEXT_BLOCK], reply: ClientSEReply<ClientSE.UPDATE_TEXT_BLOCK>) => {
-        
+        try {
+            if (!isValidTextBlockEvent(data)) {
+                throw new Error("Invalid text block event");
+            }
+            handleTextBlockEvent(data);
+            broadcastToMyRoom(socket, ServerSE.UPDATE_TEXT_BLOCK, data);
+        } catch (error: any) {
+            console.log("Error updating text block",data,error);
+            reply(undefined, "Error updating text block");
+        }
+    });
+
+    socket.on(ClientSE.TEXT_CARET, (data: ClientSEPayload[ClientSE.TEXT_CARET], reply: ClientSEReply<ClientSE.TEXT_CARET>) => {
+        try {
+            const socketData = getSocketData(socket);
+            socketData.user.textRoomData = {caret: data};
+            setSocketData(socket, socketData);
+            const payload: ServerSEPayload[ServerSE.TEXT_CARET] = { sid: socket.id, caret: data };
+            broadcastToMyRoom(socket, ServerSE.TEXT_CARET, payload);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
     });
 };
