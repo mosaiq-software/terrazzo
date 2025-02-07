@@ -114,3 +114,16 @@ export interface EventLog {
     oldValue: any;
     newValue: any;
 }
+
+export type TextBlockId = string;
+export interface TextBlock {
+    id: TextBlockId;
+    parentId: string;
+    text: string;
+}
+export interface TextBlockEvent {
+    id: TextBlockId;
+    start: number;
+    end: number;
+    inserted: string;
+}
