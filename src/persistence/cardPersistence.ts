@@ -29,6 +29,15 @@ export const getCardsByListId = async (listId: string) => {
     return (await CardModel.findAll({ where: { listId } })).map(card => card.toJSON()) as Card[];
 };
 
+export const getCardsByListIdShort = async (listId: string) => {
+    return (await CardModel.findAll({
+        where: { listId },
+        attributes:{
+            exclude:['description', 'storyPoints', 'sprintId', 'archived', 'createdAt', 'updatedAt']
+        }}))
+        .map(card => card.toJSON()) as Card[];
+};
+
 export const createCardOnList = async (card: Card, listId: string) => {
     return await CardModel.create({
         id: card.id,

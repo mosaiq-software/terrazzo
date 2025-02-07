@@ -1,7 +1,7 @@
-import {createListOnBoard, getListsByBoardIdDown, getNextListOrder} from "@trz-api/persistence/listPersistence";
+import {createListOnBoard, getListsByBoardIdOrder, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
 import {Board, List} from "@mosaiq/terrazzo-common/types";
-import {getAllCardsOfList} from "@trz-api/board/cardCommon";
+import {getAllCardsOfList} from "@trz-api/board/cardController";
 
 //Gets
 
@@ -12,7 +12,7 @@ import {getAllCardsOfList} from "@trz-api/board/cardCommon";
  */
 export async function getAllListsOfBoard(boardID:string) {
 
-    const lists = await getListsByBoardIdDown(boardID);
+    const lists = await getListsByBoardIdOrder(boardID);
 
     if(lists == null) {
         return [];
@@ -54,8 +54,6 @@ export async function addList(boardID:string, listName:string) {
 
     const newListOrder = await getNextListOrder(boardID);
 
-    console.log(newListOrder);
-
     const newList: List = {
         id:crypto.randomUUID(),
         boardId:boardID,
@@ -69,7 +67,7 @@ export async function addList(boardID:string, listName:string) {
     //add try statement for error handling
     try {
         await createListOnBoard(newList, boardID);
-        return newList.id;
+        return newList;
     }catch (e) {
         throw new Error("Failed to save board" + e);
     }

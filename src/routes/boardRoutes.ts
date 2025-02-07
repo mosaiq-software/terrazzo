@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
-import {addBoard, getWholeBoard} from "@trz-api/board/boardCommon";
+import {addBoard, getWholeBoard} from "@trz-api/board/boardController";
 import {getBoards} from "@trz-api/persistence/boardPersistence";
-import {addList} from "@trz-api/board/listCommon";
-import {addCard, editDescription, editName} from "@trz-api/board/cardCommon";
+import {addList} from "@trz-api/board/listController";
+import {addCard, editDescription, editName} from "@trz-api/board/cardController";
 
 const router = Router();
 
@@ -83,8 +83,8 @@ async function createList(req:Request, res:Response) {
     }
 
     try {
-        const listID = await addList(req.body.boardId, req.body.name);
-        res.status(200).json({listId: listID});
+        const list = await addList(req.body.boardId, req.body.name);
+        res.status(200).json({list: list});
     } catch (e: any) {
         console.log("Error creating List");
         res.status(400).json({message: e.message});

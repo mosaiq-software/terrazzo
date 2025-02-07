@@ -1,7 +1,16 @@
 import { Server, Socket } from 'socket.io';
-import { broadcastToMyRoom, getSocketData, setSocketData, joinRoom, leaveRoom } from './socketUtils';
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-common/socketTypes';
-import { getBoardById } from '@trz-api/persistence/boardPersistence';
+import {
+    broadcastToMyRoom,
+    getSocketData,
+    setSocketData,
+    joinRoom,
+    leaveRoom,
+    broadcastToMyselfAndMyRoom
+} from './socketUtils';
+import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
+import {addBoard, getWholeBoard} from "@trz-api/board/boardController";
+import {addList} from "@trz-api/board/listController";
+import {addCard} from "@trz-api/board/cardController";
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SET_ROOM, async (room: ClientSEPayload[ClientSE.SET_ROOM], reply: ClientSEReply<ClientSE.SET_ROOM>) => {
@@ -43,11 +52,51 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No board id provided');
             }
-            const board = await getBoardById(data);
+            const board = await getWholeBoard(data);
             reply({ board });
         } catch (error: any) {
             reply({ board: undefined }, error.message);
         }
     });
-        
+
+    socket.on(ClientSE.CREATE_BOARD, async (data: ClientSEPayload[ClientSE.CREATE_BOARD], reply: ClientSEReply<ClientSE.CREATE_BOARD>) => {
+        try {
+            if (!data) {
+                throw new Error('No board data provided');
+            }
+            const boardID = await addBoard(data.name, data.boardCode);
+            reply({ boardID });
+        } catch (error: any) {
+            console.error("Error creating board", error);
+            reply({ boardID: "" }, error.message);
+        }
+    });
+
+    socket.on(ClientSE.CREATE_LIST, async (data: ClientSEPayload[ClientSE.CREATE_LIST], reply: ClientSEReply<ClientSE.CREATE_LIST>) => {
+        try {
+            if (!data) {
+                throw new Error('No list data provided');
+            }
+            const payload = await addList(data.boardID, data.listName);
+            broadcastToMyselfAndMyRoom(socket, ServerSE.ADD_LIST, payload);
+            reply({ success: true });
+        } catch (error: any) {
+            console.error("Error creating list", error);
+            reply({ success: false }, error.message);
+        }
+    });
+
+    socket.on(ClientSE.CREATE_CARD, async (data: ClientSEPayload[ClientSE.CREATE_CARD], reply: ClientSEReply<ClientSE.CREATE_CARD>) => {
+        try {
+            if (!data) {
+                throw new Error('No card data provided');
+            }
+            const payload = await addCard(data.listID, data.cardName);
+            broadcastToMyselfAndMyRoom(socket, ServerSE.ADD_CARD, payload);
+            reply({ success: true });
+        } catch (error: any) {
+            console.error("Error creating card", error);
+            reply({ success: false }, error.message);
+        }
+    });
 };
