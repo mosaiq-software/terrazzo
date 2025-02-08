@@ -1,4 +1,3 @@
-import { Position } from '../socketTypes';
 import {TextBlockEvent} from '../types';
 
 export const executeTextBlockEvent = (textBlock: string, event: TextBlockEvent, selectionStart?: number): {updated:string, selectionStart: number} => {

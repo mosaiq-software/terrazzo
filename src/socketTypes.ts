@@ -37,7 +37,7 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_LIST]: CreateListType;
     [ClientSE.CREATE_CARD]: CreateCardType;
     [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
-    [ClientSE.UPDATE_TEXT_BLOCK]: TextBlockEvent;
+    [ClientSE.UPDATE_TEXT_BLOCK]: TextBlockEvent[];
     [ClientSE.TEXT_CARET]: Position;
 }
 export interface ClientSEReplies {
@@ -76,7 +76,7 @@ export interface ServerSEPayload {
     [ServerSE.USER_IDLE]: { sid: SocketId; idle: boolean };
     [ServerSE.ADD_LIST]: List;
     [ServerSE.ADD_CARD]: Card;
-    [ServerSE.UPDATE_TEXT_BLOCK]: TextBlockEvent;
+    [ServerSE.UPDATE_TEXT_BLOCK]: TextBlockEvent[];
     [ServerSE.TEXT_CARET]: {sid: SocketId, caret: Position};
 }
 export interface ServerSEReplies {
