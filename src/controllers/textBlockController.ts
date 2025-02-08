@@ -8,7 +8,7 @@ export const handleTextBlockEvent = async (event: TextBlockEvent) => {
     if(!textBlock){
         throw new Error("Text block not found");
     }
-    const updated = executeTextBlockEvent(textBlock.text, event);
+    const {updated} = executeTextBlockEvent(textBlock.text, event);
     try {
         await writeTextBlock(event.id, updated);
     } catch (error: any) {
