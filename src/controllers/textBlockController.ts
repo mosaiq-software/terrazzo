@@ -3,16 +3,31 @@ import { executeTextBlockEvent } from "@mosaiq/terrazzo-common/utils/textUtils";
 import { getTextBlockById, writeTextBlock } from "@trz-api/persistence/textBlockPersistence";
 
 
-export const handleTextBlockEvent = async (event: TextBlockEvent) => {
-    const textBlock = await getTextBlockById(event.id);
+export const handleTextBlockEvents = async (events: TextBlockEvent[]) => {
+    if(!events || events.length === 0){
+        return undefined;
+    }
+
+    const textBlock = await getTextBlockById(events[0].id);
     if(!textBlock){
         throw new Error("Text block not found");
     }
-    const {updated} = executeTextBlockEvent(textBlock.text, event);
+
+    let text = textBlock.text;
+
+    for (let event of events){
+        if(event.id !== events[0].id){
+            throw new Error("Mismatched IDs "+event.id+" != "+events[0].id);
+        }
+        const {updated} = executeTextBlockEvent(text, event);
+        text = updated;
+    }
+
     try {
-        await writeTextBlock(event.id, updated);
+        await writeTextBlock(events[0].id, text);
+        return text;
     } catch (error: any) {
-        console.error("Unable to save text block " + event.id + " : "+error.message);
-        throw error;
+        console.error("Unable to save text block " + events[0].id + " : "+error.message);
+        throw new Error("Unable to save text block " + events[0].id + " : "+error.message);
     }
 }
