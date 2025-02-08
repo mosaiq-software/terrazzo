@@ -28,10 +28,15 @@ export const executeTextBlockEvent = (textBlock: string, event: TextBlockEvent, 
     return {updated, selectionStart:newSelStart}
 }
 
-export const isValidTextBlockEvent = (event?:TextBlockEvent) => {
-    return event && 
-        event.id && 
-        (typeof event.inserted === "string") &&
-        (typeof event.end === "number") &&
-        (typeof event.start === 'number');
+export const isValidTextBlockEvents = (events:TextBlockEvent[]) => {
+    for(let event of events){
+        if(!(event && 
+            event.id && 
+            (typeof event.inserted === "string") &&
+            (typeof event.end === "number") &&
+            (typeof event.start === 'number'))) {
+                return false;
+            }
+    }
+    return true;
 }

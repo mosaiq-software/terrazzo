@@ -50,7 +50,7 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_LIST]: {success: boolean};
     [ClientSE.CREATE_CARD]: {success: boolean};
     [ClientSE.GET_TEXT_BLOCK]: TextBlock | undefined;
-    [ClientSE.UPDATE_TEXT_BLOCK]: undefined;
+    [ClientSE.UPDATE_TEXT_BLOCK]: string | undefined;
     [ClientSE.TEXT_CARET]: undefined;
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
@@ -76,7 +76,7 @@ export interface ServerSEPayload {
     [ServerSE.USER_IDLE]: { sid: SocketId; idle: boolean };
     [ServerSE.ADD_LIST]: List;
     [ServerSE.ADD_CARD]: Card;
-    [ServerSE.UPDATE_TEXT_BLOCK]: TextBlockEvent[];
+    [ServerSE.UPDATE_TEXT_BLOCK]: {events: TextBlockEvent[], updated: string};
     [ServerSE.TEXT_CARET]: {sid: SocketId, caret: Position};
 }
 export interface ServerSEReplies {
