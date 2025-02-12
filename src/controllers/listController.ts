@@ -1,7 +1,12 @@
-import {createListOnBoard, getListsByBoardIdOrder, getNextListOrder} from "@trz-api/persistence/listPersistence";
+import {
+    createListOnBoard,
+    getListById,
+    getListsByBoardIdOrder,
+    getNextListOrder, updateList
+} from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
 import {Board, List} from "@mosaiq/terrazzo-common/types";
-import {getAllCardsOfList} from "@trz-api/board/cardController";
+import {getAllCardsOfList} from "@trz-api/controllers/cardController";
 
 //Gets
 
@@ -101,6 +106,29 @@ export function updateListPositions(boardID:string, newPosition:number[]) {
     //add try statement for error handling
     try {
         //saving to db
+        return true;
+    }catch (e) {
+        throw new Error("Failed to save board" + e);
+    }
+}
+
+//Updates
+
+export async function updateListName(listID:string, newName:string) {
+    const updatingList = await getListById(listID);
+
+    if (updatingList == null) {
+        throw new Error("List not found");
+    }
+
+    if(newName.length > 50) {
+        throw new Error("Title must be 50 characters or less");
+    }
+
+    updatingList.name = newName;
+
+    try {
+        await updateList(updatingList);
         return true;
     }catch (e) {
         throw new Error("Failed to save board" + e);
