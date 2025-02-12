@@ -106,3 +106,31 @@ export async function getOrgMembershipData(org: string, access_token: string) {
         return null;
     }
 };
+
+export const revokeGithubAuth = async (access_token: string) => {
+    try{
+        await validateGithubAuthToken(access_token);
+    } catch (error: any) {
+        throw new Error("Unable to validate auth token");
+    }
+    try {
+        const credentials = `${process.env.GITHUB_AUTH_CLIENT_ID}:${process.env.GITHUB_AUTH_CLIENT_SECRET}`;
+        const encodedCredentials = btoa(credentials);
+        const response = await fetch(`https://api.github.com/applications/${process.env.GITHUB_AUTH_CLIENT_ID}/grant`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Basic ${encodedCredentials}`,
+                Accept: 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28',
+            },
+            body: JSON.stringify({
+                access_token: access_token
+            })
+        });
+        if(!response.ok){
+            throw new Error("Unable to revoke access token");
+        }
+    } catch (error:any) {
+        throw new Error("Unable to revoke access token");
+    }
+}
