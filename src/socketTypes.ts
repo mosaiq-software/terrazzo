@@ -107,7 +107,11 @@ export interface TextRoomUserData {
 
 export type Position = { x: number; y: number; }
 
-export type RoomId = string | null;
+export enum RoomType {
+    MOUSE = "MOUSE",
+    TEXT = "TEXT"
+}
+export type RoomId = `${RoomType}-${string}` | null;
 export type SocketId = string;
 
 export type CreateBoardType = { name:string; boardCode: string}
