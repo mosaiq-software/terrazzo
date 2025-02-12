@@ -3,6 +3,7 @@ import cors from 'cors';
 
 import boardRoutes from './routes/boardRoutes';
 import userRoutes from './routes/userRoutes';
+import textBlockRoutes from './routes/textBlockRoutes';
 
 export const initApp = async () => {
     const app = express();
@@ -17,6 +18,7 @@ export const initApp = async () => {
 
     app.use('/board', boardRoutes);
     app.use('/user', userRoutes);
+    app.use('/text', textBlockRoutes)
 
     return app;
 }
