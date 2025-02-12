@@ -37,8 +37,8 @@ const initSockets = () => {
             };
             (socket.data as SocketData) = socketData;
         } catch (error) {
-            console.error('Error validating token:', error);
             socket.disconnect(true);
+            return;
         }
 
 

@@ -1,3 +1,4 @@
+import { validateGithubAuthToken } from "@trz-api/utils/authUtils";
 import axios from "axios";
 import { Request, Response } from "express";
 import queryString from "query-string";
@@ -11,7 +12,13 @@ export const githubAuth = async (req: Request, res: Response) => {
     if (!access_token) {
         return res.status(400).send('Invalid code');
     }
-    res.json({ access_token });
+    try{
+        await validateGithubAuthToken(access_token);
+    } catch (error: any) {
+        res.status(401).json(error.message);
+        return;
+    }
+    res.status(200).json({ access_token });
 };
 
 export const githubUserData = async (req: Request, res: Response) => {
@@ -19,8 +26,14 @@ export const githubUserData = async (req: Request, res: Response) => {
     if (!access_token) {
         return res.status(400).send('No access token provided');
     }
+    try{
+        await validateGithubAuthToken(access_token);
+    } catch (error: any) {
+        res.status(401).json(error.message);
+        return;
+    }
     const userData = await getPrivateGitHubUserData(access_token);
-    res.json(userData);
+    res.status(200).json(userData);
 }
 
 async function getAccessTokenFromCode(code:string) {
