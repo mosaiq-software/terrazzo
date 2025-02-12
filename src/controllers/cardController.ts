@@ -8,7 +8,7 @@ import {
 import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
 import {getListById} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
-import {Card, Priority} from "../../../terrazzo-common/src/types";
+import {Card, Priority} from "@mosaiq/terrazzo-common/types";
 
 //Gets
 

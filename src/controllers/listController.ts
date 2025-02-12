@@ -5,7 +5,7 @@ import {
     getNextListOrder, updateList
 } from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
-import {Board, List} from "../../../terrazzo-common/src/types";
+import {Board, List} from "@mosaiq/terrazzo-common/types";
 import {getAllCardsOfList} from "@trz-api/controllers/cardController";
 
 //Gets
