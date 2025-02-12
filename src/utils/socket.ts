@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import { ServerSE, ServerSocketIOEvent } from '@mosaiq/terrazzo-common/socketTypes';
-import { validateAuthToken } from './socketUtils';
+import { validateGithubAuthToken } from './authUtils';
 import { registerCustomSocketEvents } from './socketCustomHandlers';
 import { registerEngineSocketEvents } from './socketEngineHandlers';
 import { SocketData } from './socketTypes';
@@ -22,7 +22,7 @@ const initSockets = () => {
     io.on(ServerSocketIOEvent.CONNECTION, async (socket) => {
         try {
             const token = socket.handshake.auth.token;
-            const userData = await validateAuthToken(token);
+            const userData = await validateGithubAuthToken(token);
             const socketData: SocketData = {
                 connectedAt: new Date(),
                 access_token: token,
@@ -37,8 +37,8 @@ const initSockets = () => {
             };
             (socket.data as SocketData) = socketData;
         } catch (error) {
-            console.error('Error validating token:', error);
             socket.disconnect(true);
+            return;
         }
 
 
