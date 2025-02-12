@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import { broadcastToMyRoom, getSocketRoom } from './socketUtils';
+import { broadcastToMyRoom } from './socketUtils';
 import { ServerSE, ServerSEPayload, ServerSocketIOEvent } from '@mosaiq/terrazzo-common/socketTypes';
 
 
