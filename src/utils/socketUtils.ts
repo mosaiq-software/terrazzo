@@ -1,6 +1,5 @@
 import { Server, Socket } from 'socket.io';
 import { RoomId, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-common/socketTypes';
-import { getOrgMemberIds, getPrivateGitHubUserData } from '@trz-api/controllers/userController';
 import { SocketData } from './socketTypes';
 
 export const getSocketRoom = (socket: Socket): RoomId | undefined => {
@@ -21,21 +20,6 @@ export const getSocketsInRoom = async (io: Server, room: RoomId): Promise<UserDa
         return socket?.data.user;
     });
     return users as UserData[];
-}
-
-export const validateAuthToken = async (token: string) => {
-    if (!token) {
-        throw new Error('No token provided');
-    }
-    const userData = await getPrivateGitHubUserData(token);
-    if (!userData) {
-        throw new Error('Invalid token');
-    }
-    const orgMembers = await getOrgMemberIds(process.env.ORG_NAME!, token);
-    if (!orgMembers.includes(userData.id)) {
-        throw new Error('User not in organization: ' + process.env.ORG_NAME);
-    }
-    return userData;
 }
 
 export const broadcast = (socket: Socket, to: RoomId | undefined, event: ServerSE, payload: ServerSEPayload[ServerSE]) => {
