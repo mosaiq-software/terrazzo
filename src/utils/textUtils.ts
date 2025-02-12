@@ -8,20 +8,20 @@ export const executeTextBlockEvent = (textBlock: string, event: TextBlockEvent, 
     end = Math.min(end, textBlock.length);
 
     const updated = textBlock.substring(0, start) + inserted + textBlock.substring(end);
-    if (!selectionStart){
+    if (selectionStart === undefined){
         return {updated, selectionStart: 0};
     }
 
     let newSelStart = 0;
+    const deleteDelta = end - start;
     if (selectionStart < start) {
         // before changed area, leave alone
         newSelStart = selectionStart;
     } else if (selectionStart < end) {
         // inside deleted area, move to where deletion started
-        newSelStart = start;
+        newSelStart = start + inserted.length;
     } else {
         // after deleted area, shift back by deletion then forwards by insertion
-        const deleteDelta = end - start;
         newSelStart = (selectionStart - deleteDelta) + inserted.length;
     }
 
