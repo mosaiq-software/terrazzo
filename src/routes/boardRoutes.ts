@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
-import {addBoard, getWholeBoard} from "@trz-api/board/boardController";
+import {addBoard, getWholeBoard} from "@trz-api/controllers/boardController";
 import {getBoards} from "@trz-api/persistence/boardPersistence";
-import {addList} from "@trz-api/board/listController";
-import {addCard, editDescription, editName} from "@trz-api/board/cardController";
+import {addList} from "@trz-api/controllers/listController";
+import {addCard, editDescription, editName} from "@trz-api/controllers/cardController";
 
 const router = Router();
 
