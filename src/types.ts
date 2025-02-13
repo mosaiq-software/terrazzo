@@ -5,7 +5,7 @@ export interface Card {
     listId: string;
     cardNumber: number;
     name: string;
-    description: string;
+    descriptionTextBlockId: TextBlockId;
     priority: Priority;
     storyPoints: number;
     sprintId: string;
