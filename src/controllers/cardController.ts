@@ -9,6 +9,7 @@ import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
 import {getListById} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
 import {Card, Priority} from "@mosaiq/terrazzo-common/types";
+import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
 
 //Gets
 
@@ -62,13 +63,24 @@ export async function addCard(listID:string, cardName:string) {
     if(updatingList.cards && updatingList.cards.length > 50) {
         throw new Error("List cannot have more than 50 cards");
     }
+    const cardUid = crypto.randomUUID();
+    let descriptionTextBlockId;
+    try {
+        const descBlock = await createTextBlock("", cardUid);
+        if(!descBlock){
+            throw new Error("Failed to create description text block");
+        }
+        descriptionTextBlockId = descBlock.id;
+    } catch (error:any) {
+        throw new Error("Failed to create description text block");
+    }
 
     const newCard: Card = {
-        id:crypto.randomUUID(),
+        id:cardUid,
         listId:listID,
         cardNumber:(board.totalCards + 1),
         name:cardName,
-        description:"",
+        descriptionTextBlockId: descriptionTextBlockId,
         priority:Priority.LOWEST,
         storyPoints:0,
         sprintId:"",
