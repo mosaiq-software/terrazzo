@@ -134,3 +134,15 @@ export async function updateListName(listID:string, newName:string) {
         throw new Error("Failed to save board" + e);
     }
 }
+
+//Utils
+
+export async function getBoardIDFromListID(listID:string) {
+    const updatingList = await getListById(listID);
+
+    if (updatingList == null) {
+        throw new Error("List not found");
+    }
+
+    return updatingList.boardId;
+}

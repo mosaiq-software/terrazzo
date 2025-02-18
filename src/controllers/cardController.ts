@@ -1,5 +1,5 @@
 import {
-    createCardOnList,
+    createCardOnList, getCardById,
     getCardsByListIdShort,
     getNextCardOrder,
     updateDescription,
@@ -143,4 +143,26 @@ export async function editName(cardID:string, name:string) {
     }catch (e) {
         throw new Error("Failed to save Card" + e);
     }
+}
+
+//Utils
+
+export async function getListIDFromCardID(cardID:string) {
+    const card = await getCardById(cardID);
+    if (card == null) {
+        throw new Error("Card not found");
+    }
+    return card.listId;
+}
+
+export async function getBoardIDFromCardID(cardID:string) {
+    const card = await getCardById(cardID);
+    if (card == null) {
+        throw new Error("Card not found");
+    }
+    const list = await getListById(card.listId);
+    if (list == null) {
+        throw new Error("List not found");
+    }
+    return list.boardId;
 }
