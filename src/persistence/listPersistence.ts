@@ -1,6 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
 import { List } from '@mosaiq/terrazzo-common/types';
+import e from 'express';
 
 class ListModel extends Model {}
 ListModel.init({
@@ -60,4 +61,16 @@ export const updateList = async (list: List) => {
 
 export const setListArchived = async (id: string, archived: boolean) => {
     return await ListModel.update({ archived }, { where: { id } });
+}
+
+export const getListsBoardId = async (listId: string) => {
+    return ((await ListModel.findByPk(listId))?.toJSON() as List).boardId ?? null;
+}
+
+export const updateListOrder = async (lists: List[]) => {
+    for (let i = 0; i < lists.length; i++){
+        await ListModel.update({
+            order: i,
+        }, { where: { id: lists[i].id } });
+    }
 }
