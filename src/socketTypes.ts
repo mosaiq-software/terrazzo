@@ -35,7 +35,6 @@ export interface ClientSEPayload {
     // Client to Server
     [ClientSE.SET_ROOM]: RoomId;
     [ClientSE.MOUSE_MOVE]: MouseRoomUserData;
-    [ClientSE.MOUSE_MOVE]: MouseRoomUserData;
     [ClientSE.USER_IDLE]: boolean;
     [ClientSE.GET_BOARD]: string;
     [ClientSE.CREATE_BOARD]: CreateBoardType;
