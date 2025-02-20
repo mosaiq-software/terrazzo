@@ -28,8 +28,8 @@ export enum ClientSE { // Client to Server
     UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
     TEXT_CARET = "TEXT_CARET",
     MOVE_LIST = "MOVE_LIST",
-    MOVE_CARD = "MOVE_CARD"
-    
+    MOVE_CARD = "MOVE_CARD",
+    UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
 }
 export interface ClientSEPayload {
     // Client to Server
@@ -45,7 +45,8 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_TEXT_BLOCK]: TextBlockEvent[];
     [ClientSE.TEXT_CARET]: Position;
     [ClientSE.MOVE_LIST]: {listId: string, position: number};
-    [ClientSE.MOVE_CARD]: {cardId: string, toList: string, position: number};
+    [ClientSE.MOVE_CARD]: {cardId: string, toList: string, position?: number};
+    [ClientSE.UPDATE_CARD_FIELD]: Partial<Card>;
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
@@ -62,6 +63,7 @@ export interface ClientSEReplies {
     [ClientSE.TEXT_CARET]: undefined;
     [ClientSE.MOVE_LIST]: undefined;
     [ClientSE.MOVE_CARD]: undefined;
+    [ClientSE.UPDATE_CARD_FIELD]: undefined;
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
 
@@ -79,6 +81,7 @@ export enum ServerSE { // Server to Client
     TEXT_CARET = "TEXT_CARET",
     MOVE_LIST = "MOVE_LIST",
     MOVE_CARD = "MOVE_CARD",
+    UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -93,7 +96,8 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_TEXT_BLOCK]: {events: TextBlockEvent[], updated: string};
     [ServerSE.TEXT_CARET]: {sid: SocketId, caret: Position};
     [ServerSE.MOVE_LIST]: {listId: string, position: number};
-    [ServerSE.MOVE_CARD]: {cardId: string, toList: string, position: number};
+    [ServerSE.MOVE_CARD]: {cardId: string, toList: string, position?: number};
+    [ServerSE.UPDATE_CARD_FIELD]: Partial<Card>;
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -109,6 +113,7 @@ export interface ServerSEReplies {
     [ServerSE.TEXT_CARET]: void;
     [ServerSE.MOVE_LIST]: void;
     [ServerSE.MOVE_CARD]: void;
+    [ServerSE.UPDATE_CARD_FIELD]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
 
