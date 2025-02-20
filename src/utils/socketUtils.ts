@@ -1,8 +1,7 @@
 import { Server, Socket } from 'socket.io';
-import { RoomId, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-common/socketTypes';
+import {RoomId, RoomType, ServerSE, ServerSEPayload, UserData} from '@mosaiq/terrazzo-common/socketTypes';
 import { SocketData } from './socketTypes';
-import {getRoomCode} from "../../../terrazzo-common/dist/utils/socketUtils";
-import {RoomType} from "../../../terrazzo-common/dist/socketTypes";
+import {getRoomCode} from "@mosaiq/terrazzo-common/utils/socketUtils";
 
 export const getSocketRoom = (socket: Socket): RoomId | undefined => {
     return Array.from(socket.rooms).find(room => room !== socket.id);

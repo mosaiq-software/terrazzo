@@ -7,14 +7,13 @@ import {
     leaveRoom,
     broadcastToMyselfAndMyRoom, broadcastToAnotherRoom
 } from './socketUtils';
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
 import {addBoard, getWholeBoard} from "@trz-api/controllers/boardController";
-import {addList, getBoardIDFromListID, updateListName} from "@trz-api/controllers/listController";
+import {addList, updateListName} from "@trz-api/controllers/listController";
 import {addCard, editName, getBoardIDFromCardID} from "@trz-api/controllers/cardController";
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
-import {RoomType} from "../../../terrazzo-common/dist/socketTypes";
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SET_ROOM, async (room: ClientSEPayload[ClientSE.SET_ROOM], reply: ClientSEReply<ClientSE.SET_ROOM>) => {
