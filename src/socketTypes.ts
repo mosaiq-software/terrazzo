@@ -24,6 +24,7 @@ export enum ClientSE { // Client to Server
     CREATE_LIST = "CREATE_LIST",
     CREATE_CARD = "CREATE_CARD",
     UPDATE_LIST_TITLE = "UPDATE_LIST_TITLE",
+    UPDATE_CARD_TITLE = "UPDATE_CARD_TITLE",
     GET_TEXT_BLOCK = "GET_TEXT_BLOCK",
     UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
     TEXT_CARET = "TEXT_CARET",
@@ -41,6 +42,7 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_LIST]: CreateListType;
     [ClientSE.CREATE_CARD]: CreateCardType;
     [ClientSE.UPDATE_LIST_TITLE]: UpdateListTitleType;
+    [ClientSE.UPDATE_CARD_TITLE]: UpdateCardTitleType;
     [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
     [ClientSE.UPDATE_TEXT_BLOCK]: TextBlockEvent[];
     [ClientSE.TEXT_CARET]: Position;
@@ -57,6 +59,7 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_LIST]: {success: boolean};
     [ClientSE.CREATE_CARD]: {success: boolean};
     [ClientSE.UPDATE_LIST_TITLE]: {success: boolean};
+    [ClientSE.UPDATE_CARD_TITLE]: {success: boolean};
     [ClientSE.GET_TEXT_BLOCK]: TextBlock | undefined;
     [ClientSE.UPDATE_TEXT_BLOCK]: string | undefined;
     [ClientSE.TEXT_CARET]: undefined;
@@ -75,6 +78,7 @@ export enum ServerSE { // Server to Client
     ADD_LIST = "ADD_LIST",
     ADD_CARD = "ADD_CARD",
     UPDATE_LIST_TITLE = "UPDATE_LIST_TITLE",
+    UPDATE_CARD_TITLE = "UPDATE_CARD_TITLE",
     UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
     TEXT_CARET = "TEXT_CARET",
     MOVE_LIST = "MOVE_LIST",
@@ -90,6 +94,7 @@ export interface ServerSEPayload {
     [ServerSE.ADD_LIST]: List;
     [ServerSE.ADD_CARD]: Card;
     [ServerSE.UPDATE_LIST_TITLE]: UpdateListTitleType;
+    [ServerSE.UPDATE_CARD_TITLE]: UpdateCardTitleType;
     [ServerSE.UPDATE_TEXT_BLOCK]: {events: TextBlockEvent[], updated: string};
     [ServerSE.TEXT_CARET]: {sid: SocketId, caret: Position};
     [ServerSE.MOVE_LIST]: {listId: string, position: number};
@@ -105,6 +110,7 @@ export interface ServerSEReplies {
     [ServerSE.ADD_LIST]: void;
     [ServerSE.ADD_CARD]: void;
     [ServerSE.UPDATE_LIST_TITLE]: void;
+    [ServerSE.UPDATE_CARD_TITLE]: void;
     [ServerSE.UPDATE_TEXT_BLOCK]: void;
     [ServerSE.TEXT_CARET]: void;
     [ServerSE.MOVE_LIST]: void;
@@ -141,6 +147,7 @@ export type CreateListType = {boardID: string; listName: string}
 export type CreateCardType = {listID: string; cardName: string}
 
 export type UpdateListTitleType = {listID: string; title: string}
+export type UpdateCardTitleType = {cardID: string; title: string}
 
 export interface UserData {
     sid: SocketId;
