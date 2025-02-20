@@ -9,13 +9,15 @@ export interface Card {
     priority: Priority;
     storyPoints: number;
     sprintId: string;
-    assignees: User[];
-    comments: Comment[];
-    checklists: Checklist[];
-    labels: Label[];
-    timesheetEntries: TimesheetEntry[];
     archived: boolean;
     order: number;
+    assignees: User[];
+    labels: Label[];
+    
+    comments: Comment[];
+    
+    checklists: Checklist[];
+    timesheetEntries: TimesheetEntry[];
 }
 
 export interface List {

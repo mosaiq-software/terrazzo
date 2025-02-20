@@ -27,11 +27,14 @@ export enum ClientSE { // Client to Server
     GET_TEXT_BLOCK = "GET_TEXT_BLOCK",
     UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
     TEXT_CARET = "TEXT_CARET",
+    MOVE_LIST = "MOVE_LIST",
+    MOVE_CARD = "MOVE_CARD"
+    
 }
 export interface ClientSEPayload {
     // Client to Server
     [ClientSE.SET_ROOM]: RoomId;
-    [ClientSE.MOUSE_MOVE]: Position;
+    [ClientSE.MOUSE_MOVE]: MouseRoomUserData;
     [ClientSE.USER_IDLE]: boolean;
     [ClientSE.GET_BOARD]: string;
     [ClientSE.CREATE_BOARD]: CreateBoardType;
@@ -41,6 +44,8 @@ export interface ClientSEPayload {
     [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
     [ClientSE.UPDATE_TEXT_BLOCK]: TextBlockEvent[];
     [ClientSE.TEXT_CARET]: Position;
+    [ClientSE.MOVE_LIST]: {listId: string, position: number};
+    [ClientSE.MOVE_CARD]: {cardId: string, toList: string, position: number};
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
@@ -55,6 +60,8 @@ export interface ClientSEReplies {
     [ClientSE.GET_TEXT_BLOCK]: TextBlock | undefined;
     [ClientSE.UPDATE_TEXT_BLOCK]: string | undefined;
     [ClientSE.TEXT_CARET]: undefined;
+    [ClientSE.MOVE_LIST]: undefined;
+    [ClientSE.MOVE_CARD]: undefined;
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
 
@@ -70,6 +77,8 @@ export enum ServerSE { // Server to Client
     UPDATE_LIST_TITLE = "UPDATE_LIST_TITLE",
     UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
     TEXT_CARET = "TEXT_CARET",
+    MOVE_LIST = "MOVE_LIST",
+    MOVE_CARD = "MOVE_CARD",
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -83,6 +92,8 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_LIST_TITLE]: UpdateListTitleType;
     [ServerSE.UPDATE_TEXT_BLOCK]: {events: TextBlockEvent[], updated: string};
     [ServerSE.TEXT_CARET]: {sid: SocketId, caret: Position};
+    [ServerSE.MOVE_LIST]: {listId: string, position: number};
+    [ServerSE.MOVE_CARD]: {cardId: string, toList: string, position: number};
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -96,10 +107,16 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_LIST_TITLE]: void;
     [ServerSE.UPDATE_TEXT_BLOCK]: void;
     [ServerSE.TEXT_CARET]: void;
+    [ServerSE.MOVE_LIST]: void;
+    [ServerSE.MOVE_CARD]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
 
-export interface MouseRoomUserData extends Position {};
+export interface MouseRoomUserData {
+    pos: Position;
+    draggingList?: string;
+    draggingCard?: string;
+};
 
 export interface TextRoomUserData {
     caret: Position;
