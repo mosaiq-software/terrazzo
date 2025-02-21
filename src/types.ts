@@ -49,9 +49,14 @@ export interface Sprint {
 
 export interface User {
     id: string;
-    fullName: string;
-    discordUserId: string;
+    username: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    profilePicture: string;
     githubUserId: string;
+    projectIds: string[];
+    workspaceIds: string[];
     activeTimerId: string;
     archived: boolean;
 }
@@ -126,4 +131,20 @@ export interface TextBlockEvent {
     start: number;
     end: number;
     inserted: string;
+}
+
+export interface Project {
+    id: string;
+    name: string;
+    description: string;
+    members: User[];
+    boards: Board[];
+    archived: boolean;
+}
+
+export interface Workspace {
+    id: string;
+    name: string;
+    members: User[];
+    projects: Project[];
 }
