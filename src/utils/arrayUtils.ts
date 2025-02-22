@@ -13,7 +13,7 @@ export function updateBaseFromPartial<T>(base:T, partial: Partial<T>): T {
     }
     const mappedBase = {...base}
     const keys = Object.keys(mappedBase);
-    for(let k in keys) {
+    for(let k of keys) {
         const partialField = partial[k];
         if (partialField !== undefined) {
             mappedBase[k] = partialField;
