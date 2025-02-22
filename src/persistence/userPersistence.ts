@@ -8,8 +8,10 @@ UserModel.init({
         type: DataTypes.STRING,
         primaryKey: true
     },
-    fullName: DataTypes.STRING,
-    discordUserId: DataTypes.STRING,
+    username: DataTypes.STRING,
+    firstName: DataTypes.STRING,
+    lastName: DataTypes.STRING,
+    profilePicture: DataTypes.STRING,
     githubUserId: DataTypes.STRING,
     activeTimerId: DataTypes.STRING,
     archived: DataTypes.BOOLEAN
@@ -30,11 +32,28 @@ export const getUserByGithubId = async (githubId: string) => {
     return (await UserModel.findOne({ where: { githubUserId: githubId } }))?.toJSON() as User | null;
 };
 
+export const findOrCreateUser = async (user: User) => {
+    return await UserModel.upsert({
+        where: { id: user.id },
+        defaults: {
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profilePicture: user.profilePicture,
+            githubUserId: user.githubUserId,
+            activeTimerId: user.activeTimerId,
+            archived: false
+        }
+    });
+};
+
 export const createUser = async (user: User) => {
     return await UserModel.create({
         id: user.id,
-        fullName: user.fullName,
-        discordUserId: user.discordUserId,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePicture: user.profilePicture,
         githubUserId: user.githubUserId,
         activeTimerId: user.activeTimerId,
         archived: false
@@ -43,9 +62,10 @@ export const createUser = async (user: User) => {
 
 export const updateUser = async (user: User) => {
     return await UserModel.update({
-        fullName: user.fullName,
-        discordUserId: user.discordUserId,
-        githubUserId: user.githubUserId,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePicture: user.profilePicture,
         activeTimerId: user.activeTimerId,
         archived: user.archived
     }, { where: { id: user.id } });

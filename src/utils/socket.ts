@@ -4,6 +4,8 @@ import { validateGithubAuthToken } from './authUtils';
 import { registerCustomSocketEvents } from './socketCustomHandlers';
 import { registerEngineSocketEvents } from './socketEngineHandlers';
 import { SocketData } from './socketTypes';
+import {User} from "../../../terrazzo-common/dist/types";
+import {createUser} from "@trz-api/persistence/userPersistence";
 
 const initSockets = () => {
     console.info("Starting sockets");
@@ -23,6 +25,7 @@ const initSockets = () => {
         try {
             const token = socket.handshake.auth.token;
             const userData = await validateGithubAuthToken(token);
+
             const socketData: SocketData = {
                 connectedAt: new Date(),
                 access_token: token,

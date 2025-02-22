@@ -1,4 +1,4 @@
-import { githubAuth, githubUserData, revokeGithubAuth } from '@trz-api/controllers/userController';
+import { githubAuth, githubUserData, revokeGithubAuth } from '@trz-api/utils/githubUtils';
 import express from 'express';
 
 const router = express.Router();

@@ -91,6 +91,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
 
     socket.on(ClientSE.CREATE_CARD, async (data: ClientSEPayload[ClientSE.CREATE_CARD], reply: ClientSEReply<ClientSE.CREATE_CARD>) => {
         try {
+            console.log("Creating card", data);
             if (!data) {
                 throw new Error('No card data provided');
             }
