@@ -28,12 +28,15 @@ export enum ClientSE { // Client to Server
     GET_TEXT_BLOCK = "GET_TEXT_BLOCK",
     UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
     TEXT_CARET = "TEXT_CARET",
+    MOVE_LIST = "MOVE_LIST",
+    MOVE_CARD = "MOVE_CARD",
+    
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
 }
 export interface ClientSEPayload {
     // Client to Server
     [ClientSE.SET_ROOM]: RoomId;
-    [ClientSE.MOUSE_MOVE]: Position;
+    [ClientSE.MOUSE_MOVE]: MouseRoomUserData;
     [ClientSE.USER_IDLE]: boolean;
     [ClientSE.GET_BOARD]: string;
     [ClientSE.CREATE_BOARD]: CreateBoardType;
@@ -44,6 +47,8 @@ export interface ClientSEPayload {
     [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
     [ClientSE.UPDATE_TEXT_BLOCK]: TextBlockEvent[];
     [ClientSE.TEXT_CARET]: Position;
+    [ClientSE.MOVE_LIST]: {listId: string, position: number};
+    [ClientSE.MOVE_CARD]: {cardId: string, toList: string, position: number};
     [ClientSE.UPDATE_CARD_FIELD]: Partial<Card>;
 }
 export interface ClientSEReplies {
@@ -60,6 +65,8 @@ export interface ClientSEReplies {
     [ClientSE.GET_TEXT_BLOCK]: TextBlock | undefined;
     [ClientSE.UPDATE_TEXT_BLOCK]: string | undefined;
     [ClientSE.TEXT_CARET]: undefined;
+    [ClientSE.MOVE_LIST]: undefined;
+    [ClientSE.MOVE_CARD]: undefined;
     [ClientSE.UPDATE_CARD_FIELD]: undefined;
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
@@ -77,6 +84,8 @@ export enum ServerSE { // Server to Client
     UPDATE_CARD_TITLE = "UPDATE_CARD_TITLE",
     UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
     TEXT_CARET = "TEXT_CARET",
+    MOVE_LIST = "MOVE_LIST",
+    MOVE_CARD = "MOVE_CARD",
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
 }
 export interface ServerSEPayload {
@@ -92,6 +101,8 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_CARD_TITLE]: UpdateCardTitleType;
     [ServerSE.UPDATE_TEXT_BLOCK]: {events: TextBlockEvent[], updated: string};
     [ServerSE.TEXT_CARET]: {sid: SocketId, caret: Position};
+    [ServerSE.MOVE_LIST]: {listId: string, position: number};
+    [ServerSE.MOVE_CARD]: {cardId: string, toList: string, position: number};
     [ServerSE.UPDATE_CARD_FIELD]: Partial<Card>
 }
 export interface ServerSEReplies {
@@ -107,11 +118,22 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_CARD_TITLE]: void;
     [ServerSE.UPDATE_TEXT_BLOCK]: void;
     [ServerSE.TEXT_CARET]: void;
+    [ServerSE.MOVE_LIST]: void;
+    [ServerSE.MOVE_CARD]: void;
     [ServerSE.UPDATE_CARD_FIELD]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
 
-export interface MouseRoomUserData extends Position {};
+export interface MouseRoomUserData {
+    pos: Position;
+    draggingList?: string;
+    draggingCard?: string;
+};
+export interface MouseRoomUserData {
+    pos: Position;
+    draggingList?: string;
+    draggingCard?: string;
+};
 
 export interface TextRoomUserData {
     caret: Position;
