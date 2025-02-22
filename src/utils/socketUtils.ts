@@ -3,7 +3,7 @@ import { RoomId, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-co
 import { SocketData } from './socketTypes';
 
 export const getSocketRoom = (socket: Socket): RoomId | undefined => {
-    return Array.from(socket.rooms).find(room => room !== socket.id) as RoomId;
+    return (Array.from(socket.rooms).find(room => room !== socket.id) as RoomId) ?? undefined;
 }
 
 export const getSocketsInRoom = async (io: Server, room: RoomId): Promise<UserData[]> => {
