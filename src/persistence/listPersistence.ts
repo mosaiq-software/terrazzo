@@ -37,7 +37,7 @@ export const getListsByBoardIdOrder = async (boardId: BoardId) => {
 
 export const getNextListOrder = async (boardId: BoardId) => {
     const list = (await ListModel.findAll({ where: { boardId }, order: [['order', 'DESC']] })).map(list => list.toJSON()) as List[];
-    return list ? list.length + 1 : 1;
+    return list ? list.length : 0;
 }
 
 export const createListOnBoard = async (list: List, boardId: BoardId) => {
