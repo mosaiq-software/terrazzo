@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Comment } from '@mosaiq/terrazzo-common/types';
+import { CardId, Comment, CommentId, UserId } from '@mosaiq/terrazzo-common/types';
 
 class CommentModel extends Model {}
 CommentModel.init({
@@ -17,19 +17,19 @@ CommentModel.init({
 
 sequelize.sync();
 
-export const getCommentById = async (id: string) => {
+export const getCommentById = async (id: CommentId) => {
     return (await CommentModel.findByPk(id))?.toJSON() as Comment | null;
 }
 
-export const getCommentsByCardId = async (cardId: string) => {
+export const getCommentsByCardId = async (cardId: CardId) => {
     return (await CommentModel.findAll({ where: { cardId } })).map(comment => comment.toJSON()) as Comment[];
 }
 
-export const getCommentsByUserId = async (userId: string) => {
+export const getCommentsByUserId = async (userId: UserId) => {
     return (await CommentModel.findAll({ where: { postedBy: userId } })).map(comment => comment.toJSON()) as Comment[];
 }
 
-export const createCommentOnCard = async (comment: Comment, cardId: string) => {
+export const createCommentOnCard = async (comment: Comment, cardId: CardId) => {
     return await CommentModel.create({
         id: comment.id,
         cardId,
@@ -47,7 +47,7 @@ export const updateComment = async (comment: Comment) => {
     }, { where: { id: comment.id } });
 }
 
-export const setCommentArchived = async (id: string, archived: boolean) => {
+export const setCommentArchived = async (id: CommentId, archived: boolean) => {
     return await CommentModel.update({ archived }, { where: { id } });
 }
 

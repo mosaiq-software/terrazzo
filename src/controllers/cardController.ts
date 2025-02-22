@@ -1,14 +1,14 @@
 import {
     createCardOnList,
+    getCardsByListIdDown,
     getCardsByListIdShort,
-    getNextCardOrder,
     updateDescription,
     updateName,
 } from "@trz-api/persistence/cardPersistence";
 import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
 import {getListById} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
-import {Card, Priority} from "@mosaiq/terrazzo-common/types";
+import {Card, ListId, Priority} from "@mosaiq/terrazzo-common/types";
 import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
 
 //Gets
@@ -143,4 +143,9 @@ export async function editName(cardID:string, name:string) {
     }catch (e) {
         throw new Error("Failed to save Card" + e);
     }
+}
+
+export const getNextCardOrder = async (listId: ListId) => {
+    const card = await getCardsByListIdDown(listId);
+    return card ? card.length + 1 : 1;
 }

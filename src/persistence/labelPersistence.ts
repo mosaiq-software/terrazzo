@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Label } from '@mosaiq/terrazzo-common/types';
+import { BoardId, Label, LabelId } from '@mosaiq/terrazzo-common/types';
 
 class LabelModel extends Model {}
 LabelModel.init({
@@ -15,15 +15,15 @@ LabelModel.init({
 
 sequelize.sync();
 
-export const getLabelById = async (id: string) => {
+export const getLabelById = async (id: LabelId) => {
     return (await LabelModel.findByPk(id))?.toJSON() as Label | null;
 }
 
-export const getLabelsByBoardId = async (boardId: string) => {
+export const getLabelsByBoardId = async (boardId: BoardId) => {
     return (await LabelModel.findAll({ where: { boardId } })).map(label => label.toJSON()) as Label[];
 }
 
-export const createLabelOnBoard = async (label: Label, boardId: string) => {
+export const createLabelOnBoard = async (label: Label, boardId: BoardId) => {
     return await LabelModel.create({
         id: label.id,
         boardId,
@@ -39,10 +39,10 @@ export const updateLabel = async (label: Label) => {
     }, { where: { id: label.id } });
 }
 
-export const deleteLabel = async (id: string) => {
+export const deleteLabel = async (id: LabelId) => {
     return await LabelModel.destroy({ where: { id } });
 }
 
-export const deleteLabelsByBoardId = async (boardId: string) => {
+export const deleteLabelsByBoardId = async (boardId: BoardId) => {
     return await LabelModel.destroy({ where: { boardId } });
 }
