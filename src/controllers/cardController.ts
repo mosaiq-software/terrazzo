@@ -1,12 +1,11 @@
 import {
     createCardOnList,
     getCardById,
+    getCardsByListIdDown,
     getCardsByListIdShortUp,
     getCardsByListIdUp,
-    getNextCardOrder,
     updateCardList,
     updateCardOrder,
-    updateDescription,
     updateName,
 } from "@trz-api/persistence/cardPersistence";
 import {getListById, getNextListOrder} from "@trz-api/persistence/listPersistence";
