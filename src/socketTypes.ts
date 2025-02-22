@@ -1,4 +1,4 @@
-import {Board, Card, List, TextBlock, TextBlockEvent, TextBlockId} from "./types";
+import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationId, Project, ProjectId, TextBlock, TextBlockEvent, TextBlockId} from "./types";
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -30,7 +30,10 @@ export enum ClientSE { // Client to Server
     TEXT_CARET = "TEXT_CARET",
     MOVE_LIST = "MOVE_LIST",
     MOVE_CARD = "MOVE_CARD",
-    
+    UPDATE_ORG_FIELD = "UPDATE_ORG_FIELD",
+    UPDATE_PROJECT_FIELD = "UPDATE_PROJECT_FIELD",
+    UPDATE_BOARD_FIELD = "UPDATE_BOARD_FIELD",
+    UPDATE_LIST_FIELD = "UPDATE_LIST_FIELD",
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
 }
 export interface ClientSEPayload {
@@ -46,10 +49,14 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_CARD_TITLE]: UpdateCardTitleType;
     [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
     [ClientSE.UPDATE_TEXT_BLOCK]: TextBlockEvent[];
-    [ClientSE.TEXT_CARET]: Position;
+    [ClientSE.TEXT_CARET]: Position | undefined;
     [ClientSE.MOVE_LIST]: {listId: string, position: number};
-    [ClientSE.MOVE_CARD]: {cardId: string, toList: string, position: number};
-    [ClientSE.UPDATE_CARD_FIELD]: Partial<Card>;
+    [ClientSE.MOVE_CARD]: {cardId: string, toList: string, position?: number};
+    [ClientSE.UPDATE_ORG_FIELD]: (Partial<Organization> & {id: OrganizationId});
+    [ClientSE.UPDATE_PROJECT_FIELD]: (Partial<Project> & {id: ProjectId});
+    [ClientSE.UPDATE_BOARD_FIELD]: (Partial<Board> & {id: BoardId});
+    [ClientSE.UPDATE_LIST_FIELD]: (Partial<List> & {id: ListId});
+    [ClientSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
@@ -57,7 +64,7 @@ export interface ClientSEReplies {
     [ClientSE.MOUSE_MOVE]: undefined;
     [ClientSE.USER_IDLE]: undefined;
     [ClientSE.GET_BOARD]: { board: Board | undefined };
-    [ClientSE.CREATE_BOARD]: {boardID: string};
+    [ClientSE.CREATE_BOARD]: {boardID: BoardId};
     [ClientSE.CREATE_LIST]: {success: boolean};
     [ClientSE.CREATE_CARD]: {success: boolean};
     [ClientSE.UPDATE_LIST_TITLE]: {success: boolean};
@@ -67,6 +74,10 @@ export interface ClientSEReplies {
     [ClientSE.TEXT_CARET]: undefined;
     [ClientSE.MOVE_LIST]: undefined;
     [ClientSE.MOVE_CARD]: undefined;
+    [ClientSE.UPDATE_ORG_FIELD]: undefined;
+    [ClientSE.UPDATE_PROJECT_FIELD]: undefined;
+    [ClientSE.UPDATE_BOARD_FIELD]: undefined;
+    [ClientSE.UPDATE_LIST_FIELD]: undefined;
     [ClientSE.UPDATE_CARD_FIELD]: undefined;
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
@@ -86,6 +97,10 @@ export enum ServerSE { // Server to Client
     TEXT_CARET = "TEXT_CARET",
     MOVE_LIST = "MOVE_LIST",
     MOVE_CARD = "MOVE_CARD",
+    UPDATE_ORG_FIELD = "UPDATE_ORG_FIELD",
+    UPDATE_PROJECT_FIELD = "UPDATE_PROJECT_FIELD",
+    UPDATE_BOARD_FIELD = "UPDATE_BOARD_FIELD",
+    UPDATE_LIST_FIELD = "UPDATE_LIST_FIELD",
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
 }
 export interface ServerSEPayload {
@@ -101,9 +116,13 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_CARD_TITLE]: UpdateCardTitleType;
     [ServerSE.UPDATE_TEXT_BLOCK]: {events: TextBlockEvent[], updated: string};
     [ServerSE.TEXT_CARET]: {sid: SocketId, caret: Position};
-    [ServerSE.MOVE_LIST]: {listId: string, position: number};
-    [ServerSE.MOVE_CARD]: {cardId: string, toList: string, position: number};
-    [ServerSE.UPDATE_CARD_FIELD]: Partial<Card>
+    [ServerSE.MOVE_LIST]: {listId: ListId, position: number};
+    [ServerSE.MOVE_CARD]: {cardId: CardId, toList: ListId, position: number};
+    [ServerSE.UPDATE_ORG_FIELD]: (Partial<Organization> & {id: OrganizationId});
+    [ServerSE.UPDATE_PROJECT_FIELD]: (Partial<Project> & {id: ProjectId});
+    [ServerSE.UPDATE_BOARD_FIELD]: (Partial<Board> & {id: BoardId});
+    [ServerSE.UPDATE_LIST_FIELD]: (Partial<List> & {id: ListId});
+    [ServerSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -120,19 +139,18 @@ export interface ServerSEReplies {
     [ServerSE.TEXT_CARET]: void;
     [ServerSE.MOVE_LIST]: void;
     [ServerSE.MOVE_CARD]: void;
+    [ServerSE.UPDATE_ORG_FIELD]: void;
+    [ServerSE.UPDATE_PROJECT_FIELD]: void;
+    [ServerSE.UPDATE_BOARD_FIELD]: void;
+    [ServerSE.UPDATE_LIST_FIELD]: void;
     [ServerSE.UPDATE_CARD_FIELD]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
 
 export interface MouseRoomUserData {
     pos: Position;
-    draggingList?: string;
-    draggingCard?: string;
-};
-export interface MouseRoomUserData {
-    pos: Position;
-    draggingList?: string;
-    draggingCard?: string;
+    draggingList?: ListId;
+    draggingCard?: CardId;
 };
 
 export interface TextRoomUserData {
@@ -149,11 +167,11 @@ export type RoomId = `${RoomType}-${string}` | null;
 export type SocketId = string;
 
 export type CreateBoardType = { name:string; boardCode: string}
-export type CreateListType = {boardID: string; listName: string}
-export type CreateCardType = {listID: string; cardName: string}
+export type CreateListType = {boardID: BoardId; listName: string}
+export type CreateCardType = {listID: ListId; cardName: CardId}
 
-export type UpdateListTitleType = {listID: string; title: string}
-export type UpdateCardTitleType = {cardID: string; title: string}
+export type UpdateListTitleType = {listID: ListId; title: string}
+export type UpdateCardTitleType = {cardID: CardId; title: string}
 
 export interface UserData {
     sid: SocketId;
