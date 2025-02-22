@@ -66,10 +66,6 @@ export const updateCard = async (card: Card) => {
     }, { where: { id: card.id } });
 };
 
-export const updateDescription = async (cardId: CardId, description: string) => {
-    return await CardModel.update({ description: description }, { where: { id: cardId } });
-};
-
 export const updateName = async (cardId: CardId, name: string) => {
     return await CardModel.update({ name: name }, { where: { id: cardId } });
 };

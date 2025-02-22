@@ -80,7 +80,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No list data provided');
             }
-            const payload = await addList(data.boardID, data.listName);
+            const payload:ServerSEPayload[ServerSE.ADD_LIST] = await addList(data.boardID, data.listName);
             broadcastToMyselfAndMyRoom(socket, ServerSE.ADD_LIST, payload);
             reply({ success: true });
         } catch (error: any) {
@@ -94,7 +94,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No card data provided');
             }
-            const payload = await addCard(data.listID, data.cardName);
+            const payload: ServerSEPayload[ServerSE.ADD_CARD] = await addCard(data.listID, data.cardName);
             broadcastToMyselfAndMyRoom(socket, ServerSE.ADD_CARD, payload);
             reply({ success: true });
         } catch (error: any) {
@@ -109,7 +109,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
                 throw new Error('No list data provided');
             }
             const result = await updateListName(data.listID, data.title);
-            const payload = { listID: data.listID, title: data.title };
+            const payload:ServerSEPayload[ServerSE.UPDATE_LIST_TITLE] = { listID: data.listID, title: data.title };
             if (result){
                 broadcastToMyselfAndMyRoom(socket, ServerSE.UPDATE_LIST_TITLE, payload);
             }
@@ -142,7 +142,8 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
                 throw new Error("Invalid text block event");
             }
             const text = await handleTextBlockEvents(data);
-            broadcastToMyRoom(socket, ServerSE.UPDATE_TEXT_BLOCK, {events: data, updated: text??''});
+            const payload:ServerSEPayload[ServerSE.UPDATE_TEXT_BLOCK] = {events: data, updated: text??''};
+            broadcastToMyRoom(socket, ServerSE.UPDATE_TEXT_BLOCK, payload);
             reply(text);
         } catch (error: any) {
             console.log("Error updating text block",data,error);

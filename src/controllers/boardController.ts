@@ -1,7 +1,7 @@
-import {Board} from "../../../terrazzo-common/src/types";
-import {createBoard, getBoardById, getBoardMembers} from "@trz-api/persistence/boardPersistence";
+import {createBoard, getBoardById} from "@trz-api/persistence/boardPersistence";
 import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
 import {getAllListsOfBoard} from "@trz-api/controllers/listController";
+import { Board, BoardId } from "@mosaiq/terrazzo-common/types";
 
 //Gets
 
@@ -10,7 +10,7 @@ import {getAllListsOfBoard} from "@trz-api/controllers/listController";
  * Returns a promise of the type Board with all its lists, members, sprints, and labels
  * @param boardID
  */
-export async function getWholeBoard(boardID:string) {
+export async function getWholeBoard(boardID:BoardId) {
     //pull board from db with ID
     const board = await getBoardById(boardID);
 
@@ -20,9 +20,8 @@ export async function getWholeBoard(boardID:string) {
 
     try {
         board.lists = await getAllListsOfBoard(boardID);
-        board.members = await getBoardMembers(boardID);
-        board.sprints = [];
         board.labels = await getLabelsByBoardId(boardID);
+        board.sprints = [];
 
         return board;
     } catch (e) {
@@ -40,20 +39,6 @@ export async function getWholeBoard(boardID:string) {
  * @param boardCode
  */
 export async function addBoard(name:string, boardCode:string) {
-
-    const newBoard: Board = {
-        id:"",
-        boardCode:"",
-        name:"",
-        lists:[],
-        members:[],
-        sprints:[],
-        labels:[],
-        archived:false,
-        createdAt:0,
-        totalCards:0
-    };
-
     if(name.length > 50) {
         throw new Error("Title must be 50 characters or less");
     }
@@ -62,11 +47,17 @@ export async function addBoard(name:string, boardCode:string) {
         throw new Error("Abbreviation must be 3 characters or less");
     }
 
-    newBoard.id = crypto.randomUUID();
-    newBoard.boardCode = boardCode;
-    newBoard.name = name;
-    newBoard.totalCards = 0;
-    newBoard.createdAt = Date.now();
+    const newBoard: Board = {
+        id: crypto.randomUUID(),
+        boardCode: boardCode,
+        name: name,
+        lists:[],
+        sprints:[],
+        labels:[],
+        archived:false,
+        createdAt: Date.now(),
+        totalCards:0
+    };
 
     try{
         await createBoard(newBoard);

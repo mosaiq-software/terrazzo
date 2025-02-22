@@ -5,7 +5,7 @@ import {
     getNextListOrder, updateList
 } from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
-import {Board, List} from "@mosaiq/terrazzo-common/types";
+import {Board, BoardId, List, ListId} from "@mosaiq/terrazzo-common/types";
 import {getAllCardsOfList} from "@trz-api/controllers/cardController";
 
 //Gets
@@ -15,7 +15,7 @@ import {getAllCardsOfList} from "@trz-api/controllers/cardController";
  * Returns a promise of all lists with all their cards
  * @param boardID
  */
-export async function getAllListsOfBoard(boardID:string) {
+export async function getAllListsOfBoard(boardID:BoardId) {
 
     const lists = await getListsByBoardIdOrder(boardID);
 
@@ -44,7 +44,7 @@ export async function getAllListsOfBoard(boardID:string) {
  * @param boardID
  * @param listName
  */
-export async function addList(boardID:string, listName:string) {
+export async function addList(boardID:BoardId, listName:string) {
 
     //pull board from db with ID
     const updatingBoard = await getBoardById(boardID);
@@ -57,20 +57,15 @@ export async function addList(boardID:string, listName:string) {
         throw new Error("Board cannot have more than 50 lists");
     }
 
-    const newListOrder = await getNextListOrder(boardID);
-
-    const newList: List = {
-        id:crypto.randomUUID(),
-        boardId:boardID,
-        name:listName,
-        cards:[],
-        archived:false,
-        order: newListOrder
-    };
-
-    //save board before returning
-    //add try statement for error handling
     try {
+        const newList: List = {
+            id:crypto.randomUUID(),
+            boardId:boardID,
+            name:listName,
+            cards:[],
+            archived:false,
+            order: await getNextListOrder(boardID)
+        };
         await createListOnBoard(newList, boardID);
         return newList;
     }catch (e) {
@@ -78,43 +73,7 @@ export async function addList(boardID:string, listName:string) {
     }
 }
 
-//Updates
-
-/**
- * Under construction
- * @param boardID
- * @param newPosition
- */
-export function updateListPositions(boardID:string, newPosition:number[]) {
-    const updatingBoard: Board = {
-        id:"",
-        boardCode:"",
-        name:"",
-        lists:[],
-        members:[],
-        sprints:[],
-        labels:[],
-        archived:false,
-        createdAt:0,
-        totalCards: 0};
-
-    if(newPosition[1] > updatingBoard.lists.length || newPosition[1] < updatingBoard.lists.length) {
-        throw new Error("Position out of bounds");
-    }
-
-    //save board before returning
-    //add try statement for error handling
-    try {
-        //saving to db
-        return true;
-    }catch (e) {
-        throw new Error("Failed to save board" + e);
-    }
-}
-
-//Updates
-
-export async function updateListName(listID:string, newName:string) {
+export async function updateListName(listID:ListId, newName:string) {
     const updatingList = await getListById(listID);
 
     if (updatingList == null) {

@@ -2,10 +2,8 @@ import {
     createCardOnList,
     getCardsByListIdDown,
     getCardsByListIdShort,
-    updateDescription,
     updateName,
 } from "@trz-api/persistence/cardPersistence";
-import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
 import {getListById} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
 import {Card, ListId, Priority} from "@mosaiq/terrazzo-common/types";
@@ -19,15 +17,11 @@ import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
  * Returns a promise of all cards in the list
  * @param listID
  */
-export async function getAllCardsOfList(listID:string) {
+export async function getAllCardsOfList(listID: ListId) {
     const cards = await getCardsByListIdShort(listID);
 
     if(cards == null) {
         return [];
-    }
-
-    for (const card of cards) {
-        card.labels = await getLabelsByBoardId(card.id);
     }
 
     try {
@@ -46,7 +40,7 @@ export async function getAllCardsOfList(listID:string) {
  * @param listID
  * @param cardName
  */
-export async function addCard(listID:string, cardName:string) {
+export async function addCard(listID:ListId, cardName:string) {
     //pull board from db with ID
     const updatingList = await getListById(listID);
 
@@ -60,46 +54,36 @@ export async function addCard(listID:string, cardName:string) {
         throw new Error("Board not found");
     }
 
-    if(updatingList.cards && updatingList.cards.length > 50) {
-        throw new Error("List cannot have more than 50 cards");
-    }
     const cardUid = crypto.randomUUID();
-    let descriptionTextBlockId;
-    try {
-        const descBlock = await createTextBlock("", cardUid);
-        if(!descBlock){
-            throw new Error("Failed to create description text block");
-        }
-        descriptionTextBlockId = descBlock.id;
-    } catch (error:any) {
-        throw new Error("Failed to create description text block");
-    }
-
     const newCard: Card = {
         id:cardUid,
         listId:listID,
         cardNumber:(board.totalCards + 1),
         name:cardName,
-        descriptionTextBlockId: descriptionTextBlockId,
+        descriptionTextBlockId: '',
         priority:Priority.LOWEST,
         storyPoints:0,
         sprintId:"",
         assignees:[],
         comments:[],
-        checklists:[],
         labels:[],
-        timesheetEntries:[],
         archived:false,
-        order:await getNextCardOrder(listID)
+        order: await getNextCardOrder(listID)
     };
-
-    //save board before returning
-    //add try statement for error handling
     try {
-        await createCardOnList(newCard, listID).then(async () => {
-            board.totalCards++;
-            await updateBoard(board);
-        });
+        const descBlock = await createTextBlock("", cardUid);
+        if(!descBlock){
+            throw new Error("Failed to create description text block");
+        }
+        newCard.descriptionTextBlockId = descBlock.id;
+    } catch (error:any) {
+        throw new Error("Failed to create description text block");
+    }
+
+    try {
+        await createCardOnList(newCard, listID);
+        board.totalCards++;
+        await updateBoard(board);
         return newCard;
     }catch (e) {
         throw new Error("Failed to save Card" + e);
@@ -107,25 +91,6 @@ export async function addCard(listID:string, cardName:string) {
 }
 
 //Updates
-
-/**
- * Updates the description of a card
- * You must pass in the card ID and the new description
- * Returns true if successful
- * @param cardID
- * @param description
- */
-export async function editDescription(cardID:string, description:string) {
-
-    //Add any checks here for any future use
-    try {
-        await updateDescription(cardID, description);
-        return true;
-    }catch (e) {
-        throw new Error("Failed to save Card" + e);
-    }
-}
-
 
 /**
  * Updates the name of a card
