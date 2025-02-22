@@ -10,7 +10,7 @@ import {
 import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
 import {addBoard, getWholeBoard} from "@trz-api/controllers/boardController";
 import {addList, moveList, updateListName} from "@trz-api/controllers/listController";
-import {addCard} from "@trz-api/controllers/cardController";
+import {addCard, moveCardToList} from "@trz-api/controllers/cardController";
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
@@ -172,9 +172,11 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         }
     });
 
-    socket.on(ClientSE.MOVE_CARD, (data: ClientSEPayload[ClientSE.MOVE_CARD], reply: ClientSEReply<ClientSE.MOVE_CARD>) => {
+    socket.on(ClientSE.MOVE_CARD, async (data: ClientSEPayload[ClientSE.MOVE_CARD], reply: ClientSEReply<ClientSE.MOVE_CARD>) => {
         try {
-
+            await moveCardToList(data.cardId, data.toList, data.position);
+            const payload: ServerSEPayload[ServerSE.MOVE_CARD] = {...data};
+            broadcastToMyRoom(socket, ServerSE.MOVE_CARD, payload);
         } catch (error: any) {
             reply(undefined, error.message);
         }
