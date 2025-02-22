@@ -115,9 +115,9 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_LIST_TITLE]: UpdateListTitleType;
     [ServerSE.UPDATE_CARD_TITLE]: UpdateCardTitleType;
     [ServerSE.UPDATE_TEXT_BLOCK]: {events: TextBlockEvent[], updated: string};
-    [ServerSE.TEXT_CARET]: {sid: SocketId, caret: Position};
+    [ServerSE.TEXT_CARET]: {sid: SocketId, caret?: Position};
     [ServerSE.MOVE_LIST]: {listId: ListId, position: number};
-    [ServerSE.MOVE_CARD]: {cardId: CardId, toList: ListId, position: number};
+    [ServerSE.MOVE_CARD]: {cardId: CardId, toList: ListId, position?: number};
     [ServerSE.UPDATE_ORG_FIELD]: (Partial<Organization> & {id: OrganizationId});
     [ServerSE.UPDATE_PROJECT_FIELD]: (Partial<Project> & {id: ProjectId});
     [ServerSE.UPDATE_BOARD_FIELD]: (Partial<Board> & {id: BoardId});
@@ -154,7 +154,7 @@ export interface MouseRoomUserData {
 };
 
 export interface TextRoomUserData {
-    caret: Position;
+    caret?: Position;
 }
 
 export type Position = { x: number; y: number; }
