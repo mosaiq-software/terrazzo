@@ -3,7 +3,7 @@ import { RoomId, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-co
 import { SocketData } from './socketTypes';
 
 export const getSocketRoom = (socket: Socket): RoomId | undefined => {
-    return Array.from(socket.rooms).find(room => room !== socket.id);
+    return Array.from(socket.rooms).find(room => room !== socket.id) as RoomId;
 }
 
 export const getSocketsInRoom = async (io: Server, room: RoomId): Promise<UserData[]> => {
@@ -23,10 +23,6 @@ export const getSocketsInRoom = async (io: Server, room: RoomId): Promise<UserDa
 }
 
 export const broadcast = (socket: Socket, to: RoomId | undefined, event: ServerSE, payload: ServerSEPayload[ServerSE]) => {
-    if (to === 'ALL_CLIENTS') {
-        socket.broadcast.emit(event, payload);
-        return;
-    }
     if (!to) {
         return;
     }
