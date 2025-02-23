@@ -1,7 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { OrganizationId, ProjectId, UID, UserId } from '@mosaiq/terrazzo-common/types';
-import { Role } from '@mosaiq/terrazzo-common/constants';
+import { MembershipRecord, OrganizationId, ProjectId, UID, UserId } from '@mosaiq/terrazzo-common/types';
+import { EntityType, Role } from '@mosaiq/terrazzo-common/constants';
 
 class MembershipModel extends Model {}
 MembershipModel.init({
@@ -11,6 +11,7 @@ MembershipModel.init({
     },
     userId: DataTypes.STRING,
     entityId: DataTypes.STRING,
+    entityType: DataTypes.TINYINT,
     userRole: DataTypes.TINYINT,
 }, { sequelize, modelName: 'membershipModel' });
 
@@ -23,12 +24,17 @@ export const getMembershipById = async (id: UID) => {
         }}))?.toJSON() as UID | undefined;
 }
 
-export const createMembershipRecord = async (user:UserId, entity:ProjectId|OrganizationId, role: Role) => {
+export const getMembershipRecordsForUser = async (userId:UserId, entityType: EntityType) => {
+    return ((await MembershipModel.findAll({where: {userId, entityType}})).map(r=>r.toJSON())) as MembershipRecord[];
+}
+
+export const createMembershipRecord = async (userId:UserId, entityId:ProjectId|OrganizationId, entityType: EntityType, userRole: Role) => {
     return await MembershipModel.create({
         id: crypto.randomUUID(),
-        userId: user,
-        entityId: entity,
-        userRole: role,
+        userId,
+        entityId,
+        userRole,
+        entityType,
     });
 }
 

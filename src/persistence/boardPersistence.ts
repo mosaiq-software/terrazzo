@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Board, BoardId, ProjectId } from '@mosaiq/terrazzo-common/types';
+import { Board, BoardHeader, BoardId, ProjectId } from '@mosaiq/terrazzo-common/types';
 
 class BoardModel extends Model {}
 BoardModel.init({
@@ -19,14 +19,14 @@ BoardModel.init({
 sequelize.sync();
 
 export const getBoards = async () => {
-    return (await BoardModel.findAll()).map(board => board.toJSON()) as Board[];
+    return (await BoardModel.findAll()).map(board => board.toJSON()) as BoardHeader[];
 }
 
 export const getBoardById = async (id: BoardId) => {
     return (await BoardModel.findByPk(id, {
         attributes:{
             exclude:['createdAt', 'updatedAt']
-        }}))?.toJSON() as Board | undefined;
+        }}))?.toJSON() as BoardHeader | undefined;
 }
 
 export const getBoardsByProjectId = async (projectId: ProjectId) => {
@@ -36,10 +36,10 @@ export const getBoardsByProjectId = async (projectId: ProjectId) => {
         attributes:{
             exclude:['createdAt', 'updatedAt']
         }
-    })).map(board => board.toJSON()) as Board[];
+    })).map(board => board.toJSON()) as BoardHeader[];
 }
 
-export const createBoard = async (board: Board) => {
+export const createBoard = async (board: BoardHeader) => {
     return await BoardModel.create({
         id: board.id,
         projectId: board.projectId,
@@ -50,7 +50,7 @@ export const createBoard = async (board: Board) => {
     });
 }
 
-export const updateBoard = async (board: Board) => {
+export const updateBoard = async (board: BoardHeader) => {
     return await BoardModel.update({
         boardCode: board.boardCode,
         name: board.name,

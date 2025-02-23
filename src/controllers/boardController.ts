@@ -1,7 +1,7 @@
 import {createBoard, getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
 import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
 import {getAllListsOfBoard} from "@trz-api/controllers/listController";
-import { Board, BoardId, ProjectId } from "@mosaiq/terrazzo-common/types";
+import { Board, BoardHeader, BoardId, ProjectId } from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
@@ -13,17 +13,19 @@ import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils"
  */
 export async function getWholeBoard(boardID:BoardId) {
     //pull board from db with ID
-    const board = await getBoardById(boardID);
+    const boardHeader = await getBoardById(boardID);
 
-    if(board == null) {
+    if(boardHeader == null) {
         throw new Error("Board not found");
     }
 
     try {
-        board.lists = await getAllListsOfBoard(boardID);
-        board.labels = await getLabelsByBoardId(boardID);
-        board.sprints = [];
-
+        const board: Board = {
+            ...boardHeader,
+            lists: await getAllListsOfBoard(boardID),
+            labels:  await getLabelsByBoardId(boardID),
+            sprints:  [],
+        };
         return board;
     } catch (e) {
         throw new Error("Failed to retrieve board" + e);
@@ -69,13 +71,13 @@ export async function addBoard(name:string, boardCode:string, projectId:ProjectI
     }
 }
 
-export async function updateBoardFromPartial(boardId: BoardId, partial:Partial<Board>) {
+export async function updateBoardFromPartial(boardId: BoardId, partial:Partial<BoardHeader>) {
     const updatingBoard = await getBoardById(boardId);
     if (updatingBoard == null) {
         throw new Error("Board not found");
     }
 
-    const updated = updateBaseFromPartial<Board>(updatingBoard, partial);
+    const updated = updateBaseFromPartial<BoardHeader>(updatingBoard, partial);
     try {
         await updateBoard(updated);
     } catch (e:any) {

@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Organization, OrganizationId } from '@mosaiq/terrazzo-common/types';
+import { Organization, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
 
 class OrgModel extends Model {}
 OrgModel.init({
@@ -21,10 +21,10 @@ export const getOrgById = async (id: OrganizationId) => {
     return (await OrgModel.findByPk(id, {
         attributes:{
             exclude:['updatedAt']
-        }}))?.toJSON() as Organization | undefined;
+        }}))?.toJSON() as OrganizationHeader | undefined;
 }
 
-export const createOrg = async (org: Organization) => {
+export const createOrg = async (org: OrganizationHeader) => {
     return await OrgModel.create({
         id: org.id,
         name: org.name,
@@ -35,7 +35,7 @@ export const createOrg = async (org: Organization) => {
     });
 }
 
-export const updateOrg = async (org: Organization) => {
+export const updateOrg = async (org: OrganizationHeader) => {
     return await OrgModel.update({
         name: org.name,
         archived: org.archived,

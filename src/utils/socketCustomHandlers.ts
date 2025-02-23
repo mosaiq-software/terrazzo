@@ -14,8 +14,9 @@ import {addCard, moveCardToList, updateCardFromPartial} from "@trz-api/controlle
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
-import { addOrganization, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
-import { addProject, updateProjectFromPartial } from '@trz-api/controllers/projectController';
+import { addOrganization, getOrganizationWithProjects, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
+import { addProject, getProjectWithBoards, updateProjectFromPartial } from '@trz-api/controllers/projectController';
+import { getUsersEntities } from '@trz-api/controllers/userController';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SET_ROOM, async (room: ClientSEPayload[ClientSE.SET_ROOM], reply: ClientSEReply<ClientSE.SET_ROOM>) => {
@@ -52,15 +53,51 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         }
     });
 
+    socket.on(ClientSE.GET_USERS_ENTITIES, async (data: ClientSEPayload[ClientSE.GET_USERS_ENTITIES], reply: ClientSEReply<ClientSE.GET_USERS_ENTITIES>) => {
+        try {
+            if (!data) {
+                throw new Error('No user id provided');
+            }
+            const entities = await getUsersEntities(data);
+            reply(entities);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.GET_ORGANIZATION, async (data: ClientSEPayload[ClientSE.GET_ORGANIZATION], reply: ClientSEReply<ClientSE.GET_ORGANIZATION>) => {
+        try {
+            if (!data) {
+                throw new Error('No org id provided');
+            }
+            const org = await getOrganizationWithProjects(data);
+            reply(org);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.GET_PROJECT, async (data: ClientSEPayload[ClientSE.GET_PROJECT], reply: ClientSEReply<ClientSE.GET_PROJECT>) => {
+        try {
+            if (!data) {
+                throw new Error('No project id provided');
+            }
+            const project = await getProjectWithBoards(data);
+            reply(project);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
     socket.on(ClientSE.GET_BOARD, async (data: ClientSEPayload[ClientSE.GET_BOARD], reply: ClientSEReply<ClientSE.GET_BOARD>) => {
         try {
             if (!data) {
                 throw new Error('No board id provided');
             }
             const board = await getWholeBoard(data);
-            reply({ board });
+            reply(board);
         } catch (error: any) {
-            reply({ board: undefined }, error.message);
+            reply(undefined, error.message);
         }
     });
 
@@ -69,7 +106,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No card data provided');
             }
-            const orgId = await addOrganization(data.name, data.creator, data.isPersonal);
+            const orgId = await addOrganization(data.name, data.creator, false);
             reply(orgId);
         } catch (error: any) {
             console.error("Error creating card", error);
