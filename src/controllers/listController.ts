@@ -138,6 +138,17 @@ export async function updateListName(listID:string, newName:string) {
     }
 }
 
+//Utils
+
+export async function getBoardIDFromListID(listID:string) {
+    const updatingList = await getListById(listID);
+
+    if (updatingList == null) {
+        throw new Error("List not found");
+    }
+
+    return updatingList.boardId;
+}
 export async function moveList(listID: string, toPosition: number) {
     try {
         const boardId = await getListsBoardId(listID);
