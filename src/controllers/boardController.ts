@@ -1,7 +1,8 @@
-import {createBoard, getBoardById} from "@trz-api/persistence/boardPersistence";
+import {createBoard, getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
 import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
 import {getAllListsOfBoard} from "@trz-api/controllers/listController";
-import { Board, BoardId } from "@mosaiq/terrazzo-common/types";
+import { Board, BoardId, ProjectId } from "@mosaiq/terrazzo-common/types";
+import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
 
@@ -38,7 +39,7 @@ export async function getWholeBoard(boardID:BoardId) {
  * @param name
  * @param boardCode
  */
-export async function addBoard(name:string, boardCode:string) {
+export async function addBoard(name:string, boardCode:string, projectId:ProjectId) {
     if(name.length > 50) {
         throw new Error("Title must be 50 characters or less");
     }
@@ -49,8 +50,9 @@ export async function addBoard(name:string, boardCode:string) {
 
     const newBoard: Board = {
         id: crypto.randomUUID(),
-        boardCode: boardCode,
-        name: name,
+        projectId,
+        boardCode,
+        name,
         lists:[],
         sprints:[],
         labels:[],
@@ -67,4 +69,16 @@ export async function addBoard(name:string, boardCode:string) {
     }
 }
 
-//Updates
+export async function updateBoardFromPartial(boardId: BoardId, partial:Partial<Board>) {
+    const updatingBoard = await getBoardById(boardId);
+    if (updatingBoard == null) {
+        throw new Error("Board not found");
+    }
+
+    const updated = updateBaseFromPartial<Board>(updatingBoard, partial);
+    try {
+        await updateBoard(updated);
+    } catch (e:any) {
+        throw new Error("Failed to update board "+e);
+    }
+}

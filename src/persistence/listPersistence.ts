@@ -58,10 +58,6 @@ export const updateList = async (list: List) => {
     }, { where: { id: list.id } });
 }
 
-export const setListArchived = async (id: ListId, archived: boolean) => {
-    return await ListModel.update({ archived }, { where: { id } });
-}
-
 export const getListsBoardId = async (listId: string) => {
     return ((await ListModel.findByPk(listId))?.toJSON() as List).boardId ?? null;
 }

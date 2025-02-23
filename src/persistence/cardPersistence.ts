@@ -79,10 +79,6 @@ export const getCardsByListIdUp = async (listId: string) => {
     return (await CardModel.findAll({ where: { listId }, order: [['order', 'ASC']] })).map(list => list.toJSON()) as Card[];
 };
 
-export const setCardArchived = async (id: CardId, archived: boolean) => {
-    return await CardModel.update({ archived }, { where: { id } });
-};
-
 export const getNextCardOrder = async (listId: string) => {
     const cards = (await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] })).map(card => card.toJSON()) as Card[];
     return cards?.length ?? 0;

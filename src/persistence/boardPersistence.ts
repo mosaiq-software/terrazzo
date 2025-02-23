@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Board, BoardId } from '@mosaiq/terrazzo-common/types';
+import { Board, BoardId, ProjectId } from '@mosaiq/terrazzo-common/types';
 
 class BoardModel extends Model {}
 BoardModel.init({
@@ -8,6 +8,7 @@ BoardModel.init({
         type: DataTypes.STRING,
         primaryKey: true
     },
+    projectId: DataTypes.STRING,
     boardCode: DataTypes.STRING,
     name: DataTypes.STRING,
     archived: DataTypes.BOOLEAN,
@@ -28,9 +29,20 @@ export const getBoardById = async (id: BoardId) => {
         }}))?.toJSON() as Board | undefined;
 }
 
+export const getBoardsByProjectId = async (projectId: ProjectId) => {
+    return (await BoardModel.findAll({
+        where: { projectId },
+        order: [['createdAt', 'ASC']],
+        attributes:{
+            exclude:['createdAt', 'updatedAt']
+        }
+    })).map(board => board.toJSON()) as Board[];
+}
+
 export const createBoard = async (board: Board) => {
     return await BoardModel.create({
         id: board.id,
+        projectId: board.projectId,
         boardCode: board.boardCode,
         name: board.name,
         archived: false,
@@ -45,8 +57,4 @@ export const updateBoard = async (board: Board) => {
         archived: board.archived,
         totalCards: board.totalCards
     }, { where: { id: board.id } });
-};
-
-export const setBoardArchived = async (id: BoardId, archived: boolean) => {
-    return await BoardModel.update({ archived }, { where: { id } });
 };
