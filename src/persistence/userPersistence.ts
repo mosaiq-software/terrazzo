@@ -29,7 +29,11 @@ export const getUserByUsername = async (username: string) => {
 }
 
 export const getUserByGithubId = async (githubId: string) => {
-    return (await UserModel.findOne({ where: { githubUserId: githubId } }))?.toJSON() as User | null;
+    return (await UserModel.findOne({
+        where: { githubUserId: githubId },
+        attributes:{
+            exclude:['createdAt', 'updatedAt']
+        }}))?.toJSON() as User | null;
 };
 
 export const findOrCreateUser = async (user: User) => {
