@@ -1,4 +1,4 @@
-import {Board, Card, List, TextBlock, TextBlockEvent, TextBlockId} from "./types";
+import {Board, Card, List, TextBlock, TextBlockEvent, TextBlockId, User} from "./types";
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -29,7 +29,10 @@ export enum ClientSE { // Client to Server
     UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
     TEXT_CARET = "TEXT_CARET",
     MOVE_LIST = "MOVE_LIST",
-    MOVE_CARD = "MOVE_CARD"
+    MOVE_CARD = "MOVE_CARD",
+    SETUP_USER = "SETUP_USER",
+    GET_USER = "GET_USER",
+    CHECK_USERNAME_TAKEN = "CHECK_USERNAME_TAKEN",
     
 }
 export interface ClientSEPayload {
@@ -48,6 +51,9 @@ export interface ClientSEPayload {
     [ClientSE.TEXT_CARET]: Position;
     [ClientSE.MOVE_LIST]: {listId: string, position: number};
     [ClientSE.MOVE_CARD]: {cardId: string, toList: string, position: number};
+    [ClientSE.SETUP_USER]: {id: string, username: string, firstName: string, lastName:string}
+    [ClientSE.GET_USER]: string;
+    [ClientSE.CHECK_USERNAME_TAKEN]: string;
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
@@ -65,6 +71,9 @@ export interface ClientSEReplies {
     [ClientSE.TEXT_CARET]: undefined;
     [ClientSE.MOVE_LIST]: undefined;
     [ClientSE.MOVE_CARD]: undefined;
+    [ClientSE.SETUP_USER]: {user: User | undefined};
+    [ClientSE.GET_USER]: {user: User | undefined};
+    [ClientSE.CHECK_USERNAME_TAKEN]: {taken:boolean};
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
 
