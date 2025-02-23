@@ -1,5 +1,7 @@
+import { EntityType, Priority, Role } from "./constants";
+
 export type URL = string;
-export type UID = string;
+export type UID = `${string}-${string}-${string}-${string}-${string}`;
 export type OrganizationId = UID;
 export type ProjectId = UID;
 export type BoardId = UID;
@@ -13,7 +15,10 @@ export type CommentId = UID;
 export interface OrganizationHeader {
     id: OrganizationId;
     name: string;
+    archived: boolean;
+    createdAt: number;
     logoUrl: URL;
+    isPersonalOrg: boolean;
 }
 export interface Organization extends OrganizationHeader{
     projects: ProjectHeader[];
@@ -21,7 +26,10 @@ export interface Organization extends OrganizationHeader{
 
 export interface ProjectHeader {
     id: ProjectId;
+    orgId: OrganizationId;
     name: string;
+    archived: boolean;
+    createdAt: number;
     logoUrl: URL;
 }
 export interface Project extends ProjectHeader{
@@ -30,6 +38,7 @@ export interface Project extends ProjectHeader{
 
 export interface BoardHeader {
     id: BoardId;
+    projectId: ProjectId;
     boardCode: string;
     name: string;
     archived: boolean;
@@ -53,7 +62,7 @@ export interface List {
 
 export interface CardHeader {
     id: CardId;
-    listId: ListId;
+    listId: ListId | null;
     cardNumber: number;
     name: string;
     priority: Priority;
@@ -93,14 +102,6 @@ export interface Comment {
     archived: boolean;
 }
 
-export enum Priority {
-    LOWEST = 1,
-    LOW = 2,
-    MEDIUM = 3,
-    HIGH = 4,
-    HIGHEST = 5
-}
-
 export interface Label {
     id: LabelId;
     name: string;
@@ -116,4 +117,12 @@ export interface TextBlockEvent {
     start: number;
     end: number;
     inserted: string;
+}
+
+export interface MembershipRecord {
+    id: UID;
+    userId: UserId;
+    entityId: ProjectId|OrganizationId;
+    entityType: EntityType;
+    role: Role;
 }
