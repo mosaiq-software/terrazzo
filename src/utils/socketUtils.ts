@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io';
-import { RoomId, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-common/socketTypes';
+import {RoomId, RoomType, ServerSE, ServerSEPayload, UserData} from '@mosaiq/terrazzo-common/socketTypes';
 import { SocketData } from './socketTypes';
+import {getRoomCode} from "@mosaiq/terrazzo-common/utils/socketUtils";
 
 export const getSocketRoom = (socket: Socket): RoomId | undefined => {
     return (Array.from(socket.rooms).find(room => room !== socket.id) as RoomId) ?? undefined;
@@ -35,7 +36,12 @@ export const broadcastToMyRoom = (socket: Socket, event: ServerSE, payload: Serv
         socket.broadcast.to(room).emit(event, payload);
     }
 }
-
+export const broadcastToAnotherRoom = (socket: Socket, roomType: RoomType, uid: string, event: ServerSE, payload: ServerSEPayload[keyof ServerSEPayload]) => {
+    const room = getRoomCode(roomType,uid);
+    if (room) {
+        socket.broadcast.to(room).emit(event, payload);
+    }
+}
 export const broadcastToAll = (io: Server, event: ServerSE, payload: ServerSEPayload[keyof ServerSEPayload]) => {
     io.emit(event, payload);
 }

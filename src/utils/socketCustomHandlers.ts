@@ -5,12 +5,12 @@ import {
     setSocketData,
     joinRoom,
     leaveRoom,
-    broadcastToMyselfAndMyRoom
+    broadcastToMyselfAndMyRoom, broadcastToAnotherRoom
 } from './socketUtils';
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
 import {addBoard, getWholeBoard, updateBoardFromPartial} from "@trz-api/controllers/boardController";
 import {addList, moveList, updateListFromPartial} from "@trz-api/controllers/listController";
-import {addCard, moveCardToList, updateCardFromPartial} from "@trz-api/controllers/cardController";
+import {addCard, moveCardToList, editName, getBoardIDFromCardID, updateCardFromPartial} from "@trz-api/controllers/cardController";
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
@@ -231,6 +231,42 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         } catch (error: any) {
             console.error("Error updating card fields", error);
             reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.UPDATE_CARD_TITLE, async (data: ClientSEPayload[ClientSE.UPDATE_CARD_TITLE], reply: ClientSEReply<ClientSE.UPDATE_CARD_TITLE>) => {
+        try {
+            if (!data) {
+                throw new Error('No card data provided');
+            }
+            const result = await editName(data.cardID, data.title);
+            const payload: ServerSEPayload[ServerSE.UPDATE_CARD_TITLE] = { cardID: data.cardID, title: data.title };
+            if(result){
+                broadcastToMyselfAndMyRoom(socket, ServerSE.UPDATE_CARD_TITLE, payload);
+                broadcastToAnotherRoom(socket, RoomType.MOUSE, await getBoardIDFromCardID(data.cardID), ServerSE.UPDATE_CARD_TITLE, payload);
+            }
+            reply({ success: true });
+        } catch (error: any) {
+            console.error("Error updating card title", error);
+            reply({ success: false }, error.message);
+        }
+    });
+
+    socket.on(ClientSE.UPDATE_CARD_TITLE, async (data: ClientSEPayload[ClientSE.UPDATE_CARD_TITLE], reply: ClientSEReply<ClientSE.UPDATE_CARD_TITLE>) => {
+        try {
+            if (!data) {
+                throw new Error('No card data provided');
+            }
+            const result = await editName(data.cardID, data.title);
+            const payload: ServerSEPayload[ServerSE.UPDATE_CARD_TITLE] = { cardID: data.cardID, title: data.title };
+            if(result){
+                broadcastToMyselfAndMyRoom(socket, ServerSE.UPDATE_CARD_TITLE, payload);
+                broadcastToAnotherRoom(socket, RoomType.MOUSE, await getBoardIDFromCardID(data.cardID), ServerSE.UPDATE_CARD_TITLE, payload);
+            }
+            reply({ success: true });
+        } catch (error: any) {
+            console.error("Error updating card title", error);
+            reply({ success: false }, error.message);
         }
     });
 

@@ -116,6 +116,28 @@ export const getNextCardOrder = async (listId: ListId) => {
     return card ? card.length + 1 : 1;
 }
 
+//Utils
+
+export async function getListIDFromCardID(cardID:string) {
+    const card = await getCardById(cardID);
+    if (card == null) {
+        throw new Error("Card not found");
+    }
+    return card.listId;
+}
+
+export async function getBoardIDFromCardID(cardID:string) {
+    const card = await getCardById(cardID);
+    if (card == null) {
+        throw new Error("Card not found");
+    }
+    const list = await getListById(card.listId);
+    if (list == null) {
+        throw new Error("List not found");
+    }
+    return list.boardId;
+}
+
 /*
     Remove the card from its old list and move it to the new one at the position
 */

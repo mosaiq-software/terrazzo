@@ -90,6 +90,17 @@ export async function updateListFromPartial(listId: ListId, partial:Partial<List
     }
 }
 
+//Utils
+
+export async function getBoardIDFromListID(listID:string) {
+    const updatingList = await getListById(listID);
+
+    if (updatingList == null) {
+        throw new Error("List not found");
+    }
+
+    return updatingList.boardId;
+}
 export async function moveList(listID: string, toPosition: number) {
     try {
         const boardId = await getListsBoardId(listID);
