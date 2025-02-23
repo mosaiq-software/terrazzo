@@ -56,10 +56,6 @@ export async function addList(boardID:BoardId, listName:string) {
         throw new Error("Board not found");
     }
 
-    if(updatingBoard.lists && updatingBoard.lists.length > 50) {
-        throw new Error("Board cannot have more than 50 lists");
-    }
-
     try {
         const newList: List = {
             id:crypto.randomUUID(),
@@ -92,7 +88,7 @@ export async function updateListFromPartial(listId: ListId, partial:Partial<List
 
 //Utils
 
-export async function getBoardIDFromListID(listID:string) {
+export async function getBoardIDFromListID(listID:ListId) {
     const updatingList = await getListById(listID);
 
     if (updatingList == null) {

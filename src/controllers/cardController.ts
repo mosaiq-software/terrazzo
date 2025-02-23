@@ -118,7 +118,7 @@ export const getNextCardOrder = async (listId: ListId) => {
 
 //Utils
 
-export async function getListIDFromCardID(cardID:string) {
+export async function getListIDFromCardID(cardID:CardId) {
     const card = await getCardById(cardID);
     if (card == null) {
         throw new Error("Card not found");
@@ -126,9 +126,9 @@ export async function getListIDFromCardID(cardID:string) {
     return card.listId;
 }
 
-export async function getBoardIDFromCardID(cardID:string) {
+export async function getBoardIDFromCardID(cardID:CardId) {
     const card = await getCardById(cardID);
-    if (card == null) {
+    if (card == null || !card.listId) {
         throw new Error("Card not found");
     }
     const list = await getListById(card.listId);

@@ -10,7 +10,8 @@
     "prepare": "husky",
     "after-push": "node ./scripts/after-push.mjs",
     "before-push": "node ./scripts/before-push.mjs",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "types": "tsc --noemit"
   },
   "author": "",
   "license": "UNLICENCED",

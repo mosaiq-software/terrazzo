@@ -1,3 +1,4 @@
+import { TextBlockId } from "@mosaiq/terrazzo-common/types";
 import { isValidTextBlockEvents } from "@mosaiq/terrazzo-common/utils/textUtils";
 import { handleTextBlockEvents } from "@trz-api/controllers/textBlockController";
 import { createTextBlock, getAllTextBlockIds, getTextBlockById } from "@trz-api/persistence/textBlockPersistence";
@@ -28,7 +29,7 @@ async function getTextBlock(req:Request, res:Response) {
         return;
     }
     try {
-        const textBlock = await getTextBlockById(req.params.id);
+        const textBlock = await getTextBlockById(req.params.id as TextBlockId);
         if(!textBlock) {
             res.status(404).json("Text block not found");
             return;

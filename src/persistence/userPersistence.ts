@@ -8,11 +8,7 @@ UserModel.init({
         type: DataTypes.STRING,
         primaryKey: true
     },
-    fullName: DataTypes.STRING,
-    discordUserId: DataTypes.STRING,
     githubUserId: DataTypes.STRING,
-    activeTimerId: DataTypes.STRING,
-    archived: DataTypes.BOOLEAN
 }, { sequelize, modelName: 'userModel' });
 
 sequelize.sync();
@@ -33,21 +29,13 @@ export const getUserByGithubId = async (githubId: string) => {
 export const createUser = async (user: User) => {
     return await UserModel.create({
         id: user.id,
-        fullName: user.fullName,
-        discordUserId: user.discordUserId,
         githubUserId: user.githubUserId,
-        activeTimerId: user.activeTimerId,
-        archived: false
     });
 };
 
 export const updateUser = async (user: User) => {
     return await UserModel.update({
-        fullName: user.fullName,
-        discordUserId: user.discordUserId,
         githubUserId: user.githubUserId,
-        activeTimerId: user.activeTimerId,
-        archived: user.archived
     }, { where: { id: user.id } });
 };
 
