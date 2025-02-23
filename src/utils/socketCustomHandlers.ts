@@ -9,7 +9,7 @@ import {
 } from './socketUtils';
 import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
 import {addBoard, getWholeBoard} from "@trz-api/controllers/boardController";
-import {addList, moveList, updateListName} from "@trz-api/controllers/listController";
+import {addList, moveList, updateListFromPartial} from "@trz-api/controllers/listController";
 import {addCard, moveCardToList} from "@trz-api/controllers/cardController";
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
@@ -103,20 +103,17 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         }
     });
 
-    socket.on(ClientSE.UPDATE_LIST_TITLE, async (data: ClientSEPayload[ClientSE.UPDATE_LIST_TITLE], reply: ClientSEReply<ClientSE.UPDATE_LIST_TITLE>) => {
+    socket.on(ClientSE.UPDATE_LIST_FIELD, async (data: ClientSEPayload[ClientSE.UPDATE_LIST_FIELD], reply: ClientSEReply<ClientSE.UPDATE_LIST_FIELD>) => {
         try {
             if (!data) {
                 throw new Error('No list data provided');
             }
-            const result = await updateListName(data.listID, data.title);
-            const payload:ServerSEPayload[ServerSE.UPDATE_LIST_TITLE] = { listID: data.listID, title: data.title };
-            if (result){
-                broadcastToMyselfAndMyRoom(socket, ServerSE.UPDATE_LIST_TITLE, payload);
-            }
-            reply({ success: true });
+            await updateListFromPartial(data.id, data);
+            const payload:ServerSEPayload[ServerSE.UPDATE_LIST_FIELD] = data;
+            broadcastToMyselfAndMyRoom(socket, ServerSE.UPDATE_LIST_FIELD, payload);
         } catch (error: any) {
             console.error("Error updating list title", error);
-            reply({ success: false }, error.message);
+            reply(undefined, error.message);
         }
     });
 

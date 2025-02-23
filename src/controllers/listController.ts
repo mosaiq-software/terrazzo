@@ -7,9 +7,9 @@ import {
     updateListOrder
 } from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
-import {Board, BoardId, List, ListId} from "@mosaiq/terrazzo-common/types";
+import {BoardId, List, ListId} from "@mosaiq/terrazzo-common/types";
 import {getAllCardsOfList} from "@trz-api/controllers/cardController";
-import { arrayMove } from "@mosaiq/terrazzo-common/utils/arrayUtils";
+import { arrayMove, updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
 
@@ -76,24 +76,17 @@ export async function addList(boardID:BoardId, listName:string) {
     }
 }
 
-export async function updateListName(listID:ListId, newName:string) {
-    const updatingList = await getListById(listID);
-
+export async function updateListFromPartial(listId: ListId, partial:Partial<List>) {
+    const updatingList = await getListById(listId);
     if (updatingList == null) {
         throw new Error("List not found");
     }
 
-    if(newName.length > 50) {
-        throw new Error("Title must be 50 characters or less");
-    }
-
-    updatingList.name = newName;
-
+    const updated = updateBaseFromPartial<List>(updatingList, partial);
     try {
-        await updateList(updatingList);
-        return true;
-    }catch (e) {
-        throw new Error("Failed to save board" + e);
+        await updateList(updated);
+    } catch (e:any) {
+        throw new Error("Failed to update list "+e);
     }
 }
 
