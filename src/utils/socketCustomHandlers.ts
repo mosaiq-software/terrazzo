@@ -126,7 +126,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
                 throw new Error('No card data provided');
             }
             const result = await editName(data.cardID, data.title);
-            const payload= { cardID: data.cardID, title: data.title };
+            const payload: ServerSEPayload[ServerSE.UPDATE_CARD_TITLE] = { cardID: data.cardID, title: data.title };
             if(result){
                 broadcastToMyselfAndMyRoom(socket, ServerSE.UPDATE_CARD_TITLE, payload);
                 broadcastToAnotherRoom(socket, RoomType.MOUSE, await getBoardIDFromCardID(data.cardID), ServerSE.UPDATE_CARD_TITLE, payload);
