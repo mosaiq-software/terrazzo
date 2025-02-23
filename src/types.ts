@@ -87,9 +87,13 @@ export interface Sprint {
 
 export interface User {
     id: UserId;
-    fullName: string;
-    discordUserId: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+    profilePicture: string;
     githubUserId: string;
+    projectIds: string[];
+    workspaceIds: string[];
     activeTimerId: string;
     archived: boolean;
 }
