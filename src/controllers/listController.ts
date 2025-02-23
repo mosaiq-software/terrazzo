@@ -118,6 +118,7 @@ export async function moveList(listID: string, toPosition: number) {
         const movedLists = arrayMove<List>(lists, index, toPosition);
         await updateListOrder(movedLists);
     } catch (error: any) {
+        console.error(error);
         throw error;
     }
 }
