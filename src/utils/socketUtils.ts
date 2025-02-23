@@ -4,7 +4,7 @@ import { SocketData } from './socketTypes';
 import {getRoomCode} from "@mosaiq/terrazzo-common/utils/socketUtils";
 
 export const getSocketRoom = (socket: Socket): RoomId | undefined => {
-    return Array.from(socket.rooms).find(room => room !== socket.id);
+    return (Array.from(socket.rooms).find(room => room !== socket.id) as RoomId) ?? undefined;
 }
 
 export const getSocketsInRoom = async (io: Server, room: RoomId): Promise<UserData[]> => {
@@ -24,10 +24,6 @@ export const getSocketsInRoom = async (io: Server, room: RoomId): Promise<UserDa
 }
 
 export const broadcast = (socket: Socket, to: RoomId | undefined, event: ServerSE, payload: ServerSEPayload[ServerSE]) => {
-    if (to === 'ALL_CLIENTS') {
-        socket.broadcast.emit(event, payload);
-        return;
-    }
     if (!to) {
         return;
     }

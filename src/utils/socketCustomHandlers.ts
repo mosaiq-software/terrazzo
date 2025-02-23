@@ -9,8 +9,8 @@ import {
 } from './socketUtils';
 import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
 import {addBoard, getWholeBoard} from "@trz-api/controllers/boardController";
-import {addList, updateListName} from "@trz-api/controllers/listController";
-import {addCard, editName, getBoardIDFromCardID} from "@trz-api/controllers/cardController";
+import {addList, moveList, updateListName} from "@trz-api/controllers/listController";
+import {addCard, moveCardToList, editName, getBoardIDFromCardID} from "@trz-api/controllers/cardController";
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
@@ -175,6 +175,26 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             setSocketData(socket, socketData);
             const payload: ServerSEPayload[ServerSE.TEXT_CARET] = { sid: socket.id, caret: data };
             broadcastToMyRoom(socket, ServerSE.TEXT_CARET, payload);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.MOVE_LIST, async (data: ClientSEPayload[ClientSE.MOVE_LIST], reply: ClientSEReply<ClientSE.MOVE_LIST>) => {
+        try {
+            await moveList(data.listId, data.position);
+            const payload: ServerSEPayload[ServerSE.MOVE_LIST] = {listId: data.listId, position: data.position};
+            broadcastToMyRoom(socket, ServerSE.MOVE_LIST, payload);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.MOVE_CARD, async (data: ClientSEPayload[ClientSE.MOVE_CARD], reply: ClientSEReply<ClientSE.MOVE_CARD>) => {
+        try {
+            await moveCardToList(data.cardId, data.toList, data.position);
+            const payload: ServerSEPayload[ServerSE.MOVE_CARD] = {...data};
+            broadcastToMyRoom(socket, ServerSE.MOVE_CARD, payload);
         } catch (error: any) {
             reply(undefined, error.message);
         }

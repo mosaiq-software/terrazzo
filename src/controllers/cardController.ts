@@ -1,12 +1,15 @@
 import {
-    createCardOnList, getCardById,
-    getCardsByListIdShort,
+    createCardOnList,
+    getCardById,
+    getCardsByListIdShortUp,
+    getCardsByListIdUp,
     getNextCardOrder,
+    updateCardList,
+    updateCardOrder,
     updateDescription,
     updateName,
 } from "@trz-api/persistence/cardPersistence";
-import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
-import {getListById} from "@trz-api/persistence/listPersistence";
+import {getListById, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
 import {Card, Priority} from "@mosaiq/terrazzo-common/types";
 import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
@@ -20,14 +23,10 @@ import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
  * @param listID
  */
 export async function getAllCardsOfList(listID:string) {
-    const cards = await getCardsByListIdShort(listID);
+    const cards = await getCardsByListIdShortUp(listID);
 
     if(cards == null) {
         return [];
-    }
-
-    for (const card of cards) {
-        card.labels = await getLabelsByBoardId(card.id);
     }
 
     try {
@@ -165,4 +164,97 @@ export async function getBoardIDFromCardID(cardID:string) {
         throw new Error("List not found");
     }
     return list.boardId;
+}
+
+/*
+    Remove the card from its old list and move it to the new one at the position
+*/
+export async function moveCardToList(cardId: string, toListId:string, position?:number) {
+    try {
+        if(position === undefined){
+            const nextOrder = await getNextListOrder(toListId);
+            if(nextOrder == undefined){
+                throw new Error(`No next order found on list ${toListId}`);
+            }
+            position = nextOrder;
+         }
+
+         let card: Card | null = await removeCardFromList(cardId);
+         if(!card) {
+            card = await getCardById(cardId);
+            if(!card) {
+                throw new Error("Could not find card that was removed!");
+            }
+        }
+        await addCardToList(card.id, toListId, position);
+    } catch (error: any) {
+        console.error(`Error moving card ${cardId} to list ${toListId}: ${error}`);
+        throw error;
+    }
+}
+
+/** 
+    Remove a card from its list and shift the remaining cards in the list down by 1 to preserve order
+    @returns the removed card
+*/
+export const removeCardFromList = async (cardId:string): Promise<Card> => {
+    try {
+        const remCard = await getCardById(cardId);
+        if(!remCard){
+            throw new Error("Card not found");
+        }
+        if(!remCard.listId){
+            throw new Error("Card is not assigned to any list");
+        }
+        const cards = await getCardsByListIdUp(remCard.listId);
+        if (!cards || cards.length === 0) {
+            throw new Error("List not found");
+        }
+        const remCardIndex = cards.findIndex(c=>c.id === cardId);
+        if(remCardIndex === -1){
+            throw new Error("Card not found in list");
+        }
+
+        cards.splice(remCardIndex, 1);
+        const promises = [updateCardOrder(remCard.id, -1), updateCardList(remCard.id, '')];
+        for(let i = 0; i < cards.length; i++) {
+            cards[i].order = i;
+            promises.push(updateCardOrder(cards[i].id, i));
+        }
+        await Promise.all(promises);
+        return {...remCard, listId: '', order: -1};
+    } catch (error: any) {
+        console.log(`Error removing card: ${error}`);
+        throw error;
+    }
+}
+
+/**
+ * Add a card to a list. The card must not be in any list to allow this to happen
+ */
+export const addCardToList = async (cardId:string, toList: string, atPosition:number): Promise<void> => {
+    try {
+        const addCard = await getCardById(cardId);
+        if(!addCard){
+            throw new Error("Card not found");
+        }
+        if(addCard.listId){
+            throw new Error("Card is already in a list");
+        }
+        const cards = await getCardsByListIdUp(toList);
+        if (!cards) {
+            throw new Error("List not found");
+        }
+        atPosition = Math.max(0, Math.min(atPosition, cards.length));
+        cards.splice(atPosition, 0 , addCard);
+        const promises = [updateCardList(addCard.id, toList)];
+        for(let i = 0; i < cards.length; i++) {
+            cards[i].order = i;
+            promises.push(updateCardOrder(cards[i].id, i));
+        }
+        await Promise.all(promises);
+    } catch (error: any) {
+        console.log(`Error adding card: ${error}`);
+        throw error;
+    }
 }

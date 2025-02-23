@@ -29,11 +29,12 @@ export const getCardsByListId = async (listId: string) => {
     return (await CardModel.findAll({ where: { listId } })).map(card => card.toJSON()) as Card[];
 };
 
-export const getCardsByListIdShort = async (listId: string) => {
+export const getCardsByListIdShortUp = async (listId: string) => {
     return (await CardModel.findAll({
         where: { listId },
+        order: [['order', 'ASC']],
         attributes:{
-            exclude:['description', 'storyPoints', 'sprintId', 'archived', 'createdAt', 'updatedAt']
+            exclude:['description', 'updatedAt']
         }}))
         .map(card => card.toJSON()) as Card[];
 };
@@ -78,11 +79,23 @@ export const getCardsByListIdDown = async (listId: string) => {
     return (await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] })).map(list => list.toJSON()) as Card[];
 };
 
+export const getCardsByListIdUp = async (listId: string) => {
+    return (await CardModel.findAll({ where: { listId }, order: [['order', 'ASC']] })).map(list => list.toJSON()) as Card[];
+};
+
 export const setCardArchived = async (id: string, archived: boolean) => {
     return await CardModel.update({ archived }, { where: { id } });
 };
 
 export const getNextCardOrder = async (listId: string) => {
-    const card = (await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] })).map(card => card.toJSON()) as Card[];
-    return card ? card.length + 1 : 1;
+    const cards = (await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] })).map(card => card.toJSON()) as Card[];
+    return cards?.length ?? 0;
+}
+
+export const updateCardList = async (cardId:string, listId:string) => {
+    return await CardModel.update({listId}, {where: { id: cardId}});
+}
+
+export const updateCardOrder = async (cardId:string, order:number) => {
+    return await CardModel.update({order}, {where: { id: cardId}});
 }

@@ -1,12 +1,15 @@
 import {
     createListOnBoard,
     getListById,
+    getListsBoardId,
     getListsByBoardIdOrder,
-    getNextListOrder, updateList
+    getNextListOrder, updateList,
+    updateListOrder
 } from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
 import {Board, List} from "@mosaiq/terrazzo-common/types";
 import {getAllCardsOfList} from "@trz-api/controllers/cardController";
+import { arrayMove } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
 
@@ -145,4 +148,24 @@ export async function getBoardIDFromListID(listID:string) {
     }
 
     return updatingList.boardId;
+}
+export async function moveList(listID: string, toPosition: number) {
+    try {
+        const boardId = await getListsBoardId(listID);
+        if(!boardId){
+            throw new Error("No board found for list");
+        }
+        const lists = await getListsByBoardIdOrder(boardId);
+        if(!lists){
+            throw new Error("No lists found on board");
+        }
+        const index = lists.findIndex((l)=>l.id === listID);
+        if(index < 0){
+            throw new Error("List not found in list")
+        }
+        const movedLists = arrayMove<List>(lists, index, toPosition);
+        await updateListOrder(movedLists);
+    } catch (error: any) {
+        throw error;
+    }
 }
