@@ -41,6 +41,7 @@ export enum ClientSE { // Client to Server
     UPDATE_BOARD_FIELD = "UPDATE_BOARD_FIELD",
     UPDATE_LIST_FIELD = "UPDATE_LIST_FIELD",
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
+
     SETUP_USER = "SETUP_USER",
     GET_USER = "GET_USER",
     CHECK_USERNAME_TAKEN = "CHECK_USERNAME_TAKEN",
@@ -72,6 +73,7 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_BOARD_FIELD]: (Partial<Board> & {id: BoardId});
     [ClientSE.UPDATE_LIST_FIELD]: (Partial<List> & {id: ListId});
     [ClientSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
+
     [ClientSE.SETUP_USER]: {id: string, username: string, firstName: string, lastName:string}
     [ClientSE.GET_USER]: string;
     [ClientSE.CHECK_USERNAME_TAKEN]: string;
@@ -103,6 +105,7 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_BOARD_FIELD]: undefined;
     [ClientSE.UPDATE_LIST_FIELD]: undefined;
     [ClientSE.UPDATE_CARD_FIELD]: undefined;
+    
     [ClientSE.SETUP_USER]: {user: User | undefined};
     [ClientSE.GET_USER]: {user: User | undefined};
     [ClientSE.CHECK_USERNAME_TAKEN]: {taken:boolean};

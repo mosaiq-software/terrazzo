@@ -85,17 +85,17 @@ export interface Sprint {
     endDate: Date;
 }
 
-export interface User {
+export interface UserHeader {
     id: UserId;
     username: string;
     firstName: string;
     lastName: string;
-    profilePicture: string;
+    profilePicture: URL;
     githubUserId: string;
-    projectIds: string[];
-    workspaceIds: string[];
-    activeTimerId: string;
-    archived: boolean;
+}
+export interface User extends UserHeader {
+    projectIds: ProjectId[];
+    organizationIds: OrganizationId[];
 }
 
 export interface Comment {
