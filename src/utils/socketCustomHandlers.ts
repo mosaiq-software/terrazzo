@@ -14,6 +14,8 @@ import {addCard, moveCardToList} from "@trz-api/controllers/cardController";
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
+import {checkUsernameTaken, getOrCreateUserByGithubId, setupUser} from "@trz-api/controllers/userController";
+import {updateUser} from "@trz-api/persistence/userPersistence";
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SET_ROOM, async (room: ClientSEPayload[ClientSE.SET_ROOM], reply: ClientSEReply<ClientSE.SET_ROOM>) => {
@@ -180,6 +182,42 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             broadcastToMyRoom(socket, ServerSE.MOVE_CARD, payload);
         } catch (error: any) {
             reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.GET_USER, async (data: ClientSEPayload[ClientSE.GET_USER], reply: ClientSEReply<ClientSE.GET_USER>) => {
+        try {
+            if (!data) {
+                throw new Error('No user id provided');
+            }
+            const user = await getOrCreateUserByGithubId(data);
+            reply({ user: user });
+        } catch (error: any) {
+            reply({ user: undefined }, error.message);
+        }
+    });
+
+    socket.on(ClientSE.SETUP_USER, async (data: ClientSEPayload[ClientSE.SETUP_USER], reply: ClientSEReply<ClientSE.SETUP_USER>) => {
+        try {
+            if (!data) {
+                throw new Error('No user data provided');
+            }
+            const user = await setupUser(data.id, data.username, data.firstName, data.lastName);
+            reply({ user });
+        } catch (error: any) {
+            reply({ user: undefined }, error.message);
+        }
+    });
+
+    socket.on(ClientSE.CHECK_USERNAME_TAKEN, async (data: ClientSEPayload[ClientSE.CHECK_USERNAME_TAKEN], reply: ClientSEReply<ClientSE.CHECK_USERNAME_TAKEN>) => {
+        try {
+            if (!data) {
+                throw new Error('No username provided');
+            }
+            const taken = await checkUsernameTaken(data);
+            reply({ taken });
+        } catch (error: any) {
+            reply({ taken: false }, error.message);
         }
     });
 };

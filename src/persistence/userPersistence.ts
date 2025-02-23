@@ -24,9 +24,9 @@ export const getUserById = async (id: string) => {
     return (await UserModel.findByPk(id))?.toJSON() as User | null;
 };
 
-export const getUserByDiscordId = async (discordId: string) => {
-    return (await UserModel.findOne({ where: { discordUserId: discordId } }))?.toJSON() as User | null;
-};
+export const getUserByUsername = async (username: string) => {
+    return (await UserModel.findOne({ where: { username } }))?.toJSON() as User | null;
+}
 
 export const getUserByGithubId = async (githubId: string) => {
     return (await UserModel.findOne({ where: { githubUserId: githubId } }))?.toJSON() as User | null;
