@@ -15,7 +15,7 @@ export const handleTextBlockEvents = async (events: TextBlockEvent[]) => {
 
     let text = textBlock.text;
 
-    for (let event of events){
+    for (const event of events){
         if(event.id !== events[0].id){
             throw new Error("Mismatched IDs "+event.id+" != "+events[0].id);
         }

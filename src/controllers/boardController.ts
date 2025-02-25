@@ -1,7 +1,8 @@
-import {Board} from "../../../terrazzo-common/src/types";
-import {createBoard, getBoardById, getBoardMembers} from "@trz-api/persistence/boardPersistence";
+import {createBoard, getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
 import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
 import {getAllListsOfBoard} from "@trz-api/controllers/listController";
+import { Board, BoardHeader, BoardId, ProjectId } from "@mosaiq/terrazzo-common/types";
+import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
 
@@ -10,20 +11,21 @@ import {getAllListsOfBoard} from "@trz-api/controllers/listController";
  * Returns a promise of the type Board with all its lists, members, sprints, and labels
  * @param boardID
  */
-export async function getWholeBoard(boardID:string) {
+export async function getWholeBoard(boardID:BoardId) {
     //pull board from db with ID
-    const board = await getBoardById(boardID);
+    const boardHeader = await getBoardById(boardID);
 
-    if(board == null) {
+    if(boardHeader == null) {
         throw new Error("Board not found");
     }
 
     try {
-        board.lists = await getAllListsOfBoard(boardID);
-        board.members = await getBoardMembers(boardID);
-        board.sprints = [];
-        board.labels = await getLabelsByBoardId(boardID);
-
+        const board: Board = {
+            ...boardHeader,
+            lists: await getAllListsOfBoard(boardID),
+            labels:  await getLabelsByBoardId(boardID),
+            sprints:  [],
+        };
         return board;
     } catch (e) {
         throw new Error("Failed to retrieve board" + e);
@@ -39,21 +41,7 @@ export async function getWholeBoard(boardID:string) {
  * @param name
  * @param boardCode
  */
-export async function addBoard(name:string, boardCode:string) {
-
-    const newBoard: Board = {
-        id:"",
-        boardCode:"",
-        name:"",
-        lists:[],
-        members:[],
-        sprints:[],
-        labels:[],
-        archived:false,
-        createdAt:0,
-        totalCards:0
-    };
-
+export async function addBoard(name:string, boardCode:string, projectId:ProjectId) {
     if(name.length > 50) {
         throw new Error("Title must be 50 characters or less");
     }
@@ -62,11 +50,18 @@ export async function addBoard(name:string, boardCode:string) {
         throw new Error("Abbreviation must be 3 characters or less");
     }
 
-    newBoard.id = crypto.randomUUID();
-    newBoard.boardCode = boardCode;
-    newBoard.name = name;
-    newBoard.totalCards = 0;
-    newBoard.createdAt = Date.now();
+    const newBoard: Board = {
+        id: crypto.randomUUID(),
+        projectId,
+        boardCode,
+        name,
+        lists:[],
+        sprints:[],
+        labels:[],
+        archived:false,
+        createdAt: Date.now(),
+        totalCards:0
+    };
 
     try{
         await createBoard(newBoard);
@@ -76,4 +71,16 @@ export async function addBoard(name:string, boardCode:string) {
     }
 }
 
-//Updates
+export async function updateBoardFromPartial(boardId: BoardId, partial:Partial<BoardHeader>) {
+    const updatingBoard = await getBoardById(boardId);
+    if (updatingBoard == null) {
+        throw new Error("Board not found");
+    }
+
+    const updated = updateBaseFromPartial<BoardHeader>(updatingBoard, partial);
+    try {
+        await updateBoard(updated);
+    } catch (e:any) {
+        throw new Error("Failed to update board "+e);
+    }
+}

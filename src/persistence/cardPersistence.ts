@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import {Card} from '@mosaiq/terrazzo-common/types';
+import {Card, CardId, ListId} from '@mosaiq/terrazzo-common/types';
 
 class CardModel extends Model {}
 CardModel.init({
@@ -21,15 +21,15 @@ CardModel.init({
 
 sequelize.sync();
 
-export const getCardById = async (id: string) => {
+export const getCardById = async (id: CardId) => {
     return (await CardModel.findByPk(id))?.toJSON() as Card | null;
 };
 
-export const getCardsByListId = async (listId: string) => {
+export const getCardsByListId = async (listId: ListId) => {
     return (await CardModel.findAll({ where: { listId } })).map(card => card.toJSON()) as Card[];
 };
 
-export const getCardsByListIdShortUp = async (listId: string) => {
+export const getCardsByListIdShortUp = async (listId: ListId) => {
     return (await CardModel.findAll({
         where: { listId },
         order: [['order', 'ASC']],
@@ -39,7 +39,7 @@ export const getCardsByListIdShortUp = async (listId: string) => {
         .map(card => card.toJSON()) as Card[];
 };
 
-export const createCardOnList = async (card: Card, listId: string) => {
+export const createCardOnList = async (card: Card, listId: ListId) => {
     return await CardModel.create({
         id: card.id,
         listId,
@@ -67,24 +67,16 @@ export const updateCard = async (card: Card) => {
     }, { where: { id: card.id } });
 };
 
-export const updateDescription = async (cardId: string, description: string) => {
-    return await CardModel.update({ description: description }, { where: { id: cardId } });
-};
-
-export const updateName = async (cardId: string, name: string) => {
+export const updateName = async (cardId: CardId, name: string) => {
     return await CardModel.update({ name: name }, { where: { id: cardId } });
 };
 
-export const getCardsByListIdDown = async (listId: string) => {
-    return (await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] })).map(list => list.toJSON()) as Card[];
+export const getCardsByListIdDown = async (listId: ListId) => {
+    return (await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] })).map(card => card.toJSON()) as Card[];
 };
 
 export const getCardsByListIdUp = async (listId: string) => {
     return (await CardModel.findAll({ where: { listId }, order: [['order', 'ASC']] })).map(list => list.toJSON()) as Card[];
-};
-
-export const setCardArchived = async (id: string, archived: boolean) => {
-    return await CardModel.update({ archived }, { where: { id } });
 };
 
 export const getNextCardOrder = async (listId: string) => {

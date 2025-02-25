@@ -8,7 +8,6 @@ TextBlockModel.init({
         type: DataTypes.STRING,
         primaryKey: true
     },
-    parentId: DataTypes.STRING,
     text: DataTypes.TEXT
 }, { sequelize, modelName: 'textBlockModel' });
 
@@ -18,22 +17,17 @@ export const getTextBlockById = async (id: TextBlockId) => {
     return (await TextBlockModel.findByPk(id))?.toJSON() as TextBlock | null;
 }
 
-export const getTextBlockByParentId = async (parentId: string) => {
-    return (await TextBlockModel.findAll({ where: { parentId } })).map(block => block.toJSON()) as TextBlock[];
-}
-
 export const getAllTextBlockIds = async () => {
     return (await TextBlockModel.findAll({
         attributes: ['id']
     })).map((ret)=>ret.toJSON().id);
 }
 
-export const createTextBlock = async (text: string, parentId: string) => {
-    const uuid = crypto.randomUUID();
+export const createTextBlock = async (text?: string) => {
+    const uid = crypto.randomUUID();
     return (await TextBlockModel.create({
-        id: uuid,
-        parentId,
-        text,
+        id: uid,
+        text: text ?? '',
     })).toJSON() as TextBlock;
 }
 
