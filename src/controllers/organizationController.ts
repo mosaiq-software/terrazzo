@@ -3,7 +3,7 @@ import { Organization, OrganizationHeader, OrganizationId, UserId } from "@mosai
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 import { createMembershipRecord } from "@trz-api/persistence/membershipPersistence";
 import { createOrg, getOrgById, updateOrg } from "@trz-api/persistence/organizationPersistence";
-import { getProjectsByOrdId } from "@trz-api/persistence/projectPersistence";
+import { getProjectsByOrgId } from "@trz-api/persistence/projectPersistence";
 
 export async function getOrganizationWithProjects(orgId: OrganizationId) {
     try {
@@ -13,7 +13,7 @@ export async function getOrganizationWithProjects(orgId: OrganizationId) {
         }
         const org: Organization = {
             ...orgHeader,
-            projects: await getProjectsByOrdId(orgId) ?? [],
+            projects: await getProjectsByOrgId(orgId) ?? [],
         };
         return org;
     } catch (e) {

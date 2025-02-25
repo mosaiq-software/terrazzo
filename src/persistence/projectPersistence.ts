@@ -13,6 +13,7 @@ ProjectModel.init({
     archived: DataTypes.BOOLEAN,
     createdAt: DataTypes.INTEGER,
     logoUrl: DataTypes.STRING,
+    description: DataTypes.TEXT,
 }, { sequelize, modelName: 'projectModel' });
 
 sequelize.sync();
@@ -24,12 +25,12 @@ export const getProjectById = async (id: ProjectId) => {
         }}))?.toJSON() as ProjectHeader | undefined;
 }
 
-export const getProjectsByOrdId = async (orgId: OrganizationId) => {
+export const getProjectsByOrgId = async (orgId: OrganizationId) => {
     return (await ProjectModel.findAll({
         where: { orgId },
         order: [['createdAt', 'ASC']],
         attributes:{
-            exclude:['createdAt', 'updatedAt']
+            exclude:['updatedAt']
         }
     })).map(prj => prj.toJSON()) as ProjectHeader[];
 }
@@ -42,6 +43,7 @@ export const createProject = async (project: ProjectHeader) => {
         archived: false,
         createdAt: project.createdAt,
         logoUrl: project.logoUrl,
+        description: project.description,
     });
 }
 
@@ -51,5 +53,6 @@ export const updateProject = async (project: ProjectHeader) => {
         orgId: project.orgId,
         archived: project.archived,
         logoUrl: project.logoUrl,
+        description: project.description,
     }, { where: { id: project.id } });
 };
