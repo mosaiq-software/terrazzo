@@ -1,4 +1,5 @@
 import {RoomId, RoomType} from "../socketTypes";
-export const getRoomCode = (roomType: RoomType, uid: string): RoomId => {
+import { UID } from "../types";
+export const getRoomCode = (roomType: RoomType, uid: UID): RoomId => {
     return `${roomType}-${uid}`;
 }

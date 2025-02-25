@@ -1,7 +1,8 @@
 import {TextBlockEvent} from '../types';
 
 export const executeTextBlockEvent = (textBlock: string, event: TextBlockEvent, selectionStart?: number): {updated:string, selectionStart: number} => {
-    let {start, end, inserted} = event;
+    let {start, end} = event;
+    const {inserted} = event;
     if(start > end){ [start, end] = [end, start]; }
 
     start = Math.max(0, start);
@@ -29,7 +30,7 @@ export const executeTextBlockEvent = (textBlock: string, event: TextBlockEvent, 
 }
 
 export const isValidTextBlockEvents = (events:TextBlockEvent[]) => {
-    for(let event of events){
+    for(const event of events){
         if(!(event && 
             event.id && 
             (typeof event.inserted === "string") &&
