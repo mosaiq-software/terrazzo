@@ -17,6 +17,14 @@ export enum Role {
     OWNER = 4,
 }
 
+export const RoleNames = [
+    "None",   // 0
+    "Guest",  // 1
+    "Member", // 2
+    "Admin",  // 3
+    "Owner",  // 4
+]
+
 export enum EntityType {
     PROJECT = 0,
     ORG = 1,

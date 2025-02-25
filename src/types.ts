@@ -19,6 +19,7 @@ export interface OrganizationHeader {
     createdAt: number;
     logoUrl: URL;
     isPersonalOrg: boolean;
+    description: string;
 }
 export interface Organization extends OrganizationHeader{
     projects: ProjectHeader[];
@@ -31,6 +32,7 @@ export interface ProjectHeader {
     archived: boolean;
     createdAt: number;
     logoUrl: URL;
+    description: string;
 }
 export interface Project extends ProjectHeader{
     boards: BoardHeader[];

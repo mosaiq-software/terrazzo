@@ -5,7 +5,8 @@
     "types": "dist/index.d.ts",
     "repository": "https://github.com/mosaiq-software/terrazzo-common.git",
     "scripts": {
-        "build": "tsc",
+        "build": "npm run prebuild && tsc",
+        "prebuild": "npm run lint && npm run types",
         "prepare": "husky",
         "after-push": "node ./scripts/after-push.mjs",
         "before-push": "node ./scripts/before-push.mjs",
