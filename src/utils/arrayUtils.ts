@@ -1,3 +1,5 @@
+import { MembershipRecord } from "../types";
+
 export function arrayMove<T>(array:T[], from:number, to:number): T[] {
     const newArray = array.slice();
     newArray.splice(to < 0 ? newArray.length + to : to, 0, newArray.splice(from, 1)[0]);
@@ -20,4 +22,18 @@ export function updateBaseFromPartial<T>(base:T, partial: Partial<T>): T {
         }
     }
     return mappedBase;
+}
+
+/**
+ * If the userId and entityId are the same on 2 records, combine the 2 records and keep the max permission level
+ */
+export const combineMembershipRecords = (records: MembershipRecord[]):MembershipRecord[] => {
+    const map: {[id:string]:MembershipRecord} = {};
+    for(const rec of records){
+        const id = rec.entityId+" "+rec.userId;
+        if(!map[id] || map[id].role < rec.role){
+            map[id] = rec;
+        }
+    }
+    return Object.values(map);
 }

@@ -11,6 +11,9 @@ export type UserId = UID;
 export type TextBlockId = UID;
 export type LabelId = UID;
 export type CommentId = UID;
+export type InviteId = UID;
+export type MembershipRecordId = UID;
+export type EntityId = ProjectId | OrganizationId;
 
 export interface OrganizationHeader {
     id: OrganizationId;
@@ -22,7 +25,9 @@ export interface OrganizationHeader {
     description: string;
 }
 export interface Organization extends OrganizationHeader{
+    members: Member[];
     projects: ProjectHeader[];
+    invites: Invite[];
 }
 
 export interface ProjectHeader {
@@ -35,7 +40,9 @@ export interface ProjectHeader {
     description: string;
 }
 export interface Project extends ProjectHeader{
+    members: Member[];
     boards: BoardHeader[];
+    invites: Invite[];
 }
 
 export interface BoardHeader {
@@ -53,12 +60,14 @@ export interface Board extends BoardHeader{
     labels: Label[];
 }
 
-export interface List {
+export interface ListHeader {
     id: ListId;
     boardId: BoardId;
     name: string;
     archived: boolean;
     order: number;
+}
+export interface List extends ListHeader{
     cards: CardHeader[];
 }
 
@@ -72,12 +81,12 @@ export interface CardHeader {
     sprintId: string;
     archived: boolean;
     order: number;
-    labels: Label[];
-    assignees: User[];
+    descriptionTextBlockId: TextBlockId;
 }
 export interface Card extends CardHeader{
-    descriptionTextBlockId: TextBlockId;
-    comments: Comment[];
+    comments: CommentId[];
+    labels: LabelId[];
+    assignees: UserId[];
 }
 
 export interface Sprint {
@@ -104,7 +113,7 @@ export interface Comment {
     id: CommentId;
     content: string;
     postedAt: Date;
-    postedBy: User;
+    postedBy: UserId;
     archived: boolean;
 }
 
@@ -126,9 +135,24 @@ export interface TextBlockEvent {
 }
 
 export interface MembershipRecord {
-    id: UID;
+    id: MembershipRecordId;
     userId: UserId;
-    entityId: ProjectId|OrganizationId;
+    entityId: EntityId;
+    entityType: EntityType;
+    role: Role;
+}
+
+export interface Member {
+    user: UserHeader;
+    record: MembershipRecord;
+}
+
+export interface Invite {
+    id: InviteId;
+    toUser: UserId;
+    fromUser: UserId;
+    createdAt: number;
+    entityId: EntityId;
     entityType: EntityType;
     role: Role;
 }

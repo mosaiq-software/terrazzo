@@ -1,4 +1,5 @@
-import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockEvent, TextBlockId, UserId, User} from "./types";
+import { EntityType, Role } from "./constants";
+import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockEvent, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord} from "./types";
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -41,10 +42,15 @@ export enum ClientSE { // Client to Server
     UPDATE_BOARD_FIELD = "UPDATE_BOARD_FIELD",
     UPDATE_LIST_FIELD = "UPDATE_LIST_FIELD",
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
+    UPDATE_MEMBERSHIP_RECORD_FIELD = "UPDATE_MEMBERSHIP_RECORD_FIELD",
 
     SETUP_USER = "SETUP_USER",
     GET_USER = "GET_USER",
     CHECK_USERNAME_TAKEN = "CHECK_USERNAME_TAKEN",
+    
+    SEND_INVITE = "SEND_INVITE",
+    RESPOND_INVITE = "RESPOND_INVITE",
+    KICK_MEMBER = "KICK_MEMBER",
 }
 export interface ClientSEPayload {
     // Client to Server
@@ -73,10 +79,15 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_BOARD_FIELD]: (Partial<Board> & {id: BoardId});
     [ClientSE.UPDATE_LIST_FIELD]: (Partial<List> & {id: ListId});
     [ClientSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
+    [ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD]: (Partial<MembershipRecord> & {id: MembershipRecordId});
 
     [ClientSE.SETUP_USER]: {id: string, username: string, firstName: string, lastName:string}
     [ClientSE.GET_USER]: string;
     [ClientSE.CHECK_USERNAME_TAKEN]: string;
+
+    [ClientSE.SEND_INVITE]: { toUsername: string, entityId: EntityId, entityType: EntityType, role: Role };
+    [ClientSE.RESPOND_INVITE]: {inviteId: InviteId, response:boolean};
+    [ClientSE.KICK_MEMBER]: MembershipRecordId;
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
@@ -105,10 +116,15 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_BOARD_FIELD]: undefined;
     [ClientSE.UPDATE_LIST_FIELD]: undefined;
     [ClientSE.UPDATE_CARD_FIELD]: undefined;
+    [ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD]: undefined;
     
     [ClientSE.SETUP_USER]: {user: User | undefined};
     [ClientSE.GET_USER]: {user: User | undefined};
     [ClientSE.CHECK_USERNAME_TAKEN]: {taken:boolean};
+
+    [ClientSE.SEND_INVITE]: InviteId | undefined;
+    [ClientSE.RESPOND_INVITE]: undefined;
+    [ClientSE.KICK_MEMBER]: undefined;
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
 
@@ -131,6 +147,8 @@ export enum ServerSE { // Server to Client
     UPDATE_BOARD_FIELD = "UPDATE_BOARD_FIELD",
     UPDATE_LIST_FIELD = "UPDATE_LIST_FIELD",
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
+
+    RECEIVE_INVITE = "RECEIVE_INVITE",
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -151,6 +169,8 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_BOARD_FIELD]: (Partial<Board> & {id: BoardId});
     [ServerSE.UPDATE_LIST_FIELD]: (Partial<List> & {id: ListId});
     [ServerSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
+
+    [ServerSE.RECEIVE_INVITE]: Invite & {entityName:string, fromName: string};
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -171,6 +191,8 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_BOARD_FIELD]: void;
     [ServerSE.UPDATE_LIST_FIELD]: void;
     [ServerSE.UPDATE_CARD_FIELD]: void;
+    
+    [ServerSE.RECEIVE_INVITE]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
 
@@ -201,6 +223,7 @@ export type CreateCardType = {listID: ListId; cardName: string};
 
 export interface UserData {
     sid: SocketId;
+    userId: UserId;
     githubId: string;
     username: string;
     avatarUrl: string;
