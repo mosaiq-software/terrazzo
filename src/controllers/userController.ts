@@ -77,9 +77,7 @@ export async function createNewUser(username: string, firstName: string, lastNam
         profilePicture: profilePicture,
         githubUserId: githubUserId,
         projectIds: [],
-        workspaceIds: [],
-        activeTimerId: "",
-        archived: false
+        organizationIds: [],
     };
 
     try {

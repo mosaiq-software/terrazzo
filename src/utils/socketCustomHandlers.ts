@@ -298,9 +298,9 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
                 throw new Error('No user id provided');
             }
             const user = await getOrCreateUserByGithubId(data);
-            reply({ user: user });
+            reply(user);
         } catch (error: any) {
-            reply({ user: undefined }, error.message);
+            reply(undefined , error.message);
         }
     });
 
@@ -310,9 +310,9 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
                 throw new Error('No user data provided');
             }
             const user = await setupUser(data.id, data.username, data.firstName, data.lastName);
-            reply({ user });
+            reply(user);
         } catch (error: any) {
-            reply({ user: undefined }, error.message);
+            reply(undefined , error.message);
         }
     });
 
@@ -322,9 +322,9 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
                 throw new Error('No username provided');
             }
             const taken = await checkUsernameTaken(data);
-            reply({ taken });
+            reply(taken);
         } catch (error: any) {
-            reply({ taken: false }, error.message);
+            reply(false, error.message);
         }
     });
 };
