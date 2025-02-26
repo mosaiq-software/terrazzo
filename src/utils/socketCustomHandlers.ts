@@ -8,7 +8,6 @@ import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
 import {checkUsernameTaken, getOrCreateUserByGithubId, setupUser} from "@trz-api/controllers/userController";
-import {updateUser} from "@trz-api/persistence/userPersistence";
 import { addOrganization, getOrganizationWithProjects, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { addProject, getProjectWithBoards, updateProjectFromPartial } from '@trz-api/controllers/projectController';
 import { getUsersEntities } from '@trz-api/controllers/userController';

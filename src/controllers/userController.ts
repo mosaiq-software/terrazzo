@@ -54,7 +54,7 @@ export async function getUser(userID: string) {
 }
 
 export async function checkUsernameTaken(username: string) {
-    const user = await getUserByUsername(username.toLowerCase());
+    const user = await getUserByUsername(username);
     return user != null;
 }
 
@@ -65,7 +65,7 @@ export async function createNewUser(username: string, firstName: string, lastNam
     if(username.length > 13) {
         throw new Error("Username must be 13 characters or less");
     }
-    if(await getUserByUsername(username.toLowerCase()) != null) {
+    if(await getUserByUsername(username) != null) {
         throw new Error("Username already exists");
     }
 

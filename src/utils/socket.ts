@@ -4,8 +4,6 @@ import { validateGithubAuthToken } from './authUtils';
 import { registerCustomSocketEvents } from './socketCustomHandlers';
 import { registerEngineSocketEvents } from './socketEngineHandlers';
 import { SocketData } from './socketTypes';
-import {User} from "../../../terrazzo-common/dist/types";
-import {createUser} from "@trz-api/persistence/userPersistence";
 
 const initSockets = () => {
     console.info("Starting sockets");

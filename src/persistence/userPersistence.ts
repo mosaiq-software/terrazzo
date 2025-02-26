@@ -1,4 +1,4 @@
-import { Model, DataTypes } from 'sequelize';
+import {Model, DataTypes, Sequelize} from 'sequelize';
 import { sequelize } from './dbHelper';
 import { User } from '@mosaiq/terrazzo-common/types';
 
@@ -23,7 +23,13 @@ export const getUserById = async (id: string) => {
 };
 
 export const getUserByUsername = async (username: string) => {
-    return (await UserModel.findOne({ where: { username } }))?.toJSON() as User | null;
+    return (await UserModel.findOne({ where:
+            Sequelize.where(
+                Sequelize.fn('lower',
+                    Sequelize.col('username')
+                ),
+                sequelize.fn('lower', username))
+    }))?.toJSON() as User | null;
 }
 
 export const getUserByGithubId = async (githubId: string) => {
