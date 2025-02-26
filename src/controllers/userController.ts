@@ -1,3 +1,8 @@
+import { EntityType } from "@mosaiq/terrazzo-common/constants";
+import { UserId } from "@mosaiq/terrazzo-common/types";
+import { getMembershipRecordsForUser } from "@trz-api/persistence/membershipPersistence";
+import { getOrgById } from "@trz-api/persistence/organizationPersistence";
+import { getProjectById } from "@trz-api/persistence/projectPersistence";
 import { User } from "@mosaiq/terrazzo-common/types";
 import {
     createUser,
@@ -108,5 +113,26 @@ export async function setupUser(id: string, username: string, firstName: string,
 
     } catch (e) {
         throw new Error("Failed to update user" + e);
+    }
+}
+
+
+export const getUsersEntities = async (userId: UserId) => {
+    try {
+        const projectMemberships = await getMembershipRecordsForUser(userId, EntityType.PROJECT) ?? [];
+        const orgMemberships = await getMembershipRecordsForUser(userId, EntityType.ORG) ?? [];
+
+        const projects = (await Promise.all(projectMemberships.map(async (p)=>{
+            return getProjectById(p.entityId);
+        }))).filter(p=>!!p);
+
+        const organizations = (await Promise.all(orgMemberships.map(async (o)=>{
+            return getOrgById(o.entityId);
+        }))).filter(o=>!!o);
+
+        return {projects, organizations}
+    } catch (e) {
+        console.error(e);
+        throw e;
     }
 }

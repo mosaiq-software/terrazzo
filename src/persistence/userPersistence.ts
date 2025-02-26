@@ -13,8 +13,6 @@ UserModel.init({
     lastName: DataTypes.STRING,
     profilePicture: DataTypes.STRING,
     githubUserId: DataTypes.STRING,
-    activeTimerId: DataTypes.STRING,
-    archived: DataTypes.BOOLEAN
 }, { sequelize, modelName: 'userModel' });
 
 sequelize.sync();
@@ -45,7 +43,6 @@ export const findOrCreateUser = async (user: User) => {
             lastName: user.lastName,
             profilePicture: user.profilePicture,
             githubUserId: user.githubUserId,
-            activeTimerId: user.activeTimerId,
             archived: false
         }
     });
@@ -59,8 +56,6 @@ export const createUser = async (user: User) => {
         lastName: user.lastName,
         profilePicture: user.profilePicture,
         githubUserId: user.githubUserId,
-        activeTimerId: user.activeTimerId,
-        archived: false
     });
 };
 
@@ -70,8 +65,7 @@ export const updateUser = async (user: User) => {
         firstName: user.firstName,
         lastName: user.lastName,
         profilePicture: user.profilePicture,
-        activeTimerId: user.activeTimerId,
-        archived: user.archived
+        githubUserId: user.githubUserId,
     }, { where: { id: user.id } });
 };
 

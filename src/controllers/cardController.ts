@@ -1,18 +1,20 @@
 import {
     createCardOnList,
     getCardById,
+    getCardsByListIdDown,
     getCardsByListIdShortUp,
     getCardsByListIdUp,
-    getNextCardOrder,
+    updateCard,
     updateCardList,
     updateCardOrder,
-    updateDescription,
     updateName,
 } from "@trz-api/persistence/cardPersistence";
 import {getListById, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
-import {Card, Priority} from "@mosaiq/terrazzo-common/types";
+import {Card, CardId, ListId} from "@mosaiq/terrazzo-common/types";
 import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
+import { Priority } from "@mosaiq/terrazzo-common/constants";
+import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
 
@@ -22,7 +24,7 @@ import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
  * Returns a promise of all cards in the list
  * @param listID
  */
-export async function getAllCardsOfList(listID:string) {
+export async function getAllCardsOfList(listID: ListId) {
     const cards = await getCardsByListIdShortUp(listID);
 
     if(cards == null) {
@@ -45,7 +47,7 @@ export async function getAllCardsOfList(listID:string) {
  * @param listID
  * @param cardName
  */
-export async function addCard(listID:string, cardName:string) {
+export async function addCard(listID:ListId, cardName:string) {
     //pull board from db with ID
     const updatingList = await getListById(listID);
 
@@ -59,95 +61,87 @@ export async function addCard(listID:string, cardName:string) {
         throw new Error("Board not found");
     }
 
-    if(updatingList.cards && updatingList.cards.length > 50) {
-        throw new Error("List cannot have more than 50 cards");
-    }
     const cardUid = crypto.randomUUID();
-    let descriptionTextBlockId;
-    try {
-        const descBlock = await createTextBlock("", cardUid);
-        if(!descBlock){
-            throw new Error("Failed to create description text block");
-        }
-        descriptionTextBlockId = descBlock.id;
-    } catch (error:any) {
-        throw new Error("Failed to create description text block");
-    }
-
     const newCard: Card = {
         id:cardUid,
         listId:listID,
         cardNumber:(board.totalCards + 1),
         name:cardName,
-        descriptionTextBlockId: descriptionTextBlockId,
+        descriptionTextBlockId: cardUid, // placeholder id
         priority:Priority.LOWEST,
         storyPoints:0,
         sprintId:"",
         assignees:[],
         comments:[],
-        checklists:[],
         labels:[],
-        timesheetEntries:[],
         archived:false,
-        order:await getNextCardOrder(listID)
+        order: await getNextCardOrder(listID)
     };
-
-    //save board before returning
-    //add try statement for error handling
     try {
-        await createCardOnList(newCard, listID).then(async () => {
-            board.totalCards++;
-            await updateBoard(board);
-        });
+        const descBlock = await createTextBlock();
+        if(!descBlock){
+            throw new Error("Failed to create description text block");
+        }
+        newCard.descriptionTextBlockId = descBlock.id;
+    } catch (error:any) {
+        throw new Error("Failed to create description text block");
+    }
+
+    try {
+        await createCardOnList(newCard, listID);
+        board.totalCards++;
+        await updateBoard(board);
         return newCard;
     }catch (e) {
         throw new Error("Failed to save Card" + e);
     }
 }
 
-//Updates
+export async function updateCardFromPartial(cardId: CardId, partial:Partial<Card>) {
+    const updatingCard = await getCardById(cardId);
+    if (updatingCard == null) {
+        throw new Error("Card not found");
+    }
 
-/**
- * Updates the description of a card
- * You must pass in the card ID and the new description
- * Returns true if successful
- * @param cardID
- * @param description
- */
-export async function editDescription(cardID:string, description:string) {
-
-    //Add any checks here for any future use
+    const updated = updateBaseFromPartial<Card>(updatingCard, partial);
     try {
-        await updateDescription(cardID, description);
-        return true;
-    }catch (e) {
-        throw new Error("Failed to save Card" + e);
+        await updateCard(updated);
+    } catch (e:any) {
+        throw new Error("Failed to update card "+e);
     }
 }
 
+export const getNextCardOrder = async (listId: ListId) => {
+    const card = await getCardsByListIdDown(listId);
+    return card ? card.length + 1 : 1;
+}
 
-/**
- * Updates the name of a card
- * You must pass in the card ID and the new name
- * Returns true if successful
- * @param cardID
- * @param name
- */
-export async function editName(cardID:string, name:string) {
+//Utils
 
-    //Add any checks here for any future use
-    try {
-        await updateName(cardID, name);
-        return true;
-    }catch (e) {
-        throw new Error("Failed to save Card" + e);
+export async function getListIDFromCardID(cardID:CardId) {
+    const card = await getCardById(cardID);
+    if (card == null) {
+        throw new Error("Card not found");
     }
+    return card.listId;
+}
+
+export async function getBoardIDFromCardID(cardID:CardId) {
+    const card = await getCardById(cardID);
+    if (card == null || !card.listId) {
+        throw new Error("Card not found");
+    }
+    const list = await getListById(card.listId);
+    if (list == null) {
+        throw new Error("List not found");
+    }
+    return list.boardId;
 }
 
 /*
     Remove the card from its old list and move it to the new one at the position
 */
-export async function moveCardToList(cardId: string, toListId:string, position?:number) {
+export async function moveCardToList(cardId: CardId, toListId:ListId, position?:number) {
     try {
         if(position === undefined){
             const nextOrder = await getNextListOrder(toListId);
@@ -175,7 +169,7 @@ export async function moveCardToList(cardId: string, toListId:string, position?:
     Remove a card from its list and shift the remaining cards in the list down by 1 to preserve order
     @returns the removed card
 */
-export const removeCardFromList = async (cardId:string): Promise<Card> => {
+export const removeCardFromList = async (cardId:CardId): Promise<Card> => {
     try {
         const remCard = await getCardById(cardId);
         if(!remCard){
@@ -200,7 +194,7 @@ export const removeCardFromList = async (cardId:string): Promise<Card> => {
             promises.push(updateCardOrder(cards[i].id, i));
         }
         await Promise.all(promises);
-        return {...remCard, listId: '', order: -1};
+        return {...remCard, listId: null, order: -1};
     } catch (error: any) {
         console.log(`Error removing card: ${error}`);
         throw error;
@@ -210,7 +204,7 @@ export const removeCardFromList = async (cardId:string): Promise<Card> => {
 /**
  * Add a card to a list. The card must not be in any list to allow this to happen
  */
-export const addCardToList = async (cardId:string, toList: string, atPosition:number): Promise<void> => {
+export const addCardToList = async (cardId:CardId, toList: ListId, atPosition:number): Promise<void> => {
     try {
         const addCard = await getCardById(cardId);
         if(!addCard){

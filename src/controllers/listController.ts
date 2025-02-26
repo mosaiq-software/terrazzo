@@ -7,9 +7,9 @@ import {
     updateListOrder
 } from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
-import {Board, List} from "@mosaiq/terrazzo-common/types";
+import {BoardId, List, ListId} from "@mosaiq/terrazzo-common/types";
 import {getAllCardsOfList} from "@trz-api/controllers/cardController";
-import { arrayMove } from "@mosaiq/terrazzo-common/utils/arrayUtils";
+import { arrayMove, updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
 
@@ -18,7 +18,7 @@ import { arrayMove } from "@mosaiq/terrazzo-common/utils/arrayUtils";
  * Returns a promise of all lists with all their cards
  * @param boardID
  */
-export async function getAllListsOfBoard(boardID:string) {
+export async function getAllListsOfBoard(boardID:BoardId) {
 
     const lists = await getListsByBoardIdOrder(boardID);
 
@@ -47,7 +47,7 @@ export async function getAllListsOfBoard(boardID:string) {
  * @param boardID
  * @param listName
  */
-export async function addList(boardID:string, listName:string) {
+export async function addList(boardID:BoardId, listName:string) {
 
     //pull board from db with ID
     const updatingBoard = await getBoardById(boardID);
@@ -56,24 +56,15 @@ export async function addList(boardID:string, listName:string) {
         throw new Error("Board not found");
     }
 
-    if(updatingBoard.lists && updatingBoard.lists.length > 50) {
-        throw new Error("Board cannot have more than 50 lists");
-    }
-
-    const newListOrder = await getNextListOrder(boardID);
-
-    const newList: List = {
-        id:crypto.randomUUID(),
-        boardId:boardID,
-        name:listName,
-        cards:[],
-        archived:false,
-        order: newListOrder
-    };
-
-    //save board before returning
-    //add try statement for error handling
     try {
+        const newList: List = {
+            id:crypto.randomUUID(),
+            boardId:boardID,
+            name:listName,
+            cards:[],
+            archived:false,
+            order: await getNextListOrder(boardID)
+        };
         await createListOnBoard(newList, boardID);
         return newList;
     }catch (e) {
@@ -81,63 +72,31 @@ export async function addList(boardID:string, listName:string) {
     }
 }
 
-//Updates
-
-/**
- * Under construction
- * @param boardID
- * @param newPosition
- */
-export function updateListPositions(boardID:string, newPosition:number[]) {
-    const updatingBoard: Board = {
-        id:"",
-        boardCode:"",
-        name:"",
-        lists:[],
-        members:[],
-        sprints:[],
-        labels:[],
-        archived:false,
-        createdAt:0,
-        totalCards: 0};
-
-    if(newPosition[1] > updatingBoard.lists.length || newPosition[1] < updatingBoard.lists.length) {
-        throw new Error("Position out of bounds");
+export async function updateListFromPartial(listId: ListId, partial:Partial<List>) {
+    const updatingList = await getListById(listId);
+    if (updatingList == null) {
+        throw new Error("List not found");
     }
 
-    //save board before returning
-    //add try statement for error handling
+    const updated = updateBaseFromPartial<List>(updatingList, partial);
     try {
-        //saving to db
-        return true;
-    }catch (e) {
-        throw new Error("Failed to save board" + e);
+        await updateList(updated);
+    } catch (e:any) {
+        throw new Error("Failed to update list "+e);
     }
 }
 
-//Updates
+//Utils
 
-export async function updateListName(listID:string, newName:string) {
+export async function getBoardIDFromListID(listID:ListId) {
     const updatingList = await getListById(listID);
 
     if (updatingList == null) {
         throw new Error("List not found");
     }
 
-    if(newName.length > 50) {
-        throw new Error("Title must be 50 characters or less");
-    }
-
-    updatingList.name = newName;
-
-    try {
-        await updateList(updatingList);
-        return true;
-    }catch (e) {
-        throw new Error("Failed to save board" + e);
-    }
+    return updatingList.boardId;
 }
-
 export async function moveList(listID: string, toPosition: number) {
     try {
         const boardId = await getListsBoardId(listID);
@@ -155,6 +114,7 @@ export async function moveList(listID: string, toPosition: number) {
         const movedLists = arrayMove<List>(lists, index, toPosition);
         await updateListOrder(movedLists);
     } catch (error: any) {
+        console.error(error);
         throw error;
     }
 }

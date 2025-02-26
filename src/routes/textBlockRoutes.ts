@@ -1,12 +1,12 @@
+import { TextBlockId } from "@mosaiq/terrazzo-common/types";
 import { isValidTextBlockEvents } from "@mosaiq/terrazzo-common/utils/textUtils";
 import { handleTextBlockEvents } from "@trz-api/controllers/textBlockController";
-import { createTextBlock, getAllTextBlockIds, getTextBlockById, getTextBlockByParentId } from "@trz-api/persistence/textBlockPersistence";
+import { createTextBlock, getAllTextBlockIds, getTextBlockById } from "@trz-api/persistence/textBlockPersistence";
 import { Router, Request, Response } from "express";
 
 const router = Router();
 
 router.get("/list", getTextBlockIds);
-router.get("/on/:parentId", getTextBlockByParent)
 router.get("/:id", getTextBlock);
 
 router.post("/create", createTextBlockRoute);
@@ -23,26 +23,13 @@ async function getTextBlockIds(req:Request, res:Response) {
 }
 
 
-async function getTextBlockByParent(req:Request, res:Response) {
-    if(!req.params.parentId) {
-        res.status(400).json({message: "parentId is required"});
-        return;
-    }
-    try {
-        const textBlocks = await getTextBlockByParentId(req.params.parentId)
-        res.status(200).json(textBlocks);
-    } catch (e: any) {
-        res.status(500).json({message: e.message});
-    }
-}
-
 async function getTextBlock(req:Request, res:Response) {
     if(!req.params.id) {
         res.status(400).json({message: "id is required"});
         return;
     }
     try {
-        const textBlock = await getTextBlockById(req.params.id);
+        const textBlock = await getTextBlockById(req.params.id as TextBlockId);
         if(!textBlock) {
             res.status(404).json("Text block not found");
             return;
@@ -59,7 +46,7 @@ async function createTextBlockRoute(req:Request, res:Response) {
         return;
     }
     try {
-        const textBlock = await createTextBlock(req.body.text ?? "", req.body.parentId);
+        const textBlock = await createTextBlock(req.body.text);
         res.status(200).json(textBlock);
     } catch (e: any) {
         res.status(500).json({message: e.message});
