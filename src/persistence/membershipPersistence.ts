@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { MembershipRecord, OrganizationId, ProjectId, UID, UserId } from '@mosaiq/terrazzo-common/types';
+import { EntityId, MembershipRecord, MembershipRecordId, OrganizationId, ProjectId, UID, UserId } from '@mosaiq/terrazzo-common/types';
 import { EntityType, Role } from '@mosaiq/terrazzo-common/constants';
 
 class MembershipModel extends Model {}
@@ -28,7 +28,7 @@ export const getMembershipRecordsForUser = async (userId:UserId, entityType: Ent
     return ((await MembershipModel.findAll({where: {userId, entityType}})).map(r=>r.toJSON())) as MembershipRecord[];
 }
 
-export const createMembershipRecord = async (userId:UserId, entityId:ProjectId|OrganizationId, entityType: EntityType, userRole: Role) => {
+export const createMembershipRecord = async (userId:UserId, entityId:EntityId, entityType: EntityType, userRole: Role) => {
     return await MembershipModel.create({
         id: crypto.randomUUID(),
         userId,
@@ -38,12 +38,16 @@ export const createMembershipRecord = async (userId:UserId, entityId:ProjectId|O
     });
 }
 
-export const updateMembershipRole = async (user:UserId, entity:ProjectId|OrganizationId, role: Role) => {
+export const updateMembershipRole = async (user:UserId, entity:EntityId, role: Role) => {
     return await MembershipModel.update({
         userRole: role,
     }, { where: { userId: user, entityId: entity } });
 };
 
-export const deleteMembershipRecord = async (user:UserId, entity:ProjectId|OrganizationId) => {
-    return await MembershipModel.destroy({ where: { userId: user, entityId: entity } });
+export const deleteMembershipRecord = async (membershipRecordId: MembershipRecordId) => {
+    return await MembershipModel.destroy({ where: { id: membershipRecordId} });
+}
+
+export const getMembershipRecordForEntity = async (entityId: EntityId) => {
+    return ((await MembershipModel.findAll({where: {entityId}})).map(r=>r.toJSON())) as MembershipRecord[];
 }

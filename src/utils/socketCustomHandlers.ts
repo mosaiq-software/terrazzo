@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import { broadcastToMyRoom, getSocketData, setSocketData, joinRoom, leaveRoom, broadcastToMyselfAndMyRoom} from './socketUtils';
+import { broadcastToMyRoom, getSocketData, setSocketData, joinRoom, leaveRoom, broadcastToMyselfAndMyRoom, broadcastToUser} from './socketUtils';
 import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
 import {addBoard, getWholeBoard, updateBoardFromPartial} from "@trz-api/controllers/boardController";
 import {addList, moveList, updateListFromPartial} from "@trz-api/controllers/listController";
@@ -7,9 +7,14 @@ import {addCard, moveCardToList, updateCardFromPartial} from "@trz-api/controlle
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
-import { addOrganization, getOrganizationWithProjects, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
-import { addProject, getProjectWithBoards, updateProjectFromPartial } from '@trz-api/controllers/projectController';
+import { addOrganization, getFullOrganization, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
+import { addProject, getFullProject, updateProjectFromPartial } from '@trz-api/controllers/projectController';
 import { getUsersEntities } from '@trz-api/controllers/userController';
+import { replyToInvite, sendInvite } from '@trz-api/controllers/inviteController';
+import { EntityType } from '@mosaiq/terrazzo-common/constants';
+import { getOrgById } from '@trz-api/persistence/organizationPersistence';
+import { getProjectById } from '@trz-api/persistence/projectPersistence';
+import { deleteMembershipRecord } from '@trz-api/persistence/membershipPersistence';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SET_ROOM, async (room: ClientSEPayload[ClientSE.SET_ROOM], reply: ClientSEReply<ClientSE.SET_ROOM>) => {
@@ -63,7 +68,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No org id provided');
             }
-            const org = await getOrganizationWithProjects(data);
+            const org = await getFullOrganization(data);
             reply(org);
         } catch (error: any) {
             reply(undefined, error.message);
@@ -75,7 +80,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No project id provided');
             }
-            const project = await getProjectWithBoards(data);
+            const project = await getFullProject(data);
             reply(project);
         } catch (error: any) {
             reply(undefined, error.message);
@@ -285,6 +290,40 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             await moveCardToList(data.cardId, data.toList, data.position);
             const payload: ServerSEPayload[ServerSE.MOVE_CARD] = {...data};
             broadcastToMyRoom(socket, ServerSE.MOVE_CARD, payload);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.SEND_INVITE, async (data: ClientSEPayload[ClientSE.SEND_INVITE], reply: ClientSEReply<ClientSE.SEND_INVITE>) => {
+        try {
+            // const fromUser = ""; TODO get the fromUser automatically from the socket connection
+            let entityName = '';
+            if(data.entityType === EntityType.ORG) {
+                entityName = (await getOrgById(data.entityId))?.name ?? '';
+            } else if(data.entityType === EntityType.PROJECT) {
+                entityName = (await getProjectById(data.entityId))?.name ?? '';
+            }
+            const invite = await sendInvite(data.toUsername, fromUser.id, data.entityId, data.entityType, data.role);
+            const payload: ServerSEPayload[ServerSE.RECEIVE_INVITE] = {...invite, fromName: fromUser.name, entityName};
+            broadcastToUser(socket, payload.toUser, ServerSE.RECEIVE_INVITE, payload);
+            reply(undefined);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.RESPOND_INVITE, async (data: ClientSEPayload[ClientSE.RESPOND_INVITE], reply: ClientSEReply<ClientSE.RESPOND_INVITE>) => {
+        try {
+            await replyToInvite(data.inviteId, data.response);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.KICK_MEMBER, async (data: ClientSEPayload[ClientSE.KICK_MEMBER], reply: ClientSEReply<ClientSE.KICK_MEMBER>) => {
+        try {
+            await deleteMembershipRecord(data);
         } catch (error: any) {
             reply(undefined, error.message);
         }

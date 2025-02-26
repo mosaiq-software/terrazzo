@@ -1,11 +1,13 @@
 import { EntityType, Role } from "@mosaiq/terrazzo-common/constants";
-import { Organization, OrganizationHeader, OrganizationId, UserId } from "@mosaiq/terrazzo-common/types";
+import { Member, Organization, OrganizationHeader, OrganizationId, UserId } from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
-import { createMembershipRecord } from "@trz-api/persistence/membershipPersistence";
+import { getAllInvitesForEntity } from "@trz-api/persistence/invitePersistence";
+import { createMembershipRecord, getMembershipRecordForEntity } from "@trz-api/persistence/membershipPersistence";
 import { createOrg, getOrgById, updateOrg } from "@trz-api/persistence/organizationPersistence";
 import { getProjectsByOrgId } from "@trz-api/persistence/projectPersistence";
+import { getUserById } from "@trz-api/persistence/userPersistence";
 
-export async function getOrganizationWithProjects(orgId: OrganizationId) {
+export async function getFullOrganization(orgId: OrganizationId) {
     try {
         const orgHeader = await getOrgById(orgId);
         if(!orgHeader) {
@@ -14,6 +16,8 @@ export async function getOrganizationWithProjects(orgId: OrganizationId) {
         const org: Organization = {
             ...orgHeader,
             projects: await getProjectsByOrgId(orgId) ?? [],
+            members: await getMembersInOrg(orgId) ?? [],
+            invites: await getAllInvitesForEntity(orgId) ?? [],
         };
         return org;
     } catch (e) {
@@ -39,6 +43,7 @@ export async function addOrganization(name:string, creator:UserId, isPersonal:bo
         createdAt: Date.now(),
         isPersonalOrg: isPersonal,
         logoUrl: "",
+        description: "",
     };
 
     try{
@@ -63,4 +68,19 @@ export async function updateOrganizationFromPartial(orgId: OrganizationId, parti
     } catch (e:any) {
         throw new Error("Failed to update org "+e);
     }
+}
+
+export const getMembersInOrg = async (orgId: OrganizationId) => {
+    const org = await getOrgById(orgId);
+    if (org == null) {
+        throw new Error("Org not found");
+    }
+    const records = await getMembershipRecordForEntity(orgId);
+    const members = (await Promise.all(records.map(async (r)=>{
+        return {
+            record: r,
+            user: await getUserById(r.userId),
+        }
+    }))).filter(m=>!!m.user) as Member[];
+    return members;
 }

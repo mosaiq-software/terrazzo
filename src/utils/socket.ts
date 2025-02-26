@@ -28,6 +28,7 @@ const initSockets = () => {
                 access_token: token,
                 user: {
                     sid: socket.id,
+                    userId: crypto.randomUUID(), //TODO replace this with the actual iD
                     githubId: userData.id,
                     username: userData.login,
                     avatarUrl: userData.avatar_url,
