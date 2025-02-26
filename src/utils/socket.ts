@@ -23,6 +23,7 @@ const initSockets = () => {
         try {
             const token = socket.handshake.auth.token;
             const userData = await validateGithubAuthToken(token);
+
             const socketData: SocketData = {
                 connectedAt: new Date(),
                 access_token: token,

@@ -1,4 +1,4 @@
-import { getOrgMemberIds, getPrivateGitHubUserData } from "@trz-api/controllers/userController";
+import { getOrgMemberIds, getPrivateGitHubUserData } from "@trz-api/utils/githubUtils";
 
 export const validateGithubAuthToken = async (token: string) => {
     if (!token) {

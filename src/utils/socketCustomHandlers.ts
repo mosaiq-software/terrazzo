@@ -7,6 +7,7 @@ import {addCard, moveCardToList, updateCardFromPartial} from "@trz-api/controlle
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
+import {checkUsernameTaken, getOrCreateUserByGithubId, setupUser} from "@trz-api/controllers/userController";
 import { addOrganization, getOrganizationWithProjects, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { addProject, getProjectWithBoards, updateProjectFromPartial } from '@trz-api/controllers/projectController';
 import { getUsersEntities } from '@trz-api/controllers/userController';
@@ -287,6 +288,42 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             broadcastToMyRoom(socket, ServerSE.MOVE_CARD, payload);
         } catch (error: any) {
             reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.GET_USER, async (data: ClientSEPayload[ClientSE.GET_USER], reply: ClientSEReply<ClientSE.GET_USER>) => {
+        try {
+            if (!data) {
+                throw new Error('No user id provided');
+            }
+            const user = await getOrCreateUserByGithubId(data);
+            reply(user);
+        } catch (error: any) {
+            reply(undefined , error.message);
+        }
+    });
+
+    socket.on(ClientSE.SETUP_USER, async (data: ClientSEPayload[ClientSE.SETUP_USER], reply: ClientSEReply<ClientSE.SETUP_USER>) => {
+        try {
+            if (!data) {
+                throw new Error('No user data provided');
+            }
+            const user = await setupUser(data.id, data.username, data.firstName, data.lastName);
+            reply(user);
+        } catch (error: any) {
+            reply(undefined , error.message);
+        }
+    });
+
+    socket.on(ClientSE.CHECK_USERNAME_TAKEN, async (data: ClientSEPayload[ClientSE.CHECK_USERNAME_TAKEN], reply: ClientSEReply<ClientSE.CHECK_USERNAME_TAKEN>) => {
+        try {
+            if (!data) {
+                throw new Error('No username provided');
+            }
+            const taken = await checkUsernameTaken(data);
+            reply(taken);
+        } catch (error: any) {
+            reply(false, error.message);
         }
     });
 };
