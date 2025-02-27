@@ -7,6 +7,19 @@ import { createOrg, getOrgById, updateOrg } from "@trz-api/persistence/organizat
 import { getProjectsByOrgId } from "@trz-api/persistence/projectPersistence";
 import { getUserById } from "@trz-api/persistence/userPersistence";
 
+export async function getOrganizationPreview(orgId: OrganizationId) {
+    try {
+        const orgHeader = await getOrgById(orgId);
+        if(!orgHeader) {
+            throw new Error("No Org found with id "+orgId);
+        }
+        return orgHeader;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
 export async function getFullOrganization(orgId: OrganizationId) {
     try {
         const orgHeader = await getOrgById(orgId);

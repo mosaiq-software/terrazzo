@@ -7,9 +7,9 @@ import {addCard, moveCardToList, updateCardFromPartial} from "@trz-api/controlle
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
-import { addOrganization, getFullOrganization, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
-import { addProject, getFullProject, updateProjectFromPartial } from '@trz-api/controllers/projectController';
-import { getUsersEntities } from '@trz-api/controllers/userController';
+import { addOrganization, getFullOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
+import { addProject, getFullProject, getProjectPreview, updateProjectFromPartial } from '@trz-api/controllers/projectController';
+import { getUserPreview, getUsersEntities } from '@trz-api/controllers/userController';
 import { replyToInvite, sendInvite } from '@trz-api/controllers/inviteController';
 import { EntityType } from '@mosaiq/terrazzo-common/constants';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
@@ -51,7 +51,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         }
     });
 
-    socket.on(ClientSE.GET_USERS_ENTITIES, async (data: ClientSEPayload[ClientSE.GET_USERS_ENTITIES], reply: ClientSEReply<ClientSE.GET_USERS_ENTITIES>) => {
+    socket.on(ClientSE.GET_USER_DASH, async (data: ClientSEPayload[ClientSE.GET_USER_DASH], reply: ClientSEReply<ClientSE.GET_USER_DASH>) => {
         try {
             if (!data) {
                 throw new Error('No user id provided');
@@ -94,6 +94,42 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             }
             const board = await getWholeBoard(data);
             reply(board);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.PREVIEW_ORGANIZATION, async (data: ClientSEPayload[ClientSE.PREVIEW_ORGANIZATION], reply: ClientSEReply<ClientSE.PREVIEW_ORGANIZATION>) => {
+        try {
+            if (!data) {
+                throw new Error('No org id provided');
+            }
+            const orgHeader = await getOrganizationPreview(data);
+            reply(orgHeader);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.PREVIEW_PROJECT, async (data: ClientSEPayload[ClientSE.PREVIEW_PROJECT], reply: ClientSEReply<ClientSE.PREVIEW_PROJECT>) => {
+        try {
+            if (!data) {
+                throw new Error('No project id provided');
+            }
+            const projectHeader = await getProjectPreview(data);
+            reply(projectHeader);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.PREVIEW_USER, async (data: ClientSEPayload[ClientSE.PREVIEW_USER], reply: ClientSEReply<ClientSE.PREVIEW_USER>) => {
+        try {
+            if (!data) {
+                throw new Error('No user id provided');
+            }
+            const userHeader = await getUserPreview(data);
+            reply(userHeader);
         } catch (error: any) {
             reply(undefined, error.message);
         }
@@ -297,15 +333,15 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
 
     socket.on(ClientSE.SEND_INVITE, async (data: ClientSEPayload[ClientSE.SEND_INVITE], reply: ClientSEReply<ClientSE.SEND_INVITE>) => {
         try {
-            // const fromUser = ""; TODO get the fromUser automatically from the socket connection
+            const socketData = getSocketData(socket);
             let entityName = '';
             if(data.entityType === EntityType.ORG) {
                 entityName = (await getOrgById(data.entityId))?.name ?? '';
             } else if(data.entityType === EntityType.PROJECT) {
                 entityName = (await getProjectById(data.entityId))?.name ?? '';
             }
-            const invite = await sendInvite(data.toUsername, fromUser.id, data.entityId, data.entityType, data.role);
-            const payload: ServerSEPayload[ServerSE.RECEIVE_INVITE] = {...invite, fromName: fromUser.name, entityName};
+            const invite = await sendInvite(data.toUsername, socketData.user.userId, data.entityId, data.entityType, data.role);
+            const payload: ServerSEPayload[ServerSE.RECEIVE_INVITE] = invite;
             broadcastToUser(socket, payload.toUser, ServerSE.RECEIVE_INVITE, payload);
             reply(undefined);
         } catch (error: any) {

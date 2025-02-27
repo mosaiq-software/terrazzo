@@ -1,8 +1,10 @@
 import { EntityType } from "@mosaiq/terrazzo-common/constants";
-import { OrganizationHeader, ProjectHeader, UserId } from "@mosaiq/terrazzo-common/types";
+import { OrganizationHeader, ProjectHeader, UserDash, UserId } from "@mosaiq/terrazzo-common/types";
+import { getInvitesToUser } from "@trz-api/persistence/invitePersistence";
 import { getMembershipRecordsForUser } from "@trz-api/persistence/membershipPersistence";
 import { getOrgById } from "@trz-api/persistence/organizationPersistence";
 import { getProjectById } from "@trz-api/persistence/projectPersistence";
+import { getUserById } from "@trz-api/persistence/userPersistence";
 import { validateGithubAuthToken } from "@trz-api/utils/authUtils";
 import axios from "axios";
 import { Request, Response } from "express";
@@ -141,7 +143,7 @@ export const revokeGithubAuth = async (access_token: string) => {
 }
 
 
-export const getUsersEntities = async (userId: UserId) => {
+export const getUsersEntities = async (userId: UserId): Promise<UserDash> => {
     try {
         const projectMemberships = await getMembershipRecordsForUser(userId, EntityType.PROJECT) ?? [];
         const orgMemberships = await getMembershipRecordsForUser(userId, EntityType.ORG) ?? [];
@@ -154,7 +156,22 @@ export const getUsersEntities = async (userId: UserId) => {
             return getOrgById(o.entityId);
         }))).filter(o=>!!o);
 
-        return {projects, organizations}
+        const invites = await getInvitesToUser(userId);
+
+        return {projects, organizations, invites};
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
+export const getUserPreview = async (userId: UserId) => {
+    try {
+        const user = await getUserById(userId);
+        if(!user){
+            throw new Error("No user found");
+        }
+        return user;
     } catch (e) {
         console.error(e);
         throw e;

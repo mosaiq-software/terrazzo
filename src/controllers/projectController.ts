@@ -6,6 +6,19 @@ import { getMembershipRecordForEntity } from "@trz-api/persistence/membershipPer
 import { createProject, getProjectById, updateProject } from "@trz-api/persistence/projectPersistence";
 import { getUserById } from "@trz-api/persistence/userPersistence";
 
+export async function getProjectPreview(projectId: ProjectId) {
+    try {
+        const projectHeader = await getProjectById(projectId);
+        if(!projectHeader){
+            throw new Error ("No project found with id "+projectId);
+        }
+        return projectHeader;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
 export async function getFullProject(projectId: ProjectId) {
     try {
         const projectHeader = await getProjectById(projectId);

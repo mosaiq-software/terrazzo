@@ -5,10 +5,25 @@ import {getRoomCode} from "@mosaiq/terrazzo-common/utils/socketUtils";
 import { UID, UserId } from '@mosaiq/terrazzo-common/types';
 
 export const getSocketRoom = (socket: Socket): RoomId | undefined => {
-    return (Array.from(socket.rooms).find(room => room !== socket.id) as RoomId) ?? undefined;
+    const rooms = Array.from(socket.rooms) as RoomId[];
+    return rooms.find(room => room && room !== socket.id && !room.startsWith(RoomType.USER));
+}
+export const logoutSocket = (socket: Socket) => {
+    const rooms = Array.from(socket.rooms) as RoomId[];
+    const userRoom = rooms.find(room => room && room.startsWith(RoomType.USER));
+    if(userRoom){
+        socket.leave(userRoom);
+    }
+}
+export const loginSocket = (socket: Socket, userId: UserId) => {
+    logoutSocket(socket);
+    const userRoom = getRoomCode(RoomType.USER, userId);
+    if(userRoom) {
+        socket.join(userRoom);
+    }
 }
 
-export const getSocketsInRoom = async (io: Server, room: RoomId): Promise<UserData[]> => {
+export const getUsersInRoom = async (io: Server, room: RoomId): Promise<UserData[]> => {
     if (!room) {
         return [];
     }
@@ -50,9 +65,8 @@ export const broadcastToSocket = (socket: Socket, toSocketId:SocketId, event: Se
     socket.broadcast.to(toSocketId).emit(event, payload);
 }
 export const broadcastToUser = (socket: Socket, toUserId:UserId, event: ServerSE, payload: ServerSEPayload[keyof ServerSEPayload]) => {
-    // socket.broadcast.to(toSocketId).emit(event, payload);
+    broadcastToAnotherRoom(socket, RoomType.USER, toUserId, event, payload);
 }
-
 export const broadcastToMyselfAndMyRoom = (socket: Socket, event: ServerSE, payload: ServerSEPayload[keyof ServerSEPayload]) => {
     const room = getSocketRoom(socket);
     if (room) {
@@ -64,7 +78,6 @@ export const broadcastToMyselfAndMyRoom = (socket: Socket, event: ServerSE, payl
 export const getSocketData = (socket: Socket) => {
     return socket.data as SocketData;
 }
-
 export const setSocketData = (socket: Socket, data: SocketData) => {
     // TODO validate each field before setting to ensure no data corruption or injection
     socket.data = data;
@@ -72,7 +85,7 @@ export const setSocketData = (socket: Socket, data: SocketData) => {
 
 export const joinRoom = async (io: Server, socket: Socket, room: RoomId): Promise<UserData[]> => {
     if (room && typeof room === 'string') {
-        const roomUsers = await getSocketsInRoom(io, room);
+        const roomUsers = await getUsersInRoom(io, room);
         const socketData = getSocketData(socket);
         const payload: ServerSEPayload[ServerSE.CLIENT_JOINED_ROOM] = { ...socketData.user, sid: socket.id }
         broadcast(socket, room, ServerSE.CLIENT_JOINED_ROOM, payload);

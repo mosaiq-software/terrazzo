@@ -4,6 +4,7 @@ import { validateGithubAuthToken } from './authUtils';
 import { registerCustomSocketEvents } from './socketCustomHandlers';
 import { registerEngineSocketEvents } from './socketEngineHandlers';
 import { SocketData } from './socketTypes';
+import { loginSocket } from './socketUtils';
 
 const initSockets = () => {
     console.info("Starting sockets");
@@ -37,6 +38,7 @@ const initSockets = () => {
                 }
             };
             (socket.data as SocketData) = socketData;
+            loginSocket(socket, socketData.user.userId);
         } catch (error) {
             socket.disconnect(true);
             return;
