@@ -12,8 +12,8 @@ const initSockets = () => {
 
     const io = new Server({
         cors: {
-            origin: "*",
-            methods: ["GET", "POST"],
+            origin: ["*"],
+            credentials: true
         },
         connectionStateRecovery: {
             maxDisconnectionDuration: 1 * 60 * 1000, // 1 minutes
