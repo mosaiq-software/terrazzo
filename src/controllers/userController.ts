@@ -4,7 +4,6 @@ import { getInvitesToUser } from "@trz-api/persistence/invitePersistence";
 import { getMembershipRecordsForUser } from "@trz-api/persistence/membershipPersistence";
 import { getOrgById } from "@trz-api/persistence/organizationPersistence";
 import { getProjectById } from "@trz-api/persistence/projectPersistence";
-import { getUserById } from "@trz-api/persistence/userPersistence";
 import { User } from "@mosaiq/terrazzo-common/types";
 import {
     createUser,
