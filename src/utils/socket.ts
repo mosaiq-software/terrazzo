@@ -5,6 +5,7 @@ import { registerCustomSocketEvents } from './socketCustomHandlers';
 import { registerEngineSocketEvents } from './socketEngineHandlers';
 import { SocketData } from './socketTypes';
 import { loginSocket } from './socketUtils';
+import { instrument } from "@socket.io/admin-ui";
 
 const initSockets = () => {
     console.info("Starting sockets");
@@ -18,6 +19,11 @@ const initSockets = () => {
             maxDisconnectionDuration: 1 * 60 * 1000, // 1 minutes
             skipMiddlewares: true,
         },
+    });
+
+    instrument(io, {
+        auth: false,
+        mode: "development",
     });
 
     io.on(ServerSocketIOEvent.CONNECTION, async (socket) => {

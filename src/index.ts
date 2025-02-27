@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import { initApp } from './app';
 import {initSockets} from './utils/socket';
+import { initAdminServer } from './socketAdminServer';
 
 const start = async () => {
     const SOCKET_PORT = parseInt(process.env.SOCKET_PORT+'') || undefined;
@@ -21,6 +22,11 @@ const start = async () => {
     const app = await initApp();
     app.listen(process.env.API_PORT, () => {
         console.log(`Server started at ${process.env.API_URL}:${process.env.API_PORT}`);
+    });
+
+    const adminServer = await initAdminServer();
+    adminServer.listen(process.env.SOCKET_ADMIN_PORT, () => {
+        console.log(`Socket admin server started at ${process.env.API_URL}:${process.env.SOCKET_ADMIN_PORT}`);
     });
 
     const { io } = initSockets();
