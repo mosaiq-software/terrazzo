@@ -156,3 +156,9 @@ export interface Invite {
     entityType: EntityType;
     role: Role;
 }
+
+export interface UserDash {
+    organizations: OrganizationHeader[];
+    projects: ProjectHeader[];
+    invites: Invite[];
+}

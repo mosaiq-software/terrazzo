@@ -1,5 +1,5 @@
 import { EntityType, Role } from "./constants";
-import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockEvent, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord} from "./types";
+import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockEvent, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader} from "./types";
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -24,11 +24,15 @@ export enum ClientSE { // Client to Server
     MOVE_LIST = "MOVE_LIST",
     MOVE_CARD = "MOVE_CARD",
 
-    GET_USERS_ENTITIES = "GET_USERS_ENTITIES",
+    GET_USER_DASH = "GET_USER_DASH",
     GET_ORGANIZATION = "GET_ORGANIZATION",
     GET_PROJECT = "GET_PROJECT",
     GET_BOARD = "GET_BOARD",
     GET_TEXT_BLOCK = "GET_TEXT_BLOCK",
+
+    PREVIEW_ORGANIZATION = "PREVIEW_ORGANIZATION",
+    PREVIEW_PROJECT = "PREVIEW_PROJECT",
+    PREVIEW_USER = "PREVIEW_USER",
 
     CREATE_ORG = "CREATE_ORG",
     CREATE_PROJECT = "CREATE_PROJECT",
@@ -61,11 +65,15 @@ export interface ClientSEPayload {
     [ClientSE.MOVE_LIST]: {listId: ListId, position: number};
     [ClientSE.MOVE_CARD]: {cardId: CardId, toList: ListId, position?: number};
 
-    [ClientSE.GET_USERS_ENTITIES]: UserId;
+    [ClientSE.GET_USER_DASH]: UserId;
     [ClientSE.GET_ORGANIZATION]: OrganizationId;
     [ClientSE.GET_PROJECT]: ProjectId;
     [ClientSE.GET_BOARD]: BoardId;
     [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
+
+    [ClientSE.PREVIEW_ORGANIZATION]: OrganizationId;
+    [ClientSE.PREVIEW_PROJECT]: ProjectId;
+    [ClientSE.PREVIEW_USER]: UserId;
 
     [ClientSE.CREATE_ORG]: CreateOrgType;
     [ClientSE.CREATE_PROJECT]: CreateProjectType;
@@ -98,11 +106,15 @@ export interface ClientSEReplies {
     [ClientSE.MOVE_LIST]: undefined;
     [ClientSE.MOVE_CARD]: undefined;
 
-    [ClientSE.GET_USERS_ENTITIES]: {organizations: OrganizationHeader[], projects: ProjectHeader[]} | undefined;
+    [ClientSE.GET_USER_DASH]: UserDash | undefined;
     [ClientSE.GET_ORGANIZATION]: Organization | undefined;
     [ClientSE.GET_PROJECT] : Project | undefined;
     [ClientSE.GET_BOARD]: Board | undefined;
     [ClientSE.GET_TEXT_BLOCK]: TextBlock | undefined;
+
+    [ClientSE.PREVIEW_ORGANIZATION]: OrganizationHeader | undefined;
+    [ClientSE.PREVIEW_PROJECT]: ProjectHeader | undefined;
+    [ClientSE.PREVIEW_USER]: UserHeader | undefined;
     
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
     [ClientSE.CREATE_PROJECT]: ProjectId | undefined;
@@ -170,7 +182,7 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_LIST_FIELD]: (Partial<List> & {id: ListId});
     [ServerSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
 
-    [ServerSE.RECEIVE_INVITE]: Invite & {entityName:string, fromName: string};
+    [ServerSE.RECEIVE_INVITE]: Invite;
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -210,7 +222,8 @@ export type Position = { x: number; y: number; }
 
 export enum RoomType {
     MOUSE = "MOUSE",
-    TEXT = "TEXT"
+    TEXT = "TEXT",
+    USER = "USER",
 }
 export type RoomId = `${RoomType}-${string}` | null;
 export type SocketId = string;
