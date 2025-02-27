@@ -130,9 +130,9 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_CARD_FIELD]: undefined;
     [ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD]: undefined;
     
-    [ClientSE.SETUP_USER]: {user: User | undefined};
-    [ClientSE.GET_USER]: {user: User | undefined};
-    [ClientSE.CHECK_USERNAME_TAKEN]: {taken:boolean};
+    [ClientSE.SETUP_USER]: User | undefined;
+    [ClientSE.GET_USER]: User | undefined;
+    [ClientSE.CHECK_USERNAME_TAKEN]: boolean;
 
     [ClientSE.SEND_INVITE]: InviteId | undefined;
     [ClientSE.RESPOND_INVITE]: undefined;
