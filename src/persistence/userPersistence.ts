@@ -1,4 +1,4 @@
-import { Model, DataTypes } from 'sequelize';
+import {Model, DataTypes, Sequelize} from 'sequelize';
 import { sequelize } from './dbHelper';
 import { User } from '@mosaiq/terrazzo-common/types';
 
@@ -8,6 +8,10 @@ UserModel.init({
         type: DataTypes.STRING,
         primaryKey: true
     },
+    username: DataTypes.STRING,
+    firstName: DataTypes.STRING,
+    lastName: DataTypes.STRING,
+    profilePicture: DataTypes.STRING,
     githubUserId: DataTypes.STRING,
 }, { sequelize, modelName: 'userModel' });
 
@@ -18,23 +22,55 @@ export const getUserById = async (id: string) => {
     return (await UserModel.findByPk(id))?.toJSON() as User | null;
 };
 
-export const getUserByDiscordId = async (discordId: string) => {
-    return (await UserModel.findOne({ where: { discordUserId: discordId } }))?.toJSON() as User | null;
-};
+export const getUserByUsername = async (username: string) => {
+    return (await UserModel.findOne({ where:
+            Sequelize.where(
+                Sequelize.fn('lower',
+                    Sequelize.col('username')
+                ),
+                sequelize.fn('lower', username))
+    }))?.toJSON() as User | null;
+}
 
 export const getUserByGithubId = async (githubId: string) => {
-    return (await UserModel.findOne({ where: { githubUserId: githubId } }))?.toJSON() as User | null;
+    return (await UserModel.findOne({
+        where: { githubUserId: githubId },
+        attributes:{
+            exclude:['createdAt', 'updatedAt']
+        }}))?.toJSON() as User | null;
+};
+
+export const findOrCreateUser = async (user: User) => {
+    return await UserModel.upsert({
+        where: { id: user.id },
+        defaults: {
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profilePicture: user.profilePicture,
+            githubUserId: user.githubUserId,
+            archived: false
+        }
+    });
 };
 
 export const createUser = async (user: User) => {
     return await UserModel.create({
         id: user.id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePicture: user.profilePicture,
         githubUserId: user.githubUserId,
     });
 };
 
 export const updateUser = async (user: User) => {
     return await UserModel.update({
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePicture: user.profilePicture,
         githubUserId: user.githubUserId,
     }, { where: { id: user.id } });
 };
