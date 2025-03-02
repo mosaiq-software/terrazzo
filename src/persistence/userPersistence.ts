@@ -1,6 +1,6 @@
 import {Model, DataTypes, Sequelize} from 'sequelize';
 import { sequelize } from './dbHelper';
-import { User } from '@mosaiq/terrazzo-common/types';
+import { UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
 
 class UserModel extends Model {}
 UserModel.init({
@@ -18,8 +18,8 @@ UserModel.init({
 sequelize.sync();
 
 
-export const getUserById = async (id: string) => {
-    return (await UserModel.findByPk(id))?.toJSON() as User | null;
+export const getUserById = async (id: UserId) => {
+    return (await UserModel.findByPk(id))?.toJSON() as UserHeader | null;
 };
 
 export const getUserByUsername = async (username: string) => {
@@ -29,7 +29,7 @@ export const getUserByUsername = async (username: string) => {
                     Sequelize.col('username')
                 ),
                 sequelize.fn('lower', username))
-    }))?.toJSON() as User | null;
+    }))?.toJSON() as UserHeader | null;
 }
 
 export const getUserByGithubId = async (githubId: string) => {
@@ -37,10 +37,10 @@ export const getUserByGithubId = async (githubId: string) => {
         where: { githubUserId: githubId },
         attributes:{
             exclude:['createdAt', 'updatedAt']
-        }}))?.toJSON() as User | null;
+        }}))?.toJSON() as UserHeader | null;
 };
 
-export const findOrCreateUser = async (user: User) => {
+export const findOrCreateUser = async (user: UserHeader) => {
     return await UserModel.upsert({
         where: { id: user.id },
         defaults: {
@@ -54,7 +54,7 @@ export const findOrCreateUser = async (user: User) => {
     });
 };
 
-export const createUser = async (user: User) => {
+export const createUser = async (user: UserHeader) => {
     return await UserModel.create({
         id: user.id,
         username: user.username,
@@ -65,7 +65,7 @@ export const createUser = async (user: User) => {
     });
 };
 
-export const updateUser = async (user: User) => {
+export const updateUser = async (user: UserHeader) => {
     return await UserModel.update({
         username: user.username,
         firstName: user.firstName,
@@ -73,15 +73,4 @@ export const updateUser = async (user: User) => {
         profilePicture: user.profilePicture,
         githubUserId: user.githubUserId,
     }, { where: { id: user.id } });
-};
-
-export const setActiveTimer = async (userId: string, timerId: string | null) => {
-    if (!timerId) {
-        timerId = null;
-    }
-    return await UserModel.update({ activeTimerId: timerId }, { where: { id: userId } });
-};
-
-export const setUserArchived = async (id: string, archived: boolean) => {
-    return await UserModel.update({ archived }, { where: { id } });
 };

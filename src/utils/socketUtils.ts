@@ -34,7 +34,8 @@ export const getUsersInRoom = async (io: Server, room: RoomId): Promise<UserData
     const sockets = Array.from(roomSockets);
     const users = sockets.map(socketId => {
         const socket = io.sockets.sockets.get(socketId);
-        return socket?.data.user;
+        const data = socket ? getSocketData(socket) : undefined;
+        return data?.user;
     });
     return users as UserData[];
 }
@@ -76,11 +77,11 @@ export const broadcastToMyselfAndMyRoom = (socket: Socket, event: ServerSE, payl
 }
 
 export const getSocketData = (socket: Socket) => {
-    return socket.data as SocketData;
+    return (socket as any).terrazzoSocketData as SocketData;
 }
 export const setSocketData = (socket: Socket, data: SocketData) => {
     // TODO validate each field before setting to ensure no data corruption or injection
-    socket.data = data;
+    (socket as any).terrazzoSocketData = data;
 }
 
 export const joinRoom = async (io: Server, socket: Socket, room: RoomId): Promise<UserData[]> => {

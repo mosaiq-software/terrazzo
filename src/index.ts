@@ -14,7 +14,8 @@ const start = async () => {
         !process.env.GITHUB_AUTH_CLIENT_ID ||
         !process.env.ORG_NAME ||
         !process.env.DATABASE_PATH ||
-        !process.env.DATABASE_LOGGING
+        !process.env.DATABASE_LOGGING ||
+        !process.env.FRONTEND_URL
     ) {
         throw new Error('Make sure to set all required environment variables');
     }

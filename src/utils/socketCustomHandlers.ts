@@ -7,7 +7,6 @@ import {addCard, moveCardToList, updateCardFromPartial} from "@trz-api/controlle
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
-import {checkUsernameTaken, getOrCreateUserByGithubId, setupUser} from "@trz-api/controllers/userController";
 import { addOrganization, getFullOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { addProject, getFullProject, getProjectPreview, updateProjectFromPartial } from '@trz-api/controllers/projectController';
 import { getUserPreview, getUsersEntities } from '@trz-api/controllers/userController';
@@ -332,42 +331,6 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         }
     });
 
-    socket.on(ClientSE.GET_USER, async (data: ClientSEPayload[ClientSE.GET_USER], reply: ClientSEReply<ClientSE.GET_USER>) => {
-        try {
-            if (!data) {
-                throw new Error('No user id provided');
-            }
-            const user = await getOrCreateUserByGithubId(data);
-            reply(user);
-        } catch (error: any) {
-            reply(undefined , error.message);
-        }
-    });
-
-    socket.on(ClientSE.SETUP_USER, async (data: ClientSEPayload[ClientSE.SETUP_USER], reply: ClientSEReply<ClientSE.SETUP_USER>) => {
-        try {
-            if (!data) {
-                throw new Error('No user data provided');
-            }
-            const user = await setupUser(data.id, data.username, data.firstName, data.lastName);
-            reply(user);
-        } catch (error: any) {
-            reply(undefined , error.message);
-        }
-    });
-
-    socket.on(ClientSE.CHECK_USERNAME_TAKEN, async (data: ClientSEPayload[ClientSE.CHECK_USERNAME_TAKEN], reply: ClientSEReply<ClientSE.CHECK_USERNAME_TAKEN>) => {
-        try {
-            if (!data) {
-                throw new Error('No username provided');
-            }
-            const taken = await checkUsernameTaken(data);
-            reply(taken);
-        } catch (error: any) {
-            reply(false, error.message);
-        }
-    });
-
     socket.on(ClientSE.SEND_INVITE, async (data: ClientSEPayload[ClientSE.SEND_INVITE], reply: ClientSEReply<ClientSE.SEND_INVITE>) => {
         try {
             const socketData = getSocketData(socket);
@@ -380,7 +343,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             const invite = await sendInvite(data.toUsername, socketData.user.userId, data.entityId, data.entityType, data.role);
             const payload: ServerSEPayload[ServerSE.RECEIVE_INVITE] = invite;
             broadcastToUser(socket, payload.toUser, ServerSE.RECEIVE_INVITE, payload);
-            reply(undefined);
+            reply(invite);
         } catch (error: any) {
             reply(undefined, error.message);
         }

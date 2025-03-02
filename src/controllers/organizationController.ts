@@ -44,10 +44,10 @@ export async function addOrganization(name:string, creator:UserId, isPersonal:bo
         throw new Error("Name must be 0 - 50 characters");
     }
 
-    // const user = await getUser(creator)...
-    // if(!user){
-    //     throw new Error("Org must have a creator");
-    // }
+    const user = await getUserById(creator);
+    if(!user){
+        throw new Error("Org must have a creator");
+    }
 
     const newOrg: OrganizationHeader = {
         id: crypto.randomUUID(),

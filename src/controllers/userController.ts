@@ -1,5 +1,5 @@
 import { EntityType } from "@mosaiq/terrazzo-common/constants";
-import { UserDash, UserId } from "@mosaiq/terrazzo-common/types";
+import { UserDash, UserHeader, UserId } from "@mosaiq/terrazzo-common/types";
 import { getInvitesToUser } from "@trz-api/persistence/invitePersistence";
 import { getMembershipRecordsForUser } from "@trz-api/persistence/membershipPersistence";
 import { getOrgById } from "@trz-api/persistence/organizationPersistence";
@@ -12,47 +12,28 @@ import {
     getUserByUsername,
     updateUser
 } from "@trz-api/persistence/userPersistence";
-import {getPublicGithubUserDataFromGithubUserId} from "@trz-api/utils/githubUtils";
+import {getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId} from "@trz-api/utils/githubUtils";
 
 //Gets
-export async function getOrCreateUserByGithubId(githubId: string) {
-    let user = await getUserByGithubId(githubId);
+export async function getOrCreateUserByGithubAccessToken(accessToken: string) {
+    const githubData = await getPrivateGitHubUserData(accessToken);
+    if(!githubData){
+        throw new Error("Cant find an account with that access token");
+    }
+    let user = await getUserByGithubId(githubData.id);
 
     try{
         if(user == null) {
-            user = await createNewUser("", "", "", "", githubId);
+            user = await createNewUser("", "", "", "", githubData.id);
             return user;
         }
 
-        //add workspace and project data here
-        /*
-        user.workspaces = await getWorkspacesByUserId(user.id);
-        user.projects = await getProjectsByUserId(user.id);
-         */
         return user;
     }catch (e) {
         throw new Error("Failed to retrieve user" + e);
     }
 }
 
-export async function getUser(userID: string) {
-    const user = await getUserById(userID);
-
-    if(user == null) {
-        throw new Error("User not found");
-    }
-
-    try{
-        //add workspace and project data here
-        /*
-        user.workspaces = await getWorkspacesByUserId(user.id);
-        user.projects = await getProjectsByUserId(user.id);
-         */
-        return user;
-    }catch (e) {
-        throw new Error("Failed to retrieve user" + e);
-    }
-}
 
 export async function checkUsernameTaken(username: string) {
     const user = await getUserByUsername(username);
@@ -70,15 +51,15 @@ export async function createNewUser(username: string, firstName: string, lastNam
         throw new Error("Username already exists");
     }
 
-    const newUser:User = {
+    const ghProfile = await getPublicGithubUserDataFromGithubUserId(githubUserId);
+
+    const newUser:UserHeader = {
         id: crypto.randomUUID(),
-        username: username,
+        username: username || ghProfile?.login || "",
         firstName: firstName,
         lastName: lastName,
-        profilePicture: profilePicture,
-        githubUserId: githubUserId,
-        projectIds: [],
-        organizationIds: [],
+        profilePicture: profilePicture || ghProfile?.avatar_url || "",
+        githubUserId: githubUserId
     };
 
     try {
@@ -91,20 +72,17 @@ export async function createNewUser(username: string, firstName: string, lastNam
 
 //Updates
 
-export async function setupUser(id: string, username: string, firstName: string, lastName:string) {
+export async function setupUser(userId: UserId, username: string, firstName: string, lastName:string) {
 
-    const user = await getUserById(id);
+    const user = await getUserById(userId);
 
     if(user == null) {
         throw new Error("User not found");
     }
 
-    const githubData = await getPublicGithubUserDataFromGithubUserId(user.githubUserId);
-
     user.username = username;
     user.firstName = firstName;
     user.lastName = lastName;
-    user.profilePicture = githubData.avatar_url;
 
     try {
         await updateUser(user);

@@ -1,40 +1,18 @@
-import { validateGithubAuthToken } from "@trz-api/utils/authUtils";
+import { GithubUserProfile, User } from "@mosaiq/terrazzo-common/types";
 import axios from "axios";
 import { Request, Response } from "express";
 import queryString from "query-string";
 
-export const githubAuth = async (req: Request, res: Response) => {
-    const code = req.query.code as string;
+export const githubAuth = async (code:string) => {
     if (!code) {
-        return res.status(400).send('No code provided');
+        throw new Error("No code provided");
     }
     const access_token = await getAccessTokenFromCode(code);
     if (!access_token) {
-        return res.status(400).send('Invalid code');
+        throw new Error("Invalid code");
     }
-    try{
-        await validateGithubAuthToken(access_token);
-    } catch (error: any) {
-        res.status(401).json(error.message);
-        return;
-    }
-    res.status(200).json({ access_token });
+    return access_token;
 };
-
-export const githubUserData = async (req: Request, res: Response) => {
-    const access_token = req.query.access_token as string;
-    if (!access_token) {
-        return res.status(400).send('No access token provided');
-    }
-    try{
-        await validateGithubAuthToken(access_token);
-    } catch (error: any) {
-        res.status(401).json(error.message);
-        return;
-    }
-    const userData = await getPrivateGitHubUserData(access_token);
-    res.status(200).json(userData);
-}
 
 async function getAccessTokenFromCode(code:string) {
     try{
@@ -57,7 +35,7 @@ async function getAccessTokenFromCode(code:string) {
     }
 };
 
-export async function getPrivateGitHubUserData(access_token: string) {
+export async function getPrivateGitHubUserData(access_token: string): Promise<GithubUserProfile | null> {
     try{
         const { data } = await axios({
             url: 'https://api.github.com/user',
@@ -72,7 +50,7 @@ export async function getPrivateGitHubUserData(access_token: string) {
     }
 };
 
-export async function getPublicGithubUserDataFromGithubUserId(githubId: string) {
+export async function getPublicGithubUserDataFromGithubUserId(githubId: string): Promise<GithubUserProfile | null> {
     try {
         const { data } = await axios({
             url: `https://api.github.com/user/${githubId}`,
@@ -108,11 +86,6 @@ export async function getOrgMembershipData(org: string, access_token: string) {
 };
 
 export const revokeGithubAuth = async (access_token: string) => {
-    try{
-        await validateGithubAuthToken(access_token);
-    } catch (error: any) {
-        throw new Error("Unable to validate auth token");
-    }
     try {
         const credentials = `${process.env.GITHUB_AUTH_CLIENT_ID}:${process.env.GITHUB_AUTH_CLIENT_SECRET}`;
         const encodedCredentials = btoa(credentials);
