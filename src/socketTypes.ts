@@ -11,6 +11,7 @@ export enum ClientSocketIOEvent {
 }
 export enum ServerSocketIOEvent {
     CONNECTION = 'connection',
+    CONNECTION_ERROR = 'connection_error',
     DISCONNECT = 'disconnect',
     DISCONNECTING = 'disconnecting',
 }
@@ -48,10 +49,6 @@ export enum ClientSE { // Client to Server
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
     UPDATE_MEMBERSHIP_RECORD_FIELD = "UPDATE_MEMBERSHIP_RECORD_FIELD",
 
-    SETUP_USER = "SETUP_USER",
-    GET_USER = "GET_USER",
-    CHECK_USERNAME_TAKEN = "CHECK_USERNAME_TAKEN",
-    
     SEND_INVITE = "SEND_INVITE",
     RESPOND_INVITE = "RESPOND_INVITE",
     KICK_MEMBER = "KICK_MEMBER",
@@ -88,10 +85,6 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_LIST_FIELD]: (Partial<List> & {id: ListId});
     [ClientSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
     [ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD]: (Partial<MembershipRecord> & {id: MembershipRecordId});
-
-    [ClientSE.SETUP_USER]: {id: string, username: string, firstName: string, lastName:string}
-    [ClientSE.GET_USER]: string;
-    [ClientSE.CHECK_USERNAME_TAKEN]: string;
 
     [ClientSE.SEND_INVITE]: { toUsername: string, entityId: EntityId, entityType: EntityType, role: Role };
     [ClientSE.RESPOND_INVITE]: {inviteId: InviteId, response:boolean};
@@ -130,11 +123,7 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_CARD_FIELD]: undefined;
     [ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD]: undefined;
     
-    [ClientSE.SETUP_USER]: User | undefined;
-    [ClientSE.GET_USER]: User | undefined;
-    [ClientSE.CHECK_USERNAME_TAKEN]: boolean;
-
-    [ClientSE.SEND_INVITE]: InviteId | undefined;
+    [ClientSE.SEND_INVITE]: Invite | undefined;
     [ClientSE.RESPOND_INVITE]: undefined;
     [ClientSE.KICK_MEMBER]: undefined;
 }
@@ -244,4 +233,9 @@ export interface UserData {
     idle: boolean;
     mouseRoomData?: MouseRoomUserData;
     textRoomData?: TextRoomUserData;
+}
+
+export interface SocketHandshakeAuth {
+    userId: UserId;
+    githubToken: string;
 }

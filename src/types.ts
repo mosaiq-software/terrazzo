@@ -162,3 +162,10 @@ export interface UserDash {
     projects: ProjectHeader[];
     invites: Invite[];
 }
+
+export interface GithubUserProfile {
+    id: string,
+    login: string,
+    avatar_url: URL,
+    name: string,
+}
