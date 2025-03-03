@@ -157,9 +157,12 @@ export interface Invite {
     role: Role;
 }
 
-export interface UserDash {
-    organizations: OrganizationHeader[];
+export interface UserDashOrganization extends OrganizationHeader {
     projects: ProjectHeader[];
+}
+export interface UserDash {
+    organizations: UserDashOrganization[];
+    standaloneProjects: ProjectHeader[];
     invites: Invite[];
 }
 
