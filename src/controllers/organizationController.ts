@@ -1,11 +1,12 @@
 import { EntityType, Role } from "@mosaiq/terrazzo-common/constants";
 import { Member, Organization, OrganizationHeader, OrganizationId, UserId } from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
-import { getAllInvitesForEntity } from "@trz-api/persistence/invitePersistence";
+import { getAllInviteRecordsForEntity } from "@trz-api/persistence/invitePersistence";
 import { createMembershipRecord, getMembershipRecordForEntity } from "@trz-api/persistence/membershipPersistence";
 import { createOrg, getOrgById, updateOrg } from "@trz-api/persistence/organizationPersistence";
 import { getProjectsByOrgId } from "@trz-api/persistence/projectPersistence";
 import { getUserById } from "@trz-api/persistence/userPersistence";
+import { getInvitesForEntity } from "./inviteController";
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
@@ -26,11 +27,13 @@ export async function getFullOrganization(orgId: OrganizationId) {
         if(!orgHeader) {
             throw new Error("No Org found with id "+orgId);
         }
+
+        
         const org: Organization = {
             ...orgHeader,
             projects: await getProjectsByOrgId(orgId) ?? [],
             members: await getMembersInOrg(orgId) ?? [],
-            invites: await getAllInvitesForEntity(orgId) ?? [],
+            invites: await getInvitesForEntity(orgId) ?? [],
         };
         return org;
     } catch (e) {

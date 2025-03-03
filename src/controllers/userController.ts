@@ -1,6 +1,6 @@
 import { EntityType } from "@mosaiq/terrazzo-common/constants";
 import { UserDash, UserHeader, UserId } from "@mosaiq/terrazzo-common/types";
-import { getInvitesToUser } from "@trz-api/persistence/invitePersistence";
+import { getInviteRecordsToUser } from "@trz-api/persistence/invitePersistence";
 import { getMembershipRecordsForUser } from "@trz-api/persistence/membershipPersistence";
 import { getOrgById } from "@trz-api/persistence/organizationPersistence";
 import { getProjectById, getProjectsByOrgId } from "@trz-api/persistence/projectPersistence";
@@ -12,6 +12,7 @@ import {
     updateUser
 } from "@trz-api/persistence/userPersistence";
 import {getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId} from "@trz-api/utils/githubUtils";
+import { getInvitesToUser } from "./inviteController";
 
 //Gets
 export async function getOrCreateUserByGithubAccessToken(accessToken: string) {

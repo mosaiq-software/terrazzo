@@ -334,15 +334,9 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SEND_INVITE, async (data: ClientSEPayload[ClientSE.SEND_INVITE], reply: ClientSEReply<ClientSE.SEND_INVITE>) => {
         try {
             const socketData = getSocketData(socket);
-            let entityName = '';
-            if(data.entityType === EntityType.ORG) {
-                entityName = (await getOrgById(data.entityId))?.name ?? '';
-            } else if(data.entityType === EntityType.PROJECT) {
-                entityName = (await getProjectById(data.entityId))?.name ?? '';
-            }
             const invite = await sendInvite(data.toUsername, socketData.user.userId, data.entityId, data.entityType, data.role);
             const payload: ServerSEPayload[ServerSE.RECEIVE_INVITE] = invite;
-            broadcastToUser(socket, payload.toUser, ServerSE.RECEIVE_INVITE, payload);
+            broadcastToUser(socket, payload.toUser.id, ServerSE.RECEIVE_INVITE, payload);
             reply(invite);
         } catch (error: any) {
             reply(undefined, error.message);

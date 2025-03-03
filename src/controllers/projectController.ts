@@ -1,10 +1,11 @@
 import { Member, MembershipRecord, OrganizationId, Project, ProjectHeader, ProjectId,} from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 import { getBoardsByProjectId } from "@trz-api/persistence/boardPersistence";
-import { getAllInvitesForEntity } from "@trz-api/persistence/invitePersistence";
+import { getAllInviteRecordsForEntity } from "@trz-api/persistence/invitePersistence";
 import { getMembershipRecordForEntity } from "@trz-api/persistence/membershipPersistence";
 import { createProject, getProjectById, updateProject } from "@trz-api/persistence/projectPersistence";
 import { getUserById } from "@trz-api/persistence/userPersistence";
+import { getInvitesForEntity } from "./inviteController";
 
 export async function getProjectPreview(projectId: ProjectId) {
     try {
@@ -30,7 +31,7 @@ export async function getFullProject(projectId: ProjectId) {
             ...projectHeader,
             boards :await getBoardsByProjectId(projectId) ?? [],
             members : await getMembersInProject(projectId) ?? [],
-            invites: await getAllInvitesForEntity(projectId) ?? [],
+            invites: await getInvitesForEntity(projectId) ?? [],
         };
         
         return project;

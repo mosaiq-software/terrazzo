@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Invite, InviteId, OrganizationId, ProjectId, UserId } from '@mosaiq/terrazzo-common/types';
+import { Invite, InviteId, InviteRecord, OrganizationId, ProjectId, UserId } from '@mosaiq/terrazzo-common/types';
 
 class InviteModel extends Model {}
 InviteModel.init({
@@ -18,44 +18,44 @@ InviteModel.init({
 
 sequelize.sync();
 
-export const getInviteById = async (id: InviteId) => {
+export const getInviteRecordById = async (id: InviteId) => {
     return (await InviteModel.findByPk(id, {
         attributes:{
             exclude:['updatedAt']
-        }}))?.toJSON() as Invite | undefined;
+        }}))?.toJSON() as InviteRecord | undefined;
 }
 
-export const getInvitesToUser = async (userId: UserId) => {
+export const getInviteRecordsToUser = async (userId: UserId) => {
     return (await InviteModel.findAll({
         where: { toUser: userId },
         order: [['createdAt', 'DESC']],
         attributes:{
             exclude:['updatedAt']
         }
-    })).map(prj => prj.toJSON()) as Invite[];
+    })).map(prj => prj.toJSON()) as InviteRecord[];
 }
 
-export const getInvitesFromUser = async (userId: UserId) => {
+export const getInviteRecordsFromUser = async (userId: UserId) => {
     return (await InviteModel.findAll({
         where: { fromUser: userId },
         order: [['createdAt', 'DESC']],
         attributes:{
             exclude:['updatedAt']
         }
-    })).map(prj => prj.toJSON()) as Invite[];
+    })).map(prj => prj.toJSON()) as InviteRecord[];
 }
 
-export const getAllInvitesForEntity = async (entityId: ProjectId | OrganizationId) => {
+export const getAllInviteRecordsForEntity = async (entityId: ProjectId | OrganizationId) => {
     return (await InviteModel.findAll({
         where: { entityId },
         order: [['createdAt', 'DESC']],
         attributes:{
             exclude:['updatedAt']
         }
-    })).map(prj => prj.toJSON()) as Invite[];
+    })).map(prj => prj.toJSON()) as InviteRecord[];
 }
 
-export const createInvite = async (invite: Invite) => {
+export const createInviteRecord = async (invite: InviteRecord) => {
     return await InviteModel.create({
         id: invite.id,
         toUser: invite.toUser,
@@ -63,10 +63,10 @@ export const createInvite = async (invite: Invite) => {
         createdAt: invite.createdAt,
         entityId: invite.entityId,
         entityType: invite.entityType,
-        userRole: invite.role,
+        userRole: invite.userRole,
     });
 }
 
-export const deleteInvite = async (inviteId: InviteId) => {
+export const deleteInviteRecord = async (inviteId: InviteId) => {
     return await InviteModel.destroy({ where: { id: inviteId } });
 }
