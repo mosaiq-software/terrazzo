@@ -31,7 +31,7 @@ export const combineMembershipRecords = (records: MembershipRecord[]):Membership
     const map: {[id:string]:MembershipRecord} = {};
     for(const rec of records){
         const id = rec.entityId+" "+rec.userId;
-        if(!map[id] || map[id].role < rec.role){
+        if(!map[id] || map[id].userRole < rec.userRole){
             map[id] = rec;
         }
     }
