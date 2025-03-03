@@ -139,7 +139,7 @@ export interface MembershipRecord {
     userId: UserId;
     entityId: EntityId;
     entityType: EntityType;
-    role: Role;
+    userRole: Role;
 }
 
 export interface Member {
@@ -147,14 +147,23 @@ export interface Member {
     record: MembershipRecord;
 }
 
-export interface Invite {
+export interface InviteRecord {
     id: InviteId;
     toUser: UserId;
     fromUser: UserId;
     createdAt: number;
     entityId: EntityId;
     entityType: EntityType;
-    role: Role;
+    userRole: Role;
+}
+export interface Invite {
+    id: InviteId;
+    toUser: UserHeader;
+    fromUser: UserHeader;
+    createdAt: number;
+    entityId: EntityId;
+    entityType: EntityType;
+    userRole: Role;
 }
 
 export interface UserDashOrganization extends OrganizationHeader {
