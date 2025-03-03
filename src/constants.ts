@@ -1,5 +1,6 @@
 export enum LocalStorageKey {
     GITHUB_ACCESS_TOKEN = 'GITHUB_ACCESS_TOKEN',
+    SIDEBAR_COLLAPSED = 'SIDEBAR_COLLAPSED',
 }
 
 export enum Priority {
