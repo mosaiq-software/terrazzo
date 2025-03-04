@@ -23,9 +23,10 @@ import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils"
  * All cards are returned with all their labels, checklists, comments, and timesheet entries
  * Returns a promise of all cards in the list
  * @param listID
+ * @param archived
  */
-export async function getAllCardsOfList(listID: ListId) {
-    const cards = await getCardsByListIdShortUp(listID);
+export async function getAllCardsOfList(listID: ListId, archived: boolean) {
+    let cards = await getCardsByListIdShortUp(listID, archived);
 
     if(cards == null) {
         return [];
