@@ -26,7 +26,7 @@ import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils"
  * @param archived
  */
 export async function getAllCardsOfList(listID: ListId, archived: boolean) {
-    let cards = await getCardsByListIdShortUp(listID, archived);
+    const cards = await getCardsByListIdShortUp(listID, archived);
 
     if(cards == null) {
         return [];
