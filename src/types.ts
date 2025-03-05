@@ -76,7 +76,7 @@ export interface CardHeader {
     listId: ListId | null;
     cardNumber: number;
     name: string;
-    priority: Priority;
+    priority: Priority | null;
     storyPoints: number;
     sprintId: string;
     archived: boolean;
