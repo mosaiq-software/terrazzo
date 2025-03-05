@@ -17,17 +17,18 @@ import { arrayMove, updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/
  * Gets all lists of a board by board ID
  * Returns a promise of all lists with all their cards
  * @param boardID
+ * @param archived
  */
-export async function getAllListsOfBoard(boardID:BoardId) {
+export async function getAllListsOfBoard(boardID:BoardId, archived:boolean) {
 
-    const lists = await getListsByBoardIdOrder(boardID);
+    const lists = await getListsByBoardIdOrder(boardID, archived);
 
     if(lists == null) {
         return [];
     }
 
     for (const list of lists) {
-        list.cards = await getAllCardsOfList(list.id);
+        list.cards = await getAllCardsOfList(list.id, false); //we dont want archived cards when getting all lists, archived cards will be displayed elsewhere
     }
 
     try {
@@ -103,7 +104,7 @@ export async function moveList(listID: string, toPosition: number) {
         if(!boardId){
             throw new Error("No board found for list");
         }
-        const lists = await getListsByBoardIdOrder(boardId);
+        const lists = await getListsByBoardIdOrder(boardId, false); //assumes as of now that archived lists are not included
         if(!lists){
             throw new Error("No lists found on board");
         }

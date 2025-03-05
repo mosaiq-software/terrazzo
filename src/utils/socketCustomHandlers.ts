@@ -1,9 +1,22 @@
 import { Server, Socket } from 'socket.io';
-import { broadcastToMyRoom, getSocketData, setSocketData, joinRoom, leaveRoom, broadcastToMyselfAndMyRoom, broadcastToUser} from './socketUtils';
+import {
+    broadcastToMyRoom,
+    getSocketData,
+    setSocketData,
+    joinRoom,
+    leaveRoom,
+    broadcastToMyselfAndMyRoom, broadcastToUser,
+    broadcastToAnotherRoom
+} from './socketUtils';
 import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
 import {addBoard, getWholeBoard, updateBoardFromPartial} from "@trz-api/controllers/boardController";
 import {addList, moveList, updateListFromPartial} from "@trz-api/controllers/listController";
-import {addCard, moveCardToList, updateCardFromPartial} from "@trz-api/controllers/cardController";
+import {
+    addCard,
+    getBoardIDFromCardID,
+    moveCardToList,
+    updateCardFromPartial
+} from "@trz-api/controllers/cardController";
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
@@ -259,6 +272,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             await updateCardFromPartial(data.id, data);
             const payload:ServerSEPayload[ServerSE.UPDATE_CARD_FIELD] = data;
             broadcastToMyselfAndMyRoom(socket, ServerSE.UPDATE_CARD_FIELD, payload);
+            broadcastToAnotherRoom(socket, RoomType.MOUSE, await getBoardIDFromCardID(data.id), ServerSE.UPDATE_CARD_FIELD, payload);
         } catch (error: any) {
             console.error("Error updating card fields", error);
             reply(undefined, error.message);

@@ -7,13 +7,11 @@ import {
     updateCard,
     updateCardList,
     updateCardOrder,
-    updateName,
 } from "@trz-api/persistence/cardPersistence";
 import {getListById, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
 import {Card, CardId, ListId} from "@mosaiq/terrazzo-common/types";
 import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
-import { Priority } from "@mosaiq/terrazzo-common/constants";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
@@ -23,9 +21,10 @@ import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils"
  * All cards are returned with all their labels, checklists, comments, and timesheet entries
  * Returns a promise of all cards in the list
  * @param listID
+ * @param archived
  */
-export async function getAllCardsOfList(listID: ListId) {
-    const cards = await getCardsByListIdShortUp(listID);
+export async function getAllCardsOfList(listID: ListId, archived: boolean) {
+    const cards = await getCardsByListIdShortUp(listID, archived);
 
     if(cards == null) {
         return [];
@@ -68,7 +67,7 @@ export async function addCard(listID:ListId, cardName:string) {
         cardNumber:(board.totalCards + 1),
         name:cardName,
         descriptionTextBlockId: cardUid, // placeholder id
-        priority:Priority.LOWEST,
+        priority:null,
         storyPoints:0,
         sprintId:"",
         assignees:[],

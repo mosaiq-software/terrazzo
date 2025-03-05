@@ -29,9 +29,9 @@ export const getCardsByListId = async (listId: ListId) => {
     return (await CardModel.findAll({ where: { listId } })).map(card => card.toJSON()) as Card[];
 };
 
-export const getCardsByListIdShortUp = async (listId: ListId) => {
+export const getCardsByListIdShortUp = async (listId: ListId, archived:boolean) => {
     return (await CardModel.findAll({
-        where: { listId },
+        where: { listId, archived },
         order: [['order', 'ASC']],
         attributes:{
             exclude:['description', 'updatedAt']
