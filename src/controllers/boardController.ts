@@ -22,7 +22,7 @@ export async function getWholeBoard(boardID:BoardId) {
     try {
         const board: Board = {
             ...boardHeader,
-            lists: await getAllListsOfBoard(boardID),
+            lists: await getAllListsOfBoard(boardID, false), //we dont want archived lists when getting whole board
             labels:  await getLabelsByBoardId(boardID),
             sprints:  [],
         };
