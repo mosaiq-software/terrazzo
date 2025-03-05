@@ -13,7 +13,8 @@
         "prepublish-cleanup": "node ./scripts/pre-publish.mjs",
         "build:watch": "tsc -w",
         "lint": "eslint .",
-        "types": "tsc --noemit"
+        "types": "tsc --noemit",
+        "update": "git fetch origin develop && git merge origin/develop"
     },
     "publishConfig": {
         "registry": "https://registry.mosaiq.dev"
