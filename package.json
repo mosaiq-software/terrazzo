@@ -11,7 +11,8 @@
     "after-push": "node ./scripts/after-push.mjs",
     "before-push": "node ./scripts/before-push.mjs",
     "lint": "eslint .",
-    "types": "tsc --noemit"
+    "types": "tsc --noemit",
+    "update": "git fetch origin develop && git merge origin/develop"
   },
   "author": "",
   "license": "UNLICENCED",
