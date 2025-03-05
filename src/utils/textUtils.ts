@@ -1,4 +1,4 @@
-import {TextBlockEvent} from '../types';
+import {TextBlockEvent, UserHeader} from '../types';
 
 export const executeTextBlockEvent = (textBlock: string, event: TextBlockEvent, selectionStart?: number): {updated:string, selectionStart: number} => {
     let {start, end} = event;
@@ -40,4 +40,14 @@ export const isValidTextBlockEvents = (events:TextBlockEvent[]) => {
             }
     }
     return true;
+}
+
+export const fullName = (user: UserHeader | undefined | null) => {
+    if(!user){
+        return 'User';
+    }
+    if(!user.firstName && !user.lastName){
+        return user.username;
+    }
+    return `${user.firstName} ${user.lastName}`;
 }

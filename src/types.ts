@@ -161,17 +161,21 @@ export interface Invite {
     toUser: UserHeader;
     fromUser: UserHeader;
     createdAt: number;
-    entityId: EntityId;
+    entity: OrganizationHeader | ProjectHeader;
     entityType: EntityType;
     userRole: Role;
 }
 
 export interface UserDashOrganization extends OrganizationHeader {
     projects: ProjectHeader[];
+    members: Member[];
+}
+export interface UserDashProject extends ProjectHeader {
+    members: Member[];
 }
 export interface UserDash {
     organizations: UserDashOrganization[];
-    standaloneProjects: ProjectHeader[];
+    standaloneProjects: UserDashProject[];
     invites: Invite[];
 }
 
