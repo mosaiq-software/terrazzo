@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from './dbHelper';
-import { Invite, InviteId, InviteRecord, OrganizationId, ProjectId, UserId } from '@mosaiq/terrazzo-common/types';
+import { EntityId, Invite, InviteId, InviteRecord, OrganizationId, ProjectId, UserId } from '@mosaiq/terrazzo-common/types';
 
 class InviteModel extends Model {}
 InviteModel.init({
@@ -35,9 +35,9 @@ export const getInviteRecordsToUser = async (userId: UserId) => {
     })).map(prj => prj.toJSON()) as InviteRecord[];
 }
 
-export const getInviteRecordsFromUser = async (userId: UserId) => {
+export const getInviteRecordsToUserInEntity = async (userId: UserId, entityId: EntityId) => {
     return (await InviteModel.findAll({
-        where: { fromUser: userId },
+        where: { toUser: userId, entityId},
         order: [['createdAt', 'DESC']],
         attributes:{
             exclude:['updatedAt']

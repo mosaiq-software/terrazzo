@@ -17,15 +17,19 @@ MembershipModel.init({
 
 sequelize.sync();
 
-export const getMembershipById = async (id: UID) => {
+export const getMembershipById = async (id: MembershipRecordId) => {
     return (await MembershipModel.findByPk(id, {
         attributes:{
             exclude:['updatedAt']
-        }}))?.toJSON() as UID | undefined;
+        }}))?.toJSON() as MembershipRecord | null;
 }
 
 export const getMembershipRecordsForUser = async (userId:UserId, entityType: EntityType) => {
     return ((await MembershipModel.findAll({where: {userId, entityType}})).map(r=>r.toJSON())) as MembershipRecord[];
+}
+
+export const getMembershipRecordsForUserInEntity = async (userId:UserId, entityId: EntityId) => {
+    return ((await MembershipModel.findAll({where: {userId, entityId}})).map(r=>r.toJSON())) as MembershipRecord[];
 }
 
 export const createMembershipRecord = async (userId:UserId, entityId:EntityId, entityType: EntityType, userRole: Role) => {
@@ -38,10 +42,10 @@ export const createMembershipRecord = async (userId:UserId, entityId:EntityId, e
     });
 }
 
-export const updateMembershipRole = async (user:UserId, entity:EntityId, role: Role) => {
+export const updateMembershipRecord = async (record: MembershipRecord) => {
     return await MembershipModel.update({
-        userRole: role,
-    }, { where: { userId: user, entityId: entity } });
+        userRole: record.userRole,
+    }, { where: { id:record.id } });
 };
 
 export const deleteMembershipRecord = async (membershipRecordId: MembershipRecordId) => {

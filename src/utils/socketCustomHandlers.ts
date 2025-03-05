@@ -9,11 +9,8 @@ import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils'
 import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
 import { addOrganization, getFullOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { addProject, getFullProject, getProjectPreview, updateProjectFromPartial } from '@trz-api/controllers/projectController';
-import { getUserPreview, getUsersEntities } from '@trz-api/controllers/userController';
+import { getUserPreview, getUsersEntities, updateMembershipRecordFromPartial } from '@trz-api/controllers/userController';
 import { replyToInvite, sendInvite } from '@trz-api/controllers/inviteController';
-import { EntityType } from '@mosaiq/terrazzo-common/constants';
-import { getOrgById } from '@trz-api/persistence/organizationPersistence';
-import { getProjectById } from '@trz-api/persistence/projectPersistence';
 import { deleteMembershipRecord } from '@trz-api/persistence/membershipPersistence';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
@@ -264,6 +261,18 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             broadcastToMyselfAndMyRoom(socket, ServerSE.UPDATE_CARD_FIELD, payload);
         } catch (error: any) {
             console.error("Error updating card fields", error);
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD, async (data: ClientSEPayload[ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD], reply: ClientSEReply<ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD>) => {
+        try {
+            if (!data) {
+                throw new Error('No record id provided');
+            }
+            const record = await updateMembershipRecordFromPartial(data.id, data);
+        } catch (error: any) {
+            console.error("Error updating record fields", error);
             reply(undefined, error.message);
         }
     });

@@ -1,7 +1,6 @@
 import { EntityType } from "@mosaiq/terrazzo-common/constants";
-import { UserDash, UserHeader, UserId } from "@mosaiq/terrazzo-common/types";
-import { getInviteRecordsToUser } from "@trz-api/persistence/invitePersistence";
-import { getMembershipRecordsForUser } from "@trz-api/persistence/membershipPersistence";
+import { BoardId, List, MembershipRecord, MembershipRecordId, OrganizationId, ProjectId, UserDash, UserHeader, UserId } from "@mosaiq/terrazzo-common/types";
+import { getMembershipById, getMembershipRecordsForUser, updateMembershipRecord } from "@trz-api/persistence/membershipPersistence";
 import { getOrgById } from "@trz-api/persistence/organizationPersistence";
 import { getProjectById, getProjectsByOrgId } from "@trz-api/persistence/projectPersistence";
 import {
@@ -13,6 +12,12 @@ import {
 } from "@trz-api/persistence/userPersistence";
 import {getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId} from "@trz-api/utils/githubUtils";
 import { getInvitesToUser } from "./inviteController";
+import { addOrganization, getMembersInOrg, updateOrganizationFromPartial } from "./organizationController";
+import { addProject } from "./projectController";
+import { addBoard } from "./boardController";
+import { addList } from "./listController";
+import { addCard } from "./cardController";
+import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
 export async function getOrCreateUserByGithubAccessToken(accessToken: string) {
@@ -64,10 +69,11 @@ export async function createNewUser(username: string, firstName: string, lastNam
 
     try {
         await createUser(newUser);
-        return newUser;
     } catch (e) {
         throw new Error("Failed to create user" + e);
     }
+
+    return newUser;
 }
 
 //Updates
@@ -86,11 +92,29 @@ export async function setupUser(userId: UserId, username: string, firstName: str
 
     try {
         await updateUser(user);
-        return user;
 
     } catch (e) {
         throw new Error("Failed to update user" + e);
     }
+
+    // create a default personal org for the user to have projects in
+    try {
+        const personalOrgId:OrganizationId = await addOrganization(firstName+"'s Space", user.id, true);
+        await updateOrganizationFromPartial(personalOrgId, {logoUrl: user.profilePicture, description: "A place to keep your personal projects"});
+        const personalProjectId:ProjectId = await addProject("My First Project", personalOrgId);
+        const personalBoardId:BoardId = await addBoard("Task Tracking", "", personalProjectId);
+        const personalListTodo:List = await addList(personalBoardId, "To do");
+        const personalListDoing:List = await addList(personalBoardId, "Doing");
+        const personalListDone:List = await addList(personalBoardId, "Done");
+        await addCard(personalListTodo.id, "🔎 Explore Terrazzo!");
+        await addCard(personalListTodo.id, "📃 Add a card to a list");
+        await addCard(personalListTodo.id, "🧱 Start my own project");
+        await addCard(personalListTodo.id, "😀 Invite some friends");
+    } catch (e) {
+        throw new Error("Failed to create users personal organization "+e)
+    }
+
+    return user;
 }
 
 
@@ -99,15 +123,20 @@ export const getUsersEntities = async (userId: UserId): Promise<UserDash> => {
         const projectMemberships = await getMembershipRecordsForUser(userId, EntityType.PROJECT) ?? [];
         const orgMemberships = await getMembershipRecordsForUser(userId, EntityType.ORG) ?? [];
 
+
         const standaloneProjects = (await Promise.all(projectMemberships.map(async (p)=>{
-            return getProjectById(p.entityId);
+            const project = await getProjectById(p.entityId);
+            if(!project) return null;
+            const members = await getMembersInOrg(project.id);
+            return {...project, members};
         }))).filter(p=>!!p);
 
         const organizations = (await Promise.all(orgMemberships.map(async (o)=>{
             const org = await getOrgById(o.entityId);
             if(!org) return null;
             const projects = await getProjectsByOrgId(org.id);
-            return {...org, projects};
+            const members = await getMembersInOrg(org.id);
+            return {...org, projects, members};
         }))).filter(o=>!!o);
 
         const invites = await getInvitesToUser(userId);
@@ -120,14 +149,24 @@ export const getUsersEntities = async (userId: UserId): Promise<UserDash> => {
 }
 
 export const getUserPreview = async (userId: UserId) => {
+    const user = await getUserById(userId);
+    if(!user){
+        throw new Error("No user found");
+    }
+    return user;
+}
+
+export async function updateMembershipRecordFromPartial(recordId: MembershipRecordId, partial:Partial<MembershipRecord>) {
+    const updatingRecord = await getMembershipById(recordId);
+    if (updatingRecord == null) {
+        throw new Error("Membership record not found");
+    }
+
+    const updated = updateBaseFromPartial<MembershipRecord>(updatingRecord, partial);
     try {
-        const user = await getUserById(userId);
-        if(!user){
-            throw new Error("No user found");
-        }
-        return user;
-    } catch (e) {
-        console.error(e);
-        throw e;
+        await updateMembershipRecord(updated);
+        return updated;
+    } catch (e:any) {
+        throw new Error("Failed to update record "+e);
     }
 }

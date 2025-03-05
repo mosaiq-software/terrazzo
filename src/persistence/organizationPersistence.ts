@@ -12,7 +12,7 @@ OrgModel.init({
     archived: DataTypes.BOOLEAN,
     createdAt: DataTypes.INTEGER,
     logoUrl: DataTypes.STRING,
-    personal: DataTypes.BOOLEAN,
+    isPersonalOrg: DataTypes.BOOLEAN,
     description: DataTypes.TEXT,
 }, { sequelize, modelName: 'organizationModel' });
 
@@ -32,7 +32,7 @@ export const createOrg = async (org: OrganizationHeader) => {
         archived: false,
         createdAt: org.createdAt,
         logoUrl: org.logoUrl,
-        personal: org.isPersonalOrg,
+        isPersonalOrg: org.isPersonalOrg,
         description: org.description,
     });
 }

@@ -22,24 +22,19 @@ export async function getOrganizationPreview(orgId: OrganizationId) {
 }
 
 export async function getFullOrganization(orgId: OrganizationId) {
-    try {
-        const orgHeader = await getOrgById(orgId);
-        if(!orgHeader) {
-            throw new Error("No Org found with id "+orgId);
-        }
-
-        
-        const org: Organization = {
-            ...orgHeader,
-            projects: await getProjectsByOrgId(orgId) ?? [],
-            members: await getMembersInOrg(orgId) ?? [],
-            invites: await getInvitesForEntity(orgId) ?? [],
-        };
-        return org;
-    } catch (e) {
-        console.error(e);
-        throw e;
+    const orgHeader = await getOrgById(orgId);
+    if(!orgHeader) {
+        throw new Error("No Org found with id "+orgId);
     }
+
+    
+    const org: Organization = {
+        ...orgHeader,
+        projects: await getProjectsByOrgId(orgId) ?? [],
+        members: await getMembersInOrg(orgId) ?? [],
+        invites: await getInvitesForEntity(orgId) ?? [],
+    };
+    return org;
 }
 
 export async function addOrganization(name:string, creator:UserId, isPersonal:boolean) {
