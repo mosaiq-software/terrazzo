@@ -169,9 +169,11 @@ export interface Invite {
 export interface UserDashOrganization extends OrganizationHeader {
     projects: ProjectHeader[];
     members: Member[];
+    myMembershipRecord: MembershipRecord;
 }
 export interface UserDashProject extends ProjectHeader {
     members: Member[];
+    myMembershipRecord: MembershipRecord;
 }
 export interface UserDash {
     organizations: UserDashOrganization[];
