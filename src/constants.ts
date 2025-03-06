@@ -21,3 +21,14 @@ export enum EntityType {
     PROJECT = 0,
     ORG = 1,
 }
+
+export enum StoryPoints{
+    ZERO = 0,
+    XXS = 1,
+    XS = 2,
+    S = 3,
+    M = 5,
+    L = 8,
+    XL = 13,
+    XXL = 21,
+}
