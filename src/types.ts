@@ -40,7 +40,8 @@ export interface ProjectHeader {
     description: string;
 }
 export interface Project extends ProjectHeader{
-    members: Member[];
+    orgMembers: Member[];
+    externalMembers: Member[];
     boards: BoardHeader[];
     invites: Invite[];
 }

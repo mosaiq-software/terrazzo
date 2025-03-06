@@ -145,6 +145,8 @@ export enum ServerSE { // Server to Client
     ADD_CARD = "ADD_CARD",
     
     UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
+    UPDATE_ORG_FIELD = "UPDATE_ORG_FIELD",
+    UPDATE_PROJECT_FIELD = "UPDATE_PROJECT_FIELD",
     UPDATE_BOARD_FIELD = "UPDATE_BOARD_FIELD",
     UPDATE_LIST_FIELD = "UPDATE_LIST_FIELD",
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
@@ -167,6 +169,8 @@ export interface ServerSEPayload {
     [ServerSE.ADD_CARD]: Card;
     
     [ServerSE.UPDATE_TEXT_BLOCK]: {events: TextBlockEvent[], updated: string};
+    [ServerSE.UPDATE_ORG_FIELD]: (Partial<Organization> & {id: OrganizationId});
+    [ServerSE.UPDATE_PROJECT_FIELD]: (Partial<Project> & {id: ProjectId});
     [ServerSE.UPDATE_BOARD_FIELD]: (Partial<Board> & {id: BoardId});
     [ServerSE.UPDATE_LIST_FIELD]: (Partial<List> & {id: ListId});
     [ServerSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
@@ -189,6 +193,8 @@ export interface ServerSEReplies {
     [ServerSE.ADD_CARD]: void;
 
     [ServerSE.UPDATE_TEXT_BLOCK]: void;
+    [ServerSE.UPDATE_ORG_FIELD]: void;
+    [ServerSE.UPDATE_PROJECT_FIELD]: void;
     [ServerSE.UPDATE_BOARD_FIELD]: void;
     [ServerSE.UPDATE_LIST_FIELD]: void;
     [ServerSE.UPDATE_CARD_FIELD]: void;
@@ -210,9 +216,10 @@ export interface TextRoomUserData {
 export type Position = { x: number; y: number; }
 
 export enum RoomType {
-    MOUSE = "MOUSE",
-    TEXT = "TEXT",
-    USER = "USER",
+    MOUSE = "MOUSE",   // Show others mouse cursors / dragging
+    TEXT = "TEXT",     // For collaborative text area only
+    USER = "USER",     // For sending updates to a specific UserId's socket
+    DATA = "DATA",     // For updating arbitrary fields realtime
 }
 export type RoomId = `${RoomType}-${string}` | null;
 export type SocketId = string;
