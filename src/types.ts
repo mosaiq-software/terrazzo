@@ -14,6 +14,7 @@ export type CommentId = UID;
 export type InviteId = UID;
 export type MembershipRecordId = UID;
 export type EntityId = ProjectId | OrganizationId;
+export type AssignmentId = UID;
 
 export interface OrganizationHeader {
     id: OrganizationId;
@@ -69,7 +70,7 @@ export interface ListHeader {
     order: number;
 }
 export interface List extends ListHeader{
-    cards: CardHeader[];
+    cards: Card[];
 }
 
 export interface CardHeader {
@@ -187,4 +188,10 @@ export interface GithubUserProfile {
     login: string,
     avatar_url: URL,
     name: string,
+}
+
+export interface Assignment {
+    id: AssignmentId;
+    userId: UserId;
+    cardId: CardId;
 }
