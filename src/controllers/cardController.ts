@@ -10,9 +10,10 @@ import {
 } from "@trz-api/persistence/cardPersistence";
 import {getListById, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
-import {Card, CardId, ListId} from "@mosaiq/terrazzo-common/types";
+import {Card, CardHeader, CardId, ListId} from "@mosaiq/terrazzo-common/types";
 import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
+import { getAssignmentsForCard } from "@trz-api/persistence/assignmentPersistence";
 
 //Gets
 
@@ -24,11 +25,13 @@ import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils"
  * @param archived
  */
 export async function getAllCardsOfList(listID: ListId, archived: boolean) {
-    const cards = await getCardsByListIdShortUp(listID, archived);
+    const cardHeaders = await getCardsByListIdShortUp(listID, archived);
 
-    if(cards == null) {
+    if(cardHeaders == null) {
         return [];
     }
+
+    const cards = await populateCards(cardHeaders);
 
     try {
         return cards;
@@ -96,13 +99,13 @@ export async function addCard(listID:ListId, cardName:string) {
     }
 }
 
-export async function updateCardFromPartial(cardId: CardId, partial:Partial<Card>) {
+export async function updateCardFromPartial(cardId: CardId, partial:Partial<CardHeader>) {
     const updatingCard = await getCardById(cardId);
     if (updatingCard == null) {
         throw new Error("Card not found");
     }
 
-    const updated = updateBaseFromPartial<Card>(updatingCard, partial);
+    const updated = updateBaseFromPartial<CardHeader>(updatingCard, partial);
     try {
         await updateCard(updated);
     } catch (e:any) {
@@ -150,7 +153,7 @@ export async function moveCardToList(cardId: CardId, toListId:ListId, position?:
             position = nextOrder;
          }
 
-         let card: Card | null = await removeCardFromList(cardId);
+         let card: CardHeader | null = await removeCardFromList(cardId);
          if(!card) {
             card = await getCardById(cardId);
             if(!card) {
@@ -168,7 +171,7 @@ export async function moveCardToList(cardId: CardId, toListId:ListId, position?:
     Remove a card from its list and shift the remaining cards in the list down by 1 to preserve order
     @returns the removed card
 */
-export const removeCardFromList = async (cardId:CardId): Promise<Card> => {
+export const removeCardFromList = async (cardId:CardId): Promise<CardHeader> => {
     try {
         const remCard = await getCardById(cardId);
         if(!remCard){
@@ -187,7 +190,7 @@ export const removeCardFromList = async (cardId:CardId): Promise<Card> => {
         }
 
         cards.splice(remCardIndex, 1);
-        const promises = [updateCardOrder(remCard.id, -1), updateCardList(remCard.id, '')];
+        const promises = [updateCardOrder(remCard.id, -1), updateCardList(remCard.id, null)];
         for(let i = 0; i < cards.length; i++) {
             cards[i].order = i;
             promises.push(updateCardOrder(cards[i].id, i));
@@ -228,4 +231,16 @@ export const addCardToList = async (cardId:CardId, toList: ListId, atPosition:nu
         console.log(`Error adding card: ${error}`);
         throw error;
     }
+}
+
+export const populateCards = async (cardHeaders:CardHeader[]): Promise<Card[]> => {
+    return await Promise.all(cardHeaders.map(async (c:CardHeader)=>{
+        const cc:Card = {
+            ...c,
+            assignees: await getAssignmentsForCard(c.id),
+            labels: [],
+            comments: [],
+        };
+        return cc;
+    }));
 }
