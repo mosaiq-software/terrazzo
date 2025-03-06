@@ -1,4 +1,4 @@
-import { EntityType, Priority, Role } from "./constants";
+import {EntityType, Priority, Role, StoryPoints} from "./constants";
 
 export type URL = string;
 export type UID = `${string}-${string}-${string}-${string}-${string}`;
@@ -78,7 +78,7 @@ export interface CardHeader {
     cardNumber: number;
     name: string;
     priority: Priority | null;
-    storyPoints: number;
+    storyPoints: StoryPoints | null;
     sprintId: string;
     archived: boolean;
     order: number;
