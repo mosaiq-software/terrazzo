@@ -69,7 +69,14 @@ export const broadcastToUser = (socket: Socket, toUserId:UserId, event: ServerSE
     broadcastToAnotherRoom(socket, RoomType.USER, toUserId, event, payload);
 }
 export const broadcastToMyselfAndMyRoom = (socket: Socket, event: ServerSE, payload: ServerSEPayload[keyof ServerSEPayload]) => {
+    socket.emit(event, payload);
     const room = getSocketRoom(socket);
+    if (room) {
+        socket.broadcast.to(room).emit(event, payload);
+    }
+}
+export const broadcastToMyselfAndAnotherRoom = (socket: Socket, roomType: RoomType, uid: UID, event: ServerSE, payload: ServerSEPayload[keyof ServerSEPayload]) => {
+    const room = getRoomCode(roomType, uid);
     if (room) {
         socket.emit(event, payload);
         socket.broadcast.to(room).emit(event, payload);

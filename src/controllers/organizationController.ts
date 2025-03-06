@@ -1,12 +1,12 @@
 import { EntityType, Role } from "@mosaiq/terrazzo-common/constants";
-import { Member, Organization, OrganizationHeader, OrganizationId, UserId } from "@mosaiq/terrazzo-common/types";
+import { Organization, OrganizationHeader, OrganizationId, UserId } from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
-import { getAllInviteRecordsForEntity } from "@trz-api/persistence/invitePersistence";
 import { createMembershipRecord, getMembershipRecordForEntity } from "@trz-api/persistence/membershipPersistence";
 import { createOrg, getOrgById, updateOrg } from "@trz-api/persistence/organizationPersistence";
 import { getProjectsByOrgId } from "@trz-api/persistence/projectPersistence";
 import { getUserById } from "@trz-api/persistence/userPersistence";
 import { getInvitesForEntity } from "./inviteController";
+import { populateMemberships } from "./userController";
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
@@ -87,11 +87,6 @@ export const getMembersInOrg = async (orgId: OrganizationId) => {
         throw new Error("Org not found");
     }
     const records = await getMembershipRecordForEntity(orgId);
-    const members = (await Promise.all(records.map(async (r)=>{
-        return {
-            record: r,
-            user: await getUserById(r.userId),
-        }
-    }))).filter(m=>!!m.user) as Member[];
+    const members = populateMemberships(records);
     return members;
 }

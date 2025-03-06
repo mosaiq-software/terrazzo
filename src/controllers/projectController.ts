@@ -1,11 +1,11 @@
-import { Member, MembershipRecord, OrganizationId, Project, ProjectHeader, ProjectId,} from "@mosaiq/terrazzo-common/types";
+import { OrganizationId, Project, ProjectHeader, ProjectId,} from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 import { getBoardsByProjectId } from "@trz-api/persistence/boardPersistence";
-import { getAllInviteRecordsForEntity } from "@trz-api/persistence/invitePersistence";
 import { getMembershipRecordForEntity } from "@trz-api/persistence/membershipPersistence";
 import { createProject, getProjectById, updateProject } from "@trz-api/persistence/projectPersistence";
-import { getUserById } from "@trz-api/persistence/userPersistence";
 import { getInvitesForEntity } from "./inviteController";
+import { populateMemberships } from "./userController";
+import { getMembersInOrg } from "./organizationController";
 
 export async function getProjectPreview(projectId: ProjectId) {
     try {
@@ -30,7 +30,8 @@ export async function getFullProject(projectId: ProjectId) {
         const project:Project = {
             ...projectHeader,
             boards :await getBoardsByProjectId(projectId) ?? [],
-            members : await getMembersInProject(projectId) ?? [],
+            externalMembers : await getMembersInProject(projectId) ?? [],
+            orgMembers : await getMembersInOrg(projectHeader.orgId) ?? [],
             invites: await getInvitesForEntity(projectId) ?? [],
         };
         
@@ -84,11 +85,7 @@ export const getMembersInProject = async (projectId: ProjectId) => {
         throw new Error("Project not found");
     }
     const records = await getMembershipRecordForEntity(projectId);
-    const members = (await Promise.all(records.map(async (r)=>{
-        return {
-            record: r,
-            user: await getUserById(r.userId),
-        }
-    }))).filter(m=>!!m.user) as Member[];
+    const members = populateMemberships(records);
+
     return members;
 }

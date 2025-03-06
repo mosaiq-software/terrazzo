@@ -42,25 +42,31 @@ export const sendInvite = async (toUsername: string, fromUserId: UserId, entityI
     return invite;
 }
 
-export const replyToInvite = async (inviteId:InviteId, accept:boolean) => {
+export const replyToInvite = async (inviteId:InviteId, accept:boolean): Promise<InviteRecord | undefined> => {
     if(accept){
-        await acceptInvite(inviteId);
+        return await acceptInvite(inviteId);
     } else {
-        await declineInvite(inviteId);
+        return await declineInvite(inviteId);
     }
 }
 
-const acceptInvite = async (inviteId: InviteId) => {
+const acceptInvite = async (inviteId: InviteId): Promise<InviteRecord | undefined> => {
     const invite = await getInviteRecordById(inviteId);
     if(!invite){
         throw new Error("Invite not found");
     }
     await createMembershipRecord(invite.toUser, invite.entityId, invite.entityType, invite.userRole);
     await deleteInviteRecord(inviteId);
+    return invite;
 }
 
-const declineInvite = async (inviteId: InviteId) => {
+const declineInvite = async (inviteId: InviteId): Promise<InviteRecord | undefined> => {
+    const invite = await getInviteRecordById(inviteId);
+    if(!invite){
+        throw new Error("Invite not found");
+    }
     await deleteInviteRecord(inviteId);
+    return invite;
 }
 
 export const getInvitesForEntity = async (entityId: EntityId): Promise<Invite[]> => {

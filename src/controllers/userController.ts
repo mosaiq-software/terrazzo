@@ -1,6 +1,6 @@
 import { EntityType } from "@mosaiq/terrazzo-common/constants";
-import { BoardId, List, MembershipRecord, MembershipRecordId, OrganizationId, ProjectId, UserDash, UserHeader, UserId } from "@mosaiq/terrazzo-common/types";
-import { getMembershipById, getMembershipRecordsForUser, updateMembershipRecord } from "@trz-api/persistence/membershipPersistence";
+import { BoardId, List, Member, MembershipRecord, MembershipRecordId, OrganizationId, ProjectId, UserDash, UserHeader, UserId } from "@mosaiq/terrazzo-common/types";
+import { deleteMembershipRecord, getMembershipById, getMembershipRecordsForUser, updateMembershipRecord } from "@trz-api/persistence/membershipPersistence";
 import { getOrgById } from "@trz-api/persistence/organizationPersistence";
 import { getProjectById, getProjectsByOrgId } from "@trz-api/persistence/projectPersistence";
 import {
@@ -127,8 +127,8 @@ export const getUsersEntities = async (userId: UserId): Promise<UserDash> => {
         const standaloneProjects = (await Promise.all(projectMemberships.map(async (p)=>{
             const project = await getProjectById(p.entityId);
             if(!project) return null;
-            const members = await getMembersInOrg(project.id);
-            return {...project, members};
+            const members = await getMembersInOrg(project.orgId);
+            return {...project, members, myMembershipRecord: p};
         }))).filter(p=>!!p);
 
         const organizations = (await Promise.all(orgMemberships.map(async (o)=>{
@@ -136,7 +136,7 @@ export const getUsersEntities = async (userId: UserId): Promise<UserDash> => {
             if(!org) return null;
             const projects = await getProjectsByOrgId(org.id);
             const members = await getMembersInOrg(org.id);
-            return {...org, projects, members};
+            return {...org, projects, members, myMembershipRecord: o};
         }))).filter(o=>!!o);
 
         const invites = await getInvitesToUser(userId);
@@ -169,4 +169,31 @@ export async function updateMembershipRecordFromPartial(recordId: MembershipReco
     } catch (e:any) {
         throw new Error("Failed to update record "+e);
     }
+}
+
+export const removeMembership = async (membershipRecordId: MembershipRecordId): Promise<Member | undefined> => {
+    const record = await getMembershipById(membershipRecordId);
+    if(!record){
+        throw new Error("Record not found");
+    }
+
+    const members = (await populateMemberships([record]));
+    if(!members || members.length === 0){
+        throw new Error("Couldnt populate records");
+    }
+
+    const member = members[0]
+    
+    await deleteMembershipRecord(membershipRecordId);
+    return member;
+}
+
+export const populateMemberships = async (records: MembershipRecord[]) => {
+    const members = (await Promise.all(records.map(async (r)=>{
+        return {
+            record: r,
+            user: await getUserById(r.userId),
+        }
+    }))).filter(m=>!!m.user) as Member[];
+    return members;
 }
