@@ -16,7 +16,7 @@
   "author": "",
   "license": "UNLICENCED",
   "dependencies": {
-    "@mosaiq/terrazzo-common": "1.5.2",
+    "@mosaiq/terrazzo-common": "1.5.3",
     "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
