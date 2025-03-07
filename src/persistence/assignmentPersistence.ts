@@ -26,6 +26,10 @@ export const getAssignmentsForCard = async (cardId: CardId): Promise<UserId[]> =
     return (await AssignmentModel.findAll({ where: { cardId } })).map(asn => (asn.toJSON() as Assignment).userId);
 }
 
+export const getAssignmentRecordsForUserOnCard = async (userId:UserId, cardId: CardId): Promise<Assignment[]> => {
+    return (await AssignmentModel.findAll({ where: { cardId, userId } })).map(asn => (asn.toJSON() as Assignment));
+}
+
 
 export const createAssignmentRecord = async (userId: UserId, cardId:CardId) => {
     return await AssignmentModel.create({

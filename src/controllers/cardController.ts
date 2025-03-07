@@ -15,6 +15,7 @@ import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 import { getAssignmentsForCard } from "@trz-api/persistence/assignmentPersistence";
 
+export const MOVING_LIST_ORDER = -10000;
 //Gets
 
 /**
@@ -175,28 +176,28 @@ export const removeCardFromList = async (cardId:CardId): Promise<CardHeader> => 
     try {
         const remCard = await getCardById(cardId);
         if(!remCard){
-            throw new Error("Card not found");
+            throw new Error(`Card ${cardId} not found`);
         }
         if(!remCard.listId){
-            throw new Error("Card is not assigned to any list");
+            throw new Error(`Card ${cardId} is not assigned to any list`);
         }
         const cards = await getCardsByListIdUp(remCard.listId);
-        if (!cards || cards.length === 0) {
-            throw new Error("List not found");
+        if (!cards) {
+            throw new Error(`List ${remCard.listId} not found`);
         }
         const remCardIndex = cards.findIndex(c=>c.id === cardId);
         if(remCardIndex === -1){
-            throw new Error("Card not found in list");
+            throw new Error(`Card ${cardId} not found in list ${remCard.listId}`);
         }
 
         cards.splice(remCardIndex, 1);
-        const promises = [updateCardOrder(remCard.id, -1), updateCardList(remCard.id, null)];
+        const promises = [updateCardOrder(remCard.id, MOVING_LIST_ORDER)];
         for(let i = 0; i < cards.length; i++) {
             cards[i].order = i;
             promises.push(updateCardOrder(cards[i].id, i));
         }
         await Promise.all(promises);
-        return {...remCard, listId: null, order: -1};
+        return {...remCard, order: MOVING_LIST_ORDER};
     } catch (error: any) {
         console.log(`Error removing card: ${error}`);
         throw error;
@@ -210,14 +211,14 @@ export const addCardToList = async (cardId:CardId, toList: ListId, atPosition:nu
     try {
         const addCard = await getCardById(cardId);
         if(!addCard){
-            throw new Error("Card not found");
+            throw new Error(`Card ${cardId} not found`);
         }
-        if(addCard.listId){
-            throw new Error("Card is already in a list");
-        }
+        // if(addCard.order !== MOVING_LIST_ORDER){
+        //     throw new Error(`Card ${cardId} is already in a list`);
+        // }
         const cards = await getCardsByListIdUp(toList);
         if (!cards) {
-            throw new Error("List not found");
+            throw new Error(`List ${toList} not found`);
         }
         atPosition = Math.max(0, Math.min(atPosition, cards.length));
         cards.splice(atPosition, 0 , addCard);

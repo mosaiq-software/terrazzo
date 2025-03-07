@@ -28,6 +28,7 @@ import { getInvitesForEntity, replyToInvite, sendInvite } from '@trz-api/control
 import { deleteMembershipRecord } from '@trz-api/persistence/membershipPersistence';
 import { EntityType } from '@mosaiq/terrazzo-common/constants';
 import { getProjectById } from '@trz-api/persistence/projectPersistence';
+import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/assignmentController';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SET_ROOM, async (room: ClientSEPayload[ClientSE.SET_ROOM], reply: ClientSEReply<ClientSE.SET_ROOM>) => {
@@ -453,6 +454,23 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             } else {
                 throw new Error("Invalid entity type "+member.record.entityType);
             }
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.UPDATE_CARD_ASSIGNEE, async (data: ClientSEPayload[ClientSE.UPDATE_CARD_ASSIGNEE], reply: ClientSEReply<ClientSE.UPDATE_CARD_ASSIGNEE>) => {
+        try {
+            if(data.assigned){
+                await addAssigneeToCard(data.cardId, data.userId);
+            } else {
+                await removeAssigneeFromCard(data.cardId, data.userId);
+            }
+
+            const boardId = await getBoardIDFromCardID(data.cardId);
+
+            const payload: ServerSEPayload[ServerSE.UPDATE_CARD_ASSIGNEE] = data;
+            broadcastToMyselfAndAnotherRoom(socket, RoomType.MOUSE, boardId, ServerSE.UPDATE_CARD_ASSIGNEE, payload);
         } catch (error: any) {
             reply(undefined, error.message);
         }

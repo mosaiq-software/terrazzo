@@ -87,7 +87,7 @@ export const getNextCardOrder = async (listId: ListId) => {
     return cards?.length ?? 0;
 }
 
-export const updateCardList = async (cardId:CardId, listId:ListId|null) => {
+export const updateCardList = async (cardId:CardId, listId:ListId) => {
     return await CardModel.update({listId}, {where: { id: cardId}});
 }
 
