@@ -75,7 +75,7 @@ export interface List extends ListHeader{
 
 export interface CardHeader {
     id: CardId;
-    listId: ListId | null;
+    listId: ListId;
     cardNumber: number;
     name: string;
     priority: Priority | null;
