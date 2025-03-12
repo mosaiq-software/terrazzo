@@ -376,7 +376,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             }
             const text = await handleTextBlockEvents(data);
             const payload:ServerSEPayload[ServerSE.UPDATE_TEXT_BLOCK] = {events: data, updated: text??''};
-            broadcastToMyRooms(socket, ServerSE.UPDATE_TEXT_BLOCK, payload, [RoomType.TEXT]);
+            broadcastToMyRooms(socket, ServerSE.UPDATE_TEXT_BLOCK, payload, [RoomType.TEXT], false);
             reply(text);
         } catch (error: any) {
             console.log("Error updating text block",data,error);
@@ -390,7 +390,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             socketData.user.textRoomData = {caret: data};
             setSocketData(socket, socketData);
             const payload: ServerSEPayload[ServerSE.TEXT_CARET] = { sid: socket.id, caret: data };
-            broadcastToMyRooms(socket, ServerSE.TEXT_CARET, payload, [RoomType.TEXT]);
+            broadcastToMyRooms(socket, ServerSE.TEXT_CARET, payload, [RoomType.TEXT], false);
         } catch (error: any) {
             reply(undefined, error.message);
         }
