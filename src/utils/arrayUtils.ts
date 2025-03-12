@@ -2,8 +2,12 @@ import { MembershipRecord } from "../types";
 
 export function arrayMove<T>(array:T[], from:number, to:number): T[] {
     const newArray = array.slice();
-    newArray.splice(to < 0 ? newArray.length + to : to, 0, newArray.splice(from, 1)[0]);
+    arrayMoveInPlace(newArray, from, to);
     return newArray;
+}
+
+export function arrayMoveInPlace(array:any[], from:number, to:number):void {
+    array.splice(to < 0 ? array.length + to : to, 0, array.splice(from, 1)[0]);
 }
 
 export function updateBaseFromPartial<T>(base:T, partial: Partial<T>): T {

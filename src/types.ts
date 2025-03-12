@@ -61,6 +61,9 @@ export interface Board extends BoardHeader{
     sprints: Sprint[];
     labels: Label[];
 }
+export interface BoardRes extends BoardHeader {
+    lists: {listId:ListId, cardIds:CardId[]}[];
+}
 
 export interface ListHeader {
     id: ListId;
@@ -195,3 +198,5 @@ export interface Assignment {
     userId: UserId;
     cardId: CardId;
 }
+
+export type NonEmptyArray<T> = [T, ...T[]];

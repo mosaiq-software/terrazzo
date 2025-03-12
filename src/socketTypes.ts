@@ -1,5 +1,5 @@
 import { EntityType, Role } from "./constants";
-import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockEvent, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment} from "./types";
+import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockEvent, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment, BoardRes, ListHeader} from "./types";
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -18,7 +18,8 @@ export enum ServerSocketIOEvent {
 
 // CLIENT SOCKET EVENTS
 export enum ClientSE { // Client to Server
-    SET_ROOM = "SET_ROOM",
+    JOIN_ROOM = "JOIN_ROOM",
+    LEAVE_ROOM = "LEAVE_ROOM",
     MOUSE_MOVE = "MOUSE_MOVE",
     USER_IDLE = "USER_IDLE",
     TEXT_CARET = "TEXT_CARET",
@@ -29,6 +30,8 @@ export enum ClientSE { // Client to Server
     GET_ORGANIZATION = "GET_ORGANIZATION",
     GET_PROJECT = "GET_PROJECT",
     GET_BOARD = "GET_BOARD",
+    GET_LIST = "GET_LIST",
+    GET_CARD = "GET_CARD",
     GET_TEXT_BLOCK = "GET_TEXT_BLOCK",
 
     PREVIEW_ORGANIZATION = "PREVIEW_ORGANIZATION",
@@ -58,7 +61,8 @@ export enum ClientSE { // Client to Server
 }
 export interface ClientSEPayload {
     // Client to Server
-    [ClientSE.SET_ROOM]: RoomId;
+    [ClientSE.JOIN_ROOM]: RoomId;
+    [ClientSE.LEAVE_ROOM]: RoomId;
     [ClientSE.MOUSE_MOVE]: MouseRoomUserData;
     [ClientSE.USER_IDLE]: boolean;
     [ClientSE.TEXT_CARET]: Position | undefined;
@@ -69,6 +73,8 @@ export interface ClientSEPayload {
     [ClientSE.GET_ORGANIZATION]: OrganizationId;
     [ClientSE.GET_PROJECT]: ProjectId;
     [ClientSE.GET_BOARD]: BoardId;
+    [ClientSE.GET_LIST]: ListId;
+    [ClientSE.GET_CARD]: CardId;
     [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationId;
@@ -97,7 +103,8 @@ export interface ClientSEPayload {
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
-    [ClientSE.SET_ROOM]: { users: UserData[] };
+    [ClientSE.JOIN_ROOM]: UserData[];
+    [ClientSE.LEAVE_ROOM]: undefined;
     [ClientSE.MOUSE_MOVE]: undefined;
     [ClientSE.USER_IDLE]: undefined;
     [ClientSE.TEXT_CARET]: undefined;
@@ -107,7 +114,9 @@ export interface ClientSEReplies {
     [ClientSE.GET_USER_DASH]: UserDash | undefined;
     [ClientSE.GET_ORGANIZATION]: Organization | undefined;
     [ClientSE.GET_PROJECT] : Project | undefined;
-    [ClientSE.GET_BOARD]: Board | undefined;
+    [ClientSE.GET_BOARD]: BoardRes | undefined;
+    [ClientSE.GET_LIST]: ListHeader | undefined;
+    [ClientSE.GET_CARD]: Card | undefined;
     [ClientSE.GET_TEXT_BLOCK]: TextBlock | undefined;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationHeader | undefined;
@@ -226,12 +235,13 @@ export interface TextRoomUserData {
 export type Position = { x: number; y: number; }
 
 export enum RoomType {
+    INVALID_DO_NOT_USE = "INVALID", // Capture case. Do not use!
     MOUSE = "MOUSE",   // Show others mouse cursors / dragging
     TEXT = "TEXT",     // For collaborative text area only
     USER = "USER",     // For sending updates to a specific UserId's socket
     DATA = "DATA",     // For updating arbitrary fields realtime
 }
-export type RoomId = `${RoomType}-${string}` | null;
+export type RoomId = `${RoomType}@${string}` | null;
 export type SocketId = string;
 
 export type CreateOrgType = {name: string, creator:UserId};
@@ -242,12 +252,8 @@ export type CreateCardType = {listID: ListId; cardName: string};
 
 export interface UserData {
     sid: SocketId;
-    userId: UserId;
-    githubId: string;
-    username: string;
-    avatarUrl: string;
-    fullName: string;
     idle: boolean;
+    user: UserHeader;
     mouseRoomData?: MouseRoomUserData;
     textRoomData?: TextRoomUserData;
 }
