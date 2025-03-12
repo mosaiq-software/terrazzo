@@ -7,8 +7,8 @@ import {
     updateListOrder
 } from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
-import {BoardId, List, ListHeader, ListId} from "@mosaiq/terrazzo-common/types";
-import {getAllCardsOfList} from "@trz-api/controllers/cardController";
+import {BoardId, CardId, List, ListHeader, ListId} from "@mosaiq/terrazzo-common/types";
+import {getAllCardsOfList, getCardIdsOnList} from "@trz-api/controllers/cardController";
 import { arrayMove, updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
@@ -21,11 +21,13 @@ import { arrayMove, updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/
  */
 export async function getAllListsOfBoard(boardID:BoardId, archived:boolean) {
 
-    const listHeaders = await getListsByBoardIdOrder(boardID, archived);
+    let listHeaders = await getListsByBoardIdOrder(boardID, archived);
 
     if(listHeaders == null) {
         return [];
     }
+
+    listHeaders = listHeaders.filter(l=>!l.archived);
 
     const lists:List[] = await Promise.all(listHeaders.map(async (l)=>{
         return {
@@ -40,6 +42,30 @@ export async function getAllListsOfBoard(boardID:BoardId, archived:boolean) {
         throw new Error("Failed to retrieve board" + e);
     }
 
+}
+
+export async function getListAndCardIdsOnBoard(boardID:BoardId, archived:boolean): Promise<{listId:ListId, cardIds:CardId[]}[]> {
+    const listHeaders = await getListsByBoardIdOrder(boardID, archived);
+    if(listHeaders == null) {
+        return [];
+    }
+    const res: {listId:ListId, cardIds:CardId[]}[] = [];
+    for(const li of listHeaders){
+        const r = {
+            listId: li.id,
+            cardIds: await getCardIdsOnList(li.id, false),
+        }
+        res.push(r);
+    }
+    return res;
+}
+
+export async function getListRes (listId: ListId): Promise<ListHeader | undefined> {
+    const listHeader = await getListById(listId);
+    if(listHeader == null) {
+        throw new Error("List not found");
+    }
+    return listHeader;
 }
 
 //Creates

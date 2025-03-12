@@ -43,21 +43,17 @@ const initSockets = () => {
                 githubAccessToken: auth.githubToken,
                 user: {
                     sid: socket.id,
-                    userId: userData.id,
-                    githubId: userData.githubUserId,
-                    username: githubData.login,
-                    avatarUrl: githubData.avatar_url,
-                    fullName: githubData.name,
                     idle: false,
+                    user: userData,
                 }
             };
             setSocketData(socket, socketData)
             loginSocket(socket, userData.id);
         } catch (error) {
+            console.warn("Error connecting "+socket.id, error);
             socket.disconnect(true);
             return;
         }
-
 
         socket.emit(ServerSE.READY);
 
