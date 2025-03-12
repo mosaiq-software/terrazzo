@@ -60,7 +60,7 @@ export async function createNewUser(username: string, firstName: string, lastNam
 
     const newUser:UserHeader = {
         id: crypto.randomUUID(),
-        username: username || ghProfile?.login || "",
+        username: username || "",
         firstName: firstName,
         lastName: lastName,
         profilePicture: profilePicture || ghProfile?.avatar_url || "",
