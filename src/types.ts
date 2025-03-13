@@ -11,6 +11,10 @@ export type UserId = UID;
 export type TextBlockId = UID;
 export type LabelId = UID;
 export type CommentId = UID;
+export type InviteId = UID;
+export type MembershipRecordId = UID;
+export type EntityId = ProjectId | OrganizationId;
+export type AssignmentId = UID;
 
 export interface OrganizationHeader {
     id: OrganizationId;
@@ -19,9 +23,12 @@ export interface OrganizationHeader {
     createdAt: number;
     logoUrl: URL;
     isPersonalOrg: boolean;
+    description: string;
 }
 export interface Organization extends OrganizationHeader{
+    members: Member[];
     projects: ProjectHeader[];
+    invites: Invite[];
 }
 
 export interface ProjectHeader {
@@ -31,9 +38,13 @@ export interface ProjectHeader {
     archived: boolean;
     createdAt: number;
     logoUrl: URL;
+    description: string;
 }
 export interface Project extends ProjectHeader{
+    orgMembers: Member[];
+    externalMembers: Member[];
     boards: BoardHeader[];
+    invites: Invite[];
 }
 
 export interface BoardHeader {
@@ -50,19 +61,24 @@ export interface Board extends BoardHeader{
     sprints: Sprint[];
     labels: Label[];
 }
+export interface BoardRes extends BoardHeader {
+    lists: {listId:ListId, cardIds:CardId[]}[];
+}
 
-export interface List {
+export interface ListHeader {
     id: ListId;
     boardId: BoardId;
     name: string;
     archived: boolean;
     order: number;
-    cards: CardHeader[];
+}
+export interface List extends ListHeader{
+    cards: Card[];
 }
 
 export interface CardHeader {
     id: CardId;
-    listId: ListId | null;
+    listId: ListId;
     cardNumber: number;
     name: string;
     priority: Priority | null;
@@ -70,12 +86,12 @@ export interface CardHeader {
     sprintId: string;
     archived: boolean;
     order: number;
-    labels: Label[];
-    assignees: User[];
+    descriptionTextBlockId: TextBlockId;
 }
 export interface Card extends CardHeader{
-    descriptionTextBlockId: TextBlockId;
-    comments: Comment[];
+    comments: CommentId[];
+    labels: LabelId[];
+    assignees: UserId[];
 }
 
 export interface Sprint {
@@ -102,7 +118,7 @@ export interface Comment {
     id: CommentId;
     content: string;
     postedAt: Date;
-    postedBy: User;
+    postedBy: UserId;
     archived: boolean;
 }
 
@@ -124,9 +140,63 @@ export interface TextBlockEvent {
 }
 
 export interface MembershipRecord {
-    id: UID;
+    id: MembershipRecordId;
     userId: UserId;
-    entityId: ProjectId|OrganizationId;
+    entityId: EntityId;
     entityType: EntityType;
-    role: Role;
+    userRole: Role;
 }
+
+export interface Member {
+    user: UserHeader;
+    record: MembershipRecord;
+}
+
+export interface InviteRecord {
+    id: InviteId;
+    toUser: UserId;
+    fromUser: UserId;
+    createdAt: number;
+    entityId: EntityId;
+    entityType: EntityType;
+    userRole: Role;
+}
+export interface Invite {
+    id: InviteId;
+    toUser: UserHeader;
+    fromUser: UserHeader;
+    createdAt: number;
+    entity: OrganizationHeader | ProjectHeader;
+    entityType: EntityType;
+    userRole: Role;
+}
+
+export interface UserDashOrganization extends OrganizationHeader {
+    projects: ProjectHeader[];
+    members: Member[];
+    myMembershipRecord: MembershipRecord;
+}
+export interface UserDashProject extends ProjectHeader {
+    members: Member[];
+    myMembershipRecord: MembershipRecord;
+}
+export interface UserDash {
+    organizations: UserDashOrganization[];
+    standaloneProjects: UserDashProject[];
+    invites: Invite[];
+}
+
+export interface GithubUserProfile {
+    id: string,
+    login: string,
+    avatar_url: URL,
+    name: string,
+}
+
+export interface Assignment {
+    id: AssignmentId;
+    userId: UserId;
+    cardId: CardId;
+}
+
+export type NonEmptyArray<T> = [T, ...T[]];

@@ -1,4 +1,5 @@
-import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockEvent, TextBlockId, UserId, User} from "./types";
+import { EntityType, Role } from "./constants";
+import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockEvent, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment, BoardRes, ListHeader} from "./types";
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -10,24 +11,32 @@ export enum ClientSocketIOEvent {
 }
 export enum ServerSocketIOEvent {
     CONNECTION = 'connection',
+    CONNECTION_ERROR = 'connection_error',
     DISCONNECT = 'disconnect',
     DISCONNECTING = 'disconnecting',
 }
 
 // CLIENT SOCKET EVENTS
 export enum ClientSE { // Client to Server
-    SET_ROOM = "SET_ROOM",
+    JOIN_ROOM = "JOIN_ROOM",
+    LEAVE_ROOM = "LEAVE_ROOM",
     MOUSE_MOVE = "MOUSE_MOVE",
     USER_IDLE = "USER_IDLE",
     TEXT_CARET = "TEXT_CARET",
     MOVE_LIST = "MOVE_LIST",
     MOVE_CARD = "MOVE_CARD",
 
-    GET_USERS_ENTITIES = "GET_USERS_ENTITIES",
+    GET_USER_DASH = "GET_USER_DASH",
     GET_ORGANIZATION = "GET_ORGANIZATION",
     GET_PROJECT = "GET_PROJECT",
     GET_BOARD = "GET_BOARD",
+    GET_LIST = "GET_LIST",
+    GET_CARD = "GET_CARD",
     GET_TEXT_BLOCK = "GET_TEXT_BLOCK",
+
+    PREVIEW_ORGANIZATION = "PREVIEW_ORGANIZATION",
+    PREVIEW_PROJECT = "PREVIEW_PROJECT",
+    PREVIEW_USER = "PREVIEW_USER",
 
     CREATE_ORG = "CREATE_ORG",
     CREATE_PROJECT = "CREATE_PROJECT",
@@ -41,25 +50,36 @@ export enum ClientSE { // Client to Server
     UPDATE_BOARD_FIELD = "UPDATE_BOARD_FIELD",
     UPDATE_LIST_FIELD = "UPDATE_LIST_FIELD",
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
+    UPDATE_MEMBERSHIP_RECORD_FIELD = "UPDATE_MEMBERSHIP_RECORD_FIELD",
+    UPDATE_CARD_ASSIGNEE = "UPDATE_CARD_ASSIGNEE",
 
-    SETUP_USER = "SETUP_USER",
-    GET_USER = "GET_USER",
-    CHECK_USERNAME_TAKEN = "CHECK_USERNAME_TAKEN",
+    SEND_INVITE = "SEND_INVITE",
+    RESPOND_INVITE = "RESPOND_INVITE",
+    KICK_MEMBER = "KICK_MEMBER",
+
+
 }
 export interface ClientSEPayload {
     // Client to Server
-    [ClientSE.SET_ROOM]: RoomId;
+    [ClientSE.JOIN_ROOM]: RoomId;
+    [ClientSE.LEAVE_ROOM]: RoomId;
     [ClientSE.MOUSE_MOVE]: MouseRoomUserData;
     [ClientSE.USER_IDLE]: boolean;
     [ClientSE.TEXT_CARET]: Position | undefined;
     [ClientSE.MOVE_LIST]: {listId: ListId, position: number};
     [ClientSE.MOVE_CARD]: {cardId: CardId, toList: ListId, position?: number};
 
-    [ClientSE.GET_USERS_ENTITIES]: UserId;
+    [ClientSE.GET_USER_DASH]: UserId;
     [ClientSE.GET_ORGANIZATION]: OrganizationId;
     [ClientSE.GET_PROJECT]: ProjectId;
     [ClientSE.GET_BOARD]: BoardId;
+    [ClientSE.GET_LIST]: ListId;
+    [ClientSE.GET_CARD]: CardId;
     [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
+
+    [ClientSE.PREVIEW_ORGANIZATION]: OrganizationId;
+    [ClientSE.PREVIEW_PROJECT]: ProjectId;
+    [ClientSE.PREVIEW_USER]: UserId;
 
     [ClientSE.CREATE_ORG]: CreateOrgType;
     [ClientSE.CREATE_PROJECT]: CreateProjectType;
@@ -73,25 +93,35 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_BOARD_FIELD]: (Partial<Board> & {id: BoardId});
     [ClientSE.UPDATE_LIST_FIELD]: (Partial<List> & {id: ListId});
     [ClientSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
+    [ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD]: (Partial<MembershipRecord> & {id: MembershipRecordId});
+    [ClientSE.UPDATE_CARD_ASSIGNEE]: {cardId:CardId, userId:UserId, assigned:boolean};
 
-    [ClientSE.SETUP_USER]: {id: string, username: string, firstName: string, lastName:string}
-    [ClientSE.GET_USER]: string;
-    [ClientSE.CHECK_USERNAME_TAKEN]: string;
+    [ClientSE.SEND_INVITE]: { toUsername: string, entityId: EntityId, entityType: EntityType, role: Role };
+    [ClientSE.RESPOND_INVITE]: {inviteId: InviteId, response:boolean};
+    [ClientSE.KICK_MEMBER]: MembershipRecordId;
+
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
-    [ClientSE.SET_ROOM]: { users: UserData[] };
+    [ClientSE.JOIN_ROOM]: UserData[];
+    [ClientSE.LEAVE_ROOM]: undefined;
     [ClientSE.MOUSE_MOVE]: undefined;
     [ClientSE.USER_IDLE]: undefined;
     [ClientSE.TEXT_CARET]: undefined;
     [ClientSE.MOVE_LIST]: undefined;
     [ClientSE.MOVE_CARD]: undefined;
 
-    [ClientSE.GET_USERS_ENTITIES]: {organizations: OrganizationHeader[], projects: ProjectHeader[]} | undefined;
+    [ClientSE.GET_USER_DASH]: UserDash | undefined;
     [ClientSE.GET_ORGANIZATION]: Organization | undefined;
     [ClientSE.GET_PROJECT] : Project | undefined;
-    [ClientSE.GET_BOARD]: Board | undefined;
+    [ClientSE.GET_BOARD]: BoardRes | undefined;
+    [ClientSE.GET_LIST]: ListHeader | undefined;
+    [ClientSE.GET_CARD]: Card | undefined;
     [ClientSE.GET_TEXT_BLOCK]: TextBlock | undefined;
+
+    [ClientSE.PREVIEW_ORGANIZATION]: OrganizationHeader | undefined;
+    [ClientSE.PREVIEW_PROJECT]: ProjectHeader | undefined;
+    [ClientSE.PREVIEW_USER]: UserHeader | undefined;
     
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
     [ClientSE.CREATE_PROJECT]: ProjectId | undefined;
@@ -105,10 +135,13 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_BOARD_FIELD]: undefined;
     [ClientSE.UPDATE_LIST_FIELD]: undefined;
     [ClientSE.UPDATE_CARD_FIELD]: undefined;
+    [ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD]: undefined;
+    [ClientSE.UPDATE_CARD_ASSIGNEE]: undefined;
     
-    [ClientSE.SETUP_USER]: User | undefined;
-    [ClientSE.GET_USER]: User | undefined;
-    [ClientSE.CHECK_USERNAME_TAKEN]: boolean;
+    [ClientSE.SEND_INVITE]: Invite | undefined;
+    [ClientSE.RESPOND_INVITE]: undefined;
+    [ClientSE.KICK_MEMBER]: undefined;
+
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
 
@@ -128,9 +161,14 @@ export enum ServerSE { // Server to Client
     ADD_CARD = "ADD_CARD",
     
     UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
+    UPDATE_ORG_FIELD = "UPDATE_ORG_FIELD",
+    UPDATE_PROJECT_FIELD = "UPDATE_PROJECT_FIELD",
     UPDATE_BOARD_FIELD = "UPDATE_BOARD_FIELD",
     UPDATE_LIST_FIELD = "UPDATE_LIST_FIELD",
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
+    UPDATE_CARD_ASSIGNEE = "UPDATE_CARD_ASSIGNEE",
+
+    RECEIVE_INVITE = "RECEIVE_INVITE",
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -148,9 +186,14 @@ export interface ServerSEPayload {
     [ServerSE.ADD_CARD]: Card;
     
     [ServerSE.UPDATE_TEXT_BLOCK]: {events: TextBlockEvent[], updated: string};
+    [ServerSE.UPDATE_ORG_FIELD]: (Partial<Organization> & {id: OrganizationId});
+    [ServerSE.UPDATE_PROJECT_FIELD]: (Partial<Project> & {id: ProjectId});
     [ServerSE.UPDATE_BOARD_FIELD]: (Partial<Board> & {id: BoardId});
     [ServerSE.UPDATE_LIST_FIELD]: (Partial<List> & {id: ListId});
     [ServerSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
+    [ServerSE.UPDATE_CARD_ASSIGNEE]: {cardId:CardId, userId:UserId, assigned:boolean};
+
+    [ServerSE.RECEIVE_INVITE]: Invite;
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -168,9 +211,14 @@ export interface ServerSEReplies {
     [ServerSE.ADD_CARD]: void;
 
     [ServerSE.UPDATE_TEXT_BLOCK]: void;
+    [ServerSE.UPDATE_ORG_FIELD]: void;
+    [ServerSE.UPDATE_PROJECT_FIELD]: void;
     [ServerSE.UPDATE_BOARD_FIELD]: void;
     [ServerSE.UPDATE_LIST_FIELD]: void;
     [ServerSE.UPDATE_CARD_FIELD]: void;
+    [ServerSE.UPDATE_CARD_ASSIGNEE]:void;
+    
+    [ServerSE.RECEIVE_INVITE]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
 
@@ -187,10 +235,13 @@ export interface TextRoomUserData {
 export type Position = { x: number; y: number; }
 
 export enum RoomType {
-    MOUSE = "MOUSE",
-    TEXT = "TEXT"
+    INVALID_DO_NOT_USE = "INVALID", // Capture case. Do not use!
+    MOUSE = "MOUSE",   // Show others mouse cursors / dragging
+    TEXT = "TEXT",     // For collaborative text area only
+    USER = "USER",     // For sending updates to a specific UserId's socket
+    DATA = "DATA",     // For updating arbitrary fields realtime
 }
-export type RoomId = `${RoomType}-${string}` | null;
+export type RoomId = `${RoomType}@${string}` | null;
 export type SocketId = string;
 
 export type CreateOrgType = {name: string, creator:UserId};
@@ -201,11 +252,13 @@ export type CreateCardType = {listID: ListId; cardName: string};
 
 export interface UserData {
     sid: SocketId;
-    githubId: string;
-    username: string;
-    avatarUrl: string;
-    fullName: string;
     idle: boolean;
+    user: UserHeader;
     mouseRoomData?: MouseRoomUserData;
     textRoomData?: TextRoomUserData;
+}
+
+export interface SocketHandshakeAuth {
+    userId: UserId;
+    githubToken: string;
 }

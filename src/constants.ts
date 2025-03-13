@@ -1,5 +1,6 @@
 export enum LocalStorageKey {
     GITHUB_ACCESS_TOKEN = 'GITHUB_ACCESS_TOKEN',
+    SIDEBAR_COLLAPSED = 'SIDEBAR_COLLAPSED',
 }
 
 export enum Priority {
@@ -16,6 +17,14 @@ export enum Role {
     ADMIN = 3,
     OWNER = 4,
 }
+
+export const RoleNames = [
+    "None",   // 0
+    "Guest",  // 1
+    "Member", // 2
+    "Admin",  // 3
+    "Owner",  // 4
+]
 
 export enum EntityType {
     PROJECT = 0,

@@ -1,18 +1,20 @@
 {
     "name": "@mosaiq/terrazzo-common",
-    "version": "1.5.3",
+    "version": "1.6.0",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "repository": "https://github.com/mosaiq-software/terrazzo-common.git",
     "scripts": {
-        "build": "tsc",
+        "build": "npm run prebuild && tsc",
+        "prebuild": "npm run lint && npm run types",
         "prepare": "husky",
         "after-push": "node ./scripts/after-push.mjs",
         "before-push": "node ./scripts/before-push.mjs",
         "prepublish-cleanup": "node ./scripts/pre-publish.mjs",
         "build:watch": "tsc -w",
         "lint": "eslint .",
-        "types": "tsc --noemit"
+        "types": "tsc --noemit",
+        "update": "git fetch origin develop && git merge origin/develop"
     },
     "publishConfig": {
         "registry": "https://registry.mosaiq.dev"
