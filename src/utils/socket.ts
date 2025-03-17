@@ -1,17 +1,21 @@
 import { Server } from 'socket.io';
-import { ServerSE, ServerSocketIOEvent } from '@mosaiq/terrazzo-common/socketTypes';
-import { validateGithubAuthToken } from './authUtils';
+import { ServerSE, ServerSocketIOEvent, SocketHandshakeAuth } from '@mosaiq/terrazzo-common/socketTypes';
 import { registerCustomSocketEvents } from './socketCustomHandlers';
 import { registerEngineSocketEvents } from './socketEngineHandlers';
 import { SocketData } from './socketTypes';
+import { loginSocket, setSocketData } from './socketUtils';
+import { instrument } from "@socket.io/admin-ui";
+import { getPrivateGitHubUserData } from './githubUtils';
+import { getUserPreview } from '@trz-api/controllers/userController';
+import { createServer } from 'http';
 
 const initSockets = () => {
     console.info("Starting sockets");
-
-    const io = new Server({
+    const httpServer = createServer();
+    const io = new Server(httpServer, {
         cors: {
-            origin: "*",
-            methods: ["GET", "POST"],
+            origin: [process.env.FRONTEND_URL+"", `http://localhost:${process.env.SOCKET_ADMIN_PORT}`],
+            credentials: true
         },
         connectionStateRecovery: {
             maxDisconnectionDuration: 1 * 60 * 1000, // 1 minutes
@@ -19,34 +23,46 @@ const initSockets = () => {
         },
     });
 
+    instrument(io, {
+        auth: false,
+        mode: "development",
+    });
+
     io.on(ServerSocketIOEvent.CONNECTION, async (socket) => {
         try {
-            const token = socket.handshake.auth.token;
-            const userData = await validateGithubAuthToken(token);
+            const auth:SocketHandshakeAuth = socket.handshake.auth as any;
+            const githubData = await getPrivateGitHubUserData(auth.githubToken);
+            const userData = await getUserPreview(auth.userId);
+
+            if(!githubData || !userData){
+                throw new Error("No user found");
+            }
 
             const socketData: SocketData = {
                 connectedAt: new Date(),
-                access_token: token,
+                githubAccessToken: auth.githubToken,
                 user: {
                     sid: socket.id,
-                    githubId: userData.id,
-                    username: userData.login,
-                    avatarUrl: userData.avatar_url,
-                    fullName: userData.name,
                     idle: false,
+                    user: userData,
                 }
             };
-            (socket.data as SocketData) = socketData;
+            setSocketData(socket, socketData)
+            loginSocket(socket, userData.id);
         } catch (error) {
+            console.warn("Error connecting "+socket.id, error);
             socket.disconnect(true);
             return;
         }
-
 
         socket.emit(ServerSE.READY);
 
         registerEngineSocketEvents(socket, io);
         registerCustomSocketEvents(socket, io);
+    });
+
+    io.on(ServerSocketIOEvent.CONNECTION_ERROR, (err) => {
+        console.error("Connection error", err.code, err.req);
     });
 
     return { io };

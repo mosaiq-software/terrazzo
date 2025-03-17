@@ -7,8 +7,8 @@ import {
     updateListOrder
 } from "@trz-api/persistence/listPersistence";
 import {getBoardById} from "@trz-api/persistence/boardPersistence";
-import {BoardId, List, ListId} from "@mosaiq/terrazzo-common/types";
-import {getAllCardsOfList} from "@trz-api/controllers/cardController";
+import {BoardId, CardId, List, ListHeader, ListId} from "@mosaiq/terrazzo-common/types";
+import {getAllCardsOfList, getCardIdsOnList} from "@trz-api/controllers/cardController";
 import { arrayMove, updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
@@ -21,15 +21,20 @@ import { arrayMove, updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/
  */
 export async function getAllListsOfBoard(boardID:BoardId, archived:boolean) {
 
-    const lists = await getListsByBoardIdOrder(boardID, archived);
+    let listHeaders = await getListsByBoardIdOrder(boardID, archived);
 
-    if(lists == null) {
+    if(listHeaders == null) {
         return [];
     }
 
-    for (const list of lists) {
-        list.cards = await getAllCardsOfList(list.id, false); //we dont want archived cards when getting all lists, archived cards will be displayed elsewhere
-    }
+    listHeaders = listHeaders.filter(l=>!l.archived);
+
+    const lists:List[] = await Promise.all(listHeaders.map(async (l)=>{
+        return {
+            ...l,
+            cards: await getAllCardsOfList(l.id, false)
+        };
+    }));
 
     try {
         return lists;
@@ -37,6 +42,30 @@ export async function getAllListsOfBoard(boardID:BoardId, archived:boolean) {
         throw new Error("Failed to retrieve board" + e);
     }
 
+}
+
+export async function getListAndCardIdsOnBoard(boardID:BoardId, archived:boolean): Promise<{listId:ListId, cardIds:CardId[]}[]> {
+    const listHeaders = await getListsByBoardIdOrder(boardID, archived);
+    if(listHeaders == null) {
+        return [];
+    }
+    const res: {listId:ListId, cardIds:CardId[]}[] = [];
+    for(const li of listHeaders){
+        const r = {
+            listId: li.id,
+            cardIds: await getCardIdsOnList(li.id, false),
+        }
+        res.push(r);
+    }
+    return res;
+}
+
+export async function getListRes (listId: ListId): Promise<ListHeader | undefined> {
+    const listHeader = await getListById(listId);
+    if(listHeader == null) {
+        throw new Error("List not found");
+    }
+    return listHeader;
 }
 
 //Creates
@@ -62,8 +91,8 @@ export async function addList(boardID:BoardId, listName:string) {
             id:crypto.randomUUID(),
             boardId:boardID,
             name:listName,
-            cards:[],
             archived:false,
+            cards: [],
             order: await getNextListOrder(boardID)
         };
         await createListOnBoard(newList, boardID);
@@ -73,13 +102,13 @@ export async function addList(boardID:BoardId, listName:string) {
     }
 }
 
-export async function updateListFromPartial(listId: ListId, partial:Partial<List>) {
+export async function updateListFromPartial(listId: ListId, partial:Partial<ListHeader>) {
     const updatingList = await getListById(listId);
     if (updatingList == null) {
         throw new Error("List not found");
     }
 
-    const updated = updateBaseFromPartial<List>(updatingList, partial);
+    const updated = updateBaseFromPartial<ListHeader>(updatingList, partial);
     try {
         await updateList(updated);
     } catch (e:any) {
@@ -98,7 +127,7 @@ export async function getBoardIDFromListID(listID:ListId) {
 
     return updatingList.boardId;
 }
-export async function moveList(listID: string, toPosition: number) {
+export async function moveList(listID: ListId, toPosition: number) {
     try {
         const boardId = await getListsBoardId(listID);
         if(!boardId){
@@ -112,7 +141,7 @@ export async function moveList(listID: string, toPosition: number) {
         if(index < 0){
             throw new Error("List not found in list")
         }
-        const movedLists = arrayMove<List>(lists, index, toPosition);
+        const movedLists = arrayMove<ListHeader>(lists, index, toPosition);
         await updateListOrder(movedLists);
     } catch (error: any) {
         console.error(error);

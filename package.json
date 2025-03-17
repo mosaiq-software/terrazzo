@@ -11,12 +11,14 @@
     "after-push": "node ./scripts/after-push.mjs",
     "before-push": "node ./scripts/before-push.mjs",
     "lint": "eslint .",
-    "types": "tsc --noemit"
+    "types": "tsc --noemit",
+    "update": "git fetch origin develop && git merge origin/develop"
   },
   "author": "",
   "license": "UNLICENCED",
   "dependencies": {
-    "@mosaiq/terrazzo-common": "1.5.3",
+    "@mosaiq/terrazzo-common": "../terrazzo-common/dist",
+    "@socket.io/admin-ui": "^0.5.1",
     "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

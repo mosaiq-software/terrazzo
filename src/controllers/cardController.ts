@@ -10,10 +10,12 @@ import {
 } from "@trz-api/persistence/cardPersistence";
 import {getListById, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
-import {Card, CardId, ListId} from "@mosaiq/terrazzo-common/types";
+import {BoardId, Card, CardHeader, CardId, ListId} from "@mosaiq/terrazzo-common/types";
 import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
+import { getAssignmentsForCard } from "@trz-api/persistence/assignmentPersistence";
 
+export const MOVING_LIST_ORDER = -10000;
 //Gets
 
 /**
@@ -24,17 +26,38 @@ import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils"
  * @param archived
  */
 export async function getAllCardsOfList(listID: ListId, archived: boolean) {
-    const cards = await getCardsByListIdShortUp(listID, archived);
+    let cardHeaders = await getCardsByListIdShortUp(listID, archived);
 
-    if(cards == null) {
+    if(cardHeaders == null) {
         return [];
     }
+
+    cardHeaders = cardHeaders.filter(c=>!c.archived);
+
+    const cards = await populateCards(cardHeaders);
 
     try {
         return cards;
     } catch (e) {
         throw new Error("Failed to retrieve board" + e);
     }
+}
+
+export async function getCardIdsOnList(listID: ListId, archived: boolean): Promise<CardId[]> {
+    const cardHeaders = await getCardsByListIdShortUp(listID, archived);
+    if(cardHeaders == null) {
+        return [];
+    }
+    return cardHeaders.map(c=>c.id);
+}
+
+export async function getSingleFullCard (cardId: CardId): Promise<Card | undefined> {
+    const cardHeader = await getCardById(cardId);
+    if(!cardHeader){
+        throw new Error("Card not found");
+    }
+    const card = (await populateCards([cardHeader])??[undefined])[0] ?? undefined;
+    return card;
 }
 
 //Creates
@@ -96,13 +119,13 @@ export async function addCard(listID:ListId, cardName:string) {
     }
 }
 
-export async function updateCardFromPartial(cardId: CardId, partial:Partial<Card>) {
+export async function updateCardFromPartial(cardId: CardId, partial:Partial<CardHeader>) {
     const updatingCard = await getCardById(cardId);
     if (updatingCard == null) {
         throw new Error("Card not found");
     }
 
-    const updated = updateBaseFromPartial<Card>(updatingCard, partial);
+    const updated = updateBaseFromPartial<CardHeader>(updatingCard, partial);
     try {
         await updateCard(updated);
     } catch (e:any) {
@@ -142,90 +165,58 @@ export async function getBoardIDFromCardID(cardID:CardId) {
 */
 export async function moveCardToList(cardId: CardId, toListId:ListId, position?:number) {
     try {
-        if(position === undefined){
-            const nextOrder = await getNextListOrder(toListId);
-            if(nextOrder == undefined){
-                throw new Error(`No next order found on list ${toListId}`);
-            }
-            position = nextOrder;
-         }
-
-         let card: Card | null = await removeCardFromList(cardId);
-         if(!card) {
-            card = await getCardById(cardId);
-            if(!card) {
-                throw new Error("Could not find card that was removed!");
-            }
+        const card = await getCardById(cardId);
+        if(!card){
+            throw new Error(`Card ${cardId} not found`);
         }
-        await addCardToList(card.id, toListId, position);
+        let currentListCards = await getCardsByListIdShortUp(card.listId, false);
+        if(!currentListCards){
+            throw new Error(`Current list ${card.listId} not found`);
+        }
+        let newListCards = await getCardsByListIdShortUp(toListId, false);
+    
+        currentListCards = currentListCards.filter(c=>c.id!==cardId);
+        
+        if(card.listId === toListId){
+            newListCards = currentListCards;
+        }
+        if(!newListCards){
+            throw new Error(`New list ${toListId} not found`);
+        }
+
+        if(position !== undefined){
+			newListCards.splice(position, 0, card);
+		} else{
+			newListCards.push(card);
+		}
+
+        const promises = [];
+        for(let i = 0; i < currentListCards.length; i++) {
+            currentListCards[i].order = i;
+            promises.push(updateCardOrder(currentListCards[i].id, i));
+        }
+        if(toListId !== card.listId){
+            for(let i = 0; i < newListCards.length; i++) {
+                newListCards[i].order = i;
+                promises.push(updateCardOrder(newListCards[i].id, i));
+            }
+            promises.push(updateCardList(cardId, toListId));
+        }
+        await Promise.all(promises);
     } catch (error: any) {
         console.error(`Error moving card ${cardId} to list ${toListId}: ${error}`);
         throw error;
     }
 }
 
-/** 
-    Remove a card from its list and shift the remaining cards in the list down by 1 to preserve order
-    @returns the removed card
-*/
-export const removeCardFromList = async (cardId:CardId): Promise<Card> => {
-    try {
-        const remCard = await getCardById(cardId);
-        if(!remCard){
-            throw new Error("Card not found");
-        }
-        if(!remCard.listId){
-            throw new Error("Card is not assigned to any list");
-        }
-        const cards = await getCardsByListIdUp(remCard.listId);
-        if (!cards || cards.length === 0) {
-            throw new Error("List not found");
-        }
-        const remCardIndex = cards.findIndex(c=>c.id === cardId);
-        if(remCardIndex === -1){
-            throw new Error("Card not found in list");
-        }
-
-        cards.splice(remCardIndex, 1);
-        const promises = [updateCardOrder(remCard.id, -1), updateCardList(remCard.id, '')];
-        for(let i = 0; i < cards.length; i++) {
-            cards[i].order = i;
-            promises.push(updateCardOrder(cards[i].id, i));
-        }
-        await Promise.all(promises);
-        return {...remCard, listId: null, order: -1};
-    } catch (error: any) {
-        console.log(`Error removing card: ${error}`);
-        throw error;
-    }
-}
-
-/**
- * Add a card to a list. The card must not be in any list to allow this to happen
- */
-export const addCardToList = async (cardId:CardId, toList: ListId, atPosition:number): Promise<void> => {
-    try {
-        const addCard = await getCardById(cardId);
-        if(!addCard){
-            throw new Error("Card not found");
-        }
-        if(addCard.listId){
-            throw new Error("Card is already in a list");
-        }
-        const cards = await getCardsByListIdUp(toList);
-        if (!cards) {
-            throw new Error("List not found");
-        }
-        atPosition = Math.max(0, Math.min(atPosition, cards.length));
-        cards.splice(atPosition, 0 , addCard);
-        const promises = [updateCardList(addCard.id, toList)];
-        for(let i = 0; i < cards.length; i++) {
-            cards[i].order = i;
-            promises.push(updateCardOrder(cards[i].id, i));
-        }
-        await Promise.all(promises);
-    } catch (error: any) {
-        console.log(`Error adding card: ${error}`);
-        throw error;
-    }
+export const populateCards = async (cardHeaders:CardHeader[]): Promise<Card[]> => {
+    return await Promise.all(cardHeaders.map(async (c:CardHeader)=>{
+        const cc:Card = {
+            ...c,
+            assignees: await getAssignmentsForCard(c.id),
+            labels: [],
+            comments: [],
+        };
+        return cc;
+    }));
 }

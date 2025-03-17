@@ -1,12 +1,12 @@
 import { Server, Socket } from 'socket.io';
-import { broadcastToMyRoom } from './socketUtils';
-import { ServerSE, ServerSEPayload, ServerSocketIOEvent } from '@mosaiq/terrazzo-common/socketTypes';
+import { broadcastToMyRooms } from './socketUtils';
+import { ServerSE, ServerSocketIOEvent } from '@mosaiq/terrazzo-common/socketTypes';
+import { allRoomTypes } from '@mosaiq/terrazzo-common/utils/socketUtils';
 
 
 export const registerEngineSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ServerSocketIOEvent.DISCONNECTING, (reason) => {
-        const payload: ServerSEPayload[ServerSE.CLIENT_LEFT_ROOM] = socket.id;
-        broadcastToMyRoom(socket, ServerSE.CLIENT_LEFT_ROOM, payload);
+        broadcastToMyRooms<ServerSE.CLIENT_LEFT_ROOM>(socket, ServerSE.CLIENT_LEFT_ROOM, socket.id, allRoomTypes());
     });
     
     socket.on(ServerSocketIOEvent.DISCONNECT, () => {

@@ -1,7 +1,7 @@
 import {createBoard, getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
 import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
-import {getAllListsOfBoard} from "@trz-api/controllers/listController";
-import { Board, BoardHeader, BoardId, ProjectId } from "@mosaiq/terrazzo-common/types";
+import {getAllListsOfBoard, getListAndCardIdsOnBoard} from "@trz-api/controllers/listController";
+import { Board, BoardHeader, BoardId, BoardRes, ProjectId } from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
@@ -25,6 +25,24 @@ export async function getWholeBoard(boardID:BoardId) {
             lists: await getAllListsOfBoard(boardID, false), //we dont want archived lists when getting whole board
             labels:  await getLabelsByBoardId(boardID),
             sprints:  [],
+        };
+        return board;
+    } catch (e) {
+        throw new Error("Failed to retrieve board" + e);
+    }
+}
+
+
+export async function getBoardRes(boardID:BoardId): Promise<BoardRes | undefined> {
+    const boardHeader = await getBoardById(boardID);
+    if(boardHeader == null) {
+        throw new Error("Board not found");
+    }
+
+    try {
+        const board: BoardRes = {
+            ...boardHeader,
+            lists: await getListAndCardIdsOnBoard(boardID, false),
         };
         return board;
     } catch (e) {
