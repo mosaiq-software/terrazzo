@@ -64,10 +64,6 @@ export async function addBoard(name:string, boardCode:string, projectId:ProjectI
         throw new Error("Title must be 50 characters or less");
     }
 
-    if(boardCode.length > 3) {
-        throw new Error("Abbreviation must be 3 characters or less");
-    }
-
     const newBoard: Board = {
         id: crypto.randomUUID(),
         projectId,
