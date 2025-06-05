@@ -59,7 +59,7 @@ export async function getBoardRes(boardID:BoardId): Promise<BoardRes | undefined
  * @param name
  * @param boardCode
  */
-export async function addBoard(name:number, boardCode:string, projectId:ProjectId) {
+export async function addBoard(name:string, boardCode:string, projectId:ProjectId) {
     if(name.length > 50) {
         throw new Error("Title must be 50 characters or less");
     }
