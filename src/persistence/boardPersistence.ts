@@ -25,7 +25,7 @@ export const getBoards = async () => {
 export const getBoardById = async (id: BoardId) => {
     return (await BoardModel.findByPk(id, {
         attributes:{
-            exclude:['createdAt', 'updatedAt']
+            exclude:['updatedAt']
         }}))?.toJSON() as BoardHeader | undefined;
 }
 
@@ -34,7 +34,7 @@ export const getBoardsByProjectId = async (projectId: ProjectId) => {
         where: { projectId },
         order: [['createdAt', 'ASC']],
         attributes:{
-            exclude:['createdAt', 'updatedAt']
+            exclude:['updatedAt']
         }
     })).map(board => board.toJSON()) as BoardHeader[];
 }
