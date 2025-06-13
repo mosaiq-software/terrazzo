@@ -63,6 +63,7 @@ export interface Board extends BoardHeader{
 }
 export interface BoardRes extends BoardHeader {
     lists: {listId:ListId, cardIds:CardId[]}[];
+    labels: Label[];
 }
 
 export interface ListHeader {
