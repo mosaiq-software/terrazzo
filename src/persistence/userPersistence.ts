@@ -1,5 +1,5 @@
 import {Model, DataTypes, Sequelize} from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
 
 class UserModel extends Model {}
@@ -13,9 +13,7 @@ UserModel.init({
     lastName: DataTypes.STRING,
     profilePicture: DataTypes.STRING,
     githubUserId: DataTypes.STRING,
-}, { sequelize, modelName: 'userModel' });
-
-sequelize.sync();
+}, { sequelize});
 
 
 export const getUserById = async (id: UserId) => {

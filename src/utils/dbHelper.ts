@@ -4,3 +4,11 @@ export const sequelize = new Sequelize({
     storage: process.env.DATABASE_PATH ?? "./undefinedDatabase.sqlite",
     logging: (process.env.DATABASE_LOGGING === "true")
 });
+
+sequelize.sync({ alter: true })
+    .then(() => {
+        console.log('Database & tables created!');
+    })
+    .catch((error) => {
+        console.error('Error creating database or tables:', error);
+    });

@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
-import { BoardId, Label, LabelId } from '@mosaiq/terrazzo-common/types';
+import { sequelize } from '@trz-api/utils/dbHelper';
+import { BoardId, CardId, Label, LabelId } from '@mosaiq/terrazzo-common/types';
 
 class LabelModel extends Model {}
 LabelModel.init({
@@ -11,9 +11,17 @@ LabelModel.init({
     boardId: DataTypes.STRING,
     name: DataTypes.STRING,
     color: DataTypes.STRING
-}, { sequelize, modelName: 'labelModel' });
+}, { sequelize});
 
-sequelize.sync();
+class LabeledCardModel extends Model {}
+LabeledCardModel.init({
+    labelId: {type: DataTypes.STRING, primaryKey: true},
+    cardId: {type: DataTypes.STRING, primaryKey: true},
+}, { 
+    sequelize, 
+    timestamps: false,
+});
+
 
 export const getLabelById = async (id: LabelId) => {
     return (await LabelModel.findByPk(id))?.toJSON() as Label | null;
@@ -45,4 +53,27 @@ export const deleteLabel = async (id: LabelId) => {
 
 export const deleteLabelsByBoardId = async (boardId: BoardId) => {
     return await LabelModel.destroy({ where: { boardId } });
+}
+
+
+
+
+export const getLabelsOnCard = async (cardId:CardId) => {
+    return (await LabeledCardModel.findAll({ where: { cardId } })).map(label => label.toJSON().labelId) as LabelId[];
+}
+
+export const deleteLabelingOnCardsByLabelId = async (labelId:LabelId) => {
+    return await LabeledCardModel.destroy({ where: { labelId } });
+}
+
+export const deleteLabelsOnCard = async (cardId:CardId) => {
+    return await LabeledCardModel.destroy({ where: { cardId } });
+}
+
+export const addLabelToCard = async (labelId:LabelId, cardId:CardId) => {
+    return await LabeledCardModel.create({
+        id: crypto.randomUUID(),
+        cardId,
+        labelId
+    });
 }

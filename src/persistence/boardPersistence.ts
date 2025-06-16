@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { Board, BoardHeader, BoardId, ProjectId } from '@mosaiq/terrazzo-common/types';
 
 class BoardModel extends Model {}
@@ -14,9 +14,8 @@ BoardModel.init({
     archived: DataTypes.BOOLEAN,
     createdAt: DataTypes.INTEGER,
     totalCards: DataTypes.INTEGER,
-}, { sequelize, modelName: 'boardModel' });
+}, { sequelize});
 
-sequelize.sync();
 
 export const getBoards = async () => {
     return (await BoardModel.findAll()).map(board => board.toJSON()) as BoardHeader[];
@@ -25,7 +24,7 @@ export const getBoards = async () => {
 export const getBoardById = async (id: BoardId) => {
     return (await BoardModel.findByPk(id, {
         attributes:{
-            exclude:['createdAt', 'updatedAt']
+            exclude:['updatedAt']
         }}))?.toJSON() as BoardHeader | undefined;
 }
 
@@ -34,7 +33,7 @@ export const getBoardsByProjectId = async (projectId: ProjectId) => {
         where: { projectId },
         order: [['createdAt', 'ASC']],
         attributes:{
-            exclude:['createdAt', 'updatedAt']
+            exclude:['updatedAt']
         }
     })).map(board => board.toJSON()) as BoardHeader[];
 }

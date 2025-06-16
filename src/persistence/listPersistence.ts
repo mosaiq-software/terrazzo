@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { BoardId, ListHeader, ListId } from '@mosaiq/terrazzo-common/types';
 
 class ListModel extends Model {}
@@ -12,9 +12,8 @@ ListModel.init({
     name: DataTypes.STRING,
     archived: DataTypes.BOOLEAN,
     order: DataTypes.INTEGER
-}, { sequelize, modelName: 'listModel' });
+}, { sequelize});
 
-sequelize.sync();
 
 
 export const getListById = async (id: ListId) => {

@@ -1,7 +1,7 @@
 import {createBoard, getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
-import {getLabelsByBoardId} from "@trz-api/persistence/labelPersistence";
+import {createLabelOnBoard, deleteLabel, deleteLabelingOnCardsByLabelId, deleteLabelsByBoardId, getLabelById, getLabelsByBoardId, updateLabel} from "@trz-api/persistence/labelPersistence";
 import {getAllListsOfBoard, getListAndCardIdsOnBoard} from "@trz-api/controllers/listController";
-import { Board, BoardHeader, BoardId, BoardRes, ProjectId } from "@mosaiq/terrazzo-common/types";
+import { Board, BoardHeader, BoardId, BoardRes, Label, LabelId, ProjectId } from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 
 //Gets
@@ -43,6 +43,7 @@ export async function getBoardRes(boardID:BoardId): Promise<BoardRes | undefined
         const board: BoardRes = {
             ...boardHeader,
             lists: await getListAndCardIdsOnBoard(boardID, false),
+            labels: await getLabelsByBoardId(boardID),
         };
         return board;
     } catch (e) {
@@ -97,4 +98,30 @@ export async function updateBoardFromPartial(boardId: BoardId, partial:Partial<B
     } catch (e:any) {
         throw new Error("Failed to update board "+e);
     }
+}
+
+export async function createBoardLabel(boardId:BoardId, name:string, color:string): Promise<Label[]>{
+    const label:Label = {
+        name,
+        color,
+        id: crypto.randomUUID(),
+    }
+    await createLabelOnBoard(label, boardId);
+    return await getLabelsByBoardId(boardId);
+}
+
+export async function removeBoardLabel(boardId:BoardId, labelId:LabelId): Promise<Label[]>{
+    await deleteLabel(labelId);
+    await deleteLabelingOnCardsByLabelId(labelId);
+    return await getLabelsByBoardId(boardId);
+}
+
+export async function updateBoardLabels(boardId:BoardId, updatedLabel:Label): Promise<Label[]>{
+    const label = await getLabelById(updatedLabel.id);
+    if(!label){
+        throw new Error("Label does not exist");
+    }
+
+    await updateLabel(updatedLabel);
+    return await getLabelsByBoardId(boardId);
 }

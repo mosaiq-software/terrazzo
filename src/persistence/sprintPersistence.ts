@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { Sprint } from '@mosaiq/terrazzo-common/types';
 
 class SprintModel extends Model {}
@@ -11,9 +11,8 @@ SprintModel.init({
     name: DataTypes.STRING,
     startDate: DataTypes.DATE,
     endDate: DataTypes.DATE,
-}, { sequelize, modelName: 'sprintModel' });
+}, { sequelize});
 
-sequelize.sync();
 
 export const getSprintById = async (id: string) => {
     return (await SprintModel.findByPk(id))?.toJSON() as Sprint | null;

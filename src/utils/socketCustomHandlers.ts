@@ -8,13 +8,14 @@ import {
     broadcastToMyRooms,
 } from './socketUtils';
 import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
-import {addBoard, getBoardRes, getWholeBoard, updateBoardFromPartial} from "@trz-api/controllers/boardController";
+import {addBoard, createBoardLabel, getBoardRes, getWholeBoard, removeBoardLabel, updateBoardFromPartial, updateBoardLabels} from "@trz-api/controllers/boardController";
 import {addList, getBoardIDFromListID, getListRes, moveList, updateListFromPartial} from "@trz-api/controllers/listController";
 import {
     addCard,
     getBoardIDFromCardID,
     getSingleFullCard,
     moveCardToList,
+    setCardsLabels,
     updateCardFromPartial
 } from "@trz-api/controllers/cardController";
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
@@ -29,6 +30,7 @@ import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { getListById } from '@trz-api/persistence/listPersistence';
 import { getCardById } from '@trz-api/persistence/cardPersistence';
+import { BoardId, CardId } from '@mosaiq/terrazzo-common/types';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.JOIN_ROOM, async (room: ClientSEPayload[ClientSE.JOIN_ROOM], reply: ClientSEReply<ClientSE.JOIN_ROOM>) => {
@@ -349,6 +351,64 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             // }
         } catch (error: any) {
             console.error("Error updating record fields", error);
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.CREATE_BOARD_LABEL, async (data: ClientSEPayload[ClientSE.CREATE_BOARD_LABEL], reply: ClientSEReply<ClientSE.CREATE_BOARD_LABEL>) => {
+        try {
+            if (!data) {
+                throw new Error('No data provided');
+            }
+            const boardId:BoardId = data.boardId;
+            const labels = await createBoardLabel(boardId, data.name, data.color);
+            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, {boardId, labels}, [getRoomCode(RoomType.DATA, boardId)])
+        } catch (error: any) {
+            console.error("Error creating board label", error);
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.UPDATE_BOARD_LABEL, async (data: ClientSEPayload[ClientSE.UPDATE_BOARD_LABEL], reply: ClientSEReply<ClientSE.UPDATE_BOARD_LABEL>) => {
+        try {
+            if (!data) {
+                throw new Error('No data provided');
+            }
+            const boardId:BoardId = data.boardId;
+            const labels = await updateBoardLabels(boardId, data.label);
+            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, {boardId, labels}, [getRoomCode(RoomType.DATA, boardId)])
+        } catch (error: any) {
+            console.error("Error updating board labels", error);
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.DELETE_BOARD_LABEL, async (data: ClientSEPayload[ClientSE.DELETE_BOARD_LABEL], reply: ClientSEReply<ClientSE.DELETE_BOARD_LABEL>) => {
+        try {
+            if (!data) {
+                throw new Error('No data provided');
+            }
+            const boardId:BoardId = data.boardId;
+            const labels = await removeBoardLabel(boardId, data.labelId);
+            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, {boardId, labels}, [getRoomCode(RoomType.DATA, boardId)])
+        } catch (error: any) {
+            console.error("Error deleting board labels", error);
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.UPDATE_CARDS_LABELS, async (data: ClientSEPayload[ClientSE.UPDATE_CARDS_LABELS], reply: ClientSEReply<ClientSE.UPDATE_CARDS_LABELS>) => {
+        try {
+            if (!data) {
+                throw new Error('No data provided');
+            }
+            await setCardsLabels(data.cardId, data.labelIds);
+            const boardId = await getBoardIDFromCardID(data.cardId);
+            if(boardId){
+                broadcast<ServerSE.UPDATE_CARDS_LABELS>(socket, ServerSE.UPDATE_CARDS_LABELS, data, [getRoomCode(RoomType.DATA, boardId)]);
+            }
+        } catch (error: any) {
+            console.error("Error deleting board labels", error);
             reply(undefined, error.message);
         }
     });

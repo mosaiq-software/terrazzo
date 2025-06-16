@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { TextBlock, TextBlockId } from '@mosaiq/terrazzo-common/types';
 
 class TextBlockModel extends Model {}
@@ -9,9 +9,8 @@ TextBlockModel.init({
         primaryKey: true
     },
     text: DataTypes.TEXT
-}, { sequelize, modelName: 'textBlockModel' });
+}, { sequelize});
 
-sequelize.sync();
 
 export const getTextBlockById = async (id: TextBlockId) => {
     return (await TextBlockModel.findByPk(id))?.toJSON() as TextBlock | null;
