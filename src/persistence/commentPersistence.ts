@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { CardId, Comment, CommentId, UserId } from '@mosaiq/terrazzo-common/types';
 
 class CommentModel extends Model {}
@@ -13,9 +13,8 @@ CommentModel.init({
     postedBy: DataTypes.STRING,
     postedAt: DataTypes.DATE,
     archived: DataTypes.BOOLEAN
-}, { sequelize, modelName: 'commentModel' });
+}, { sequelize});
 
-sequelize.sync();
 
 export const getCommentById = async (id: CommentId) => {
     return (await CommentModel.findByPk(id))?.toJSON() as Comment | null;

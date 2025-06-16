@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { BoardId, CardId, Label, LabelId } from '@mosaiq/terrazzo-common/types';
 
 class LabelModel extends Model {}
@@ -11,19 +11,17 @@ LabelModel.init({
     boardId: DataTypes.STRING,
     name: DataTypes.STRING,
     color: DataTypes.STRING
-}, { sequelize, modelName: 'labelModel' });
+}, { sequelize});
 
 class LabeledCardModel extends Model {}
 LabeledCardModel.init({
-    id: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-    },
-    labelId: DataTypes.STRING,
-    cardId: DataTypes.STRING,
-}, { sequelize, modelName: 'labeledCardModel' });
+    labelId: {type: DataTypes.STRING, primaryKey: true},
+    cardId: {type: DataTypes.STRING, primaryKey: true},
+}, { 
+    sequelize, 
+    timestamps: false,
+});
 
-sequelize.sync();
 
 export const getLabelById = async (id: LabelId) => {
     return (await LabelModel.findByPk(id))?.toJSON() as Label | null;

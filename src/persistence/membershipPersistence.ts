@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { EntityId, MembershipRecord, MembershipRecordId, OrganizationId, ProjectId, UID, UserId } from '@mosaiq/terrazzo-common/types';
 import { EntityType, Role } from '@mosaiq/terrazzo-common/constants';
 
@@ -13,9 +13,8 @@ MembershipModel.init({
     entityId: DataTypes.STRING,
     entityType: DataTypes.TINYINT,
     userRole: DataTypes.TINYINT,
-}, { sequelize, modelName: 'membershipModel' });
+}, { sequelize});
 
-sequelize.sync();
 
 export const getMembershipById = async (id: MembershipRecordId) => {
     return (await MembershipModel.findByPk(id, {

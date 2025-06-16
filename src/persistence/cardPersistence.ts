@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import {Card, CardHeader, CardId, ListId} from '@mosaiq/terrazzo-common/types';
 
 class CardModel extends Model {}
@@ -20,9 +20,8 @@ CardModel.init({
     sprintId: DataTypes.STRING,
     archived: DataTypes.BOOLEAN,
     order: DataTypes.INTEGER
-}, { sequelize, modelName: 'cardModel' });
+}, { sequelize});
 
-sequelize.sync();
 
 export const getCardById = async (id: CardId) => {
     return (await CardModel.findByPk(id))?.toJSON() as CardHeader | null;

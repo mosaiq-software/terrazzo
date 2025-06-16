@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { Assignment, AssignmentId, BoardId, CardId, Label, LabelId, UserId } from '@mosaiq/terrazzo-common/types';
 
 class AssignmentModel extends Model {}
@@ -10,9 +10,8 @@ AssignmentModel.init({
     },
     userId: DataTypes.STRING,
     cardId: DataTypes.STRING,
-}, { sequelize, modelName: 'assignmentModel' });
+}, { sequelize});
 
-sequelize.sync();
 
 export const getAssignmentById = async (asnId: AssignmentId) => {
     return (await AssignmentModel.findByPk(asnId))?.toJSON() as Assignment | null;

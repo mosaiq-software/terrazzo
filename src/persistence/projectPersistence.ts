@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { OrganizationId, Project, ProjectHeader, ProjectId } from '@mosaiq/terrazzo-common/types';
 
 class ProjectModel extends Model {}
@@ -14,9 +14,8 @@ ProjectModel.init({
     createdAt: DataTypes.INTEGER,
     logoUrl: DataTypes.STRING,
     description: DataTypes.TEXT,
-}, { sequelize, modelName: 'projectModel' });
+}, { sequelize});
 
-sequelize.sync();
 
 export const getProjectById = async (id: ProjectId) => {
     return (await ProjectModel.findByPk(id, {

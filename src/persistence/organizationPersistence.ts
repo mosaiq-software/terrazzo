@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { Organization, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
 
 class OrgModel extends Model {}
@@ -14,9 +14,8 @@ OrgModel.init({
     logoUrl: DataTypes.STRING,
     isPersonalOrg: DataTypes.BOOLEAN,
     description: DataTypes.TEXT,
-}, { sequelize, modelName: 'organizationModel' });
+}, { sequelize});
 
-sequelize.sync();
 
 export const getOrgById = async (id: OrganizationId) => {
     return (await OrgModel.findByPk(id, {

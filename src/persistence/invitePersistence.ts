@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { sequelize } from './dbHelper';
+import { sequelize } from '@trz-api/utils/dbHelper';
 import { EntityId, Invite, InviteId, InviteRecord, OrganizationId, ProjectId, UserId } from '@mosaiq/terrazzo-common/types';
 
 class InviteModel extends Model {}
@@ -14,9 +14,8 @@ InviteModel.init({
     entityId: DataTypes.STRING,
     entityType: DataTypes.TINYINT,
     userRole: DataTypes.TINYINT,
-}, { sequelize, modelName: 'inviteModel' });
+}, { sequelize});
 
-sequelize.sync();
 
 export const getInviteRecordById = async (id: InviteId) => {
     return (await InviteModel.findByPk(id, {
