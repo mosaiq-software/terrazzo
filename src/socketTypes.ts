@@ -1,5 +1,5 @@
 import { EntityType, Role } from "./constants";
-import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockEvent, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment, BoardRes, ListHeader} from "./types";
+import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockEvent, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment, BoardRes, ListHeader, Label, LabelId} from "./types";
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -43,6 +43,7 @@ export enum ClientSE { // Client to Server
     CREATE_BOARD = "CREATE_BOARD",
     CREATE_LIST = "CREATE_LIST",
     CREATE_CARD = "CREATE_CARD",
+    CREATE_BOARD_LABEL = "CREATE_BOARD_LABEL",
 
     UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
     UPDATE_ORG_FIELD = "UPDATE_ORG_FIELD",
@@ -52,6 +53,10 @@ export enum ClientSE { // Client to Server
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
     UPDATE_MEMBERSHIP_RECORD_FIELD = "UPDATE_MEMBERSHIP_RECORD_FIELD",
     UPDATE_CARD_ASSIGNEE = "UPDATE_CARD_ASSIGNEE",
+    UPDATE_BOARD_LABEL = "UPDATE_BOARD_LABEL",
+    UPDATE_CARDS_LABELS = "UPDATE_CARDS_LABELS",
+
+    DELETE_BOARD_LABEL = "DELETE_BOARD_LABEL",
 
     SEND_INVITE = "SEND_INVITE",
     RESPOND_INVITE = "RESPOND_INVITE",
@@ -86,6 +91,7 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_BOARD]: CreateBoardType;
     [ClientSE.CREATE_LIST]: CreateListType;
     [ClientSE.CREATE_CARD]: CreateCardType;
+    [ClientSE.CREATE_BOARD_LABEL]: {boardId:BoardId, name:string, color:string};
 
     [ClientSE.UPDATE_TEXT_BLOCK]: TextBlockEvent[];
     [ClientSE.UPDATE_ORG_FIELD]: (Partial<Organization> & {id: OrganizationId});
@@ -95,6 +101,10 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
     [ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD]: (Partial<MembershipRecord> & {id: MembershipRecordId});
     [ClientSE.UPDATE_CARD_ASSIGNEE]: {cardId:CardId, userId:UserId, assigned:boolean};
+    [ClientSE.UPDATE_BOARD_LABEL]: {boardId:BoardId, label:Label};
+    [ClientSE.UPDATE_CARDS_LABELS]: {cardId:CardId, labelIds:LabelId[]};
+
+    [ClientSE.DELETE_BOARD_LABEL]: {boardId:BoardId, labelId:LabelId};
 
     [ClientSE.SEND_INVITE]: { toUsername: string, entityId: EntityId, entityType: EntityType, role: Role };
     [ClientSE.RESPOND_INVITE]: {inviteId: InviteId, response:boolean};
@@ -128,6 +138,7 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_BOARD]: BoardId | undefined;
     [ClientSE.CREATE_LIST]: ListId | undefined;
     [ClientSE.CREATE_CARD]: CardId | undefined;
+    [ClientSE.CREATE_BOARD_LABEL]: LabelId | undefined;
     
     [ClientSE.UPDATE_TEXT_BLOCK]: string | undefined;
     [ClientSE.UPDATE_ORG_FIELD]: undefined;
@@ -137,6 +148,10 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_CARD_FIELD]: undefined;
     [ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD]: undefined;
     [ClientSE.UPDATE_CARD_ASSIGNEE]: undefined;
+    [ClientSE.UPDATE_BOARD_LABEL]: undefined;
+    [ClientSE.UPDATE_CARDS_LABELS]: undefined;
+
+    [ClientSE.DELETE_BOARD_LABEL]: undefined;
     
     [ClientSE.SEND_INVITE]: Invite | undefined;
     [ClientSE.RESPOND_INVITE]: undefined;
@@ -167,6 +182,8 @@ export enum ServerSE { // Server to Client
     UPDATE_LIST_FIELD = "UPDATE_LIST_FIELD",
     UPDATE_CARD_FIELD = "UPDATE_CARD_FIELD",
     UPDATE_CARD_ASSIGNEE = "UPDATE_CARD_ASSIGNEE",
+    UPDATE_BOARD_LABELS = "UPDATE_BOARD_LABELS",
+    UPDATE_CARDS_LABELS = "UPDATE_CARDS_LABELS",
 
     RECEIVE_INVITE = "RECEIVE_INVITE",
 }
@@ -192,6 +209,8 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_LIST_FIELD]: (Partial<List> & {id: ListId});
     [ServerSE.UPDATE_CARD_FIELD]: (Partial<Card> & {id: CardId});
     [ServerSE.UPDATE_CARD_ASSIGNEE]: {cardId:CardId, userId:UserId, assigned:boolean};
+    [ServerSE.UPDATE_BOARD_LABELS]: {boardId:BoardId, labels:Label[]};
+    [ServerSE.UPDATE_CARDS_LABELS]: {cardId:CardId, labelIds:LabelId[]};
 
     [ServerSE.RECEIVE_INVITE]: Invite;
 }
@@ -217,7 +236,9 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_LIST_FIELD]: void;
     [ServerSE.UPDATE_CARD_FIELD]: void;
     [ServerSE.UPDATE_CARD_ASSIGNEE]:void;
-    
+    [ServerSE.UPDATE_BOARD_LABELS]: void;
+    [ServerSE.UPDATE_CARDS_LABELS]: void;
+
     [ServerSE.RECEIVE_INVITE]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
