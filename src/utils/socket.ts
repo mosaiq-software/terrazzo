@@ -14,18 +14,19 @@ const initSockets = () => {
     const httpServer = createServer();
     const io = new Server(httpServer, {
         cors: {
-            origin: [process.env.FRONTEND_URL+"", `http://localhost:${process.env.SOCKET_ADMIN_PORT}`],
+            origin: [process.env.FRONTEND_URL+"", `https://api.terrazzo.mosaiq.dev/socketadmin`],
             credentials: true
         },
         connectionStateRecovery: {
             maxDisconnectionDuration: 1 * 60 * 1000, // 1 minutes
             skipMiddlewares: true,
         },
+        path: "/socket"
     });
 
     instrument(io, {
         auth: false,
-        mode: "development",
+        mode: "production",
     });
 
     io.on(ServerSocketIOEvent.CONNECTION, async (socket) => {
