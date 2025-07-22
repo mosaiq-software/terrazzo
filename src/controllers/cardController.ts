@@ -70,7 +70,7 @@ export async function getSingleFullCard (cardId: CardId): Promise<Card | undefin
  * @param listID
  * @param cardName
  */
-export async function addCard(listID:ListId, cardName:string) {
+export async function addCard(listID:ListId, cardName:string, description?:string, explicitCardNumber?:number) {
     //pull board from db with ID
     const updatingList = await getListById(listID);
 
@@ -88,7 +88,7 @@ export async function addCard(listID:ListId, cardName:string) {
     const newCard: Card = {
         id:cardUid,
         listId:listID,
-        cardNumber:(board.totalCards + 1),
+        cardNumber: explicitCardNumber ?? (board.totalCards + 1),
         name:cardName,
         descriptionTextBlockId: cardUid, // placeholder id
         priority:null,
@@ -101,7 +101,7 @@ export async function addCard(listID:ListId, cardName:string) {
         order: await getNextCardOrder(listID)
     };
     try {
-        const descBlock = await createTextBlock();
+        const descBlock = await createTextBlock(description);
         if(!descBlock){
             throw new Error("Failed to create description text block");
         }
