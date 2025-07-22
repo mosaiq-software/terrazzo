@@ -1,8 +1,10 @@
 import {createBoard, getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
 import {createLabelOnBoard, deleteLabel, deleteLabelingOnCardsByLabelId, deleteLabelsByBoardId, getLabelById, getLabelsByBoardId, updateLabel} from "@trz-api/persistence/labelPersistence";
-import {getAllListsOfBoard, getListAndCardIdsOnBoard} from "@trz-api/controllers/listController";
-import { Board, BoardHeader, BoardId, BoardRes, Label, LabelId, ProjectId } from "@mosaiq/terrazzo-common/types";
+import {addList, getAllListsOfBoard, getListAndCardIdsOnBoard, moveList} from "@trz-api/controllers/listController";
+import { Board, BoardHeader, BoardId, BoardRes, Label, LabelId, ListId, ProjectId } from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
+import { TrelloExportType, TrelloLabelColorsMap } from "@trz-api/utils/trelloTypes";
+import { addCard, moveCardToList, setCardsLabels } from "./cardController";
 
 //Gets
 
@@ -110,6 +112,16 @@ export async function createBoardLabel(boardId:BoardId, name:string, color:strin
     return await getLabelsByBoardId(boardId);
 }
 
+export async function createBoardLabelSingle(boardId:BoardId, name:string, color:string): Promise<LabelId>{
+    const label:Label = {
+        name,
+        color,
+        id: crypto.randomUUID(),
+    }
+    await createLabelOnBoard(label, boardId);
+    return label.id;
+}
+
 export async function removeBoardLabel(boardId:BoardId, labelId:LabelId): Promise<Label[]>{
     await deleteLabel(labelId);
     await deleteLabelingOnCardsByLabelId(labelId);
@@ -124,4 +136,57 @@ export async function updateBoardLabels(boardId:BoardId, updatedLabel:Label): Pr
 
     await updateLabel(updatedLabel);
     return await getLabelsByBoardId(boardId);
+}
+
+
+
+export const createTerrazzoBoardFromTrelloBoard = async (onProjectId: ProjectId, trelloData: any) => {
+    const trelloBoard = trelloData as TrelloExportType;
+    
+    const boardName = trelloBoard.name;
+    const trelloLists = trelloBoard.lists;
+    const trelloCards = trelloBoard.cards;
+    const trelloLabels = trelloBoard.labels;
+
+    // Trello id --> trz id
+    const listMap: {[trl:string]:ListId} = {}
+    const labelMap: {[trl:string]:LabelId} = {}
+
+    try {
+        const trzBoardId = await addBoard(boardName, "", onProjectId);
+        for (const trelloList of trelloLists){
+            const trelloListName = trelloList.name;
+            const trelloListOrder = trelloList.pos;
+
+            const trzList = await addList(trzBoardId, trelloListName);
+            await moveList(trzList.id, trelloListOrder);
+
+            listMap[trelloList.id] = trzList.id;
+        }
+
+        for(const trlLabel of trelloBoard.labels){
+            const labelId = await createBoardLabelSingle(trzBoardId, trlLabel.name, TrelloLabelColorsMap[trlLabel.color]);
+            labelMap[trlLabel.id] = labelId;
+        }
+
+        for (const trlCard of trelloCards){
+            const trlCardName = trlCard.name;
+            const trlCardDesc = trlCard.desc;
+            const trlCardLabelIds = trlCard.idLabels;
+            const trlCardListId = trlCard.idList;
+            const trlCardOrder = trlCard.pos;
+            const trlCardNumber = trlCard.idShort;
+
+            const trzListId = listMap[trlCardListId];
+            const trzCard = await addCard(trzListId, trlCardName, trlCardDesc, trlCardNumber);
+            await moveCardToList(trzCard.id, trzListId, trlCardOrder);
+            const trzLabelIds = trlCardLabelIds.map((trlLabelId)=>labelMap[trlLabelId]);
+            await setCardsLabels(trzCard.id, trzLabelIds);
+        }
+
+        return trzBoardId;
+    } catch (error:any){
+        console.error("Error importing from trello", error);
+        return undefined;
+    }
 }

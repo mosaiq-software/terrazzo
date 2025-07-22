@@ -2,7 +2,8 @@ import { checkUsernameTaken, getOrCreateUserByGithubAccessToken, setupUser } fro
 import { githubAuth, revokeGithubAuth } from '@trz-api/utils/githubUtils';
 import {RestRequestBody, RestRequestParams, RestResponse, RestResponseTypes, RestRoutes} from "@mosaiq/terrazzo-common/apiTypes";
 import express from 'express';
-import { UserId } from '@mosaiq/terrazzo-common/types';
+import { ProjectId, UserId } from '@mosaiq/terrazzo-common/types';
+import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
 
 const router = express.Router();
 
@@ -95,6 +96,18 @@ router.post(RestRoutes.USER_SETUP, async (req, res) => {
         const user = await setupUser(params.id as UserId, body.username, body.firstName, body.lastName);
         const response: RestResponse<RestRoutes.USER_SETUP> = user;
         res.status(200).send(response);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.post("/uploadtrello/:projectId", async (req, res) => {
+    const projectId = req.params.projectId as ProjectId;
+    const body = req.body;
+    try {
+        const boardId = await createTerrazzoBoardFromTrelloBoard(projectId, body);
+        res.status(200).send(boardId);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');
