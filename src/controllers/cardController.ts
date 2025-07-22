@@ -101,7 +101,7 @@ export async function addCard(listID:ListId, cardName:string, description?:strin
         order: await getNextCardOrder(listID)
     };
     try {
-        const descBlock = await createTextBlock();
+        const descBlock = await createTextBlock(description);
         if(!descBlock){
             throw new Error("Failed to create description text block");
         }

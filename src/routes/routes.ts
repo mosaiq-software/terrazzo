@@ -102,11 +102,11 @@ router.post(RestRoutes.USER_SETUP, async (req, res) => {
     }
 });
 
-router.post("/uploadtrello/:projectId", async (req, res) => {
-    const projectId = req.params.projectId as ProjectId;
-    const body = req.body;
+router.post(RestRoutes.IMPORT_FROM_TRELLO, async (req, res) => {
+    const params: RestRequestParams[RestRoutes.IMPORT_FROM_TRELLO] = req.params as RestRequestParams[RestRoutes.IMPORT_FROM_TRELLO];
+    const body: RestRequestBody[RestRoutes.IMPORT_FROM_TRELLO] = req.body;
     try {
-        const boardId = await createTerrazzoBoardFromTrelloBoard(projectId, body);
+        const boardId = await createTerrazzoBoardFromTrelloBoard(params.projectId, body);
         res.status(200).send(boardId);
     } catch (error) {
         console.error(error);
