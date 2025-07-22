@@ -1,0 +1,13 @@
+services:
+    terrazzo-api:
+        build: .
+        container_name: terrazzo-api
+        ports:
+            - "9051:9051"
+            - "9052:9052"
+            - "9053:9053"
+        restart: unless-stopped
+        volumes:
+        - trz-db:/etc/trz
+volumes:
+    trz-db:
