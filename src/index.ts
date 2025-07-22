@@ -5,6 +5,7 @@ import * as constants from './constants';
 import * as textUtils from './utils/textUtils';
 import * as socketUtils from './utils/socketUtils';
 import * as arrayUtils from './utils/arrayUtils';
+import * as trelloTypes from './trelloTypes';
 
 export { 
     types,
@@ -14,4 +15,5 @@ export {
     textUtils,
     socketUtils,
     arrayUtils,
+    trelloTypes,
 };

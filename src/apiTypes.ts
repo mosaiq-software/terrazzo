@@ -1,4 +1,5 @@
-import { GithubUserProfile, User, UserHeader, UserId } from "./types";
+import { TrelloExportType } from "./trelloTypes";
+import { BoardId, GithubUserProfile, ProjectId, User, UserHeader, UserId } from "./types";
 
 /**
  * Data types for the REST API
@@ -12,6 +13,7 @@ export enum RestRoutes {
     USER_GITHUB_REVOKE_TOKEN = "/user/github/revoke/:accessToken",
     USER_CHECK_USERNAME = "/user/check-username/:username",
     USER_SETUP = "/user/setup/:id",
+    IMPORT_FROM_TRELLO = "/uploadtrello/:projectId",
 }
 
 export enum RestMethods {
@@ -28,6 +30,7 @@ export const RestRequestMethod = {
     [RestRoutes.USER_GITHUB_REVOKE_TOKEN]: RestMethods.DELETE,
     [RestRoutes.USER_CHECK_USERNAME]: RestMethods.GET,
     [RestRoutes.USER_SETUP]: RestMethods.POST,
+    [RestRoutes.IMPORT_FROM_TRELLO]: RestMethods.POST,
 }
 export interface RestRequestParams {
     [RestRoutes.INDEX]: {};
@@ -36,6 +39,7 @@ export interface RestRequestParams {
     [RestRoutes.USER_GITHUB_REVOKE_TOKEN]: {accessToken:string};
     [RestRoutes.USER_CHECK_USERNAME]: {username: string};
     [RestRoutes.USER_SETUP]: {id:string};
+    [RestRoutes.IMPORT_FROM_TRELLO]: {projectId:ProjectId}
 }
 
 export interface RestRequestBody {
@@ -45,6 +49,7 @@ export interface RestRequestBody {
     [RestRoutes.USER_GITHUB_REVOKE_TOKEN]: undefined;
     [RestRoutes.USER_CHECK_USERNAME]: undefined;
     [RestRoutes.USER_SETUP]: {username:string, firstName:string, lastName:string};
+    [RestRoutes.IMPORT_FROM_TRELLO]: TrelloExportType;
 }
 
 export interface RestResponseTypes {
@@ -54,6 +59,7 @@ export interface RestResponseTypes {
     [RestRoutes.USER_GITHUB_REVOKE_TOKEN]: undefined;
     [RestRoutes.USER_CHECK_USERNAME]: boolean;
     [RestRoutes.USER_SETUP]: UserHeader;
+    [RestRoutes.IMPORT_FROM_TRELLO]: BoardId | undefined;
 }
 export type ErrorString = string;
 export type RestResponse<T extends RestRoutes> = RestResponseTypes[T] | ErrorString;
