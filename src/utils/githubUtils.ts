@@ -69,6 +69,7 @@ export async function getOrgMemberIds(org: string, access_token: string) {
     }
     return members.map((member: any) => member.id);
 }
+
 export async function getOrgMembershipData(org: string, access_token: string) {
     try {
         const { data } = await axios({
