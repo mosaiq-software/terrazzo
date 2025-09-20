@@ -1,13 +1,20 @@
 services:
-    terrazzo-api:
+    api:
         build: .
-        container_name: terrazzo-api
         ports:
-            - "9051:9051"
-            - "9052:9052"
-            - "9053:9053"
-        restart: unless-stopped
+            - '${API_PORT}:${API_PORT}'
+        restart: always
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://0.0.0.0:${API_PORT}/']
+            interval: 15s
+            timeout: 10s
+            retries: 5
+            start_period: 30s
         volumes:
-        - trz-db:/etc/trz
-volumes:
-    trz-db:
+            - type: bind
+              source: ${DATABASE_PATH}
+              target: ${DATABASE_PATH}
+              bind:
+                  create_host_path: true
+        env_file:
+            - .env

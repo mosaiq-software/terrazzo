@@ -7,6 +7,7 @@
   "repository": "https://github.com/mosaiq-software/terrazzo-api",
   "scripts": {
     "start": "tsx watch src/index.ts",
+    "start:prod": "npm ci && npm i @mosaiq/terrazzo-common@latest && npm run start",
     "prepare": "husky",
     "after-push": "node ./scripts/after-push.mjs",
     "before-push": "node ./scripts/before-push.mjs",
