@@ -32,6 +32,7 @@ const start = async () => {
 
     const { io } = initSockets();
     io.listen(SOCKET_PORT);
+    console.log(`Socket server started at ${process.env.API_URL}:${SOCKET_PORT}`);
 }
 
 start();
