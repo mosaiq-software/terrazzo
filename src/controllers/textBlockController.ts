@@ -26,7 +26,11 @@ export const loadTextBlockEncodedData = async (textBlockId:TextBlockId) => {
         if(!textBlock){
             throw new Error(`Text block ${textBlockId} not found`);
         }
-        return textBlock.text;
+        const text = textBlock.text;
+        if(isValidBase64(text)){
+            return text;
+        }
+        return plaintextToRemirrorYjs(text);
     } catch (error: any) {
         console.error(`Unable to load text block ${textBlockId} : ${error.message}`);
         return null;
@@ -51,44 +55,60 @@ export const createTextBlockWithPlaintext = async (plaintext?:string) => {
  * @returns Base64 encoded Y.js document state
  */
 export const plaintextToRemirrorYjs = (text: string): string => {
-    // Create a new Y.js document
     const ydoc = new Y.Doc();
     
-    // Get the shared type for the document - Remirror uses 'default' as the key for the main document
-    const yXmlFragment = ydoc.getXmlFragment('default');
+    // Based on inspection, we need to create the shared types that Remirror expects
+    // The rawSharedTypes shows both 'prosemirror' and 'default' exist as AbstractType
+    // Let's try different approaches to see what works
     
-    if (text.trim()) {
-        // Split text by newlines to create paragraph elements
-        const lines = text.split('\n');
-        
-        lines.forEach((line, index) => {
-            // Create a paragraph element for each line
-            const paragraph = new Y.XmlElement('paragraph');
-            
-            if (line.trim()) {
-                // If line has content, add it as a text node
-                const textNode = new Y.XmlText();
-                textNode.insert(0, line);
-                paragraph.insert(0, [textNode]);
-            } else {
-                // Empty paragraph for empty lines
-                const textNode = new Y.XmlText();
-                paragraph.insert(0, [textNode]);
-            }
-            
-            yXmlFragment.insert(index, [paragraph]);
-        });
-    } else {
-        // If no text, create a single empty paragraph
+    // Approach 1: Create as XmlFragment (most common for ProseMirror)
+    const prosemirrorDoc = ydoc.getXmlFragment('prosemirror');
+    
+    if (text) {
+        // Create a simple paragraph structure that ProseMirror expects
         const paragraph = new Y.XmlElement('paragraph');
         const textNode = new Y.XmlText();
+        textNode.insert(0, text);
         paragraph.insert(0, [textNode]);
-        yXmlFragment.insert(0, [paragraph]);
+        prosemirrorDoc.insert(0, [paragraph]);
+    } else {
+        // Empty document should still have a paragraph
+        const paragraph = new Y.XmlElement('paragraph');
+        prosemirrorDoc.insert(0, [paragraph]);
     }
     
-    // Encode the document state as an update and convert to base64
+    // Also create the 'default' shared type (might be needed by Remirror)
+    const defaultType = ydoc.getXmlFragment('default');
+    
     const update = Y.encodeStateAsUpdate(ydoc);
     const base64String = Buffer.from(update).toString('base64');
-    
     return base64String;
+}
+
+
+/**
+ * Validates if a string is a valid base64 encoded string
+ * @param str The string to validate
+ * @returns true if the string is valid base64, false otherwise
+ */
+export const isValidBase64 = (str: string): boolean => {
+    if (!str || typeof str !== 'string') {
+        return false;
+    }
+    const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+    if (!base64Regex.test(str)) {
+        return false;
+    }
+    if (str.length % 4 !== 0) {
+        return false;
+    }
+
+    try {
+        Buffer.from(str, 'base64');
+        const decoded = Buffer.from(str, 'base64');
+        const reencoded = decoded.toString('base64');
+        return reencoded === str;
+    } catch (error) {
+        return false;
+    }
 }
