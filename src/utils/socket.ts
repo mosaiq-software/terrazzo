@@ -8,6 +8,8 @@ import { instrument } from "@socket.io/admin-ui";
 import { getPrivateGitHubUserData } from './githubUtils';
 import { getUserPreview } from '@trz-api/controllers/userController';
 import { createServer } from 'http';
+import { Document, YSocketIO } from '@trz-api/utils/y-socket-io';
+import * as Y from 'yjs';
 
 const initSockets = () => {
     console.info("Starting sockets");
@@ -28,6 +30,42 @@ const initSockets = () => {
         auth: false,
         mode: "production",
     });
+
+    // Create the YSocketIO instance
+    // NOTE: This uses the socket namespaces that match the regular expression /^\/yjs\|.*$/, make sure that when using namespaces
+    //       for other logic, these do not match the regular expression, this could cause unwanted problems.
+    // TIP: You can export a new instance from another file to manage as singleton and access documents from all app.
+    const ysocketio = new YSocketIO(io, {
+    // authenticate: (auth) => auth.token === 'valid-token',
+    // levelPersistenceDir: './storage-location',
+    // gcEnabled: true,
+    })
+
+    // ysocketio.on('document-update', (doc: Document, update: Uint8Array) => {
+    //     const b64  = Buffer.from(update).toString('base64');
+    //     console.info(`Document ${doc.name} updated, update (base64): ${b64}`);
+    // });
+
+    // ysocketio.on('document-loaded', (doc: Document) => {
+    //     console.log(`The document ${doc.name} was loaded`);
+
+    // });
+
+    // ysocketio.on('document-destroy', async (doc: Document) => {
+    //     console.log(`The document ${doc.name} is being destroyed`);
+    // });
+
+    // ysocketio.on('awareness-update', (doc: Document, update: Uint8Array) => {
+    //     console.log(`The awareness of the document ${doc.name} is updated`);
+    // });
+
+    // ysocketio.on('all-document-connections-closed', async (doc: Document) => {
+    //     console.log(`All clients of document ${doc.name} are disconected`);
+    // });
+    
+
+    // Execute initialize method
+    ysocketio.initialize()
 
     io.on(ServerSocketIOEvent.CONNECTION, async (socket) => {
         try {

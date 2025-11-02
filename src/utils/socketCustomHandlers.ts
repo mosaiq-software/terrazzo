@@ -20,7 +20,7 @@ import {
 } from "@trz-api/controllers/cardController";
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
-import { handleTextBlockEvents } from '@trz-api/controllers/textBlockController';
+import { storeTextBlockData } from '@trz-api/controllers/textBlockController';
 import { addOrganization, getFullOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { addProject, getFullProject, getProjectPreview, updateProjectFromPartial } from '@trz-api/controllers/projectController';
 import { getUserPreview, getUsersEntities, removeMembership, updateMembershipRecordFromPartial } from '@trz-api/controllers/userController';
@@ -426,21 +426,6 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         } catch (error: any) {
             console.error("Error getting text block",data,error);
             reply(undefined, "Error getting text block");
-        }
-    });
-
-    socket.on(ClientSE.UPDATE_TEXT_BLOCK, async (data: ClientSEPayload[ClientSE.UPDATE_TEXT_BLOCK], reply: ClientSEReply<ClientSE.UPDATE_TEXT_BLOCK>) => {
-        try {
-            if (!isValidTextBlockEvents(data)) {
-                throw new Error("Invalid text block event");
-            }
-            const text = await handleTextBlockEvents(data);
-            const payload:ServerSEPayload[ServerSE.UPDATE_TEXT_BLOCK] = {events: data, updated: text??''};
-            broadcastToMyRooms(socket, ServerSE.UPDATE_TEXT_BLOCK, payload, [RoomType.TEXT], false);
-            reply(text);
-        } catch (error: any) {
-            console.log("Error updating text block",data,error);
-            reply(undefined, "Error updating text block");
         }
     });
 

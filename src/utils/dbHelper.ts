@@ -5,7 +5,7 @@ export const sequelize = new Sequelize({
     logging: (process.env.DATABASE_LOGGING === "true")
 });
 
-sequelize.sync({ alter: true })
+sequelize.sync({ alter: false })
     .then(() => {
         console.log('Database & tables created!');
     })
