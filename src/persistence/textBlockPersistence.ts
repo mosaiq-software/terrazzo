@@ -16,12 +16,6 @@ export const getTextBlockById = async (id: TextBlockId) => {
     return (await TextBlockModel.findByPk(id))?.toJSON() as TextBlock | null;
 }
 
-export const getAllTextBlockIds = async () => {
-    return (await TextBlockModel.findAll({
-        attributes: ['id']
-    })).map((ret)=>ret.toJSON().id);
-}
-
 export const createTextBlock = async (text?: string) => {
     const uid = crypto.randomUUID();
     return (await TextBlockModel.create({

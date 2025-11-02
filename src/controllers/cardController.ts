@@ -11,10 +11,10 @@ import {
 import {getListById, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
 import {BoardId, Card, CardHeader, CardId, LabelId, ListId} from "@mosaiq/terrazzo-common/types";
-import { createTextBlock } from "@trz-api/persistence/textBlockPersistence";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 import { getAssignmentsForCard } from "@trz-api/persistence/assignmentPersistence";
 import { addLabelToCard, deleteLabelsOnCard, getLabelsOnCard } from "@trz-api/persistence/labelPersistence";
+import { createTextBlockWithPlaintext } from "./textBlockController";
 
 export const MOVING_LIST_ORDER = -10000;
 //Gets
@@ -101,7 +101,7 @@ export async function addCard(listID:ListId, cardName:string, description?:strin
         order: await getNextCardOrder(listID)
     };
     try {
-        const descBlock = await createTextBlock(description);
+        const descBlock = await createTextBlockWithPlaintext(description);
         if(!descBlock){
             throw new Error("Failed to create description text block");
         }

@@ -20,7 +20,7 @@ import {
 } from "@trz-api/controllers/cardController";
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
-import { storeTextBlockData } from '@trz-api/controllers/textBlockController';
+import { storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
 import { addOrganization, getFullOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { addProject, getFullProject, getProjectPreview, updateProjectFromPartial } from '@trz-api/controllers/projectController';
 import { getUserPreview, getUsersEntities, removeMembership, updateMembershipRecordFromPartial } from '@trz-api/controllers/userController';

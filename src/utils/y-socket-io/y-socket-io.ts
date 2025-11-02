@@ -3,7 +3,7 @@ import { Namespace, Server, Socket } from 'socket.io'
 import * as AwarenessProtocol from 'y-protocols/awareness'
 import { Document } from "./document";
 import { Observable } from 'lib0/observable'
-import { loadTextBlockData, storeTextBlockData } from '@trz-api/controllers/textBlockController';
+import { loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
 import { TextBlockId } from '@mosaiq/terrazzo-common/types';
 
 /**
@@ -243,10 +243,10 @@ export class YSocketIO extends Observable<string> {
 }
 
 const storeDocument = async (name: string, data: string): Promise<void> => {
-    await storeTextBlockData(name as TextBlockId, data);
+    await storeTextBlockEncodedData(name as TextBlockId, data);
 }
 
 const loadDocument = async (name: string): Promise<string | null> => {
-    const stored = await loadTextBlockData(name as TextBlockId);
+    const stored = await loadTextBlockEncodedData(name as TextBlockId);
     return stored;
 }
