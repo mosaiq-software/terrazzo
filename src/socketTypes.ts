@@ -1,5 +1,5 @@
 import { EntityType, Role } from "./constants";
-import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockEvent, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment, BoardRes, ListHeader, Label, LabelId} from "./types";
+import {Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment, BoardRes, ListHeader, Label, LabelId} from "./types";
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -45,7 +45,6 @@ export enum ClientSE { // Client to Server
     CREATE_CARD = "CREATE_CARD",
     CREATE_BOARD_LABEL = "CREATE_BOARD_LABEL",
 
-    UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
     UPDATE_ORG_FIELD = "UPDATE_ORG_FIELD",
     UPDATE_PROJECT_FIELD = "UPDATE_PROJECT_FIELD",
     UPDATE_BOARD_FIELD = "UPDATE_BOARD_FIELD",
@@ -61,8 +60,6 @@ export enum ClientSE { // Client to Server
     SEND_INVITE = "SEND_INVITE",
     RESPOND_INVITE = "RESPOND_INVITE",
     KICK_MEMBER = "KICK_MEMBER",
-
-
 }
 export interface ClientSEPayload {
     // Client to Server
@@ -93,7 +90,6 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_CARD]: CreateCardType;
     [ClientSE.CREATE_BOARD_LABEL]: {boardId:BoardId, name:string, color:string};
 
-    [ClientSE.UPDATE_TEXT_BLOCK]: TextBlockEvent[];
     [ClientSE.UPDATE_ORG_FIELD]: (Partial<Organization> & {id: OrganizationId});
     [ClientSE.UPDATE_PROJECT_FIELD]: (Partial<Project> & {id: ProjectId});
     [ClientSE.UPDATE_BOARD_FIELD]: (Partial<Board> & {id: BoardId});
@@ -140,7 +136,6 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_CARD]: CardId | undefined;
     [ClientSE.CREATE_BOARD_LABEL]: LabelId | undefined;
     
-    [ClientSE.UPDATE_TEXT_BLOCK]: string | undefined;
     [ClientSE.UPDATE_ORG_FIELD]: undefined;
     [ClientSE.UPDATE_PROJECT_FIELD]: undefined;
     [ClientSE.UPDATE_BOARD_FIELD]: undefined;
@@ -175,7 +170,6 @@ export enum ServerSE { // Server to Client
     ADD_LIST = "ADD_LIST",
     ADD_CARD = "ADD_CARD",
     
-    UPDATE_TEXT_BLOCK = "UPDATE_TEXT_BLOCK",
     UPDATE_ORG_FIELD = "UPDATE_ORG_FIELD",
     UPDATE_PROJECT_FIELD = "UPDATE_PROJECT_FIELD",
     UPDATE_BOARD_FIELD = "UPDATE_BOARD_FIELD",
@@ -202,7 +196,6 @@ export interface ServerSEPayload {
     [ServerSE.ADD_LIST]: List;
     [ServerSE.ADD_CARD]: Card;
     
-    [ServerSE.UPDATE_TEXT_BLOCK]: {events: TextBlockEvent[], updated: string};
     [ServerSE.UPDATE_ORG_FIELD]: (Partial<Organization> & {id: OrganizationId});
     [ServerSE.UPDATE_PROJECT_FIELD]: (Partial<Project> & {id: ProjectId});
     [ServerSE.UPDATE_BOARD_FIELD]: (Partial<Board> & {id: BoardId});
@@ -229,7 +222,6 @@ export interface ServerSEReplies {
     [ServerSE.ADD_LIST]: void;
     [ServerSE.ADD_CARD]: void;
 
-    [ServerSE.UPDATE_TEXT_BLOCK]: void;
     [ServerSE.UPDATE_ORG_FIELD]: void;
     [ServerSE.UPDATE_PROJECT_FIELD]: void;
     [ServerSE.UPDATE_BOARD_FIELD]: void;

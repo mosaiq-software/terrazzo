@@ -133,12 +133,6 @@ export interface TextBlock {
     id: TextBlockId;
     text: string;
 }
-export interface TextBlockEvent {
-    id: TextBlockId;
-    start: number;
-    end: number;
-    inserted: string;
-}
 
 export interface MembershipRecord {
     id: MembershipRecordId;
