@@ -12,12 +12,13 @@ import {
 } from "@trz-api/persistence/userPersistence";
 import {getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId} from "@trz-api/utils/githubUtils";
 import { getInvitesToUser } from "./inviteController";
-import { addOrganization, getMembersInOrg, updateOrganizationFromPartial } from "./organizationController";
+import { addOrganization, updateOrganizationFromPartial } from "./organizationController";
 import { addProject } from "./projectController";
 import { addBoard } from "./boardController";
 import { addList } from "./listController";
 import { addCard } from "./cardController";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
+import { getMembersInOrg } from "./membershipController";
 
 //Gets
 export async function getOrCreateUserByGithubAccessToken(accessToken: string) {

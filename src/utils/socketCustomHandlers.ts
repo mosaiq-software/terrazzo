@@ -553,7 +553,8 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             const boardId = await getBoardIDFromCardID(data.cardId);
 
             const payload: ServerSEPayload[ServerSE.UPDATE_CARD_ASSIGNEE] = data;
-            // broadcastToMyselfAndAnotherRoom(socket, RoomType.MOUSE, boardId, ServerSE.UPDATE_CARD_ASSIGNEE, payload);
+            broadcast<ServerSE.UPDATE_CARD_ASSIGNEE>(socket, ServerSE.UPDATE_CARD_ASSIGNEE, payload, [getRoomCode(RoomType.DATA, boardId)]);
+            broadcast<ServerSE.UPDATE_CARD_ASSIGNEE>(socket, ServerSE.UPDATE_CARD_ASSIGNEE, payload, [getRoomCode(RoomType.USER, data.userId)]);
         } catch (error: any) {
             reply(undefined, error.message);
         }

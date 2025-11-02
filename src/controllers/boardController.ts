@@ -5,7 +5,7 @@ import { Board, BoardHeader, BoardId, BoardRes, Label, LabelId, ListId, ProjectI
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 import { TrelloExportType, TrelloLabelColorsMap } from "@mosaiq/terrazzo-common/trelloTypes";
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from "./cardController";
-import { getMembersInProject } from "./projectController";
+import { getMembersInProjectWithOrgDeduped } from "./membershipController";
 
 //Gets
 
@@ -22,7 +22,7 @@ export async function getWholeBoard(boardID:BoardId) {
         throw new Error("Board not found");
     }
 
-    const projectMembers = await getMembersInProject(boardHeader.projectId)
+    const projectMembers = await getMembersInProjectWithOrgDeduped(boardHeader.projectId)
 
     try {
         const board: Board = {
@@ -44,7 +44,7 @@ export async function getBoardRes(boardID:BoardId): Promise<BoardRes | undefined
         throw new Error("Board not found");
     }
 
-    const projectMembers = await getMembersInProject(boardHeader.projectId)
+    const projectMembers = await getMembersInProjectWithOrgDeduped(boardHeader.projectId)
 
     try {
         const board: BoardRes = {
@@ -72,7 +72,7 @@ export async function addBoard(name:string, boardCode:string, projectId:ProjectI
     if(name.length > 50) {
         throw new Error("Title must be 50 characters or less");
     }
-    const projectMembers = await getMembersInProject(projectId)
+    const projectMembers = await getMembersInProjectWithOrgDeduped(projectId)
 
     const newBoard: Board = {
         id: crypto.randomUUID(),

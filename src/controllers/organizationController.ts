@@ -1,12 +1,12 @@
 import { EntityType, Role } from "@mosaiq/terrazzo-common/constants";
 import { Organization, OrganizationHeader, OrganizationId, UserId } from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
-import { createMembershipRecord, getMembershipRecordForEntity } from "@trz-api/persistence/membershipPersistence";
+import { createMembershipRecord } from "@trz-api/persistence/membershipPersistence";
 import { createOrg, getOrgById, updateOrg } from "@trz-api/persistence/organizationPersistence";
 import { getProjectsByOrgId } from "@trz-api/persistence/projectPersistence";
 import { getUserById } from "@trz-api/persistence/userPersistence";
 import { getInvitesForEntity } from "./inviteController";
-import { populateMemberships } from "./userController";
+import { getMembersInOrg } from "./membershipController";
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
@@ -81,12 +81,3 @@ export async function updateOrganizationFromPartial(orgId: OrganizationId, parti
     }
 }
 
-export const getMembersInOrg = async (orgId: OrganizationId) => {
-    const org = await getOrgById(orgId);
-    if (org == null) {
-        throw new Error("Org not found");
-    }
-    const records = await getMembershipRecordForEntity(orgId);
-    const members = populateMemberships(records);
-    return members;
-}
