@@ -59,10 +59,10 @@ export interface BoardHeader {
 export interface Board extends BoardHeader{
     lists: List[];
     labels: Label[];
+    members: Member[]
 }
-export interface BoardRes extends BoardHeader {
+export interface BoardRes extends Omit<Board, "lists"> {
     lists: {listId:ListId, cardIds:CardId[]}[];
-    labels: Label[];
 }
 
 export interface ListHeader {
