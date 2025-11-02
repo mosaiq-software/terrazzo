@@ -88,11 +88,14 @@ export interface CardHeader {
     archived: boolean;
     order: number;
     descriptionTextBlockId: TextBlockId;
+    createdAt: number;
+    createdById: UserId | null;
 }
 export interface Card extends CardHeader{
     comments: CommentId[];
     labels: LabelId[];
     assignees: UserId[];
+    createdBy: UserHeader | null;
 }
 
 export interface Sprint {
