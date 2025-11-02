@@ -41,8 +41,7 @@ export interface ProjectHeader {
     description: string;
 }
 export interface Project extends ProjectHeader{
-    orgMembers: Member[];
-    externalMembers: Member[];
+    members: Member[];
     boards: BoardHeader[];
     invites: Invite[];
 }
