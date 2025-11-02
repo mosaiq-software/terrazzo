@@ -10,11 +10,12 @@ import {
 } from "@trz-api/persistence/cardPersistence";
 import {getListById, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
-import {BoardId, Card, CardHeader, CardId, LabelId, ListId} from "@mosaiq/terrazzo-common/types";
+import {BoardId, Card, CardHeader, CardId, LabelId, ListId, UserId} from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 import { getAssignmentsForCard } from "@trz-api/persistence/assignmentPersistence";
 import { addLabelToCard, deleteLabelsOnCard, getLabelsOnCard } from "@trz-api/persistence/labelPersistence";
 import { createTextBlockWithPlaintext } from "./textBlockController";
+import { getUserById } from "@trz-api/persistence/userPersistence";
 
 export const MOVING_LIST_ORDER = -10000;
 //Gets
@@ -70,7 +71,7 @@ export async function getSingleFullCard (cardId: CardId): Promise<Card | undefin
  * @param listID
  * @param cardName
  */
-export async function addCard(listID:ListId, cardName:string, description?:string, explicitCardNumber?:number) {
+export async function addCard(listID:ListId, cardName:string, description?:string, explicitCardNumber?:number, createdById?:UserId) {
     //pull board from db with ID
     const updatingList = await getListById(listID);
 
@@ -98,7 +99,10 @@ export async function addCard(listID:ListId, cardName:string, description?:strin
         comments:[],
         labels:[],
         archived:false,
-        order: await getNextCardOrder(listID)
+        order: await getNextCardOrder(listID),
+        createdAt: Date.now(),
+        createdById: createdById ?? null,
+        createdBy: createdById ? await getUserById(createdById) : null,
     };
     try {
         const descBlock = await createTextBlockWithPlaintext(description);
@@ -216,6 +220,7 @@ export const populateCards = async (cardHeaders:CardHeader[]): Promise<Card[]> =
             ...c,
             assignees: await getAssignmentsForCard(c.id),
             labels: await getLabelsOnCard(c.id),
+            createdBy: c.createdById ? await getUserById(c.createdById) : null,
             comments: [],
         };
         return cc;

@@ -176,7 +176,7 @@ export const createTerrazzoBoardFromTrelloBoard = async (onProjectId: ProjectId,
             const trlCardNumber = trlCard.idShort;
 
             const trzListId = listMap[trlCardListId];
-            const trzCard = await addCard(trzListId, trlCardName, trlCardDesc, trlCardNumber);
+            const trzCard = await addCard(trzListId, trlCardName, trlCardDesc, trlCardNumber, undefined);
             await moveCardToList(trzCard.id, trzListId, trlCardOrder);
             const trzLabelIds = trlCardLabelIds.map((trlLabelId)=>labelMap[trlLabelId]);
             await setCardsLabels(trzCard.id, trzLabelIds);

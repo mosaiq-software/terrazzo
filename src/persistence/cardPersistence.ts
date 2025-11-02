@@ -19,8 +19,10 @@ CardModel.init({
     storyPoints: DataTypes.INTEGER,
     sprintId: DataTypes.STRING,
     archived: DataTypes.BOOLEAN,
-    order: DataTypes.INTEGER
-}, { sequelize});
+    order: DataTypes.INTEGER,
+    createdById: DataTypes.STRING,
+    createdAt: DataTypes.NUMBER,
+}, { sequelize, timestamps: false});
 
 
 export const getCardById = async (id: CardId) => {
@@ -52,7 +54,9 @@ export const createCardOnList = async (card: CardHeader, listId: ListId) => {
         storyPoints: card.storyPoints,
         sprintId: card.sprintId,
         archived: false,
-        order: card.order
+        order: card.order,
+        createdById: card.createdById,
+        createdAt: card.createdAt,
     });
 };
 

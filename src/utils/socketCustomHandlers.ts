@@ -19,17 +19,12 @@ import {
     updateCardFromPartial
 } from "@trz-api/controllers/cardController";
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
-import { isValidTextBlockEvents } from '@mosaiq/terrazzo-common/utils/textUtils';
-import { storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
 import { addOrganization, getFullOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { addProject, getFullProject, getProjectPreview, updateProjectFromPartial } from '@trz-api/controllers/projectController';
 import { getUserPreview, getUsersEntities, removeMembership, updateMembershipRecordFromPartial } from '@trz-api/controllers/userController';
 import { getInvitesForEntity, replyToInvite, sendInvite } from '@trz-api/controllers/inviteController';
-import { EntityType } from '@mosaiq/terrazzo-common/constants';
 import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/assignmentController';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
-import { getListById } from '@trz-api/persistence/listPersistence';
-import { getCardById } from '@trz-api/persistence/cardPersistence';
 import { BoardId, CardId } from '@mosaiq/terrazzo-common/types';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
@@ -245,7 +240,8 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No card data provided');
             }
-            const card = await addCard(data.listID, data.cardName);
+            const socketData = getSocketData(socket);
+            const card = await addCard(data.listID, data.cardName, undefined, undefined, socketData.user.user.id);
             const boardId = await getBoardIDFromCardID(card.id);
             if(boardId){
                 broadcast<ServerSE.ADD_CARD>(socket, ServerSE.ADD_CARD, card, [getRoomCode(RoomType.DATA, boardId)]);

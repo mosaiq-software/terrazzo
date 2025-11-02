@@ -106,10 +106,10 @@ export async function setupUser(userId: UserId, username: string, firstName: str
         const personalListTodo:List = await addList(personalBoardId, "To do");
         const personalListDoing:List = await addList(personalBoardId, "Doing");
         const personalListDone:List = await addList(personalBoardId, "Done");
-        await addCard(personalListTodo.id, "🔎 Explore Terrazzo!");
-        await addCard(personalListTodo.id, "📃 Add a card to a list");
-        await addCard(personalListTodo.id, "🧱 Start my own project");
-        await addCard(personalListTodo.id, "😀 Invite some friends");
+        await addCard(personalListTodo.id, "🔎 Explore Terrazzo!", undefined, undefined, user.id);
+        await addCard(personalListTodo.id, "📃 Add a card to a list", undefined, undefined, user.id);
+        await addCard(personalListTodo.id, "🧱 Start my own project", undefined, undefined, user.id);
+        await addCard(personalListTodo.id, "😀 Invite some friends", undefined, undefined, user.id);
     } catch (e) {
         throw new Error("Failed to create users personal organization "+e)
     }
