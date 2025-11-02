@@ -94,7 +94,6 @@ export async function addCard(listID:ListId, cardName:string, description?:strin
         descriptionTextBlockId: cardUid, // placeholder id
         priority:null,
         storyPoints:null,
-        sprintId:"",
         assignees:[],
         comments:[],
         labels:[],

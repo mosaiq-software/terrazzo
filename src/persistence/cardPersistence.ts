@@ -17,7 +17,6 @@ CardModel.init({
     descriptionTextBlockId: DataTypes.STRING,
     priority: DataTypes.INTEGER,
     storyPoints: DataTypes.INTEGER,
-    sprintId: DataTypes.STRING,
     archived: DataTypes.BOOLEAN,
     order: DataTypes.INTEGER,
     createdById: DataTypes.STRING,
@@ -52,7 +51,6 @@ export const createCardOnList = async (card: CardHeader, listId: ListId) => {
         descriptionTextBlockId: card.descriptionTextBlockId,
         priority: card.priority,
         storyPoints: card.storyPoints,
-        sprintId: card.sprintId,
         archived: false,
         order: card.order,
         createdById: card.createdById,
@@ -67,7 +65,6 @@ export const updateCard = async (card: CardHeader) => {
         descriptionTextBlockId: card.descriptionTextBlockId,
         priority: card.priority,
         storyPoints: card.storyPoints,
-        sprintId: card.sprintId,
         archived: card.archived,
         order: card.order
     }, { where: { id: card.id } });

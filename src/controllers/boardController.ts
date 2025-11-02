@@ -10,7 +10,7 @@ import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from "
 
 /**
  * Gets a board by its ID
- * Returns a promise of the type Board with all its lists, members, sprints, and labels
+ * Returns a promise of the type Board with all its lists, members, and labels
  * @param boardID
  */
 export async function getWholeBoard(boardID:BoardId) {
@@ -26,7 +26,6 @@ export async function getWholeBoard(boardID:BoardId) {
             ...boardHeader,
             lists: await getAllListsOfBoard(boardID, false), //we dont want archived lists when getting whole board
             labels:  await getLabelsByBoardId(boardID),
-            sprints:  [],
         };
         return board;
     } catch (e) {
@@ -73,7 +72,6 @@ export async function addBoard(name:string, boardCode:string, projectId:ProjectI
         boardCode,
         name,
         lists:[],
-        sprints:[],
         labels:[],
         archived:false,
         createdAt: Date.now(),
