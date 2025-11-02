@@ -58,7 +58,6 @@ export interface BoardHeader {
 }
 export interface Board extends BoardHeader{
     lists: List[];
-    sprints: Sprint[];
     labels: Label[];
 }
 export interface BoardRes extends BoardHeader {
@@ -84,7 +83,6 @@ export interface CardHeader {
     name: string;
     priority: Priority | null;
     storyPoints: StoryPoints | null;
-    sprintId: string;
     archived: boolean;
     order: number;
     descriptionTextBlockId: TextBlockId;
@@ -96,13 +94,6 @@ export interface Card extends CardHeader{
     labels: LabelId[];
     assignees: UserId[];
     createdBy: UserHeader | null;
-}
-
-export interface Sprint {
-    id: string;
-    name: string;
-    startDate: Date;
-    endDate: Date;
 }
 
 export interface UserHeader {
