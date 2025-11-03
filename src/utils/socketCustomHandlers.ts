@@ -12,6 +12,7 @@ import {addBoard, createBoardLabel, getBoardRes, getWholeBoard, removeBoardLabel
 import {addList, getBoardIDFromListID, getListRes, moveList, updateListFromPartial} from "@trz-api/controllers/listController";
 import {
     addCard,
+    duplicateCard,
     getBoardIDFromCardID,
     getSingleFullCard,
     moveCardToList,
@@ -242,6 +243,24 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             }
             const socketData = getSocketData(socket);
             const card = await addCard(data.listID, data.cardName, undefined, undefined, socketData.user.user.id);
+            const boardId = await getBoardIDFromCardID(card.id);
+            if(boardId){
+                broadcast<ServerSE.ADD_CARD>(socket, ServerSE.ADD_CARD, card, [getRoomCode(RoomType.DATA, boardId)]);
+            }
+            reply(card.id);
+        } catch (error: any) {
+            console.error("Error creating card", error);
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.CREATE_DUPLICATE_CARD, async (data: ClientSEPayload[ClientSE.CREATE_DUPLICATE_CARD], reply: ClientSEReply<ClientSE.CREATE_DUPLICATE_CARD>) => {
+        try {
+            if (!data) {
+                throw new Error('No card data provided');
+            }
+            const socketData = getSocketData(socket);
+            const card = await duplicateCard(data.cardId, socketData.user.user.id);
             const boardId = await getBoardIDFromCardID(card.id);
             if(boardId){
                 broadcast<ServerSE.ADD_CARD>(socket, ServerSE.ADD_CARD, card, [getRoomCode(RoomType.DATA, boardId)]);

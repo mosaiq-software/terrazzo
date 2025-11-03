@@ -10,12 +10,14 @@ import {
 } from "@trz-api/persistence/cardPersistence";
 import {getListById, getNextListOrder} from "@trz-api/persistence/listPersistence";
 import {getBoardById, updateBoard} from "@trz-api/persistence/boardPersistence";
-import {BoardId, Card, CardHeader, CardId, LabelId, ListId, UserId} from "@mosaiq/terrazzo-common/types";
+import {BoardId, Card, CardHeader, CardId, LabelId, ListId, TextBlockId, UserId} from "@mosaiq/terrazzo-common/types";
 import { updateBaseFromPartial } from "@mosaiq/terrazzo-common/utils/arrayUtils";
 import { getAssignmentsForCard } from "@trz-api/persistence/assignmentPersistence";
 import { addLabelToCard, deleteLabelsOnCard, getLabelsOnCard } from "@trz-api/persistence/labelPersistence";
-import { createTextBlockWithPlaintext } from "./textBlockController";
+import { createTextBlockWithEncodedData, createTextBlockWithPlaintext } from "./textBlockController";
 import { getUserById } from "@trz-api/persistence/userPersistence";
+import { getTextBlockById } from "@trz-api/persistence/textBlockPersistence";
+import { addAssigneeToCard } from "./assignmentController";
 
 export const MOVING_LIST_ORDER = -10000;
 //Gets
@@ -121,6 +123,99 @@ export async function addCard(listID:ListId, cardName:string, description?:strin
     }catch (e) {
         throw new Error("Failed to save Card" + e);
     }
+}
+
+/**
+ * Duplicates a card including its description, assignments, and labels
+ * Returns the new duplicated card
+ * @param cardId The ID of the card to duplicate
+ * @param createdById Optional user ID of the user creating the duplicate
+ */
+export async function duplicateCard(cardId: CardId, createdById?:UserId) {
+    const existingCardHeader = await getCardById(cardId);
+    if(!existingCardHeader){
+        throw new Error("Card not found");
+    }
+
+    const list = await getListById(existingCardHeader.listId);
+    if(!list){
+        throw new Error("List not found");
+    }
+    const board = await getBoardById(list.boardId);
+    if(!board){
+        throw new Error("Board not found");
+    }
+
+    const existingCard = (await populateCards([existingCardHeader]))[0];
+    if(!existingCard){
+        throw new Error("Error populating existing card");
+    }
+
+    const newCardId = crypto.randomUUID();
+    const newCard: Card = {
+        id:newCardId,
+        listId:list.id,
+        cardNumber: board.totalCards + 1,
+        name:existingCard.name + " (Copy)",
+        descriptionTextBlockId: newCardId, // placeholder id
+        priority:existingCard.priority,
+        storyPoints:existingCard.storyPoints,
+        assignees:existingCard.assignees,
+        comments:existingCard.comments,
+        labels:existingCard.labels,
+        archived:existingCard.archived,
+        order: await getNextCardOrder(list.id),
+        createdAt: Date.now(),
+        createdById: createdById ?? null,
+        createdBy: createdById ? await getUserById(createdById) : null,
+    };
+
+    try {
+        const currentEncodedDesc = await getTextBlockById(existingCard.descriptionTextBlockId);
+        let newTextBlockId: TextBlockId | undefined = undefined;
+        if(currentEncodedDesc){
+            const descBlock = await createTextBlockWithEncodedData(currentEncodedDesc.text);
+            if(!descBlock){
+                throw new Error("Failed to create description text block");
+            }
+            newTextBlockId = descBlock.id;
+        } else {
+            const description = "";
+            const descBlock = await createTextBlockWithPlaintext(description);
+            if(!descBlock){
+                throw new Error("Failed to create description text block");
+            }
+            newTextBlockId = descBlock.id;
+        }
+        newCard.descriptionTextBlockId = newTextBlockId;
+    } catch (error:any) {
+        throw new Error("Failed to create description text block " + error.message);
+    }
+
+    try {
+        await createCardOnList(newCard, list.id);
+        board.totalCards++;
+        await updateBoard(board);
+    }catch (e) {
+        throw new Error("Failed to save Card" + e);
+    }
+
+    try {
+        for(const assignee of existingCard.assignees){
+            await addAssigneeToCard(newCard.id, assignee);
+        }
+    } catch (error:any) {
+        throw new Error("Failed to add assignees to card " + error.message);
+    }
+
+    try {
+        setCardsLabels(newCard.id, existingCard.labels);
+    } catch (error:any) {
+        throw new Error("Failed to add labels to card " + error.message);
+    }
+
+    return newCard;
+
 }
 
 export async function updateCardFromPartial(cardId: CardId, partial:Partial<CardHeader>) {

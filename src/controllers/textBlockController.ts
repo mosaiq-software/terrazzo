@@ -38,9 +38,13 @@ export const loadTextBlockEncodedData = async (textBlockId:TextBlockId) => {
 }
 
 export const createTextBlockWithPlaintext = async (plaintext?:string) => {
+    const encoded = plaintextToRemirrorYjs(plaintext ?? '');
+    return await createTextBlockWithEncodedData(encoded);
+}
+
+export const createTextBlockWithEncodedData = async (data:string) => {
     try {
-        const encoded = plaintextToRemirrorYjs(plaintext ?? '');
-        const uid = await createTextBlock(encoded);
+        const uid = await createTextBlock(data);
         return uid;
     } catch (e:any) {
         console.error(`Unable to create text block`, e);
