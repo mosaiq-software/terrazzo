@@ -44,6 +44,7 @@ export enum ClientSE { // Client to Server
     CREATE_LIST = "CREATE_LIST",
     CREATE_CARD = "CREATE_CARD",
     CREATE_BOARD_LABEL = "CREATE_BOARD_LABEL",
+    CREATE_DUPLICATE_CARD = "CREATE_DUPLICATE_CARD",
 
     UPDATE_ORG_FIELD = "UPDATE_ORG_FIELD",
     UPDATE_PROJECT_FIELD = "UPDATE_PROJECT_FIELD",
@@ -89,6 +90,7 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_LIST]: CreateListType;
     [ClientSE.CREATE_CARD]: CreateCardType;
     [ClientSE.CREATE_BOARD_LABEL]: {boardId:BoardId, name:string, color:string};
+    [ClientSE.CREATE_DUPLICATE_CARD]: {cardId:CardId};
 
     [ClientSE.UPDATE_ORG_FIELD]: (Partial<Organization> & {id: OrganizationId});
     [ClientSE.UPDATE_PROJECT_FIELD]: (Partial<Project> & {id: ProjectId});
@@ -135,6 +137,7 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_LIST]: ListId | undefined;
     [ClientSE.CREATE_CARD]: CardId | undefined;
     [ClientSE.CREATE_BOARD_LABEL]: LabelId | undefined;
+    [ClientSE.CREATE_DUPLICATE_CARD]: CardId | undefined;
     
     [ClientSE.UPDATE_ORG_FIELD]: undefined;
     [ClientSE.UPDATE_PROJECT_FIELD]: undefined;
