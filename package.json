@@ -14,7 +14,8 @@
         "build:watch": "tsc -w",
         "lint": "eslint .",
         "types": "tsc --noemit",
-        "update": "git fetch origin develop && git merge origin/develop"
+        "update": "git fetch origin develop && git merge origin/develop",
+        "pretty": "prettier --write \"./**/*.{ts,tsx,json}\""
     },
     "publishConfig": {
         "registry": "https://registry.mosaiq.dev"
@@ -28,6 +29,7 @@
         "husky": "^9.1.7",
         "open": "^10.1.0",
         "typescript": "^5.7.3",
-        "typescript-eslint": "^8.24.1"
+        "typescript-eslint": "^8.24.1",
+        "prettier": "^3.5.3"
     }
 }
