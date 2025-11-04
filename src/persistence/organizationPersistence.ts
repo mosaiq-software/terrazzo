@@ -3,26 +3,31 @@ import { sequelize } from '@trz-api/utils/dbHelper';
 import { Organization, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
 
 class OrgModel extends Model {}
-OrgModel.init({
-    id: {
-        type: DataTypes.STRING,
-        primaryKey: true
+OrgModel.init(
+    {
+        id: {
+            type: DataTypes.STRING,
+            primaryKey: true,
+        },
+        name: DataTypes.STRING,
+        archived: DataTypes.BOOLEAN,
+        createdAt: DataTypes.INTEGER,
+        logoUrl: DataTypes.STRING,
+        isPersonalOrg: DataTypes.BOOLEAN,
+        description: DataTypes.TEXT,
     },
-    name: DataTypes.STRING,
-    archived: DataTypes.BOOLEAN,
-    createdAt: DataTypes.INTEGER,
-    logoUrl: DataTypes.STRING,
-    isPersonalOrg: DataTypes.BOOLEAN,
-    description: DataTypes.TEXT,
-}, { sequelize});
-
+    { sequelize }
+);
 
 export const getOrgById = async (id: OrganizationId) => {
-    return (await OrgModel.findByPk(id, {
-        attributes:{
-            exclude:['updatedAt']
-        }}))?.toJSON() as OrganizationHeader | undefined;
-}
+    return (
+        await OrgModel.findByPk(id, {
+            attributes: {
+                exclude: ['updatedAt'],
+            },
+        })
+    )?.toJSON() as OrganizationHeader | undefined;
+};
 
 export const createOrg = async (org: OrganizationHeader) => {
     return await OrgModel.create({
@@ -34,13 +39,16 @@ export const createOrg = async (org: OrganizationHeader) => {
         isPersonalOrg: org.isPersonalOrg,
         description: org.description,
     });
-}
+};
 
 export const updateOrg = async (org: OrganizationHeader) => {
-    return await OrgModel.update({
-        name: org.name,
-        archived: org.archived,
-        logoUrl: org.logoUrl,
-        description: org.description,
-    }, { where: { id: org.id } });
+    return await OrgModel.update(
+        {
+            name: org.name,
+            archived: org.archived,
+            logoUrl: org.logoUrl,
+            description: org.description,
+        },
+        { where: { id: org.id } }
+    );
 };

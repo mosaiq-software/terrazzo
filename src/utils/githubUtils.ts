@@ -1,21 +1,21 @@
-import { GithubUserProfile, User } from "@mosaiq/terrazzo-common/types";
-import axios from "axios";
-import { Request, Response } from "express";
-import queryString from "query-string";
+import { GithubUserProfile, User } from '@mosaiq/terrazzo-common/types';
+import axios from 'axios';
+import { Request, Response } from 'express';
+import queryString from 'query-string';
 
-export const githubAuth = async (code:string) => {
+export const githubAuth = async (code: string) => {
     if (!code) {
-        throw new Error("No code provided");
+        throw new Error('No code provided');
     }
     const access_token = await getAccessTokenFromCode(code);
     if (!access_token) {
-        throw new Error("Invalid code");
+        throw new Error('Invalid code');
     }
     return access_token;
 };
 
-async function getAccessTokenFromCode(code:string) {
-    try{
+async function getAccessTokenFromCode(code: string) {
+    try {
         const { data } = await axios({
             url: 'https://github.com/login/oauth/access_token',
             method: 'get',
@@ -27,16 +27,15 @@ async function getAccessTokenFromCode(code:string) {
             },
         });
         const parsedData = queryString.parse(data);
-        if (parsedData.error) 
-            throw new Error(parsedData.error_description as string);
+        if (parsedData.error) throw new Error(parsedData.error_description as string);
         return parsedData.access_token as string;
-    }catch(error){
+    } catch (error) {
         return null;
     }
-};
+}
 
 export async function getPrivateGitHubUserData(access_token: string): Promise<GithubUserProfile | null> {
-    try{
+    try {
         const { data } = await axios({
             url: 'https://api.github.com/user',
             method: 'get',
@@ -48,7 +47,7 @@ export async function getPrivateGitHubUserData(access_token: string): Promise<Gi
     } catch (error) {
         return null;
     }
-};
+}
 
 export async function getPublicGithubUserDataFromGithubUserId(githubId: string): Promise<GithubUserProfile | null> {
     try {
@@ -84,7 +83,7 @@ export async function getOrgMembershipData(org: string, access_token: string) {
     } catch (error) {
         return null;
     }
-};
+}
 
 export const revokeGithubAuth = async (access_token: string) => {
     try {
@@ -98,13 +97,13 @@ export const revokeGithubAuth = async (access_token: string) => {
                 'X-GitHub-Api-Version': '2022-11-28',
             },
             body: JSON.stringify({
-                access_token: access_token
-            })
+                access_token: access_token,
+            }),
         });
-        if(!response.ok){
-            throw new Error("Unable to revoke access token");
+        if (!response.ok) {
+            throw new Error('Unable to revoke access token');
         }
-    } catch (error:any) {
-        throw new Error("Unable to revoke access token");
+    } catch (error: any) {
+        throw new Error('Unable to revoke access token');
     }
-}
+};

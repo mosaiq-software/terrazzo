@@ -1,33 +1,32 @@
-import { TextBlockId } from "@mosaiq/terrazzo-common/types";
-import { createTextBlock, getTextBlockById, writeTextBlock } from "@trz-api/persistence/textBlockPersistence";
+import { TextBlockId } from '@mosaiq/terrazzo-common/types';
+import { createTextBlock, getTextBlockById, writeTextBlock } from '@trz-api/persistence/textBlockPersistence';
 import * as Y from 'yjs';
 
-
-export const storeTextBlockEncodedData = async (_textBlockId:TextBlockId, data: string) => {
+export const storeTextBlockEncodedData = async (_textBlockId: TextBlockId, data: string) => {
     let textBlockId = (await getTextBlockById(_textBlockId))?.id;
-    if(!textBlockId){
+    if (!textBlockId) {
         textBlockId = (await createTextBlock(data)).id;
     }
-    if(!textBlockId){
+    if (!textBlockId) {
         throw new Error(`Unable to find or create text block ${_textBlockId}`);
     }
 
     try {
         await writeTextBlock(textBlockId, data);
     } catch (error: any) {
-        console.error("Unable to save text block " + textBlockId + " : "+error.message);
-        throw new Error("Unable to save text block " + textBlockId + " : "+error.message);
+        console.error('Unable to save text block ' + textBlockId + ' : ' + error.message);
+        throw new Error('Unable to save text block ' + textBlockId + ' : ' + error.message);
     }
-}
+};
 
-export const loadTextBlockEncodedData = async (textBlockId:TextBlockId) => {
+export const loadTextBlockEncodedData = async (textBlockId: TextBlockId) => {
     try {
         const textBlock = await getTextBlockById(textBlockId);
-        if(!textBlock){
+        if (!textBlock) {
             throw new Error(`Text block ${textBlockId} not found`);
         }
         const text = textBlock.text;
-        if(isValidBase64(text)){
+        if (isValidBase64(text)) {
             return text;
         }
         return plaintextToRemirrorYjs(text);
@@ -35,22 +34,22 @@ export const loadTextBlockEncodedData = async (textBlockId:TextBlockId) => {
         console.error(`Unable to load text block ${textBlockId} : ${error.message}`);
         return null;
     }
-}
+};
 
-export const createTextBlockWithPlaintext = async (plaintext?:string) => {
+export const createTextBlockWithPlaintext = async (plaintext?: string) => {
     const encoded = plaintextToRemirrorYjs(plaintext ?? '');
     return await createTextBlockWithEncodedData(encoded);
-}
+};
 
-export const createTextBlockWithEncodedData = async (data:string) => {
+export const createTextBlockWithEncodedData = async (data: string) => {
     try {
         const uid = await createTextBlock(data);
         return uid;
-    } catch (e:any) {
+    } catch (e: any) {
         console.error(`Unable to create text block`, e);
         return null;
     }
-}
+};
 
 /**
  * Converts plain text to a Y.js document that can be saved as base64 string
@@ -60,14 +59,14 @@ export const createTextBlockWithEncodedData = async (data:string) => {
  */
 export const plaintextToRemirrorYjs = (text: string): string => {
     const ydoc = new Y.Doc();
-    
+
     // Based on inspection, we need to create the shared types that Remirror expects
     // The rawSharedTypes shows both 'prosemirror' and 'default' exist as AbstractType
     // Let's try different approaches to see what works
-    
+
     // Approach 1: Create as XmlFragment (most common for ProseMirror)
     const prosemirrorDoc = ydoc.getXmlFragment('prosemirror');
-    
+
     if (text) {
         // Create a simple paragraph structure that ProseMirror expects
         const paragraph = new Y.XmlElement('paragraph');
@@ -80,15 +79,14 @@ export const plaintextToRemirrorYjs = (text: string): string => {
         const paragraph = new Y.XmlElement('paragraph');
         prosemirrorDoc.insert(0, [paragraph]);
     }
-    
+
     // Also create the 'default' shared type (might be needed by Remirror)
     const defaultType = ydoc.getXmlFragment('default');
-    
+
     const update = Y.encodeStateAsUpdate(ydoc);
     const base64String = Buffer.from(update).toString('base64');
     return base64String;
-}
-
+};
 
 /**
  * Validates if a string is a valid base64 encoded string
@@ -115,4 +113,4 @@ export const isValidBase64 = (str: string): boolean => {
     } catch (error) {
         return false;
     }
-}
+};

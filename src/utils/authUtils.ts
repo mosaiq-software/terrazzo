@@ -1,4 +1,4 @@
-import { getOrgMemberIds, getPrivateGitHubUserData } from "@trz-api/utils/githubUtils";
+import { getOrgMemberIds, getPrivateGitHubUserData } from '@trz-api/utils/githubUtils';
 
 export const validateGithubAuthToken = async (token: string) => {
     if (!token) {
@@ -13,4 +13,4 @@ export const validateGithubAuthToken = async (token: string) => {
         throw new Error('User not in organization: ' + process.env.ORG_NAME);
     }
     return userData;
-}
+};

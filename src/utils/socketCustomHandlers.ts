@@ -1,24 +1,9 @@
 import { Server, Socket } from 'socket.io';
-import {
-    broadcast,
-    getSocketData,
-    setSocketData,
-    joinRoom,
-    leaveRoom,
-    broadcastToMyRooms,
-} from './socketUtils';
+import { broadcast, getSocketData, setSocketData, joinRoom, leaveRoom, broadcastToMyRooms } from './socketUtils';
 import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
-import {addBoard, createBoardLabel, getBoardRes, getWholeBoard, removeBoardLabel, updateBoardFromPartial, updateBoardLabels} from "@trz-api/controllers/boardController";
-import {addList, getBoardIDFromListID, getListRes, moveList, updateListFromPartial} from "@trz-api/controllers/listController";
-import {
-    addCard,
-    duplicateCard,
-    getBoardIDFromCardID,
-    getSingleFullCard,
-    moveCardToList,
-    setCardsLabels,
-    updateCardFromPartial
-} from "@trz-api/controllers/cardController";
+import { addBoard, createBoardLabel, getBoardRes, getWholeBoard, removeBoardLabel, updateBoardFromPartial, updateBoardLabels } from '@trz-api/controllers/boardController';
+import { addList, getBoardIDFromListID, getListRes, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
+import { addCard, duplicateCard, getBoardIDFromCardID, getSingleFullCard, moveCardToList, setCardsLabels, updateCardFromPartial } from '@trz-api/controllers/cardController';
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { addOrganization, getFullOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { addProject, getFullProject, getProjectPreview, updateProjectFromPartial } from '@trz-api/controllers/projectController';
@@ -123,8 +108,8 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
                 throw new Error('No list id provided');
             }
             const list = await getListRes(data);
-            if(!list){
-                throw new Error("List not found "+data);
+            if (!list) {
+                throw new Error('List not found ' + data);
             }
             reply(list);
         } catch (error: any) {
@@ -138,8 +123,8 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
                 throw new Error('No card id provided');
             }
             const card = await getSingleFullCard(data);
-            if(!card){
-                throw new Error("Card not found "+data);
+            if (!card) {
+                throw new Error('Card not found ' + data);
             }
             reply(card);
         } catch (error: any) {
@@ -191,7 +176,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             const orgId = await addOrganization(data.name, data.creator, false);
             reply(orgId);
         } catch (error: any) {
-            console.error("Error creating card", error);
+            console.error('Error creating card', error);
             reply(undefined, error.message);
         }
     });
@@ -204,7 +189,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             const projectId = await addProject(data.name, data.orgId);
             reply(projectId);
         } catch (error: any) {
-            console.error("Error creating card", error);
+            console.error('Error creating card', error);
             reply(undefined, error.message);
         }
     });
@@ -217,7 +202,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             const boardID = await addBoard(data.name, data.boardCode, data.projectId);
             reply(boardID);
         } catch (error: any) {
-            console.error("Error creating board", error);
+            console.error('Error creating board', error);
             reply(undefined, error.message);
         }
     });
@@ -231,7 +216,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             broadcast<ServerSE.ADD_LIST>(socket, ServerSE.ADD_LIST, list, [getRoomCode(RoomType.DATA, data.boardID)]);
             reply(list.id);
         } catch (error: any) {
-            console.error("Error creating list", error);
+            console.error('Error creating list', error);
             reply(undefined, error.message);
         }
     });
@@ -244,12 +229,12 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             const socketData = getSocketData(socket);
             const card = await addCard(data.listID, data.cardName, undefined, undefined, socketData.user.user.id);
             const boardId = await getBoardIDFromCardID(card.id);
-            if(boardId){
+            if (boardId) {
                 broadcast<ServerSE.ADD_CARD>(socket, ServerSE.ADD_CARD, card, [getRoomCode(RoomType.DATA, boardId)]);
             }
             reply(card.id);
         } catch (error: any) {
-            console.error("Error creating card", error);
+            console.error('Error creating card', error);
             reply(undefined, error.message);
         }
     });
@@ -262,12 +247,12 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             const socketData = getSocketData(socket);
             const card = await duplicateCard(data.cardId, socketData.user.user.id);
             const boardId = await getBoardIDFromCardID(card.id);
-            if(boardId){
+            if (boardId) {
                 broadcast<ServerSE.ADD_CARD>(socket, ServerSE.ADD_CARD, card, [getRoomCode(RoomType.DATA, boardId)]);
             }
             reply(card.id);
         } catch (error: any) {
-            console.error("Error creating card", error);
+            console.error('Error creating card', error);
             reply(undefined, error.message);
         }
     });
@@ -280,7 +265,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             await updateOrganizationFromPartial(data.id, data);
             broadcast<ServerSE.UPDATE_ORG_FIELD>(socket, ServerSE.UPDATE_ORG_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
         } catch (error: any) {
-            console.error("Error updating org fields", error);
+            console.error('Error updating org fields', error);
             reply(undefined, error.message);
         }
     });
@@ -293,7 +278,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             await updateProjectFromPartial(data.id, data);
             broadcast<ServerSE.UPDATE_PROJECT_FIELD>(socket, ServerSE.UPDATE_PROJECT_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
         } catch (error: any) {
-            console.error("Error updating project fields", error);
+            console.error('Error updating project fields', error);
             reply(undefined, error.message);
         }
     });
@@ -306,7 +291,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             await updateBoardFromPartial(data.id, data);
             broadcast<ServerSE.UPDATE_BOARD_FIELD>(socket, ServerSE.UPDATE_BOARD_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
         } catch (error: any) {
-            console.error("Error updating board fields", error);
+            console.error('Error updating board fields', error);
             reply(undefined, error.message);
         }
     });
@@ -318,11 +303,11 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             }
             await updateListFromPartial(data.id, data);
             const boardId = await getBoardIDFromListID(data.id);
-            if(boardId){
+            if (boardId) {
                 broadcast<ServerSE.UPDATE_LIST_FIELD>(socket, ServerSE.UPDATE_LIST_FIELD, data, [getRoomCode(RoomType.DATA, boardId)]);
             }
         } catch (error: any) {
-            console.error("Error updating list fields", error);
+            console.error('Error updating list fields', error);
             reply(undefined, error.message);
         }
     });
@@ -334,11 +319,11 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             }
             await updateCardFromPartial(data.id, data);
             const boardId = await getBoardIDFromCardID(data.id);
-            if(boardId){
+            if (boardId) {
                 broadcast<ServerSE.UPDATE_CARD_FIELD>(socket, ServerSE.UPDATE_CARD_FIELD, data, [getRoomCode(RoomType.DATA, boardId)]);
             }
         } catch (error: any) {
-            console.error("Error updating card fields", error);
+            console.error('Error updating card fields', error);
             reply(undefined, error.message);
         }
     });
@@ -349,8 +334,8 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
                 throw new Error('No record id provided');
             }
             const record = await updateMembershipRecordFromPartial(data.id, data);
-            if(!record){
-                throw new Error("No record found");
+            if (!record) {
+                throw new Error('No record found');
             }
             // if(record.entityType === EntityType.ORG){
             //     const org = await getFullOrganization(record.entityId);
@@ -365,7 +350,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             //     throw new Error("Invalid entity type "+record.entityType);
             // }
         } catch (error: any) {
-            console.error("Error updating record fields", error);
+            console.error('Error updating record fields', error);
             reply(undefined, error.message);
         }
     });
@@ -375,11 +360,11 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No data provided');
             }
-            const boardId:BoardId = data.boardId;
+            const boardId: BoardId = data.boardId;
             const labels = await createBoardLabel(boardId, data.name, data.color);
-            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, {boardId, labels}, [getRoomCode(RoomType.DATA, boardId)])
+            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
         } catch (error: any) {
-            console.error("Error creating board label", error);
+            console.error('Error creating board label', error);
             reply(undefined, error.message);
         }
     });
@@ -389,11 +374,11 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No data provided');
             }
-            const boardId:BoardId = data.boardId;
+            const boardId: BoardId = data.boardId;
             const labels = await updateBoardLabels(boardId, data.label);
-            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, {boardId, labels}, [getRoomCode(RoomType.DATA, boardId)])
+            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
         } catch (error: any) {
-            console.error("Error updating board labels", error);
+            console.error('Error updating board labels', error);
             reply(undefined, error.message);
         }
     });
@@ -403,11 +388,11 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No data provided');
             }
-            const boardId:BoardId = data.boardId;
+            const boardId: BoardId = data.boardId;
             const labels = await removeBoardLabel(boardId, data.labelId);
-            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, {boardId, labels}, [getRoomCode(RoomType.DATA, boardId)])
+            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
         } catch (error: any) {
-            console.error("Error deleting board labels", error);
+            console.error('Error deleting board labels', error);
             reply(undefined, error.message);
         }
     });
@@ -419,11 +404,11 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             }
             await setCardsLabels(data.cardId, data.labelIds);
             const boardId = await getBoardIDFromCardID(data.cardId);
-            if(boardId){
+            if (boardId) {
                 broadcast<ServerSE.UPDATE_CARDS_LABELS>(socket, ServerSE.UPDATE_CARDS_LABELS, data, [getRoomCode(RoomType.DATA, boardId)]);
             }
         } catch (error: any) {
-            console.error("Error deleting board labels", error);
+            console.error('Error deleting board labels', error);
             reply(undefined, error.message);
         }
     });
@@ -431,7 +416,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.GET_TEXT_BLOCK, async (data: ClientSEPayload[ClientSE.GET_TEXT_BLOCK], reply: ClientSEReply<ClientSE.GET_TEXT_BLOCK>) => {
         try {
             if (!data) {
-                throw new Error("No id provided");
+                throw new Error('No id provided');
             }
             const textBlock = await getTextBlockById(data);
             if (textBlock === null) {
@@ -439,15 +424,15 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             }
             reply(textBlock);
         } catch (error: any) {
-            console.error("Error getting text block",data,error);
-            reply(undefined, "Error getting text block");
+            console.error('Error getting text block', data, error);
+            reply(undefined, 'Error getting text block');
         }
     });
 
     socket.on(ClientSE.TEXT_CARET, (data: ClientSEPayload[ClientSE.TEXT_CARET], reply: ClientSEReply<ClientSE.TEXT_CARET>) => {
         try {
             const socketData = getSocketData(socket);
-            socketData.user.textRoomData = {caret: data};
+            socketData.user.textRoomData = { caret: data };
             setSocketData(socket, socketData);
             const payload: ServerSEPayload[ServerSE.TEXT_CARET] = { sid: socket.id, caret: data };
             broadcastToMyRooms(socket, ServerSE.TEXT_CARET, payload, [RoomType.TEXT], false);
@@ -459,9 +444,9 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.MOVE_LIST, async (data: ClientSEPayload[ClientSE.MOVE_LIST], reply: ClientSEReply<ClientSE.MOVE_LIST>) => {
         try {
             await moveList(data.listId, data.position);
-            const payload: ServerSEPayload[ServerSE.MOVE_LIST] = {listId: data.listId, position: data.position};
+            const payload: ServerSEPayload[ServerSE.MOVE_LIST] = { listId: data.listId, position: data.position };
             const boardId = await getBoardIDFromListID(data.listId);
-            if(boardId){
+            if (boardId) {
                 broadcast<ServerSE.MOVE_LIST>(socket, ServerSE.MOVE_LIST, payload, [getRoomCode(RoomType.DATA, boardId)], false);
             }
         } catch (error: any) {
@@ -472,9 +457,9 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.MOVE_CARD, async (data: ClientSEPayload[ClientSE.MOVE_CARD], reply: ClientSEReply<ClientSE.MOVE_CARD>) => {
         try {
             await moveCardToList(data.cardId, data.toList, data.position);
-            const payload: ServerSEPayload[ServerSE.MOVE_CARD] = {...data};
+            const payload: ServerSEPayload[ServerSE.MOVE_CARD] = { ...data };
             const boardId = await getBoardIDFromListID(data.toList);
-            if(boardId){
+            if (boardId) {
                 broadcast<ServerSE.MOVE_CARD>(socket, ServerSE.MOVE_CARD, payload, [getRoomCode(RoomType.DATA, boardId)], false);
             }
         } catch (error: any) {
@@ -507,8 +492,8 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.RESPOND_INVITE, async (data: ClientSEPayload[ClientSE.RESPOND_INVITE], reply: ClientSEReply<ClientSE.RESPOND_INVITE>) => {
         try {
             const invRec = await replyToInvite(data.inviteId, data.response);
-            if(!invRec){
-                throw new Error("No invite record found");
+            if (!invRec) {
+                throw new Error('No invite record found');
             }
             const invites = await getInvitesForEntity(invRec.entityId);
             // if(invRec.entityType === EntityType.ORG){
@@ -536,8 +521,8 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.KICK_MEMBER, async (data: ClientSEPayload[ClientSE.KICK_MEMBER], reply: ClientSEReply<ClientSE.KICK_MEMBER>) => {
         try {
             const member = await removeMembership(data);
-            if(!member){
-                throw new Error("No member found");
+            if (!member) {
+                throw new Error('No member found');
             }
             // if(member.record.entityType === EntityType.ORG){
             //     const org = await getFullOrganization(member.record.entityId);
@@ -563,7 +548,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
 
     socket.on(ClientSE.UPDATE_CARD_ASSIGNEE, async (data: ClientSEPayload[ClientSE.UPDATE_CARD_ASSIGNEE], reply: ClientSEReply<ClientSE.UPDATE_CARD_ASSIGNEE>) => {
         try {
-            if(data.assigned){
+            if (data.assigned) {
                 await addAssigneeToCard(data.cardId, data.userId);
             } else {
                 await removeAssigneeFromCard(data.cardId, data.userId);

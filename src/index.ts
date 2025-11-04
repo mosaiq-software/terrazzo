@@ -1,22 +1,11 @@
-import 'dotenv/config'
+import 'dotenv/config';
 import { initApp } from './app';
-import {initSockets} from './utils/socket';
+import { initSockets } from './utils/socket';
 import { initAdminServer } from './socketAdminServer';
 
 const start = async () => {
-    const SOCKET_PORT = parseInt(process.env.SOCKET_PORT+'') || undefined;
-    if (
-        !SOCKET_PORT ||
-        !process.env.API_PORT ||
-        !process.env.API_URL ||
-        !process.env.GITHUB_AUTH_CLIENT_SECRET ||
-        !process.env.GITHUB_AUTH_CALLBACK_URL ||
-        !process.env.GITHUB_AUTH_CLIENT_ID ||
-        !process.env.ORG_NAME ||
-        !process.env.DATABASE_PATH ||
-        !process.env.DATABASE_LOGGING ||
-        !process.env.FRONTEND_URL
-    ) {
+    const SOCKET_PORT = parseInt(process.env.SOCKET_PORT + '') || undefined;
+    if (!SOCKET_PORT || !process.env.API_PORT || !process.env.API_URL || !process.env.GITHUB_AUTH_CLIENT_SECRET || !process.env.GITHUB_AUTH_CALLBACK_URL || !process.env.GITHUB_AUTH_CLIENT_ID || !process.env.ORG_NAME || !process.env.DATABASE_PATH || !process.env.DATABASE_LOGGING || !process.env.FRONTEND_URL) {
         throw new Error('Make sure to set all required environment variables');
     }
 
@@ -33,6 +22,6 @@ const start = async () => {
     const { io } = initSockets();
     io.listen(SOCKET_PORT);
     console.log(`Socket server started at ${process.env.API_URL}:${SOCKET_PORT}`);
-}
+};
 
 start();

@@ -6,9 +6,9 @@ export const initAdminServer = async () => {
     socketAdminServer.use(cors());
     socketAdminServer.use(express.json());
     socketAdminServer.use(express.urlencoded({ extended: true }));
-    socketAdminServer.set('trust proxy', true)
+    socketAdminServer.set('trust proxy', true);
 
-    socketAdminServer.use(express.static('admin-ui'))
+    socketAdminServer.use(express.static('admin-ui'));
 
     return socketAdminServer;
-}
+};

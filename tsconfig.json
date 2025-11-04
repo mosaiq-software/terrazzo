@@ -5,7 +5,7 @@
         "outDir": "./dist",
         "baseUrl": "./",
         "paths": {
-            "@trz-api/*": ["src/*/index", "src/*"],
+            "@trz-api/*": ["src/*/index", "src/*"]
         },
         "strict": true,
         "esModuleInterop": true,
@@ -18,5 +18,4 @@
     },
     "include": ["src/**/*.ts"],
     "exclude": ["node_modules"]
-
 }
