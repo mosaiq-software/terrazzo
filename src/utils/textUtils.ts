@@ -1,11 +1,11 @@
-import { UserHeader} from '../types';
+import { UserHeader } from '../types';
 
 export const fullName = (user: UserHeader | undefined | null) => {
-    if(!user){
+    if (!user) {
         return 'Anonymous';
     }
-    if(!user.firstName && !user.lastName){
+    if (!user.firstName && !user.lastName) {
         return user.username;
     }
     return `${user.firstName} ${user.lastName}`;
-}
+};

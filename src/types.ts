@@ -1,4 +1,4 @@
-import {EntityType, Priority, Role, StoryPoints} from "./constants";
+import { EntityType, Priority, Role, StoryPoints } from './constants';
 
 export type URL = string;
 export type UID = `${string}-${string}-${string}-${string}-${string}`;
@@ -25,7 +25,7 @@ export interface OrganizationHeader {
     isPersonalOrg: boolean;
     description: string;
 }
-export interface Organization extends OrganizationHeader{
+export interface Organization extends OrganizationHeader {
     members: Member[];
     projects: ProjectHeader[];
     invites: Invite[];
@@ -40,7 +40,7 @@ export interface ProjectHeader {
     logoUrl: URL;
     description: string;
 }
-export interface Project extends ProjectHeader{
+export interface Project extends ProjectHeader {
     members: Member[];
     boards: BoardHeader[];
     invites: Invite[];
@@ -55,13 +55,13 @@ export interface BoardHeader {
     createdAt: number;
     totalCards: number;
 }
-export interface Board extends BoardHeader{
+export interface Board extends BoardHeader {
     lists: List[];
     labels: Label[];
-    members: Member[]
+    members: Member[];
 }
-export interface BoardRes extends Omit<Board, "lists"> {
-    lists: {listId:ListId, cardIds:CardId[]}[];
+export interface BoardRes extends Omit<Board, 'lists'> {
+    lists: { listId: ListId; cardIds: CardId[] }[];
 }
 
 export interface ListHeader {
@@ -71,7 +71,7 @@ export interface ListHeader {
     archived: boolean;
     order: number;
 }
-export interface List extends ListHeader{
+export interface List extends ListHeader {
     cards: Card[];
 }
 
@@ -88,7 +88,7 @@ export interface CardHeader {
     createdAt: number;
     createdById: UserId | null;
 }
-export interface Card extends CardHeader{
+export interface Card extends CardHeader {
     comments: CommentId[];
     labels: LabelId[];
     assignees: UserId[];
@@ -175,10 +175,10 @@ export interface UserDash {
 }
 
 export interface GithubUserProfile {
-    id: string,
-    login: string,
-    avatar_url: URL,
-    name: string,
+    id: string;
+    login: string;
+    avatar_url: URL;
+    name: string;
 }
 
 export interface Assignment {

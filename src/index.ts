@@ -7,13 +7,4 @@ import * as socketUtils from './utils/socketUtils';
 import * as arrayUtils from './utils/arrayUtils';
 import * as trelloTypes from './trelloTypes';
 
-export { 
-    types,
-    socketTypes,
-    apiTypes,
-    constants,
-    textUtils,
-    socketUtils,
-    arrayUtils,
-    trelloTypes,
-};
+export { types, socketTypes, apiTypes, constants, textUtils, socketUtils, arrayUtils, trelloTypes };

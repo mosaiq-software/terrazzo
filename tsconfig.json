@@ -12,11 +12,8 @@
         "noImplicitAny": false,
         "allowJs": true,
         "allowSyntheticDefaultImports": true,
-        "moduleResolution": "node",
+        "moduleResolution": "node"
     },
-    "exclude": [
-        "node_modules",
-        "dist"
-    ],
-    "include": ["./src/*"],
+    "exclude": ["node_modules", "dist"],
+    "include": ["./src/*"]
 }

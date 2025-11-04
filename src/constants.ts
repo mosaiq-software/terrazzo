@@ -1,18 +1,18 @@
-import { UID } from "./types";
+import { UID } from './types';
 
 export enum LocalStorageKey {
     GITHUB_ACCESS_TOKEN = 'GITHUB_ACCESS_TOKEN',
     SIDEBAR_COLLAPSED = 'SIDEBAR_COLLAPSED',
 }
 
-export const TEMPORARY_ID:UID = "THIS-IS-A-TEMPORARY-ID";
+export const TEMPORARY_ID: UID = 'THIS-IS-A-TEMPORARY-ID';
 
 export enum Priority {
     LOWEST = 1,
     LOW = 2,
     MEDIUM = 3,
     HIGH = 4,
-    HIGHEST = 5
+    HIGHEST = 5,
 }
 
 export enum Role {
@@ -23,19 +23,19 @@ export enum Role {
 }
 
 export const RoleNames = [
-    "None",   // 0
-    "Guest",  // 1
-    "Member", // 2
-    "Admin",  // 3
-    "Owner",  // 4
-]
+    'None', // 0
+    'Guest', // 1
+    'Member', // 2
+    'Admin', // 3
+    'Owner', // 4
+];
 
 export enum EntityType {
     PROJECT = 0,
     ORG = 1,
 }
 
-export enum StoryPoints{
+export enum StoryPoints {
     ZERO = 0,
     XXS = 1,
     XS = 2,
