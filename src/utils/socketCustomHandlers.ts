@@ -12,6 +12,7 @@ import { getInvitesForEntity, replyToInvite, sendInvite } from '@trz-api/control
 import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/assignmentController';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { BoardId, CardId } from '@mosaiq/terrazzo-common/types';
+import { executeQueryForUser } from '@trz-api/controllers/queryController';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.JOIN_ROOM, async (room: ClientSEPayload[ClientSE.JOIN_ROOM], reply: ClientSEReply<ClientSE.JOIN_ROOM>) => {
@@ -559,6 +560,16 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             const payload: ServerSEPayload[ServerSE.UPDATE_CARD_ASSIGNEE] = data;
             broadcast<ServerSE.UPDATE_CARD_ASSIGNEE>(socket, ServerSE.UPDATE_CARD_ASSIGNEE, payload, [getRoomCode(RoomType.DATA, boardId)]);
             broadcast<ServerSE.UPDATE_CARD_ASSIGNEE>(socket, ServerSE.UPDATE_CARD_ASSIGNEE, payload, [getRoomCode(RoomType.USER, data.userId)]);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.GET_SEARCH_RESULTS, async (data: ClientSEPayload[ClientSE.GET_SEARCH_RESULTS], reply: ClientSEReply<ClientSE.GET_SEARCH_RESULTS>) => {
+        try {
+            const socketData = getSocketData(socket);
+            const results = await executeQueryForUser(socketData.user.user.id, data.query, data.searchSessionId);
+            reply({ results });
         } catch (error: any) {
             reply(undefined, error.message);
         }

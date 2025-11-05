@@ -80,12 +80,27 @@ export const plaintextToRemirrorYjs = (text: string): string => {
         prosemirrorDoc.insert(0, [paragraph]);
     }
 
-    // Also create the 'default' shared type (might be needed by Remirror)
-    const defaultType = ydoc.getXmlFragment('default');
-
     const update = Y.encodeStateAsUpdate(ydoc);
     const base64String = Buffer.from(update).toString('base64');
     return base64String;
+};
+
+export const remirrorYjsToPlaintext = (base64Data: string): string => {
+    const binaryData = Buffer.from(base64Data, 'base64');
+    const ydoc = new Y.Doc();
+    Y.applyUpdate(ydoc, binaryData);
+    const prosemirrorDoc = ydoc.getXmlFragment('prosemirror');
+
+    let plaintext = '';
+    prosemirrorDoc.forEach((node) => {
+        plaintext += node.toString();
+    });
+
+    // clean up the plaintext by removing XML tags
+    plaintext = plaintext.replace(/<\/?[^>]+(>|$)/g, ' ').trim();
+    plaintext = plaintext.replace(/\s+/g, ' ');
+
+    return plaintext;
 };
 
 /**

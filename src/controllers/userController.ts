@@ -9,10 +9,11 @@ import { getInvitesToUser } from './inviteController';
 import { addOrganization, updateOrganizationFromPartial } from './organizationController';
 import { addProject } from './projectController';
 import { addBoard } from './boardController';
-import { addList } from './listController';
+import { addList, getListAndCardIdsOnBoard } from './listController';
 import { addCard } from './cardController';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import { getMembersInOrg } from './membershipController';
+import { getBoardsByProjectId } from '@trz-api/persistence/boardPersistence';
 
 //Gets
 export async function getOrCreateUserByGithubAccessToken(accessToken: string) {
@@ -142,6 +143,19 @@ export const getUsersEntities = async (userId: UserId): Promise<UserDash> => {
         console.error(e);
         throw e;
     }
+};
+
+export const getAllActiveBoardIdsForUser = async (userId: UserId) => {
+    const dash = await getUsersEntities(userId);
+    const projectIds = dash.standaloneProjects.filter((p) => !p.archived).map((p) => p.id);
+    const orgProjectIds = dash.organizations.filter((o) => !o.archived).flatMap((o) => o.projects.filter((p) => !p.archived).map((p) => p.id));
+    const allProjectIds = [...new Set([...projectIds, ...orgProjectIds])];
+    const boardIds: BoardId[] = [];
+    for (const pid of allProjectIds) {
+        const boards = await getBoardsByProjectId(pid);
+        boardIds.push(...boards.map((b) => b.id));
+    }
+    return boardIds;
 };
 
 export const getUserPreview = async (userId: UserId) => {
