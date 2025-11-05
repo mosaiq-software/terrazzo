@@ -196,6 +196,8 @@ export enum DatapointType {
     BoardTitle = 'board.title',
     CardTitle = 'card.title',
     CardDescription = 'card.description',
+    DocumentTitle = 'document.title',
+    DocumentContent = 'document.content',
 }
 export interface QueryableDatapoint {
     title: string;
