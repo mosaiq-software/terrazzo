@@ -188,3 +188,20 @@ export interface Assignment {
 }
 
 export type NonEmptyArray<T> = [T, ...T[]];
+
+export enum DatapointType {
+    BoardTitle = 'board.title',
+    CardTitle = 'card.title',
+    CardDescription = 'card.description',
+}
+export interface QueryableDatapoint {
+    title: string;
+    display: string;
+    content: string;
+    id: UID;
+    type: DatapointType;
+}
+
+export interface QueryResult extends QueryableDatapoint {
+    score: number;
+}

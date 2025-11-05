@@ -1,5 +1,5 @@
 import { EntityType, Role } from './constants';
-import { Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment, BoardRes, ListHeader, Label, LabelId } from './types';
+import { Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment, BoardRes, ListHeader, Label, LabelId, QueryResult } from './types';
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -34,6 +34,7 @@ export enum ClientSE {
     GET_LIST = 'GET_LIST',
     GET_CARD = 'GET_CARD',
     GET_TEXT_BLOCK = 'GET_TEXT_BLOCK',
+    GET_SEARCH_RESULTS = 'GET_SEARCH_RESULTS',
 
     PREVIEW_ORGANIZATION = 'PREVIEW_ORGANIZATION',
     PREVIEW_PROJECT = 'PREVIEW_PROJECT',
@@ -80,6 +81,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_LIST]: ListId;
     [ClientSE.GET_CARD]: CardId;
     [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
+    [ClientSE.GET_SEARCH_RESULTS]: { query: string; searchSessionId: string };
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationId;
     [ClientSE.PREVIEW_PROJECT]: ProjectId;
@@ -126,6 +128,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_LIST]: ListHeader | undefined;
     [ClientSE.GET_CARD]: Card | undefined;
     [ClientSE.GET_TEXT_BLOCK]: TextBlock | undefined;
+    [ClientSE.GET_SEARCH_RESULTS]: { results: QueryResult[] } | undefined;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationHeader | undefined;
     [ClientSE.PREVIEW_PROJECT]: ProjectHeader | undefined;
