@@ -13,6 +13,8 @@ import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { BoardId, CardId } from '@mosaiq/terrazzo-common/types';
 import { executeQueryForUser } from '@trz-api/controllers/queryController';
+import { createNewDocument, modifyDocument } from '@trz-api/controllers/documentController';
+import { getDocumentById } from '@trz-api/persistence/documentPersistence';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.JOIN_ROOM, async (room: ClientSEPayload[ClientSE.JOIN_ROOM], reply: ClientSEReply<ClientSE.JOIN_ROOM>) => {
@@ -570,6 +572,38 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             const socketData = getSocketData(socket);
             const results = await executeQueryForUser(socketData.user.user.id, data.query, data.searchSessionId);
             reply({ results });
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.CREATE_DOCUMENT, async (data: ClientSEPayload[ClientSE.CREATE_DOCUMENT], reply: ClientSEReply<ClientSE.CREATE_DOCUMENT>) => {
+        try {
+            const socketData = getSocketData(socket);
+            const document = await createNewDocument(data.title, data.parentId, socketData.user.user.id);
+            reply(document);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.GET_DOCUMENT, async (data: ClientSEPayload[ClientSE.GET_DOCUMENT], reply: ClientSEReply<ClientSE.GET_DOCUMENT>) => {
+        try {
+            const document = await getDocumentById(data);
+            reply(document);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.UPDATE_DOCUMENT_FIELD, async (data: ClientSEPayload[ClientSE.UPDATE_DOCUMENT_FIELD], reply: ClientSEReply<ClientSE.UPDATE_DOCUMENT_FIELD>) => {
+        try {
+            const socketData = getSocketData(socket);
+            const updatedDocument = await modifyDocument(data.id, data, socketData.user.user.id);
+            if (!updatedDocument) {
+                throw new Error('No document found');
+            }
+            broadcast<ServerSE.UPDATE_DOCUMENT_FIELD>(socket, ServerSE.UPDATE_DOCUMENT_FIELD, updatedDocument, [getRoomCode(RoomType.DATA, data.id)]);
         } catch (error: any) {
             reply(undefined, error.message);
         }

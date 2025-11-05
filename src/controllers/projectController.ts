@@ -4,6 +4,7 @@ import { getBoardsByProjectId } from '@trz-api/persistence/boardPersistence';
 import { createProject, getProjectById, updateProject } from '@trz-api/persistence/projectPersistence';
 import { getInvitesForEntity } from './inviteController';
 import { getMembersInProjectWithOrgDeduped } from './membershipController';
+import { getAllDocumentsForParent } from './documentController';
 
 export async function getProjectPreview(projectId: ProjectId) {
     try {
@@ -30,6 +31,7 @@ export async function getFullProject(projectId: ProjectId) {
             members: (await getMembersInProjectWithOrgDeduped(projectId)) ?? [],
             boards: (await getBoardsByProjectId(projectId)) ?? [],
             invites: (await getInvitesForEntity(projectId)) ?? [],
+            documents: (await getAllDocumentsForParent(projectId)) ?? [],
         };
 
         return project;
