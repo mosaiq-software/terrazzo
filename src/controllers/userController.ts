@@ -145,19 +145,6 @@ export const getUsersEntities = async (userId: UserId): Promise<UserDash> => {
     }
 };
 
-export const getAllActiveBoardIdsForUser = async (userId: UserId) => {
-    const dash = await getUsersEntities(userId);
-    const projectIds = dash.standaloneProjects.filter((p) => !p.archived).map((p) => p.id);
-    const orgProjectIds = dash.organizations.filter((o) => !o.archived).flatMap((o) => o.projects.filter((p) => !p.archived).map((p) => p.id));
-    const allProjectIds = [...new Set([...projectIds, ...orgProjectIds])];
-    const boardIds: BoardId[] = [];
-    for (const pid of allProjectIds) {
-        const boards = await getBoardsByProjectId(pid);
-        boardIds.push(...boards.map((b) => b.id));
-    }
-    return boardIds;
-};
-
 export const getUserPreview = async (userId: UserId) => {
     const user = await getUserById(userId);
     if (!user) {
