@@ -15,6 +15,7 @@ export type InviteId = UID;
 export type MembershipRecordId = UID;
 export type EntityId = ProjectId | OrganizationId;
 export type AssignmentId = UID;
+export type DocumentId = UID;
 
 export interface OrganizationHeader {
     id: OrganizationId;
@@ -29,6 +30,7 @@ export interface Organization extends OrganizationHeader {
     members: Member[];
     projects: ProjectHeader[];
     invites: Invite[];
+    documents: DocumentHeader[];
 }
 
 export interface ProjectHeader {
@@ -44,6 +46,7 @@ export interface Project extends ProjectHeader {
     members: Member[];
     boards: BoardHeader[];
     invites: Invite[];
+    documents: DocumentHeader[];
 }
 
 export interface BoardHeader {
@@ -204,4 +207,15 @@ export interface QueryableDatapoint {
 
 export interface QueryResult extends QueryableDatapoint {
     score: number;
+}
+
+export interface DocumentHeader {
+    id: DocumentId;
+    parentId: UID;
+    title: string;
+    textBlockId: TextBlockId;
+    archived: boolean;
+    createdAt: number;
+    lastModifiedAt: number;
+    lastModifiedByUserId: UserId;
 }

@@ -1,5 +1,5 @@
 import { EntityType, Role } from './constants';
-import { Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment, BoardRes, ListHeader, Label, LabelId, QueryResult } from './types';
+import { Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment, BoardRes, ListHeader, Label, LabelId, QueryResult, DocumentId, DocumentHeader, UID } from './types';
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -35,6 +35,7 @@ export enum ClientSE {
     GET_CARD = 'GET_CARD',
     GET_TEXT_BLOCK = 'GET_TEXT_BLOCK',
     GET_SEARCH_RESULTS = 'GET_SEARCH_RESULTS',
+    GET_DOCUMENT = 'GET_DOCUMENT',
 
     PREVIEW_ORGANIZATION = 'PREVIEW_ORGANIZATION',
     PREVIEW_PROJECT = 'PREVIEW_PROJECT',
@@ -47,6 +48,7 @@ export enum ClientSE {
     CREATE_CARD = 'CREATE_CARD',
     CREATE_BOARD_LABEL = 'CREATE_BOARD_LABEL',
     CREATE_DUPLICATE_CARD = 'CREATE_DUPLICATE_CARD',
+    CREATE_DOCUMENT = 'CREATE_DOCUMENT',
 
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
     UPDATE_PROJECT_FIELD = 'UPDATE_PROJECT_FIELD',
@@ -57,6 +59,7 @@ export enum ClientSE {
     UPDATE_CARD_ASSIGNEE = 'UPDATE_CARD_ASSIGNEE',
     UPDATE_BOARD_LABEL = 'UPDATE_BOARD_LABEL',
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
+    UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
 
     DELETE_BOARD_LABEL = 'DELETE_BOARD_LABEL',
 
@@ -82,6 +85,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_CARD]: CardId;
     [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
     [ClientSE.GET_SEARCH_RESULTS]: { query: string; searchSessionId: string };
+    [ClientSE.GET_DOCUMENT]: DocumentId;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationId;
     [ClientSE.PREVIEW_PROJECT]: ProjectId;
@@ -94,6 +98,7 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_CARD]: CreateCardType;
     [ClientSE.CREATE_BOARD_LABEL]: { boardId: BoardId; name: string; color: string };
     [ClientSE.CREATE_DUPLICATE_CARD]: { cardId: CardId };
+    [ClientSE.CREATE_DOCUMENT]: { title: string; parentId: UID };
 
     [ClientSE.UPDATE_ORG_FIELD]: Partial<Organization> & { id: OrganizationId };
     [ClientSE.UPDATE_PROJECT_FIELD]: Partial<Project> & { id: ProjectId };
@@ -104,6 +109,7 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
     [ClientSE.UPDATE_BOARD_LABEL]: { boardId: BoardId; label: Label };
     [ClientSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
+    [ClientSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
 
     [ClientSE.DELETE_BOARD_LABEL]: { boardId: BoardId; labelId: LabelId };
 
@@ -129,6 +135,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_CARD]: Card | undefined;
     [ClientSE.GET_TEXT_BLOCK]: TextBlock | undefined;
     [ClientSE.GET_SEARCH_RESULTS]: { results: QueryResult[] } | undefined;
+    [ClientSE.GET_DOCUMENT]: DocumentHeader | undefined;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationHeader | undefined;
     [ClientSE.PREVIEW_PROJECT]: ProjectHeader | undefined;
@@ -141,6 +148,7 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_CARD]: CardId | undefined;
     [ClientSE.CREATE_BOARD_LABEL]: LabelId | undefined;
     [ClientSE.CREATE_DUPLICATE_CARD]: CardId | undefined;
+    [ClientSE.CREATE_DOCUMENT]: DocumentHeader | undefined;
 
     [ClientSE.UPDATE_ORG_FIELD]: undefined;
     [ClientSE.UPDATE_PROJECT_FIELD]: undefined;
@@ -151,6 +159,7 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_CARD_ASSIGNEE]: undefined;
     [ClientSE.UPDATE_BOARD_LABEL]: undefined;
     [ClientSE.UPDATE_CARDS_LABELS]: undefined;
+    [ClientSE.UPDATE_DOCUMENT_FIELD]: undefined;
 
     [ClientSE.DELETE_BOARD_LABEL]: undefined;
 
@@ -184,6 +193,7 @@ export enum ServerSE {
     UPDATE_CARD_ASSIGNEE = 'UPDATE_CARD_ASSIGNEE',
     UPDATE_BOARD_LABELS = 'UPDATE_BOARD_LABELS',
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
+    UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
 
     RECEIVE_INVITE = 'RECEIVE_INVITE',
 }
@@ -210,6 +220,7 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
     [ServerSE.UPDATE_BOARD_LABELS]: { boardId: BoardId; labels: Label[] };
     [ServerSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
+    [ServerSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
 
     [ServerSE.RECEIVE_INVITE]: Invite;
 }
@@ -236,6 +247,7 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_CARD_ASSIGNEE]: void;
     [ServerSE.UPDATE_BOARD_LABELS]: void;
     [ServerSE.UPDATE_CARDS_LABELS]: void;
+    [ServerSE.UPDATE_DOCUMENT_FIELD]: void;
 
     [ServerSE.RECEIVE_INVITE]: void;
 }
