@@ -1,0 +1,7 @@
+src/*
+scripts/*
+.github/*
+.husky/*
+.gitignore
+*.tgz
+/.idea
