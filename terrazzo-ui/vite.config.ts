@@ -6,7 +6,7 @@ import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 dotenv.config({ path: '../.env' });
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
     return {
         envDir: '../',
         define: {
@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
             'import.meta.env.GITHUB_AUTH_CALLBACK_URL': JSON.stringify(process.env.GITHUB_AUTH_CALLBACK_URL),
             'import.meta.env.NSM_WWW_PATH': JSON.stringify(process.env.NSM_WWW_PATH),
             'import.meta.env.ORG_NAME': JSON.stringify(process.env.ORG_NAME),
+            'import.meta.env.DEBUG': JSON.stringify(process.env.DEBUG),
         },
         server: {
             port: 8080,
