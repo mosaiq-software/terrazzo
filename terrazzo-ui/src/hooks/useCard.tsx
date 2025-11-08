@@ -52,7 +52,7 @@ export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean
             if (!prev) {
                 return prev;
             }
-            return { ...updateBaseFromPartial<Card>(prev, payload) };
+            return { ...updateBaseFromPartial(prev, payload) };
         });
     });
 

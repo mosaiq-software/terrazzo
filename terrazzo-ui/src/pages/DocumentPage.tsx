@@ -61,7 +61,7 @@ const DocumentPage = (): React.JSX.Element => {
             if (!prev) {
                 return prev;
             }
-            return updateBaseFromPartial<DocumentHeader>(prev, payload);
+            return updateBaseFromPartial(prev, payload);
         });
     });
 

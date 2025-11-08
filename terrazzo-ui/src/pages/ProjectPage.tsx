@@ -55,7 +55,7 @@ const ProjectPage = (): React.JSX.Element => {
             if (!prev) {
                 return prev;
             }
-            return updateBaseFromPartial<Project>(prev, payload);
+            return updateBaseFromPartial(prev, payload);
         });
     });
 
