@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Button, Modal, Input, Text, Divider, Stack, Group, TextInput } from '@mantine/core';
 import { useDebouncedCallback, useDisclosure, useHotkeys, useOs } from '@mantine/hooks';
 import { useSocket } from '@trz/contexts/socket-context';
-import { getSearchResults } from '@trz/emitters/all';
+import { getSearchResults } from '@trz/emitters';
 import { DatapointType, QueryResult } from '@mosaiq/terrazzo-common/types';
 import { NavLink, useNavigate } from 'react-router';
 import { MdOutlineAccountBox, MdOutlineIncompleteCircle, MdOutlineViewKanban } from 'react-icons/md';

@@ -17,7 +17,7 @@ export function useRoom(roomType: RoomType, roomId: UID | null | undefined, trac
         }
         if (roomId) {
             sockCtx
-                .emit<ClientSE.JOIN_ROOM>(ClientSE.JOIN_ROOM, getRoomCode(roomType, roomId))
+                .emit(ClientSE.JOIN_ROOM, getRoomCode(roomType, roomId))
                 .then((res) => {
                     if (res) {
                         setRoomUsers(res.map((r) => [r.sid, r]));
@@ -30,20 +30,20 @@ export function useRoom(roomType: RoomType, roomId: UID | null | undefined, trac
 
         return () => {
             if (roomId) {
-                sockCtx.emit<ClientSE.LEAVE_ROOM>(ClientSE.LEAVE_ROOM, getRoomCode(roomType, roomId)).catch((e) => {
+                sockCtx.emit(ClientSE.LEAVE_ROOM, getRoomCode(roomType, roomId)).catch((e) => {
                     notify(NoteType.SOCKET_ROOM_ERROR, [roomId, e]);
                 });
             }
         };
     }, [roomId, sockCtx.connected, sockCtx.sid]);
 
-    useSocketListener<ServerSE.CLIENT_JOINED_ROOM>(ServerSE.CLIENT_JOINED_ROOM, (payload) => {
+    useSocketListener(ServerSE.CLIENT_JOINED_ROOM, (payload) => {
         if (trackUsers) {
             roomUsers.set(payload.sid, payload);
         }
     });
 
-    useSocketListener<ServerSE.CLIENT_LEFT_ROOM>(ServerSE.CLIENT_LEFT_ROOM, (payload) => {
+    useSocketListener(ServerSE.CLIENT_LEFT_ROOM, (payload) => {
         if (trackUsers) {
             roomUsers.delete(payload);
         }

@@ -6,7 +6,7 @@ import { useTRZ } from '@trz/contexts/TRZ-context';
 import { ActionIcon, Anchor, Badge, Box, Button, ColorInput, Divider, Fieldset, Group, Loader, Pill, ScrollArea, Select, Space, Stack, Text, Textarea, TextInput, Title, Tooltip } from '@mantine/core';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { useRoom } from '@trz/hooks/useRoom';
-import { createBoardLabel, deleteBoardLabel, getBoardData, getDocument, getUserHeader, updateBoardField, updateBoardLabel, updateDocumentMetadata } from '@trz/emitters/all';
+import { createBoardLabel, deleteBoardLabel, getBoardData, getDocument, getUserHeader, updateBoardField, updateBoardLabel, updateDocumentMetadata } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';

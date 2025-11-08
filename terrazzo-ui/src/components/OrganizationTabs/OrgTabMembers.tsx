@@ -8,7 +8,7 @@ import { MembershipRow } from '@trz/components/MembershipRow';
 import { MembershipRecord, Organization, OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { PendingInviteRow } from '@trz/components/PendingInviteRow';
 import { useSocket } from '@trz/contexts/socket-context';
-import { replyInvite, revokeMembershipRecord, sendInvite, updateMembershipRecordField } from '@trz/emitters/all';
+import { replyInvite, revokeMembershipRecord, sendInvite, updateMembershipRecordField } from '@trz/emitters';
 interface OrgTabMembersProps {
     myMembershipRecord: MembershipRecord;
     orgData: Organization;

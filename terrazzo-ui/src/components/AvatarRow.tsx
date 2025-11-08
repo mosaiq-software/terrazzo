@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Avatar, Tooltip, Text } from '@mantine/core';
 import { UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
-import { getUserHeader } from '@trz/emitters/all';
+import { getUserHeader } from '@trz/emitters';
 
 interface AvatarRowProps {
     users: (UserHeader | UserId)[];

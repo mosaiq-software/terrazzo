@@ -4,7 +4,7 @@ import { BOARD_CARD_WIDTH, BoardListCard } from '@trz/components/BoardListCards'
 import { Organization, ProjectId } from '@mosaiq/terrazzo-common/types';
 import { modals } from '@mantine/modals';
 import { useNavigate } from 'react-router';
-import { createDocument } from '@trz/emitters/all';
+import { createDocument } from '@trz/emitters';
 import { useSocket } from '@trz/contexts/socket-context';
 import { NoteType, notify } from '@trz/util/notifications';
 
