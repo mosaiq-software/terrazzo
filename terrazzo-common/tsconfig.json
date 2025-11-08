@@ -1,21 +1,20 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "es6",
-        "declaration": true,
-        "declarationMap": true,
-        "sourceMap": true,
+        "target": "es2015",
+        "module": "ES2015",
         "outDir": "./dist",
-        "rootDir": "./src",
+        "baseUrl": "./",
         "strict": true,
         "esModuleInterop": true,
-        "noImplicitAny": false,
-        "allowJs": true,
-        "allowSyntheticDefaultImports": true,
-        "moduleResolution": "node"
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true
     },
-    "exclude": ["node_modules", "dist"],
-    "include": ["./src/**/*"],
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules"],
     "tsc-alias": {
         "verbose": false,
         "resolveFullPaths": true,
