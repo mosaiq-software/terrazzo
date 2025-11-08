@@ -16,7 +16,7 @@ import CardDetails from '@trz/components/CardDetails/CardDetails';
 import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { createList, emitMoveCard, emitMoveList, getBoardData, getCardData, getListData } from '@trz/emitters/all';
+import { createList, emitMoveCard, emitMoveList, getBoardData, getCardData, getListData } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { arrayMoveInPlace, updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import { useRoom } from '@trz/hooks/useRoom';

@@ -10,7 +10,7 @@ import { MdFileCopy } from 'react-icons/md';
 import { PriorityButtons } from '@trz/components/CardDetails/PriorityButtons';
 import { CardId } from '@mosaiq/terrazzo-common/types';
 import { useUser } from '@trz/contexts/user-context';
-import { updateCardAssignee, updateCardField } from '@trz/emitters/all';
+import { updateCardAssignee, updateCardField } from '@trz/emitters';
 import { useClipboard, useIdle } from '@mantine/hooks';
 import { IDLE_TIMEOUT_MS } from '@trz/util/textUtils';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';

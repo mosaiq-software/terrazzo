@@ -13,7 +13,7 @@ import { ProjectTabCards } from '@trz/components/ProjectTabs/ProjectTabCards';
 import { ProjectTabSettings } from '@trz/components/ProjectTabs/ProjectTabSettings';
 import { ProjectTabMembers } from '@trz/components/ProjectTabs/ProjectTabMembers';
 import { useDashboard } from '@trz/contexts/dashboard-context';
-import { getProjectData, updateProjectField } from '@trz/emitters/all';
+import { getProjectData, updateProjectField } from '@trz/emitters';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';

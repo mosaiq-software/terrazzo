@@ -12,7 +12,7 @@ import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
 import { OrgTabSettings } from '@trz/components/OrganizationTabs/OrgTabSettings';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
-import { getOrganizationData, updateOrgField } from '@trz/emitters/all';
+import { getOrganizationData, updateOrgField } from '@trz/emitters';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useDashboard } from '@trz/contexts/dashboard-context';
 import { modals } from '@mantine/modals';
