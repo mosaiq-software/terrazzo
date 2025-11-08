@@ -1,0 +1,32 @@
+.remirror-editor {
+    
+    overflow-y: visible !important;
+    width: inherit !important;
+
+    h1, h2, h3, h4, h5, h6, p, strong, em, u, s, a, blockquote, ul, ol, li {
+        color: white !important;
+    }
+    
+    code {
+        background-color: #2d2d2d !important;
+        color: #f8f8f2 !important;
+        padding: 1px 2px !important;
+    }
+
+    div[data-callout-type='info'] {
+        background-color: #265b83 !important;
+        border-left: 4px solid #68c3ff !important;
+    }
+    div[data-callout-type='warning'] {
+        background-color: #bc9039 !important;
+        border-left: 4px solid #ffd531 !important;
+    }
+    div[data-callout-type='error'] {
+        background-color: #b42948 !important;
+        border-left: 4px solid #ff5e7e !important;
+    }
+    div[data-callout-type='success'] {
+        background-color: #20a350 !important;
+        border-left: 4px solid #46fd86 !important;
+    }
+}
