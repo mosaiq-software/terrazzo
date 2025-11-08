@@ -73,7 +73,7 @@ export async function updateOrganizationFromPartial(orgId: OrganizationId, parti
         throw new Error('Org not found');
     }
 
-    const updated = updateBaseFromPartial<OrganizationHeader>(updatingOrg, partial);
+    const updated = updateBaseFromPartial(updatingOrg, partial);
     try {
         await updateOrg(updated);
     } catch (e: any) {

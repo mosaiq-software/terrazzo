@@ -27,7 +27,7 @@
         "@mantine/hooks": "^7.14.2",
         "@mantine/modals": "^7.16.2",
         "@mantine/notifications": "^7.16.2",
-        "@mosaiq/terrazzo-common": "../terrazzo-common/dist",
+        "@mosaiq/terrazzo-common": "file:../terrazzo-common/dist",
         "@remirror/extension-yjs": "^4.0.2",
         "@remirror/pm": "^3.0.1",
         "@remirror/react": "^3.0.3",

@@ -70,7 +70,7 @@ export async function updateProjectFromPartial(projectId: ProjectId, partial: Pa
         throw new Error('Project not found');
     }
 
-    const updated = updateBaseFromPartial<ProjectHeader>(updatingProject, partial);
+    const updated = updateBaseFromPartial(updatingProject, partial);
     try {
         await updateProject(updated);
     } catch (e: any) {

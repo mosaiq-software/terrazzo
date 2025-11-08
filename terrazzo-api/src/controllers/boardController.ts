@@ -100,7 +100,7 @@ export async function updateBoardFromPartial(boardId: BoardId, partial: Partial<
         throw new Error('Board not found');
     }
 
-    const updated = updateBaseFromPartial<BoardHeader>(updatingBoard, partial);
+    const updated = updateBaseFromPartial(updatingBoard, partial);
     try {
         await updateBoard(updated);
     } catch (e: any) {

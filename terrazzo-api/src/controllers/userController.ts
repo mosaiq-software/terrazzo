@@ -159,7 +159,7 @@ export async function updateMembershipRecordFromPartial(recordId: MembershipReco
         throw new Error('Membership record not found');
     }
 
-    const updated = updateBaseFromPartial<MembershipRecord>(updatingRecord, partial);
+    const updated = updateBaseFromPartial(updatingRecord, partial);
     try {
         await updateMembershipRecord(updated);
         return updated;

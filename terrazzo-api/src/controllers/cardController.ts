@@ -214,7 +214,7 @@ export async function updateCardFromPartial(cardId: CardId, partial: Partial<Car
         throw new Error('Card not found');
     }
 
-    const updated = updateBaseFromPartial<CardHeader>(updatingCard, partial);
+    const updated = updateBaseFromPartial(updatingCard, partial);
     try {
         await updateCard(updated);
     } catch (e: any) {

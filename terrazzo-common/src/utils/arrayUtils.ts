@@ -10,7 +10,7 @@ export function arrayMoveInPlace(array: any[], from: number, to: number): void {
     array.splice(to < 0 ? array.length + to : to, 0, array.splice(from, 1)[0]);
 }
 
-export function updateBaseFromPartial<T>(base: T, partial: Partial<T>): T {
+export function updateBaseFromPartial<T extends Record<string, any>>(base: T, partial: Partial<T>): T {
     if (typeof base !== 'object') {
         throw new Error('Expected base to be object, received ' + typeof base);
     }
@@ -18,11 +18,11 @@ export function updateBaseFromPartial<T>(base: T, partial: Partial<T>): T {
         throw new Error('Base cannot be null');
     }
     const mappedBase = { ...base };
-    const keys = Object.keys(mappedBase);
+    const keys = Object.keys(partial) as Array<keyof T>;
     for (const k of keys) {
         const partialField = partial[k];
         if (partialField !== undefined) {
-            mappedBase[k] = partialField;
+            mappedBase[k] = partialField as T[keyof T];
         }
     }
     return mappedBase;

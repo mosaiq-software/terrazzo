@@ -100,7 +100,7 @@ export async function updateListFromPartial(listId: ListId, partial: Partial<Lis
         throw new Error('List not found');
     }
 
-    const updated = updateBaseFromPartial<ListHeader>(updatingList, partial);
+    const updated = updateBaseFromPartial(updatingList, partial);
     try {
         await updateList(updated);
     } catch (e: any) {

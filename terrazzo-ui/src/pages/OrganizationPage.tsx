@@ -55,7 +55,7 @@ const OrganizationPage = (): React.JSX.Element => {
             if (!prev) {
                 return prev;
             }
-            return updateBaseFromPartial<Organization>(prev, payload);
+            return updateBaseFromPartial(prev, payload);
         });
     });
 

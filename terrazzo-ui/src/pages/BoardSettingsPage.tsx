@@ -60,7 +60,7 @@ const BoardSettingsPage = (): React.JSX.Element => {
             if (!prev) {
                 return prev;
             }
-            return updateBaseFromPartial<BoardHeader>(prev, payload);
+            return updateBaseFromPartial(prev, payload);
         });
     });
 

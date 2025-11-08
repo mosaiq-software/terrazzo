@@ -72,7 +72,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
             if (!prev) {
                 return prev;
             }
-            const updated = updateBaseFromPartial<ListHeader>(prev, payload);
+            const updated = updateBaseFromPartial(prev, payload);
             if (payload.name) {
                 setListTitle(payload.name);
             }
