@@ -1,0 +1,13 @@
+name: CD
+
+on:
+    push:
+        branches:
+            - develop
+
+jobs:
+    deploy:
+        name: Deploy to Stage
+        runs-on: ubuntu-latest
+        steps:
+            - run: curl "https://api.nsm.mosaiq.dev/deploy/terrazzo/${{ secrets.NSM_KEY_STAGE }}"
