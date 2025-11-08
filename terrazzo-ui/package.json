@@ -2,20 +2,17 @@
     "name": "terrazzo-ui",
     "version": "1.0.1",
     "main": "src/index.tsx",
-    "repository": "https://github.com/mosaiq-software/terrazzo-ui",
     "scripts": {
         "test": "test",
         "start": "webpack serve",
         "start:open": "webpack serve -- open",
         "build": "webpack --mode production",
         "build:prod": "npm ci && npm i @mosaiq/terrazzo-common@latest && webpack --mode production --output-path /www",
-        "prepare": "husky",
-        "after-push": "node ./scripts/after-push.mjs",
-        "before-push": "node ./scripts/before-push.mjs",
         "lint": "eslint .",
         "types": "tsc --noemit",
         "update": "git fetch origin develop && git merge origin/develop",
-        "pretty": "prettier --write \"./**/*.{ts,tsx,json}\""
+        "common:prod": "npm un @mosaiq/terrazzo-common && npm i @mosaiq/terrazzo-common@latest",
+        "common:dev": "npm un @mosaiq/terrazzo-common && npm i ../terrazzo-common/dist"
     },
     "license": "UNLICENSED",
     "dependencies": {
@@ -70,8 +67,6 @@
         "eslint-plugin-react-hooks": "^5.1.0",
         "globals": "^16.0.0",
         "html-webpack-plugin": "^5.6.3",
-        "husky": "^9.1.7",
-        "open": "^10.1.0",
         "postcss": "^8.4.49",
         "postcss-loader": "^8.1.1",
         "postcss-preset-mantine": "^1.17.0",
@@ -80,7 +75,6 @@
         "typescript-eslint": "^8.24.1",
         "webpack": "^5.96.1",
         "webpack-cli": "^5.1.4",
-        "webpack-dev-server": "^5.1.0",
-        "prettier": "^3.5.3"
+        "webpack-dev-server": "^5.1.0"
     }
 }

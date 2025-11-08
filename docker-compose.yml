@@ -1,0 +1,38 @@
+services:
+    common-job:
+        build: ./terrazzo-common/
+        restart: no
+    ui-job:
+        build: ./terrazzo-ui/
+        restart: no
+        depends_on:
+            - common-job
+        volumes:
+            - type: bind
+              source: ${NSM_WWW_PATH}
+              target: /www
+        env_file:
+            - .env
+    api:
+        build: ./terrazzo-api/
+        depends_on:
+            - common-job
+        ports:
+            - "${API_PORT}:${API_PORT}"
+            - "${SOCKET_PORT}:${SOCKET_PORT}"
+            - "${SOCKET_ADMIN_PORT}:${SOCKET_ADMIN_PORT}"
+        restart: always
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://0.0.0.0:${API_PORT}/"]
+            interval: 15s
+            timeout: 10s
+            retries: 5
+            start_period: 30s
+        volumes:
+            - type: bind
+              source: ${DATABASE_DIR}
+              target: ${DATABASE_DIR}
+              bind:
+                  create_host_path: true
+        env_file:
+            - .env

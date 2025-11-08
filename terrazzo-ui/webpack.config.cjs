@@ -4,10 +4,6 @@ const webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
 
 module.exports = () => {
-    // path is at ../trz-common/.env
-    const envPath = path.resolve(__dirname, '.env');
-    const envVars = require('dotenv').config({ path: envPath }).parsed || {};
-
     return {
         mode: "development",
         entry: path.resolve(__dirname, "src/index.tsx"),
@@ -61,9 +57,16 @@ module.exports = () => {
             new HtmlWebpackPlugin({
                 template: path.resolve(__dirname, 'src/index.html')
             }),
-            new Dotenv({
-                path: envPath
-            })
+            new Dotenv(
+                process.env.PRODUCTION === "true" ?
+                    {
+                        systemvars: true,
+                    }
+                    :
+                    {
+                        path: '../.env'
+                    }
+            )
         ],
         optimization: {
             moduleIds: 'deterministic',
