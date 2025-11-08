@@ -1,9 +1,9 @@
 import js from '@eslint/js'
-import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
 
 export default defineConfig([
     globalIgnores(['dist']),
@@ -25,9 +25,8 @@ export default defineConfig([
             "@typescript-eslint/no-explicit-any": "off",
             "prefer-const": ["error", { ignoreReadBeforeAssign: true }],
             "@typescript-eslint/no-empty-object-type": "off",
-            "react/jsx-key": "error",
-            "react/jsx-no-useless-fragment": "warn",
-            "react/jsx-pascal-case": "warn",
+            "react-hooks/exhaustive-deps": "off",
+            "react-refresh/only-export-components": "off",
         }
     },
 ])

@@ -8,7 +8,7 @@
         },
         "strict": true,
         "moduleResolution": "node",
-        "jsx": "react",
+        "jsx": "react-jsx",
         "outDir": "./dist/",
         "sourceMap": true,
         "noImplicitAny": false,
