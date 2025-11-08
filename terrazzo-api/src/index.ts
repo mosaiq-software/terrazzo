@@ -1,7 +1,8 @@
-import 'dotenv/config';
 import { initApp } from './app';
 import { initSockets } from './utils/socket';
 import { initAdminServer } from './socketAdminServer';
+import dotenv from 'dotenv';
+dotenv.config({ path: '../.env' });
 
 const start = async () => {
     const SOCKET_PORT = parseInt(process.env.SOCKET_PORT + '') || undefined;
