@@ -6,7 +6,7 @@
     "type": "module",
     "scripts": {
         "start": "tsx watch src/index.ts",
-        "start:prod": "npm ci && npm i @mosaiq/terrazzo-common@latest && npm run start",
+        "start:prod": "npm run common:prod && npm run start",
         "lint": "eslint .",
         "types": "tsc --noemit",
         "update": "git fetch origin develop && git merge origin/develop",

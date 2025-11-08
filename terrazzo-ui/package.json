@@ -7,7 +7,7 @@
         "start": "webpack serve",
         "start:open": "webpack serve -- open",
         "build": "webpack --mode production",
-        "build:prod": "npm ci && npm i @mosaiq/terrazzo-common@latest && webpack --mode production --output-path /www",
+        "build:prod": "npm ci && npm i @mosaiq/terrazzo-common@latest && npm run build && rm -rf /www/* && cp -r ./public/* /www",
         "lint": "eslint .",
         "types": "tsc --noemit",
         "update": "git fetch origin develop && git merge origin/develop",
