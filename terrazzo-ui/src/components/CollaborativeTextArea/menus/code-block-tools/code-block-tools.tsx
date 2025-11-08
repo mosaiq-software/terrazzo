@@ -1,5 +1,4 @@
-import type { FindProsemirrorNodeResult } from '@remirror/core';
-import { cx } from '@remirror/core';
+import { cx, FindProsemirrorNodeResult } from '@remirror/core';
 import { codeBlockPositioner } from '@remirror/extension-code-block';
 import { PositionerPortal } from '@remirror/react-components';
 import { usePositioner } from '@remirror/react-hooks';

@@ -1,4 +1,5 @@
-import type { FC, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
+
 import { DecreaseIndentButton, IncreaseIndentButton } from '../buttons';
 import { CommandButtonGroup } from './command-button-group';
 

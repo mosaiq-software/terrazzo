@@ -1,5 +1,5 @@
 import { TrelloExportType } from './trelloTypes';
-import { BoardId, GithubUserProfile, ProjectId, User, UserHeader, UserId } from './types';
+import { BoardId, ProjectId, UserHeader } from './types';
 
 /**
  * Data types for the REST API

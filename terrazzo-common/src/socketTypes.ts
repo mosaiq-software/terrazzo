@@ -1,5 +1,5 @@
 import { EntityType, Role } from './constants';
-import { Board, BoardId, Card, CardId, List, ListId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, TextBlock, TextBlockId, UserId, User, InviteId, Invite, EntityId, MembershipRecordId, MembershipRecord, UserDash, UserHeader, Assignment, BoardRes, ListHeader, Label, LabelId, QueryResult, DocumentId, DocumentHeader, UID } from './types';
+import { Board, BoardId, BoardRes, Card, CardId, DocumentHeader, DocumentId, EntityId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, MembershipRecord, MembershipRecordId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, QueryResult, TextBlock, TextBlockId, UID, UserDash, UserHeader, UserId } from './types';
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {

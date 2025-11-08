@@ -1,5 +1,5 @@
 import { Avatar, Button, Menu, Stack } from '@mantine/core';
-import type { Card } from '@mosaiq/terrazzo-common/types';
+import { Card } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';

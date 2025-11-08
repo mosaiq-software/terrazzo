@@ -1,5 +1,5 @@
-import type { CommandDecoratorMessageProps, CommandUiIcon } from '@remirror/core';
-import type { CoreIcon } from '@remirror/icons';
+import { CommandDecoratorMessageProps, CommandUiIcon } from '@remirror/core';
+import { CoreIcon } from '@remirror/icons';
 import { useHelpers, useI18n } from '@remirror/react-core';
 import { useMemo } from 'react';
 import { getCommandOptionValue, getShortcutString, getUiShortcutString } from './react-component-utils';

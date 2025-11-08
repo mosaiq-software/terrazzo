@@ -3,14 +3,12 @@ import { TextBlockId } from '@mosaiq/terrazzo-common/types';
 import { TableComponents, TableExtension } from '@remirror/extension-react-tables';
 import { YjsExtension } from '@remirror/extension-yjs';
 import { i18nFormat } from '@remirror/i18n';
-import type { RemirrorProps, UseThemeProps } from '@remirror/react';
-import { EditorComponent, EmojiPopupComponent, MentionAtomPopupComponent, MentionAtomState, Remirror, ThemeProvider, useRemirror } from '@remirror/react';
+import { EditorComponent, EmojiPopupComponent, Remirror, RemirrorProps, ThemeProvider, useRemirror, UseThemeProps } from '@remirror/react';
 import { AllStyledComponent } from '@remirror/styles/emotion';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { ProviderConfiguration, SocketIOProvider } from '@trz/util/yjsSocketProvier';
-import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
-import type { AnyExtension, CreateEditorStateProps } from 'remirror';
-import { IdentifierSchemaAttributes } from 'remirror';
+import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
+import { AnyExtension, CreateEditorStateProps, IdentifierSchemaAttributes } from 'remirror';
 import { AnnotationExtension, CalloutExtension, DropCursorExtension, EmojiExtension, ImageExtension, MentionAtomExtension, MentionAtomNodeAttributes, PlaceholderExtension, wysiwygPreset } from 'remirror/extensions';
 import { ManagerOptions, SocketOptions } from 'socket.io-client';
 import data from 'svgmoji/emoji.json';
@@ -31,38 +29,39 @@ const extraAttributes: IdentifierSchemaAttributes[] = [
     { identifiers: ['mention'], attributes: { href: { default: null } } },
 ];
 
-export interface SocialEditorProps extends Partial<ReactEditorProps>, Pick<MentionComponentProps, 'users' | 'tags'> {}
+export interface SocialEditorProps extends Partial<ReactEditorProps> {}
+// export interface SocialEditorProps extends Partial<ReactEditorProps>, Pick<MentionComponentProps, 'users' | 'tags'> {}
 
-interface MentionComponentProps<UserData extends MentionAtomNodeAttributes = MentionAtomNodeAttributes> {
-    users?: UserData[];
-    tags?: string[];
-}
+// interface MentionComponentProps<UserData extends MentionAtomNodeAttributes = MentionAtomNodeAttributes> {
+//     users?: UserData[];
+//     tags?: string[];
+// }
 
-function MentionComponent({ users, tags }: MentionComponentProps) {
-    const [mentionState, setMentionState] = useState<MentionAtomState | null>();
-    const tagItems = useMemo(() => (tags ?? []).map((tag) => ({ id: tag, label: `#${tag}` })), [tags]);
-    const items = useMemo(() => {
-        if (!mentionState) {
-            return [];
-        }
+// function MentionComponent({ users, tags }: MentionComponentProps) {
+//     const [mentionState, setMentionState] = useState<MentionAtomState | null>();
+//     const tagItems = useMemo(() => (tags ?? []).map((tag) => ({ id: tag, label: `#${tag}` })), [tags]);
+//     const items = useMemo(() => {
+//         if (!mentionState) {
+//             return [];
+//         }
 
-        const allItems = mentionState.name === 'at' ? users : tagItems;
+//         const allItems = mentionState.name === 'at' ? users : tagItems;
 
-        if (!allItems) {
-            return [];
-        }
+//         if (!allItems) {
+//             return [];
+//         }
 
-        const query = mentionState.query.full.toLowerCase() ?? '';
-        return allItems.filter((item) => item.label.toLowerCase().includes(query)).sort();
-    }, [mentionState, users, tagItems]);
+//         const query = mentionState.query.full.toLowerCase() ?? '';
+//         return allItems.filter((item) => item.label.toLowerCase().includes(query)).sort();
+//     }, [mentionState, users, tagItems]);
 
-    return (
-        <MentionAtomPopupComponent
-            onChange={setMentionState}
-            items={items}
-        />
-    );
-}
+//     return (
+//         <MentionAtomPopupComponent
+//             onChange={setMentionState}
+//             items={items}
+//         />
+//     );
+// }
 
 interface EditorWrapperProps extends PropsWithChildren<SocialEditorProps>, SharedCollaborativeTextAreaProps {}
 
@@ -175,10 +174,10 @@ const Editor = (props: EditorProps) => {
             <CollabTextAreaToolbar />
             <EditorComponent />
             <EmojiPopupComponent />
-            <MentionComponent
+            {/* <MentionComponent
                 users={props.users}
                 tags={props.tags}
-            />
+            /> */}
             <TableComponents />
             {props.children}
         </Remirror>

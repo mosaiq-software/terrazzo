@@ -1,4 +1,4 @@
-import type { FC, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
 import { ToggleCalloutButton } from '../buttons';
 import { CommandButtonGroup } from './command-button-group';
 

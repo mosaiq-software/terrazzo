@@ -1,4 +1,4 @@
-import type { FindExtension } from '@remirror/extension-find';
+import { FindExtension } from '@remirror/extension-find';
 import { useCommands, useHelpers } from '@remirror/react-core';
 import { useCallback, useEffect, useState } from 'react';
 

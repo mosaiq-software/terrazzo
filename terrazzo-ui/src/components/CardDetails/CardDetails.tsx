@@ -1,6 +1,6 @@
 import { ActionIcon, Box, Button, Center, Group, Loader, Modal, Stack, Text, Tooltip, useCombobox } from '@mantine/core';
 import { useClipboard, useIdle } from '@mantine/hooks';
-import type { CardId } from '@mosaiq/terrazzo-common/types';
+import { CardId } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { PriorityButtons } from '@trz/components/CardDetails/PriorityButtons';
 import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/CollaborativeTextArea';

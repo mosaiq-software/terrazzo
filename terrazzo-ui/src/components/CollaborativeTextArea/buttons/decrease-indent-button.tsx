@@ -1,6 +1,7 @@
 import { NodeFormattingExtension } from '@remirror/extension-node-formatting';
 import { useCommands } from '@remirror/react-core';
 import { FC, useCallback } from 'react';
+
 import { CommandButton, CommandButtonProps } from './command-button';
 
 export interface DecreaseIndentButtonProps extends Omit<CommandButtonProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {}
