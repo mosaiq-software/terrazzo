@@ -6,7 +6,8 @@ services:
         build: ./terrazzo-ui/
         restart: no
         depends_on:
-            - common-job
+            common-job:
+                condition: service_completed_successfully
         volumes:
             - type: bind
               source: ${NSM_WWW_PATH}
@@ -16,7 +17,8 @@ services:
     api:
         build: ./terrazzo-api/
         depends_on:
-            - common-job
+            common-job:
+                condition: service_completed_successfully
         ports:
             - "${API_PORT}:${API_PORT}"
             - "${SOCKET_PORT}:${SOCKET_PORT}"
