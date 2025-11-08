@@ -1,7 +1,6 @@
-import React, { FC, useCallback } from 'react';
 import { HeadingExtension, HeadingExtensionAttributes } from '@remirror/extension-heading';
 import { useActive, useCommands } from '@remirror/react-core';
-
+import { FC, useCallback } from 'react';
 import { CommandMenuItem, CommandMenuItemProps } from './command-menu-item';
 
 export interface ToggleHeadingMenuItemProps extends Omit<CommandMenuItemProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {

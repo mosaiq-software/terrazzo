@@ -1,22 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useSocket } from '@trz/contexts/socket-context';
-import { BoardHeader, BoardId, CardId, Label, LabelId, ListId, UID } from '@mosaiq/terrazzo-common/types';
-import { useTRZ } from '@trz/contexts/TRZ-context';
-import { ActionIcon, Alert, Badge, Box, Button, ColorInput, Divider, Fieldset, Group, Pill, ScrollArea, Select, Space, Stack, Text, Textarea, TextInput, Title, Tooltip } from '@mantine/core';
-import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { useRoom } from '@trz/hooks/useRoom';
-import { createBoardLabel, deleteBoardLabel, getBoardData, updateBoardField, updateBoardLabel } from '@trz/emitters';
-import { NoteType, notify } from '@trz/util/notifications';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
-import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
-import { NotFound, PageErrors } from '@trz/components/NotFound';
-import { MdOutlineAdd, MdOutlineCheck, MdOutlineChevronLeft, MdOutlineClose, MdOutlineDelete, MdOutlineEdit } from 'react-icons/md';
+import { ActionIcon, Alert, Box, Button, ColorInput, Divider, Fieldset, Group, ScrollArea, Space, Stack, Text, TextInput, Title, Tooltip } from '@mantine/core';
 import { TEMPORARY_ID } from '@mosaiq/terrazzo-common/constants';
-import { colorIsDarkAdvanced, generateRandomColor } from '@trz/util/colorUtils';
+import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
+import type { BoardHeader, BoardId, Label } from '@mosaiq/terrazzo-common/types';
+import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { RingHoldingButton } from '@trz/components/RingHoldingButton';
+import { useSocket } from '@trz/contexts/socket-context';
+import { useTRZ } from '@trz/contexts/TRZ-context';
+import { createBoardLabel, deleteBoardLabel, getBoardData, updateBoardField, updateBoardLabel } from '@trz/emitters';
+import { useRoom } from '@trz/hooks/useRoom';
+import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { colorIsDarkAdvanced, generateRandomColor } from '@trz/util/colorUtils';
+import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
+import React, { useEffect, useState } from 'react';
+import { MdOutlineAdd, MdOutlineCheck, MdOutlineChevronLeft, MdOutlineClose, MdOutlineDelete, MdOutlineEdit } from 'react-icons/md';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const BoardSettingsPage = (): React.JSX.Element => {
     const [boardData, setBoardData] = useState<BoardHeader | undefined>(undefined);

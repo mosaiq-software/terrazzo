@@ -1,5 +1,5 @@
 import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardId, LabelId, Label, CardId } from '@mosaiq/terrazzo-common/types';
+import { BoardId, CardId, Label, LabelId } from '@mosaiq/terrazzo-common/types';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
 export const createBoardLabel = async (sockCtx: SocketContextType, boardId: BoardId, name: string, color: string): Promise<LabelId | undefined> => {

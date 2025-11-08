@@ -1,7 +1,6 @@
-import React, { FC, useCallback } from 'react';
 import { CommandsExtension } from '@remirror/core';
 import { useCommands, useEditorState } from '@remirror/react-core';
-
+import { FC, useCallback } from 'react';
 import { CommandButton, CommandButtonProps } from './command-button';
 
 export interface PasteButtonProps extends Omit<CommandButtonProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {}

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
 import { Button, Group, Menu, Select, TextInput } from '@mantine/core';
-import { NoteType, notify } from '@trz/util/notifications';
-import { Role, RoleNames } from '@mosaiq/terrazzo-common/constants';
 import { useHotkeys } from '@mantine/hooks';
+import { Role, RoleNames } from '@mosaiq/terrazzo-common/constants';
+import { NoteType, notify } from '@trz/util/notifications';
+import { useState } from 'react';
+
 interface AddUserProps {
     disabled: boolean;
     onSubmit: (username: string, role: Role) => Promise<boolean>;

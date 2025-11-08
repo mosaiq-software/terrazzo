@@ -1,19 +1,18 @@
 import { Avatar, Button, Divider, Flex, Menu, Stack, Tooltip } from '@mantine/core';
+import { useClipboard } from '@mantine/hooks';
+import { Priority } from '@mosaiq/terrazzo-common/constants';
 import { Card, CardId } from '@mosaiq/terrazzo-common/types';
+import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { SocketContextType, useSocket } from '@trz/contexts/socket-context';
 import { TRZContextType, useTRZ } from '@trz/contexts/TRZ-context';
+import { useUser } from '@trz/contexts/user-context';
 import { createDuplicateCard, updateCardAssignee, updateCardField, updateCardsLabels } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
 import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
-import React from 'react';
+import { NoteType, notify } from '@trz/util/notifications';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
 import { MdBarChart, MdCheck, MdDocumentScanner, MdLabel, MdLink } from 'react-icons/md';
 import { prioNames, priorityColors, unicodeMap } from './CardDetails/PriorityButtons';
-import { Priority } from '@mosaiq/terrazzo-common/constants';
-import { NoteType, notify } from '@trz/util/notifications';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
-import { useClipboard } from '@mantine/hooks';
-import { useUser } from '@trz/contexts/user-context';
 
 const OPEN_DELAY = 100;
 const CLOSE_DELAY = 100;

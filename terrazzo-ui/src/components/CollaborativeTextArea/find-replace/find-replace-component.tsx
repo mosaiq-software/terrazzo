@@ -1,7 +1,6 @@
 import { Box, IconButton } from '@mui/material';
-import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Icon } from '@remirror/react-components';
-
+import { FC, useCallback, useEffect, useState } from 'react';
 import { FindController } from './find-controller';
 import { FindInput } from './find-input';
 import { ReplaceController } from './replace-controller';

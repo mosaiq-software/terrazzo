@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo } from 'react';
-import { Box, ScrollArea, Title, Flex, Divider, Text, Loader, Center, Kbd, Button, Tooltip, Avatar, Group, Stack, HoverCard, UnstyledButton } from '@mantine/core';
-import { BOARD_CARD_WIDTH, BoardListCard } from '@trz/components/BoardListCards';
-import { useNavigate } from 'react-router-dom';
-import { useUser } from '@trz/contexts/user-context';
+import { Avatar, Box, Button, Center, Divider, Flex, Group, HoverCard, Kbd, Loader, ScrollArea, Stack, Text, Title, Tooltip, UnstyledButton } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { useTRZ } from '@trz/contexts/TRZ-context';
 import { AvatarRow } from '@trz/components/AvatarRow';
+import { BOARD_CARD_WIDTH, BoardListCard } from '@trz/components/BoardListCards';
 import { useDashboard } from '@trz/contexts/dashboard-context';
+import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useUser } from '@trz/contexts/user-context';
 import { setTitle } from '@trz/util/tabUtils';
+import React, { useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = (): React.JSX.Element => {
     const usr = useUser();

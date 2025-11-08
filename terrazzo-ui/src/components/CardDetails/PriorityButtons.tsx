@@ -1,10 +1,10 @@
-import React from 'react';
 import { Box, Button, Flex, Menu, Text, Tooltip } from '@mantine/core';
 import { Priority } from '@mosaiq/terrazzo-common/constants';
-import { Card } from '@mosaiq/terrazzo-common/types';
+import type { Card } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
-import { NoteType, notify } from '@trz/util/notifications';
 import { updateCardField } from '@trz/emitters';
+import { NoteType, notify } from '@trz/util/notifications';
+import React from 'react';
 
 export const priorityColors: string[] = ['gray', '#4A82C7', '#24296A', '#422760', '#853974', '#BD3758'];
 

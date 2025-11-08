@@ -1,24 +1,23 @@
-import React, { useEffect } from 'react';
 import { ActionIcon, Box, Button, Center, Group, Loader, Modal, Stack, Text, Tooltip, useCombobox } from '@mantine/core';
+import { useClipboard, useIdle } from '@mantine/hooks';
+import type { CardId } from '@mosaiq/terrazzo-common/types';
+import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { PriorityButtons } from '@trz/components/CardDetails/PriorityButtons';
 import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/CollaborativeTextArea';
 import EditableTextbox from '@trz/components/EditableTextbox';
 import { useSocket } from '@trz/contexts/socket-context';
-import { NoteType, notify } from '@trz/util/notifications';
-import { getCardNumber } from '@trz/util/boardUtils';
-import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
-import { MdFileCopy } from 'react-icons/md';
-import { PriorityButtons } from '@trz/components/CardDetails/PriorityButtons';
-import { CardId } from '@mosaiq/terrazzo-common/types';
 import { useUser } from '@trz/contexts/user-context';
 import { updateCardAssignee, updateCardField } from '@trz/emitters';
-import { useClipboard, useIdle } from '@mantine/hooks';
-import { IDLE_TIMEOUT_MS } from '@trz/util/textUtils';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
-import { LabelsMenu } from './LabelsMenu';
-import { AssigneeMenu } from './AssigneeMenu';
 import { useCard } from '@trz/hooks/useCard';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
-import { setTitle } from '@trz/util/tabUtils';
+import { getCardNumber } from '@trz/util/boardUtils';
+import { NoteType, notify } from '@trz/util/notifications';
+import { IDLE_TIMEOUT_MS } from '@trz/util/textUtils';
+import React from 'react';
+import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
+import { MdFileCopy } from 'react-icons/md';
+import { AssigneeMenu } from './AssigneeMenu';
+import { LabelsMenu } from './LabelsMenu';
 
 interface CardDetailsProps {
     cardId: CardId;

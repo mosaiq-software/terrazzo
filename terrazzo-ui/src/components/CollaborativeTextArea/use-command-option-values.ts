@@ -1,8 +1,7 @@
-import { useMemo } from 'react';
 import type { CommandDecoratorMessageProps, CommandUiIcon } from '@remirror/core';
 import type { CoreIcon } from '@remirror/icons';
 import { useHelpers, useI18n } from '@remirror/react-core';
-
+import { useMemo } from 'react';
 import { getCommandOptionValue, getShortcutString, getUiShortcutString } from './react-component-utils';
 
 export interface UseCommandOptionValuesParams extends Omit<CommandDecoratorMessageProps, 't'> {

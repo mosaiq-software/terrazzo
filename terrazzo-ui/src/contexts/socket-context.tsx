@@ -1,8 +1,7 @@
+import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSocketIOEvent, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId } from '@mosaiq/terrazzo-common/socketTypes';
+import { NoteType, notify } from '@trz/util/notifications';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSocketIOEvent, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId } from '@mosaiq/terrazzo-common/socketTypes';
-import { UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
-import { NoteType, notify } from '@trz/util/notifications';
 import { useUser } from './user-context';
 
 export type SocketContextType = {

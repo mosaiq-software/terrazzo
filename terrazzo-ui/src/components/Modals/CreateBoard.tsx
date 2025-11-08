@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { TextInput, Container, Flex, Button, Space, Text, FileInput, Fieldset } from '@mantine/core';
+import { Button, Container, Fieldset, FileInput, Flex, Space, Text, TextInput } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
-import { useSocket } from '@trz/contexts/socket-context';
-import { useNavigate } from 'react-router-dom';
-import { NoteType, notify } from '@trz/util/notifications';
-import { ProjectId } from '@mosaiq/terrazzo-common/types';
-import { createBoard } from '@trz/emitters';
-import { callTrzApi } from '@trz/util/apiUtils';
 import { RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
 import { TrelloExportType } from '@mosaiq/terrazzo-common/trelloTypes';
+import { ProjectId } from '@mosaiq/terrazzo-common/types';
+import { useSocket } from '@trz/contexts/socket-context';
+import { createBoard } from '@trz/emitters';
+import { callTrzApi } from '@trz/util/apiUtils';
+import { NoteType, notify } from '@trz/util/notifications';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CreateBoard = (props: ContextModalProps<{ modalBody: string; projectId: ProjectId }>): React.JSX.Element => {
     const [boardName, setBoardName] = React.useState('');

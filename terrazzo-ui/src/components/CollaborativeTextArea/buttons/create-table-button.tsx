@@ -1,8 +1,7 @@
-import React, { FC, useCallback } from 'react';
 import { TableExtension } from '@remirror/extension-tables';
 import { useActive, useCommands } from '@remirror/react-core';
-
-import { CommandButton, CommandButtonProps } from './command-button';
+import { type FC, useCallback } from 'react';
+import { CommandButton, type CommandButtonProps } from './command-button';
 
 export interface CreateTableButtonProps extends Omit<CommandButtonProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {}
 

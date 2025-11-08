@@ -1,8 +1,8 @@
-import * as Y from 'yjs';
 import * as bc from 'lib0/broadcastchannel';
-import * as AwarenessProtocol from 'y-protocols/awareness';
 import { Observable } from 'lib0/observable';
 import { io, ManagerOptions, Socket, SocketOptions } from 'socket.io-client';
+import * as AwarenessProtocol from 'y-protocols/awareness';
+import * as Y from 'yjs';
 
 export interface AwarenessChange {
     added: number[];

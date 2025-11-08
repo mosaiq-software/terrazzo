@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import queryString from 'query-string';
-import { useNavigate } from 'react-router-dom';
-import { Center, Container, Paper, Stack, Title, Text, Loader } from '@mantine/core';
-import { useUser, DEFAULT_NO_AUTH_ROUTE } from '@trz/contexts/user-context';
+import { Center, Container, Loader, Paper, Stack, Text, Title } from '@mantine/core';
+import { useUser } from '@trz/contexts/user-context';
 import { NoteType, notify } from '@trz/util/notifications';
+import queryString from 'query-string';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 /*
 This page will only show as the callback fro github login. It should take the code from the string, save it, and then go to another page with the new data.

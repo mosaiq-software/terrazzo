@@ -1,7 +1,6 @@
-import React, { FC, useCallback } from 'react';
 import { WhitespaceExtension } from '@remirror/extension-whitespace';
 import { useCommands, useHelpers } from '@remirror/react-core';
-
+import { FC, useCallback } from 'react';
 import { CommandButton, CommandButtonProps } from './command-button';
 
 export interface ToggleWhitespaceButtonProps extends Omit<CommandButtonProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {}

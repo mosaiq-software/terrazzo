@@ -1,7 +1,7 @@
 import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardId, Card, ListId, CardId, CardHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { BoardId, Card, CardHeader, CardId, ListId, UserId } from '@mosaiq/terrazzo-common/types';
 import { SocketContextType } from '@trz/contexts/socket-context';
-import { notify, NoteType } from '@trz/util/notifications';
+import { NoteType, notify } from '@trz/util/notifications';
 
 export const getCardData = async (sockCtx: SocketContextType, cardId: BoardId): Promise<Card | undefined> => {
     try {

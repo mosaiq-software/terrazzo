@@ -1,8 +1,7 @@
-import { Box, Button, ButtonProps, Tooltip } from '@mantine/core';
-import React, { FC, MouseEvent, MouseEventHandler, ReactNode, useCallback } from 'react';
-import { CoreIcon, isString } from '@remirror/core';
-
-import { useCommandOptionValues, UseCommandOptionValuesParams } from '../use-command-option-values';
+import { Box, Button, type ButtonProps, Tooltip } from '@mantine/core';
+import { type CoreIcon, isString } from '@remirror/core';
+import { type FC, type MouseEvent, type MouseEventHandler, type ReactNode, useCallback } from 'react';
+import { useCommandOptionValues, type UseCommandOptionValuesParams } from '../use-command-option-values';
 import { CommandButtonBadge, CommandButtonIcon } from './command-button-icon';
 
 export interface CommandButtonProps extends Omit<ButtonProps, 'value' | 'aria-label' | 'onClick'>, Omit<UseCommandOptionValuesParams, 'active' | 'attrs'> {

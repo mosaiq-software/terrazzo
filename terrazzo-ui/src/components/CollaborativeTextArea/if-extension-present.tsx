@@ -1,6 +1,6 @@
-import React, { FC, ReactNode } from 'react';
 import { AnyExtensionConstructor } from '@remirror/core';
 import { useHasExtension } from '@remirror/react-core';
+import { FC, ReactNode } from 'react';
 
 export interface IfExtensionPresentProps {
     extension: AnyExtensionConstructor;

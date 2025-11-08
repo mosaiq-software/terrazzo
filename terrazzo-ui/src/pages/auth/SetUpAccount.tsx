@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
 import { Button, Center, Container, Paper, Space, Stack, Text, TextInput, Title } from '@mantine/core';
-import { useUser } from '@trz/contexts/user-context';
 import { useDebouncedValue } from '@mantine/hooks';
+import { useUser } from '@trz/contexts/user-context';
+import { NoteType, notify } from '@trz/util/notifications';
 import { USERNAME_DEBOUNCE } from '@trz/util/textUtils';
 import { checkUsernameTaken } from '@trz/util/userUtils';
-import { NoteType, notify } from '@trz/util/notifications';
+import React, { useEffect } from 'react';
 
 export const SetUpAccount = () => {
     const usr = useUser();

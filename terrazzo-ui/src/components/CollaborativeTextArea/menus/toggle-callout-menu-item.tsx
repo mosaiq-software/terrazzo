@@ -1,7 +1,6 @@
-import React, { FC, useCallback } from 'react';
 import { CalloutExtension, CalloutExtensionAttributes } from '@remirror/extension-callout';
 import { useActive, useCommands } from '@remirror/react-core';
-
+import { FC, useCallback } from 'react';
 import { CommandMenuItem, CommandMenuItemProps } from './command-menu-item';
 
 export interface ToggleCalloutMenuItemProps extends Omit<CommandMenuItemProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {

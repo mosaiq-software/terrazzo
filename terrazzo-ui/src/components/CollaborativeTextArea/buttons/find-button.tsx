@@ -1,9 +1,8 @@
 import styled from '@emotion/styled';
 import { Paper } from '@mui/material';
-import React, { FC, useCallback, useState } from 'react';
 import { PositionerPortal } from '@remirror/react-components';
 import { usePositioner } from '@remirror/react-hooks';
-
+import { FC, useCallback, useState } from 'react';
 import { FindReplaceComponent } from '../find-replace';
 import { CommandButton, CommandButtonProps } from './command-button';
 

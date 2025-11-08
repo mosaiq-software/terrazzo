@@ -1,7 +1,6 @@
-import React, { FC, useCallback } from 'react';
 import { FontSizeExtension } from '@remirror/extension-font-size';
 import { useCommands } from '@remirror/react-core';
-
+import { FC, useCallback } from 'react';
 import { CommandButton, CommandButtonProps } from './command-button';
 
 export interface IncreaseFontSizeButtonProps extends Omit<CommandButtonProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {}

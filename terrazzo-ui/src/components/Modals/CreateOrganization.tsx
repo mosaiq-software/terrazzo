@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { TextInput, Container, Flex, Button } from '@mantine/core';
+import { Button, Container, Flex, TextInput } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useNavigate } from 'react-router-dom';
-import { NoteType, notify } from '@trz/util/notifications';
 import { useUser } from '@trz/contexts/user-context';
 import { createOrganization } from '@trz/emitters';
+import { NoteType, notify } from '@trz/util/notifications';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CreateOrganization = (props: ContextModalProps<{ modalBody: string }>): React.JSX.Element => {
     const [orgName, setOrgName] = React.useState('');

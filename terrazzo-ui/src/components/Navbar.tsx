@@ -1,8 +1,7 @@
-import React from 'react';
 import { Avatar, Button } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { FaBell } from 'react-icons/fa';
 import { useUser } from '@trz/contexts/user-context';
+import { FaBell } from 'react-icons/fa';
 
 const Navbar = () => {
     const usr = useUser();

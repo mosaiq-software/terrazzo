@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Title, Stack, TextInput, Textarea, Group, Button, Divider, Space, Anchor, Fieldset, Text } from '@mantine/core';
+import { Anchor, Box, Button, Divider, Fieldset, Group, Space, Stack, Text, TextInput, Textarea, Title } from '@mantine/core';
 import { Role } from '@mosaiq/terrazzo-common/constants';
-import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
-import { notify, NoteType } from '@trz/util/notifications';
-import { MembershipRecord, Project, ProjectHeader, ProjectId } from '@mosaiq/terrazzo-common/types';
+import { MembershipRecord, Project, ProjectHeader } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useNavigate } from 'react-router-dom';
+import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
 import { revokeMembershipRecord, updateProjectField } from '@trz/emitters';
+import { NoteType, notify } from '@trz/util/notifications';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface ProjectTabSettingsProps {
     myMembershipRecord: MembershipRecord;

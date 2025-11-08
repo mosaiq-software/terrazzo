@@ -1,24 +1,23 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Avatar, Group, Flex, Title, Text, Tabs, ScrollArea, Center, Stack, Button, Loader } from '@mantine/core';
-import { AvatarRow } from '@trz/components/AvatarRow';
-import { Organization, OrganizationId } from '@mosaiq/terrazzo-common/types';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useSocket } from '@trz/contexts/socket-context';
-import { NoteType, notify } from '@trz/util/notifications';
-import { NotFound, PageErrors } from '@trz/components/NotFound';
+import { Avatar, Box, Button, Center, Flex, Group, Loader, ScrollArea, Stack, Tabs, Text, Title } from '@mantine/core';
 import { Role } from '@mosaiq/terrazzo-common/constants';
-import { useTRZ } from '@trz/contexts/TRZ-context';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
+import { Organization, OrganizationId } from '@mosaiq/terrazzo-common/types';
+import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { AvatarRow } from '@trz/components/AvatarRow';
+import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
-import { OrgTabSettings } from '@trz/components/OrganizationTabs/OrgTabSettings';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
+import { OrgTabSettings } from '@trz/components/OrganizationTabs/OrgTabSettings';
+import { useDashboard } from '@trz/contexts/dashboard-context';
+import { useSocket } from '@trz/contexts/socket-context';
+import { useTRZ } from '@trz/contexts/TRZ-context';
 import { getOrganizationData, updateOrgField } from '@trz/emitters';
 import { useRoom } from '@trz/hooks/useRoom';
-import { useDashboard } from '@trz/contexts/dashboard-context';
-import { modals } from '@mantine/modals';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const OrganizationPage = (): React.JSX.Element => {
     const params = useParams();

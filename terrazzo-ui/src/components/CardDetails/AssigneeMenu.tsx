@@ -1,13 +1,11 @@
-import { Avatar, Box, Button, Checkbox, MantineSize, Menu, Pill, Stack, Text, Tooltip } from '@mantine/core';
-import { Card, LabelId } from '@mosaiq/terrazzo-common/types';
+import { Avatar, Button, Menu, Stack } from '@mantine/core';
+import type { Card } from '@mosaiq/terrazzo-common/types';
+import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
-import { updateCardAssignee, updateCardsLabels } from '@trz/emitters';
-import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
-import React, { useMemo } from 'react';
-import { MdAddCircleOutline, MdCheck, MdOutlineAddCircle } from 'react-icons/md';
+import { updateCardAssignee } from '@trz/emitters';
+import { MdOutlineAddCircle } from 'react-icons/md';
 import { AvatarRow } from '../AvatarRow';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 
 interface AssigneeMenuProps {
     card: Card;

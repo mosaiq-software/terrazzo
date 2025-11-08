@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react';
-import { Box, Flex, Group, Button, Divider, Title, Text, Image, Stack, Center, Container, Anchor } from '@mantine/core';
+import { Anchor, Box, Button, Center, Container, Divider, Flex, Group, Stack, Text, Title } from '@mantine/core';
+import { useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
-import './LandingPage.css';
-import TerrazzoLogo from '../assets/terrazzo-logo.svg';
-import mosaiqLogo from '../assets/mosaiq-logo.png';
-import terrazzoScreenshot from '../assets/terrazzo-screenshot.png';
-import { useUser } from '@trz/contexts/user-context';
 import { UserProfileIcon } from '@trz/components/UserProfileIcon';
+import { useUser } from '@trz/contexts/user-context';
 import { setTitle } from '@trz/util/tabUtils';
+import mosaiqLogo from '../assets/mosaiq-logo.png';
+import TerrazzoLogo from '../assets/terrazzo-logo.svg';
+import terrazzoScreenshot from '../assets/terrazzo-screenshot.png';
+import './LandingPage.css';
 
 const COLORS = {
     background: '#19191b',

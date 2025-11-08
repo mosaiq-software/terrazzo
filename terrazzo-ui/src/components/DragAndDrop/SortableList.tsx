@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import ListElement from '@trz/components/ListElement';
-import { CSS, Transform } from '@dnd-kit/utilities';
-import { useSortable } from '@dnd-kit/sortable';
-import { CardId, ListId } from '@mosaiq/terrazzo-common/types';
 import { DraggableAttributes, useDroppable } from '@dnd-kit/core';
 import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS, Transform } from '@dnd-kit/utilities';
+import { CardId, ListId } from '@mosaiq/terrazzo-common/types';
+import ListElement from '@trz/components/ListElement';
+import React, { useEffect, useState } from 'react';
 
 interface SortableListProps {
     listId: ListId;

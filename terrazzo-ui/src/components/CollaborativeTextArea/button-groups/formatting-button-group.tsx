@@ -1,5 +1,4 @@
-import React, { FC, ReactNode } from 'react';
-
+import type { FC, ReactNode } from 'react';
 import { ToggleBoldButton, ToggleCodeButton, ToggleItalicButton, ToggleStrikeButton, ToggleUnderlineButton } from '../buttons';
 import { CommandButtonGroup } from './command-button-group';
 

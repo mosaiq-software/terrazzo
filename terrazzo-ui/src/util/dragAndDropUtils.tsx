@@ -1,8 +1,7 @@
-import React from 'react';
+import { defaultDropAnimationSideEffects, DropAnimation } from '@dnd-kit/core';
+import { CardId, ListId, UID } from '@mosaiq/terrazzo-common/types';
 import CardElement from '@trz/components/CardElement';
 import ListElement from '@trz/components/ListElement';
-import { UID, CardId, ListId } from '@mosaiq/terrazzo-common/types';
-import { defaultDropAnimationSideEffects, DropAnimation } from '@dnd-kit/core';
 
 export const horizontalCollisionDetection = (args): string | null => {
     // Get the horizontally closest list

@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState } from 'react';
+import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { BoardRes } from '@mosaiq/terrazzo-common/types';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
+import React, { createContext, useContext, useState } from 'react';
 
 export type TRZContextType = {
     navbarHeight: number;
