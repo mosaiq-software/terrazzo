@@ -1,7 +1,7 @@
-import { callTrzApi } from '@trz/util/apiUtils';
-import { NoteType, notify } from '@trz/util/notifications';
 import { RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
 import { UserId } from '@mosaiq/terrazzo-common/types';
+import { callTrzApi } from '@trz/util/apiUtils';
+import { NoteType, notify } from '@trz/util/notifications';
 
 export const checkUsernameTaken = async (username: string) => {
     try {

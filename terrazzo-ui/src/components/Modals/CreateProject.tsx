@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { TextInput, Container, Flex, Button } from '@mantine/core';
+import { Button, Container, Flex, TextInput } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
-import { useSocket } from '@trz/contexts/socket-context';
-import { useNavigate, useParams } from 'react-router-dom';
-import { NoteType, notify } from '@trz/util/notifications';
 import { OrganizationId } from '@mosaiq/terrazzo-common/types';
+import { useSocket } from '@trz/contexts/socket-context';
 import { createProject } from '@trz/emitters';
+import { NoteType, notify } from '@trz/util/notifications';
+import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const CreateProject = (props: ContextModalProps<{ modalBody: string; orgId: OrganizationId }>): React.JSX.Element => {
     const [projectName, setProjectName] = React.useState('');

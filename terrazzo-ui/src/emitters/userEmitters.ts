@@ -1,7 +1,7 @@
 import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { UserId, UserDash } from '@mosaiq/terrazzo-common/types';
+import { UserDash, UserId } from '@mosaiq/terrazzo-common/types';
 import { SocketContextType } from '@trz/contexts/socket-context';
-import { notify, NoteType } from '@trz/util/notifications';
+import { NoteType, notify } from '@trz/util/notifications';
 
 export const getUsersDash = async (sockCtx: SocketContextType, userId: UserId): Promise<UserDash | undefined> => {
     try {

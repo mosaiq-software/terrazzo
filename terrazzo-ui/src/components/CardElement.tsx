@@ -1,14 +1,14 @@
-import React from 'react';
 import { Group, Paper, Text } from '@mantine/core';
+import { useInViewport } from '@mantine/hooks';
 import { CardId } from '@mosaiq/terrazzo-common/types';
 import { AvatarRow } from '@trz/components/AvatarRow';
 import { PriorityChip } from '@trz/components/CardDetails/PriorityButtons';
 import { getCardNumber } from '@trz/util/boardUtils';
-import { useInViewport } from '@mantine/hooks';
-import { LabelDisplay } from './CardDetails/LabelsMenu';
 import { useContextMenu } from 'mantine-contextmenu';
-import { CardContextMenu } from './CardContextMenu';
+import React from 'react';
 import { useCard } from '../hooks/useCard';
+import { CardContextMenu } from './CardContextMenu';
+import { LabelDisplay } from './CardDetails/LabelsMenu';
 
 interface CardElementProps {
     cardId: CardId;
@@ -65,7 +65,7 @@ const CardElement = (props: CardElementProps) => {
                 />
             ))}
         >
-            {process.env.DEBUG === 'true' && <Text fz="6pt">{props.cardId}</Text>}
+            {import.meta.env.DEBUG === 'true' && <Text fz="6pt">{props.cardId}</Text>}
             {card && inViewport && (
                 <React.Fragment>
                     <LabelDisplay

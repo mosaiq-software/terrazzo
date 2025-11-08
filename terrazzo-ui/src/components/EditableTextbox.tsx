@@ -1,6 +1,6 @@
+import { Input, InputProps, Text, TextProps, Title, TitleProps } from '@mantine/core';
+import { captureDraggableEvents, captureEvent, forAllClickEvents } from '@trz/util/eventUtils';
 import React, { CSSProperties } from 'react';
-import { Text, Title, Input, TitleProps, TextProps, InputProps } from '@mantine/core';
-import { captureAllEvents, captureDraggableEvents, captureEvent, forAllClickEvents } from '@trz/util/eventUtils';
 
 interface EditableTextboxProps {
     value: string;

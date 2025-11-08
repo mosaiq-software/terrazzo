@@ -1,8 +1,8 @@
 /**
  * Adapted from Mantine's use-map hook
  */
-import { useRef } from 'react';
 import { useForceUpdate } from '@mantine/hooks';
+import { useRef } from 'react';
 
 export function useMap<T, V>(initialState?: [T, V][]): [Map<T, V>, (map: Map<T, V> | [T, V][]) => void] {
     const mapRef = useRef(new Map<T, V>(initialState));

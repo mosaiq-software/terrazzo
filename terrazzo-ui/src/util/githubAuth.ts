@@ -1,17 +1,17 @@
-import queryString from 'query-string';
-import { callTrzApi } from '@trz/util//apiUtils';
-import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
-import { NoteType, notify } from '@trz/util/notifications';
 import { readSessionStorageValue } from '@mantine/hooks';
 import { RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
+import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { UserHeader } from '@mosaiq/terrazzo-common/types';
+import { callTrzApi } from '@trz/util//apiUtils';
+import { NoteType, notify } from '@trz/util/notifications';
+import queryString from 'query-string';
 
 /*
     Returns the URL to redirect to for GitHub login.
 */
 export const getGithubLoginUrl = () => {
-    const client_id = process.env.GITHUB_AUTH_CLIENT_ID;
-    const redirect_uri = `${process.env.FRONTEND_URL}${process.env.GITHUB_AUTH_CALLBACK_URL}`;
+    const client_id = import.meta.env.GITHUB_AUTH_CLIENT_ID;
+    const redirect_uri = `${import.meta.env.FRONTEND_URL}${import.meta.env.GITHUB_AUTH_CALLBACK_URL}`;
     const scope = ['read:user', 'user:email', 'read:org'].join(' ');
     const allow_signup = true;
 

@@ -1,6 +1,5 @@
-import React from 'react';
 import { Divider, Group } from '@mantine/core';
-import { BasicFormattingButtonGroup, CalloutTypeButtonGroup, DataTransferButtonGroup, HeadingLevelButtonGroup, HistoryButtonGroup, ListButtonGroup } from './button-groups';
+import { BasicFormattingButtonGroup, CalloutTypeButtonGroup, HeadingLevelButtonGroup, ListButtonGroup } from './button-groups';
 import { CreateTableButton } from './buttons';
 
 export const CollabTextAreaToolbar = () => {

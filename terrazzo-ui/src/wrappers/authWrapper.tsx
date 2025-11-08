@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
 import { Center, Loader } from '@mantine/core';
 import { useUser } from '@trz/contexts/user-context';
+import { useEffect } from 'react';
 
 interface AuthWrapperProps {
     children: any;

@@ -1,8 +1,7 @@
-import React, { FC, useCallback } from 'react';
 import { CommandsExtension } from '@remirror/core';
 import { useCommands, useCurrentSelection } from '@remirror/react-core';
-
-import { CommandButton, CommandButtonProps } from './command-button';
+import { type FC, useCallback } from 'react';
+import { CommandButton, type CommandButtonProps } from './command-button';
 
 export interface CutButtonProps extends Omit<CommandButtonProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {}
 

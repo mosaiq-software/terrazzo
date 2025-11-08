@@ -1,8 +1,8 @@
 import { Button, FormControl } from '@mui/material';
-import React, { MouseEvent } from 'react';
 import { codeBlockPositioner } from '@remirror/extension-code-block';
 import { useCommands } from '@remirror/react-core';
 import { usePositioner } from '@remirror/react-hooks';
+import { MouseEvent } from 'react';
 
 const defaultButtonText = 'format';
 

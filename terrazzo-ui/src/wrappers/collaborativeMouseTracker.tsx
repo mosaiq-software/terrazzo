@@ -1,14 +1,14 @@
-import React, { MouseEventHandler, useCallback, useEffect, useRef } from 'react';
-import { useSocket } from '@trz/contexts/socket-context';
-import UserCursor from '@trz/components/UserCursor';
-import { ClientSE, Position, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { Box, MantineStyleProp } from '@mantine/core';
-import { BoardId, CardId, ListId } from '@mosaiq/terrazzo-common/types';
 import { useIdle, useThrottledCallback } from '@mantine/hooks';
-import { IDLE_TIMEOUT_MS, MOUSE_UPDATE_THROTTLE_MS } from '@trz/util/textUtils';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { useRoom } from '@trz/hooks/useRoom';
+import { ClientSE, Position, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
+import { BoardId, CardId, ListId } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import UserCursor from '@trz/components/UserCursor';
+import { useSocket } from '@trz/contexts/socket-context';
+import { useRoom } from '@trz/hooks/useRoom';
+import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { IDLE_TIMEOUT_MS, MOUSE_UPDATE_THROTTLE_MS } from '@trz/util/textUtils';
+import { MouseEventHandler, useCallback, useEffect, useRef } from 'react';
 
 interface CollaborativeMouseTrackerProps {
     boardId: BoardId;

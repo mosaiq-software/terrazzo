@@ -1,12 +1,12 @@
-import React, { useMemo } from 'react';
 import { Box, Title } from '@mantine/core';
-import { BOARD_CARD_WIDTH, BoardListCard } from '@trz/components/BoardListCards';
-import { Project } from '@mosaiq/terrazzo-common/types';
-import { useNavigate } from 'react-router';
 import { modals } from '@mantine/modals';
-import { createDocument } from '@trz/emitters';
-import { notify, NoteType } from '@trz/util/notifications';
+import { Project } from '@mosaiq/terrazzo-common/types';
+import { BOARD_CARD_WIDTH, BoardListCard } from '@trz/components/BoardListCards';
 import { useSocket } from '@trz/contexts/socket-context';
+import { createDocument } from '@trz/emitters';
+import { NoteType, notify } from '@trz/util/notifications';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router';
 
 interface ProjectTabCardsProps {
     projectData: Project;

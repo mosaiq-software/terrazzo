@@ -1,23 +1,22 @@
-import React, { FC, PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
-import { IdentifierSchemaAttributes } from 'remirror';
-import { EmojiExtension, MentionAtomExtension, MentionAtomNodeAttributes, PlaceholderExtension, wysiwygPreset, AnnotationExtension, CalloutExtension, ImageExtension, DropCursorExtension } from 'remirror/extensions';
-import data from 'svgmoji/emoji.json';
+import { Alert } from '@mantine/core';
+import { TextBlockId } from '@mosaiq/terrazzo-common/types';
 import { TableComponents, TableExtension } from '@remirror/extension-react-tables';
+import { YjsExtension } from '@remirror/extension-yjs';
 import { i18nFormat } from '@remirror/i18n';
+import type { RemirrorProps, UseThemeProps } from '@remirror/react';
 import { EditorComponent, EmojiPopupComponent, MentionAtomPopupComponent, MentionAtomState, Remirror, ThemeProvider, useRemirror } from '@remirror/react';
 import { AllStyledComponent } from '@remirror/styles/emotion';
-import { TextBlockId } from '@mosaiq/terrazzo-common/types';
-import type { AnyExtension, CreateEditorStateProps } from 'remirror';
-import type { RemirrorProps, UseThemeProps } from '@remirror/react';
-import { YjsExtension } from '@remirror/extension-yjs';
-import { ProviderConfiguration, SocketIOProvider } from '@trz/util/yjsSocketProvier';
-import { Doc } from 'yjs';
-import { ManagerOptions, SocketOptions } from 'socket.io-client';
 import { useImageColor } from '@trz/hooks/useImageColor';
-import { CollabTextAreaToolbar } from './Toolbar';
-
+import { ProviderConfiguration, SocketIOProvider } from '@trz/util/yjsSocketProvier';
+import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
+import type { AnyExtension, CreateEditorStateProps } from 'remirror';
+import { IdentifierSchemaAttributes } from 'remirror';
+import { AnnotationExtension, CalloutExtension, DropCursorExtension, EmojiExtension, ImageExtension, MentionAtomExtension, MentionAtomNodeAttributes, PlaceholderExtension, wysiwygPreset } from 'remirror/extensions';
+import { ManagerOptions, SocketOptions } from 'socket.io-client';
+import data from 'svgmoji/emoji.json';
+import { Doc } from 'yjs';
 import './CollaborativeTextAreaStyle.css';
-import { Alert } from '@mantine/core';
+import { CollabTextAreaToolbar } from './Toolbar';
 
 export interface ReactEditorProps extends Pick<CreateEditorStateProps, 'stringHandler'>, Pick<RemirrorProps, 'initialContent' | 'editable' | 'autoFocus' | 'hooks' | 'i18nFormat' | 'locale' | 'supportedLocales'> {
     placeholder?: string;
@@ -78,7 +77,7 @@ const EditorWrapper = (props: EditorWrapperProps) => {
         let _socketIOProvider: SocketIOProvider;
         const init = async () => {
             const doc = new Doc();
-            const url = process.env.SOCKET_URL;
+            const url = import.meta.env.SOCKET_URL;
             if (!url) throw new Error('SOCKET_URL environment variable is not set');
             const textBlockId = props.textBlockId;
             const pConf: ProviderConfiguration = {

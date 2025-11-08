@@ -1,16 +1,15 @@
-import React from 'react';
-import { Routes, Route, Outlet } from 'react-router-dom';
 import { GithubAuth } from '@trz/pages/auth/github';
+import LoginPage from '@trz/pages/auth/LoginPage';
 import { SetUpAccount } from '@trz/pages/auth/SetUpAccount';
-import ContentPageWrapper from '@trz/wrappers/ContentPageWrapper';
-import LandingPage from '@trz/pages/LandingPage';
-import HomePage from '@trz/pages/HomePage';
-import OrganizationPage from '@trz/pages/OrganizationPage';
-import ProjectPage from '@trz/pages/ProjectPage';
 import BoardPage from '@trz/pages/BoardPage';
 import BoardSettingsPage from '@trz/pages/BoardSettingsPage';
+import HomePage from '@trz/pages/HomePage';
+import LandingPage from '@trz/pages/LandingPage';
+import OrganizationPage from '@trz/pages/OrganizationPage';
+import ProjectPage from '@trz/pages/ProjectPage';
 import UserSettingsPage from '@trz/pages/UserSettingsPage';
-import LoginPage from '@trz/pages/auth/LoginPage';
+import ContentPageWrapper from '@trz/wrappers/ContentPageWrapper';
+import { Outlet, Route, Routes } from 'react-router-dom';
 import { NotFound, PageErrors } from './components/NotFound';
 import DocumentPage from './pages/DocumentPage';
 

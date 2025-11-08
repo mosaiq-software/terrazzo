@@ -1,5 +1,5 @@
 import { Button, ButtonGroup } from '@mui/material';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
 export const ReplaceController: FC<{
     replace: () => void;

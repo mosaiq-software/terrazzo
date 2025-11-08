@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useSocket } from '@trz/contexts/socket-context';
 import { UserDash } from '@mosaiq/terrazzo-common/types';
-import { useUser } from './user-context';
+import { useSocket } from '@trz/contexts/socket-context';
 import { getUsersDash } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useUser } from './user-context';
 
 type DashboardContextType = {
     userDash: UserDash | undefined;

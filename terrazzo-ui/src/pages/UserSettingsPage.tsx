@@ -1,24 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useSocket } from '@trz/contexts/socket-context';
-import { BoardHeader, BoardId, CardId, Label, LabelId, ListId, UID } from '@mosaiq/terrazzo-common/types';
-import { useTRZ } from '@trz/contexts/TRZ-context';
-import { ActionIcon, Anchor, Badge, Box, Button, ColorInput, Divider, Fieldset, Group, Pill, ScrollArea, Select, Space, Stack, Text, Textarea, TextInput, Title, Tooltip } from '@mantine/core';
-import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { useRoom } from '@trz/hooks/useRoom';
-import { createBoardLabel, deleteBoardLabel, getBoardData, updateBoardField, updateBoardLabel } from '@trz/emitters';
-import { NoteType, notify } from '@trz/util/notifications';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
-import { DEFAULT_AUTHED_ROUTE, useUser } from '@trz/contexts/user-context';
-import { NotFound, PageErrors } from '@trz/components/NotFound';
-import { MdOutlineAdd, MdOutlineCheck, MdOutlineChevronLeft, MdOutlineClose, MdOutlineDelete, MdOutlineEdit } from 'react-icons/md';
-import { TEMPORARY_ID } from '@mosaiq/terrazzo-common/constants';
-import { colorIsDarkAdvanced, generateRandomColor } from '@trz/util/colorUtils';
-import { RingHoldingButton } from '@trz/components/RingHoldingButton';
+import { Anchor, Box, Fieldset, Group, ScrollArea, Space, Stack, Text, Title } from '@mantine/core';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { useDashboard } from '@trz/contexts/dashboard-context';
+import { useSocket } from '@trz/contexts/socket-context';
+import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useUser } from '@trz/contexts/user-context';
 import { setTitle } from '@trz/util/tabUtils';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const UserSettingsPage = (): React.JSX.Element => {
     const [isDirty, setIsDirty] = useState<boolean>(false);

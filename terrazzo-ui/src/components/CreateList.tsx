@@ -1,6 +1,6 @@
+import { Button, CloseButton, Flex, FocusTrap, Paper, TextInput } from '@mantine/core';
+import { getHotkeyHandler, useClickOutside } from '@mantine/hooks';
 import React, { useState } from 'react';
-import { Button, CloseButton, Paper, TextInput, Flex, FocusTrap } from '@mantine/core';
-import { useClickOutside, getHotkeyHandler } from '@mantine/hooks';
 
 interface CreateListProps {
     onCreateList: (title: string) => void;

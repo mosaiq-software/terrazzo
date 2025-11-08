@@ -1,9 +1,9 @@
 import { FormControl, MenuItem, Select, SelectChangeEvent } from '@mui/material';
-import React, { PointerEvent, useEffect, useMemo } from 'react';
 import { uniqueBy } from '@remirror/core';
 import { CodeBlockExtension, codeBlockPositioner } from '@remirror/extension-code-block';
 import { useCommands, useExtension } from '@remirror/react-core';
 import { usePositioner } from '@remirror/react-hooks';
+import { PointerEvent, useEffect, useMemo } from 'react';
 
 export interface CodeBlockLanguageSelectProps {
     languages?: Array<{ displayName: string; value?: string }>;

@@ -1,14 +1,14 @@
-import React from 'react';
-import { Box, Group, Title, Tabs, Stack } from '@mantine/core';
-import { Role, EntityType } from '@mosaiq/terrazzo-common/constants';
-import { notify, NoteType } from '@trz/util/notifications';
-import { MdOutlinePerson, MdOutlineMailOutline } from 'react-icons/md';
+import { Box, Group, Stack, Tabs, Title } from '@mantine/core';
+import { EntityType, Role } from '@mosaiq/terrazzo-common/constants';
+import { MembershipRecord, Organization } from '@mosaiq/terrazzo-common/types';
 import { AddUser } from '@trz/components/AddUser';
 import { MembershipRow } from '@trz/components/MembershipRow';
-import { MembershipRecord, Organization, OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { PendingInviteRow } from '@trz/components/PendingInviteRow';
 import { useSocket } from '@trz/contexts/socket-context';
 import { replyInvite, revokeMembershipRecord, sendInvite, updateMembershipRecordField } from '@trz/emitters';
+import { NoteType, notify } from '@trz/util/notifications';
+import { MdOutlineMailOutline, MdOutlinePerson } from 'react-icons/md';
+
 interface OrgTabMembersProps {
     myMembershipRecord: MembershipRecord;
     orgData: Organization;

@@ -1,6 +1,6 @@
-import * as Y from 'yjs';
 import { Namespace, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
+import * as Y from 'yjs';
 
 export interface AwarenessChange {
     added: number[];
@@ -8,7 +8,7 @@ export interface AwarenessChange {
     removed: number[];
 }
 
-const gcEnabled = process.env.GC !== 'false' && process.env.GC !== '0';
+const gcEnabled = true;
 
 /**
  * Document callbacks. Here you can set:

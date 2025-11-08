@@ -1,7 +1,7 @@
 import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { ProjectId, Project, OrganizationId, ProjectHeader } from '@mosaiq/terrazzo-common/types';
+import { OrganizationId, Project, ProjectHeader, ProjectId } from '@mosaiq/terrazzo-common/types';
 import { SocketContextType } from '@trz/contexts/socket-context';
-import { notify, NoteType } from '@trz/util/notifications';
+import { NoteType, notify } from '@trz/util/notifications';
 
 export const getProjectData = async (sockCtx: SocketContextType, projectId: ProjectId): Promise<Project | undefined> => {
     try {

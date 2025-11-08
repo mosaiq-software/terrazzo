@@ -1,7 +1,7 @@
-import React from 'react';
 import { Badge, Box } from '@mantine/core';
-import { useImageColor } from '@trz/hooks/useImageColor';
 import { Position } from '@mosaiq/terrazzo-common/socketTypes';
+import { useImageColor } from '@trz/hooks/useImageColor';
+import React from 'react';
 import { GiArrowCursor } from 'react-icons/gi';
 
 interface UserCursorProps {

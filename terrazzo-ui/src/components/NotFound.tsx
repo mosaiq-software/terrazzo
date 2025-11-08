@@ -1,5 +1,4 @@
-import { Box, Center, Stack, Title, Text } from '@mantine/core';
-import React from 'react';
+import { Center, Stack, Text, Title } from '@mantine/core';
 import { NavLink } from 'react-router-dom';
 
 export enum PageErrors {

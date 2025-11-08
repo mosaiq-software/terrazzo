@@ -1,8 +1,7 @@
-import React from 'react';
-import { Button, Center, Container, Paper, Stack, Title, Text, Space, Checkbox } from '@mantine/core';
+import { Button, Center, Checkbox, Container, Paper, Space, Stack, Text, Title } from '@mantine/core';
+import { useSessionStorage } from '@mantine/hooks';
 import { getGithubLoginUrl } from '@trz/util/githubAuth';
 import { FaGithub } from 'react-icons/fa';
-import { useSessionStorage } from '@mantine/hooks';
 
 interface LoginPageProps {}
 const LoginPage = (props: LoginPageProps) => {

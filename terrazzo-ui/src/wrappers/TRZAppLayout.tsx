@@ -1,21 +1,19 @@
-import React from 'react';
-import { NavLink, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { Avatar, Box, Burger, Button, Divider, Group, Indicator, Kbd, Notification, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { useHotkeys, useLocalStorage } from '@mantine/hooks';
-import { Burger, Group, Tooltip, Kbd, Divider, Input, Text, Box, Stack, Title, Avatar, Button, Image, UnstyledButton, Menu, Popover, Indicator, Notification, ScrollAreaAutosize } from '@mantine/core';
-import { MdHomeFilled, MdNotificationsNone, MdOutlineSearch, MdOutlineSettings } from 'react-icons/md';
-import { useSocket } from '@trz/contexts/socket-context';
-import { useUser } from '@trz/contexts/user-context';
-import { notify, NoteType } from '@trz/util/notifications';
 import { EntityType, LocalStorageKey, RoleNames } from '@mosaiq/terrazzo-common/constants';
-import { useTRZ } from '@trz/contexts/TRZ-context';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
-import { replyInvite } from '@trz/emitters';
-import { useDashboard } from '@trz/contexts/dashboard-context';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
+import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { SearchBar } from '@trz/components/AutoComplete/Searchbar';
 import { UserProfileIcon } from '@trz/components/UserProfileIcon';
-import TerrazzoLogo from '../assets/terrazzo-logo.svg';
+import { useDashboard } from '@trz/contexts/dashboard-context';
+import { useSocket } from '@trz/contexts/socket-context';
+import { useTRZ } from '@trz/contexts/TRZ-context';
+import { replyInvite } from '@trz/emitters';
+import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { NoteType, notify } from '@trz/util/notifications';
+import { MdHomeFilled, MdNotificationsNone, MdOutlineSettings } from 'react-icons/md';
+import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
+import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
 
 const ANIM_DURATION = 500;
 interface TRZAppLayoutProps {

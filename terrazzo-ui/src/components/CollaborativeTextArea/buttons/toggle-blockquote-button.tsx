@@ -1,7 +1,6 @@
-import React, { FC, useCallback } from 'react';
 import { BlockquoteExtension } from '@remirror/extension-blockquote';
 import { useActive, useCommands } from '@remirror/react-core';
-
+import { FC, useCallback } from 'react';
 import { CommandButton, CommandButtonProps } from './command-button';
 
 export interface ToggleBlockquoteButtonProps extends Omit<CommandButtonProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {}

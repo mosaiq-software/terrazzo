@@ -1,5 +1,4 @@
-import React, { FC, ReactNode } from 'react';
-
+import type { FC, ReactNode } from 'react';
 import { CopyButton, CutButton, PasteButton } from '../buttons';
 import { CommandButtonGroup } from './command-button-group';
 

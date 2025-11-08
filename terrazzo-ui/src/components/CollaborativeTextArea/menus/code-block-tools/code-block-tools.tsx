@@ -1,10 +1,10 @@
-import React, { CSSProperties, useMemo } from 'react';
 import type { FindProsemirrorNodeResult } from '@remirror/core';
 import { cx } from '@remirror/core';
 import { codeBlockPositioner } from '@remirror/extension-code-block';
 import { PositionerPortal } from '@remirror/react-components';
 import { usePositioner } from '@remirror/react-hooks';
 import { ExtensionCodeBlockTheme } from '@remirror/theme';
+import React, { CSSProperties, useMemo } from 'react';
 
 export interface CodeBlockToolsProps {
     position?: 'left' | 'right';

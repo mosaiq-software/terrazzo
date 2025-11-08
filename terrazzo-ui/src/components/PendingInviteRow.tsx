@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Avatar, Button, Grid, Group, Menu, Select, TextInput, Title, Text, Tooltip } from '@mantine/core';
-import { NoteColor, NoteType, notify } from '@trz/util/notifications';
+import { Avatar, Button, Grid, Text, Tooltip } from '@mantine/core';
 import { Role, RoleNames } from '@mosaiq/terrazzo-common/constants';
 import { Invite } from '@mosaiq/terrazzo-common/types';
-import { IoMdClose } from 'react-icons/io';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { NoteColor } from '@trz/util/notifications';
+import { IoMdClose } from 'react-icons/io';
+
 interface PendingInviteRowProps {
     invite: Invite;
     editorPermLevel: Role;

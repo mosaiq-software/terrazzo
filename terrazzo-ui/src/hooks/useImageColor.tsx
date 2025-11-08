@@ -1,5 +1,5 @@
-import React from 'react';
 import { Vibrant } from 'node-vibrant/browser';
+import React from 'react';
 
 export type imageColorType = 'Vibrant' | 'Muted' | 'DarkVibrant' | 'DarkMuted' | 'LightVibrant' | 'LightMuted';
 

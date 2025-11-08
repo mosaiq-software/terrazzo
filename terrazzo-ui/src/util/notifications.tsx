@@ -1,6 +1,5 @@
 import { Box, Button, Group, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import React from 'react';
 
 const AUTO_CLOSE_TIMEOUT = 5000;
 const LONG_NOTIFICATION_TIMEOUT = 10000;

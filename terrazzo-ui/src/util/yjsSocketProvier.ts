@@ -1,8 +1,8 @@
-import * as Y from 'yjs';
 import * as bc from 'lib0/broadcastchannel';
-import * as AwarenessProtocol from 'y-protocols/awareness';
 import { Observable } from 'lib0/observable';
 import { io, ManagerOptions, Socket, SocketOptions } from 'socket.io-client';
+import * as AwarenessProtocol from 'y-protocols/awareness';
+import * as Y from 'yjs';
 
 export interface AwarenessChange {
     added: number[];
@@ -171,7 +171,8 @@ export class SocketIOProvider extends Observable<string> {
      */
     private readonly initSystemListeners = (): void => {
         if (typeof window !== 'undefined') window.addEventListener('beforeunload', this.beforeUnloadHandler);
-        else if (typeof process !== 'undefined') process.on('exit', this.beforeUnloadHandler);
+        // @ts-expect-error process is not defined on frontend
+        else if (typeof process !== 'undefined') process?.on('exit', this.beforeUnloadHandler);
     };
 
     /**
@@ -247,7 +248,8 @@ export class SocketIOProvider extends Observable<string> {
         if (this.resyncInterval != null) clearInterval(this.resyncInterval);
         this.disconnect();
         if (typeof window !== 'undefined') window.removeEventListener('beforeunload', this.beforeUnloadHandler);
-        else if (typeof process !== 'undefined') process.off('exit', this.beforeUnloadHandler);
+        // @ts-expect-error process is not defined on frontend
+        else if (typeof process !== 'undefined') process?.off('exit', this.beforeUnloadHandler);
         this.awareness.off('update', this.awarenessUpdate);
         this.awareness.destroy();
         this.doc.off('update', this.onUpdateDoc);

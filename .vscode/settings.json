@@ -1,3 +1,9 @@
 {
-    "cSpell.words": ["Collab", "milkdown", "mosaiq"]
+    "cSpell.words": ["Collab", "milkdown", "mosaiq"],
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always",
+        "source.fixAll.eslint": "always",
+        "source.addMissingImports.ts": "always"
+    }
 }

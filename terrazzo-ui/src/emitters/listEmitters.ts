@@ -1,7 +1,7 @@
 import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { BoardId, ListHeader, ListId } from '@mosaiq/terrazzo-common/types';
 import { SocketContextType } from '@trz/contexts/socket-context';
-import { notify, NoteType } from '@trz/util/notifications';
+import { NoteType, notify } from '@trz/util/notifications';
 
 export const getListData = async (sockCtx: SocketContextType, listId: BoardId): Promise<ListHeader | undefined> => {
     try {

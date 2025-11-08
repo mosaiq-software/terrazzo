@@ -1,12 +1,11 @@
-import { ActionIcon, Box, Button, Checkbox, MantineSize, Menu, Pill, Stack, Text, Tooltip } from '@mantine/core';
-import { Card, LabelId } from '@mosaiq/terrazzo-common/types';
+import { ActionIcon, Button, type MantineSize, Menu, Pill, Stack, Tooltip } from '@mantine/core';
+import type { Card, LabelId } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { updateCardsLabels } from '@trz/emitters';
 import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
-import React, { useMemo } from 'react';
 import { IoMdInformationCircleOutline } from 'react-icons/io';
-import { MdAddCircleOutline, MdCheck, MdLabel, MdLabelOutline } from 'react-icons/md';
+import { MdCheck, MdLabel } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 
 interface LabelsMenuProps {

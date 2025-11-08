@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
 import { Center, RingProgress, UnstyledButton } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
+import { useEffect, useState } from 'react';
 
 interface RingHoldingButtonProps {
     children?: any;

@@ -1,6 +1,6 @@
 import { EntityType, Role } from '@mosaiq/terrazzo-common/constants';
 import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { MembershipRecordId, MembershipRecord, EntityId, InviteId } from '@mosaiq/terrazzo-common/types';
+import { EntityId, InviteId, MembershipRecord, MembershipRecordId } from '@mosaiq/terrazzo-common/types';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
 export const updateMembershipRecordField = async (sockCtx: SocketContextType, id: MembershipRecordId, partial: Partial<MembershipRecord>) => {

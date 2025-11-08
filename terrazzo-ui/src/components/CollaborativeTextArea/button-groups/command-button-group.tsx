@@ -1,5 +1,5 @@
 import { Box } from '@mantine/core';
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 
 export interface CommandButtonGroupProps {
     children: ReactNode | ReactNode[];

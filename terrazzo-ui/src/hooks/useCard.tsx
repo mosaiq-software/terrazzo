@@ -1,12 +1,12 @@
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { CardId, Card } from '@mosaiq/terrazzo-common/types';
+import { Card, CardId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { useSocket } from '@trz/contexts/socket-context';
 import { getCardData } from '@trz/emitters';
 import { CARD_CACHE_PREFIX } from '@trz/util/boardUtils';
-import { notify, NoteType } from '@trz/util/notifications';
-import { useState, useEffect } from 'react';
+import { NoteType, notify } from '@trz/util/notifications';
+import { useEffect, useState } from 'react';
 import { useSocketListener } from './useSocketListener';
-import { useSocket } from '@trz/contexts/socket-context';
 
 export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean) => {
     const [card, setCard] = useState<Card | undefined>(undefined);

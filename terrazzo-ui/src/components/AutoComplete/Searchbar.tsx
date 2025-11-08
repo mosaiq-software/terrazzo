@@ -1,13 +1,13 @@
-import React, { useMemo, useState } from 'react';
-import { Button, Modal, Input, Text, Divider, Stack, Group, TextInput } from '@mantine/core';
-import { useDebouncedCallback, useDisclosure, useHotkeys, useOs } from '@mantine/hooks';
+import { Button, Divider, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
+import { useDebouncedCallback, useHotkeys } from '@mantine/hooks';
+import { DatapointType, type QueryResult } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getSearchResults } from '@trz/emitters';
-import { DatapointType, QueryResult } from '@mosaiq/terrazzo-common/types';
-import { NavLink, useNavigate } from 'react-router';
-import { MdOutlineAccountBox, MdOutlineIncompleteCircle, MdOutlineViewKanban } from 'react-icons/md';
-import { IoDocumentOutline } from 'react-icons/io5';
+import React, { useState } from 'react';
 import { BsCardText } from 'react-icons/bs';
+import { IoDocumentOutline } from 'react-icons/io5';
+import { MdOutlineIncompleteCircle, MdOutlineViewKanban } from 'react-icons/md';
+import { useNavigate } from 'react-router';
 
 export function SearchBar() {
     const [searchSessionId, setSearchSessionId] = useState<string | undefined>(undefined);
