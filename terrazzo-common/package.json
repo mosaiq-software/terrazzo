@@ -1,13 +1,12 @@
 {
     "name": "@mosaiq/terrazzo-common",
     "version": "1.6.2",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "src/index.ts",
+    "type": "module",
     "scripts": {
-        "build": "npm run prebuild && tsc",
-        "prebuild": "npm run lint && npm run types",
+        "build": "tsc && tsc-alias",
+        "build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
         "prepublish-cleanup": "node ./scripts/pre-publish.mjs",
-        "build:watch": "tsc -w",
         "lint": "eslint .",
         "types": "tsc --noemit",
         "update": "git fetch origin develop && git merge origin/develop",
@@ -23,6 +22,7 @@
         "eslint": "^9.21.0",
         "globals": "^16.0.0",
         "typescript": "^5.7.3",
-        "typescript-eslint": "^8.24.1"
+        "typescript-eslint": "^8.24.1",
+        "tsc-alias": "^1.8.16"
     }
 }
