@@ -4,13 +4,13 @@
     "main": "src/index.ts",
     "type": "module",
     "scripts": {
-        "build": "tsc && tsc-alias",
-        "build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
+        "build": "tsc && tsc-alias && npm run prepublish-cleanup",
+        "build:watch": "npm run build && (concurrently \"tsc -w\" \"tsc-alias -w\")",
         "prepublish-cleanup": "node ./scripts/pre-publish.mjs",
         "lint": "eslint .",
         "types": "tsc --noemit",
         "update": "git fetch origin develop && git merge origin/develop",
-        "publish:prod": "npm ci && npm run build && npm run prepublish-cleanup && npm publish ./dist"
+        "publish:prod": "npm ci && npm run build && npm publish ./dist"
     },
     "publishConfig": {
         "registry": "https://registry.mosaiq.dev"
