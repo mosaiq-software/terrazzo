@@ -171,7 +171,6 @@ export class SocketIOProvider extends Observable<string> {
      */
     private readonly initSystemListeners = (): void => {
         if (typeof window !== 'undefined') window.addEventListener('beforeunload', this.beforeUnloadHandler);
-        // @ts-expect-error process is not defined on frontend
         else if (typeof process !== 'undefined') process?.on('exit', this.beforeUnloadHandler);
     };
 
@@ -248,7 +247,6 @@ export class SocketIOProvider extends Observable<string> {
         if (this.resyncInterval != null) clearInterval(this.resyncInterval);
         this.disconnect();
         if (typeof window !== 'undefined') window.removeEventListener('beforeunload', this.beforeUnloadHandler);
-        // @ts-expect-error process is not defined on frontend
         else if (typeof process !== 'undefined') process?.off('exit', this.beforeUnloadHandler);
         this.awareness.off('update', this.awarenessUpdate);
         this.awareness.destroy();
