@@ -158,7 +158,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                 e.preventDefault();
             }}
         >
-            {process.env.DEBUG === 'true' && <Text fz="6pt">{props.listId}</Text>}
+            {import.meta.env.DEBUG === 'true' && <Text fz="6pt">{props.listId}</Text>}
             <Group
                 {...props.handleProps}
                 justify="space-between"

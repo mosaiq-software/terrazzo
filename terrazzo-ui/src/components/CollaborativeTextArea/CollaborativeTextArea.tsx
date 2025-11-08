@@ -77,7 +77,7 @@ const EditorWrapper = (props: EditorWrapperProps) => {
         let _socketIOProvider: SocketIOProvider;
         const init = async () => {
             const doc = new Doc();
-            const url = process.env.SOCKET_URL;
+            const url = import.meta.env.SOCKET_URL;
             if (!url) throw new Error('SOCKET_URL environment variable is not set');
             const textBlockId = props.textBlockId;
             const pConf: ProviderConfiguration = {

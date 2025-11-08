@@ -1,7 +1,7 @@
 import { RestMethods, RestRequestBody, RestRequestMethod, RestRequestParams, RestResponse, RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
 
 export const getApiUrl = () => {
-    const apiUrl = process.env.API_URL;
+    const apiUrl = import.meta.env.API_URL;
 
     if (!apiUrl) {
         throw new Error('Missing required environment variables for API URL');

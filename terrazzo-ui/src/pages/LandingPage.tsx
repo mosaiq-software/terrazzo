@@ -6,7 +6,7 @@ import { UserProfileIcon } from '@trz/components/UserProfileIcon';
 import { useUser } from '@trz/contexts/user-context';
 import { setTitle } from '@trz/util/tabUtils';
 import mosaiqLogo from '../assets/mosaiq-logo.png';
-import TerrazzoLogo from '../assets/terrazzo-logo.svg';
+import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
 import terrazzoScreenshot from '../assets/terrazzo-screenshot.png';
 import './LandingPage.css';
 

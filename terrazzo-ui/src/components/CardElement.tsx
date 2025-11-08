@@ -65,7 +65,7 @@ const CardElement = (props: CardElementProps) => {
                 />
             ))}
         >
-            {process.env.DEBUG === 'true' && <Text fz="6pt">{props.cardId}</Text>}
+            {import.meta.env.DEBUG === 'true' && <Text fz="6pt">{props.cardId}</Text>}
             {card && inViewport && (
                 <React.Fragment>
                     <LabelDisplay

@@ -21,7 +21,8 @@ const SocketProvider: React.FC<any> = ({ children }) => {
     // const [userLookup, setUserLookup] = useState<{[userId:UserId]:UserHeader}>({});
 
     useEffect(() => {
-        if (!process.env.SOCKET_URL) {
+        console.log('Socket effect running', import.meta.env);
+        if (!import.meta.env.SOCKET_URL) {
             throw new Error('SOCKET_URL environment variable is not set');
         }
         if (!usr.userData?.id || !usr.githubAuthToken) {
@@ -33,7 +34,7 @@ const SocketProvider: React.FC<any> = ({ children }) => {
             userId: usr.userData.id,
             githubToken: usr.githubAuthToken,
         };
-        const sock = io(process.env.SOCKET_URL, {
+        const sock = io(import.meta.env.SOCKET_URL, {
             auth,
             path: '/socket',
         });

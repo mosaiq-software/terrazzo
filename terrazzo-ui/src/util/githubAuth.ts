@@ -10,8 +10,8 @@ import queryString from 'query-string';
     Returns the URL to redirect to for GitHub login.
 */
 export const getGithubLoginUrl = () => {
-    const client_id = process.env.GITHUB_AUTH_CLIENT_ID;
-    const redirect_uri = `${process.env.FRONTEND_URL}${process.env.GITHUB_AUTH_CALLBACK_URL}`;
+    const client_id = import.meta.env.GITHUB_AUTH_CLIENT_ID;
+    const redirect_uri = `${import.meta.env.FRONTEND_URL}${import.meta.env.GITHUB_AUTH_CALLBACK_URL}`;
     const scope = ['read:user', 'user:email', 'read:org'].join(' ');
     const allow_signup = true;
 

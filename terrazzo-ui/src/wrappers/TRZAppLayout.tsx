@@ -13,7 +13,7 @@ import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
 import { MdHomeFilled, MdNotificationsNone, MdOutlineSettings } from 'react-icons/md';
 import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
-import TerrazzoLogo from '../assets/terrazzo-logo.svg';
+import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
 
 const ANIM_DURATION = 500;
 interface TRZAppLayoutProps {
