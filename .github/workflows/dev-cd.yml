@@ -10,4 +10,4 @@ jobs:
         name: Deploy to Stage
         runs-on: ubuntu-latest
         steps:
-            - run: curl "https://api.nsm.mosaiq.dev/deploy/terrazzo/${{ secrets.NSM_KEY_STAGE }}"
+            - run: curl "https://api.nsm.mosaiq.dev/deploy/terrazzo-staging/${{ secrets.NSM_KEY_STAGE }}"

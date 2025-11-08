@@ -11,7 +11,7 @@ import { UserHeader } from '@mosaiq/terrazzo-common/types';
 */
 export const getGithubLoginUrl = () => {
     const client_id = process.env.GITHUB_AUTH_CLIENT_ID;
-    const redirect_uri = process.env.GITHUB_AUTH_CALLBACK_URL;
+    const redirect_uri = `${process.env.FRONTEND_URL}${process.env.GITHUB_AUTH_CALLBACK_URL}`;
     const scope = ['read:user', 'user:email', 'read:org'].join(' ');
     const allow_signup = true;
 

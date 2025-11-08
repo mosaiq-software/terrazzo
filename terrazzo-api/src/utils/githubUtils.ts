@@ -22,7 +22,7 @@ async function getAccessTokenFromCode(code: string) {
             params: {
                 client_id: process.env.GITHUB_AUTH_CLIENT_ID,
                 client_secret: process.env.GITHUB_AUTH_CLIENT_SECRET,
-                redirect_uri: process.env.GITHUB_AUTH_CALLBACK_URL,
+                redirect_uri: `${process.env.FRONTEND_URL}${process.env.GITHUB_AUTH_CALLBACK_URL}`,
                 code,
             },
         });
