@@ -1,15 +1,14 @@
-import { ActionIcon, Avatar, Button, Divider, Flex, Menu, Portal, Stack, Tooltip } from '@mantine/core';
+import { Avatar, Button, Divider, Flex, Menu, Stack, Tooltip } from '@mantine/core';
 import { Card, CardId } from '@mosaiq/terrazzo-common/types';
 import { SocketContextType, useSocket } from '@trz/contexts/socket-context';
 import { TRZContextType, useTRZ } from '@trz/contexts/TRZ-context';
-import { createCard, createDuplicateCard, updateCardAssignee, updateCardField, updateCardsLabels } from '@trz/emitters';
+import { createDuplicateCard, updateCardAssignee, updateCardField, updateCardsLabels } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
 import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
 import React from 'react';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
-import { IoMdInformationCircleOutline } from 'react-icons/io';
-import { MdAccountBox, MdBarChart, MdCheck, MdDocumentScanner, MdLabel, MdLink } from 'react-icons/md';
-import { prioNames, PriorityChip, priorityColors, unicodeMap } from './CardDetails/PriorityButtons';
+import { MdBarChart, MdCheck, MdDocumentScanner, MdLabel, MdLink } from 'react-icons/md';
+import { prioNames, priorityColors, unicodeMap } from './CardDetails/PriorityButtons';
 import { Priority } from '@mosaiq/terrazzo-common/constants';
 import { NoteType, notify } from '@trz/util/notifications';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
@@ -235,10 +234,6 @@ export const CtxPriorityMenu = (props: CtxMenuItemProps) => {
             return;
         }
     };
-
-    if (!props.trzCtx.boardData?.labels.length) {
-        return null;
-    }
 
     return (
         <Menu
