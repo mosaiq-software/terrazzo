@@ -6,7 +6,7 @@ import { notify, NoteType } from '@trz/util/notifications';
 import { MembershipRecord, Organization, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useNavigate } from 'react-router-dom';
-import { revokeMembershipRecord, updateOrgField } from '@trz/emitters';
+import { revokeMembershipRecord, updateOrgField } from '@trz/emitters/all';
 
 interface OrgTabSettingsProps {
     myMembershipRecord: MembershipRecord;

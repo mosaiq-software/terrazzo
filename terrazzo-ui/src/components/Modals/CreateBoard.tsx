@@ -6,7 +6,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { useNavigate } from 'react-router-dom';
 import { NoteType, notify } from '@trz/util/notifications';
 import { ProjectId } from '@mosaiq/terrazzo-common/types';
-import { createBoard } from '@trz/emitters';
+import { createBoard } from '@trz/emitters/all';
 import { callTrzApi } from '@trz/util/apiUtils';
 import { RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
 import { TrelloExportType } from '@mosaiq/terrazzo-common/trelloTypes';

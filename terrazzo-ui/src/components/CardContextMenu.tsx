@@ -2,7 +2,7 @@ import { ActionIcon, Avatar, Button, Divider, Flex, Menu, Portal, Stack, Tooltip
 import { Card, CardId } from '@mosaiq/terrazzo-common/types';
 import { SocketContextType, useSocket } from '@trz/contexts/socket-context';
 import { TRZContextType, useTRZ } from '@trz/contexts/TRZ-context';
-import { createCard, createDuplicateCard, updateCardAssignee, updateCardField, updateCardsLabels } from '@trz/emitters';
+import { createCard, createDuplicateCard, updateCardAssignee, updateCardField, updateCardsLabels } from '@trz/emitters/all';
 import { useCard } from '@trz/hooks/useCard';
 import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
 import React from 'react';

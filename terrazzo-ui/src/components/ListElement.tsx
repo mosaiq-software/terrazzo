@@ -8,7 +8,7 @@ import { NoteType, notify } from '@trz/util/notifications';
 import { captureDraggableEvents, captureEvent, forAllClickEvents } from '@trz/util/eventUtils';
 import { FaArchive } from 'react-icons/fa';
 import { HiDotsVertical } from 'react-icons/hi';
-import { createCard, getListData, updateListField } from '@trz/emitters';
+import { createCard, getListData, updateListField } from '@trz/emitters/all';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import SortableCard from './DragAndDrop/SortableCard';
 import { useSocketListener } from '@trz/hooks/useSocketListener';

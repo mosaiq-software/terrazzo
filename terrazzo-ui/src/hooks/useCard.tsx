@@ -1,7 +1,7 @@
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { CardId, Card } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
-import { getCardData } from '@trz/emitters';
+import { getCardData } from '@trz/emitters/all';
 import { CARD_CACHE_PREFIX } from '@trz/util/boardUtils';
 import { notify, NoteType } from '@trz/util/notifications';
 import { useState, useEffect } from 'react';

@@ -9,7 +9,7 @@ import { notify, NoteType } from '@trz/util/notifications';
 import { EntityType, LocalStorageKey, RoleNames } from '@mosaiq/terrazzo-common/constants';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
-import { replyInvite } from '@trz/emitters';
+import { replyInvite } from '@trz/emitters/all';
 import { useDashboard } from '@trz/contexts/dashboard-context';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';

@@ -1,32 +1,27 @@
+import 'dotenv/config';
 import { initApp } from './app';
 import { initSockets } from './utils/socket';
 import { initAdminServer } from './socketAdminServer';
-import dotenv from 'dotenv';
-dotenv.config({ path: '../.env' });
 
 const start = async () => {
     const SOCKET_PORT = parseInt(process.env.SOCKET_PORT + '') || undefined;
-    if (!SOCKET_PORT) throw new Error('SOCKET_PORT is not defined in environment variables');
-    const API_PORT = parseInt(process.env.API_PORT + '') || undefined;
-    if (!API_PORT) throw new Error('API_PORT is not defined in environment variables');
-    const SOCKET_ADMIN_PORT = parseInt(process.env.SOCKET_ADMIN_PORT + '') || undefined;
-    if (!SOCKET_ADMIN_PORT) throw new Error('SOCKET_ADMIN_PORT is not defined in environment variables');
-    const API_URL = process.env.API_URL;
-    if (!API_URL) throw new Error('API_URL is not defined in environment variables');
+    if (!SOCKET_PORT || !process.env.API_PORT || !process.env.API_URL || !process.env.GITHUB_AUTH_CLIENT_SECRET || !process.env.GITHUB_AUTH_CALLBACK_URL || !process.env.GITHUB_AUTH_CLIENT_ID || !process.env.ORG_NAME || !process.env.DATABASE_PATH || !process.env.DATABASE_LOGGING || !process.env.FRONTEND_URL) {
+        throw new Error('Make sure to set all required environment variables');
+    }
 
     const app = await initApp();
-    app.listen(API_PORT, () => {
-        console.log(`Server started at ${API_URL} on port ${API_PORT}`);
+    app.listen(process.env.API_PORT, () => {
+        console.log(`Server started at ${process.env.API_URL}:${process.env.API_PORT}`);
     });
 
     const adminServer = await initAdminServer();
-    adminServer.listen(SOCKET_ADMIN_PORT, () => {
-        console.log(`Socket admin server started at ${API_URL} on port ${SOCKET_ADMIN_PORT}`);
+    adminServer.listen(process.env.SOCKET_ADMIN_PORT, () => {
+        console.log(`Socket admin server started at ${process.env.API_URL}:${process.env.SOCKET_ADMIN_PORT}`);
     });
 
     const { io } = initSockets();
     io.listen(SOCKET_PORT);
-    console.log(`Socket server started at ${API_URL} on port ${SOCKET_PORT}`);
+    console.log(`Socket server started at ${process.env.API_URL}:${SOCKET_PORT}`);
 };
 
 start();

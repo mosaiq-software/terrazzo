@@ -2,7 +2,7 @@ import { ActionIcon, Box, Button, Checkbox, MantineSize, Menu, Pill, Stack, Text
 import { Card, LabelId } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
-import { updateCardsLabels } from '@trz/emitters';
+import { updateCardsLabels } from '@trz/emitters/all';
 import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
 import React, { useMemo } from 'react';
 import { IoMdInformationCircleOutline } from 'react-icons/io';

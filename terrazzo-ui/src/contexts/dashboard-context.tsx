@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useSocket } from '@trz/contexts/socket-context';
 import { UserDash } from '@mosaiq/terrazzo-common/types';
 import { useUser } from './user-context';
-import { getUsersDash } from '@trz/emitters';
+import { getUsersDash } from '@trz/emitters/all';
 import { NoteType, notify } from '@trz/util/notifications';
 
 type DashboardContextType = {

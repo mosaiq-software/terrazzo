@@ -6,7 +6,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { useNavigate, useParams } from 'react-router-dom';
 import { NoteType, notify } from '@trz/util/notifications';
 import { OrganizationId } from '@mosaiq/terrazzo-common/types';
-import { createProject } from '@trz/emitters';
+import { createProject } from '@trz/emitters/all';
 
 const CreateProject = (props: ContextModalProps<{ modalBody: string; orgId: OrganizationId }>): React.JSX.Element => {
     const [projectName, setProjectName] = React.useState('');

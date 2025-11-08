@@ -6,7 +6,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { useNavigate } from 'react-router-dom';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useUser } from '@trz/contexts/user-context';
-import { createOrganization } from '@trz/emitters';
+import { createOrganization } from '@trz/emitters/all';
 
 const CreateOrganization = (props: ContextModalProps<{ modalBody: string }>): React.JSX.Element => {
     const [orgName, setOrgName] = React.useState('');

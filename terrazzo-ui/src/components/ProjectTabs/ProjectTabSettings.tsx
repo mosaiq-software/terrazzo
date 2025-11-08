@@ -6,7 +6,7 @@ import { notify, NoteType } from '@trz/util/notifications';
 import { MembershipRecord, Project, ProjectHeader, ProjectId } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useNavigate } from 'react-router-dom';
-import { revokeMembershipRecord, updateProjectField } from '@trz/emitters';
+import { revokeMembershipRecord, updateProjectField } from '@trz/emitters/all';
 
 interface ProjectTabSettingsProps {
     myMembershipRecord: MembershipRecord;

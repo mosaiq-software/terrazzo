@@ -8,10 +8,8 @@ import { instrument } from '@socket.io/admin-ui';
 import { getPrivateGitHubUserData } from './githubUtils';
 import { getUserPreview } from '@trz-api/controllers/userController';
 import { createServer } from 'http';
-import { YSocketIO } from '@trz-api/utils/y-socket-io';
-import * as socketListeners from '@trz-api/listeners';
-
-const listenerRegistrars = [registerCustomSocketEvents, registerEngineSocketEvents, ...Object.values(socketListeners)];
+import { Document, YSocketIO } from '@trz-api/utils/y-socket-io';
+import * as Y from 'yjs';
 
 const initSockets = () => {
     console.info('Starting sockets');
@@ -65,7 +63,8 @@ const initSockets = () => {
 
         socket.emit(ServerSE.READY);
 
-        listenerRegistrars.forEach((register) => register(socket, io));
+        registerEngineSocketEvents(socket, io);
+        registerCustomSocketEvents(socket, io);
     });
 
     io.on(ServerSocketIOEvent.CONNECTION_ERROR, (err) => {

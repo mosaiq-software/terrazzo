@@ -4,7 +4,7 @@ import { Priority } from '@mosaiq/terrazzo-common/constants';
 import { Card } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { NoteType, notify } from '@trz/util/notifications';
-import { updateCardField } from '@trz/emitters';
+import { updateCardField } from '@trz/emitters/all';
 
 export const priorityColors: string[] = ['gray', '#4A82C7', '#24296A', '#422760', '#853974', '#BD3758'];
 

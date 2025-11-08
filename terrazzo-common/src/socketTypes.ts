@@ -91,11 +91,11 @@ export interface ClientSEPayload {
     [ClientSE.PREVIEW_PROJECT]: ProjectId;
     [ClientSE.PREVIEW_USER]: UserId;
 
-    [ClientSE.CREATE_ORG]: { name: string; creator: UserId };
-    [ClientSE.CREATE_PROJECT]: { name: string; orgId: OrganizationId };
-    [ClientSE.CREATE_BOARD]: { name: string; boardCode: string; projectId: ProjectId };
-    [ClientSE.CREATE_LIST]: { boardID: BoardId; listName: string };
-    [ClientSE.CREATE_CARD]: { listID: ListId; cardName: string };
+    [ClientSE.CREATE_ORG]: CreateOrgType;
+    [ClientSE.CREATE_PROJECT]: CreateProjectType;
+    [ClientSE.CREATE_BOARD]: CreateBoardType;
+    [ClientSE.CREATE_LIST]: CreateListType;
+    [ClientSE.CREATE_CARD]: CreateCardType;
     [ClientSE.CREATE_BOARD_LABEL]: { boardId: BoardId; name: string; color: string };
     [ClientSE.CREATE_DUPLICATE_CARD]: { cardId: CardId };
     [ClientSE.CREATE_DOCUMENT]: { title: string; parentId: UID };
@@ -274,6 +274,12 @@ export enum RoomType {
 }
 export type RoomId = `${RoomType}@${string}` | null;
 export type SocketId = string;
+
+export type CreateOrgType = { name: string; creator: UserId };
+export type CreateProjectType = { name: string; orgId: OrganizationId };
+export type CreateBoardType = { name: string; boardCode: string; projectId: ProjectId };
+export type CreateListType = { boardID: BoardId; listName: string };
+export type CreateCardType = { listID: ListId; cardName: string };
 
 export interface UserData {
     sid: SocketId;
