@@ -1,7 +1,7 @@
 import { Badge } from '@mantine/core';
-import { type CommandUiIcon, type CoreIcon, isPlainObject, isString } from '@remirror/core';
+import { CommandUiIcon, CoreIcon, isPlainObject, isString } from '@remirror/core';
 import { Icon } from '@remirror/react-components';
-import React, { type FC, type ReactNode } from 'react';
+import React, { FC, ReactNode } from 'react';
 
 const isCommandUiIcon = (val: unknown): val is CommandUiIcon => {
     if (!isPlainObject(val)) {

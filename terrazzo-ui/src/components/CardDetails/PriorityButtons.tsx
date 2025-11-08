@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Menu, Text, Tooltip } from '@mantine/core';
 import { Priority } from '@mosaiq/terrazzo-common/constants';
-import type { Card } from '@mosaiq/terrazzo-common/types';
+import { Card } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardField } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';

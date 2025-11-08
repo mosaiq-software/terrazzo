@@ -1,4 +1,5 @@
-import type { FC, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
+
 import { DropdownButton, ToggleHeadingButton } from '../buttons';
 import { ToggleHeadingMenuItem } from '../menus';
 import { CommandButtonGroup } from './command-button-group';

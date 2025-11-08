@@ -1,4 +1,5 @@
-import type { FC, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
+
 import { CenterAlignButton, JustifyAlignButton, LeftAlignButton, RightAlignButton } from '../buttons';
 import { CommandButtonGroup } from './command-button-group';
 

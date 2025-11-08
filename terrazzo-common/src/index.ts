@@ -1,10 +1,10 @@
-import * as types from './types';
-import * as socketTypes from './socketTypes';
 import * as apiTypes from './apiTypes';
 import * as constants from './constants';
-import * as textUtils from './utils/textUtils';
-import * as socketUtils from './utils/socketUtils';
-import * as arrayUtils from './utils/arrayUtils';
+import * as socketTypes from './socketTypes';
 import * as trelloTypes from './trelloTypes';
+import * as types from './types';
+import * as arrayUtils from './utils/arrayUtils';
+import * as socketUtils from './utils/socketUtils';
+import * as textUtils from './utils/textUtils';
 
-export { types, socketTypes, apiTypes, constants, textUtils, socketUtils, arrayUtils, trelloTypes };
+export { apiTypes, arrayUtils, constants, socketTypes, socketUtils, textUtils, trelloTypes, types };

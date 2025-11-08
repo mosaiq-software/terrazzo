@@ -1,5 +1,5 @@
-import { ActionIcon, Button, type MantineSize, Menu, Pill, Stack, Tooltip } from '@mantine/core';
-import type { Card, LabelId } from '@mosaiq/terrazzo-common/types';
+import { ActionIcon, Button, MantineSize, Menu, Pill, Stack, Tooltip } from '@mantine/core';
+import { Card, LabelId } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { updateCardsLabels } from '@trz/emitters';

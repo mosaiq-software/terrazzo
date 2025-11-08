@@ -45,7 +45,7 @@
         "remirror": "^3.0.3",
         "socket.io-client": "^4.8.1",
         "vite-plugin-svgr": "^4.5.0",
-        "y-prosemirror": "^1.2.3",
+        "y-prosemirror": "1.0.19",
         "y-protocols": "^1.0.6",
         "yjs": "^13.6.27"
     },

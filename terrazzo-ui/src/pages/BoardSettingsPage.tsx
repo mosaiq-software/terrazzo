@@ -1,7 +1,7 @@
 import { ActionIcon, Alert, Box, Button, ColorInput, Divider, Fieldset, Group, ScrollArea, Space, Stack, Text, TextInput, Title, Tooltip } from '@mantine/core';
 import { TEMPORARY_ID } from '@mosaiq/terrazzo-common/constants';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import type { BoardHeader, BoardId, Label } from '@mosaiq/terrazzo-common/types';
+import { BoardHeader, BoardId, Label } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { RingHoldingButton } from '@trz/components/RingHoldingButton';

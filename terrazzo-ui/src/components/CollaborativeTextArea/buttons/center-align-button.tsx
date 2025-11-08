@@ -1,7 +1,8 @@
 import { NodeFormattingExtension } from '@remirror/extension-node-formatting';
 import { useCommands, useCurrentSelection } from '@remirror/react-core';
-import { type FC, useCallback } from 'react';
-import { CommandButton, type CommandButtonProps } from './command-button';
+import { FC, useCallback } from 'react';
+
+import { CommandButton, CommandButtonProps } from './command-button';
 
 export interface CenterAlignButtonProps extends Omit<CommandButtonProps, 'commandName' | 'active' | 'enabled' | 'attrs' | 'onSelect'> {}
 
