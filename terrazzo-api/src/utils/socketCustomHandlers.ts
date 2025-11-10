@@ -1,8 +1,8 @@
+import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
+import { getInvitesForEntity, replyToInvite, sendInvite } from '@trz-api/controllers/inviteController';
+import { removeMembership, updateMembershipRecordFromPartial } from '@trz-api/controllers/userController';
 import { Server, Socket } from 'socket.io';
 import { getSocketData } from './socketUtils';
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
-import { removeMembership, updateMembershipRecordFromPartial } from '@trz-api/controllers/userController';
-import { getInvitesForEntity, replyToInvite, sendInvite } from '@trz-api/controllers/inviteController';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD, async (data: ClientSEPayload[ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD], reply: ClientSEReply<ClientSE.UPDATE_MEMBERSHIP_RECORD_FIELD>) => {
@@ -35,7 +35,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ClientSE.SEND_INVITE, async (data: ClientSEPayload[ClientSE.SEND_INVITE], reply: ClientSEReply<ClientSE.SEND_INVITE>) => {
         try {
             const socketData = getSocketData(socket);
-            const invite = await sendInvite(data.toUsername, socketData.user.user.id, data.entityId, data.entityType, data.role);
+            const invite = await sendInvite(data.toUsername, socketData.user.user.id, data.entityId, data.role);
             const payload: ServerSEPayload[ServerSE.RECEIVE_INVITE] = invite;
             // broadcastToUser(socket, payload.toUser.id, ServerSE.RECEIVE_INVITE, payload);
             // const invites = await getInvitesForEntity(data.entityId);

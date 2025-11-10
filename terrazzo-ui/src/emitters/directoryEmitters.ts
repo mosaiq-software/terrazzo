@@ -6,7 +6,7 @@ export const getDirectory = async (sockCtx: SocketContextType, directoryId: Dire
     return await sockCtx.emit(ClientSE.GET_DIRECTORY, directoryId);
 };
 
-export const createDirectory = async (sockCtx: SocketContextType, name: string, parentId: UID | null) => {
+export const createDirectory = async (sockCtx: SocketContextType, name: string, parentId: UID) => {
     return await sockCtx.emit(ClientSE.CREATE_DIRECTORY, { parentId, name });
 };
 

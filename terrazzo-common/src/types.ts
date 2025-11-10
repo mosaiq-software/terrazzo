@@ -1,9 +1,8 @@
-import { EntityType, Priority, Role, StoryPoints } from './constants';
+import { Priority, Role, StoryPoints } from './constants';
 
 export type URL = string;
 export type UID = `${string}-${string}-${string}-${string}-${string}`;
 export type OrganizationId = UID;
-export type ProjectId = UID;
 export type BoardId = UID;
 export type ListId = UID;
 export type CardId = UID;
@@ -13,7 +12,6 @@ export type LabelId = UID;
 export type CommentId = UID;
 export type InviteId = UID;
 export type MembershipRecordId = UID;
-export type EntityId = ProjectId | OrganizationId;
 export type AssignmentId = UID;
 export type DocumentId = UID;
 export type DirectoryId = UID;
@@ -31,22 +29,6 @@ export interface Organization extends OrganizationHeader {
     members: Member[];
     invites: Invite[];
     modules: TrzModule[];
-}
-
-export interface ProjectHeader {
-    id: ProjectId;
-    orgId: OrganizationId;
-    name: string;
-    archived: boolean;
-    createdAt: number;
-    logoUrl: URL;
-    description: string;
-}
-export interface Project extends ProjectHeader {
-    members: Member[];
-    boards: BoardHeader[];
-    invites: Invite[];
-    documents: DocumentHeader[];
 }
 
 export interface BoardHeader {
@@ -107,7 +89,6 @@ export interface UserHeader {
     githubUserId: string;
 }
 export interface User extends UserHeader {
-    projectIds: ProjectId[];
     organizationIds: OrganizationId[];
 }
 
@@ -133,8 +114,7 @@ export interface TextBlock {
 export interface MembershipRecord {
     id: MembershipRecordId;
     userId: UserId;
-    entityId: EntityId;
-    entityType: EntityType;
+    entityId: UID;
     userRole: Role;
 }
 
@@ -148,8 +128,7 @@ export interface InviteRecord {
     toUser: UserId;
     fromUser: UserId;
     createdAt: number;
-    entityId: EntityId;
-    entityType: EntityType;
+    entityId: UID;
     userRole: Role;
 }
 export interface Invite {
@@ -157,23 +136,16 @@ export interface Invite {
     toUser: UserHeader;
     fromUser: UserHeader;
     createdAt: number;
-    entity: OrganizationHeader | ProjectHeader;
-    entityType: EntityType;
+    entity: OrganizationHeader;
     userRole: Role;
 }
 
 export interface UserDashOrganization extends OrganizationHeader {
-    projects: ProjectHeader[];
-    members: Member[];
-    myMembershipRecord: MembershipRecord;
-}
-export interface UserDashProject extends ProjectHeader {
     members: Member[];
     myMembershipRecord: MembershipRecord;
 }
 export interface UserDash {
     organizations: UserDashOrganization[];
-    standaloneProjects: UserDashProject[];
     invites: Invite[];
 }
 
@@ -224,7 +196,7 @@ export interface DocumentHeader {
 
 export interface DirectoryHeader {
     id: DirectoryId;
-    parentId: DirectoryId | null;
+    parentId: DirectoryId | OrganizationId;
     name: string;
     archived: boolean;
     createdAt: number;

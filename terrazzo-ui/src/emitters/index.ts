@@ -5,6 +5,5 @@ export * from './inviteEmitters';
 export * from './labelEmitters';
 export * from './listEmitters';
 export * from './organizationEmitters';
-export * from './projectEmitters';
 export * from './queryEmitters';
 export * from './userEmitters';

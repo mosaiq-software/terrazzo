@@ -5,7 +5,7 @@ import { addList, getListAndCardIdsOnBoard, moveList, updateListFromPartial } fr
 import { createBoard, getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
 import { createLabelOnBoard, deleteLabel, deleteLabelingOnCardsByLabelId, getLabelById, getLabelsByBoardId, updateLabel } from '@trz-api/persistence/labelPersistence';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
-import { getMembersInProjectWithOrgDeduped } from './membershipController';
+import { getMembersInOrg } from './membershipController';
 
 export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefined> {
     const boardHeader = await getBoardById(boardID);
@@ -13,7 +13,7 @@ export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefine
         throw new Error('Board not found');
     }
 
-    const projectMembers = await getMembersInProjectWithOrgDeduped(boardHeader.parentId);
+    const projectMembers = await getMembersInOrg(boardHeader.parentId);
 
     try {
         const board: BoardRes = {

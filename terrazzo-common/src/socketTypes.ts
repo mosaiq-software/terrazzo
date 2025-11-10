@@ -1,5 +1,5 @@
-import { EntityType, Role } from './constants';
-import { Board, BoardId, BoardRes, Card, CardId, Directory, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, EntityId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, MembershipRecord, MembershipRecordId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, QueryResult, TextBlock, TextBlockId, UID, UserDash, UserHeader, UserId } from './types';
+import { Role } from './constants';
+import { Board, BoardId, BoardRes, Card, CardId, Directory, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, MembershipRecord, MembershipRecordId, Organization, OrganizationHeader, OrganizationId, QueryResult, TextBlock, TextBlockId, UID, UserDash, UserHeader, UserId } from './types';
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -29,7 +29,6 @@ export enum ClientSE {
 
     GET_USER_DASH = 'GET_USER_DASH',
     GET_ORGANIZATION = 'GET_ORGANIZATION',
-    GET_PROJECT = 'GET_PROJECT',
     GET_BOARD = 'GET_BOARD',
     GET_LIST = 'GET_LIST',
     GET_CARD = 'GET_CARD',
@@ -39,11 +38,9 @@ export enum ClientSE {
     GET_DIRECTORY = 'GET_DIRECTORY',
 
     PREVIEW_ORGANIZATION = 'PREVIEW_ORGANIZATION',
-    PREVIEW_PROJECT = 'PREVIEW_PROJECT',
     PREVIEW_USER = 'PREVIEW_USER',
 
     CREATE_ORG = 'CREATE_ORG',
-    CREATE_PROJECT = 'CREATE_PROJECT',
     CREATE_BOARD = 'CREATE_BOARD',
     CREATE_LIST = 'CREATE_LIST',
     CREATE_CARD = 'CREATE_CARD',
@@ -53,7 +50,6 @@ export enum ClientSE {
     CREATE_DIRECTORY = 'CREATE_DIRECTORY',
 
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
-    UPDATE_PROJECT_FIELD = 'UPDATE_PROJECT_FIELD',
     UPDATE_BOARD_FIELD = 'UPDATE_BOARD_FIELD',
     UPDATE_LIST_FIELD = 'UPDATE_LIST_FIELD',
     UPDATE_CARD_FIELD = 'UPDATE_CARD_FIELD',
@@ -82,7 +78,6 @@ export interface ClientSEPayload {
 
     [ClientSE.GET_USER_DASH]: UserId;
     [ClientSE.GET_ORGANIZATION]: OrganizationId;
-    [ClientSE.GET_PROJECT]: ProjectId;
     [ClientSE.GET_BOARD]: BoardId;
     [ClientSE.GET_LIST]: ListId;
     [ClientSE.GET_CARD]: CardId;
@@ -92,21 +87,18 @@ export interface ClientSEPayload {
     [ClientSE.GET_DIRECTORY]: DirectoryId;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationId;
-    [ClientSE.PREVIEW_PROJECT]: ProjectId;
     [ClientSE.PREVIEW_USER]: UserId;
 
     [ClientSE.CREATE_ORG]: { name: string; creator: UserId };
-    [ClientSE.CREATE_PROJECT]: { name: string; orgId: OrganizationId };
-    [ClientSE.CREATE_BOARD]: { name: string; boardCode: string; projectId: ProjectId };
+    [ClientSE.CREATE_BOARD]: { name: string; boardCode: string; parentId: DirectoryId };
     [ClientSE.CREATE_LIST]: { boardID: BoardId; listName: string };
     [ClientSE.CREATE_CARD]: { listID: ListId; cardName: string };
     [ClientSE.CREATE_BOARD_LABEL]: { boardId: BoardId; name: string; color: string };
     [ClientSE.CREATE_DUPLICATE_CARD]: { cardId: CardId };
     [ClientSE.CREATE_DOCUMENT]: { title: string; parentId: UID };
-    [ClientSE.CREATE_DIRECTORY]: { name: string; parentId: DirectoryId | null };
+    [ClientSE.CREATE_DIRECTORY]: { name: string; parentId: DirectoryId };
 
     [ClientSE.UPDATE_ORG_FIELD]: Partial<Organization> & { id: OrganizationId };
-    [ClientSE.UPDATE_PROJECT_FIELD]: Partial<Project> & { id: ProjectId };
     [ClientSE.UPDATE_BOARD_FIELD]: Partial<Board> & { id: BoardId };
     [ClientSE.UPDATE_LIST_FIELD]: Partial<List> & { id: ListId };
     [ClientSE.UPDATE_CARD_FIELD]: Partial<Card> & { id: CardId };
@@ -119,7 +111,7 @@ export interface ClientSEPayload {
 
     [ClientSE.DELETE_BOARD_LABEL]: { boardId: BoardId; labelId: LabelId };
 
-    [ClientSE.SEND_INVITE]: { toUsername: string; entityId: EntityId; entityType: EntityType; role: Role };
+    [ClientSE.SEND_INVITE]: { toUsername: string; entityId: UID; role: Role };
     [ClientSE.RESPOND_INVITE]: { inviteId: InviteId; response: boolean };
     [ClientSE.KICK_MEMBER]: MembershipRecordId;
 }
@@ -135,7 +127,6 @@ export interface ClientSEReplies {
 
     [ClientSE.GET_USER_DASH]: UserDash | undefined;
     [ClientSE.GET_ORGANIZATION]: Organization | undefined;
-    [ClientSE.GET_PROJECT]: Project | undefined;
     [ClientSE.GET_BOARD]: BoardRes | undefined;
     [ClientSE.GET_LIST]: ListHeader | undefined;
     [ClientSE.GET_CARD]: Card | undefined;
@@ -145,11 +136,9 @@ export interface ClientSEReplies {
     [ClientSE.GET_DIRECTORY]: Directory | undefined;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationHeader | undefined;
-    [ClientSE.PREVIEW_PROJECT]: ProjectHeader | undefined;
     [ClientSE.PREVIEW_USER]: UserHeader | undefined;
 
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
-    [ClientSE.CREATE_PROJECT]: ProjectId | undefined;
     [ClientSE.CREATE_BOARD]: BoardId | undefined;
     [ClientSE.CREATE_LIST]: ListId | undefined;
     [ClientSE.CREATE_CARD]: CardId | undefined;
@@ -159,7 +148,6 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_DIRECTORY]: DirectoryHeader | undefined;
 
     [ClientSE.UPDATE_ORG_FIELD]: undefined;
-    [ClientSE.UPDATE_PROJECT_FIELD]: undefined;
     [ClientSE.UPDATE_BOARD_FIELD]: undefined;
     [ClientSE.UPDATE_LIST_FIELD]: undefined;
     [ClientSE.UPDATE_CARD_FIELD]: undefined;
@@ -195,7 +183,6 @@ export enum ServerSE {
     ADD_CARD = 'ADD_CARD',
 
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
-    UPDATE_PROJECT_FIELD = 'UPDATE_PROJECT_FIELD',
     UPDATE_BOARD_FIELD = 'UPDATE_BOARD_FIELD',
     UPDATE_LIST_FIELD = 'UPDATE_LIST_FIELD',
     UPDATE_CARD_FIELD = 'UPDATE_CARD_FIELD',
@@ -223,7 +210,6 @@ export interface ServerSEPayload {
     [ServerSE.ADD_CARD]: Card;
 
     [ServerSE.UPDATE_ORG_FIELD]: Partial<Organization> & { id: OrganizationId };
-    [ServerSE.UPDATE_PROJECT_FIELD]: Partial<Project> & { id: ProjectId };
     [ServerSE.UPDATE_BOARD_FIELD]: Partial<Board> & { id: BoardId };
     [ServerSE.UPDATE_LIST_FIELD]: Partial<List> & { id: ListId };
     [ServerSE.UPDATE_CARD_FIELD]: Partial<Card> & { id: CardId };
@@ -251,7 +237,6 @@ export interface ServerSEReplies {
     [ServerSE.ADD_CARD]: void;
 
     [ServerSE.UPDATE_ORG_FIELD]: void;
-    [ServerSE.UPDATE_PROJECT_FIELD]: void;
     [ServerSE.UPDATE_BOARD_FIELD]: void;
     [ServerSE.UPDATE_LIST_FIELD]: void;
     [ServerSE.UPDATE_CARD_FIELD]: void;

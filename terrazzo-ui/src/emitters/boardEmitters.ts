@@ -1,5 +1,5 @@
 import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardHeader, BoardId, BoardRes, ProjectId } from '@mosaiq/terrazzo-common/types';
+import { BoardHeader, BoardId, BoardRes, UID } from '@mosaiq/terrazzo-common/types';
 import { SocketContextType } from '@trz/contexts/socket-context';
 import { NoteType, notify } from '@trz/util/notifications';
 
@@ -12,8 +12,8 @@ export const getBoardData = async (sockCtx: SocketContextType, boardId: BoardId)
     }
 };
 
-export const createBoard = async (sockCtx: SocketContextType, name: string, boardCode: string, projectId: ProjectId): Promise<BoardId | undefined> => {
-    return await sockCtx.emit(ClientSE.CREATE_BOARD, { name, boardCode, projectId });
+export const createBoard = async (sockCtx: SocketContextType, name: string, boardCode: string, parentId: UID): Promise<BoardId | undefined> => {
+    return await sockCtx.emit(ClientSE.CREATE_BOARD, { name, boardCode, parentId });
 };
 
 export const updateBoardField = async (sockCtx: SocketContextType, id: BoardId, partial: Partial<BoardHeader>) => {

@@ -16,7 +16,7 @@ export const getDirectory = async (id: DirectoryId): Promise<Directory | undefin
     return directory;
 };
 
-export const createDirectory = async (name: string, parentId: DirectoryId | null): Promise<DirectoryHeader> => {
+export const createDirectory = async (name: string, parentId: DirectoryId): Promise<DirectoryHeader> => {
     const newDirectory: DirectoryHeader = {
         id: crypto.randomUUID(),
         name,

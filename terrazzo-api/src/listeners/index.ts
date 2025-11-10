@@ -5,7 +5,6 @@ export * from './documentListeners';
 export * from './labelListeners';
 export * from './listListeners';
 export * from './organizationListeners';
-export * from './projectListeners';
 export * from './queryListeners';
 export * from './realtimeListeners';
 export * from './textListeners';

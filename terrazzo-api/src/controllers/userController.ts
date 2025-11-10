@@ -1,19 +1,16 @@
-import { EntityType } from '@mosaiq/terrazzo-common/constants';
-import { BoardId, List, Member, MembershipRecord, MembershipRecordId, OrganizationId, ProjectId, UserDash, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { BoardId, List, Member, MembershipRecord, MembershipRecordId, OrganizationId, UserDash, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
-import { getDirectoriesByParentIdDb } from '@trz-api/persistence/directoryPersistence';
 import { deleteMembershipRecord, getMembershipById, getMembershipRecordsForUser, updateMembershipRecord } from '@trz-api/persistence/membershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
-import { getProjectById, getProjectsByOrgId } from '@trz-api/persistence/projectPersistence';
 import { createUser, getUserByGithubId, getUserById, getUserByUsername, updateUser } from '@trz-api/persistence/userPersistence';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
 import { addBoard } from './boardController';
 import { addCard } from './cardController';
+import { getModulesInDirectory } from './directoryController';
 import { getInvitesToUser } from './inviteController';
 import { addList } from './listController';
 import { getMembersInOrg } from './membershipController';
 import { addOrganization, updateOrganizationFromPartial } from './organizationController';
-import { addProject } from './projectController';
 
 //Gets
 export async function getOrCreateUserByGithubAccessToken(accessToken: string) {
@@ -92,8 +89,7 @@ export async function setupUser(userId: UserId, username: string, firstName: str
     try {
         const personalOrgId: OrganizationId = await addOrganization(firstName + "'s Space", user.id, true);
         await updateOrganizationFromPartial(personalOrgId, { logoUrl: user.profilePicture, description: 'A place to keep your personal projects' });
-        const personalProjectId: ProjectId = await addProject('My First Project', personalOrgId);
-        const personalBoardId: BoardId = await addBoard('Task Tracking', '', personalProjectId);
+        const personalBoardId: BoardId = await addBoard('Task Tracking', '', personalOrgId);
         const personalListTodo: List = await addList(personalBoardId, 'To do');
         const personalListDoing: List = await addList(personalBoardId, 'Doing');
         const personalListDone: List = await addList(personalBoardId, 'Done');
@@ -110,37 +106,22 @@ export async function setupUser(userId: UserId, username: string, firstName: str
 
 export const getUsersEntities = async (userId: UserId): Promise<UserDash> => {
     try {
-        const projectMemberships = (await getMembershipRecordsForUser(userId, EntityType.PROJECT)) ?? [];
-        const orgMemberships = (await getMembershipRecordsForUser(userId, EntityType.ORG)) ?? [];
-
-        const standaloneProjects = (
-            await Promise.all(
-                projectMemberships.map(async (p) => {
-                    const project = await getProjectById(p.entityId);
-                    if (!project) return null;
-                    const members = await getMembersInOrg(project.orgId);
-                    return { ...project, members, myMembershipRecord: p };
-                })
-            )
-        ).filter((p) => !!p);
-
+        const orgMemberships = (await getMembershipRecordsForUser(userId)) ?? [];
         const organizations = (
             await Promise.all(
                 orgMemberships.map(async (o) => {
                     const org = await getOrgById(o.entityId);
                     if (!org) return null;
-                    const projects = await getProjectsByOrgId(org.id);
                     const members = await getMembersInOrg(org.id);
-                    return { ...org, projects, members, myMembershipRecord: o };
+                    const modules = await getModulesInDirectory(org.id);
+                    return { ...org, modules, members, myMembershipRecord: o };
                 })
             )
         ).filter((o) => !!o);
 
         const invites = await getInvitesToUser(userId);
 
-        const directories = await getDirectoriesByParentIdDb(null);
-
-        return { standaloneProjects, organizations, invites, directories };
+        return { organizations, invites };
     } catch (e) {
         console.error(e);
         throw e;

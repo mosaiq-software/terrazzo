@@ -1,6 +1,6 @@
 import { Avatar, Box, Burger, Button, Divider, Group, Indicator, Kbd, Notification, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { useHotkeys, useLocalStorage } from '@mantine/hooks';
-import { EntityType, LocalStorageKey, RoleNames } from '@mosaiq/terrazzo-common/constants';
+import { LocalStorageKey, RoleNames } from '@mosaiq/terrazzo-common/constants';
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { SearchBar } from '@trz/components/AutoComplete/Searchbar';
@@ -228,7 +228,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                         </Button>
                                     </Tooltip>
                                 </Group>
-                                <Stack gap={0}>
+                                {/* <Stack gap={0}>
                                     {org.projects
                                         .filter((e) => !e.archived)
                                         .map((project) => {
@@ -277,7 +277,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                                 </Group>
                                             );
                                         })}
-                                </Stack>
+                                </Stack> */}
                             </Box>
                         );
                     })}
@@ -390,7 +390,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                                     }
                                                 >
                                                     <Text py="sm">
-                                                        {fullName(i.fromUser)} ({i.fromUser.username}) has invited you to join the {i.entity.name} {i.entityType === EntityType.ORG ? 'Organization' : 'Project'} as a {RoleNames[i.userRole]}
+                                                        {fullName(i.fromUser)} ({i.fromUser.username}) has invited you to join {i.entity.name} as a {RoleNames[i.userRole]}
                                                     </Text>
                                                     <Group>
                                                         <Button
@@ -413,11 +413,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                                                 try {
                                                                     replyInvite(sockCtx, i.id, true);
                                                                     notify(NoteType.JOINED_ENTITY, [i.entity.name]);
-                                                                    if (i.entityType === EntityType.ORG) {
-                                                                        navigate('/org/' + i.entity.id);
-                                                                    } else if (i.entityType === EntityType.PROJECT) {
-                                                                        navigate('/project/' + i.entity.id);
-                                                                    }
+                                                                    navigate('/org/' + i.entity.id);
                                                                 } catch (e) {
                                                                     notify(NoteType.GENERIC_ERROR, e);
                                                                 }

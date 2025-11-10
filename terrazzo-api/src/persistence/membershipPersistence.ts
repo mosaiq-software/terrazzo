@@ -1,7 +1,7 @@
-import { Model, DataTypes } from 'sequelize';
+import { Role } from '@mosaiq/terrazzo-common/constants';
+import { MembershipRecord, MembershipRecordId, UID, UserId } from '@mosaiq/terrazzo-common/types';
 import { sequelize } from '@trz-api/utils/dbHelper';
-import { EntityId, MembershipRecord, MembershipRecordId, OrganizationId, ProjectId, UID, UserId } from '@mosaiq/terrazzo-common/types';
-import { EntityType, Role } from '@mosaiq/terrazzo-common/constants';
+import { DataTypes, Model } from 'sequelize';
 
 class MembershipModel extends Model {}
 MembershipModel.init(
@@ -12,7 +12,6 @@ MembershipModel.init(
         },
         userId: DataTypes.STRING,
         entityId: DataTypes.STRING,
-        entityType: DataTypes.TINYINT,
         userRole: DataTypes.TINYINT,
     },
     { sequelize }
@@ -28,21 +27,20 @@ export const getMembershipById = async (id: MembershipRecordId) => {
     )?.toJSON() as MembershipRecord | null;
 };
 
-export const getMembershipRecordsForUser = async (userId: UserId, entityType: EntityType) => {
-    return (await MembershipModel.findAll({ where: { userId, entityType } })).map((r) => r.toJSON()) as MembershipRecord[];
+export const getMembershipRecordsForUser = async (userId: UserId) => {
+    return (await MembershipModel.findAll({ where: { userId } })).map((r) => r.toJSON()) as MembershipRecord[];
 };
 
-export const getMembershipRecordsForUserInEntity = async (userId: UserId, entityId: EntityId) => {
+export const getMembershipRecordsForUserInEntity = async (userId: UserId, entityId: UID) => {
     return (await MembershipModel.findAll({ where: { userId, entityId } })).map((r) => r.toJSON()) as MembershipRecord[];
 };
 
-export const createMembershipRecord = async (userId: UserId, entityId: EntityId, entityType: EntityType, userRole: Role) => {
+export const createMembershipRecord = async (userId: UserId, entityId: UID, userRole: Role) => {
     return await MembershipModel.create({
         id: crypto.randomUUID(),
         userId,
         entityId,
         userRole,
-        entityType,
     });
 };
 
@@ -59,6 +57,6 @@ export const deleteMembershipRecord = async (membershipRecordId: MembershipRecor
     return await MembershipModel.destroy({ where: { id: membershipRecordId } });
 };
 
-export const getMembershipRecordForEntity = async (entityId: EntityId) => {
+export const getMembershipRecordForEntity = async (entityId: UID) => {
     return (await MembershipModel.findAll({ where: { entityId } })).map((r) => r.toJSON()) as MembershipRecord[];
 };

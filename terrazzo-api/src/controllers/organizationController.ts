@@ -1,4 +1,4 @@
-import { EntityType, Role } from '@mosaiq/terrazzo-common/constants';
+import { Role } from '@mosaiq/terrazzo-common/constants';
 import { Organization, OrganizationHeader, OrganizationId, UserId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import { createMembershipRecord } from '@trz-api/persistence/membershipPersistence';
@@ -60,7 +60,7 @@ export async function addOrganization(name: string, creator: UserId, isPersonal:
 
     try {
         await createOrg(newOrg);
-        await createMembershipRecord(creator, newOrg.id, EntityType.ORG, Role.OWNER);
+        await createMembershipRecord(creator, newOrg.id, Role.OWNER);
         return newOrg.id;
     } catch (e) {
         throw new Error('Failed to create org' + e);

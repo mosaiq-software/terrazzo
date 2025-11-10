@@ -30,11 +30,6 @@ export const RoleNames = [
     'Owner', // 4
 ];
 
-export enum EntityType {
-    PROJECT = 0,
-    ORG = 1,
-}
-
 export enum StoryPoints {
     ZERO = 0,
     XXS = 1,

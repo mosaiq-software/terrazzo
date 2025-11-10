@@ -3,7 +3,7 @@ import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
 import { RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
 import { TrelloExportType } from '@mosaiq/terrazzo-common/trelloTypes';
-import { ProjectId } from '@mosaiq/terrazzo-common/types';
+import { UID } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createBoard } from '@trz/emitters';
 import { callTrzApi } from '@trz/util/apiUtils';
@@ -11,7 +11,7 @@ import { NoteType, notify } from '@trz/util/notifications';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const CreateBoard = (props: ContextModalProps<{ modalBody: string; projectId: ProjectId }>): React.JSX.Element => {
+const CreateBoard = (props: ContextModalProps<{ modalBody: string; parentId: UID }>): React.JSX.Element => {
     const [boardName, setBoardName] = React.useState('');
     const [boardAbbreviation, setBoardAbbreviation] = React.useState('');
     const [errorName, setErrorName] = useState('');
@@ -34,7 +34,7 @@ const CreateBoard = (props: ContextModalProps<{ modalBody: string; projectId: Pr
             return;
         }
         try {
-            const board = await createBoard(sockCtx, boardName, boardAbbreviation, props.innerProps.projectId);
+            const board = await createBoard(sockCtx, boardName, boardAbbreviation, props.innerProps.parentId);
             navigate(`/board/${board}`);
         } catch (e) {
             notify(NoteType.BOARD_CREATION_ERROR, e);
@@ -50,7 +50,7 @@ const CreateBoard = (props: ContextModalProps<{ modalBody: string; projectId: Pr
             setTrelloImportStatus('Uploading... This may take some time');
             const text = await trelloImport.text();
             const json = JSON.parse(text) as TrelloExportType;
-            const res = await callTrzApi(RestRoutes.IMPORT_FROM_TRELLO, { projectId: props.innerProps.projectId }, json);
+            const res = await callTrzApi(RestRoutes.IMPORT_FROM_TRELLO, { parentId: props.innerProps.parentId }, json);
             setTrelloImportStatus('Loading...');
             await new Promise((r) => setTimeout(r, 2000));
             navigate(`/board/${res}`);
@@ -125,4 +125,4 @@ const CreateBoard = (props: ContextModalProps<{ modalBody: string; projectId: Pr
     );
 };
 
-export const CreateBoardModal = (props: ContextModalProps<{ modalBody: string; projectId: ProjectId }>) => <CreateBoard {...props} />;
+export const CreateBoardModal = (props: ContextModalProps<{ modalBody: string; parentId: UID }>) => <CreateBoard {...props} />;

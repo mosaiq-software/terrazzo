@@ -1,5 +1,5 @@
 import { Box, Group, Stack, Tabs, Title } from '@mantine/core';
-import { EntityType, Role } from '@mosaiq/terrazzo-common/constants';
+import { Role } from '@mosaiq/terrazzo-common/constants';
 import { MembershipRecord, Organization } from '@mosaiq/terrazzo-common/types';
 import { AddUser } from '@trz/components/AddUser';
 import { MembershipRow } from '@trz/components/MembershipRow';
@@ -46,7 +46,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                                 notify(NoteType.ADD_TO_PERSONAL_ORG_ERROR);
                                 return false;
                             }
-                            const invite = await sendInvite(sockCtx, username, props.orgData.id, EntityType.ORG, role);
+                            const invite = await sendInvite(sockCtx, username, props.orgData.id, role);
                             return !!invite;
                         } catch (e) {
                             notify(NoteType.GENERIC_ERROR, e);

@@ -1,12 +1,11 @@
-import { EntityType, Role } from '@mosaiq/terrazzo-common/constants';
-import { EntityId, Invite, InviteId, InviteRecord, OrganizationHeader, OrganizationId, ProjectHeader, ProjectId, UserId } from '@mosaiq/terrazzo-common/types';
+import { Role } from '@mosaiq/terrazzo-common/constants';
+import { Invite, InviteId, InviteRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common/types';
 import { createInviteRecord, deleteInviteRecord, getAllInviteRecordsForEntity, getInviteRecordById, getInviteRecordsToUser, getInviteRecordsToUserInEntity } from '@trz-api/persistence/invitePersistence';
 import { createMembershipRecord, getMembershipRecordsForUserInEntity } from '@trz-api/persistence/membershipPersistence';
 import { getUserById, getUserByUsername } from '@trz-api/persistence/userPersistence';
 import { getOrganizationPreview } from './organizationController';
-import { getProjectPreview } from './projectController';
 
-export const sendInvite = async (toUsername: string, fromUserId: UserId, entityId: ProjectId | OrganizationId, entityType: EntityType, role: Role): Promise<Invite> => {
+export const sendInvite = async (toUsername: string, fromUserId: UserId, entityId: OrganizationId, role: Role): Promise<Invite> => {
     const toUser = await getUserByUsername(toUsername);
     if (!toUser) {
         throw new Error('User not found');
@@ -33,7 +32,6 @@ export const sendInvite = async (toUsername: string, fromUserId: UserId, entityI
         toUser: toUser.id,
         fromUser: fromUser.id,
         entityId,
-        entityType,
         userRole: role,
     };
     await createInviteRecord(inviteRecord);
@@ -55,7 +53,7 @@ const acceptInvite = async (inviteId: InviteId): Promise<InviteRecord | undefine
     if (!invite) {
         throw new Error('Invite not found');
     }
-    await createMembershipRecord(invite.toUser, invite.entityId, invite.entityType, invite.userRole);
+    await createMembershipRecord(invite.toUser, invite.entityId, invite.userRole);
     await deleteInviteRecord(inviteId);
     return invite;
 };
@@ -69,7 +67,7 @@ const declineInvite = async (inviteId: InviteId): Promise<InviteRecord | undefin
     return invite;
 };
 
-export const getInvitesForEntity = async (entityId: EntityId): Promise<Invite[]> => {
+export const getInvitesForEntity = async (entityId: OrganizationId): Promise<Invite[]> => {
     const inviteRecords = (await getAllInviteRecordsForEntity(entityId)) ?? [];
     return await populateInviteRecords(inviteRecords);
 };
@@ -84,12 +82,7 @@ const populateInviteRecords = async (inviteRecords: InviteRecord[]): Promise<Inv
     for (const record of inviteRecords) {
         const toUser = await getUserById(record.toUser);
         const fromUser = await getUserById(record.fromUser);
-        let entity: ProjectHeader | OrganizationHeader | undefined = undefined;
-        if (record.entityType === EntityType.ORG) {
-            entity = await getOrganizationPreview(record.entityId);
-        } else if (record.entityType === EntityType.PROJECT) {
-            entity = await getProjectPreview(record.entityId);
-        }
+        const entity = await getOrganizationPreview(record.entityId);
         if (toUser && fromUser && entity) {
             invites.push({
                 ...record,
