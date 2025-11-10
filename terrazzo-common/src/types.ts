@@ -29,9 +29,8 @@ export interface OrganizationHeader {
 }
 export interface Organization extends OrganizationHeader {
     members: Member[];
-    projects: ProjectHeader[];
     invites: Invite[];
-    documents: DocumentHeader[];
+    modules: TrzModule[];
 }
 
 export interface ProjectHeader {
@@ -176,7 +175,6 @@ export interface UserDash {
     organizations: UserDashOrganization[];
     standaloneProjects: UserDashProject[];
     invites: Invite[];
-    directories: DirectoryHeader[];
 }
 
 export interface GithubUserProfile {
@@ -232,7 +230,24 @@ export interface DirectoryHeader {
     createdAt: number;
 }
 export interface Directory extends DirectoryHeader {
-    subdirectories: DirectoryHeader[];
-    documents: DocumentHeader[];
-    boards: BoardHeader[];
+    modules: TrzModule[];
 }
+
+export enum TrzModuleType {
+    Directory = 'directory',
+    Document = 'document',
+    Board = 'board',
+}
+interface TrzDirectoryModule {
+    type: TrzModuleType.Directory;
+    directory: DirectoryHeader;
+}
+interface TrzDocumentModule {
+    type: TrzModuleType.Document;
+    document: DocumentHeader;
+}
+interface TrzBoardModule {
+    type: TrzModuleType.Board;
+    board: BoardHeader;
+}
+export type TrzModule = TrzDirectoryModule | TrzDocumentModule | TrzBoardModule;

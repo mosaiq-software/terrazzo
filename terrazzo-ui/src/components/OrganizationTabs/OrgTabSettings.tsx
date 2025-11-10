@@ -1,11 +1,11 @@
-import { Anchor, Box, Button, Divider, Fieldset, Group, Space, Stack, Text, TextInput, Textarea, Title } from '@mantine/core';
+import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title } from '@mantine/core';
 import { Role } from '@mosaiq/terrazzo-common/constants';
 import { MembershipRecord, Organization, OrganizationHeader } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
 import { revokeMembershipRecord, updateOrgField } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface OrgTabSettingsProps {
@@ -20,10 +20,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
     useEffect(() => {
         if (props.orgData) setEditedSettings(props.orgData);
     }, [props.orgData]);
-
-    const archivedProjects = useMemo(() => {
-        return props.orgData.projects.filter((p) => p.archived);
-    }, [props.orgData.projects]);
 
     return (
         <Box
@@ -167,25 +163,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                             Archive Organization
                         </Button>
                     </Group>
-                    <Fieldset
-                        legend="Archive"
-                        bg="transparent"
-                    >
-                        {archivedProjects.length === 0 ? (
-                            <Text>Nothing archived yet!</Text>
-                        ) : (
-                            <Stack>
-                                {archivedProjects.map((project) => (
-                                    <Anchor
-                                        key={project.id}
-                                        href={`/project/${project.id}`}
-                                    >
-                                        {project.name}
-                                    </Anchor>
-                                ))}
-                            </Stack>
-                        )}
-                    </Fieldset>
                 </Stack>
             </Box>
         </Box>
