@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import process from 'process';
 import { defineConfig } from 'vite';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import svgr from 'vite-plugin-svgr';
 dotenv.config({ path: '../.env' });
 
@@ -30,6 +31,7 @@ export default defineConfig(() => {
                     // svgr options
                 },
             }),
+            nodePolyfills(),
         ],
         resolve: {
             alias: {
