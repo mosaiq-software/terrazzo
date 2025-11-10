@@ -9,7 +9,6 @@ export type CardId = UID;
 export type UserId = UID;
 export type TextBlockId = UID;
 export type LabelId = UID;
-export type CommentId = UID;
 export type InviteId = UID;
 export type MembershipRecordId = UID;
 export type AssignmentId = UID;
@@ -74,7 +73,6 @@ export interface CardHeader {
     createdById: UserId | null;
 }
 export interface Card extends CardHeader {
-    comments: CommentId[];
     labels: LabelId[];
     assignees: UserId[];
     createdBy: UserHeader | null;
@@ -90,14 +88,6 @@ export interface UserHeader {
 }
 export interface User extends UserHeader {
     organizationIds: OrganizationId[];
-}
-
-export interface Comment {
-    id: CommentId;
-    content: string;
-    postedAt: Date;
-    postedBy: UserId;
-    archived: boolean;
 }
 
 export interface Label {
