@@ -4,8 +4,11 @@ import { modals } from '@mantine/modals';
 import { AvatarRow } from '@trz/components/AvatarRow';
 import { BOARD_CARD_WIDTH, BoardListCard } from '@trz/components/BoardListCards';
 import { useDashboard } from '@trz/contexts/dashboard-context';
+import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { useUser } from '@trz/contexts/user-context';
+import { createDirectory } from '@trz/emitters/directoryEmitters';
+import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +19,7 @@ const HomePage = (): React.JSX.Element => {
     const navigate = useNavigate();
     const clipboard = useClipboard();
     const { userDash, updateUserDash } = useDashboard();
+    const sockCtx = useSocket();
 
     useEffect(() => {
         setTitle(`Dashboard | Terrazzo`);
@@ -234,6 +238,39 @@ const HomePage = (): React.JSX.Element => {
                                 </Box>
                             </>
                         )}
+                        <Stack
+                            style={{
+                                maxWidth: '60rem',
+                                paddingTop: '2rem',
+                                minWidth: '90%',
+                            }}
+                        >
+                            <Divider c="dimmed" />
+                            {userDash?.directories.map((dir) => {
+                                return (
+                                    <Group
+                                        key={dir.id}
+                                        onClick={() => navigate(`/dir/${dir.id}`)}
+                                        style={{ cursor: 'pointer', width: '100%' }}
+                                    >
+                                        <Box c="white">{dir.name}</Box>
+                                    </Group>
+                                );
+                            })}
+                            <Group
+                                onClick={async () => {
+                                    try {
+                                        await createDirectory(sockCtx, 'New Directory', null);
+                                    } catch (e) {
+                                        notify(NoteType.CARD_UPDATE_ERROR, e);
+                                        return;
+                                    }
+                                }}
+                                style={{ cursor: 'pointer', width: '100%' }}
+                            >
+                                <Box c="dimmed">+ Add Directory</Box>
+                            </Group>
+                        </Stack>
 
                         {!userDash && (
                             <Center

@@ -1,19 +1,19 @@
 import { EntityType } from '@mosaiq/terrazzo-common/constants';
 import { BoardId, List, Member, MembershipRecord, MembershipRecordId, OrganizationId, ProjectId, UserDash, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { getDirectoriesByParentIdDb } from '@trz-api/persistence/directoryPersistence';
 import { deleteMembershipRecord, getMembershipById, getMembershipRecordsForUser, updateMembershipRecord } from '@trz-api/persistence/membershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
 import { getProjectById, getProjectsByOrgId } from '@trz-api/persistence/projectPersistence';
 import { createUser, getUserByGithubId, getUserById, getUserByUsername, updateUser } from '@trz-api/persistence/userPersistence';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
+import { addBoard } from './boardController';
+import { addCard } from './cardController';
 import { getInvitesToUser } from './inviteController';
+import { addList } from './listController';
+import { getMembersInOrg } from './membershipController';
 import { addOrganization, updateOrganizationFromPartial } from './organizationController';
 import { addProject } from './projectController';
-import { addBoard } from './boardController';
-import { addList, getListAndCardIdsOnBoard } from './listController';
-import { addCard } from './cardController';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
-import { getMembersInOrg } from './membershipController';
-import { getBoardsByProjectId } from '@trz-api/persistence/boardPersistence';
 
 //Gets
 export async function getOrCreateUserByGithubAccessToken(accessToken: string) {
@@ -138,7 +138,9 @@ export const getUsersEntities = async (userId: UserId): Promise<UserDash> => {
 
         const invites = await getInvitesToUser(userId);
 
-        return { standaloneProjects, organizations, invites };
+        const directories = await getDirectoriesByParentIdDb(null);
+
+        return { standaloneProjects, organizations, invites, directories };
     } catch (e) {
         console.error(e);
         throw e;

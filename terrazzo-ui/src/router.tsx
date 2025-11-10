@@ -12,6 +12,7 @@ import ContentPageWrapper from '@trz/wrappers/ContentPageWrapper';
 import { Outlet, Route, Routes } from 'react-router-dom';
 import { NotFound, PageErrors } from './components/NotFound';
 import DocumentPage from './pages/DocumentPage';
+import DirectoryPage from './pages/DirectoryPAge';
 
 const Router = () => {
     return (
@@ -65,6 +66,10 @@ const Router = () => {
                 <Route
                     path="/doc/:documentId"
                     element={<DocumentPage />}
+                />
+                <Route
+                    path="/dir/:directoryId"
+                    element={<DirectoryPage />}
                 />
                 <Route
                     path="/settings"

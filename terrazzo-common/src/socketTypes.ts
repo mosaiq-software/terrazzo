@@ -1,5 +1,5 @@
 import { EntityType, Role } from './constants';
-import { Board, BoardId, BoardRes, Card, CardId, DocumentHeader, DocumentId, EntityId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, MembershipRecord, MembershipRecordId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, QueryResult, TextBlock, TextBlockId, UID, UserDash, UserHeader, UserId } from './types';
+import { Board, BoardId, BoardRes, Card, CardId, Directory, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, EntityId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, MembershipRecord, MembershipRecordId, Organization, OrganizationHeader, OrganizationId, Project, ProjectHeader, ProjectId, QueryResult, TextBlock, TextBlockId, UID, UserDash, UserHeader, UserId } from './types';
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -36,6 +36,7 @@ export enum ClientSE {
     GET_TEXT_BLOCK = 'GET_TEXT_BLOCK',
     GET_SEARCH_RESULTS = 'GET_SEARCH_RESULTS',
     GET_DOCUMENT = 'GET_DOCUMENT',
+    GET_DIRECTORY = 'GET_DIRECTORY',
 
     PREVIEW_ORGANIZATION = 'PREVIEW_ORGANIZATION',
     PREVIEW_PROJECT = 'PREVIEW_PROJECT',
@@ -49,6 +50,7 @@ export enum ClientSE {
     CREATE_BOARD_LABEL = 'CREATE_BOARD_LABEL',
     CREATE_DUPLICATE_CARD = 'CREATE_DUPLICATE_CARD',
     CREATE_DOCUMENT = 'CREATE_DOCUMENT',
+    CREATE_DIRECTORY = 'CREATE_DIRECTORY',
 
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
     UPDATE_PROJECT_FIELD = 'UPDATE_PROJECT_FIELD',
@@ -60,6 +62,7 @@ export enum ClientSE {
     UPDATE_BOARD_LABEL = 'UPDATE_BOARD_LABEL',
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
     UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
+    UPDATE_DIRECTORY_FIELD = 'UPDATE_DIRECTORY_FIELD',
 
     DELETE_BOARD_LABEL = 'DELETE_BOARD_LABEL',
 
@@ -86,6 +89,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
     [ClientSE.GET_SEARCH_RESULTS]: { query: string; searchSessionId: string };
     [ClientSE.GET_DOCUMENT]: DocumentId;
+    [ClientSE.GET_DIRECTORY]: DirectoryId;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationId;
     [ClientSE.PREVIEW_PROJECT]: ProjectId;
@@ -99,6 +103,7 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_BOARD_LABEL]: { boardId: BoardId; name: string; color: string };
     [ClientSE.CREATE_DUPLICATE_CARD]: { cardId: CardId };
     [ClientSE.CREATE_DOCUMENT]: { title: string; parentId: UID };
+    [ClientSE.CREATE_DIRECTORY]: { name: string; parentId: DirectoryId | null };
 
     [ClientSE.UPDATE_ORG_FIELD]: Partial<Organization> & { id: OrganizationId };
     [ClientSE.UPDATE_PROJECT_FIELD]: Partial<Project> & { id: ProjectId };
@@ -110,6 +115,7 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_BOARD_LABEL]: { boardId: BoardId; label: Label };
     [ClientSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ClientSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
+    [ClientSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
 
     [ClientSE.DELETE_BOARD_LABEL]: { boardId: BoardId; labelId: LabelId };
 
@@ -136,6 +142,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_TEXT_BLOCK]: TextBlock | undefined;
     [ClientSE.GET_SEARCH_RESULTS]: { results: QueryResult[] } | undefined;
     [ClientSE.GET_DOCUMENT]: DocumentHeader | undefined;
+    [ClientSE.GET_DIRECTORY]: Directory | undefined;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationHeader | undefined;
     [ClientSE.PREVIEW_PROJECT]: ProjectHeader | undefined;
@@ -149,6 +156,7 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_BOARD_LABEL]: LabelId | undefined;
     [ClientSE.CREATE_DUPLICATE_CARD]: CardId | undefined;
     [ClientSE.CREATE_DOCUMENT]: DocumentHeader | undefined;
+    [ClientSE.CREATE_DIRECTORY]: DirectoryHeader | undefined;
 
     [ClientSE.UPDATE_ORG_FIELD]: undefined;
     [ClientSE.UPDATE_PROJECT_FIELD]: undefined;
@@ -160,6 +168,7 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_BOARD_LABEL]: undefined;
     [ClientSE.UPDATE_CARDS_LABELS]: undefined;
     [ClientSE.UPDATE_DOCUMENT_FIELD]: undefined;
+    [ClientSE.UPDATE_DIRECTORY_FIELD]: undefined;
 
     [ClientSE.DELETE_BOARD_LABEL]: undefined;
 
@@ -194,6 +203,7 @@ export enum ServerSE {
     UPDATE_BOARD_LABELS = 'UPDATE_BOARD_LABELS',
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
     UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
+    UPDATE_DIRECTORY = 'UPDATE_DIRECTORY',
 
     RECEIVE_INVITE = 'RECEIVE_INVITE',
 }
@@ -221,6 +231,7 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_BOARD_LABELS]: { boardId: BoardId; labels: Label[] };
     [ServerSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ServerSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
+    [ServerSE.UPDATE_DIRECTORY]: Directory;
 
     [ServerSE.RECEIVE_INVITE]: Invite;
 }
@@ -248,6 +259,7 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_BOARD_LABELS]: void;
     [ServerSE.UPDATE_CARDS_LABELS]: void;
     [ServerSE.UPDATE_DOCUMENT_FIELD]: void;
+    [ServerSE.UPDATE_DIRECTORY]: void;
 
     [ServerSE.RECEIVE_INVITE]: void;
 }

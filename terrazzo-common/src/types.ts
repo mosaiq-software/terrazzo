@@ -16,6 +16,7 @@ export type MembershipRecordId = UID;
 export type EntityId = ProjectId | OrganizationId;
 export type AssignmentId = UID;
 export type DocumentId = UID;
+export type DirectoryId = UID;
 
 export interface OrganizationHeader {
     id: OrganizationId;
@@ -175,6 +176,7 @@ export interface UserDash {
     organizations: UserDashOrganization[];
     standaloneProjects: UserDashProject[];
     invites: Invite[];
+    directories: DirectoryHeader[];
 }
 
 export interface GithubUserProfile {
@@ -220,4 +222,15 @@ export interface DocumentHeader {
     createdAt: number;
     lastModifiedAt: number;
     lastModifiedByUserId: UserId;
+}
+
+export interface DirectoryHeader {
+    id: DirectoryId;
+    parentId: DirectoryId | null;
+    name: string;
+    archived: boolean;
+    createdAt: number;
+}
+export interface Directory extends DirectoryHeader {
+    subdirectories: DirectoryHeader[];
 }

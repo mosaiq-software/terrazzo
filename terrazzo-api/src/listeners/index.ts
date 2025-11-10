@@ -1,5 +1,6 @@
 export * from './boardListeners';
 export * from './cardListeners';
+export * from './directoryListeners';
 export * from './documentListeners';
 export * from './labelListeners';
 export * from './listListeners';
