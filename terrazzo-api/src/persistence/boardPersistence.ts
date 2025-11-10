@@ -1,6 +1,6 @@
-import { Model, DataTypes } from 'sequelize';
+import { BoardHeader, BoardId, DirectoryId } from '@mosaiq/terrazzo-common/types';
 import { sequelize } from '@trz-api/utils/dbHelper';
-import { Board, BoardHeader, BoardId, ProjectId } from '@mosaiq/terrazzo-common/types';
+import { DataTypes, Model } from 'sequelize';
 
 class BoardModel extends Model {}
 BoardModel.init(
@@ -9,7 +9,7 @@ BoardModel.init(
             type: DataTypes.STRING,
             primaryKey: true,
         },
-        projectId: DataTypes.STRING,
+        parentId: DataTypes.STRING,
         boardCode: DataTypes.STRING,
         name: DataTypes.STRING,
         archived: DataTypes.BOOLEAN,
@@ -33,10 +33,10 @@ export const getBoardById = async (id: BoardId) => {
     )?.toJSON() as BoardHeader | undefined;
 };
 
-export const getBoardsByProjectId = async (projectId: ProjectId) => {
+export const getBoardsByParentId = async (parentId: DirectoryId) => {
     return (
         await BoardModel.findAll({
-            where: { projectId },
+            where: { parentId },
             order: [['createdAt', 'ASC']],
             attributes: {
                 exclude: ['updatedAt'],
@@ -48,7 +48,7 @@ export const getBoardsByProjectId = async (projectId: ProjectId) => {
 export const createBoard = async (board: BoardHeader) => {
     return await BoardModel.create({
         id: board.id,
-        projectId: board.projectId,
+        parentId: board.parentId,
         boardCode: board.boardCode,
         name: board.name,
         archived: false,

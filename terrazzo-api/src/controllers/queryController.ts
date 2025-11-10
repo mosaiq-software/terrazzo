@@ -1,17 +1,15 @@
-import { BoardId, DatapointType, OrganizationId, ProjectId, QueryableDatapoint, QueryResult, UID, UserId } from '@mosaiq/terrazzo-common/types';
-import { getUsersEntities } from './userController';
-import { getCardsByListId } from '@trz-api/persistence/cardPersistence';
-import { getBoardById, getBoardsByProjectId } from '@trz-api/persistence/boardPersistence';
-import { getListsByBoardId } from '@trz-api/persistence/listPersistence';
-import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
-import { remirrorYjsToPlaintext } from './textBlockController';
-import Fuse from 'fuse.js';
-import { getMembershipRecordsForUser } from '@trz-api/persistence/membershipPersistence';
 import { EntityType } from '@mosaiq/terrazzo-common/constants';
-import { getProjectById, getProjectsByOrgId } from '@trz-api/persistence/projectPersistence';
-import { getMembersInOrg } from './membershipController';
+import { DatapointType, OrganizationId, ProjectId, QueryableDatapoint, QueryResult, UID, UserId } from '@mosaiq/terrazzo-common/types';
+import { getBoardsByParentId } from '@trz-api/persistence/boardPersistence';
+import { getCardsByListId } from '@trz-api/persistence/cardPersistence';
+import { getListsByBoardId } from '@trz-api/persistence/listPersistence';
+import { getMembershipRecordsForUser } from '@trz-api/persistence/membershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
+import { getProjectById, getProjectsByOrgId } from '@trz-api/persistence/projectPersistence';
+import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
+import Fuse from 'fuse.js';
 import { getAllDocumentsForParent } from './documentController';
+import { remirrorYjsToPlaintext } from './textBlockController';
 
 /** Cache each search session so that we only index once per use of the searchbar */
 const CachedSearchSessions = new Map<UserId, { searchSessionId: string; datapoints: QueryableDatapoint[] }>();
@@ -42,7 +40,7 @@ const getAllQueryableDataForUser = async (userId: UserId) => {
     // Board and cards
 
     for (const pid of allProjectIds) {
-        const boardIds = await getBoardsByProjectId(pid);
+        const boardIds = await getBoardsByParentId(pid);
         for (const board of boardIds) {
             if (!board || board.archived) continue;
             queryableData.push({

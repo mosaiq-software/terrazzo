@@ -1,13 +1,14 @@
-import { ActionIcon, Box, Divider, Group, Loader, ScrollArea, Stack } from '@mantine/core';
+import { ActionIcon, Box, Divider, Group, Loader, Menu, ScrollArea, Stack } from '@mantine/core';
 import { useIdle } from '@mantine/hooks';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { Directory, DirectoryId, UserHeader } from '@mosaiq/terrazzo-common/types';
+import { BoardHeader, Directory, DirectoryHeader, DirectoryId, DocumentHeader, UserHeader } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import EditableTextbox from '@trz/components/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { useUser } from '@trz/contexts/user-context';
+import { createBoard, createDocument } from '@trz/emitters';
 import { createDirectory, getDirectory, updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useRoom } from '@trz/hooks/useRoom';
@@ -17,7 +18,7 @@ import { setTitle } from '@trz/util/tabUtils';
 import { IDLE_TIMEOUT_MS } from '@trz/util/textUtils';
 import console from 'console';
 import React, { useEffect, useState } from 'react';
-import { MdChevronLeft } from 'react-icons/md';
+import { MdAdd, MdChevronLeft } from 'react-icons/md';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const DirectoryPage = (): React.JSX.Element => {
@@ -97,13 +98,24 @@ const DirectoryPage = (): React.JSX.Element => {
         }
     }
 
-    async function addItem() {
+    async function addItem(type?: 'directory' | 'document' | 'board') {
         if (!directory) {
             notify(NoteType.DOC_UPDATE_ERROR);
             return;
         }
         try {
-            await createDirectory(sockCtx, 'New Directory', directory.id);
+            switch (type) {
+                case 'directory':
+                    await createDirectory(sockCtx, 'New Directory', directory.id);
+                    return;
+                case 'document':
+                    await createDocument(sockCtx, 'New Document', directory.id);
+                    return;
+                case 'board':
+                    await createBoard(sockCtx, 'New Board', '', directory.id);
+                    return;
+            }
+            // await createDirectory(sockCtx, 'New Directory', directory.id);
         } catch (e) {
             notify(NoteType.CARD_UPDATE_ERROR, e);
             return;
@@ -169,23 +181,23 @@ const DirectoryPage = (): React.JSX.Element => {
                             />{' '}
                         </Group>
                         <Divider c="dimmed" />
-                        {directory.subdirectories.map((subdir) => {
-                            return (
-                                <Group
-                                    key={subdir.id}
-                                    onClick={() => navigate(`/dir/${subdir.id}`)}
-                                    style={{ cursor: 'pointer', width: '100%' }}
-                                >
-                                    <Box c="white">{subdir.name}</Box>
-                                </Group>
-                            );
-                        })}
-                        <Group
-                            onClick={addItem}
-                            style={{ cursor: 'pointer', width: '100%' }}
-                        >
-                            <Box c="dimmed">+ Add Directory</Box>
-                        </Group>
+                        <DirectoryContentsRows
+                            subdirectories={directory.subdirectories}
+                            documents={directory.documents}
+                            boards={directory.boards}
+                        />
+                        <Menu>
+                            <Menu.Target>
+                                <ActionIcon variant="light">
+                                    <MdAdd size="1.5rem" />
+                                </ActionIcon>
+                            </Menu.Target>
+                            <Menu.Dropdown>
+                                <Menu.Item onClick={() => addItem('directory')}>Add Directory</Menu.Item>
+                                <Menu.Item onClick={() => addItem('document')}>Add Document</Menu.Item>
+                                <Menu.Item onClick={() => addItem('board')}>Add Board</Menu.Item>
+                            </Menu.Dropdown>
+                        </Menu>
                     </Stack>
                 </Box>
             </Stack>
@@ -194,3 +206,82 @@ const DirectoryPage = (): React.JSX.Element => {
 };
 
 export default DirectoryPage;
+
+interface DirectoryContentsRowsProps {
+    subdirectories: DirectoryHeader[];
+    documents: DocumentHeader[];
+    boards: BoardHeader[];
+}
+const DirectoryContentsRows = (props: DirectoryContentsRowsProps): React.JSX.Element => {
+    const rows: React.JSX.Element[] = [];
+    props.subdirectories.forEach((subdir) => {
+        rows.push(
+            <DirectoryRow
+                key={subdir.id}
+                directory={subdir}
+            />
+        );
+    });
+    props.documents.forEach((doc) => {
+        rows.push(
+            <DocumentRow
+                key={doc.id}
+                document={doc}
+            />
+        );
+    });
+    props.boards.forEach((board) => {
+        rows.push(
+            <BoardRow
+                key={board.id}
+                board={board}
+            />
+        );
+    });
+    return <>{rows}</>;
+};
+
+interface DirectoryRowProps {
+    directory: DirectoryHeader;
+}
+const DirectoryRow = (props: DirectoryRowProps): React.JSX.Element => {
+    const navigate = useNavigate();
+    return (
+        <Group
+            onClick={() => navigate(`/dir/${props.directory.id}`)}
+            style={{ cursor: 'pointer', width: '100%' }}
+        >
+            <Box c="white">{props.directory.name}</Box>
+        </Group>
+    );
+};
+
+interface DocumentRowProps {
+    document: DocumentHeader;
+}
+const DocumentRow = (props: DocumentRowProps): React.JSX.Element => {
+    const navigate = useNavigate();
+    return (
+        <Group
+            onClick={() => navigate(`/doc/${props.document.id}`)}
+            style={{ cursor: 'pointer', width: '100%' }}
+        >
+            <Box c="white">{props.document.title}</Box>
+        </Group>
+    );
+};
+
+interface BoardRowProps {
+    board: BoardHeader;
+}
+const BoardRow = (props: BoardRowProps): React.JSX.Element => {
+    const navigate = useNavigate();
+    return (
+        <Group
+            onClick={() => navigate(`/board/${props.board.id}`)}
+            style={{ cursor: 'pointer', width: '100%' }}
+        >
+            <Box c="white">{props.board.name}</Box>
+        </Group>
+    );
+};

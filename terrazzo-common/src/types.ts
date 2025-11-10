@@ -52,7 +52,7 @@ export interface Project extends ProjectHeader {
 
 export interface BoardHeader {
     id: BoardId;
-    projectId: ProjectId;
+    parentId: DirectoryId;
     boardCode: string;
     name: string;
     archived: boolean;
@@ -215,7 +215,7 @@ export interface QueryResult extends QueryableDatapoint {
 
 export interface DocumentHeader {
     id: DocumentId;
-    parentId: UID;
+    parentId: DirectoryId;
     title: string;
     textBlockId: TextBlockId;
     archived: boolean;
@@ -233,4 +233,6 @@ export interface DirectoryHeader {
 }
 export interface Directory extends DirectoryHeader {
     subdirectories: DirectoryHeader[];
+    documents: DocumentHeader[];
+    boards: BoardHeader[];
 }
