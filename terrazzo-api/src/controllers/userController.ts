@@ -1,15 +1,11 @@
-import { BoardId, List, Member, MembershipRecord, MembershipRecordId, OrganizationId, UserDash, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { BoardId, List, Member, MembershipRecord, MembershipRecordId, OrganizationId, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
-import { deleteMembershipRecord, getMembershipById, getMembershipRecordsForUser, updateMembershipRecord } from '@trz-api/persistence/membershipPersistence';
-import { getOrgById } from '@trz-api/persistence/organizationPersistence';
+import { deleteMembershipRecord, getMembershipById, updateMembershipRecord } from '@trz-api/persistence/membershipPersistence';
 import { createUser, getUserByGithubId, getUserById, getUserByUsername, updateUser } from '@trz-api/persistence/userPersistence';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
 import { addBoard } from './boardController';
 import { addCard } from './cardController';
-import { getModulesInDirectory } from './directoryController';
-import { getInvitesToUser } from './inviteController';
 import { addList } from './listController';
-import { getMembersInOrg } from './membershipController';
 import { addOrganization, updateOrganizationFromPartial } from './organizationController';
 
 //Gets
@@ -103,30 +99,6 @@ export async function setupUser(userId: UserId, username: string, firstName: str
 
     return user;
 }
-
-export const getUsersEntities = async (userId: UserId): Promise<UserDash> => {
-    try {
-        const orgMemberships = (await getMembershipRecordsForUser(userId)) ?? [];
-        const organizations = (
-            await Promise.all(
-                orgMemberships.map(async (o) => {
-                    const org = await getOrgById(o.entityId);
-                    if (!org) return null;
-                    const members = await getMembersInOrg(org.id);
-                    const modules = await getModulesInDirectory(org.id);
-                    return { ...org, modules, members, myMembershipRecord: o };
-                })
-            )
-        ).filter((o) => !!o);
-
-        const invites = await getInvitesToUser(userId);
-
-        return { organizations, invites };
-    } catch (e) {
-        console.error(e);
-        throw e;
-    }
-};
 
 export const getUserPreview = async (userId: UserId) => {
     const user = await getUserById(userId);

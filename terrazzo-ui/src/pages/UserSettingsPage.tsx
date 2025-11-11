@@ -1,7 +1,6 @@
 import { Anchor, Box, Fieldset, Group, ScrollArea, Space, Stack, Text, Title } from '@mantine/core';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { NotFound, PageErrors } from '@trz/components/NotFound';
-import { useDashboard } from '@trz/contexts/dashboard-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { useUser } from '@trz/contexts/user-context';
@@ -14,14 +13,13 @@ const UserSettingsPage = (): React.JSX.Element => {
     const sockCtx = useSocket();
     const trz = useTRZ();
     const userCtx = useUser();
-    const { userDash, updateUserDash } = useDashboard();
     const navigate = useNavigate();
 
     useEffect(() => {
         setTitle(`My Settings | Terrazzo`);
     }, []);
 
-    const archivedOrgs = useMemo(() => userDash?.organizations.filter((e) => e.archived) ?? [], [userDash?.organizations]);
+    const archivedOrgs = useMemo(() => trz?.allOrganizations.filter((e) => e.archived) ?? [], [trz?.allOrganizations]);
 
     if (!userCtx.userData) {
         return (

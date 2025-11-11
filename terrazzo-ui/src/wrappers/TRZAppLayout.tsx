@@ -1,17 +1,16 @@
-import { Avatar, Box, Burger, Button, Divider, Group, Indicator, Kbd, Notification, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
+import { Avatar, Box, Burger, Button, Divider, Group, Kbd, Menu, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { useHotkeys, useLocalStorage } from '@mantine/hooks';
-import { LocalStorageKey, RoleNames } from '@mosaiq/terrazzo-common/constants';
+import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { SearchBar } from '@trz/components/AutoComplete/Searchbar';
 import { UserProfileIcon } from '@trz/components/UserProfileIcon';
-import { useDashboard } from '@trz/contexts/dashboard-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { replyInvite } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
-import { MdHomeFilled, MdNotificationsNone, MdOutlineSettings } from 'react-icons/md';
+import { MdOutlineSettings } from 'react-icons/md';
 import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
 
@@ -26,7 +25,6 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
     const location = useLocation();
     const params = useParams();
     const boardId = params.boardId;
-    const { userDash, updateUserDash } = useDashboard();
     const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage<boolean>({ key: LocalStorageKey.SIDEBAR_COLLAPSED, defaultValue: false });
 
     useHotkeys([
@@ -137,150 +135,100 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                     </NavLink>
                 </Group>
                 <Divider />
-                <Tooltip
-                    disabled={!sidebarCollapsed}
-                    label={'Dashboard'}
-                    withArrow
-                    arrowPosition="side"
-                    position="right"
-                    openDelay={700}
-                    closeDelay={200}
+                <Menu
+                    position={sidebarCollapsed ? 'right-start' : 'bottom-start'}
+                    width={200}
+                    withinPortal
+                    trigger="hover"
                 >
-                    <Button
-                        variant={location.pathname === `/dashboard` ? 'light' : 'subtle'}
-                        onClick={() => {
-                            navigate(`/dashboard`);
-                        }}
-                        display={'flex'}
-                        px={0}
-                    >
-                        <MdHomeFilled
-                            size={26}
-                            color="#fff"
-                        />
-                        <Text
-                            c="#fff"
-                            style={{
-                                transition: `padding ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms`,
-                                textWrap: 'nowrap',
-                                textAlign: 'left',
-                                width: sidebarCollapsed ? '0px' : '220px',
-                                paddingLeft: sidebarCollapsed ? '0px' : '5px',
+                    <Menu.Target>
+                        <Tooltip
+                            disabled={!sidebarCollapsed}
+                            label={trz.selectedOrganization?.name}
+                            withArrow
+                            arrowPosition="side"
+                            position="right"
+                            openDelay={700}
+                            closeDelay={200}
+                        >
+                            <Button
+                                display={'flex'}
+                                variant={'subtle'}
+                                px={0}
+                                onClick={() => {
+                                    navigate(`/org/${trz.selectedOrganization?.id}`);
+                                }}
+                            >
+                                <Avatar
+                                    src={trz.selectedOrganization?.logoUrl ?? undefined}
+                                    name={trz.selectedOrganization?.name}
+                                    color={'initials'}
+                                    display={'inline-block'}
+                                    size={'sm'}
+                                />
+                                <Text
+                                    c="#fff"
+                                    style={{
+                                        transition: `padding ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms`,
+                                        textWrap: 'nowrap',
+                                        textAlign: 'left',
+                                        width: sidebarCollapsed ? '0px' : '220px',
+                                        paddingLeft: sidebarCollapsed ? '0px' : '5px',
+                                    }}
+                                >
+                                    {trz.selectedOrganization?.name}
+                                </Text>
+                            </Button>
+                        </Tooltip>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                        <Menu.Label>Organizations</Menu.Label>
+                        <Menu.Item
+                            onClick={() => {
+                                navigate('/create-organization');
                             }}
                         >
-                            Dashboard
-                        </Text>
-                    </Button>
-                </Tooltip>
-                <Divider />
-                {userDash?.organizations
-                    .filter((e) => !e.archived)
-                    .map((org) => {
-                        return (
-                            <Box
+                            Create Organization
+                        </Menu.Item>
+                        {trz.allOrganizations.map((org) => (
+                            <Menu.Item
                                 key={org.id}
-                                style={{
-                                    width: 'min-content',
+                                onClick={() => {
+                                    navigate(`/org/${org.id}`);
                                 }}
                             >
                                 <Group
-                                    align="center"
-                                    justify="flex-start"
-                                    pt="0"
-                                    w="100%"
+                                    display={'flex'}
+                                    px={0}
+                                    onClick={() => {
+                                        navigate(`/org/${trz.selectedOrganization?.id}`);
+                                    }}
                                 >
-                                    <Tooltip
-                                        disabled={!sidebarCollapsed}
-                                        label={org.name}
-                                        withArrow
-                                        arrowPosition="side"
-                                        position="right"
-                                        openDelay={700}
-                                        closeDelay={200}
+                                    <Avatar
+                                        src={trz.selectedOrganization?.logoUrl ?? undefined}
+                                        name={trz.selectedOrganization?.name}
+                                        color={'initials'}
+                                        display={'inline-block'}
+                                        size={'sm'}
+                                    />
+                                    <Text
+                                        c="#fff"
+                                        style={{
+                                            transition: `padding ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms`,
+                                            textWrap: 'nowrap',
+                                            textAlign: 'left',
+                                            width: sidebarCollapsed ? '0px' : '220px',
+                                            paddingLeft: sidebarCollapsed ? '0px' : '5px',
+                                        }}
                                     >
-                                        <Button
-                                            display={'flex'}
-                                            variant={location.pathname === `/org/${org.id}` ? 'light' : 'subtle'}
-                                            px={0}
-                                            onClick={() => {
-                                                navigate(`/org/${org.id}`);
-                                            }}
-                                        >
-                                            <Avatar
-                                                src={org.logoUrl ?? undefined}
-                                                name={org.name}
-                                                color={'initials'}
-                                                display={'inline-block'}
-                                                size={'sm'}
-                                            />
-                                            <Text
-                                                c="#fff"
-                                                style={{
-                                                    transition: `padding ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms`,
-                                                    textWrap: 'nowrap',
-                                                    textAlign: 'left',
-                                                    width: sidebarCollapsed ? '0px' : '220px',
-                                                    paddingLeft: sidebarCollapsed ? '0px' : '5px',
-                                                }}
-                                            >
-                                                {org.name}
-                                            </Text>
-                                        </Button>
-                                    </Tooltip>
+                                        {trz.selectedOrganization?.name}
+                                    </Text>
                                 </Group>
-                                {/* <Stack gap={0}>
-                                    {org.projects
-                                        .filter((e) => !e.archived)
-                                        .map((project) => {
-                                            return (
-                                                <Group
-                                                    key={project.id}
-                                                    align="center"
-                                                    justify="flex-start"
-                                                    p="0"
-                                                    ml="sm"
-                                                    style={{
-                                                        overflow: 'hidden',
-                                                        width: sidebarCollapsed ? '0px' : '100%',
-                                                        height: sidebarCollapsed ? '0px' : '36px',
-                                                        transition: `height ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms, padding ${ANIM_DURATION}ms`,
-                                                    }}
-                                                >
-                                                    <Button
-                                                        display={'flex'}
-                                                        px={0}
-                                                        variant={location.pathname === `/project/${project.id}` ? 'light' : 'subtle'}
-                                                        onClick={() => {
-                                                            navigate(`/project/${project.id}`);
-                                                        }}
-                                                    >
-                                                        <Avatar
-                                                            src={project.logoUrl ?? undefined}
-                                                            name={project.name}
-                                                            color={'initials'}
-                                                            display={'inline-block'}
-                                                            size={'sm'}
-                                                        />
-                                                        <Text
-                                                            c="#fff"
-                                                            style={{
-                                                                transition: `padding ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms`,
-                                                                textWrap: 'nowrap',
-                                                                textAlign: 'left',
-                                                                width: sidebarCollapsed ? '0px' : '200px',
-                                                                paddingLeft: sidebarCollapsed ? '0px' : '5px',
-                                                            }}
-                                                        >
-                                                            {project.name}
-                                                        </Text>
-                                                    </Button>
-                                                </Group>
-                                            );
-                                        })}
-                                </Stack> */}
-                            </Box>
-                        );
-                    })}
+                            </Menu.Item>
+                        ))}
+                    </Menu.Dropdown>
+                </Menu>
+                <Divider />
             </Stack>
             <Stack
                 flex={1}
@@ -354,7 +302,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                         variant="subtle"
                                         w="fit-content"
                                     >
-                                        <Indicator
+                                        {/* <Indicator
                                             disabled={!userDash?.invites.length}
                                             label={userDash?.invites.length ?? undefined}
                                             size={16}
@@ -363,14 +311,14 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                                 size={'1.25rem'}
                                                 color="white"
                                             />
-                                        </Indicator>
+                                        </Indicator> */}
                                     </Button>
                                 </Tooltip>
                             </Popover.Target>
                             <Popover.Dropdown>
                                 <ScrollAreaAutosize mah="60vh">
                                     <Stack w="30rem">
-                                        {userDash?.invites.map((i) => {
+                                        {/* {userDash?.invites.map((i) => {
                                             return (
                                                 <Notification
                                                     key={i.id}
@@ -424,15 +372,15 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                                     </Group>
                                                 </Notification>
                                             );
-                                        })}
-                                        {!userDash?.invites.length && (
+                                        })} */}
+                                        {/* {!userDash?.invites.length && (
                                             <Title
                                                 ta="center"
                                                 order={5}
                                             >
                                                 No notifications to show!
                                             </Title>
-                                        )}
+                                        )} */}
                                     </Stack>
                                 </ScrollAreaAutosize>
                             </Popover.Dropdown>
@@ -448,3 +396,112 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
 };
 
 export default TRZAppLayout;
+
+// {userDash?.organizations
+//                     .filter((e) => !e.archived)
+//                     .map((org) => {
+//                         return (
+//                             <Box
+//                                 key={org.id}
+//                                 style={{
+//                                     width: 'min-content',
+//                                 }}
+//                             >
+//                                 <Group
+//                                     align="center"
+//                                     justify="flex-start"
+//                                     pt="0"
+//                                     w="100%"
+//                                 >
+//                                     <Tooltip
+//                                         disabled={!sidebarCollapsed}
+//                                         label={org.name}
+//                                         withArrow
+//                                         arrowPosition="side"
+//                                         position="right"
+//                                         openDelay={700}
+//                                         closeDelay={200}
+//                                     >
+//                                         <Button
+//                                             display={'flex'}
+//                                             variant={location.pathname === `/org/${org.id}` ? 'light' : 'subtle'}
+//                                             px={0}
+//                                             onClick={() => {
+//                                                 navigate(`/org/${org.id}`);
+//                                             }}
+//                                         >
+//                                             <Avatar
+//                                                 src={org.logoUrl ?? undefined}
+//                                                 name={org.name}
+//                                                 color={'initials'}
+//                                                 display={'inline-block'}
+//                                                 size={'sm'}
+//                                             />
+//                                             <Text
+//                                                 c="#fff"
+//                                                 style={{
+//                                                     transition: `padding ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms`,
+//                                                     textWrap: 'nowrap',
+//                                                     textAlign: 'left',
+//                                                     width: sidebarCollapsed ? '0px' : '220px',
+//                                                     paddingLeft: sidebarCollapsed ? '0px' : '5px',
+//                                                 }}
+//                                             >
+//                                                 {org.name}
+//                                             </Text>
+//                                         </Button>
+//                                     </Tooltip>
+//                                 </Group>
+//                                 {/* <Stack gap={0}>
+//                                     {org.projects
+//                                         .filter((e) => !e.archived)
+//                                         .map((project) => {
+//                                             return (
+//                                                 <Group
+//                                                     key={project.id}
+//                                                     align="center"
+//                                                     justify="flex-start"
+//                                                     p="0"
+//                                                     ml="sm"
+//                                                     style={{
+//                                                         overflow: 'hidden',
+//                                                         width: sidebarCollapsed ? '0px' : '100%',
+//                                                         height: sidebarCollapsed ? '0px' : '36px',
+//                                                         transition: `height ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms, padding ${ANIM_DURATION}ms`,
+//                                                     }}
+//                                                 >
+//                                                     <Button
+//                                                         display={'flex'}
+//                                                         px={0}
+//                                                         variant={location.pathname === `/project/${project.id}` ? 'light' : 'subtle'}
+//                                                         onClick={() => {
+//                                                             navigate(`/project/${project.id}`);
+//                                                         }}
+//                                                     >
+//                                                         <Avatar
+//                                                             src={project.logoUrl ?? undefined}
+//                                                             name={project.name}
+//                                                             color={'initials'}
+//                                                             display={'inline-block'}
+//                                                             size={'sm'}
+//                                                         />
+//                                                         <Text
+//                                                             c="#fff"
+//                                                             style={{
+//                                                                 transition: `padding ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms`,
+//                                                                 textWrap: 'nowrap',
+//                                                                 textAlign: 'left',
+//                                                                 width: sidebarCollapsed ? '0px' : '200px',
+//                                                                 paddingLeft: sidebarCollapsed ? '0px' : '5px',
+//                                                             }}
+//                                                         >
+//                                                             {project.name}
+//                                                         </Text>
+//                                                     </Button>
+//                                                 </Group>
+//                                             );
+//                                         })}
+//                                 </Stack> */}
+//                             </Box>
+//                         );
+//                     })}

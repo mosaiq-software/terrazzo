@@ -1,5 +1,5 @@
 import { Role } from './constants';
-import { Board, BoardId, BoardRes, Card, CardId, Directory, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, MembershipRecord, MembershipRecordId, Organization, OrganizationHeader, OrganizationId, QueryResult, TextBlock, TextBlockId, UID, UserDash, UserHeader, UserId } from './types';
+import { Board, BoardId, BoardRes, Card, CardId, Directory, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, MembershipRecord, MembershipRecordId, Organization, OrganizationHeader, OrganizationId, QueryResult, TextBlock, TextBlockId, UID, UserHeader, UserId } from './types';
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -27,7 +27,7 @@ export enum ClientSE {
     MOVE_LIST = 'MOVE_LIST',
     MOVE_CARD = 'MOVE_CARD',
 
-    GET_USER_DASH = 'GET_USER_DASH',
+    GET_USERS_ORGANIZATIONS = 'GET_USERS_ORGANIZATIONS',
     GET_ORGANIZATION = 'GET_ORGANIZATION',
     GET_BOARD = 'GET_BOARD',
     GET_LIST = 'GET_LIST',
@@ -76,7 +76,7 @@ export interface ClientSEPayload {
     [ClientSE.MOVE_LIST]: { listId: ListId; position: number };
     [ClientSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number };
 
-    [ClientSE.GET_USER_DASH]: UserId;
+    [ClientSE.GET_USERS_ORGANIZATIONS]: UserId;
     [ClientSE.GET_ORGANIZATION]: OrganizationId;
     [ClientSE.GET_BOARD]: BoardId;
     [ClientSE.GET_LIST]: ListId;
@@ -125,7 +125,7 @@ export interface ClientSEReplies {
     [ClientSE.MOVE_LIST]: undefined;
     [ClientSE.MOVE_CARD]: undefined;
 
-    [ClientSE.GET_USER_DASH]: UserDash | undefined;
+    [ClientSE.GET_USERS_ORGANIZATIONS]: OrganizationHeader[];
     [ClientSE.GET_ORGANIZATION]: Organization | undefined;
     [ClientSE.GET_BOARD]: BoardRes | undefined;
     [ClientSE.GET_LIST]: ListHeader | undefined;

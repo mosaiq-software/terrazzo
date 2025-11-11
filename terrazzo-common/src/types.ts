@@ -130,15 +130,6 @@ export interface Invite {
     userRole: Role;
 }
 
-export interface UserDashOrganization extends OrganizationHeader {
-    members: Member[];
-    myMembershipRecord: MembershipRecord;
-}
-export interface UserDash {
-    organizations: UserDashOrganization[];
-    invites: Invite[];
-}
-
 export interface GithubUserProfile {
     id: string;
     login: string;

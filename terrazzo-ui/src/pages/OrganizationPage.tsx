@@ -8,7 +8,6 @@ import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
 import { OrgTabSettings } from '@trz/components/OrganizationTabs/OrgTabSettings';
-import { useDashboard } from '@trz/contexts/dashboard-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { getOrganizationData, updateOrgField } from '@trz/emitters';
@@ -25,10 +24,8 @@ const OrganizationPage = (): React.JSX.Element => {
     const trz = useTRZ();
     const navigate = useNavigate();
     const [orgData, setOrgData] = useState<Organization | undefined | null>();
-    const { userDash, updateUserDash } = useDashboard();
     const orgId = params.orgId as OrganizationId | undefined;
     const tabId = params.tabId;
-    const myMembershipRecord = userDash?.organizations.find((o) => o.id === orgId)?.myMembershipRecord;
     useRoom(RoomType.DATA, orgId, false);
 
     useEffect(() => {
@@ -69,14 +66,14 @@ const OrganizationPage = (): React.JSX.Element => {
             />
         );
     }
-    if (!myMembershipRecord) {
-        return (
-            <NotFound
-                itemType="organization"
-                error={PageErrors.FORBIDDEN}
-            />
-        );
-    }
+    // if (!myMembershipRecord) {
+    //     return (
+    //         <NotFound
+    //             itemType="organization"
+    //             error={PageErrors.FORBIDDEN}
+    //         />
+    //     );
+    // }
 
     const tabs: any = {
         Organization: <OrgTabCards orgData={orgData} />,

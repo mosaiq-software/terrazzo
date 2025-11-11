@@ -20,3 +20,7 @@ export const createOrganization = async (sockCtx: SocketContextType, name: strin
 export const updateOrgField = async (sockCtx: SocketContextType, id: OrganizationId, partial: Partial<OrganizationHeader>) => {
     await sockCtx.emit(ClientSE.UPDATE_ORG_FIELD, { ...partial, id });
 };
+
+export const getOrganizationsForUser = async (sockCtx: SocketContextType, userId: UserId) => {
+    return await sockCtx.emit(ClientSE.GET_USERS_ORGANIZATIONS, userId);
+};
