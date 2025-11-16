@@ -14,7 +14,7 @@ export type TRZContextType = {
     boardData: BoardRes | undefined;
     setBoardData: React.Dispatch<React.SetStateAction<BoardRes | undefined>>;
     selectedOrganization: OrganizationHeader | undefined;
-    setSelectedOrganization: React.Dispatch<React.SetStateAction<OrganizationHeader | undefined>>;
+    selectOrganization: (org: OrganizationHeader) => void;
     allOrganizations: OrganizationHeader[];
 };
 
@@ -64,6 +64,11 @@ const TRZProvider: React.FC<any> = ({ children }) => {
         });
     });
 
+    const selectOrganization = (org: OrganizationHeader) => {
+        setSelectedOrganization(org);
+        setLastSelectedOrgId(org.id);
+    };
+
     return (
         <TRZContext.Provider
             value={{
@@ -71,7 +76,7 @@ const TRZProvider: React.FC<any> = ({ children }) => {
                 boardData,
                 setBoardData,
                 selectedOrganization,
-                setSelectedOrganization,
+                selectOrganization,
                 allOrganizations,
             }}
         >

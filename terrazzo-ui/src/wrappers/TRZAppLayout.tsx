@@ -11,7 +11,7 @@ import { useTRZ } from '@trz/contexts/TRZ-context';
 import { replyInvite } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
-import { MdOutlineSettings } from 'react-icons/md';
+import { MdAdd, MdOutlineSettings } from 'react-icons/md';
 import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
 
@@ -186,7 +186,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                         </Tooltip>
                     </Menu.Target>
                     <Menu.Dropdown>
-                        <Menu.Label>Organizations</Menu.Label>
+                        <Menu.Label>Switch Organization</Menu.Label>
                         {trz.allOrganizations.map((org) => (
                             <Menu.Item
                                 key={org.id}
@@ -199,7 +199,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                     gap={8}
                                     px={0}
                                     onClick={() => {
-                                        trz.setSelectedOrganization(org);
+                                        trz.selectOrganization(org);
                                         navigate(`/org/${org.id}`);
                                     }}
                                 >
@@ -222,6 +222,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                 </Group>
                             </Menu.Item>
                         ))}
+                        <Divider my="xs" />
                         <Menu.Item
                             onClick={() => {
                                 modals.openContextModal({
@@ -231,7 +232,25 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                 });
                             }}
                         >
-                            Create Organization
+                            <Group
+                                wrap="nowrap"
+                                gap={8}
+                                px={0}
+                            >
+                                <MdAdd
+                                    size={'1.25rem'}
+                                    color="subtle"
+                                />
+                                <Text
+                                    c="subtle"
+                                    style={{
+                                        textWrap: 'nowrap',
+                                        textAlign: 'left',
+                                    }}
+                                >
+                                    Create Organization
+                                </Text>
+                            </Group>
                         </Menu.Item>
                     </Menu.Dropdown>
                 </Menu>
