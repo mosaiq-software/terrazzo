@@ -31,7 +31,7 @@ const TRZProvider: React.FC<any> = ({ children }) => {
 
     useEffect(() => {
         const fetchInitialData = async () => {
-            if (!userCtx.userData?.id) return;
+            if (!userCtx.userData?.id || !sockCtx.connected) return;
             try {
                 const orgRes = await getOrganizationsForUser(sockCtx, userCtx.userData.id);
                 if (!orgRes) {
@@ -53,7 +53,7 @@ const TRZProvider: React.FC<any> = ({ children }) => {
             }
         };
         fetchInitialData();
-    }, [userCtx.userData?.id]);
+    }, [userCtx.userData?.id, sockCtx.connected]);
 
     useSocketListener<ServerSE.UPDATE_BOARD_LABELS>(ServerSE.UPDATE_BOARD_LABELS, (payload) => {
         setBoardData((prev) => {

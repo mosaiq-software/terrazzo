@@ -1,11 +1,9 @@
-import { Role } from '@mosaiq/terrazzo-common/constants';
-import { Invite, InviteId, InviteRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common/types';
+import { Invite, InviteId, InviteRecord, OrganizationId, PermissionLevel, UserId } from '@mosaiq/terrazzo-common/types';
 import { createInviteRecord, deleteInviteRecord, getAllInviteRecordsForEntity, getInviteRecordById, getInviteRecordsToUser, getInviteRecordsToUserInEntity } from '@trz-api/persistence/invitePersistence';
-import { createMembershipRecord, getMembershipRecordsForUserInEntity } from '@trz-api/persistence/membershipPersistence';
 import { getUserById, getUserByUsername } from '@trz-api/persistence/userPersistence';
 import { getOrganizationPreview } from './organizationController';
 
-export const sendInvite = async (toUsername: string, fromUserId: UserId, entityId: OrganizationId, role: Role): Promise<Invite> => {
+export const sendInvite = async (toUsername: string, fromUserId: UserId, entityId: OrganizationId, role: PermissionLevel): Promise<Invite> => {
     const toUser = await getUserByUsername(toUsername);
     if (!toUser) {
         throw new Error('User not found');
@@ -21,10 +19,10 @@ export const sendInvite = async (toUsername: string, fromUserId: UserId, entityI
         throw new Error('User already invited');
     }
 
-    const existingMembership = await getMembershipRecordsForUserInEntity(toUser.id, entityId);
-    if (existingMembership?.length) {
-        throw new Error('User already a member');
-    }
+    // const existingMembership = await getMembershipRecordsForUserInEntity(toUser.id, entityId);
+    // if (existingMembership?.length) {
+    //     throw new Error('User already a member');
+    // }
 
     const inviteRecord: InviteRecord = {
         id: crypto.randomUUID(),
@@ -53,7 +51,7 @@ const acceptInvite = async (inviteId: InviteId): Promise<InviteRecord | undefine
     if (!invite) {
         throw new Error('Invite not found');
     }
-    await createMembershipRecord(invite.toUser, invite.entityId, invite.userRole);
+    // await createMembershipRecord(invite.toUser, invite.entityId, invite.userRole);
     await deleteInviteRecord(inviteId);
     return invite;
 };

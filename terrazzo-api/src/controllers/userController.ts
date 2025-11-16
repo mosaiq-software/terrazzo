@@ -1,6 +1,5 @@
-import { BoardId, List, Member, MembershipRecord, MembershipRecordId, OrganizationId, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
-import { deleteMembershipRecord, getMembershipById, updateMembershipRecord } from '@trz-api/persistence/membershipPersistence';
+import { BoardId, List, Member, MembershipRecord, OrganizationId, PermissionLevel, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createUser, getUserByGithubId, getUserById, getUserByUsername, updateUser } from '@trz-api/persistence/userPersistence';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
 import { addBoard } from './boardController';
@@ -84,6 +83,12 @@ export async function setupUser(userId: UserId, username: string, firstName: str
     // create a default personal org for the user to have projects in
     try {
         const personalOrgId: OrganizationId = await addOrganization(firstName + "'s Space", user.id, true);
+        const orgMembershipRecord: MembershipRecord = {
+            orgId: personalOrgId,
+            userId: user.id,
+            permissionLevel: PermissionLevel.ADMIN,
+        };
+        await upsertOrganizationMembership(orgMembershipRecord);
         await updateOrganizationFromPartial(personalOrgId, { logoUrl: user.profilePicture, description: 'A place to keep your personal projects' });
         const personalBoardId: BoardId = await addBoard('Task Tracking', '', personalOrgId);
         const personalListTodo: List = await addList(personalBoardId, 'To do');
@@ -106,38 +111,6 @@ export const getUserPreview = async (userId: UserId) => {
         throw new Error('No user found');
     }
     return user;
-};
-
-export async function updateMembershipRecordFromPartial(recordId: MembershipRecordId, partial: Partial<MembershipRecord>) {
-    const updatingRecord = await getMembershipById(recordId);
-    if (updatingRecord == null) {
-        throw new Error('Membership record not found');
-    }
-
-    const updated = updateBaseFromPartial(updatingRecord, partial);
-    try {
-        await updateMembershipRecord(updated);
-        return updated;
-    } catch (e: any) {
-        throw new Error('Failed to update record ' + e);
-    }
-}
-
-export const removeMembership = async (membershipRecordId: MembershipRecordId): Promise<Member | undefined> => {
-    const record = await getMembershipById(membershipRecordId);
-    if (!record) {
-        throw new Error('Record not found');
-    }
-
-    const members = await populateMemberships([record]);
-    if (!members || members.length === 0) {
-        throw new Error('Couldnt populate records');
-    }
-
-    const member = members[0];
-
-    await deleteMembershipRecord(membershipRecordId);
-    return member;
 };
 
 export const populateMemberships = async (records: MembershipRecord[]) => {

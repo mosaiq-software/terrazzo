@@ -1,12 +1,6 @@
 import { Box, Group, Stack, Tabs, Title } from '@mantine/core';
-import { Role } from '@mosaiq/terrazzo-common/constants';
 import { MembershipRecord, Organization } from '@mosaiq/terrazzo-common/types';
-import { AddUser } from '@trz/components/AddUser';
-import { MembershipRow } from '@trz/components/MembershipRow';
-import { PendingInviteRow } from '@trz/components/PendingInviteRow';
 import { useSocket } from '@trz/contexts/socket-context';
-import { replyInvite, revokeMembershipRecord, sendInvite, updateMembershipRecordField } from '@trz/emitters';
-import { NoteType, notify } from '@trz/util/notifications';
 import { MdOutlineMailOutline, MdOutlinePerson } from 'react-icons/md';
 
 interface OrgTabMembersProps {
@@ -38,22 +32,6 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                 >
                     Members
                 </Title>
-                <AddUser
-                    disabled={props.myMembershipRecord.userRole < Role.ADMIN}
-                    onSubmit={async (username: string, role: Role) => {
-                        try {
-                            if (props.orgData.isPersonalOrg) {
-                                notify(NoteType.ADD_TO_PERSONAL_ORG_ERROR);
-                                return false;
-                            }
-                            const invite = await sendInvite(sockCtx, username, props.orgData.id, role);
-                            return !!invite;
-                        } catch (e) {
-                            notify(NoteType.GENERIC_ERROR, e);
-                            return false;
-                        }
-                    }}
-                />
             </Group>
             <Tabs
                 orientation="vertical"
@@ -97,28 +75,6 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                         >
                             Members
                         </Title>
-                        {props.orgData.members.map((member) => (
-                            <MembershipRow
-                                key={member.user.id}
-                                user={member.user}
-                                record={member.record}
-                                editorsRecord={props.myMembershipRecord}
-                                onEditRole={(recordId, role) => {
-                                    if (props.myMembershipRecord.userRole >= Role.ADMIN && member.record.userRole < Role.OWNER && props.myMembershipRecord.userId !== member.record.userId) {
-                                        updateMembershipRecordField(sockCtx, recordId, { userRole: role });
-                                    } else {
-                                        notify(NoteType.UNAUTHORIZED);
-                                    }
-                                }}
-                                onRemoveMember={() => {
-                                    if (props.myMembershipRecord.userRole >= Role.ADMIN && member.record.userRole < Role.OWNER && props.myMembershipRecord.userId !== member.record.userId) {
-                                        revokeMembershipRecord(sockCtx, member.record.id);
-                                    } else {
-                                        notify(NoteType.UNAUTHORIZED);
-                                    }
-                                }}
-                            />
-                        ))}
                     </Stack>
                 </Tabs.Panel>
                 <Tabs.Panel value="invites">
@@ -136,21 +92,6 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                         >
                             Pending Invites
                         </Title>
-                        {props.orgData.invites.map((invite) => (
-                            <PendingInviteRow
-                                key={invite.id}
-                                invite={invite}
-                                editorPermLevel={props.myMembershipRecord.userRole}
-                                onRevokeInvite={() => {
-                                    if (props.myMembershipRecord.userRole >= Role.ADMIN) {
-                                        replyInvite(sockCtx, invite.id, false);
-                                        notify(NoteType.INVITE_REVOKED, [invite.toUser.username]);
-                                    } else {
-                                        notify(NoteType.UNAUTHORIZED);
-                                    }
-                                }}
-                            />
-                        ))}
                     </Stack>
                 </Tabs.Panel>
             </Tabs>

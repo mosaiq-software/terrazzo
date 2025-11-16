@@ -2,7 +2,7 @@ import { DatapointType, OrganizationId, QueryableDatapoint, QueryResult, UID, Us
 import { getBoardsByParentId } from '@trz-api/persistence/boardPersistence';
 import { getCardsByListId } from '@trz-api/persistence/cardPersistence';
 import { getListsByBoardId } from '@trz-api/persistence/listPersistence';
-import { getMembershipRecordsForUser } from '@trz-api/persistence/membershipPersistence';
+import { getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import Fuse from 'fuse.js';
@@ -13,11 +13,11 @@ import { remirrorYjsToPlaintext } from './textBlockController';
 const CachedSearchSessions = new Map<UserId, { searchSessionId: string; datapoints: QueryableDatapoint[] }>();
 
 const getAllQueryableDataForUser = async (userId: UserId) => {
-    const orgMemberships = (await getMembershipRecordsForUser(userId)) ?? [];
+    const orgMemberships = await getOrganizationMembershipsForUser(userId);
     const allOrgIds = new Set<OrganizationId>();
     for (const om of orgMemberships) {
-        allOrgIds.add(om.entityId);
-        const org = await getOrgById(om.entityId);
+        allOrgIds.add(om.orgId);
+        const org = await getOrgById(om.orgId);
         if (!org || org.archived) continue;
     }
 

@@ -1,5 +1,6 @@
 import { Avatar, Box, Burger, Button, Divider, Group, Kbd, Menu, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { useHotkeys, useLocalStorage } from '@mantine/hooks';
+import { modals } from '@mantine/modals';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
@@ -186,13 +187,6 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                     </Menu.Target>
                     <Menu.Dropdown>
                         <Menu.Label>Organizations</Menu.Label>
-                        <Menu.Item
-                            onClick={() => {
-                                navigate('/create-organization');
-                            }}
-                        >
-                            Create Organization
-                        </Menu.Item>
                         {trz.allOrganizations.map((org) => (
                             <Menu.Item
                                 key={org.id}
@@ -201,15 +195,17 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                 }}
                             >
                                 <Group
-                                    display={'flex'}
+                                    wrap="nowrap"
+                                    gap={8}
                                     px={0}
                                     onClick={() => {
-                                        navigate(`/org/${trz.selectedOrganization?.id}`);
+                                        trz.setSelectedOrganization(org);
+                                        navigate(`/org/${org.id}`);
                                     }}
                                 >
                                     <Avatar
-                                        src={trz.selectedOrganization?.logoUrl ?? undefined}
-                                        name={trz.selectedOrganization?.name}
+                                        src={org.logoUrl ?? undefined}
+                                        name={org.name}
                                         color={'initials'}
                                         display={'inline-block'}
                                         size={'sm'}
@@ -217,18 +213,26 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                     <Text
                                         c="#fff"
                                         style={{
-                                            transition: `padding ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms`,
                                             textWrap: 'nowrap',
                                             textAlign: 'left',
-                                            width: sidebarCollapsed ? '0px' : '220px',
-                                            paddingLeft: sidebarCollapsed ? '0px' : '5px',
                                         }}
                                     >
-                                        {trz.selectedOrganization?.name}
+                                        {org.name}
                                     </Text>
                                 </Group>
                             </Menu.Item>
                         ))}
+                        <Menu.Item
+                            onClick={() => {
+                                modals.openContextModal({
+                                    modal: 'organization',
+                                    title: 'Create New Organization',
+                                    innerProps: {},
+                                });
+                            }}
+                        >
+                            Create Organization
+                        </Menu.Item>
                     </Menu.Dropdown>
                 </Menu>
                 <Divider />

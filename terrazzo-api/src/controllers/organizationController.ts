@@ -1,7 +1,6 @@
-import { Role } from '@mosaiq/terrazzo-common/constants';
-import { Organization, OrganizationHeader, OrganizationId, UserId } from '@mosaiq/terrazzo-common/types';
+import { MembershipRecord, Organization, OrganizationHeader, OrganizationId, PermissionLevel, UserId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
-import { createMembershipRecord } from '@trz-api/persistence/membershipPersistence';
+import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrg, getOrgById, updateOrg } from '@trz-api/persistence/organizationPersistence';
 import { getUserById } from '@trz-api/persistence/userPersistence';
 import { getModulesInDirectory } from './directoryController';
@@ -58,9 +57,15 @@ export async function addOrganization(name: string, creator: UserId, isPersonal:
         description: '',
     };
 
+    const membershipRecord: MembershipRecord = {
+        userId: creator,
+        orgId: newOrg.id,
+        permissionLevel: PermissionLevel.ADMIN,
+    };
+
     try {
         await createOrg(newOrg);
-        await createMembershipRecord(creator, newOrg.id, Role.OWNER);
+        await upsertOrganizationMembership(membershipRecord);
         return newOrg.id;
     } catch (e) {
         throw new Error('Failed to create org' + e);

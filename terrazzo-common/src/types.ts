@@ -1,4 +1,4 @@
-import { Priority, Role, StoryPoints } from './constants';
+import { Priority, StoryPoints } from './constants';
 
 export type URL = string;
 export type UID = `${string}-${string}-${string}-${string}-${string}`;
@@ -10,7 +10,6 @@ export type UserId = UID;
 export type TextBlockId = UID;
 export type LabelId = UID;
 export type InviteId = UID;
-export type MembershipRecordId = UID;
 export type AssignmentId = UID;
 export type DocumentId = UID;
 export type DirectoryId = UID;
@@ -101,16 +100,28 @@ export interface TextBlock {
     text: string;
 }
 
-export interface MembershipRecord {
-    id: MembershipRecordId;
-    userId: UserId;
-    entityId: UID;
-    userRole: Role;
+export enum PermissionLevel {
+    VIEW,
+    EDIT,
+    ADMIN,
 }
 
+export interface MembershipRecord {
+    userId: UserId;
+    orgId: OrganizationId;
+    permissionLevel: PermissionLevel;
+}
 export interface Member {
     user: UserHeader;
     record: MembershipRecord;
+}
+
+export interface PermissionRecord {
+    moduleId: DirectoryId | DocumentId | BoardId;
+    orgId: OrganizationId;
+    anyonePermissionLevel: PermissionLevel | null;
+    orgPermissionLevel: PermissionLevel | null;
+    userPermissionLevels: Record<UserId, PermissionLevel>;
 }
 
 export interface InviteRecord {
@@ -119,7 +130,7 @@ export interface InviteRecord {
     fromUser: UserId;
     createdAt: number;
     entityId: UID;
-    userRole: Role;
+    userRole: PermissionLevel;
 }
 export interface Invite {
     id: InviteId;
@@ -127,7 +138,7 @@ export interface Invite {
     fromUser: UserHeader;
     createdAt: number;
     entity: OrganizationHeader;
-    userRole: Role;
+    userRole: PermissionLevel;
 }
 
 export interface GithubUserProfile {
@@ -190,6 +201,9 @@ export enum TrzModuleType {
     Directory = 'directory',
     Document = 'document',
     Board = 'board',
+
+    /** Technically an org is just a top-level module, but we should never use it as one */
+    Organization = 'organization',
 }
 interface TrzDirectoryModule {
     type: TrzModuleType.Directory;

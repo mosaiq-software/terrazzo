@@ -1,5 +1,4 @@
 import { Avatar, Box, Button, Center, Flex, Group, Loader, ScrollArea, Stack, Tabs, Text, Title } from '@mantine/core';
-import { Role } from '@mosaiq/terrazzo-common/constants';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { Organization, OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
@@ -10,6 +9,7 @@ import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
 import { OrgTabSettings } from '@trz/components/OrganizationTabs/OrgTabSettings';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useUser } from '@trz/contexts/user-context';
 import { getOrganizationData, updateOrgField } from '@trz/emitters';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
@@ -22,6 +22,7 @@ const OrganizationPage = (): React.JSX.Element => {
     const params = useParams();
     const sockCtx = useSocket();
     const trz = useTRZ();
+    const userCtx = useUser();
     const navigate = useNavigate();
     const [orgData, setOrgData] = useState<Organization | undefined | null>();
     const orgId = params.orgId as OrganizationId | undefined;
@@ -66,14 +67,16 @@ const OrganizationPage = (): React.JSX.Element => {
             />
         );
     }
-    // if (!myMembershipRecord) {
-    //     return (
-    //         <NotFound
-    //             itemType="organization"
-    //             error={PageErrors.FORBIDDEN}
-    //         />
-    //     );
-    // }
+
+    const myMembershipRecord = orgData.members.find((m) => m.user.id === userCtx.userData?.id)?.record;
+    if (!myMembershipRecord) {
+        return (
+            <NotFound
+                itemType="organization"
+                error={PageErrors.UNAUTHORIZED}
+            />
+        );
+    }
 
     const tabs: any = {
         Organization: <OrgTabCards orgData={orgData} />,
@@ -175,12 +178,7 @@ const OrganizationPage = (): React.JSX.Element => {
                             </Title>
                             <Button
                                 variant="default"
-                                disabled={myMembershipRecord.userRole < Role.OWNER}
                                 onClick={async () => {
-                                    if (myMembershipRecord.userRole < Role.OWNER) {
-                                        notify(NoteType.UNAUTHORIZED);
-                                        return;
-                                    }
                                     try {
                                         updateOrgField(sockCtx, orgId, { archived: false });
                                         notify(NoteType.CHANGES_SAVED);

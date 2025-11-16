@@ -16,21 +16,6 @@ export enum Priority {
     HIGHEST = 5,
 }
 
-export enum Role {
-    READ = 1,
-    WRITE = 2,
-    ADMIN = 3,
-    OWNER = 4,
-}
-
-export const RoleNames = [
-    'None', // 0
-    'Guest', // 1
-    'Member', // 2
-    'Admin', // 3
-    'Owner', // 4
-];
-
 export enum StoryPoints {
     ZERO = 0,
     XXS = 1,
