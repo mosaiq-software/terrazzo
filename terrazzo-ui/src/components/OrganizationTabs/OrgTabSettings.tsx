@@ -1,11 +1,10 @@
-import { Anchor, Box, Button, Divider, Fieldset, Group, Space, Stack, Text, TextInput, Textarea, Title } from '@mantine/core';
-import { Role } from '@mosaiq/terrazzo-common/constants';
+import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title } from '@mantine/core';
 import { MembershipRecord, Organization, OrganizationHeader } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
-import { revokeMembershipRecord, updateOrgField } from '@trz/emitters';
+import { updateOrgField } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface OrgTabSettingsProps {
@@ -20,10 +19,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
     useEffect(() => {
         if (props.orgData) setEditedSettings(props.orgData);
     }, [props.orgData]);
-
-    const archivedProjects = useMemo(() => {
-        return props.orgData.projects.filter((p) => p.archived);
-    }, [props.orgData.projects]);
 
     return (
         <Box
@@ -66,7 +61,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         onChange={(e) => {
                             setEditedSettings({ ...editedSettings, name: e.target.value });
                         }}
-                        disabled={props.myMembershipRecord.userRole < Role.ADMIN}
                     />
                     <Textarea
                         labelProps={{
@@ -78,7 +72,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         onChange={(e) => {
                             setEditedSettings({ ...editedSettings, description: e.target.value });
                         }}
-                        disabled={props.myMembershipRecord.userRole < Role.ADMIN}
                     />
                     <TextInput
                         labelProps={{
@@ -90,12 +83,10 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         onChange={(e) => {
                             setEditedSettings({ ...editedSettings, logoUrl: e.target.value });
                         }}
-                        disabled={props.myMembershipRecord.userRole < Role.ADMIN}
                     />
                     <Group>
                         <Button
                             variant="outline"
-                            disabled={props.myMembershipRecord.userRole < Role.ADMIN}
                             onClick={() => {
                                 setEditedSettings(props.orgData ?? {});
                             }}
@@ -104,12 +95,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         </Button>
                         <Button
                             variant="filled"
-                            disabled={props.myMembershipRecord.userRole < Role.ADMIN}
                             onClick={async () => {
-                                if (props.myMembershipRecord.userRole < Role.ADMIN) {
-                                    notify(NoteType.UNAUTHORIZED);
-                                    return;
-                                }
                                 try {
                                     updateOrgField(sockCtx, props.orgData.id, editedSettings);
                                     notify(NoteType.CHANGES_SAVED);
@@ -128,14 +114,8 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                             variant="light"
                             color="red"
                             w="min-content"
-                            disabled={props.myMembershipRecord.userRole >= Role.OWNER}
                             onClick={async () => {
-                                if (props.myMembershipRecord.userRole >= Role.OWNER) {
-                                    notify(NoteType.UNAUTHORIZED);
-                                    return;
-                                }
                                 try {
-                                    revokeMembershipRecord(sockCtx, props.myMembershipRecord.id);
                                     notify(NoteType.LEFT_ENTITY, [props.orgData.name]);
                                     navigate(DEFAULT_AUTHED_ROUTE);
                                 } catch (e) {
@@ -149,12 +129,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                             variant="light"
                             color="red"
                             w="min-content"
-                            disabled={props.myMembershipRecord.userRole < Role.OWNER}
                             onClick={async () => {
-                                if (props.myMembershipRecord.userRole < Role.OWNER) {
-                                    notify(NoteType.UNAUTHORIZED);
-                                    return;
-                                }
                                 try {
                                     updateOrgField(sockCtx, props.orgData.id, { archived: true });
                                     notify(NoteType.CHANGES_SAVED);
@@ -167,25 +142,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                             Archive Organization
                         </Button>
                     </Group>
-                    <Fieldset
-                        legend="Archive"
-                        bg="transparent"
-                    >
-                        {archivedProjects.length === 0 ? (
-                            <Text>Nothing archived yet!</Text>
-                        ) : (
-                            <Stack>
-                                {archivedProjects.map((project) => (
-                                    <Anchor
-                                        key={project.id}
-                                        href={`/project/${project.id}`}
-                                    >
-                                        {project.name}
-                                    </Anchor>
-                                ))}
-                            </Stack>
-                        )}
-                    </Fieldset>
                 </Stack>
             </Box>
         </Box>

@@ -1,14 +1,14 @@
-import { createCardOnList, getCardById, getCardsByListIdDown, getCardsByListIdShortUp, getCardsByListIdUp, updateCard, updateCardList, updateCardOrder } from '@trz-api/persistence/cardPersistence';
-import { getListById, getNextListOrder } from '@trz-api/persistence/listPersistence';
-import { getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
-import { BoardId, Card, CardHeader, CardId, LabelId, ListId, TextBlockId, UserId } from '@mosaiq/terrazzo-common/types';
+import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, UserId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import { getAssignmentsForCard } from '@trz-api/persistence/assignmentPersistence';
+import { getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
+import { createCardOnList, getCardById, getCardsByListIdDown, getCardsByListIdShortUp, updateCard, updateCardList, updateCardOrder } from '@trz-api/persistence/cardPersistence';
 import { addLabelToCard, deleteLabelsOnCard, getLabelsOnCard } from '@trz-api/persistence/labelPersistence';
-import { createTextBlockWithEncodedData, createTextBlockWithPlaintext } from './textBlockController';
-import { getUserById } from '@trz-api/persistence/userPersistence';
+import { getListById } from '@trz-api/persistence/listPersistence';
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
+import { getUserById } from '@trz-api/persistence/userPersistence';
 import { addAssigneeToCard } from './assignmentController';
+import { createTextBlockWithEncodedData, createTextBlockWithPlaintext } from './textBlockController';
 
 export const MOVING_LIST_ORDER = -10000;
 //Gets
@@ -88,7 +88,6 @@ export async function addCard(listID: ListId, cardName: string, description?: st
         priority: null,
         storyPoints: null,
         assignees: [],
-        comments: [],
         labels: [],
         archived: false,
         order: await getNextCardOrder(listID),
@@ -152,7 +151,6 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         priority: existingCard.priority,
         storyPoints: existingCard.storyPoints,
         assignees: existingCard.assignees,
-        comments: existingCard.comments,
         labels: existingCard.labels,
         archived: existingCard.archived,
         order: await getNextCardOrder(list.id),
@@ -306,7 +304,6 @@ export const populateCards = async (cardHeaders: CardHeader[]): Promise<Card[]> 
                 assignees: await getAssignmentsForCard(c.id),
                 labels: await getLabelsOnCard(c.id),
                 createdBy: c.createdById ? await getUserById(c.createdById) : null,
-                comments: [],
             };
             return cc;
         })

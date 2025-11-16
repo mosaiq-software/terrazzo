@@ -1,6 +1,6 @@
-import { Model, DataTypes } from 'sequelize';
+import { OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { sequelize } from '@trz-api/utils/dbHelper';
-import { Organization, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
+import { DataTypes, Model } from 'sequelize';
 
 class OrgModel extends Model {}
 OrgModel.init(

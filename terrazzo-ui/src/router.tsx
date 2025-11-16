@@ -6,11 +6,11 @@ import BoardSettingsPage from '@trz/pages/BoardSettingsPage';
 import HomePage from '@trz/pages/HomePage';
 import LandingPage from '@trz/pages/LandingPage';
 import OrganizationPage from '@trz/pages/OrganizationPage';
-import ProjectPage from '@trz/pages/ProjectPage';
 import UserSettingsPage from '@trz/pages/UserSettingsPage';
 import ContentPageWrapper from '@trz/wrappers/ContentPageWrapper';
 import { Outlet, Route, Routes } from 'react-router-dom';
 import { NotFound, PageErrors } from './components/NotFound';
+import DirectoryPage from './pages/DirectoryPage';
 import DocumentPage from './pages/DocumentPage';
 
 const Router = () => {
@@ -55,16 +55,16 @@ const Router = () => {
                     element={<BoardSettingsPage />}
                 />
                 <Route
-                    path="/project/:projectId/:tabId?"
-                    element={<ProjectPage />}
-                />
-                <Route
                     path="/org/:orgId/:tabId?"
                     element={<OrganizationPage />}
                 />
                 <Route
                     path="/doc/:documentId"
                     element={<DocumentPage />}
+                />
+                <Route
+                    path="/dir/:directoryId"
+                    element={<DirectoryPage />}
                 />
                 <Route
                     path="/settings"

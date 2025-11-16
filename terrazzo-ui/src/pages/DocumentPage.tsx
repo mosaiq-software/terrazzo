@@ -52,11 +52,14 @@ const DocumentPage = (): React.JSX.Element => {
     }, [docId, sockCtx.connected]);
 
     useSocketListener<ServerSE.UPDATE_DOCUMENT_FIELD>(ServerSE.UPDATE_DOCUMENT_FIELD, (payload) => {
+        if (!document || payload.id !== document.id) {
+            return;
+        }
         setDocument((prev) => {
             if (!prev) {
                 return prev;
             }
-            return updateBaseFromPartial(prev, payload);
+            return { ...updateBaseFromPartial(prev, payload) };
         });
     });
 

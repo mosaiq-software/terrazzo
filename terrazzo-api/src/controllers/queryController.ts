@@ -1,48 +1,33 @@
-import { BoardId, DatapointType, OrganizationId, ProjectId, QueryableDatapoint, QueryResult, UID, UserId } from '@mosaiq/terrazzo-common/types';
-import { getUsersEntities } from './userController';
+import { DatapointType, OrganizationId, QueryableDatapoint, QueryResult, UID, UserId } from '@mosaiq/terrazzo-common/types';
+import { getBoardsByParentId } from '@trz-api/persistence/boardPersistence';
 import { getCardsByListId } from '@trz-api/persistence/cardPersistence';
-import { getBoardById, getBoardsByProjectId } from '@trz-api/persistence/boardPersistence';
 import { getListsByBoardId } from '@trz-api/persistence/listPersistence';
-import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
-import { remirrorYjsToPlaintext } from './textBlockController';
-import Fuse from 'fuse.js';
-import { getMembershipRecordsForUser } from '@trz-api/persistence/membershipPersistence';
-import { EntityType } from '@mosaiq/terrazzo-common/constants';
-import { getProjectById, getProjectsByOrgId } from '@trz-api/persistence/projectPersistence';
-import { getMembersInOrg } from './membershipController';
+import { getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
+import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
+import Fuse from 'fuse.js';
 import { getAllDocumentsForParent } from './documentController';
+import { remirrorYjsToPlaintext } from './textBlockController';
 
 /** Cache each search session so that we only index once per use of the searchbar */
 const CachedSearchSessions = new Map<UserId, { searchSessionId: string; datapoints: QueryableDatapoint[] }>();
 
 const getAllQueryableDataForUser = async (userId: UserId) => {
-    const projectMemberships = (await getMembershipRecordsForUser(userId, EntityType.PROJECT)) ?? [];
-    const orgMemberships = (await getMembershipRecordsForUser(userId, EntityType.ORG)) ?? [];
-    const allProjectIds = new Set<ProjectId>();
+    const orgMemberships = await getOrganizationMembershipsForUser(userId);
     const allOrgIds = new Set<OrganizationId>();
-    for (const pm of projectMemberships) {
-        const project = await getProjectById(pm.entityId);
-        if (!project || project.archived) continue;
-        allProjectIds.add(pm.entityId);
-    }
     for (const om of orgMemberships) {
-        allOrgIds.add(om.entityId);
-        const org = await getOrgById(om.entityId);
+        allOrgIds.add(om.orgId);
+        const org = await getOrgById(om.orgId);
         if (!org || org.archived) continue;
-        const orgProjects = await getProjectsByOrgId(om.entityId);
-        for (const proj of orgProjects) {
-            if (proj.archived) continue;
-            allProjectIds.add(proj.id);
-        }
     }
 
     const queryableData: QueryableDatapoint[] = [];
 
     // Board and cards
-
+    //TODO make this use the new dir structure
+    const allProjectIds = new Set<UID>();
     for (const pid of allProjectIds) {
-        const boardIds = await getBoardsByProjectId(pid);
+        const boardIds = await getBoardsByParentId(pid);
         for (const board of boardIds) {
             if (!board || board.archived) continue;
             queryableData.push({

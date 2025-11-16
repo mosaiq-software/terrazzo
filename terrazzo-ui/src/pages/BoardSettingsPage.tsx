@@ -339,7 +339,7 @@ const BoardSettingsPage = (): React.JSX.Element => {
                                     try {
                                         updateBoardField(sockCtx, boardId, { archived: true });
                                         notify(NoteType.CHANGES_SAVED);
-                                        navigate(`/project/${boardData.projectId}`);
+                                        navigate(`/dir/${boardData.parentId}`);
                                     } catch (e) {
                                         notify(NoteType.BOARD_DATA_ERROR, e);
                                     }

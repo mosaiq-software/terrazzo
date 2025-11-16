@@ -1,12 +1,8 @@
-import { Box, Title } from '@mantine/core';
-import { modals } from '@mantine/modals';
-import { Organization, ProjectId } from '@mosaiq/terrazzo-common/types';
-import { BOARD_CARD_WIDTH, BoardListCard } from '@trz/components/BoardListCards';
+import { Box, Stack, Title } from '@mantine/core';
+import { Organization } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
-import { createDocument } from '@trz/emitters';
-import { NoteType, notify } from '@trz/util/notifications';
-import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
+import { DirectoryContentsRows } from '../Directory/DirectoryRows';
 
 interface OrgTabCardsProps {
     orgData: Organization;
@@ -15,39 +11,6 @@ export const OrgTabCards = (props: OrgTabCardsProps) => {
     const orgData = props.orgData;
     const navigate = useNavigate();
     const sockCtx = useSocket();
-
-    const nonArchivedProjects = useMemo(() => {
-        return orgData?.projects.filter((project) => !project.archived) ?? [];
-    }, [orgData?.projects]);
-
-    const nonArchivedDocs = useMemo(() => {
-        return orgData?.documents.filter((doc) => !doc.archived) ?? [];
-    }, [orgData?.documents]);
-
-    const onCreateProject = () => {
-        modals.openContextModal({
-            modal: 'project',
-            title: 'Create Project',
-            innerProps: { parentId: props.orgData.id },
-        });
-    };
-
-    const onClickProject = (projectId: ProjectId) => {
-        navigate(`/project/${projectId}`);
-    };
-
-    const onCreateDocument = async () => {
-        const doc = await createDocument(sockCtx, 'New Document', props.orgData.id);
-        if (!doc) {
-            notify(NoteType.DOC_CREATION_ERROR);
-            return;
-        }
-        onClickDoc(doc.id);
-    };
-
-    const onClickDoc = (docId: string) => {
-        navigate(`/doc/${docId}`);
-    };
 
     return (
         <Box
@@ -68,7 +31,8 @@ export const OrgTabCards = (props: OrgTabCardsProps) => {
             >
                 Projects
             </Title>
-            <Box
+            {/* // Saved for when we do starred modules */}
+            {/* <Box
                 style={{
                     width: '100%',
                     display: 'flex',
@@ -82,65 +46,31 @@ export const OrgTabCards = (props: OrgTabCardsProps) => {
                         maxWidth: '100%',
                     }}
                 >
-                    {nonArchivedProjects.map((project) => (
+                    {nonArchivedBoards.map((board) => (
                         <BoardListCard
-                            key={project.id}
+                            key={board.id}
                             bgColor={'#121314'}
-                            bgImage={project.logoUrl}
                             color="white"
-                            title={project.name}
-                            onClick={() => onClickProject(project.id)}
+                            title={board.name}
+                            onClick={() => onClickBoard(board.id)}
                         />
                     ))}
                     <BoardListCard
                         centered
-                        title="+ Add Project"
+                        title="+ Add Board"
                         bgColor={'#121314'}
                         color="white"
-                        onClick={onCreateProject}
+                        onClick={onCreateBoard}
                     />
                 </Box>
-            </Box>
-            <Title
-                c="white"
-                pb="20"
-                order={4}
-                maw="200"
-            >
-                Docs
-            </Title>
-            <Box
-                style={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                }}
-            >
-                <Box
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: `repeat(auto-fill, ${BOARD_CARD_WIDTH + 10}px)`,
-                        maxWidth: '100%',
-                    }}
-                >
-                    {nonArchivedDocs.map((doc) => (
-                        <BoardListCard
-                            key={doc.id}
-                            bgColor={'#121314'}
-                            color="white"
-                            title={doc.title}
-                            onClick={() => onClickDoc(doc.id)}
-                        />
-                    ))}
-                    <BoardListCard
-                        centered
-                        title="+ Add Document"
-                        bgColor={'#121314'}
-                        color="white"
-                        onClick={onCreateDocument}
-                    />
-                </Box>
-            </Box>
+            </Box> */}
+            <Stack w="100%">
+                <DirectoryContentsRows
+                    modules={orgData.modules}
+                    parentId={orgData.id}
+                    allowAddItem
+                />
+            </Stack>
         </Box>
     );
 };

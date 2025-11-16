@@ -6,7 +6,6 @@ import { Notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
 import { CreateBoardModal } from '@trz/components/Modals/CreateBoard';
 import { CreateOrganizationModal } from '@trz/components/Modals/CreateOrganization';
-import { CreateProjectModal } from '@trz/components/Modals/CreateProject';
 import { TRZProvider } from '@trz/contexts/TRZ-context';
 import { SocketProvider } from '@trz/contexts/socket-context';
 import { UserProvider } from '@trz/contexts/user-context';
@@ -19,7 +18,6 @@ const theme = createTheme({});
 
 const modals = {
     organization: CreateOrganizationModal,
-    project: CreateProjectModal,
     board: CreateBoardModal,
 };
 

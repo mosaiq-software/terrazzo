@@ -27,12 +27,7 @@ const CreateOrganization = (props: ContextModalProps<{ modalBody: string }>): Re
             return;
         }
         try {
-            const userId = usr.userData?.id;
-            if (!userId) {
-                notify(NoteType.NOT_LOGGED_IN);
-                return;
-            }
-            const ordId = await createOrganization(sockCtx, orgName, userId);
+            const ordId = await createOrganization(sockCtx, orgName);
             navigate(`/org/${ordId}`);
         } catch (e) {
             notify(NoteType.ORG_CREATION_ERROR, e);

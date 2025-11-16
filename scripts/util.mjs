@@ -1,15 +1,14 @@
 import { exec } from 'child_process';
 import fs from 'fs';
-import  open from 'open';
 
 export const getBranchName = () => {
     return new Promise((resolve, reject) => {
         exec('git branch --show-current', (err, stdout, stderr) => {
-        if (err) {
-            reject(err);
-        } else {
-            resolve(stdout.trim());
-        }
+            if (err) {
+                reject(err);
+            } else {
+                resolve(stdout.trim());
+            }
         });
     });
 };
@@ -26,8 +25,4 @@ export const getRepoName = () => {
             }
         });
     });
-};
-
-export const openUrl = (url) => {
-    open(url);
 };

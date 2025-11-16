@@ -1,41 +1,11 @@
-import { createBoard, getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
-import { createLabelOnBoard, deleteLabel, deleteLabelingOnCardsByLabelId, deleteLabelsByBoardId, getLabelById, getLabelsByBoardId, updateLabel } from '@trz-api/persistence/labelPersistence';
-import { addList, getAllListsOfBoard, getListAndCardIdsOnBoard, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
-import { Board, BoardHeader, BoardId, BoardRes, Label, LabelId, ListId, ProjectId } from '@mosaiq/terrazzo-common/types';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import { TrelloExportType, TrelloLabelColorsMap } from '@mosaiq/terrazzo-common/trelloTypes';
+import { Board, BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, ListId } from '@mosaiq/terrazzo-common/types';
+import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { addList, getListAndCardIdsOnBoard, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
+import { createBoard, getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
+import { createLabelOnBoard, deleteLabel, deleteLabelingOnCardsByLabelId, getLabelById, getLabelsByBoardId, updateLabel } from '@trz-api/persistence/labelPersistence';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
-import { getMembersInProjectWithOrgDeduped } from './membershipController';
-
-//Gets
-
-/**
- * Gets a board by its ID
- * Returns a promise of the type Board with all its lists, members, and labels
- * @param boardID
- */
-export async function getWholeBoard(boardID: BoardId) {
-    //pull board from db with ID
-    const boardHeader = await getBoardById(boardID);
-
-    if (boardHeader == null) {
-        throw new Error('Board not found');
-    }
-
-    const projectMembers = await getMembersInProjectWithOrgDeduped(boardHeader.projectId);
-
-    try {
-        const board: Board = {
-            ...boardHeader,
-            lists: await getAllListsOfBoard(boardID, false), //we dont want archived lists when getting whole board
-            labels: await getLabelsByBoardId(boardID),
-            members: projectMembers,
-        };
-        return board;
-    } catch (e) {
-        throw new Error('Failed to retrieve board' + e);
-    }
-}
+import { getMembersInOrg } from './membershipController';
 
 export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefined> {
     const boardHeader = await getBoardById(boardID);
@@ -43,7 +13,7 @@ export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefine
         throw new Error('Board not found');
     }
 
-    const projectMembers = await getMembersInProjectWithOrgDeduped(boardHeader.projectId);
+    const projectMembers = await getMembersInOrg(boardHeader.parentId);
 
     try {
         const board: BoardRes = {
@@ -58,8 +28,6 @@ export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefine
     }
 }
 
-//Creates
-
 /**
  * Adds a new board to the database
  * You must pass in the board name and code
@@ -67,20 +35,18 @@ export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefine
  * @param name
  * @param boardCode
  */
-export async function addBoard(name: string, boardCode: string, projectId: ProjectId) {
+export async function addBoard(name: string, boardCode: string, parentId: DirectoryId) {
     if (name.length > 50) {
         throw new Error('Title must be 50 characters or less');
     }
-    const projectMembers = await getMembersInProjectWithOrgDeduped(projectId);
-
     const newBoard: Board = {
         id: crypto.randomUUID(),
-        projectId,
+        parentId,
         boardCode,
         name,
         lists: [],
         labels: [],
-        members: projectMembers,
+        members: [],
         archived: false,
         createdAt: Date.now(),
         totalCards: 0,
@@ -144,7 +110,7 @@ export async function updateBoardLabels(boardId: BoardId, updatedLabel: Label): 
     return await getLabelsByBoardId(boardId);
 }
 
-export const createTerrazzoBoardFromTrelloBoard = async (onProjectId: ProjectId, trelloBoard: TrelloExportType) => {
+export const createTerrazzoBoardFromTrelloBoard = async (onParentId: DirectoryId, trelloBoard: TrelloExportType) => {
     const boardName = trelloBoard.name;
     const trelloLists = trelloBoard.lists;
     const trelloCards = trelloBoard.cards;
@@ -154,7 +120,7 @@ export const createTerrazzoBoardFromTrelloBoard = async (onProjectId: ProjectId,
     const labelMap: { [trl: string]: LabelId } = {};
 
     try {
-        const trzBoardId = await addBoard(boardName, '', onProjectId);
+        const trzBoardId = await addBoard(boardName, '', onParentId);
         for (const trelloList of trelloLists) {
             const trelloListName = trelloList.name;
             const trelloListOrder = trelloList.pos;

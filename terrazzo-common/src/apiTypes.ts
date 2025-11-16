@@ -1,5 +1,5 @@
 import { TrelloExportType } from './trelloTypes';
-import { BoardId, ProjectId, UserHeader } from './types';
+import { BoardId, UID, UserHeader } from './types';
 
 /**
  * Data types for the REST API
@@ -13,7 +13,7 @@ export enum RestRoutes {
     USER_GITHUB_REVOKE_TOKEN = '/user/github/revoke/:accessToken',
     USER_CHECK_USERNAME = '/user/check-username/:username',
     USER_SETUP = '/user/setup/:id',
-    IMPORT_FROM_TRELLO = '/uploadtrello/:projectId',
+    IMPORT_FROM_TRELLO = '/uploadtrello/:parentId',
 }
 
 export enum RestMethods {
@@ -39,7 +39,7 @@ export interface RestRequestParams {
     [RestRoutes.USER_GITHUB_REVOKE_TOKEN]: { accessToken: string };
     [RestRoutes.USER_CHECK_USERNAME]: { username: string };
     [RestRoutes.USER_SETUP]: { id: string };
-    [RestRoutes.IMPORT_FROM_TRELLO]: { projectId: ProjectId };
+    [RestRoutes.IMPORT_FROM_TRELLO]: { parentId: UID };
 }
 
 export interface RestRequestBody {

@@ -1,9 +1,6 @@
 import { Avatar, Box, Button, Center, Divider, Flex, Group, HoverCard, Kbd, Loader, ScrollArea, Stack, Text, Title, Tooltip, UnstyledButton } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { AvatarRow } from '@trz/components/AvatarRow';
-import { BOARD_CARD_WIDTH, BoardListCard } from '@trz/components/BoardListCards';
-import { useDashboard } from '@trz/contexts/dashboard-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { useUser } from '@trz/contexts/user-context';
 import { setTitle } from '@trz/util/tabUtils';
@@ -15,14 +12,12 @@ const HomePage = (): React.JSX.Element => {
     const trz = useTRZ();
     const navigate = useNavigate();
     const clipboard = useClipboard();
-    const { userDash, updateUserDash } = useDashboard();
 
     useEffect(() => {
         setTitle(`Dashboard | Terrazzo`);
     }, []);
 
-    const orgs = useMemo(() => userDash?.organizations.filter((e) => !e.archived), [userDash?.organizations]);
-    const projects = useMemo(() => userDash?.standaloneProjects.filter((e) => !e.archived), [userDash?.standaloneProjects]);
+    const orgs = useMemo(() => trz?.allOrganizations.filter((e) => !e.archived), [trz?.allOrganizations]);
 
     return (
         <ScrollArea
@@ -147,41 +142,12 @@ const HomePage = (): React.JSX.Element => {
                                                         {org.name}
                                                     </Title>
                                                 </Group>
-                                                <AvatarRow
+                                                {/* <AvatarRow
                                                     users={org.members.map((m) => m.user)}
                                                     maxUsers={10}
-                                                />
+                                                /> */}
                                             </Group>
                                         </UnstyledButton>
-                                        <Box
-                                            style={{
-                                                display: 'grid',
-                                                gridTemplateColumns: `repeat(auto-fill, ${BOARD_CARD_WIDTH + 10}px)`,
-                                                maxWidth: '100%',
-                                            }}
-                                        >
-                                            {org.projects.filter((p) => !p.archived) &&
-                                                org.projects
-                                                    .filter((p) => !p.archived)
-                                                    .map((project) => {
-                                                        return (
-                                                            <BoardListCard
-                                                                key={project.id}
-                                                                title={project.name}
-                                                                bgColor="#4b598c"
-                                                                bgImage={project.logoUrl}
-                                                                color="white"
-                                                                onClick={() => {
-                                                                    navigate('/project/' + project.id);
-                                                                }}
-                                                            />
-                                                        );
-                                                    })}
-                                        </Box>
-                                        <Divider
-                                            color="#5b5857"
-                                            mb="15"
-                                        />
                                     </Stack>
                                 );
                             })}
@@ -201,41 +167,7 @@ const HomePage = (): React.JSX.Element => {
                                 Create your own Organization
                             </Button>
                         )}
-                        {!!projects?.length && (
-                            <>
-                                <Title
-                                    c="white"
-                                    order={4}
-                                    my="xs"
-                                >
-                                    Other Projects
-                                </Title>
-                                <Box
-                                    style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(auto-fill, 360px)',
-                                        maxWidth: '100%',
-                                    }}
-                                >
-                                    {projects.map((project) => {
-                                        return (
-                                            <BoardListCard
-                                                key={project.id}
-                                                title={project.name}
-                                                bgColor="#4b598c"
-                                                bgImage={project.logoUrl}
-                                                color="white"
-                                                onClick={() => {
-                                                    navigate('/project/' + project.id);
-                                                }}
-                                            />
-                                        );
-                                    })}
-                                </Box>
-                            </>
-                        )}
-
-                        {!userDash && (
+                        {!trz && (
                             <Center
                                 w="100%"
                                 h="100%"

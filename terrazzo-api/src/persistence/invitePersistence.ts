@@ -1,6 +1,6 @@
-import { Model, DataTypes } from 'sequelize';
+import { InviteId, InviteRecord, OrganizationId, UID, UserId } from '@mosaiq/terrazzo-common/types';
 import { sequelize } from '@trz-api/utils/dbHelper';
-import { EntityId, Invite, InviteId, InviteRecord, OrganizationId, ProjectId, UserId } from '@mosaiq/terrazzo-common/types';
+import { DataTypes, Model } from 'sequelize';
 
 class InviteModel extends Model {}
 InviteModel.init(
@@ -13,7 +13,6 @@ InviteModel.init(
         fromUser: DataTypes.STRING,
         createdAt: DataTypes.STRING,
         entityId: DataTypes.STRING,
-        entityType: DataTypes.TINYINT,
         userRole: DataTypes.TINYINT,
     },
     { sequelize }
@@ -41,7 +40,7 @@ export const getInviteRecordsToUser = async (userId: UserId) => {
     ).map((prj) => prj.toJSON()) as InviteRecord[];
 };
 
-export const getInviteRecordsToUserInEntity = async (userId: UserId, entityId: EntityId) => {
+export const getInviteRecordsToUserInEntity = async (userId: UserId, entityId: UID) => {
     return (
         await InviteModel.findAll({
             where: { toUser: userId, entityId },
@@ -53,7 +52,7 @@ export const getInviteRecordsToUserInEntity = async (userId: UserId, entityId: E
     ).map((prj) => prj.toJSON()) as InviteRecord[];
 };
 
-export const getAllInviteRecordsForEntity = async (entityId: ProjectId | OrganizationId) => {
+export const getAllInviteRecordsForEntity = async (entityId: OrganizationId) => {
     return (
         await InviteModel.findAll({
             where: { entityId },
@@ -72,7 +71,6 @@ export const createInviteRecord = async (invite: InviteRecord) => {
         fromUser: invite.fromUser,
         createdAt: invite.createdAt,
         entityId: invite.entityId,
-        entityType: invite.entityType,
         userRole: invite.userRole,
     });
 };

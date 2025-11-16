@@ -1,9 +1,9 @@
+import { RestRequestBody, RestRequestParams, RestResponse, RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
+import { UserId } from '@mosaiq/terrazzo-common/types';
+import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
 import { checkUsernameTaken, getOrCreateUserByGithubAccessToken, setupUser } from '@trz-api/controllers/userController';
 import { githubAuth, revokeGithubAuth } from '@trz-api/utils/githubUtils';
-import { RestRequestBody, RestRequestParams, RestResponse, RestResponseTypes, RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
 import express from 'express';
-import { ProjectId, UserId } from '@mosaiq/terrazzo-common/types';
-import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
 
 const router = express.Router();
 
@@ -106,7 +106,7 @@ router.post(RestRoutes.IMPORT_FROM_TRELLO, async (req, res) => {
     const params: RestRequestParams[RestRoutes.IMPORT_FROM_TRELLO] = req.params as RestRequestParams[RestRoutes.IMPORT_FROM_TRELLO];
     const body: RestRequestBody[RestRoutes.IMPORT_FROM_TRELLO] = req.body;
     try {
-        const boardId = await createTerrazzoBoardFromTrelloBoard(params.projectId, body);
+        const boardId = await createTerrazzoBoardFromTrelloBoard(params.parentId, body);
         res.status(200).send(boardId);
     } catch (error) {
         console.error(error);

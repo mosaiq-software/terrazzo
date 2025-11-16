@@ -1,7 +1,8 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
-import { getFullOrganization, getOrganizationPreview, addOrganization, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
-import { broadcast } from '@trz-api/utils/socketUtils';
+import { getOrgsForUser } from '@trz-api/controllers/membershipController';
+import { addOrganization, getFullOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
+import { broadcast, getSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerOrganizationListeners = (socket: Socket, io: Server) => {
@@ -34,7 +35,8 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No card data provided');
             }
-            const orgId = await addOrganization(data.name, data.creator, false);
+            const socketData = getSocketData(socket);
+            const orgId = await addOrganization(data.name, socketData.user.user.id, false);
             reply(orgId);
         } catch (error: any) {
             console.error('Error creating card', error);
@@ -52,6 +54,18 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
         } catch (error: any) {
             console.error('Error updating org fields', error);
             reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.GET_USERS_ORGANIZATIONS, async (data: ClientSEPayload[ClientSE.GET_USERS_ORGANIZATIONS], reply: ClientSEReply<ClientSE.GET_USERS_ORGANIZATIONS>) => {
+        try {
+            if (!data) {
+                throw new Error('No user id provided');
+            }
+            const orgs = await getOrgsForUser(data);
+            reply(orgs);
+        } catch (error: any) {
+            reply([], error.message);
         }
     });
 };
