@@ -1,7 +1,6 @@
 import { Avatar, Box, Button, Center, Divider, Flex, Group, HoverCard, Kbd, Loader, ScrollArea, Stack, Text, Title, Tooltip, UnstyledButton } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { useUser } from '@trz/contexts/user-context';
 import { setTitle } from '@trz/util/tabUtils';
@@ -13,7 +12,6 @@ const HomePage = (): React.JSX.Element => {
     const trz = useTRZ();
     const navigate = useNavigate();
     const clipboard = useClipboard();
-    const sockCtx = useSocket();
 
     useEffect(() => {
         setTitle(`Dashboard | Terrazzo`);

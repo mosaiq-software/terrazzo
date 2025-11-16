@@ -1,21 +1,18 @@
 import { ActionIcon, Box, Divider, Group, Loader, ScrollArea, Stack } from '@mantine/core';
-import { useIdle } from '@mantine/hooks';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { Directory, DirectoryId, UserHeader } from '@mosaiq/terrazzo-common/types';
+import { Directory, DirectoryId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import { DirectoryContentsRows } from '@trz/components/Directory/DirectoryRows';
 import EditableTextbox from '@trz/components/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
-import { useUser } from '@trz/contexts/user-context';
 import { getDirectory, updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
-import { IDLE_TIMEOUT_MS } from '@trz/util/textUtils';
 import React, { useEffect, useState } from 'react';
 import { MdChevronLeft } from 'react-icons/md';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -25,13 +22,10 @@ const DirectoryPage = (): React.JSX.Element => {
     const sockCtx = useSocket();
     const trz = useTRZ();
     const navigate = useNavigate();
-    const idle = useIdle(IDLE_TIMEOUT_MS);
-    const usr = useUser();
 
     const dirId = params.directoryId as DirectoryId | undefined;
 
     const [directory, setDirectory] = useState<Directory | undefined | null>();
-    const [lastEditor, setLastEditor] = useState<UserHeader | null>(null);
 
     useRoom(RoomType.DATA, dirId, false);
     useCatchSaveKey();
@@ -57,7 +51,6 @@ const DirectoryPage = (): React.JSX.Element => {
     useSocketListener(
         ServerSE.UPDATE_DIRECTORY,
         (payload) => {
-            console.log('Received directory update:', payload, 'for directory:', directory);
             if (!directory || payload.id !== directory.id) {
                 return;
             }
@@ -78,7 +71,7 @@ const DirectoryPage = (): React.JSX.Element => {
     if (directory === null || !dirId) {
         return (
             <NotFound
-                itemType="document"
+                itemType="directory"
                 error={PageErrors.NOT_FOUND}
             />
         );
@@ -153,7 +146,7 @@ const DirectoryPage = (): React.JSX.Element => {
                                 style={{
                                     width: '95%',
                                 }}
-                            />{' '}
+                            />
                         </Group>
                         <Divider c="dimmed" />
                         <DirectoryContentsRows
