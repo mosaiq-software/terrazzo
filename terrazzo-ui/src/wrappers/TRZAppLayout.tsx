@@ -156,16 +156,19 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                 variant={'subtle'}
                                 px={0}
                                 onClick={() => {
-                                    navigate(`/org/${trz.selectedOrganization?.id}`);
+                                    if (!trz.selectedOrganization) return;
+                                    navigate(`/org/${trz.selectedOrganization.id}`);
                                 }}
                             >
-                                <Avatar
-                                    src={trz.selectedOrganization?.logoUrl ?? undefined}
-                                    name={trz.selectedOrganization?.name}
-                                    color={'initials'}
-                                    display={'inline-block'}
-                                    size={'sm'}
-                                />
+                                {trz.selectedOrganization && (
+                                    <Avatar
+                                        src={trz.selectedOrganization.logoUrl ?? undefined}
+                                        name={trz.selectedOrganization.name}
+                                        color={'initials'}
+                                        display={'inline-block'}
+                                        size={'sm'}
+                                    />
+                                )}
                                 <Text
                                     c="#fff"
                                     style={{
@@ -176,7 +179,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                         paddingLeft: sidebarCollapsed ? '0px' : '5px',
                                     }}
                                 >
-                                    {trz.selectedOrganization?.name}
+                                    {trz.selectedOrganization?.name ?? 'Select Organization'}
                                 </Text>
                             </Button>
                         </Tooltip>

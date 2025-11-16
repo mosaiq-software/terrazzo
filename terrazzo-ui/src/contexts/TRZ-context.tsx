@@ -1,5 +1,7 @@
+import { useLocalStorage } from '@mantine/hooks';
+import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardRes, OrganizationHeader } from '@mosaiq/terrazzo-common/types';
+import { BoardRes, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { getOrganizationsForUser } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -25,18 +27,26 @@ const TRZProvider: React.FC<any> = ({ children }) => {
     const [boardData, setBoardData] = useState<BoardRes | undefined>(undefined);
     const [selectedOrganization, setSelectedOrganization] = useState<OrganizationHeader | undefined>(undefined);
     const [allOrganizations, setAllOrganizations] = useState<OrganizationHeader[]>([]);
+    const [lastSelectedOrgId, setLastSelectedOrgId] = useLocalStorage<OrganizationId | undefined>({ key: LocalStorageKey.LAST_SELECTED_ORG, defaultValue: undefined });
 
     useEffect(() => {
         const fetchInitialData = async () => {
-            console.log('Fetching organizations for user in TRZProvider', userCtx.userData?.id);
             if (!userCtx.userData?.id) return;
             try {
                 const orgRes = await getOrganizationsForUser(sockCtx, userCtx.userData.id);
                 if (!orgRes) {
                     throw new Error('Failed to fetch organizations for user.');
                 }
-                console.log('Fetched organizations:', orgRes);
                 setAllOrganizations(orgRes);
+                let initialOrg = orgRes.length > 0 ? orgRes[0] : undefined;
+                if (lastSelectedOrgId) {
+                    const matchedOrg = orgRes.find((org) => org.id === lastSelectedOrgId);
+                    if (matchedOrg) {
+                        initialOrg = matchedOrg;
+                    }
+                }
+                setSelectedOrganization(initialOrg);
+                setLastSelectedOrgId(initialOrg?.id);
             } catch (e: any) {
                 notify(NoteType.ORG_DATA_ERROR, e);
                 setAllOrganizations([]);

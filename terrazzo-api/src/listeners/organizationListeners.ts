@@ -2,7 +2,7 @@ import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@m
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { addOrganization, getFullOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
-import { broadcast } from '@trz-api/utils/socketUtils';
+import { broadcast, getSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerOrganizationListeners = (socket: Socket, io: Server) => {
@@ -35,7 +35,8 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No card data provided');
             }
-            const orgId = await addOrganization(data.name, data.creator, false);
+            const socketData = getSocketData(socket);
+            const orgId = await addOrganization(data.name, socketData.user.user.id, false);
             reply(orgId);
         } catch (error: any) {
             console.error('Error creating card', error);

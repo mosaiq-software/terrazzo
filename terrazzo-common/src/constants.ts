@@ -3,6 +3,7 @@ import { UID } from './types';
 export enum LocalStorageKey {
     GITHUB_ACCESS_TOKEN = 'GITHUB_ACCESS_TOKEN',
     SIDEBAR_COLLAPSED = 'SIDEBAR_COLLAPSED',
+    LAST_SELECTED_ORG = 'LAST_SELECTED_ORG',
 }
 
 export const TEMPORARY_ID: UID = 'THIS-IS-A-TEMPORARY-ID';
