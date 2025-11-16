@@ -89,7 +89,7 @@ export interface ClientSEPayload {
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationId;
     [ClientSE.PREVIEW_USER]: UserId;
 
-    [ClientSE.CREATE_ORG]: { name: string; creator: UserId };
+    [ClientSE.CREATE_ORG]: { name: string };
     [ClientSE.CREATE_BOARD]: { name: string; boardCode: string; parentId: DirectoryId };
     [ClientSE.CREATE_LIST]: { boardID: BoardId; listName: string };
     [ClientSE.CREATE_CARD]: { listID: ListId; cardName: string };

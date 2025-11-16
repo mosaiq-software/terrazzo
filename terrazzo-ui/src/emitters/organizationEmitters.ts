@@ -13,8 +13,8 @@ export const getOrganizationData = async (sockCtx: SocketContextType, orgId: Org
     }
 };
 
-export const createOrganization = async (sockCtx: SocketContextType, name: string, creator: UserId): Promise<OrganizationId | undefined> => {
-    return await sockCtx.emit(ClientSE.CREATE_ORG, { name, creator });
+export const createOrganization = async (sockCtx: SocketContextType, name: string): Promise<OrganizationId | undefined> => {
+    return await sockCtx.emit(ClientSE.CREATE_ORG, { name });
 };
 
 export const updateOrgField = async (sockCtx: SocketContextType, id: OrganizationId, partial: Partial<OrganizationHeader>) => {
