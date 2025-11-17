@@ -1,8 +1,9 @@
 import { useLocalStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
-import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
+import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { BoardRes, DirectoryList, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { getOrganizationsForUser, getUserDirectoryStructure } from '@trz/emitters';
+import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -32,6 +33,7 @@ const TRZProvider: React.FC<any> = ({ children }) => {
     const [allOrganizations, setAllOrganizations] = useState<OrganizationHeader[]>([]);
     const [lastSelectedOrgId, setLastSelectedOrgId] = useLocalStorage<OrganizationId | undefined>({ key: LocalStorageKey.LAST_SELECTED_ORG, defaultValue: undefined });
     const [userDirectoryStructure, setUserDirectoryStructure] = useState<DirectoryList | undefined>(undefined);
+    useRoom(RoomType.DATA, selectedOrganization?.id, false);
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -82,12 +84,17 @@ const TRZProvider: React.FC<any> = ({ children }) => {
         });
     });
 
-    useSocketListener<ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE>(ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE, (payload) => {
-        if (payload.userId !== userCtx.userData?.id || payload.orgId !== selectedOrganization?.id) {
-            return;
-        }
-        setUserDirectoryStructure(payload.directoryStructure);
-    });
+    useSocketListener<ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE>(
+        ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE,
+        (payload) => {
+            console.log('Received UPDATE_USERS_DIRECTORY_STRUCTURE', payload, userCtx.userData?.id, selectedOrganization?.id);
+            if (payload.userId !== userCtx.userData?.id || payload.orgId !== selectedOrganization?.id) {
+                return;
+            }
+            setUserDirectoryStructure(payload.directoryStructure);
+        },
+        [selectedOrganization, userCtx.userData]
+    );
 
     const selectOrganization = (org: OrganizationHeader) => {
         setSelectedOrganization(org);

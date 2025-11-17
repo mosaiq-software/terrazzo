@@ -89,7 +89,7 @@ const recursiveGetModulePermissionsForUser = async (userId: UserId, moduleId: UI
 /**
  * A module can be any of a directory, document, or board.
  */
-const getUnknownModule = async (moduleId: UID) => {
+export const getUnknownModule = async (moduleId: UID) => {
     // Start with directories as that is the most likely type when performing membership checks
     const dir = await getDirectoryByIdDb(moduleId);
     if (dir) {
@@ -171,7 +171,7 @@ const buildDirectoryListItem = async (userId: UserId, module: TrzModule): Promis
     return null;
 };
 
-const getModuleId = (module: TrzModule): UID => {
+export const getModuleId = (module: TrzModule): UID => {
     switch (module.type) {
         case TrzModuleType.Directory:
             return module.directory.id;

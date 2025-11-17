@@ -1,7 +1,7 @@
 import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { addBoard, getBoardRes, updateBoardFromPartial } from '@trz-api/controllers/boardController';
-import { broadcast } from '@trz-api/utils/socketUtils';
+import { broadcast, broadcastUniqueUpdatesForUpdatedModule } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerBoardListeners = (socket: Socket, io: Server) => {
@@ -23,6 +23,7 @@ export const registerBoardListeners = (socket: Socket, io: Server) => {
                 throw new Error('No board data provided');
             }
             const boardID = await addBoard(data.name, data.boardCode, data.parentId);
+            broadcastUniqueUpdatesForUpdatedModule(boardID, io);
             reply(boardID);
         } catch (error: any) {
             console.error('Error creating board', error);
@@ -37,6 +38,7 @@ export const registerBoardListeners = (socket: Socket, io: Server) => {
             }
             await updateBoardFromPartial(data.id, data);
             broadcast<ServerSE.UPDATE_BOARD_FIELD>(socket, ServerSE.UPDATE_BOARD_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
+            broadcastUniqueUpdatesForUpdatedModule(data.id, io);
         } catch (error: any) {
             console.error('Error updating board fields', error);
             reply(undefined, error.message);
