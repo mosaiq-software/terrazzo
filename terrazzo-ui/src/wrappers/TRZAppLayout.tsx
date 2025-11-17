@@ -223,7 +223,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                                 textOverflow: 'ellipsis',
                                                 overflow: 'hidden',
                                                 whiteSpace: 'nowrap',
-                                                maxWidth: sidebarCollapsed ? '0px' : '130px',
+                                                maxWidth: '130px',
                                             }}
                                         >
                                             {org.name}
