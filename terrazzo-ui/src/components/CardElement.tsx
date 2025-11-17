@@ -32,7 +32,7 @@ const CardElement = (props: CardElementProps) => {
     return (
         <Paper
             ref={viewportRef}
-            bg="#17191b"
+            bg="#1e2022"
             radius="md"
             p="sm"
             shadow="md"
