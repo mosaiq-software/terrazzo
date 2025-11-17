@@ -26,6 +26,11 @@ export const prioNames = {
     [Priority.HIGHEST]: 'Critical',
 };
 
+export const size = {
+    small: 8,
+    large: 15,
+};
+
 interface PriorityButtonsProps {
     card: Card;
 }
@@ -59,7 +64,7 @@ export const PriorityButtons = (props: PriorityButtonsProps): React.JSX.Element 
                     variant="subtle"
                     justify={'flex-start'}
                 >
-                    <PriorityChip priority={priority} />
+                    <PriorityChip priority={priority} size={"large"}/>
                 </Button>
             </Menu.Target>
             <Menu.Dropdown>
@@ -98,6 +103,7 @@ export const PriorityButtons = (props: PriorityButtonsProps): React.JSX.Element 
 
 interface PriorityChipProps {
     priority: number | null | undefined;
+    size?: 'small' | 'large';     // if null, use large size
 }
 export const PriorityChip = (props: PriorityChipProps) => {
     const p = Math.max(0, Math.min(props.priority ?? 0, priorityColors.length - 1));
@@ -110,6 +116,7 @@ export const PriorityChip = (props: PriorityChipProps) => {
             <Text
                 c="white"
                 ta="center"
+                fz={props.size === 'small' ? size.small : size.large}
             >
                 {unicodeMap[p]}
             </Text>

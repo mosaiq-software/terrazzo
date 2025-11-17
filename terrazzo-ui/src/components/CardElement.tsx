@@ -101,7 +101,7 @@ const CardElement = (props: CardElementProps) => {
                             users={card.assignees}
                             maxUsers={3}
                         />
-                        <PriorityChip priority={card.priority} />
+                        <PriorityChip priority={card.priority} size={"small"} />
                     </Group>
                 </React.Fragment>
             )}
