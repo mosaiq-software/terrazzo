@@ -3,8 +3,8 @@ import { useLocalStorage } from '@mantine/hooks';
 import { DirectoryListItem, TrzModuleType } from '@mosaiq/terrazzo-common/types';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { FaChevronDown } from 'react-icons/fa';
-import { IoIosDocument } from 'react-icons/io';
-import { MdViewKanban } from 'react-icons/md';
+import { IoDocumentOutline } from 'react-icons/io5';
+import { MdOutlineViewKanban } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 
 interface DirectoryTreeItemProps {
@@ -38,7 +38,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 align="center"
                 justify="flex-start"
                 p="0"
-                pl={`${props.indent * 20}px`}
+                pl={`${props.indent * 15}px`}
                 ml="sm"
                 style={{
                     overflow: 'hidden',
@@ -64,7 +64,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                             transition: `padding ${trz.animationDuration}ms, width ${trz.animationDuration}ms`,
                             textWrap: 'nowrap',
                             textAlign: 'left',
-                            width: props.sidebarCollapsed ? '0px' : '200px',
+                            width: props.sidebarCollapsed ? '0px' : '100%',
                             paddingLeft: props.sidebarCollapsed ? '0px' : '5px',
                         }}
                     >
@@ -99,6 +99,7 @@ const DirectoryListItemIcon = (props: DirectoryListItemIconProps) => {
             }
             return (
                 <FaChevronDown
+                    color="white"
                     style={{
                         transform: props.collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
                         transition: 'transform 200ms',
@@ -106,9 +107,9 @@ const DirectoryListItemIcon = (props: DirectoryListItemIconProps) => {
                 />
             );
         case TrzModuleType.Document:
-            return <IoIosDocument />;
+            return <IoDocumentOutline color="white" />;
         case TrzModuleType.Board:
-            return <MdViewKanban />;
+            return <MdOutlineViewKanban color="white" />;
         default:
             return <></>;
     }
