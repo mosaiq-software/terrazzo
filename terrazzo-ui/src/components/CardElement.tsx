@@ -68,10 +68,14 @@ const CardElement = (props: CardElementProps) => {
             {import.meta.env.DEBUG === 'true' && <Text fz="6pt">{props.cardId}</Text>}
             {card && inViewport && (
                 <React.Fragment>
-                    <LabelDisplay
-                        labels={card.labels}
-                        size="xs"
-                    />
+                    {card.labels.length > 0 && (
+                        <div style={{marginBottom: '10px'}}>
+                            <LabelDisplay
+                                labels={card.labels}
+                                size="xs"
+                            />
+                        </div>
+                    )}
                     <Text
                         lineClamp={7}
                         c="#ffffff"
