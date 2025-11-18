@@ -1,4 +1,4 @@
-import { Board, BoardId, BoardRes, Card, CardId, Directory, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, Organization, OrganizationHeader, OrganizationId, PermissionLevel, QueryResult, TextBlock, TextBlockId, UID, UserHeader, UserId } from './types';
+import { Board, BoardId, BoardRes, Card, CardId, Directory, DirectoryHeader, DirectoryId, DirectoryList, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, Organization, OrganizationHeader, OrganizationId, PermissionLevel, QueryResult, TextBlock, TextBlockId, UID, UserHeader, UserId } from './types';
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -35,6 +35,7 @@ export enum ClientSE {
     GET_SEARCH_RESULTS = 'GET_SEARCH_RESULTS',
     GET_DOCUMENT = 'GET_DOCUMENT',
     GET_DIRECTORY = 'GET_DIRECTORY',
+    GET_USERS_DIRECTORY_STRUCTURE = 'GET_USERS_DIRECTORY_STRUCTURE',
 
     PREVIEW_ORGANIZATION = 'PREVIEW_ORGANIZATION',
     PREVIEW_USER = 'PREVIEW_USER',
@@ -82,6 +83,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_SEARCH_RESULTS]: { query: string; searchSessionId: string };
     [ClientSE.GET_DOCUMENT]: DocumentId;
     [ClientSE.GET_DIRECTORY]: DirectoryId;
+    [ClientSE.GET_USERS_DIRECTORY_STRUCTURE]: { userId: UserId; orgId: OrganizationId };
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationId;
     [ClientSE.PREVIEW_USER]: UserId;
@@ -129,6 +131,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_SEARCH_RESULTS]: { results: QueryResult[] } | undefined;
     [ClientSE.GET_DOCUMENT]: DocumentHeader | undefined;
     [ClientSE.GET_DIRECTORY]: Directory | undefined;
+    [ClientSE.GET_USERS_DIRECTORY_STRUCTURE]: DirectoryList | undefined;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationHeader | undefined;
     [ClientSE.PREVIEW_USER]: UserHeader | undefined;
@@ -184,6 +187,7 @@ export enum ServerSE {
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
     UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
     UPDATE_DIRECTORY = 'UPDATE_DIRECTORY',
+    UPDATE_USERS_DIRECTORY_STRUCTURE = 'UPDATE_USERS_DIRECTORY_STRUCTURE',
 
     RECEIVE_INVITE = 'RECEIVE_INVITE',
 }
@@ -211,6 +215,7 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ServerSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ServerSE.UPDATE_DIRECTORY]: Directory;
+    [ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE]: { userId: UserId; orgId: OrganizationId; directoryStructure: DirectoryList };
 
     [ServerSE.RECEIVE_INVITE]: Invite;
 }
@@ -238,6 +243,7 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_CARDS_LABELS]: void;
     [ServerSE.UPDATE_DOCUMENT_FIELD]: void;
     [ServerSE.UPDATE_DIRECTORY]: void;
+    [ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE]: void;
 
     [ServerSE.RECEIVE_INVITE]: void;
 }
