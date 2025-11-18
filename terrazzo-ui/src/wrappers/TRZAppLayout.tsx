@@ -217,7 +217,17 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                                             textAlign: 'left',
                                         }}
                                     >
-                                        {org.name}
+                                        <Text
+                                            c="#fff"
+                                            style={{
+                                                textOverflow: 'ellipsis',
+                                                overflow: 'hidden',
+                                                whiteSpace: 'nowrap',
+                                                maxWidth: '130px',
+                                            }}
+                                        >
+                                            {org.name}
+                                        </Text>
                                     </Text>
                                 </Group>
                             </Menu.Item>
