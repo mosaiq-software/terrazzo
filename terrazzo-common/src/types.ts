@@ -118,7 +118,6 @@ export interface Member {
 
 export interface PermissionRecord {
     moduleId: DirectoryId | DocumentId | BoardId;
-    orgId: OrganizationId;
     anyonePermissionLevel: PermissionLevel | null;
     orgPermissionLevel: PermissionLevel | null;
     userPermissionLevels: Record<UserId, PermissionLevel>;
@@ -218,3 +217,18 @@ interface TrzBoardModule {
     board: BoardHeader;
 }
 export type TrzModule = TrzDirectoryModule | TrzDocumentModule | TrzBoardModule;
+
+interface BaseDirectoryListItem {
+    moduleId: UID;
+    moduleName: string;
+}
+interface DirectoryDirectoryListItem extends BaseDirectoryListItem {
+    moduleType: TrzModuleType.Directory;
+    subItems: DirectoryListItem[];
+}
+interface OtherDirectoryListItem extends BaseDirectoryListItem {
+    moduleType: Exclude<TrzModuleType, TrzModuleType.Directory>;
+}
+
+export type DirectoryListItem = DirectoryDirectoryListItem | OtherDirectoryListItem;
+export type DirectoryList = DirectoryListItem[];

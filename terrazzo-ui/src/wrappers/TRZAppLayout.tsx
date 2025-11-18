@@ -1,9 +1,10 @@
-import { Avatar, Box, Burger, Button, Divider, Group, Kbd, Menu, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
+import { Box, Burger, Button, Divider, Group, Kbd, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { useHotkeys, useLocalStorage } from '@mantine/hooks';
-import { modals } from '@mantine/modals';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { DirectoryTree } from '@trz/components/AppLayout/DirectoryTree';
+import { OrganizationSelectorMenu } from '@trz/components/AppLayout/OrganizationSelectorMenu';
 import { SearchBar } from '@trz/components/AutoComplete/Searchbar';
 import { UserProfileIcon } from '@trz/components/UserProfileIcon';
 import { useSocket } from '@trz/contexts/socket-context';
@@ -11,11 +12,10 @@ import { useTRZ } from '@trz/contexts/TRZ-context';
 import { replyInvite } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
-import { MdAdd, MdOutlineSettings } from 'react-icons/md';
+import { MdOutlineSettings } from 'react-icons/md';
 import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
 
-const ANIM_DURATION = 500;
 interface TRZAppLayoutProps {
     children: any;
 }
@@ -71,7 +71,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
             <Stack
                 px={sidebarCollapsed ? '10px' : '15px'}
                 style={{
-                    transition: `padding ${ANIM_DURATION}ms`,
+                    transition: `padding ${trz.animationDuration}ms`,
                 }}
                 bg="#0c0c10"
                 h="100vh"
@@ -93,10 +93,10 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                         }
                     >
                         <Burger
-                            transitionDuration={ANIM_DURATION}
+                            transitionDuration={trz.animationDuration}
                             opened={!sidebarCollapsed}
                             size="20px"
-                            p="5Spx"
+                            p="5px"
                             color="white"
                             onClick={() => {
                                 setSidebarCollapsed(!sidebarCollapsed);
@@ -111,7 +111,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                             justifyContent: 'flex-end',
                             textDecoration: 'none',
                             width: sidebarCollapsed ? '0px' : '200px',
-                            transition: `width ${ANIM_DURATION}ms`,
+                            transition: `width ${trz.animationDuration}ms`,
                             overflow: 'hidden',
                         }}
                     >
@@ -136,135 +136,12 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                     </NavLink>
                 </Group>
                 <Divider />
-                <Menu
-                    position={sidebarCollapsed ? 'right-start' : 'bottom-start'}
-                    width={200}
-                    withinPortal
-                    trigger="hover"
-                >
-                    <Menu.Target>
-                        <Tooltip
-                            disabled={!sidebarCollapsed}
-                            label={trz.selectedOrganization?.name}
-                            withArrow
-                            arrowPosition="side"
-                            position="right"
-                            openDelay={700}
-                            closeDelay={200}
-                        >
-                            <Button
-                                display={'flex'}
-                                variant={'subtle'}
-                                px={0}
-                                onClick={() => {
-                                    if (!trz.selectedOrganization) return;
-                                    navigate(`/org/${trz.selectedOrganization.id}`);
-                                }}
-                            >
-                                {trz.selectedOrganization && (
-                                    <Avatar
-                                        src={trz.selectedOrganization.logoUrl ?? undefined}
-                                        name={trz.selectedOrganization.name}
-                                        color={'initials'}
-                                        display={'inline-block'}
-                                        size={'sm'}
-                                    />
-                                )}
-                                <Text
-                                    c="#fff"
-                                    style={{
-                                        transition: `padding ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms`,
-                                        textWrap: 'nowrap',
-                                        textAlign: 'left',
-                                        width: sidebarCollapsed ? '0px' : '220px',
-                                        paddingLeft: sidebarCollapsed ? '0px' : '5px',
-                                    }}
-                                >
-                                    {trz.selectedOrganization?.name ?? 'Select Organization'}
-                                </Text>
-                            </Button>
-                        </Tooltip>
-                    </Menu.Target>
-                    <Menu.Dropdown>
-                        <Menu.Label>Switch Organization</Menu.Label>
-                        {trz.allOrganizations.map((org) => (
-                            <Menu.Item
-                                key={org.id}
-                                onClick={() => {
-                                    navigate(`/org/${org.id}`);
-                                }}
-                            >
-                                <Group
-                                    wrap="nowrap"
-                                    gap={8}
-                                    px={0}
-                                    onClick={() => {
-                                        trz.selectOrganization(org);
-                                        navigate(`/org/${org.id}`);
-                                    }}
-                                >
-                                    <Avatar
-                                        src={org.logoUrl ?? undefined}
-                                        name={org.name}
-                                        color={'initials'}
-                                        display={'inline-block'}
-                                        size={'sm'}
-                                    />
-                                    <Text
-                                        c="#fff"
-                                        style={{
-                                            textWrap: 'nowrap',
-                                            textAlign: 'left',
-                                        }}
-                                    >
-                                        <Text
-                                            c="#fff"
-                                            style={{
-                                                textOverflow: 'ellipsis',
-                                                overflow: 'hidden',
-                                                whiteSpace: 'nowrap',
-                                                maxWidth: '130px',
-                                            }}
-                                        >
-                                            {org.name}
-                                        </Text>
-                                    </Text>
-                                </Group>
-                            </Menu.Item>
-                        ))}
-                        <Divider my="xs" />
-                        <Menu.Item
-                            onClick={() => {
-                                modals.openContextModal({
-                                    modal: 'organization',
-                                    title: 'Create New Organization',
-                                    innerProps: {},
-                                });
-                            }}
-                        >
-                            <Group
-                                wrap="nowrap"
-                                gap={8}
-                                px={0}
-                            >
-                                <MdAdd
-                                    size={'1.25rem'}
-                                    color="subtle"
-                                />
-                                <Text
-                                    c="subtle"
-                                    style={{
-                                        textWrap: 'nowrap',
-                                        textAlign: 'left',
-                                    }}
-                                >
-                                    Create Organization
-                                </Text>
-                            </Group>
-                        </Menu.Item>
-                    </Menu.Dropdown>
-                </Menu>
+                <OrganizationSelectorMenu sidebarCollapsed={sidebarCollapsed} />
                 <Divider />
+                <DirectoryTree
+                    sidebarCollapsed={sidebarCollapsed}
+                    directoryList={trz.userDirectoryStructure ?? []}
+                />
             </Stack>
             <Stack
                 flex={1}
@@ -432,112 +309,3 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
 };
 
 export default TRZAppLayout;
-
-// {userDash?.organizations
-//                     .filter((e) => !e.archived)
-//                     .map((org) => {
-//                         return (
-//                             <Box
-//                                 key={org.id}
-//                                 style={{
-//                                     width: 'min-content',
-//                                 }}
-//                             >
-//                                 <Group
-//                                     align="center"
-//                                     justify="flex-start"
-//                                     pt="0"
-//                                     w="100%"
-//                                 >
-//                                     <Tooltip
-//                                         disabled={!sidebarCollapsed}
-//                                         label={org.name}
-//                                         withArrow
-//                                         arrowPosition="side"
-//                                         position="right"
-//                                         openDelay={700}
-//                                         closeDelay={200}
-//                                     >
-//                                         <Button
-//                                             display={'flex'}
-//                                             variant={location.pathname === `/org/${org.id}` ? 'light' : 'subtle'}
-//                                             px={0}
-//                                             onClick={() => {
-//                                                 navigate(`/org/${org.id}`);
-//                                             }}
-//                                         >
-//                                             <Avatar
-//                                                 src={org.logoUrl ?? undefined}
-//                                                 name={org.name}
-//                                                 color={'initials'}
-//                                                 display={'inline-block'}
-//                                                 size={'sm'}
-//                                             />
-//                                             <Text
-//                                                 c="#fff"
-//                                                 style={{
-//                                                     transition: `padding ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms`,
-//                                                     textWrap: 'nowrap',
-//                                                     textAlign: 'left',
-//                                                     width: sidebarCollapsed ? '0px' : '220px',
-//                                                     paddingLeft: sidebarCollapsed ? '0px' : '5px',
-//                                                 }}
-//                                             >
-//                                                 {org.name}
-//                                             </Text>
-//                                         </Button>
-//                                     </Tooltip>
-//                                 </Group>
-//                                 {/* <Stack gap={0}>
-//                                     {org.projects
-//                                         .filter((e) => !e.archived)
-//                                         .map((project) => {
-//                                             return (
-//                                                 <Group
-//                                                     key={project.id}
-//                                                     align="center"
-//                                                     justify="flex-start"
-//                                                     p="0"
-//                                                     ml="sm"
-//                                                     style={{
-//                                                         overflow: 'hidden',
-//                                                         width: sidebarCollapsed ? '0px' : '100%',
-//                                                         height: sidebarCollapsed ? '0px' : '36px',
-//                                                         transition: `height ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms, padding ${ANIM_DURATION}ms`,
-//                                                     }}
-//                                                 >
-//                                                     <Button
-//                                                         display={'flex'}
-//                                                         px={0}
-//                                                         variant={location.pathname === `/project/${project.id}` ? 'light' : 'subtle'}
-//                                                         onClick={() => {
-//                                                             navigate(`/project/${project.id}`);
-//                                                         }}
-//                                                     >
-//                                                         <Avatar
-//                                                             src={project.logoUrl ?? undefined}
-//                                                             name={project.name}
-//                                                             color={'initials'}
-//                                                             display={'inline-block'}
-//                                                             size={'sm'}
-//                                                         />
-//                                                         <Text
-//                                                             c="#fff"
-//                                                             style={{
-//                                                                 transition: `padding ${ANIM_DURATION}ms, width ${ANIM_DURATION}ms`,
-//                                                                 textWrap: 'nowrap',
-//                                                                 textAlign: 'left',
-//                                                                 width: sidebarCollapsed ? '0px' : '200px',
-//                                                                 paddingLeft: sidebarCollapsed ? '0px' : '5px',
-//                                                             }}
-//                                                         >
-//                                                             {project.name}
-//                                                         </Text>
-//                                                     </Button>
-//                                                 </Group>
-//                                             );
-//                                         })}
-//                                 </Stack> */}
-//                             </Box>
-//                         );
-//                     })}

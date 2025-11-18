@@ -1,8 +1,8 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { createNewDocument, modifyDocument } from '@trz-api/controllers/documentController';
 import { getDocumentById } from '@trz-api/persistence/documentPersistence';
-import { getSocketData, broadcast } from '@trz-api/utils/socketUtils';
+import { broadcast, broadcastUniqueUpdatesForUpdatedModule, getSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerDocumentListeners = (socket: Socket, io: Server) => {
@@ -10,6 +10,7 @@ export const registerDocumentListeners = (socket: Socket, io: Server) => {
         try {
             const socketData = getSocketData(socket);
             const document = await createNewDocument(data.title, data.parentId, socketData.user.user.id);
+            await broadcastUniqueUpdatesForUpdatedModule(socket, io, document.id);
             reply(document);
         } catch (error: any) {
             reply(undefined, error.message);
@@ -33,6 +34,7 @@ export const registerDocumentListeners = (socket: Socket, io: Server) => {
                 throw new Error('No document found');
             }
             broadcast<ServerSE.UPDATE_DOCUMENT_FIELD>(socket, ServerSE.UPDATE_DOCUMENT_FIELD, updatedDocument, [getRoomCode(RoomType.DATA, data.id)]);
+            await broadcastUniqueUpdatesForUpdatedModule(socket, io, data.id);
         } catch (error: any) {
             reply(undefined, error.message);
         }
