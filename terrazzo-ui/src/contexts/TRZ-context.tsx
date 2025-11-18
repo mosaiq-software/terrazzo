@@ -2,7 +2,7 @@ import { useLocalStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { BoardRes, DirectoryList, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
-import { getOrganizationsForUser, getUserDirectoryStructure } from '@trz/emitters';
+import { createOrganization, getOrganizationsForUser, getUserDirectoryStructure } from '@trz/emitters';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -19,6 +19,7 @@ export type TRZContextType = {
     selectOrganization: (org: OrganizationHeader) => void;
     allOrganizations: OrganizationHeader[];
     userDirectoryStructure: DirectoryList | undefined;
+    createOrganization: (orgName: string) => Promise<OrganizationHeader | undefined>;
 };
 
 const TRZContext = createContext<TRZContextType | undefined>(undefined);
@@ -100,6 +101,28 @@ const TRZProvider: React.FC<any> = ({ children }) => {
         setLastSelectedOrgId(org.id);
     };
 
+    const createOrg = async (orgName: string) => {
+        try {
+            const orgId = await createOrganization(sockCtx, orgName);
+            if (!orgId) {
+                throw new Error('Organization creation failed');
+            }
+            const newOrg: OrganizationHeader = {
+                id: orgId,
+                name: orgName,
+                archived: false,
+                createdAt: Date.now(),
+                logoUrl: '',
+                isPersonalOrg: false,
+                description: '',
+            };
+            setAllOrganizations((prev) => [...prev, newOrg]);
+            return newOrg;
+        } catch (e) {
+            notify(NoteType.ORG_CREATION_ERROR, e);
+        }
+    };
+
     return (
         <TRZContext.Provider
             value={{
@@ -111,6 +134,7 @@ const TRZProvider: React.FC<any> = ({ children }) => {
                 selectOrganization,
                 allOrganizations,
                 userDirectoryStructure,
+                createOrganization: createOrg,
             }}
         >
             {children}
