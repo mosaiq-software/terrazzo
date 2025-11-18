@@ -85,6 +85,10 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                                 style={{
                                     textWrap: 'nowrap',
                                     textAlign: 'left',
+                                    textOverflow: 'ellipsis',
+                                    overflow: 'hidden',
+                                    whiteSpace: 'nowrap',
+                                    maxWidth: '130px',
                                 }}
                             >
                                 {org.name}
