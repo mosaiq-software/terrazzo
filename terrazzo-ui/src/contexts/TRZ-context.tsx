@@ -2,7 +2,7 @@ import { useLocalStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { BoardRes, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
-import { getOrganizationsForUser } from '@trz/emitters';
+import { createOrganization, getOrganizationsForUser } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ export type TRZContextType = {
     selectedOrganization: OrganizationHeader | undefined;
     selectOrganization: (org: OrganizationHeader) => void;
     allOrganizations: OrganizationHeader[];
+    createOrganization: (orgName: string) => Promise<OrganizationHeader | undefined>;
 };
 
 const TRZContext = createContext<TRZContextType | undefined>(undefined);
@@ -69,6 +70,28 @@ const TRZProvider: React.FC<any> = ({ children }) => {
         setLastSelectedOrgId(org.id);
     };
 
+    const createOrg = async (orgName: string) => {
+        try {
+            const ordId = await createOrganization(sockCtx, orgName);
+            if (!ordId) {
+                throw new Error('Organization creation failed');
+            }
+            const newOrg: OrganizationHeader = {
+                id: ordId,
+                name: orgName,
+                archived: false,
+                createdAt: Date.now(),
+                logoUrl: '',
+                isPersonalOrg: false,
+                description: '',
+            };
+            setAllOrganizations((prev) => [...prev, newOrg]);
+            return newOrg;
+        } catch (e) {
+            notify(NoteType.ORG_CREATION_ERROR, e);
+        }
+    };
+
     return (
         <TRZContext.Provider
             value={{
@@ -78,6 +101,7 @@ const TRZProvider: React.FC<any> = ({ children }) => {
                 selectedOrganization,
                 selectOrganization,
                 allOrganizations,
+                createOrganization: createOrg,
             }}
         >
             {children}

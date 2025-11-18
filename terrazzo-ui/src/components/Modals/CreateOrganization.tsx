@@ -1,18 +1,14 @@
 import { Button, Container, Flex, TextInput } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
-import { useSocket } from '@trz/contexts/socket-context';
-import { useUser } from '@trz/contexts/user-context';
-import { createOrganization } from '@trz/emitters';
-import { NoteType, notify } from '@trz/util/notifications';
+import { useTRZ } from '@trz/contexts/TRZ-context';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const CreateOrganization = (props: ContextModalProps<{ modalBody: string }>): React.JSX.Element => {
     const [orgName, setOrgName] = React.useState('');
     const [errorName, setErrorName] = useState('');
-    const sockCtx = useSocket();
-    const usr = useUser();
+    const trz = useTRZ();
     const navigate = useNavigate();
 
     async function onSubmit() {
@@ -22,15 +18,10 @@ const CreateOrganization = (props: ContextModalProps<{ modalBody: string }>): Re
             setErrorName('Enter a name');
             return;
         }
-        if (orgName.length > 50) {
-            setErrorName('Max 50 characters');
-            return;
-        }
-        try {
-            const ordId = await createOrganization(sockCtx, orgName);
-            navigate(`/org/${ordId}`);
-        } catch (e) {
-            notify(NoteType.ORG_CREATION_ERROR, e);
+        const orgId = await trz.createOrganization(orgName);
+        if (orgId) {
+            trz.selectOrganization(orgId);
+            navigate(`/org/${orgId.id}`);
         }
         props.context.closeModal(props.id);
     }
