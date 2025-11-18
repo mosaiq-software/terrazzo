@@ -10,7 +10,7 @@ export const registerDocumentListeners = (socket: Socket, io: Server) => {
         try {
             const socketData = getSocketData(socket);
             const document = await createNewDocument(data.title, data.parentId, socketData.user.user.id);
-            broadcastUniqueUpdatesForUpdatedModule(document.id, io);
+            await broadcastUniqueUpdatesForUpdatedModule(socket, io, document.id);
             reply(document);
         } catch (error: any) {
             reply(undefined, error.message);
@@ -34,7 +34,7 @@ export const registerDocumentListeners = (socket: Socket, io: Server) => {
                 throw new Error('No document found');
             }
             broadcast<ServerSE.UPDATE_DOCUMENT_FIELD>(socket, ServerSE.UPDATE_DOCUMENT_FIELD, updatedDocument, [getRoomCode(RoomType.DATA, data.id)]);
-            broadcastUniqueUpdatesForUpdatedModule(updatedDocument.id, io);
+            await broadcastUniqueUpdatesForUpdatedModule(socket, io, data.id);
         } catch (error: any) {
             reply(undefined, error.message);
         }

@@ -62,18 +62,6 @@ export function broadcast<T extends ServerSE>(socket: Socket, event: T, payload:
     }
 }
 
-export function ioBroadcast<T extends ServerSE>(io: Server, event: T, payload: ServerSEPayload[T], to: NonEmptyArray<RoomId>) {
-    if (!to || to.length === 0) {
-        return;
-    }
-    for (const rid of to) {
-        if (rid) {
-            io.to(rid);
-        }
-    }
-    io.emit(event, payload);
-}
-
 export function broadcastToMyRooms<T extends ServerSE>(socket: Socket, event: T, payload: ServerSEPayload[T], include: NonEmptyArray<RoomType>, returnToSender?: boolean) {
     const rooms = getSocketRooms(socket)?.filter((r) => !!r && include.includes(getRoomType(r)));
     if (rooms && rooms.length > 0) {
@@ -123,29 +111,23 @@ export const leaveRoom = (socket: Socket, room: RoomId) => {
  * This function broadcasts updates to all connected clients for the given module ID.
  * This will only send it to users who have access to the module.
  */
-export const broadcastUniqueUpdatesForUpdatedModule = async (moduleId: UID, io: Server) => {
-    console.log(`Broadcasting unique directory structure updates for module ${moduleId}`);
+export const broadcastUniqueUpdatesForUpdatedModule = async (socket: Socket, io: Server, moduleId: UID) => {
     const unknownModule = await getUnknownModule(moduleId);
     if (!unknownModule) {
         throw new Error(`Module ${moduleId} not found`);
     }
     const orgId = await getOrganizationModuleIsIn(moduleId);
-    console.log(`Module ${moduleId} is in organization ${orgId}`);
     const members = await getMembersInOrg(orgId);
-    console.log(`Organization ${orgId} has ${members.map((m) => m.user.id).join(', ')}`);
     const socketsSubscribedToOrgRoom = await getUsersInRoom(io, getRoomCode(RoomType.DATA, orgId));
-    console.log(`There are ${socketsSubscribedToOrgRoom.map((s) => s.sid).join(', ')} sockets in the org data room for org ${orgId}`);
     // only broadcast to members who have access to the module
     const memberIds = members.map((m) => m.user.id);
     const targetUsers = socketsSubscribedToOrgRoom.filter((s) => memberIds.includes(s.user.id));
     for (const user of targetUsers) {
-        console.log(`Broadcasting update to user ${user.user.id}`);
         const userRoomId = getRoomCode(RoomType.USER, user.user.id);
         const usersDirectoryStructure = await getUserDirectoryStructure(user.user.id, orgId);
         if (usersDirectoryStructure) {
-            console.log(`Broadcasting directory structure update to user ${user.user.id}`);
-            ioBroadcast<ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE>(
-                io,
+            broadcast<ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE>(
+                socket,
                 ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE,
                 {
                     userId: user.user.id,

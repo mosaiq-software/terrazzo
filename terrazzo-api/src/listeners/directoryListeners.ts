@@ -18,7 +18,7 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
                 return;
             }
             broadcast(socket, ServerSE.UPDATE_DIRECTORY, directory, [getRoomCode(RoomType.DATA, directory.id)]);
-            broadcastUniqueUpdatesForUpdatedModule(directory.id, io);
+            await broadcastUniqueUpdatesForUpdatedModule(socket, io, directory.id);
         } catch (error: any) {
             reply(undefined, error.message);
         }
@@ -39,7 +39,7 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
             const directory = await getDirectory(data.id);
             if (directory) {
                 broadcast(socket, ServerSE.UPDATE_DIRECTORY, directory, [getRoomCode(RoomType.DATA, directory.id)]);
-                broadcastUniqueUpdatesForUpdatedModule(directory.id, io);
+                await broadcastUniqueUpdatesForUpdatedModule(socket, io, directory.id);
             }
         } catch (error: any) {
             reply(undefined, error.message);

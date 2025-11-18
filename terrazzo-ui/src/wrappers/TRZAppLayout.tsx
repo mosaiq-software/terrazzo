@@ -96,7 +96,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                             transitionDuration={trz.animationDuration}
                             opened={!sidebarCollapsed}
                             size="20px"
-                            p="5Spx"
+                            p="5px"
                             color="white"
                             onClick={() => {
                                 setSidebarCollapsed(!sidebarCollapsed);

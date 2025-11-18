@@ -23,7 +23,7 @@ export const registerBoardListeners = (socket: Socket, io: Server) => {
                 throw new Error('No board data provided');
             }
             const boardID = await addBoard(data.name, data.boardCode, data.parentId);
-            broadcastUniqueUpdatesForUpdatedModule(boardID, io);
+            await broadcastUniqueUpdatesForUpdatedModule(socket, io, boardID);
             reply(boardID);
         } catch (error: any) {
             console.error('Error creating board', error);
@@ -38,7 +38,7 @@ export const registerBoardListeners = (socket: Socket, io: Server) => {
             }
             await updateBoardFromPartial(data.id, data);
             broadcast<ServerSE.UPDATE_BOARD_FIELD>(socket, ServerSE.UPDATE_BOARD_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
-            broadcastUniqueUpdatesForUpdatedModule(data.id, io);
+            await broadcastUniqueUpdatesForUpdatedModule(socket, io, data.id);
         } catch (error: any) {
             console.error('Error updating board fields', error);
             reply(undefined, error.message);

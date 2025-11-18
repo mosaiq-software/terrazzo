@@ -63,12 +63,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
             <Menu.Dropdown>
                 <Menu.Label>Switch Organization</Menu.Label>
                 {trz.allOrganizations.map((org) => (
-                    <Menu.Item
-                        key={org.id}
-                        onClick={() => {
-                            navigate(`/org/${org.id}`);
-                        }}
-                    >
+                    <Menu.Item key={org.id}>
                         <Group
                             wrap="nowrap"
                             gap={8}

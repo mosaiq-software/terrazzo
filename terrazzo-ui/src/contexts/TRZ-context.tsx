@@ -87,7 +87,6 @@ const TRZProvider: React.FC<any> = ({ children }) => {
     useSocketListener<ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE>(
         ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE,
         (payload) => {
-            console.log('Received UPDATE_USERS_DIRECTORY_STRUCTURE', payload, userCtx.userData?.id, selectedOrganization?.id);
             if (payload.userId !== userCtx.userData?.id || payload.orgId !== selectedOrganization?.id) {
                 return;
             }

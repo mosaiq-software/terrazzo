@@ -6,6 +6,7 @@ import { FaChevronDown } from 'react-icons/fa';
 import { IoDocumentOutline } from 'react-icons/io5';
 import { MdOutlineViewKanban } from 'react-icons/md';
 import { useNavigate } from 'react-router';
+import { useLocation } from 'react-router-dom';
 
 interface DirectoryTreeItemProps {
     sidebarCollapsed: boolean;
@@ -15,9 +16,11 @@ interface DirectoryTreeItemProps {
 export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     const trz = useTRZ();
     const navigate = useNavigate();
+    const location = useLocation();
     const [collapsed, setCollapsed, deleteCollapsed] = useLocalStorage<boolean | undefined>({ key: `directory-tree-item-collapsed-${props.directoryListItem.moduleId}`, defaultValue: undefined });
 
-    const selected = window.location.pathname.includes(props.directoryListItem.moduleId);
+    const selected = location.pathname.includes(props.directoryListItem.moduleId);
+
     const handleClick = () => {
         if (props.directoryListItem.moduleType === TrzModuleType.Directory) {
             if (collapsed) {
