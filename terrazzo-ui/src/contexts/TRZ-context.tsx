@@ -72,12 +72,12 @@ const TRZProvider: React.FC<any> = ({ children }) => {
 
     const createOrg = async (orgName: string) => {
         try {
-            const ordId = await createOrganization(sockCtx, orgName);
-            if (!ordId) {
+            const orgId = await createOrganization(sockCtx, orgName);
+            if (!orgId) {
                 throw new Error('Organization creation failed');
             }
             const newOrg: OrganizationHeader = {
-                id: ordId,
+                id: orgId,
                 name: orgName,
                 archived: false,
                 createdAt: Date.now(),

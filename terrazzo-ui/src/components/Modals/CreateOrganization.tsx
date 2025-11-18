@@ -21,13 +21,23 @@ const CreateOrganization = (props: ContextModalProps<{ modalBody: string }>): Re
         const orgId = await trz.createOrganization(orgName);
         if (orgId) {
             trz.selectOrganization(orgId);
+            setOrgName('');
             navigate(`/org/${orgId.id}`);
+            handleClose();
         }
-        props.context.closeModal(props.id);
     }
 
+    const handleClose = () => {
+        props.context.closeModal(props.id);
+    };
+
     return (
-        <Container onKeyDown={getHotkeyHandler([['Enter', onSubmit]])}>
+        <Container
+            onKeyDown={getHotkeyHandler([
+                ['Enter', onSubmit],
+                ['Escape', handleClose],
+            ])}
+        >
             <Flex
                 direction="column"
                 justify="center"
