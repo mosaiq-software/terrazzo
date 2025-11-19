@@ -23,7 +23,7 @@ export const LabelsMenu = (props: LabelsMenuProps) => {
             withArrow
             arrowPosition="side"
             closeOnClickOutside={true}
-            trigger="hover"
+            trigger="click"
             closeDelay={200}
             opened={!trzCtx.boardData?.labels.length ? false : undefined}
         >

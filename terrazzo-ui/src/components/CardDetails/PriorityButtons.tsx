@@ -51,7 +51,7 @@ export const PriorityButtons = (props: PriorityButtonsProps): React.JSX.Element 
             withArrow
             arrowPosition="center"
             closeOnClickOutside={true}
-            trigger="hover"
+            trigger="click"
             closeDelay={200}
         >
             <Menu.Target>

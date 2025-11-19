@@ -21,7 +21,7 @@ export const AssigneeMenu = (props: AssigneeMenuProps) => {
             withArrow
             arrowPosition="side"
             closeOnClickOutside={true}
-            trigger="hover"
+            trigger="click"
             closeDelay={200}
         >
             <Menu.Target>
