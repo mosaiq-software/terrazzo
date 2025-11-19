@@ -46,7 +46,6 @@ const CardElement = (props: CardElementProps) => {
             radius="md"
             p="sm"
             shadow="md"
-            mih="85px"
             style={{
                 cursor: 'pointer',
                 marginInline: '5px',
@@ -124,9 +123,11 @@ const CardElement = (props: CardElementProps) => {
                             users={card.assignees}
                             maxUsers={3}
                         />
-                        <div style={{marginTop: '10px'}}>
-                            <PriorityChip priority={card.priority} size={"small"}/>
-                        </div>
+                        {card.priority && (
+                            <div style={{marginTop: '10px'}}>
+                                <PriorityChip priority={card.priority} size={"small"}/>
+                            </div>
+                        )}
                     </Group>
                 </React.Fragment>
             )}
