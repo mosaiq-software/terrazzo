@@ -113,7 +113,9 @@ const CardElement = (props: CardElementProps) => {
                             userSelect: 'none',
                         }}
                     >
-                        {getCardNumber(props.boardCode, card.cardNumber)}
+                        <div style={{"marginTop": '10px'}}>
+                            {getCardNumber(props.boardCode, card.cardNumber)}
+                        </div>
                     </Text>
                     <Group
                         justify="space-between"
