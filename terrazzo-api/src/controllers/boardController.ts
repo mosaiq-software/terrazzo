@@ -52,12 +52,8 @@ export async function addBoard(name: string, boardCode: string, parentId: Direct
         totalCards: 0,
     };
 
-    try {
-        await createBoard(newBoard);
-        return newBoard.id;
-    } catch (e) {
-        throw new Error('Failed to save board' + e);
-    }
+    await createBoard(newBoard);
+    return newBoard.id;
 }
 
 export async function updateBoardFromPartial(boardId: BoardId, partial: Partial<BoardHeader>) {

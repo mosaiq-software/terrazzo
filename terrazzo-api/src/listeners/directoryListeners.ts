@@ -1,7 +1,7 @@
 import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { createDirectory, getDirectory, updateDirectory } from '@trz-api/controllers/directoryController';
-import { broadcast } from '@trz-api/utils/socketUtils';
+import { broadcast, broadcastUniqueUpdatesForUpdatedModule } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerDirectoryListeners = (socket: Socket, io: Server) => {
@@ -18,6 +18,7 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
                 return;
             }
             broadcast(socket, ServerSE.UPDATE_DIRECTORY, directory, [getRoomCode(RoomType.DATA, directory.id)]);
+            await broadcastUniqueUpdatesForUpdatedModule(socket, io, directory.id);
         } catch (error: any) {
             reply(undefined, error.message);
         }
@@ -38,6 +39,7 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
             const directory = await getDirectory(data.id);
             if (directory) {
                 broadcast(socket, ServerSE.UPDATE_DIRECTORY, directory, [getRoomCode(RoomType.DATA, directory.id)]);
+                await broadcastUniqueUpdatesForUpdatedModule(socket, io, directory.id);
             }
         } catch (error: any) {
             reply(undefined, error.message);

@@ -9,10 +9,6 @@ ModulePermissionModel.init(
             type: DataTypes.STRING,
             primaryKey: true,
         },
-        orgId: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
         anyonePermissionLevel: {
             type: DataTypes.TINYINT,
             allowNull: true,

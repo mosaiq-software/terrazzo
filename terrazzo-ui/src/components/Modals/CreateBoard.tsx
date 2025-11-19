@@ -29,17 +29,15 @@ const CreateBoard = (props: ContextModalProps<{ modalBody: string; parentId: UID
             setErrorName('Enter a Title');
             return;
         }
-        if (boardName.length > 50) {
-            setErrorName('Max 50 characters');
-            return;
-        }
         try {
             const board = await createBoard(sockCtx, boardName, boardAbbreviation, props.innerProps.parentId);
+            setBoardName('');
+            setBoardAbbreviation('');
             navigate(`/board/${board}`);
+            handleClose();
         } catch (e) {
             notify(NoteType.BOARD_CREATION_ERROR, e);
         }
-        props.context.closeModal(props.id);
     }
 
     async function handleImportFromTrello() {
@@ -61,8 +59,17 @@ const CreateBoard = (props: ContextModalProps<{ modalBody: string; parentId: UID
         props.context.closeModal(props.id);
     }
 
+    const handleClose = () => {
+        props.context.closeModal(props.id);
+    };
+
     return (
-        <Container onKeyDown={getHotkeyHandler([['Enter', onSubmit]])}>
+        <Container
+            onKeyDown={getHotkeyHandler([
+                ['Enter', onSubmit],
+                ['Escape', handleClose],
+            ])}
+        >
             <Flex
                 direction="column"
                 justify="center"
