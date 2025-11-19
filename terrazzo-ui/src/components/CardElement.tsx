@@ -5,7 +5,7 @@ import { AvatarRow } from '@trz/components/AvatarRow';
 import { PriorityChip } from '@trz/components/CardDetails/PriorityButtons';
 import { getCardNumber } from '@trz/util/boardUtils';
 import { useContextMenu } from 'mantine-contextmenu';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCard } from '../hooks/useCard';
 import { CardContextMenu } from './CardContextMenu';
 import { LabelDisplay } from './CardDetails/LabelsMenu';
@@ -22,12 +22,22 @@ const CardElement = (props: CardElementProps) => {
     const card = useCard(props.cardId, props.dragging || props.isOverlay, inViewport);
     const { showContextMenu } = useContextMenu();
 
+    const [hovered, setHovered] = useState(false);
+
     const onOpenCardModal = () => {
         if (!card || props.dragging || props.isOverlay) {
             return;
         }
         props.onClick();
     };
+
+    useEffect(() => {
+        if (props.dragging || props.isOverlay) {
+            setHovered(true);
+        } else {
+            setHovered(false);
+        }
+    }, [props.dragging, props.isOverlay]);
 
     return (
         <Paper
@@ -41,7 +51,10 @@ const CardElement = (props: CardElementProps) => {
                 cursor: 'pointer',
                 marginInline: '5px',
                 width: '230px',
-                transition: `transform .1s, box-shadow .1s, filter 0ms linear ${props.dragging ? '0ms' : '225ms'}`,
+                backgroundColor: hovered ? '#2a2c31' : '#1e2022',
+                transition: `transform .1s, background-color .15s ease, box-shadow .1s, filter 0ms linear ${
+                    props.dragging ? '0ms' : '225ms'
+                }`,
                 ...(props.dragging
                     ? props.isOverlay
                         ? {
@@ -56,6 +69,12 @@ const CardElement = (props: CardElementProps) => {
                               zIndex: 11,
                           }
                     : undefined),
+            }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => {
+                if (!props.dragging && !props.isOverlay) {
+                    setHovered(false);
+                }
             }}
             onClick={onOpenCardModal}
             onContextMenuCapture={showContextMenu((close) => (
