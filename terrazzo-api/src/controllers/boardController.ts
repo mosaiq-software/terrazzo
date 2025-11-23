@@ -1,23 +1,27 @@
 import { TrelloExportType, TrelloLabelColorsMap } from '@mosaiq/terrazzo-common/trelloTypes';
-import { Board, BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, ListId } from '@mosaiq/terrazzo-common/types';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, ListId, TrzModuleType } from '@mosaiq/terrazzo-common/types';
 import { addList, getListAndCardIdsOnBoard, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
-import { createBoard, getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
+import { BoardModelType, createBoard, getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
 import { createLabelOnBoard, deleteLabel, deleteLabelingOnCardsByLabelId, getLabelById, getLabelsByBoardId, updateLabel } from '@trz-api/persistence/labelPersistence';
+import { getModuleByIdDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
 import { getMembersInOrg } from './membershipController';
+import { createNewModule } from './moduleController';
 
 export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefined> {
-    const boardHeader = await getBoardById(boardID);
-    if (boardHeader == null) {
+    const boardModel = await getBoardById(boardID);
+    const moduleModel = await getModuleByIdDb(boardID);
+    if (!boardModel || !moduleModel) {
         throw new Error('Board not found');
     }
 
-    const projectMembers = await getMembersInOrg(boardHeader.parentId);
+    const projectMembers = await getMembersInOrg(moduleModel.parentId);
 
     try {
         const board: BoardRes = {
-            ...boardHeader,
+            ...moduleModel,
+            ...boardModel,
+            type: TrzModuleType.Board,
             lists: await getListAndCardIdsOnBoard(boardID, false),
             labels: await getLabelsByBoardId(boardID),
             members: projectMembers,
@@ -36,35 +40,20 @@ export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefine
  * @param boardCode
  */
 export async function addBoard(name: string, boardCode: string, parentId: DirectoryId) {
-    if (name.length > 50) {
-        throw new Error('Title must be 50 characters or less');
-    }
-    const newBoard: Board = {
-        id: crypto.randomUUID(),
-        parentId,
+    const boardModule = await createNewModule(name, parentId, TrzModuleType.Board);
+    const boardModel: BoardModelType = {
+        id: boardModule.id,
         boardCode,
-        name,
-        lists: [],
-        labels: [],
-        members: [],
-        archived: false,
-        createdAt: Date.now(),
         totalCards: 0,
     };
-
-    await createBoard(newBoard);
-    return newBoard.id;
+    await createBoard(boardModel);
+    return boardModel.id;
 }
 
 export async function updateBoardFromPartial(boardId: BoardId, partial: Partial<BoardHeader>) {
-    const updatingBoard = await getBoardById(boardId);
-    if (updatingBoard == null) {
-        throw new Error('Board not found');
-    }
-
-    const updated = updateBaseFromPartial(updatingBoard, partial);
     try {
-        await updateBoard(updated);
+        await updateBoard(boardId, partial);
+        await updateModuleDb(boardId, partial);
     } catch (e: any) {
         throw new Error('Failed to update board ' + e);
     }

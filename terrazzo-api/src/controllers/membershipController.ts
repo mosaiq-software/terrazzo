@@ -1,11 +1,7 @@
-import { DirectoryList, DirectoryListItem, MembershipRecord, OrganizationId, PermissionLevel, TrzModule, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common/types';
-import { getBoardById } from '@trz-api/persistence/boardPersistence';
-import { getDirectoryByIdDb } from '@trz-api/persistence/directoryPersistence';
-import { getDocumentById } from '@trz-api/persistence/documentPersistence';
-import { getModulePermissionByModuleId } from '@trz-api/persistence/modulePermissionPersistence';
+import { DirectoryList, ModuleHeader, OrganizationId, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common/types';
+import { getModuleByIdDb, getModulesByParentIdDb } from '@trz-api/persistence/modulePersistence';
 import { getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
-import { getModulesInDirectory } from './directoryController';
 import { populateMemberships } from './userController';
 
 export const getMembersInOrg = async (orgId: OrganizationId) => {
@@ -33,169 +29,136 @@ export const getModulePermissionsForUser = async (userId: UserId, moduleId: UID)
     // 2. Is this user a member of the organization that owns this module? If so, return org-level permission. If unset, continue.
     // 3. If there is an "Anyone in organization" permission, return that. If unset, check the parent directory of this module and repeat.
     // If the top level module (the organization) is reached: If the user is a member of the org, return their org-level permission. If not, no access.
-
-    const orgId = await getOrganizationModuleIsIn(moduleId);
+    const module = await getModuleByIdDb(moduleId);
+    if (!module) {
+        throw new Error(`Module ${moduleId} not found`);
+    }
     const usersMembershipRecords = await getOrganizationMembershipsForUser(userId);
-    const orgMembershipRecord = usersMembershipRecords.find((rec) => rec.orgId === orgId) || null;
+    const orgMembershipRecord = usersMembershipRecords.find((rec) => rec.orgId === module.orgId) || null;
     return await recursiveGetModulePermissionsForUser(userId, moduleId, orgMembershipRecord);
 };
 
-const recursiveGetModulePermissionsForUser = async (userId: UserId, moduleId: UID, orgMembershipRecord: MembershipRecord | null): Promise<PermissionLevel | null> => {
-    const modulePerms = await getModulePermissionByModuleId(moduleId);
+// const recursiveGetModulePermissionsForUser = async (userId: UserId, moduleId: UID, orgMembershipRecord: MembershipRecord | null): Promise<PermissionLevel | null> => {
+//     const module = await getModuleByIdDb(moduleId);
 
-    if (modulePerms) {
-        // If the user has specific perms, return those
-        if (Object.keys(modulePerms.userPermissionLevels).includes(userId)) {
-            return modulePerms.userPermissionLevels[userId];
-        }
+//     if (module) {
+//         // If the user has specific perms, return those
+//         if (Object.keys(module.userPermissionLevels).includes(userId)) {
+//             return module.userPermissionLevels[userId];
+//         }
 
-        // If the user is a member of the org, return org-level perms
-        if (orgMembershipRecord && modulePerms.orgPermissionLevel !== null) {
-            return modulePerms.orgPermissionLevel;
-        }
+//         // If the user is a member of the org, return org-level perms
+//         if (orgMembershipRecord && module.orgPermissionLevel !== null) {
+//             return module.orgPermissionLevel;
+//         }
 
-        // If the module has anyone level perms, return those
-        if (modulePerms.anyonePermissionLevel !== null) {
-            return modulePerms.anyonePermissionLevel;
-        }
-    }
+//         // If the module has anyone level perms, return those
+//         if (module.anyonePermissionLevel !== null) {
+//             return module.anyonePermissionLevel;
+//         }
+//     } else {
+//         const orgMaybe = await getOrgById(moduleId);
+//         if (orgMaybe) {
+//             // If the module is an organization, we've reached the top level
+//             // Get the user's membership in the org and return that permission level
+//             if (!orgMembershipRecord) {
+//                 return null;
+//             }
+//             return orgMembershipRecord.permissionLevel;
+//         }
+//         throw new Error(`Module ${moduleId} not found`);
+//     }
 
-    // if there are no explicit perms set (all are null), check parent module to inherit from
-    const unknownModule = await getUnknownModule(moduleId);
-    if (!unknownModule) {
-        throw new Error(`Module ${moduleId} not found`);
-    }
+//     // If its not an org, get the parent module ID
+//     const parentId = module.parentId;
+//     if (!parentId) {
+//         throw new Error(`Module ${moduleId} has no parent module to inherit permissions from`);
+//     }
 
-    // If the module is an organization, we've reached the top level
-    // Get the user's membership in the org and return that permission level
-    if (unknownModule.type === TrzModuleType.Organization) {
-        // User is not a member of the org, no access
-        if (!orgMembershipRecord) {
-            return null;
-        }
-        return orgMembershipRecord.permissionLevel;
-    }
-
-    // If its not an org, get the parent module ID
-    const parentId = unknownModule.module?.parentId;
-    if (!parentId) {
-        throw new Error(`Module ${moduleId} has no parent module to inherit permissions from`);
-    }
-
-    const parentPerms = await recursiveGetModulePermissionsForUser(userId, parentId, orgMembershipRecord);
-    return parentPerms;
-};
-
-/**
- * A module can be any of a directory, document, or board.
- */
-export const getUnknownModule = async (moduleId: UID) => {
-    // Start with directories as that is the most likely type when performing membership checks
-    const dir = await getDirectoryByIdDb(moduleId);
-    if (dir) {
-        return { type: TrzModuleType.Directory, module: dir };
-    }
-    const doc = await getDocumentById(moduleId);
-    if (doc) {
-        return { type: TrzModuleType.Document, module: doc };
-    }
-    const board = await getBoardById(moduleId);
-    if (board) {
-        return { type: TrzModuleType.Board, module: board };
-    }
-    const org = await getOrgById(moduleId);
-    if (org) {
-        return { type: TrzModuleType.Organization, module: undefined };
-    }
-    return null;
-};
+//     const parentPerms = await recursiveGetModulePermissionsForUser(userId, parentId, orgMembershipRecord);
+//     return parentPerms;
+// };
 
 export const getUserDirectoryStructure = async (userId: UserId, orgId: OrganizationId): Promise<DirectoryList | undefined> => {
     const org = await getOrgById(orgId);
     if (!org) {
+        console.error(`Org ${orgId} not found`);
         return undefined;
     }
 
-    const directoryList: DirectoryList = [];
-    const orgModules = await getModulesInDirectory(orgId);
-    for (const module of orgModules) {
-        const item = await buildDirectoryListItem(userId, module);
-        if (item) {
-            directoryList.push(item);
-        }
-    }
-
-    return directoryList;
-};
-
-const buildDirectoryListItem = async (userId: UserId, module: TrzModule): Promise<DirectoryListItem | null> => {
-    const moduleId = getModuleId(module);
-    const permission = await getModulePermissionsForUser(userId, moduleId);
-
-    if (permission === null) {
-        return null;
-    }
-
-    // Recursively build directory structure
-    if (module.type === TrzModuleType.Directory) {
-        const subModules = await getModulesInDirectory(module.directory.id);
-        const subItems: DirectoryListItem[] = [];
-
-        for (const subModule of subModules) {
-            const subItem = await buildDirectoryListItem(userId, subModule);
-            if (subItem) {
-                subItems.push(subItem);
-            }
-        }
-
-        return {
-            moduleId: module.directory.id,
-            moduleName: module.directory.name,
-            moduleType: TrzModuleType.Directory,
-            subItems,
-        };
-    } else if (module.type === TrzModuleType.Document) {
-        return {
-            moduleId: module.document.id,
-            moduleName: module.document.title,
-            moduleType: TrzModuleType.Document,
-        };
-    } else if (module.type === TrzModuleType.Board) {
-        return {
-            moduleId: module.board.id,
-            moduleName: module.board.name,
-            moduleType: TrzModuleType.Board,
-        };
-    }
-
-    return null;
-};
-
-export const getModuleId = (module: TrzModule): UID => {
-    switch (module.type) {
-        case TrzModuleType.Directory:
-            return module.directory.id;
-        case TrzModuleType.Document:
-            return module.document.id;
-        case TrzModuleType.Board:
-            return module.board.id;
-    }
+    const fullDirectoryStructure = await recursivelyGetDirectoryModules(orgId);
+    const trimmedDirectory = await trimOrgDirectoryStructureForUser(userId, fullDirectory);
+    return trimmedDirectory;
 };
 
 /**
- * recursively finds the organization a module is in
+ * Get the full directory structure regardless of permissions using full modules
  */
-export const getOrganizationModuleIsIn = async (moduleId: UID): Promise<OrganizationId> => {
-    const unknownModule = await getUnknownModule(moduleId);
-    if (!unknownModule) {
-        throw new Error(`Module ${moduleId} not found`);
+interface ModuleWithChildren extends ModuleHeader {
+    children?: ModuleWithChildren[];
+}
+const recursivelyGetDirectoryModules = async (parentId: UID): Promise<ModuleWithChildren[]> => {
+    const modulesList: ModuleWithChildren[] = [];
+    const modules = await getModulesByParentIdDb(parentId);
+    for (const module of modules) {
+        if (module.type === TrzModuleType.Directory) {
+            const subItems = await recursivelyGetDirectoryModules(module.id);
+            const dirModule: ModuleWithChildren = {
+                ...module,
+                children: subItems,
+            };
+            modulesList.push(dirModule);
+        } else {
+            modulesList.push(module);
+        }
     }
-    if (unknownModule.type === TrzModuleType.Organization) {
-        return moduleId as OrganizationId;
-    }
-    const parentId = unknownModule.module?.parentId;
-    if (!parentId) {
-        throw new Error(`Module ${moduleId} has no parent module to inherit from`);
-    }
-    return await getOrganizationModuleIsIn(parentId);
+    return modulesList;
 };
+
+/**
+ * Trim an org directory structure to only include modules the user has access to
+ */
+const trimOrgDirectoryStructureForUser = async (userId: UserId, dirStructure: ModuleWithChildren[]): Promise<DirectoryList> => {};
+
+// const buildDirectoryListItem = async (userId: UserId, module: TrzModule): Promise<DirectoryListItem | null> => {
+//     const moduleId = module.id;
+//     const permission = await getModulePermissionsForUser(userId, moduleId);
+
+//     if (permission === null) {
+//         return null;
+//     }
+
+//     // Recursively build directory structure
+//     if (module.type === TrzModuleType.Directory) {
+//         const subModules = await getModulesInDirectory(module.id);
+//         const subItems: DirectoryListItem[] = [];
+
+//         for (const subModule of subModules) {
+//             const subItem = await buildDirectoryListItem(userId, subModule);
+//             if (subItem) {
+//                 subItems.push(subItem);
+//             }
+//         }
+
+//         return {
+//             moduleId: module.id,
+//             moduleName: module.name,
+//             moduleType: TrzModuleType.Directory,
+//             subItems,
+//         };
+//     } else if (module.type === TrzModuleType.Document) {
+//         return {
+//             moduleId: module.id,
+//             moduleName: module.name,
+//             moduleType: TrzModuleType.Document,
+//         };
+//     } else if (module.type === TrzModuleType.Board) {
+//         return {
+//             moduleId: module.id,
+//             moduleName: module.name,
+//             moduleType: TrzModuleType.Board,
+//         };
+//     }
+
+//     return null;
+// };

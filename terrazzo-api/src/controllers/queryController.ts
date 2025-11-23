@@ -1,12 +1,10 @@
 import { DatapointType, OrganizationId, QueryableDatapoint, QueryResult, UID, UserId } from '@mosaiq/terrazzo-common/types';
-import { getBoardsByParentId } from '@trz-api/persistence/boardPersistence';
 import { getCardsByListId } from '@trz-api/persistence/cardPersistence';
 import { getListsByBoardId } from '@trz-api/persistence/listPersistence';
 import { getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import Fuse from 'fuse.js';
-import { getAllDocumentsForParent } from './documentController';
 import { remirrorYjsToPlaintext } from './textBlockController';
 
 /** Cache each search session so that we only index once per use of the searchbar */

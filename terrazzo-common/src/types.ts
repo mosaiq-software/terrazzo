@@ -29,13 +29,9 @@ export interface Organization extends OrganizationHeader {
     modules: TrzModule[];
 }
 
-export interface BoardHeader {
-    id: BoardId;
-    parentId: DirectoryId;
+export interface BoardHeader extends ModuleHeader {
+    type: TrzModuleType.Board;
     boardCode: string;
-    name: string;
-    archived: boolean;
-    createdAt: number;
     totalCards: number;
 }
 export interface Board extends BoardHeader {
@@ -116,13 +112,6 @@ export interface Member {
     record: MembershipRecord;
 }
 
-export interface PermissionRecord {
-    moduleId: DirectoryId | DocumentId | BoardId;
-    anyonePermissionLevel: PermissionLevel | null;
-    orgPermissionLevel: PermissionLevel | null;
-    userPermissionLevels: Record<UserId, PermissionLevel>;
-}
-
 export interface InviteRecord {
     id: InviteId;
     toUser: UserId;
@@ -174,23 +163,15 @@ export interface QueryResult extends QueryableDatapoint {
     score: number;
 }
 
-export interface DocumentHeader {
-    id: DocumentId;
-    parentId: DirectoryId;
-    title: string;
+export interface DocumentHeader extends ModuleHeader {
+    type: TrzModuleType.Document;
     textBlockId: TextBlockId;
-    archived: boolean;
-    createdAt: number;
     lastModifiedAt: number;
     lastModifiedByUserId: UserId;
 }
 
-export interface DirectoryHeader {
-    id: DirectoryId;
-    parentId: DirectoryId | OrganizationId;
-    name: string;
-    archived: boolean;
-    createdAt: number;
+export interface DirectoryHeader extends ModuleHeader {
+    type: TrzModuleType.Directory;
 }
 export interface Directory extends DirectoryHeader {
     modules: TrzModule[];
@@ -204,19 +185,7 @@ export enum TrzModuleType {
     /** Technically an org is just a top-level module, but we should never use it as one */
     Organization = 'organization',
 }
-interface TrzDirectoryModule {
-    type: TrzModuleType.Directory;
-    directory: DirectoryHeader;
-}
-interface TrzDocumentModule {
-    type: TrzModuleType.Document;
-    document: DocumentHeader;
-}
-interface TrzBoardModule {
-    type: TrzModuleType.Board;
-    board: BoardHeader;
-}
-export type TrzModule = TrzDirectoryModule | TrzDocumentModule | TrzBoardModule;
+export type TrzModule = DirectoryHeader | DocumentHeader | BoardHeader;
 
 interface BaseDirectoryListItem {
     moduleId: UID;
@@ -232,3 +201,16 @@ interface OtherDirectoryListItem extends BaseDirectoryListItem {
 
 export type DirectoryListItem = DirectoryDirectoryListItem | OtherDirectoryListItem;
 export type DirectoryList = DirectoryListItem[];
+
+export interface ModuleHeader {
+    id: UID;
+    parentId: UID;
+    name: string;
+    archived: boolean;
+    createdAt: number;
+    type: TrzModuleType;
+    orgId: OrganizationId;
+    anyonePermissionLevel: PermissionLevel | null;
+    orgPermissionLevel: PermissionLevel | null;
+    userPermissionLevels: Record<UserId, PermissionLevel>;
+}
