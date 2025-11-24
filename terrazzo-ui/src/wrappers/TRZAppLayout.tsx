@@ -138,10 +138,12 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                 <Divider />
                 <OrganizationSelectorMenu sidebarCollapsed={sidebarCollapsed} />
                 <Divider />
-                <DirectoryTree
-                    sidebarCollapsed={sidebarCollapsed}
-                    directoryList={trz.userDirectoryStructure ?? []}
-                />
+                {trz.userDirectoryStructure && (
+                    <DirectoryTree
+                        sidebarCollapsed={sidebarCollapsed}
+                        directoryTreeRoot={trz.userDirectoryStructure}
+                    />
+                )}
             </Stack>
             <Stack
                 flex={1}

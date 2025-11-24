@@ -1,7 +1,7 @@
 import { useLocalStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardRes, DirectoryList, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
+import { BoardRes, ModuleHeaderWithChildren, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { createOrganization, getOrganizationsForUser, getUserDirectoryStructure } from '@trz/emitters';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
@@ -18,7 +18,7 @@ export type TRZContextType = {
     selectedOrganization: OrganizationHeader | undefined;
     selectOrganization: (org: OrganizationHeader) => void;
     allOrganizations: OrganizationHeader[];
-    userDirectoryStructure: DirectoryList | undefined;
+    userDirectoryStructure: ModuleHeaderWithChildren | undefined;
     createOrganization: (orgName: string) => Promise<OrganizationHeader | undefined>;
 };
 
@@ -33,7 +33,7 @@ const TRZProvider: React.FC<any> = ({ children }) => {
     const [selectedOrganization, setSelectedOrganization] = useState<OrganizationHeader | undefined>(undefined);
     const [allOrganizations, setAllOrganizations] = useState<OrganizationHeader[]>([]);
     const [lastSelectedOrgId, setLastSelectedOrgId] = useLocalStorage<OrganizationId | undefined>({ key: LocalStorageKey.LAST_SELECTED_ORG, defaultValue: undefined });
-    const [userDirectoryStructure, setUserDirectoryStructure] = useState<DirectoryList | undefined>(undefined);
+    const [userDirectoryStructure, setUserDirectoryStructure] = useState<ModuleHeaderWithChildren | undefined>(undefined);
     useRoom(RoomType.DATA, selectedOrganization?.id, false);
 
     useEffect(() => {

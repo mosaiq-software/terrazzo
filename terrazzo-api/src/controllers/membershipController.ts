@@ -1,5 +1,5 @@
-import { DirectoryList, ModuleHeader, OrganizationId, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common/types';
-import { getModuleByIdDb, getModulesByParentIdDb } from '@trz-api/persistence/modulePersistence';
+import { MembershipRecord, ModuleHeader, ModuleHeaderWithChildren, OrganizationHeader, OrganizationId, OrgMembershipLevel, PermissionLevel, PermissionRecord, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common/types';
+import { getModulesByOrgIdDb } from '@trz-api/persistence/modulePersistence';
 import { getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
 import { populateMemberships } from './userController';
@@ -21,144 +21,163 @@ export const getOrgsForUser = async (userId: UserId) => {
     return orgs.filter((o) => !!o);
 };
 
-export const getModulePermissionsForUser = async (userId: UserId, moduleId: UID) => {
-    // Each module at least 2 perms, "Anyone on the internet", "Anyone in organization", ..."Specific users"
-    // These can be one of "undefined" (inherit from parent), "view", "edit", "admin"
-    // for a user, check:
-    // 1. Does this user have a specific permission set on this module? If so, return that. If unset, continue.
-    // 2. Is this user a member of the organization that owns this module? If so, return org-level permission. If unset, continue.
-    // 3. If there is an "Anyone in organization" permission, return that. If unset, check the parent directory of this module and repeat.
-    // If the top level module (the organization) is reached: If the user is a member of the org, return their org-level permission. If not, no access.
-    const module = await getModuleByIdDb(moduleId);
-    if (!module) {
-        throw new Error(`Module ${moduleId} not found`);
-    }
-    const usersMembershipRecords = await getOrganizationMembershipsForUser(userId);
-    const orgMembershipRecord = usersMembershipRecords.find((rec) => rec.orgId === module.orgId) || null;
-    return await recursiveGetModulePermissionsForUser(userId, moduleId, orgMembershipRecord);
+/**
+ * Returns the maximum of two permission levels, treating undefined or null as PermissionLevel.NONE.
+ */
+const maxPermissionLevel = (levelA: PermissionLevel | undefined | null, levelB: PermissionLevel | undefined | null) => {
+    const a = levelA ?? PermissionLevel.NONE;
+    const b = levelB ?? PermissionLevel.NONE;
+    return Math.max(a, b);
 };
 
-// const recursiveGetModulePermissionsForUser = async (userId: UserId, moduleId: UID, orgMembershipRecord: MembershipRecord | null): Promise<PermissionLevel | null> => {
-//     const module = await getModuleByIdDb(moduleId);
+/**
+ * Overlays childPermissions on top of parentPermissions, returning the merged result.
+ * For each permission level (anyone, org, user), the higher of the two levels is taken.
+ */
+const overlayPermissionLevels = (parentPermissions: PermissionRecord, childPermissions: PermissionRecord) => {
+    const anyonePermissionLevel = maxPermissionLevel(parentPermissions.anyonePermissionLevel, childPermissions.anyonePermissionLevel);
+    const orgPermissionLevel = maxPermissionLevel(parentPermissions.orgPermissionLevel, childPermissions.orgPermissionLevel);
+    const userPermissionLevels: Record<UserId, PermissionLevel> = { ...childPermissions.userPermissionLevels };
+    for (const [userId, level] of Object.entries(parentPermissions.userPermissionLevels)) {
+        // explicitly cast userId to UserId type because for some reason TS infers the record iterator key as string
+        const existingLevel = userPermissionLevels[userId as UserId];
+        userPermissionLevels[userId as UserId] = maxPermissionLevel(level, existingLevel);
+    }
+    const mergedPermissions: PermissionRecord = {
+        anyonePermissionLevel,
+        orgPermissionLevel,
+        userPermissionLevels,
+    };
+    return mergedPermissions;
+};
 
-//     if (module) {
-//         // If the user has specific perms, return those
-//         if (Object.keys(module.userPermissionLevels).includes(userId)) {
-//             return module.userPermissionLevels[userId];
-//         }
+/**
+ * Calculates the effective permissions for all modules in the org, starting from the root module.
+ * Effective permissions are calculated by overlaying parent module permissions onto child modules.
+ */
+const calculateEffectivePermissions = (allModules: ModuleHeader[], rootOfAllModules: ModuleHeader) => {
+    // So that we dont need to filter every time, cache child modules by parentId
+    const moduleParentMap: Record<UID, ModuleHeader[]> = {};
+    for (const mod of allModules) {
+        if (!moduleParentMap[mod.parentId]) {
+            moduleParentMap[mod.parentId] = [];
+        }
+        moduleParentMap[mod.parentId].push(mod);
+    }
 
-//         // If the user is a member of the org, return org-level perms
-//         if (orgMembershipRecord && module.orgPermissionLevel !== null) {
-//             return module.orgPermissionLevel;
-//         }
+    /**
+     * Recursively calculates effective permissions for child modules given a parent module.
+     */
+    const recursivelyCalculateEffectivePermissions = (parentModule: ModuleHeader): ModuleHeaderWithChildren[] => {
+        const childModules = moduleParentMap[parentModule.id] || [];
+        const updatedChildModules: ModuleHeaderWithChildren[] = [];
+        for (const childModule of childModules) {
+            const mergedPermissions = overlayPermissionLevels(parentModule, childModule);
+            const updatedChildModule: ModuleHeaderWithChildren = {
+                ...childModule,
+                anyonePermissionLevel: mergedPermissions.anyonePermissionLevel,
+                orgPermissionLevel: mergedPermissions.orgPermissionLevel,
+                userPermissionLevels: mergedPermissions.userPermissionLevels,
+            };
+            updatedChildModule.children = recursivelyCalculateEffectivePermissions(updatedChildModule);
+            updatedChildModules.push(updatedChildModule);
+        }
+        return updatedChildModules;
+    };
+    const effectiveModules = recursivelyCalculateEffectivePermissions(rootOfAllModules);
+    return effectiveModules;
+};
 
-//         // If the module has anyone level perms, return those
-//         if (module.anyonePermissionLevel !== null) {
-//             return module.anyonePermissionLevel;
-//         }
-//     } else {
-//         const orgMaybe = await getOrgById(moduleId);
-//         if (orgMaybe) {
-//             // If the module is an organization, we've reached the top level
-//             // Get the user's membership in the org and return that permission level
-//             if (!orgMembershipRecord) {
-//                 return null;
-//             }
-//             return orgMembershipRecord.permissionLevel;
-//         }
-//         throw new Error(`Module ${moduleId} not found`);
-//     }
+/**
+ * Builds the full directory tree for the org, calculating effective permissions for all modules.
+ * An "Effective Permission" is the highest permission a user could have on a module, considering inherited permissions from parent modules.
+ */
+const getOrgFullDirectoryTree = async (org: OrganizationHeader, orgMembershipRecord: MembershipRecord[]): Promise<ModuleHeaderWithChildren> => {
+    // get all admins in the org and give them ADMIN permissions on the root directory
+    const orgAdminRecords = orgMembershipRecord.filter((rec) => rec.permissionLevel === OrgMembershipLevel.ADMIN);
+    const userPermissionLevels: Record<UserId, PermissionLevel> = {};
+    for (const rec of orgAdminRecords) {
+        userPermissionLevels[rec.userId] = PermissionLevel.ADMIN;
+    }
+    const orgFakeModuleHeader: ModuleHeader = {
+        id: org.id,
+        parentId: '-----',
+        name: org.name,
+        archived: false,
+        createdAt: org.createdAt,
+        orgId: org.id,
+        type: TrzModuleType.Organization,
+        anyonePermissionLevel: null,
+        orgPermissionLevel: null,
+        userPermissionLevels: userPermissionLevels,
+    };
+    const allModules = await getModulesByOrgIdDb(org.id);
+    const effectiveModules = calculateEffectivePermissions(allModules, orgFakeModuleHeader);
+    return { ...orgFakeModuleHeader, children: effectiveModules };
+};
 
-//     // If its not an org, get the parent module ID
-//     const parentId = module.parentId;
-//     if (!parentId) {
-//         throw new Error(`Module ${moduleId} has no parent module to inherit permissions from`);
-//     }
+/**
+ * Trims the directory tree to only include modules the user has at least VIEW permission on.
+ * @param rootModule The root of the directory tree to trim
+ * @param userId The ID of the user for whom the tree is being trimmed
+ * @param isInOrg Whether the user is a member of the organization
+ * @returns The trimmed directory tree, or null if the user has no access to the root module
+ */
+const trimDirectoryTreeForUser = (rootModule: ModuleHeaderWithChildren, userId: UserId, isInOrg: boolean): ModuleHeaderWithChildren | null => {
+    /**
+     * Determines if the user has at least VIEW permission on the given module
+     */
+    const userHasAccess = (module: ModuleHeaderWithChildren): boolean => {
+        const userLevel = module.userPermissionLevels[userId] ?? PermissionLevel.NONE;
+        const orgLevel = isInOrg ? (module.orgPermissionLevel ?? PermissionLevel.NONE) : PermissionLevel.NONE;
+        const anyoneLevel = module.anyonePermissionLevel ?? PermissionLevel.NONE;
+        const maxLevel = Math.max(userLevel, orgLevel, anyoneLevel);
+        return maxLevel >= PermissionLevel.VIEW;
+    };
 
-//     const parentPerms = await recursiveGetModulePermissionsForUser(userId, parentId, orgMembershipRecord);
-//     return parentPerms;
-// };
+    /**
+     * Recursively trims the directory tree for the user
+     */
+    const recursivelyTrim = (module: ModuleHeaderWithChildren): ModuleHeaderWithChildren | null => {
+        if (!userHasAccess(module)) {
+            return null;
+        }
+        if (!module.children || module.children.length === 0) {
+            return { ...module, children: [] };
+        }
+        const trimmedChildren: ModuleHeaderWithChildren[] = [];
+        for (const child of module.children) {
+            const trimmedChild = recursivelyTrim(child);
+            if (trimmedChild) {
+                trimmedChildren.push(trimmedChild);
+            }
+        }
+        return { ...module, children: trimmedChildren };
+    };
+    return recursivelyTrim(rootModule);
+};
 
-export const getUserDirectoryStructure = async (userId: UserId, orgId: OrganizationId): Promise<DirectoryList | undefined> => {
+/**
+ * For each userId in userIds, returns the org directory tree trimmed to only include modules they have at least VIEW permission on.
+ * This handles multiple users efficiently by calculating the full effective permission tree once, and then trimming it for each user.
+ */
+export const getOrgDirectoryTreeForUsers = async (orgId: OrganizationId, userIds: UserId[]): Promise<Record<UserId, ModuleHeaderWithChildren | null>> => {
+    const dedupedInputUserIds = Array.from(new Set(userIds));
     const org = await getOrgById(orgId);
     if (!org) {
-        console.error(`Org ${orgId} not found`);
-        return undefined;
+        throw new Error('Org not found');
     }
-
-    const fullDirectoryStructure = await recursivelyGetDirectoryModules(orgId);
-    const trimmedDirectory = await trimOrgDirectoryStructureForUser(userId, fullDirectory);
-    return trimmedDirectory;
+    const orgMembershipRecords = await getOrganizationMembershipsForOrg(orgId);
+    const orgTree = await getOrgFullDirectoryTree(org, orgMembershipRecords);
+    const outputMap: Record<UserId, ModuleHeaderWithChildren | null> = {};
+    for (const userId of dedupedInputUserIds) {
+        const isInOrg = orgMembershipRecords.some((rec) => rec.userId === userId);
+        const trimmedTree = trimDirectoryTreeForUser(orgTree, userId, isInOrg);
+        outputMap[userId] = trimmedTree;
+    }
+    return outputMap;
 };
 
-/**
- * Get the full directory structure regardless of permissions using full modules
- */
-interface ModuleWithChildren extends ModuleHeader {
-    children?: ModuleWithChildren[];
-}
-const recursivelyGetDirectoryModules = async (parentId: UID): Promise<ModuleWithChildren[]> => {
-    const modulesList: ModuleWithChildren[] = [];
-    const modules = await getModulesByParentIdDb(parentId);
-    for (const module of modules) {
-        if (module.type === TrzModuleType.Directory) {
-            const subItems = await recursivelyGetDirectoryModules(module.id);
-            const dirModule: ModuleWithChildren = {
-                ...module,
-                children: subItems,
-            };
-            modulesList.push(dirModule);
-        } else {
-            modulesList.push(module);
-        }
-    }
-    return modulesList;
+export const getOrgDirectoryTreeForUser = async (orgId: OrganizationId, userId: UserId): Promise<ModuleHeaderWithChildren | null> => {
+    return (await getOrgDirectoryTreeForUsers(orgId, [userId]))[userId];
 };
-
-/**
- * Trim an org directory structure to only include modules the user has access to
- */
-const trimOrgDirectoryStructureForUser = async (userId: UserId, dirStructure: ModuleWithChildren[]): Promise<DirectoryList> => {};
-
-// const buildDirectoryListItem = async (userId: UserId, module: TrzModule): Promise<DirectoryListItem | null> => {
-//     const moduleId = module.id;
-//     const permission = await getModulePermissionsForUser(userId, moduleId);
-
-//     if (permission === null) {
-//         return null;
-//     }
-
-//     // Recursively build directory structure
-//     if (module.type === TrzModuleType.Directory) {
-//         const subModules = await getModulesInDirectory(module.id);
-//         const subItems: DirectoryListItem[] = [];
-
-//         for (const subModule of subModules) {
-//             const subItem = await buildDirectoryListItem(userId, subModule);
-//             if (subItem) {
-//                 subItems.push(subItem);
-//             }
-//         }
-
-//         return {
-//             moduleId: module.id,
-//             moduleName: module.name,
-//             moduleType: TrzModuleType.Directory,
-//             subItems,
-//         };
-//     } else if (module.type === TrzModuleType.Document) {
-//         return {
-//             moduleId: module.id,
-//             moduleName: module.name,
-//             moduleType: TrzModuleType.Document,
-//         };
-//     } else if (module.type === TrzModuleType.Board) {
-//         return {
-//             moduleId: module.id,
-//             moduleName: module.name,
-//             moduleType: TrzModuleType.Board,
-//         };
-//     }
-
-//     return null;
-// };

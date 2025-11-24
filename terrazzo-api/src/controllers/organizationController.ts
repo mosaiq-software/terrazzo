@@ -1,9 +1,8 @@
-import { MembershipRecord, Organization, OrganizationHeader, OrganizationId, PermissionLevel, UserId } from '@mosaiq/terrazzo-common/types';
+import { MembershipRecord, Organization, OrganizationHeader, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrg, getOrgById, updateOrg } from '@trz-api/persistence/organizationPersistence';
 import { getUserById } from '@trz-api/persistence/userPersistence';
-import { getModulesInDirectory } from './directoryController';
 import { getInvitesForEntity } from './inviteController';
 import { getMembersInOrg } from './membershipController';
 
@@ -27,12 +26,10 @@ export async function getFullOrganization(orgId: OrganizationId) {
     }
     const members = await getMembersInOrg(orgId);
     const invites = await getInvitesForEntity(orgId);
-    const modules = await getModulesInDirectory(orgId);
     const org: Organization = {
         ...orgHeader,
         members: members,
         invites: invites,
-        modules,
     };
     return org;
 }
@@ -60,7 +57,7 @@ export async function addOrganization(name: string, creator: UserId, isPersonal:
     const membershipRecord: MembershipRecord = {
         userId: creator,
         orgId: newOrg.id,
-        permissionLevel: PermissionLevel.ADMIN,
+        permissionLevel: OrgMembershipLevel.ADMIN,
     };
 
     try {

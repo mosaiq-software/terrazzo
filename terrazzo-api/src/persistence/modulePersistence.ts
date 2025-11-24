@@ -43,6 +43,14 @@ export const getModulesByParentIdDb = async (parentId: UID | null) => {
     ).map((mdl) => mdl.toJSON()) as ModuleHeader[];
 };
 
+export const getModulesByOrgIdDb = async (orgId: UID) => {
+    return (
+        await ModuleModel.findAll({
+            where: { orgId },
+        })
+    ).map((mdl) => mdl.toJSON()) as ModuleHeader[];
+};
+
 export const createModuleDb = async (module: ModuleHeader) => {
     return await ModuleModel.create({ ...module });
 };

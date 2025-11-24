@@ -26,7 +26,6 @@ export interface OrganizationHeader {
 export interface Organization extends OrganizationHeader {
     members: Member[];
     invites: Invite[];
-    modules: TrzModule[];
 }
 
 export interface BoardHeader extends ModuleHeader {
@@ -97,15 +96,21 @@ export interface TextBlock {
 }
 
 export enum PermissionLevel {
+    NONE,
     VIEW,
     EDIT,
+    ADMIN,
+}
+
+export enum OrgMembershipLevel {
+    MEMBER,
     ADMIN,
 }
 
 export interface MembershipRecord {
     userId: UserId;
     orgId: OrganizationId;
-    permissionLevel: PermissionLevel;
+    permissionLevel: OrgMembershipLevel;
 }
 export interface Member {
     user: UserHeader;
@@ -187,22 +192,13 @@ export enum TrzModuleType {
 }
 export type TrzModule = DirectoryHeader | DocumentHeader | BoardHeader;
 
-interface BaseDirectoryListItem {
-    moduleId: UID;
-    moduleName: string;
-}
-interface DirectoryDirectoryListItem extends BaseDirectoryListItem {
-    moduleType: TrzModuleType.Directory;
-    subItems: DirectoryListItem[];
-}
-interface OtherDirectoryListItem extends BaseDirectoryListItem {
-    moduleType: Exclude<TrzModuleType, TrzModuleType.Directory>;
+export interface PermissionRecord {
+    anyonePermissionLevel: PermissionLevel | null;
+    orgPermissionLevel: PermissionLevel | null;
+    userPermissionLevels: Record<UserId, PermissionLevel>;
 }
 
-export type DirectoryListItem = DirectoryDirectoryListItem | OtherDirectoryListItem;
-export type DirectoryList = DirectoryListItem[];
-
-export interface ModuleHeader {
+export interface ModuleHeader extends PermissionRecord {
     id: UID;
     parentId: UID;
     name: string;
@@ -210,7 +206,8 @@ export interface ModuleHeader {
     createdAt: number;
     type: TrzModuleType;
     orgId: OrganizationId;
-    anyonePermissionLevel: PermissionLevel | null;
-    orgPermissionLevel: PermissionLevel | null;
-    userPermissionLevels: Record<UserId, PermissionLevel>;
+}
+
+export interface ModuleHeaderWithChildren extends ModuleHeader {
+    children?: ModuleHeaderWithChildren[];
 }
