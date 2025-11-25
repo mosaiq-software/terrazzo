@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { useRoom } from './useRoom';
 import { useSocketListener } from './useSocketListener';
 
-export const useDocument = (documentId: DocumentId) => {
+export const useDocument = (documentId?: DocumentId) => {
     useRoom(RoomType.DATA, documentId, false);
 
     const [document, setDocument] = useState<DocumentHeader | undefined>(undefined);

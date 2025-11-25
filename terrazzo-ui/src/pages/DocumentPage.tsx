@@ -12,19 +12,20 @@ import { updateDocumentMetadata } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useDocument } from '@trz/hooks/useDocument';
 import { NoteType, notify } from '@trz/util/notifications';
+import { setTitle } from '@trz/util/tabUtils';
 import { IDLE_TIMEOUT_MS } from '@trz/util/textUtils';
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const DocumentPage = (): React.JSX.Element => {
     const params = useParams();
     const sockCtx = useSocket();
     const trz = useTRZ();
-    const navigate = useNavigate();
     const docId = params.documentId as DocumentId | undefined;
     const idle = useIdle(IDLE_TIMEOUT_MS);
     const usr = useUser();
-    const { document, lastEditor } = useDocument(docId!);
+    const { document, lastEditor } = useDocument(docId);
+    setTitle(`${document?.name ?? 'Document'} | Terrazzo`);
     useCatchSaveKey();
 
     if (document === undefined) {
