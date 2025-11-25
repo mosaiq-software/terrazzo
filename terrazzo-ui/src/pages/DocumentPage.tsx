@@ -42,7 +42,7 @@ const DocumentPage = (): React.JSX.Element => {
             try {
                 const doc = await getDocument(sockCtx, docId);
                 setDocument(doc ?? null);
-                setTitle(`${doc?.title ?? 'Document'} | Terrazzo`);
+                setTitle(`${doc?.name ?? 'Document'} | Terrazzo`);
             } catch (err) {
                 notify(NoteType.DOC_DATA_ERROR, err);
                 return;
@@ -93,7 +93,7 @@ const DocumentPage = (): React.JSX.Element => {
             return;
         }
         try {
-            updateDocumentMetadata(sockCtx, document.id, { title: value });
+            updateDocumentMetadata(sockCtx, document.id, { name: value });
         } catch (e) {
             notify(NoteType.CARD_UPDATE_ERROR, e);
             return;
@@ -124,7 +124,7 @@ const DocumentPage = (): React.JSX.Element => {
                     >
                         <Group>
                             <EditableTextbox
-                                value={document.title}
+                                value={document.name}
                                 onChange={onTitleChange}
                                 type="title"
                                 placeholder="Document Title..."
