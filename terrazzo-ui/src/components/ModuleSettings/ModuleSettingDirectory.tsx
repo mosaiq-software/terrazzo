@@ -5,6 +5,7 @@ import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
 import { useDirectory } from '@trz/hooks/useDirectory';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
+import { PermissionsEditor } from './PermissionsEditor';
 
 interface ModuleSettingsDirectoryProps {
     directoryId: DirectoryId;
@@ -42,6 +43,16 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
                 value={directoryEdits.name ?? directory.name ?? ''}
                 onChange={(e) => {
                     setDirectoryEdits({ ...directoryEdits, name: e.target.value });
+                }}
+            />
+            <PermissionsEditor
+                permissionRecord={{
+                    anyonePermissionLevel: directoryEdits.anyonePermissionLevel ?? directory.anyonePermissionLevel,
+                    orgPermissionLevel: directoryEdits.orgPermissionLevel ?? directory.orgPermissionLevel,
+                    userPermissionLevels: directoryEdits.userPermissionLevels ?? directory.userPermissionLevels,
+                }}
+                onChangeRecord={(newRecord) => {
+                    setDirectoryEdits({ ...directoryEdits, ...newRecord });
                 }}
             />
             <Button

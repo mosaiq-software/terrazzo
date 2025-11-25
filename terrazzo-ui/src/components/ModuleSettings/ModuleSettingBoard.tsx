@@ -6,6 +6,7 @@ import { useBoard } from '@trz/hooks/useBoard';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
 import { LabelEditor } from './LabelEditor';
+import { PermissionsEditor } from './PermissionsEditor';
 
 interface ModuleSettingsBoardProps {
     boardId: BoardId;
@@ -55,6 +56,16 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
                 value={boardEdits.boardCode ?? boardData.boardCode ?? ''}
                 onChange={(e) => {
                     setBoardEdits({ ...boardEdits, boardCode: e.target.value });
+                }}
+            />
+            <PermissionsEditor
+                permissionRecord={{
+                    anyonePermissionLevel: boardEdits.anyonePermissionLevel ?? boardData.anyonePermissionLevel,
+                    orgPermissionLevel: boardEdits.orgPermissionLevel ?? boardData.orgPermissionLevel,
+                    userPermissionLevels: boardEdits.userPermissionLevels ?? boardData.userPermissionLevels,
+                }}
+                onChangeRecord={(newRecord) => {
+                    setBoardEdits({ ...boardEdits, ...newRecord });
                 }}
             />
             <Button

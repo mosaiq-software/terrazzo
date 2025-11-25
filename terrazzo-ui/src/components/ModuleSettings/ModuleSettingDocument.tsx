@@ -5,6 +5,7 @@ import { updateDocumentMetadata } from '@trz/emitters';
 import { useDocument } from '@trz/hooks/useDocument';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
+import { PermissionsEditor } from './PermissionsEditor';
 
 interface ModuleSettingsDocumentProps {
     documentId: DocumentId;
@@ -42,6 +43,16 @@ export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
                 value={documentEdits.name ?? document.name ?? ''}
                 onChange={(e) => {
                     setDocumentEdits({ ...documentEdits, name: e.target.value });
+                }}
+            />
+            <PermissionsEditor
+                permissionRecord={{
+                    anyonePermissionLevel: documentEdits.anyonePermissionLevel ?? document.anyonePermissionLevel,
+                    orgPermissionLevel: documentEdits.orgPermissionLevel ?? document.orgPermissionLevel,
+                    userPermissionLevels: documentEdits.userPermissionLevels ?? document.userPermissionLevels,
+                }}
+                onChangeRecord={(newRecord) => {
+                    setDocumentEdits({ ...documentEdits, ...newRecord });
                 }}
             />
             <Button
