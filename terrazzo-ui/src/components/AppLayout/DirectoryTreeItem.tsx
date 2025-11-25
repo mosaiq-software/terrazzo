@@ -132,8 +132,6 @@ const DirectoryListItemIcon = (props: DirectoryListItemIconProps) => {
 
 const getModuleUrl = (moduleType: TrzModuleType, moduleId: string): string => {
     switch (moduleType) {
-        case TrzModuleType.Directory:
-            return `/dir/${moduleId}`;
         case TrzModuleType.Document:
             return `/doc/${moduleId}`;
         case TrzModuleType.Board:
