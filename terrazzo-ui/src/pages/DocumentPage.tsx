@@ -1,8 +1,6 @@
 import { Box, Group, Loader, ScrollArea, Stack, Text } from '@mantine/core';
 import { useIdle } from '@mantine/hooks';
-import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { DocumentHeader, DocumentId, UserHeader } from '@mosaiq/terrazzo-common/types';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { DocumentId } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/CollaborativeTextArea';
 import EditableTextbox from '@trz/components/EditableTextbox';
@@ -10,14 +8,12 @@ import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { useUser } from '@trz/contexts/user-context';
-import { getDocument, getUserHeader, updateDocumentMetadata } from '@trz/emitters';
+import { updateDocumentMetadata } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
-import { useRoom } from '@trz/hooks/useRoom';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { useDocument } from '@trz/hooks/useDocument';
 import { NoteType, notify } from '@trz/util/notifications';
-import { setTitle } from '@trz/util/tabUtils';
 import { IDLE_TIMEOUT_MS } from '@trz/util/textUtils';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const DocumentPage = (): React.JSX.Element => {
@@ -26,53 +22,10 @@ const DocumentPage = (): React.JSX.Element => {
     const trz = useTRZ();
     const navigate = useNavigate();
     const docId = params.documentId as DocumentId | undefined;
-    const [document, setDocument] = useState<DocumentHeader | undefined | null>();
-    const [lastEditor, setLastEditor] = useState<UserHeader | null>(null);
-    useRoom(RoomType.DATA, docId, false);
     const idle = useIdle(IDLE_TIMEOUT_MS);
     const usr = useUser();
+    const { document, lastEditor } = useDocument(docId!);
     useCatchSaveKey();
-
-    useEffect(() => {
-        const fetchDocumentData = async () => {
-            if (!docId || !sockCtx.connected) {
-                return;
-            }
-
-            try {
-                const doc = await getDocument(sockCtx, docId);
-                setDocument(doc ?? null);
-                setTitle(`${doc?.name ?? 'Document'} | Terrazzo`);
-            } catch (err) {
-                notify(NoteType.DOC_DATA_ERROR, err);
-                return;
-            }
-        };
-        fetchDocumentData();
-    }, [docId, sockCtx.connected]);
-
-    useSocketListener<ServerSE.UPDATE_DOCUMENT_FIELD>(ServerSE.UPDATE_DOCUMENT_FIELD, (payload) => {
-        if (!document || payload.id !== document.id) {
-            return;
-        }
-        setDocument((prev) => {
-            if (!prev) {
-                return prev;
-            }
-            return { ...updateBaseFromPartial(prev, payload) };
-        });
-    });
-
-    useEffect(() => {
-        const fetchLastEditor = async () => {
-            if (!document) {
-                return;
-            }
-            const lastEditor = await getUserHeader(sockCtx, document?.lastModifiedByUserId);
-            setLastEditor(lastEditor || null);
-        };
-        fetchLastEditor();
-    }, [document?.lastModifiedByUserId, sockCtx]);
 
     if (document === undefined) {
         return <Loader />;
@@ -88,14 +41,13 @@ const DocumentPage = (): React.JSX.Element => {
     }
 
     async function onTitleChange(value: string) {
-        if (!document) {
-            notify(NoteType.DOC_UPDATE_ERROR);
-            return;
-        }
         try {
+            if (!document) {
+                throw new Error('Document not loaded');
+            }
             updateDocumentMetadata(sockCtx, document.id, { name: value });
         } catch (e) {
-            notify(NoteType.CARD_UPDATE_ERROR, e);
+            notify(NoteType.DOC_UPDATE_ERROR, e);
             return;
         }
     }
