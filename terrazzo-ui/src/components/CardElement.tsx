@@ -127,7 +127,7 @@ const CardElement = (props: CardElementProps) => {
                             maxUsers={3}
                         />
                         {card.priority && (
-                            <div style={{marginTop: '10px'}}>
+                            <div style={{ marginTop: '10px' }}>
                                 <PriorityChip priority={card.priority} size={"small"}/>
                             </div>
                         )}
