@@ -95,6 +95,7 @@ const CardElement = (props: CardElementProps) => {
                     </Text>
                     <Group
                         justify="space-between"
+                        align="flex-end"
                         style={{ flexDirection: 'row-reverse' }}
                     >
                         <AvatarRow

@@ -9,11 +9,9 @@ export enum LocalStorageKey {
 export const TEMPORARY_ID: UID = 'THIS-IS-A-TEMPORARY-ID';
 
 export enum Priority {
-    LOWEST = 1,
-    LOW = 2,
-    MEDIUM = 3,
-    HIGH = 4,
-    HIGHEST = 5,
+    LOW = 1,
+    MEDIUM = 2,
+    HIGH = 3,
 }
 
 export enum StoryPoints {

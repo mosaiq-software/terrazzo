@@ -14,7 +14,7 @@ import { MdBarChart, MdCheckBox, MdDocumentScanner, MdLabel, MdLink, MdOutlineCh
 import { ContextMenuButton } from '../ContextMenu/ContextMenuButton';
 import { ContextMenuLayout } from '../ContextMenu/ContextMenuLayout';
 import { ContextMenuSelectorMenu } from '../ContextMenu/ContextMenuSelectorMenu';
-import { priorityColors, unicodeMap } from './PriorityButtons';
+import { priorityColors, PriorityIcons } from './PriorityButtons';
 
 interface CardContextMenuProps {
     cardId: CardId;
@@ -60,12 +60,14 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
                 icon={<MdBarChart size={16} />}
                 textColor="#fff"
                 textAlign="left"
-                items={priorityColors.map((color, index) => ({
-                    id: index.toString(),
-                    label: unicodeMap[index],
-                    color: color,
-                    leftIcon: (card.priority ?? 0) === index ? <MdRadioButtonChecked size={16} /> : <MdOutlineRadioButtonUnchecked size={16} />,
-                }))}
+                items={priorityColors
+                    .map((color, index) => ({
+                        id: index.toString(),
+                        label: PriorityIcons[index]({ size: 16 }),
+                        color: color,
+                        leftIcon: (card.priority ?? 0) === index ? <MdRadioButtonChecked size={16} /> : <MdOutlineRadioButtonUnchecked size={16} />,
+                    }))
+                    .reverse()}
                 onSelect={async (selected) => {
                     await updateCardField(sockCtx, card.id, { priority: Number(selected) as Priority });
                 }}
