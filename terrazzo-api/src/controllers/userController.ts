@@ -1,4 +1,4 @@
-import { BoardId, List, Member, MembershipRecord, OrganizationId, PermissionLevel, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { BoardId, List, Member, MembershipRecord, OrganizationId, OrgMembershipLevel, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
 import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createUser, getUserByGithubId, getUserById, getUserByUsername, updateUser } from '@trz-api/persistence/userPersistence';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
@@ -86,7 +86,7 @@ export async function setupUser(userId: UserId, username: string, firstName: str
         const orgMembershipRecord: MembershipRecord = {
             orgId: personalOrgId,
             userId: user.id,
-            permissionLevel: PermissionLevel.ADMIN,
+            permissionLevel: OrgMembershipLevel.ADMIN,
         };
         await upsertOrganizationMembership(orgMembershipRecord);
         await updateOrganizationFromPartial(personalOrgId, { logoUrl: user.profilePicture, description: 'A place to keep your personal projects' });

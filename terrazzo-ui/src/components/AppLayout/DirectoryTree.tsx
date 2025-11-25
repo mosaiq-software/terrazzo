@@ -1,10 +1,10 @@
 import { Stack } from '@mantine/core';
-import { DirectoryList } from '@mosaiq/terrazzo-common/types';
+import { ModuleHeaderWithChildren } from '@mosaiq/terrazzo-common/types';
 import { DirectoryTreeItem } from './DirectoryTreeItem';
 
 interface DirectoryTreeProps {
     sidebarCollapsed: boolean;
-    directoryList: DirectoryList;
+    directoryTreeRoot: ModuleHeaderWithChildren;
 }
 export const DirectoryTree = (props: DirectoryTreeProps) => {
     return (
@@ -12,9 +12,9 @@ export const DirectoryTree = (props: DirectoryTreeProps) => {
             gap={0}
             p={0}
         >
-            {props.directoryList.map((item) => (
+            {props.directoryTreeRoot.children?.map((item) => (
                 <DirectoryTreeItem
-                    key={item.moduleId}
+                    key={item.id}
                     sidebarCollapsed={props.sidebarCollapsed}
                     directoryListItem={item}
                     indent={0}

@@ -1,7 +1,13 @@
-import { Model, DataTypes } from 'sequelize';
+import { DocumentId, TextBlockId, UserId } from '@mosaiq/terrazzo-common/types';
 import { sequelize } from '@trz-api/utils/dbHelper';
-import { DocumentHeader, DocumentId } from '@mosaiq/terrazzo-common/types';
+import { DataTypes, Model } from 'sequelize';
 
+export interface DocumentModelType {
+    id: DocumentId;
+    textBlockId: TextBlockId;
+    lastModifiedAt: number;
+    lastModifiedByUserId: UserId;
+}
 class DocumentModel extends Model {}
 DocumentModel.init(
     {
@@ -9,35 +15,23 @@ DocumentModel.init(
             type: DataTypes.STRING,
             primaryKey: true,
         },
-        parentId: DataTypes.STRING,
-        title: DataTypes.STRING,
         textBlockId: DataTypes.STRING,
-        archived: DataTypes.BOOLEAN,
-        createdAt: DataTypes.INTEGER,
         lastModifiedAt: DataTypes.INTEGER,
         lastModifiedByUserId: DataTypes.STRING,
     },
     { sequelize, timestamps: false }
 );
 
-export const getDocumentById = async (id: DocumentId) => {
-    return (await DocumentModel.findByPk(id, {}))?.toJSON() as DocumentHeader | undefined;
+export const getDocumentByIdDb = async (id: DocumentId) => {
+    return (await DocumentModel.findByPk(id, {}))?.toJSON() as DocumentModelType | undefined;
 };
 
-export const getProjectsByParentId = async (parentId: DocumentId) => {
-    return (
-        await DocumentModel.findAll({
-            where: { parentId },
-        })
-    ).map((doc) => doc.toJSON()) as DocumentHeader[];
+export const createDocumentDb = async (document: DocumentModelType) => {
+    await DocumentModel.create({ ...document });
 };
 
-export const createDocument = async (document: DocumentHeader) => {
-    return await DocumentModel.create({ ...document });
-};
-
-export const updateDocument = async (id: DocumentId, document: Partial<DocumentHeader>) => {
-    return await DocumentModel.update(
+export const updateDocumentDb = async (id: DocumentId, document: Partial<DocumentModelType>) => {
+    await DocumentModel.update(
         {
             ...document,
         },
@@ -45,10 +39,10 @@ export const updateDocument = async (id: DocumentId, document: Partial<DocumentH
     );
 };
 
-export const getDocumentByTextBlockId = async (textBlockId: string) => {
+export const getDocumentByTextBlockIdDb = async (textBlockId: string) => {
     return (
         await DocumentModel.findOne({
             where: { textBlockId },
         })
-    )?.toJSON() as DocumentHeader | undefined;
+    )?.toJSON() as DocumentModelType | undefined;
 };

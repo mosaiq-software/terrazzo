@@ -1,7 +1,8 @@
 import { RoomId, RoomType, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-common/socketTypes';
 import { NonEmptyArray, UID, UserId } from '@mosaiq/terrazzo-common/types';
 import { getRoomCode, getRoomType } from '@mosaiq/terrazzo-common/utils/socketUtils';
-import { getMembersInOrg, getOrganizationModuleIsIn, getUnknownModule, getUserDirectoryStructure } from '@trz-api/controllers/membershipController';
+import { getMembersInOrg, getOrgDirectoryTreeForUsers } from '@trz-api/controllers/membershipController';
+import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
 import { Server, Socket } from 'socket.io';
 import { SocketData } from './socketTypes';
 
@@ -112,25 +113,27 @@ export const leaveRoom = (socket: Socket, room: RoomId) => {
  * This will only send it to users who have access to the module.
  */
 export const broadcastUniqueUpdatesForUpdatedModule = async (socket: Socket, io: Server, moduleId: UID) => {
-    const unknownModule = await getUnknownModule(moduleId);
-    if (!unknownModule) {
+    const module = await getModuleByIdDb(moduleId);
+    if (!module) {
         throw new Error(`Module ${moduleId} not found`);
     }
-    const orgId = await getOrganizationModuleIsIn(moduleId);
+    const orgId = module.orgId;
     const members = await getMembersInOrg(orgId);
     const socketsSubscribedToOrgRoom = await getUsersInRoom(io, getRoomCode(RoomType.DATA, orgId));
     // only broadcast to members who have access to the module
     const memberIds = members.map((m) => m.user.id);
     const targetUsers = socketsSubscribedToOrgRoom.filter((s) => memberIds.includes(s.user.id));
-    for (const user of targetUsers) {
-        const userRoomId = getRoomCode(RoomType.USER, user.user.id);
-        const usersDirectoryStructure = await getUserDirectoryStructure(user.user.id, orgId);
+    const targetUserIds = targetUsers.map((u) => u.user.id);
+    const userOrgDirectoryStructures = await getOrgDirectoryTreeForUsers(orgId, targetUserIds);
+    for (const userId of targetUserIds) {
+        const userRoomId = getRoomCode(RoomType.USER, userId);
+        const usersDirectoryStructure = userOrgDirectoryStructures[userId];
         if (usersDirectoryStructure) {
             broadcast<ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE>(
                 socket,
                 ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE,
                 {
-                    userId: user.user.id,
+                    userId,
                     orgId,
                     directoryStructure: usersDirectoryStructure,
                 },

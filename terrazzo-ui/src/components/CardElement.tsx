@@ -7,7 +7,7 @@ import { getCardNumber } from '@trz/util/boardUtils';
 import { useContextMenu } from 'mantine-contextmenu';
 import React from 'react';
 import { useCard } from '../hooks/useCard';
-import { CardContextMenu } from './CardContextMenu';
+import { CardContextMenu } from './CardDetails/CardContextMenu';
 import { LabelDisplay } from './CardDetails/LabelsMenu';
 
 interface CardElementProps {
