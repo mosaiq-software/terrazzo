@@ -36,8 +36,8 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
                 labelProps={{
                     c: 'white',
                 }}
-                label="Document Name"
-                placeholder="My Document"
+                label="Directory Name"
+                placeholder="My Directory"
                 required
                 value={directoryEdits.name ?? directory.name ?? ''}
                 onChange={(e) => {

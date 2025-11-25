@@ -68,7 +68,7 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
             {!!props.moduleHeader && (
                 <ContextMenuButton
                     icon={<MdSettings size={16} />}
-                    text="Module Settings"
+                    text={getSettingsTitle(props.moduleHeader.type)}
                     onClick={() => {
                         modals.openContextModal({
                             modal: 'moduleSettings',
@@ -82,4 +82,17 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
             )}
         </ContextMenuLayout>
     );
+};
+
+const getSettingsTitle = (moduleType: TrzModuleType) => {
+    switch (moduleType) {
+        case TrzModuleType.Board:
+            return 'Board Settings';
+        case TrzModuleType.Document:
+            return 'Document Settings';
+        case TrzModuleType.Directory:
+            return 'Directory Settings';
+        default:
+            return 'Module Settings';
+    }
 };
