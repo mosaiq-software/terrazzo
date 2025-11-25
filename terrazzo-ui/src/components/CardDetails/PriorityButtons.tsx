@@ -1,29 +1,27 @@
-import { Box, Button, Flex, Menu, Text, Tooltip } from '@mantine/core';
+import { Button, Flex, Menu } from '@mantine/core';
 import { Priority } from '@mosaiq/terrazzo-common/constants';
 import { Card } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardField } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import React from 'react';
+import { MdOutlineRadioButtonUnchecked, MdRadioButtonChecked } from 'react-icons/md';
+import { PiCellSignalFullFill, PiCellSignalLowFill, PiCellSignalMediumFill, PiCellSignalNoneDuotone } from 'react-icons/pi';
 
-export const priorityColors: string[] = ['gray', '#4A82C7', '#24296A', '#422760', '#853974', '#BD3758'];
+export const priorityColors: string[] = ['#817d7eff', '#e6abb9ff', '#ee809bff', '#fd2d61ff'];
 
-export const unicodeMap = {
-    0: '-',
-    [Priority.LOWEST]: '\u25BC' + '\u25BC', // ▼▼
-    [Priority.LOW]: '\u25BC', // ▼
-    [Priority.MEDIUM]: '\u25FC', // ■
-    [Priority.HIGH]: '\u25B2', // ▲
-    [Priority.HIGHEST]: '\u25B2' + '\u25B2', // ▲▲
+export const PriorityIcons = {
+    0: PiCellSignalNoneDuotone,
+    [Priority.LOW]: PiCellSignalLowFill,
+    [Priority.MEDIUM]: PiCellSignalMediumFill,
+    [Priority.HIGH]: PiCellSignalFullFill,
 };
 
 export const prioNames = {
     0: 'Unset',
-    [Priority.LOWEST]: 'Lowest',
     [Priority.LOW]: 'Low',
     [Priority.MEDIUM]: 'Medium',
     [Priority.HIGH]: 'High',
-    [Priority.HIGHEST]: 'Critical',
 };
 
 interface PriorityButtonsProps {
@@ -66,27 +64,23 @@ export const PriorityButtons = (props: PriorityButtonsProps): React.JSX.Element 
                 <Flex
                     direction="column-reverse"
                     align="center"
+                    gap={1}
                 >
-                    {priorityColors.map((_, index) => {
+                    {priorityColors.map((color, index) => {
                         return (
-                            <Tooltip
+                            <Button
                                 key={index}
-                                label={prioNames[index]}
-                                position="right"
-                                withArrow
+                                bg={color}
+                                ta={'center'}
+                                justify={'center'}
+                                c={'#fff'}
+                                leftSection={priority === index ? <MdRadioButtonChecked size={16} /> : <MdOutlineRadioButtonUnchecked size={16} />}
+                                onClick={() => {
+                                    handleOnChange(index);
+                                }}
                             >
-                                <Menu.Item
-                                    key={index}
-                                    bg={priorityColors[index]}
-                                    ta="center"
-                                    c="white"
-                                    onClick={() => {
-                                        handleOnChange(index);
-                                    }}
-                                >
-                                    {priority === index ? `[ ${unicodeMap[index]} ]` : unicodeMap[index]}
-                                </Menu.Item>
-                            </Tooltip>
+                                {PriorityIcons[index]({ size: 16 })}
+                            </Button>
                         );
                     })}
                     <Menu.Label>Card Priority</Menu.Label>
@@ -101,18 +95,5 @@ interface PriorityChipProps {
 }
 export const PriorityChip = (props: PriorityChipProps) => {
     const p = Math.max(0, Math.min(props.priority ?? 0, priorityColors.length - 1));
-    return (
-        <Box
-            bg={priorityColors[p]}
-            w="35"
-            style={{ '--radius': '0.3rem', borderRadius: 'var(--radius)' }}
-        >
-            <Text
-                c="white"
-                ta="center"
-            >
-                {unicodeMap[p]}
-            </Text>
-        </Box>
-    );
+    return <Flex>{PriorityIcons[p]({ size: 16, color: priorityColors[p] })}</Flex>;
 };

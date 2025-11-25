@@ -9,7 +9,7 @@ const DEFAULT_COLOR = '#242424';
 
 export interface ContextMenuSelectorMenuItem<T = string> {
     id: T;
-    label: string;
+    label: string | React.ReactNode;
     color?: string;
     leftIcon?: React.ReactNode;
     rightIcon?: React.ReactNode;
