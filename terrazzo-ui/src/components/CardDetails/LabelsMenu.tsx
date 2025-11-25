@@ -117,8 +117,7 @@ export const LabelDisplay = (props: LabelDisplayProps) => {
                         size={props.size}
                         bg={label.color}
                         c={textColor}
-                        fw={1000}
-                        style={{ letterSpacing: '0.05rem' }}
+                        style={{ letterSpacing: '0.05rem', fontWeight: 900 }}
                     >
                         {label.name}
                     </Pill>
