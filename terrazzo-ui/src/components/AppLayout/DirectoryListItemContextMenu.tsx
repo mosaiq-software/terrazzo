@@ -1,6 +1,7 @@
+import { modals } from '@mantine/modals';
 import { TrzModuleType, UID } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
-import { createBoard, createDocument } from '@trz/emitters';
+import { createDocument } from '@trz/emitters';
 import { createDirectory } from '@trz/emitters/directoryEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { MdAdd } from 'react-icons/md';
@@ -29,7 +30,11 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
                     await createDocument(sockCtx, 'New Document', props.parentId);
                     return;
                 case TrzModuleType.Board:
-                    await createBoard(sockCtx, 'New Board', '', props.parentId);
+                    modals.openContextModal({
+                        modal: 'board',
+                        title: 'Create New Board',
+                        innerProps: { parentId: props.parentId },
+                    });
                     return;
                 default:
                     notify(NoteType.CARD_UPDATE_ERROR, 'Unknown module type: ' + type);
