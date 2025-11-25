@@ -2,11 +2,13 @@ import { Button, Group, Text } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { ModuleHeaderWithChildren, TrzModuleType } from '@mosaiq/terrazzo-common/types';
 import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useContextMenu } from 'mantine-contextmenu';
 import { FaChevronDown } from 'react-icons/fa';
 import { IoDocumentOutline } from 'react-icons/io5';
 import { MdOutlineViewKanban } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 import { useLocation } from 'react-router-dom';
+import { DirectoryListItemContextMenu } from './DirectoryListItemContextMenu';
 
 interface DirectoryTreeItemProps {
     sidebarCollapsed: boolean;
@@ -17,6 +19,8 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     const trz = useTRZ();
     const navigate = useNavigate();
     const location = useLocation();
+    const { showContextMenu } = useContextMenu();
+
     const [collapsed, setCollapsed, deleteCollapsed] = useLocalStorage<boolean | undefined>({ key: `directory-tree-item-collapsed-${props.directoryListItem.id}`, defaultValue: undefined });
 
     const selected = location.pathname.includes(props.directoryListItem.id);
@@ -49,6 +53,12 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                     height: props.sidebarCollapsed ? '0px' : '36px',
                     transition: `height ${trz.animationDuration}ms, width ${trz.animationDuration}ms, padding ${trz.animationDuration}ms`,
                 }}
+                onContextMenuCapture={showContextMenu((close) => (
+                    <DirectoryListItemContextMenu
+                        cardId={props.cardId}
+                        onClose={close}
+                    />
+                ))}
             >
                 <Button
                     display={'flex'}

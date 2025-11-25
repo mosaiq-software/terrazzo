@@ -12,16 +12,16 @@ import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
 import { MdBarChart, MdCheck, MdDocumentScanner, MdLabel, MdLink } from 'react-icons/md';
-import { prioNames, priorityColors, unicodeMap } from './CardDetails/PriorityButtons';
+import { prioNames, priorityColors, unicodeMap } from '../CardDetails/PriorityButtons';
 
 const OPEN_DELAY = 100;
 const CLOSE_DELAY = 100;
 
-interface CardContextMenuProps {
+interface DirectoryListItemContextMenuProps {
     cardId: CardId;
     onClose: () => void;
 }
-export const CardContextMenu = (props: CardContextMenuProps) => {
+export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenuProps) => {
     const trzCtx = useTRZ();
     const sockCtx = useSocket();
     const userCtx = useUser();
