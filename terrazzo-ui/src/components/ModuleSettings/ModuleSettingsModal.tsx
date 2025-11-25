@@ -7,6 +7,7 @@ import { useTRZ } from '@trz/contexts/TRZ-context';
 import { updateBoardField, updateDocumentMetadata } from '@trz/emitters';
 import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
+import { ModuleSettingsDirectory } from './ModuleSettingDirectory';
 import { ModuleSettingsDocument } from './ModuleSettingDocument';
 
 interface ModuleSettingsGenericProps {
@@ -63,8 +64,21 @@ const ModuleSettings = (props: ContextModalProps<ModuleSettingsGenericProps>) =>
         );
     } else {
         switch (props.innerProps.moduleHeader.type) {
+            case TrzModuleType.Directory:
+                Settings = (
+                    <ModuleSettingsDirectory
+                        directoryId={props.innerProps.moduleHeader.id}
+                        onClose={handleClose}
+                    />
+                );
+                break;
             case TrzModuleType.Document:
-                Settings = <ModuleSettingsDocument documentId={props.innerProps.moduleHeader.id} />;
+                Settings = (
+                    <ModuleSettingsDocument
+                        documentId={props.innerProps.moduleHeader.id}
+                        onClose={handleClose}
+                    />
+                );
                 break;
             default:
                 Settings = (

@@ -1,32 +1,32 @@
 import { Button, Loader, Stack, TextInput } from '@mantine/core';
-import { DocumentHeader, DocumentId } from '@mosaiq/terrazzo-common/types';
+import { DirectoryHeader, DirectoryId } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
-import { updateDocumentMetadata } from '@trz/emitters';
-import { useDocument } from '@trz/hooks/useDocument';
+import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
+import { useDirectory } from '@trz/hooks/useDirectory';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
 
-interface ModuleSettingsDocumentProps {
-    documentId: DocumentId;
+interface ModuleSettingsDirectoryProps {
+    directoryId: DirectoryId;
     onClose: () => void;
 }
 
-export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
+export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => {
     const sockCtx = useSocket();
-    const { document } = useDocument(props.documentId);
-    const [documentEdits, setDocumentEdits] = useState<Partial<DocumentHeader>>({});
+    const directory = useDirectory(props.directoryId);
+    const [directoryEdits, setDirectoryEdits] = useState<Partial<DirectoryHeader>>({});
 
     const onSave = async () => {
         try {
-            await updateDocumentMetadata(sockCtx, props.documentId, documentEdits);
-            setDocumentEdits({});
+            await updateDirectoryMetadata(sockCtx, props.directoryId, directoryEdits);
+            setDirectoryEdits({});
             props.onClose();
         } catch (e) {
             notify(NoteType.DOC_UPDATE_ERROR, e);
         }
     };
 
-    if (!document) {
+    if (!directory) {
         return <Loader />;
     }
 
@@ -39,13 +39,13 @@ export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
                 label="Document Name"
                 placeholder="My Document"
                 required
-                value={documentEdits.name ?? document.name ?? ''}
+                value={directoryEdits.name ?? directory.name ?? ''}
                 onChange={(e) => {
-                    setDocumentEdits({ ...documentEdits, name: e.target.value });
+                    setDirectoryEdits({ ...directoryEdits, name: e.target.value });
                 }}
             />
             <Button
-                disabled={Object.keys(documentEdits).length === 0}
+                disabled={Object.keys(directoryEdits).length === 0}
                 onClick={onSave}
             >
                 Save Changes
