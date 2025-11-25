@@ -74,6 +74,7 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
                             modal: 'moduleSettings',
                             title: 'Settings',
                             innerProps: { moduleHeader: props.moduleHeader },
+                            size: 'xl',
                         });
                         props.onClose();
                     }}
