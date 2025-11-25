@@ -12,6 +12,7 @@ import { UserProvider } from '@trz/contexts/user-context';
 import { ContextMenuProvider } from 'mantine-contextmenu';
 import 'mantine-contextmenu/styles.layer.css';
 import { BrowserRouter } from 'react-router-dom';
+import { ModuleSettingsModal } from './components/ModuleSettings/ModuleSettingsModal';
 import Router from './router';
 
 const theme = createTheme({});
@@ -19,6 +20,7 @@ const theme = createTheme({});
 const modals = {
     organization: CreateOrganizationModal,
     board: CreateBoardModal,
+    moduleSettings: ModuleSettingsModal,
 };
 
 const App = () => {
