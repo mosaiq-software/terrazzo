@@ -87,7 +87,7 @@ const CardElement = (props: CardElementProps) => {
             {card && inViewport && (
                 <React.Fragment>
                     {card.labels.length > 0 && (
-                        <div style={{marginBottom: '10px'}}>
+                        <div style={{ marginBottom: '10px' }}>
                             <LabelDisplay
                                 labels={card.labels}
                                 size="xs"
