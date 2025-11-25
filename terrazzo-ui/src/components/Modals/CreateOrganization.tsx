@@ -18,11 +18,11 @@ const CreateOrganization = (props: ContextModalProps<{ modalBody: string }>): Re
             setErrorName('Enter a name');
             return;
         }
-        const orgId = await trz.createOrganization(orgName);
-        if (orgId) {
-            trz.selectOrganization(orgId);
+        const orgHeader = await trz.createOrganization(orgName);
+        if (orgHeader) {
+            trz.selectOrganization(orgHeader.id);
             setOrgName('');
-            navigate(`/org/${orgId.id}`);
+            navigate(`/org/${orgHeader.id}`);
             handleClose();
         }
     }
