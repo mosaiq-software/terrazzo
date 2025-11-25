@@ -72,7 +72,7 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
                     onClick={() => {
                         modals.openContextModal({
                             modal: 'moduleSettings',
-                            title: 'Module Settings',
+                            title: 'Settings',
                             innerProps: { moduleHeader: props.moduleHeader },
                         });
                         props.onClose();
