@@ -107,8 +107,7 @@ export async function addCard(listID: ListId, cardName: string, description?: st
 
     try {
         await createCardOnList(newCard, listID);
-        board.totalCards++;
-        await updateBoard(board);
+        await updateBoard(board.id, { totalCards: board.totalCards + 1 });
         return newCard;
     } catch (e) {
         throw new Error('Failed to save Card' + e);
@@ -183,8 +182,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
 
     try {
         await createCardOnList(newCard, list.id);
-        board.totalCards++;
-        await updateBoard(board);
+        await updateBoard(board.id, { totalCards: board.totalCards + 1 });
     } catch (e) {
         throw new Error('Failed to save Card' + e);
     }

@@ -7,7 +7,7 @@ import { getCardNumber } from '@trz/util/boardUtils';
 import { useContextMenu } from 'mantine-contextmenu';
 import React, { useEffect, useState } from 'react';
 import { useCard } from '../hooks/useCard';
-import { CardContextMenu } from './CardContextMenu';
+import { CardContextMenu } from './CardDetails/CardContextMenu';
 import { LabelDisplay } from './CardDetails/LabelsMenu';
 
 interface CardElementProps {
@@ -119,6 +119,7 @@ const CardElement = (props: CardElementProps) => {
                     </Text>
                     <Group
                         justify="space-between"
+                        align="flex-end"
                         style={{ flexDirection: 'row-reverse' }}
                     >
                         <AvatarRow

@@ -1,17 +1,10 @@
-import { Box, Stack, Title } from '@mantine/core';
+import { Box, Title } from '@mantine/core';
 import { Organization } from '@mosaiq/terrazzo-common/types';
-import { useSocket } from '@trz/contexts/socket-context';
-import { useNavigate } from 'react-router';
-import { DirectoryContentsRows } from '../Directory/DirectoryRows';
 
 interface OrgTabCardsProps {
     orgData: Organization;
 }
 export const OrgTabCards = (props: OrgTabCardsProps) => {
-    const orgData = props.orgData;
-    const navigate = useNavigate();
-    const sockCtx = useSocket();
-
     return (
         <Box
             style={{
@@ -64,13 +57,6 @@ export const OrgTabCards = (props: OrgTabCardsProps) => {
                     />
                 </Box>
             </Box> */}
-            <Stack w="100%">
-                <DirectoryContentsRows
-                    modules={orgData.modules}
-                    parentId={orgData.id}
-                    allowAddItem
-                />
-            </Stack>
         </Box>
     );
 };

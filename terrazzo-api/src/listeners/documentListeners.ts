@@ -1,7 +1,6 @@
 import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
-import { createNewDocument, modifyDocument } from '@trz-api/controllers/documentController';
-import { getDocumentById } from '@trz-api/persistence/documentPersistence';
+import { createNewDocument, getDocumentById, modifyDocument } from '@trz-api/controllers/documentController';
 import { broadcast, broadcastUniqueUpdatesForUpdatedModule, getSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 

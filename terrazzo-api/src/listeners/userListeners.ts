@@ -1,5 +1,5 @@
 import { ClientSE, ClientSEPayload, ClientSEReply } from '@mosaiq/terrazzo-common/socketTypes';
-import { getUserDirectoryStructure } from '@trz-api/controllers/membershipController';
+import { getOrgDirectoryTreeForUser } from '@trz-api/controllers/membershipController';
 import { getUserPreview } from '@trz-api/controllers/userController';
 import { Server, Socket } from 'socket.io';
 
@@ -21,8 +21,8 @@ export const registerUserListeners = (socket: Socket, io: Server) => {
             if (!data || !data.userId || !data.orgId) {
                 throw new Error('Invalid data provided');
             }
-            const directoryStructure = await getUserDirectoryStructure(data.userId, data.orgId);
-            reply(directoryStructure);
+            const directoryStructure = await getOrgDirectoryTreeForUser(data.orgId, data.userId);
+            reply(directoryStructure ?? undefined);
         } catch (error: any) {
             reply(undefined, error.message);
         }
