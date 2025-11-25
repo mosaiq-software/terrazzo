@@ -1,25 +1,20 @@
 import { ActionIcon, Alert, Box, Button, ColorInput, Divider, Fieldset, Group, ScrollArea, Space, Stack, Text, TextInput, Title, Tooltip } from '@mantine/core';
 import { TEMPORARY_ID } from '@mosaiq/terrazzo-common/constants';
-import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardHeader, BoardId, Label } from '@mosaiq/terrazzo-common/types';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { BoardId, Label } from '@mosaiq/terrazzo-common/types';
 import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { RingHoldingButton } from '@trz/components/RingHoldingButton';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
-import { createBoardLabel, deleteBoardLabel, getBoardData, updateBoardField, updateBoardLabel } from '@trz/emitters';
-import { useRoom } from '@trz/hooks/useRoom';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { createBoardLabel, deleteBoardLabel, updateBoardField, updateBoardLabel } from '@trz/emitters';
+import { useBoard } from '@trz/hooks/useBoard';
 import { colorIsDarkAdvanced, generateRandomColor } from '@trz/util/colorUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { MdOutlineAdd, MdOutlineCheck, MdOutlineChevronLeft, MdOutlineClose, MdOutlineDelete, MdOutlineEdit } from 'react-icons/md';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const BoardSettingsPage = (): React.JSX.Element => {
-    const [boardData, setBoardData] = useState<BoardHeader | undefined>(undefined);
-    const [boardLabels, setBoardLabels] = useState<Label[]>([]);
     const [editingLabel, setEditingLabel] = useState<Label | undefined>(undefined);
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const params = useParams();
@@ -27,48 +22,9 @@ const BoardSettingsPage = (): React.JSX.Element => {
     const sockCtx = useSocket();
     const trz = useTRZ();
     const navigate = useNavigate();
-    useRoom(RoomType.DATA, boardId, false);
 
-    useEffect(() => {
-        const fetchBoardData = async () => {
-            if (!boardId || !sockCtx.connected) {
-                return;
-            }
-            try {
-                const boardRes = await getBoardData(sockCtx, boardId);
-                setBoardLabels(boardRes?.labels ?? []);
-                setBoardData(boardRes);
-                trz.setBoardData(boardRes);
-                setTitle(`${boardRes?.name ?? 'Board'} Settings | Terrazzo`);
-            } catch (err) {
-                notify(NoteType.BOARD_DATA_ERROR, err);
-                return;
-            }
-        };
-        fetchBoardData();
-        return () => {
-            trz.setBoardData(undefined);
-        };
-    }, [boardId, sockCtx.connected]);
-
-    useSocketListener<ServerSE.UPDATE_BOARD_FIELD>(ServerSE.UPDATE_BOARD_FIELD, (payload) => {
-        if (boardId !== payload.id) {
-            return;
-        }
-        setBoardData((prev) => {
-            if (!prev) {
-                return prev;
-            }
-            return updateBaseFromPartial(prev, payload);
-        });
-    });
-
-    useSocketListener<ServerSE.UPDATE_BOARD_LABELS>(ServerSE.UPDATE_BOARD_LABELS, (payload) => {
-        if (boardId !== payload.boardId) {
-            return;
-        }
-        setBoardLabels(payload.labels);
-    });
+    const { boardData, boardLabels } = useBoard(boardId);
+    setTitle(`${boardData?.name ?? 'Board'} Settings | Terrazzo`);
 
     const isValidLabel = (l?: Label) => {
         return l && l.name.trim().length > 0 && l.color.length === 7;
@@ -169,7 +125,7 @@ const BoardSettingsPage = (): React.JSX.Element => {
                                     required
                                     value={boardData.name ?? ''}
                                     onChange={(e) => {
-                                        setBoardData({ ...boardData, name: e.target.value });
+                                        // setBoardData({ ...boardData, name: e.target.value });
                                         setIsDirty(true);
                                     }}
                                 />
@@ -182,7 +138,7 @@ const BoardSettingsPage = (): React.JSX.Element => {
                                     placeholder=""
                                     value={boardData.boardCode ?? ''}
                                     onChange={(e) => {
-                                        setBoardData({ ...boardData, boardCode: e.target.value });
+                                        // setBoardData({ ...boardData, boardCode: e.target.value });
                                         setIsDirty(true);
                                     }}
                                 />
