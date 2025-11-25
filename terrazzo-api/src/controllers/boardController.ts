@@ -15,7 +15,7 @@ export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefine
         throw new Error('Board not found');
     }
 
-    const projectMembers = await getMembersInOrg(moduleModel.parentId);
+    const orgMembers = await getMembersInOrg(moduleModel.orgId);
 
     try {
         const board: BoardRes = {
@@ -24,7 +24,7 @@ export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefine
             type: TrzModuleType.Board,
             lists: await getListAndCardIdsOnBoard(boardID, false),
             labels: await getLabelsByBoardId(boardID),
-            members: projectMembers,
+            members: orgMembers,
         };
         return board;
     } catch (e) {

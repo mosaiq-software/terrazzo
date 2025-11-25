@@ -26,7 +26,7 @@ export const createNewDocument = async (title: string, parentId: UID, createdByU
     return docHeader;
 };
 
-export const getDocumentById = async (id: DocumentId) => {
+export const getDocumentById = async (id: DocumentId): Promise<DocumentHeader | undefined> => {
     const docModule = await getModuleByIdDb(id);
     const docModel = await getDocumentByIdDb(id);
     if (!docModule || !docModel) {
@@ -40,10 +40,10 @@ export const getDocumentById = async (id: DocumentId) => {
     return document;
 };
 
-export const modifyDocument = async (id: DocumentId, updates: Partial<DocumentHeader>, byUserId: UserId) => {
+export const modifyDocument = async (id: DocumentId, updates: Partial<DocumentHeader>, byUserId: UserId): Promise<DocumentHeader | undefined> => {
     updates.lastModifiedAt = Date.now();
     updates.lastModifiedByUserId = byUserId;
     await updateDocumentDb(id, updates);
-    const updatedDocument = await getDocumentByIdDb(id);
+    const updatedDocument = await getDocumentById(id);
     return updatedDocument;
 };

@@ -1,8 +1,8 @@
 import { Button, ButtonProps } from '@mantine/core';
-import { forwardRef } from 'react';
+import React, { forwardRef } from 'react';
 
 interface ContextMenuButtonProps extends Omit<ButtonProps, 'children'> {
-    icon: any;
+    icon: React.ReactNode;
     text: string;
     onClick: () => void;
 }
