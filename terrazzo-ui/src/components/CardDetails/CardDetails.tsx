@@ -10,6 +10,7 @@ import { useUser } from '@trz/contexts/user-context';
 import { updateCardAssignee, updateCardField } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
+import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { IDLE_TIMEOUT_MS } from '@trz/util/textUtils';
@@ -34,6 +35,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
     const clipboard = useClipboard({ timeout: 500 });
     const card = useCard(props.cardId, false, true);
     useCatchSaveKey();
+    const boardMeta = useBoardMetadata();
 
     const onCloseModal = () => {
         props.onClose();
@@ -191,8 +193,14 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                     >
                         <Group>
                             <PriorityButtons card={card} />
-                            <LabelsMenu card={card} />
-                            <AssigneeMenu card={card} />
+                            <LabelsMenu
+                                card={card}
+                                boardLabels={boardMeta.labels}
+                            />
+                            <AssigneeMenu
+                                card={card}
+                                boardMembers={boardMeta.members}
+                            />
                             <Tooltip label={`${joinedCard ? 'Leave' : 'Join'} Card`}>
                                 <ActionIcon
                                     variant="subtle"

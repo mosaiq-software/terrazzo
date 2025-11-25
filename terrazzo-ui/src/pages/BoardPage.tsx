@@ -3,7 +3,7 @@ import { DragAbortEvent, DragCancelEvent, DragOverEvent } from '@dnd-kit/core/di
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Container } from '@mantine/core';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardHeader, BoardId, CardId, ListId, UID } from '@mosaiq/terrazzo-common/types';
+import { BoardId, BoardRes, CardId, Label, ListId, Member, UID } from '@mosaiq/terrazzo-common/types';
 import { arrayMoveInPlace, updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import CardDetails from '@trz/components/CardDetails/CardDetails';
 import CreateList from '@trz/components/CreateList';
@@ -22,15 +22,29 @@ import { setTitle } from '@trz/util/tabUtils';
 import CollaborativeMouseTracker from '@trz/wrappers/collaborativeMouseTracker';
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 interface BoardContextType {
     listToCardsMap: Map<ListId, CardId[]>;
 }
 export const BoardContext = createContext<BoardContextType | undefined>(undefined);
 
+interface BoardMetadataContextType {
+    labels: Label[];
+    members: Member[];
+    id: BoardId;
+}
+const BoardMetadataContext = createContext<BoardMetadataContextType | undefined>(undefined);
+export const useBoardMetadata = () => {
+    const context = React.useContext(BoardMetadataContext);
+    if (!context) {
+        throw new Error('useBoardMetadata must be used within a BoardMetadataContext.Provider');
+    }
+    return context;
+};
+
 const BoardPage = (): React.JSX.Element => {
-    const [boardData, setBoardData] = useState<BoardHeader | undefined>();
+    const [boardData, setBoardData] = useState<BoardRes | undefined>();
     const [draggingObject, setDraggingObject] = useState<{ list?: ListId; card?: CardId }>({});
     const [activeObject, setActiveObject] = useState<ListId | CardId | null>(null);
     const [openedCard, setOpenedCard] = useState<CardId | undefined>();
@@ -40,7 +54,6 @@ const BoardPage = (): React.JSX.Element => {
     const cardId = params.cardId as CardId;
     const sockCtx = useSocket();
     const trz = useTRZ();
-    const navigate = useNavigate();
     const [listToCardsMap, setListMap] = useMap<ListId, CardId[]>();
     const [cardToListMap, setCardMap] = useMap<CardId, ListId>();
     const listKeys = Array.from(listToCardsMap.keys());
@@ -91,6 +104,7 @@ const BoardPage = (): React.JSX.Element => {
                 if (!cardId) {
                     setTitle(`${boardRes.name} | Terrazzo`);
                 }
+                trz.setPageTitle(boardRes.name ?? '');
 
                 const tempListMap = new Map<ListId, CardId[]>();
                 const tempCardMap = new Map<CardId, ListId>();
@@ -121,9 +135,6 @@ const BoardPage = (): React.JSX.Element => {
                 for (const key of toRemove) {
                     sessionStorage.removeItem(key);
                 }
-
-                // set the board header in the TRZ context
-                trz.setBoardData(boardRes);
             } catch (err) {
                 notify(NoteType.BOARD_DATA_ERROR, err);
                 return;
@@ -131,17 +142,23 @@ const BoardPage = (): React.JSX.Element => {
         };
         fetchBoardData();
         return () => {
-            // clear the board header when leaving the page
-            trz.setBoardData(undefined);
+            trz.setPageTitle('');
         };
     }, [boardId, sockCtx.connected, cardId]);
 
     useSocketListener<ServerSE.UPDATE_BOARD_FIELD>(ServerSE.UPDATE_BOARD_FIELD, (payload) => {
+        if (payload.id !== boardId) {
+            return;
+        }
+        if (payload.name) {
+            setTitle(`${payload.name} | Terrazzo`);
+            trz.setPageTitle(payload.name);
+        }
         setBoardData((prev) => {
             if (!prev) {
                 return prev;
             }
-            return { ...updateBaseFromPartial(prev, payload) };
+            return { ...updateBaseFromPartial(prev, payload as Partial<BoardRes>) };
         });
     });
 
@@ -437,51 +454,59 @@ const BoardPage = (): React.JSX.Element => {
                     flexWrap: 'nowrap',
                 }}
             >
-                <DndContext
-                    sensors={sensors}
-                    collisionDetection={collisionDetectionStrategy}
-                    onDragEnd={handleDragEnd}
-                    onDragOver={handleDragOver}
-                    onDragStart={handleDragStart}
-                    onDragAbort={handleDragAbort}
-                    onDragCancel={handleDragCancel}
-                    measuring={{
-                        droppable: {
-                            strategy: MeasuringStrategy.Always,
-                        },
+                <BoardMetadataContext.Provider
+                    value={{
+                        labels: boardData.labels,
+                        members: boardData.members,
+                        id: boardData.id,
                     }}
                 >
-                    <BoardContext.Provider
-                        value={{
-                            listToCardsMap,
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={collisionDetectionStrategy}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={handleDragOver}
+                        onDragStart={handleDragStart}
+                        onDragAbort={handleDragAbort}
+                        onDragCancel={handleDragCancel}
+                        measuring={{
+                            droppable: {
+                                strategy: MeasuringStrategy.Always,
+                            },
                         }}
                     >
-                        <SortableContext
-                            items={listKeys}
-                            strategy={horizontalListSortingStrategy}
+                        <BoardContext.Provider
+                            value={{
+                                listToCardsMap,
+                            }}
                         >
-                            {memoizedSortableLists}
-                        </SortableContext>
-                        {createPortal(<DragOverlay dropAnimation={boardDropAnimation}>{activeObject ? (listToCardsMap.has(activeObject) ? renderListDragOverlay(activeObject, boardData.boardCode ?? '#') : renderCardDragOverlay(activeObject, boardData.boardCode ?? '#')) : null}</DragOverlay>, document.body)}
-                    </BoardContext.Provider>
-                </DndContext>
-                <CreateList
-                    onCreateList={async (title) => {
-                        try {
-                            await createList(sockCtx, boardData.id, title);
-                        } catch (e) {
-                            notify(NoteType.LIST_CREATION_ERROR, e);
-                            return;
-                        }
-                    }}
-                />
-                {openedCard && (
-                    <CardDetails
-                        cardId={openedCard}
-                        onClose={closeModal}
-                        boardCode={boardData.boardCode}
+                            <SortableContext
+                                items={listKeys}
+                                strategy={horizontalListSortingStrategy}
+                            >
+                                {memoizedSortableLists}
+                            </SortableContext>
+                            {createPortal(<DragOverlay dropAnimation={boardDropAnimation}>{activeObject ? (listToCardsMap.has(activeObject) ? renderListDragOverlay(activeObject, boardData.boardCode ?? '#') : renderCardDragOverlay(activeObject, boardData.boardCode ?? '#')) : null}</DragOverlay>, document.body)}
+                        </BoardContext.Provider>
+                    </DndContext>
+                    <CreateList
+                        onCreateList={async (title) => {
+                            try {
+                                await createList(sockCtx, boardData.id, title);
+                            } catch (e) {
+                                notify(NoteType.LIST_CREATION_ERROR, e);
+                                return;
+                            }
+                        }}
                     />
-                )}
+                    {openedCard && (
+                        <CardDetails
+                            cardId={openedCard}
+                            onClose={closeModal}
+                            boardCode={boardData.boardCode}
+                        />
+                    )}
+                </BoardMetadataContext.Provider>
             </CollaborativeMouseTracker>
         </Container>
         // </Profiler>
