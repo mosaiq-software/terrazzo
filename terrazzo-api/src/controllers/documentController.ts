@@ -1,6 +1,6 @@
 import { DocumentHeader, DocumentId, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common/types';
 import { createDocumentDb, DocumentModelType, getDocumentByIdDb, updateDocumentDb } from '@trz-api/persistence/documentPersistence';
-import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
+import { getModuleByIdDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
 import { createNewModule } from './moduleController';
 import { createTextBlockWithPlaintext } from './textBlockController';
 
@@ -44,6 +44,7 @@ export const modifyDocument = async (id: DocumentId, updates: Partial<DocumentHe
     updates.lastModifiedAt = Date.now();
     updates.lastModifiedByUserId = byUserId;
     await updateDocumentDb(id, updates);
+    await updateModuleDb(id, updates);
     const updatedDocument = await getDocumentById(id);
     return updatedDocument;
 };
