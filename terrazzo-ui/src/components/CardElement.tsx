@@ -5,7 +5,7 @@ import { AvatarRow } from '@trz/components/AvatarRow';
 import { PriorityChip } from '@trz/components/CardDetails/PriorityButtons';
 import { getCardNumber } from '@trz/util/boardUtils';
 import { useContextMenu } from 'mantine-contextmenu';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { useCard } from '../hooks/useCard';
 import { CardContextMenu } from './CardDetails/CardContextMenu';
 import { LabelDisplay } from './CardDetails/LabelsMenu';

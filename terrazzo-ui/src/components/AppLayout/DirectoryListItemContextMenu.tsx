@@ -49,10 +49,10 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
     }
 
     return (
-        <ContextMenuLayout>
+        <ContextMenuLayout title={props.parentName}>
             {props.allowAddItem && (
                 <ContextMenuSelectorMenu
-                    title={`Create New in ${props.parentName}`}
+                    title={`Create New`}
                     icon={<MdAdd size={16} />}
                     items={[
                         { id: TrzModuleType.Directory, label: 'Directory' },
