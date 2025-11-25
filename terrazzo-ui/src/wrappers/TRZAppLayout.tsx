@@ -3,6 +3,7 @@ import { useHotkeys, useLocalStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { DirectoryListItemContextMenu } from '@trz/components/AppLayout/DirectoryListItemContextMenu';
 import { DirectoryTree } from '@trz/components/AppLayout/DirectoryTree';
 import { OrganizationSelectorMenu } from '@trz/components/AppLayout/OrganizationSelectorMenu';
 import { SearchBar } from '@trz/components/AutoComplete/Searchbar';
@@ -12,6 +13,7 @@ import { useTRZ } from '@trz/contexts/TRZ-context';
 import { replyInvite } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
+import { useContextMenu } from 'mantine-contextmenu';
 import { MdOutlineSettings } from 'react-icons/md';
 import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
@@ -26,6 +28,8 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
     const location = useLocation();
     const params = useParams();
     const boardId = params.boardId;
+    const { showContextMenu } = useContextMenu();
+
     const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage<boolean>({ key: LocalStorageKey.SIDEBAR_COLLAPSED, defaultValue: false });
 
     useHotkeys([
@@ -138,12 +142,49 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                 <Divider />
                 <OrganizationSelectorMenu sidebarCollapsed={sidebarCollapsed} />
                 <Divider />
-                {trz.userDirectoryStructure && (
-                    <DirectoryTree
-                        sidebarCollapsed={sidebarCollapsed}
-                        directoryTreeRoot={trz.userDirectoryStructure}
+                <Box
+                    style={{
+                        flexGrow: 1,
+                        overflowY: 'auto',
+                        position: 'relative',
+                    }}
+                >
+                    <Box
+                        style={{
+                            position: 'relative',
+                            zIndex: 1,
+                        }}
+                    >
+                        {trz.userDirectoryStructure && (
+                            <DirectoryTree
+                                sidebarCollapsed={sidebarCollapsed}
+                                directoryTreeRoot={trz.userDirectoryStructure}
+                            />
+                        )}
+                    </Box>
+                    <Box
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            zIndex: 0,
+                        }}
+                        onContextMenuCapture={showContextMenu((close) =>
+                            trz.selectedOrganization ? (
+                                <DirectoryListItemContextMenu
+                                    onClose={close}
+                                    parentId={trz.selectedOrganization.id}
+                                    parentName={trz.selectedOrganization.name}
+                                    allowAddItem={true}
+                                />
+                            ) : (
+                                <></>
+                            )
+                        )}
                     />
-                )}
+                </Box>
             </Stack>
             <Stack
                 flex={1}

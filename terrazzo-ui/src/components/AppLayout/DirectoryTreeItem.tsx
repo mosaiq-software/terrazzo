@@ -55,8 +55,10 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 }}
                 onContextMenuCapture={showContextMenu((close) => (
                     <DirectoryListItemContextMenu
-                        cardId={props.cardId}
                         onClose={close}
+                        parentId={props.directoryListItem.id}
+                        parentName={props.directoryListItem.name}
+                        allowAddItem={props.directoryListItem.type === TrzModuleType.Directory}
                     />
                 ))}
             >
