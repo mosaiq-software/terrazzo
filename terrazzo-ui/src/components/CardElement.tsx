@@ -3,6 +3,7 @@ import { useInViewport } from '@mantine/hooks';
 import { CardId } from '@mosaiq/terrazzo-common/types';
 import { AvatarRow } from '@trz/components/AvatarRow';
 import { PriorityChip } from '@trz/components/CardDetails/PriorityButtons';
+import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';
 import { useContextMenu } from 'mantine-contextmenu';
 import React from 'react';
@@ -21,6 +22,7 @@ const CardElement = (props: CardElementProps) => {
     const { ref: viewportRef, inViewport } = useInViewport();
     const card = useCard(props.cardId, props.dragging || props.isOverlay, inViewport);
     const { showContextMenu } = useContextMenu();
+    const boardMeta = useBoardMetadata();
 
     const onOpenCardModal = () => {
         if (!card || props.dragging || props.isOverlay) {
@@ -62,6 +64,8 @@ const CardElement = (props: CardElementProps) => {
                 <CardContextMenu
                     cardId={props.cardId}
                     onClose={close}
+                    boardLabels={boardMeta.labels}
+                    boardMembers={boardMeta.members}
                 />
             ))}
         >
@@ -71,6 +75,7 @@ const CardElement = (props: CardElementProps) => {
                     <LabelDisplay
                         labels={card.labels}
                         size="xs"
+                        boardLabels={boardMeta.labels}
                     />
                     <Text
                         lineClamp={7}

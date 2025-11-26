@@ -69,7 +69,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                             gap={8}
                             px={0}
                             onClick={() => {
-                                trz.selectOrganization(org);
+                                trz.selectOrganization(org.id);
                                 navigate(`/org/${org.id}`);
                             }}
                         >

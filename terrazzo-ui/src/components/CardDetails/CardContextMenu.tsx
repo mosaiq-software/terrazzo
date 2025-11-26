@@ -1,10 +1,9 @@
 import { Avatar, Divider } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { Priority } from '@mosaiq/terrazzo-common/constants';
-import { CardId } from '@mosaiq/terrazzo-common/types';
+import { CardId, Label, Member } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useTRZ } from '@trz/contexts/TRZ-context';
 import { useUser } from '@trz/contexts/user-context';
 import { createDuplicateCard, updateCardAssignee, updateCardField, updateCardsLabels } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
@@ -19,9 +18,10 @@ import { priorityColors, PriorityIcons } from './PriorityButtons';
 interface CardContextMenuProps {
     cardId: CardId;
     onClose: () => void;
+    boardLabels: Label[];
+    boardMembers: Member[];
 }
 export const CardContextMenu = (props: CardContextMenuProps) => {
-    const trzCtx = useTRZ();
     const sockCtx = useSocket();
     const userCtx = useUser();
     const card = useCard(props.cardId, false, true);
@@ -34,11 +34,11 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
 
     return (
         <ContextMenuLayout>
-            {!!trzCtx.boardData?.labels.length && (
+            {!!props.boardLabels.length && (
                 <ContextMenuSelectorMenu
                     title={`Labels${card.labels.length > 0 ? ` (${card.labels.length})` : ''}`}
                     icon={<MdLabel size={16} />}
-                    items={trzCtx.boardData.labels.map((label) => ({
+                    items={props.boardLabels.map((label) => ({
                         id: label.id,
                         label: label.name,
                         color: label.color,
@@ -76,7 +76,7 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
                 title={`Assignees${card.assignees.length > 0 ? ` (${card.assignees.length})` : ''}`}
                 icon={<FaUserPlus size={16} />}
                 items={
-                    trzCtx.boardData?.members.map((memRec) => ({
+                    props.boardMembers.map((memRec) => ({
                         id: memRec.user.id,
                         label: fullName(memRec.user),
                         rightIcon: card.assignees.includes(memRec.user.id) ? <MdCheckBox size={16} /> : <MdOutlineCheckBoxOutlineBlank size={16} />,

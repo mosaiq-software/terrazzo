@@ -14,7 +14,6 @@ import { replyInvite } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useContextMenu } from 'mantine-contextmenu';
-import { MdOutlineSettings } from 'react-icons/md';
 import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
 
@@ -203,45 +202,12 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                     }}
                 >
                     <Group>
-                        {trz.boardData && (
-                            <Text
-                                pl="lg"
-                                c="#fff"
-                                onClick={() => {
-                                    navigate(`/board/${trz.boardData?.id}`);
-                                }}
-                                style={{
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                {trz.boardData?.boardCode ? `[${trz.boardData?.boardCode}] ` : ''}
-                                {trz.boardData?.name}
-                            </Text>
-                        )}
-                        {boardId && (
-                            <Tooltip
-                                label="Board Settings"
-                                openDelay={500}
-                                withArrow
-                            >
-                                <Button
-                                    variant="subtle"
-                                    w="fit-content"
-                                    onClick={() => {
-                                        if (location.pathname.endsWith('/settings')) {
-                                            navigate(`/board/${boardId}`);
-                                        } else {
-                                            navigate(`/board/${boardId}/settings`);
-                                        }
-                                    }}
-                                >
-                                    <MdOutlineSettings
-                                        size={'1.25rem'}
-                                        color="white"
-                                    />
-                                </Button>
-                            </Tooltip>
-                        )}
+                        <Text
+                            pl="lg"
+                            c="#fff"
+                        >
+                            {trz.pageTitle}
+                        </Text>
                     </Group>
                     <Group>
                         <Popover

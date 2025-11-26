@@ -2,7 +2,6 @@ import { GithubAuth } from '@trz/pages/auth/github';
 import LoginPage from '@trz/pages/auth/LoginPage';
 import { SetUpAccount } from '@trz/pages/auth/SetUpAccount';
 import BoardPage from '@trz/pages/BoardPage';
-import BoardSettingsPage from '@trz/pages/BoardSettingsPage';
 import HomePage from '@trz/pages/HomePage';
 import LandingPage from '@trz/pages/LandingPage';
 import OrganizationPage from '@trz/pages/OrganizationPage';
@@ -48,10 +47,6 @@ const Router = () => {
                 <Route
                     path="/card/:cardId"
                     element={<BoardPage />}
-                />
-                <Route
-                    path="/board/:boardId/settings"
-                    element={<BoardSettingsPage />}
                 />
                 <Route
                     path="/org/:orgId/:tabId?"

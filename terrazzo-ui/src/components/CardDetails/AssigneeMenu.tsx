@@ -1,18 +1,17 @@
 import { Avatar, Button, Menu, Stack } from '@mantine/core';
-import { Card } from '@mosaiq/terrazzo-common/types';
+import { Card, Member } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useTRZ } from '@trz/contexts/TRZ-context';
 import { updateCardAssignee } from '@trz/emitters';
 import { MdOutlineAddCircle } from 'react-icons/md';
 import { AvatarRow } from '../AvatarRow';
 
 interface AssigneeMenuProps {
     card: Card;
+    boardMembers: Member[];
 }
 
 export const AssigneeMenu = (props: AssigneeMenuProps) => {
-    const trzCtx = useTRZ();
     const sockCtx = useSocket();
 
     return (
@@ -48,7 +47,7 @@ export const AssigneeMenu = (props: AssigneeMenuProps) => {
             >
                 <Menu.Label>Assignees</Menu.Label>
                 <Stack gap={1}>
-                    {trzCtx.boardData?.members.map((memRec) => {
+                    {props.boardMembers.map((memRec) => {
                         const isMember = props.card.assignees.includes(memRec.user.id);
                         return (
                             <Button

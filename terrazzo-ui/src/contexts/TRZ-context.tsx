@@ -1,8 +1,8 @@
 import { useLocalStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardRes, ModuleHeaderWithChildren, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
-import { createOrganization, getOrganizationsForUser, getUserDirectoryStructure } from '@trz/emitters';
+import { ModuleHeaderWithChildren, Organization, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
+import { createOrganization, getOrganizationData, getOrganizationsForUser, getUserDirectoryStructure } from '@trz/emitters';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -13,13 +13,13 @@ import { useUser } from './user-context';
 export type TRZContextType = {
     animationDuration: number;
     navbarHeight: number;
-    boardData: BoardRes | undefined;
-    setBoardData: React.Dispatch<React.SetStateAction<BoardRes | undefined>>;
-    selectedOrganization: OrganizationHeader | undefined;
-    selectOrganization: (org: OrganizationHeader) => void;
+    selectedOrganization: Organization | undefined;
+    selectOrganization: (orgId: OrganizationId) => void;
     allOrganizations: OrganizationHeader[];
     userDirectoryStructure: ModuleHeaderWithChildren | undefined;
     createOrganization: (orgName: string) => Promise<OrganizationHeader | undefined>;
+    pageTitle: string;
+    setPageTitle: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const TRZContext = createContext<TRZContextType | undefined>(undefined);
@@ -29,11 +29,11 @@ const TRZProvider: React.FC<any> = ({ children }) => {
     const sockCtx = useSocket();
     const [animationDuration] = useState<number>(500);
     const [navbarHeight, setNavbarHeight] = useState<number>(50);
-    const [boardData, setBoardData] = useState<BoardRes | undefined>(undefined);
-    const [selectedOrganization, setSelectedOrganization] = useState<OrganizationHeader | undefined>(undefined);
+    const [selectedOrganization, setSelectedOrganization] = useState<Organization | undefined>(undefined);
     const [allOrganizations, setAllOrganizations] = useState<OrganizationHeader[]>([]);
     const [lastSelectedOrgId, setLastSelectedOrgId] = useLocalStorage<OrganizationId | undefined>({ key: LocalStorageKey.LAST_SELECTED_ORG, defaultValue: undefined });
     const [userDirectoryStructure, setUserDirectoryStructure] = useState<ModuleHeaderWithChildren | undefined>(undefined);
+    const [pageTitle, setPageTitle] = useState<string>('');
     useRoom(RoomType.DATA, selectedOrganization?.id, false);
 
     useEffect(() => {
@@ -52,8 +52,10 @@ const TRZProvider: React.FC<any> = ({ children }) => {
                         initialOrg = matchedOrg;
                     }
                 }
-                setSelectedOrganization(initialOrg);
-                setLastSelectedOrgId(initialOrg?.id);
+
+                if (initialOrg) {
+                    selectOrganization(initialOrg.id);
+                }
             } catch (e: any) {
                 notify(NoteType.ORG_DATA_ERROR, e);
                 setAllOrganizations([]);
@@ -76,15 +78,6 @@ const TRZProvider: React.FC<any> = ({ children }) => {
         fetchUserDirectoryStructure();
     }, [userCtx.userData?.id, selectedOrganization, sockCtx.connected]);
 
-    useSocketListener<ServerSE.UPDATE_BOARD_LABELS>(ServerSE.UPDATE_BOARD_LABELS, (payload) => {
-        setBoardData((prev) => {
-            if (prev?.id !== payload.boardId) {
-                return prev;
-            }
-            return { ...prev, labels: payload.labels };
-        });
-    });
-
     useSocketListener<ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE>(
         ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE,
         (payload) => {
@@ -96,9 +89,17 @@ const TRZProvider: React.FC<any> = ({ children }) => {
         [selectedOrganization, userCtx.userData]
     );
 
-    const selectOrganization = (org: OrganizationHeader) => {
-        setSelectedOrganization(org);
-        setLastSelectedOrgId(org.id);
+    const selectOrganization = async (orgId: OrganizationId) => {
+        try {
+            setLastSelectedOrgId(orgId);
+            const fullOrg = await getOrganizationData(sockCtx, orgId);
+            if (!fullOrg) {
+                throw new Error(`Failed to fetch organization data for ID ${orgId}.`);
+            }
+            setSelectedOrganization(fullOrg);
+        } catch (e: any) {
+            notify(NoteType.ORG_DATA_ERROR, e);
+        }
     };
 
     const createOrg = async (orgName: string) => {
@@ -128,13 +129,13 @@ const TRZProvider: React.FC<any> = ({ children }) => {
             value={{
                 animationDuration,
                 navbarHeight,
-                boardData,
-                setBoardData,
                 selectedOrganization,
                 selectOrganization,
                 allOrganizations,
                 userDirectoryStructure,
                 createOrganization: createOrg,
+                pageTitle,
+                setPageTitle,
             }}
         >
             {children}

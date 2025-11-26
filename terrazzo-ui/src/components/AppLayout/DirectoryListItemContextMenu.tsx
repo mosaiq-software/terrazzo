@@ -1,13 +1,16 @@
-import { TrzModuleType, UID } from '@mosaiq/terrazzo-common/types';
+import { modals } from '@mantine/modals';
+import { ModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
-import { createBoard, createDocument } from '@trz/emitters';
+import { createDocument } from '@trz/emitters';
 import { createDirectory } from '@trz/emitters/directoryEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdSettings } from 'react-icons/md';
+import { ContextMenuButton } from '../ContextMenu/ContextMenuButton';
 import { ContextMenuLayout } from '../ContextMenu/ContextMenuLayout';
 import { ContextMenuSelectorMenu } from '../ContextMenu/ContextMenuSelectorMenu';
 
 interface DirectoryListItemContextMenuProps {
+    moduleHeader?: ModuleHeader;
     parentId: UID;
     parentName: string;
     allowAddItem?: boolean;
@@ -29,7 +32,11 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
                     await createDocument(sockCtx, 'New Document', props.parentId);
                     return;
                 case TrzModuleType.Board:
-                    await createBoard(sockCtx, 'New Board', '', props.parentId);
+                    modals.openContextModal({
+                        modal: 'board',
+                        title: 'Create New Board',
+                        innerProps: { parentId: props.parentId },
+                    });
                     return;
                 default:
                     notify(NoteType.CARD_UPDATE_ERROR, 'Unknown module type: ' + type);
@@ -42,10 +49,10 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
     }
 
     return (
-        <ContextMenuLayout>
+        <ContextMenuLayout title={props.parentName}>
             {props.allowAddItem && (
                 <ContextMenuSelectorMenu
-                    title={`Create New in ${props.parentName}`}
+                    title={`Create New`}
                     icon={<MdAdd size={16} />}
                     items={[
                         { id: TrzModuleType.Directory, label: 'Directory' },
@@ -58,6 +65,34 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
                     }}
                 />
             )}
+            {!!props.moduleHeader && (
+                <ContextMenuButton
+                    icon={<MdSettings size={16} />}
+                    text={getSettingsTitle(props.moduleHeader.type)}
+                    onClick={() => {
+                        modals.openContextModal({
+                            modal: 'moduleSettings',
+                            title: 'Settings',
+                            innerProps: { moduleHeader: props.moduleHeader },
+                            size: 'xl',
+                        });
+                        props.onClose();
+                    }}
+                />
+            )}
         </ContextMenuLayout>
     );
+};
+
+const getSettingsTitle = (moduleType: TrzModuleType) => {
+    switch (moduleType) {
+        case TrzModuleType.Board:
+            return 'Board Settings';
+        case TrzModuleType.Document:
+            return 'Document Settings';
+        case TrzModuleType.Directory:
+            return 'Directory Settings';
+        default:
+            return 'Module Settings';
+    }
 };

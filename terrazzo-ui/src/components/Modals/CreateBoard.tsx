@@ -11,7 +11,7 @@ import { NoteType, notify } from '@trz/util/notifications';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const CreateBoard = (props: ContextModalProps<{ modalBody: string; parentId: UID }>): React.JSX.Element => {
+const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Element => {
     const [boardName, setBoardName] = React.useState('');
     const [boardAbbreviation, setBoardAbbreviation] = React.useState('');
     const [errorName, setErrorName] = useState('');
@@ -132,4 +132,4 @@ const CreateBoard = (props: ContextModalProps<{ modalBody: string; parentId: UID
     );
 };
 
-export const CreateBoardModal = (props: ContextModalProps<{ modalBody: string; parentId: UID }>) => <CreateBoard {...props} />;
+export const CreateBoardModal = (props: ContextModalProps<{ parentId: UID }>) => <CreateBoard {...props} />;
