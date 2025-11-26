@@ -40,7 +40,6 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
     return (
         <Fieldset legend="Permissions">
             <Stack>
-                {/* Perm rows for "anyopne on internet", "anyone in org", and "<user>" for each user */}
                 <PermissionRow
                     title="Anyone on the Internet"
                     icon={<IoMdGlobe />}

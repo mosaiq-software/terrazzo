@@ -38,8 +38,8 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
                 labelProps={{
                     c: 'white',
                 }}
-                label="Document Name"
-                placeholder="My Document"
+                label="Board Name"
+                placeholder="My Board"
                 required
                 value={boardEdits.name ?? boardData.name ?? ''}
                 onChange={(e) => {

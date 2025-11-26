@@ -14,7 +14,7 @@ import { useDocument } from '@trz/hooks/useDocument';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
 import { IDLE_TIMEOUT_MS } from '@trz/util/textUtils';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 const DocumentPage = (): React.JSX.Element => {
@@ -25,8 +25,10 @@ const DocumentPage = (): React.JSX.Element => {
     const idle = useIdle(IDLE_TIMEOUT_MS);
     const usr = useUser();
     const { document, lastEditor } = useDocument(docId);
-    setTitle(`${document?.name ?? 'Document'} | Terrazzo`);
     useCatchSaveKey();
+    useEffect(() => {
+        setTitle(`${document?.name ?? 'Document'} | Terrazzo`);
+    }, [document?.name]);
 
     if (document === undefined) {
         return <Loader />;

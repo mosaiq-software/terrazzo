@@ -53,11 +53,9 @@ const TRZProvider: React.FC<any> = ({ children }) => {
                     }
                 }
 
-                setTimeout(() => {
-                    if (initialOrg) {
-                        selectOrganization(initialOrg.id);
-                    }
-                }, 100);
+                if (initialOrg) {
+                    selectOrganization(initialOrg.id);
+                }
             } catch (e: any) {
                 notify(NoteType.ORG_DATA_ERROR, e);
                 setAllOrganizations([]);
