@@ -68,6 +68,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                     px={0}
                     variant={selected ? 'light' : 'subtle'}
                     onClick={handleClick}
+                    fullWidth
                 >
                     <DirectoryListItemIcon
                         moduleType={props.directoryListItem.type}
