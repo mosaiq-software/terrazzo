@@ -71,6 +71,10 @@ const BoardPage = (): React.JSX.Element => {
     );
 
     useEffect(() => {
+        setBoardId(params.boardId as BoardId);
+    }, [params.boardId]);
+
+    useEffect(() => {
         const fetchBoardData = async () => {
             if (!boardId && !cardId) {
                 console.error('No boardId or cardId found in url');
