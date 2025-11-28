@@ -156,7 +156,7 @@ const trimDirectoryTreeForUser = (rootModule: ModuleHeaderWithChildren, userId: 
      * Recursively trims the directory tree for the user
      */
     const recursivelyTrim = (module: ModuleHeaderWithChildren): ModuleHeaderWithChildren | null => {
-        if (!userHasAccess(module)) {
+        if (!userHasAccess(module) && module.type !== TrzModuleType.Organization) {
             return null;
         }
         if (!module.children || module.children.length === 0) {
