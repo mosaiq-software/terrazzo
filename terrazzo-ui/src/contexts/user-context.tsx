@@ -1,6 +1,7 @@
 import { readSessionStorageValue, useSessionStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { User, UserHeader } from '@mosaiq/terrazzo-common/types';
+import { useDev } from '@trz/dev/devContext';
 import { getUserDataFromGithub, revokeUserAccessToGithubAuth, tryLoginWithGithub } from '@trz/util/githubAuth';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setUpUserData } from '@trz/util/userUtils';
@@ -22,6 +23,7 @@ export const DEFAULT_AUTHED_ROUTE = '/dashboard';
 export const DEFAULT_NO_AUTH_ROUTE = '/login';
 
 const UserProvider: React.FC<any> = ({ children }) => {
+    const devCtx = useDev();
     const [githubAuthToken, setGithubAuthToken] = useState<string | null>(null);
     const [loginRouteDestination, setLoginRouteDestination] = useSessionStorage<string | null>({ key: 'loginRouteDestination' });
     const [userData, setUser] = useState<UserHeader | null>(null);
@@ -30,7 +32,6 @@ const UserProvider: React.FC<any> = ({ children }) => {
     useEffect(() => {
         const tryLogin = async () => {
             const savedToken = localStorage.getItem(LocalStorageKey.GITHUB_ACCESS_TOKEN);
-            console.log('Trying saved token:', savedToken);
             if (!savedToken) {
                 return;
             }
@@ -108,7 +109,7 @@ const UserProvider: React.FC<any> = ({ children }) => {
                 githubAuthToken,
                 githubLogin,
                 logoutAll,
-                userData,
+                userData: devCtx.DEV_selectedUserOverride || userData,
                 setUser,
                 setUpAccount,
             }}

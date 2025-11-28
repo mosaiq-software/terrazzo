@@ -1,6 +1,6 @@
-import { Model, DataTypes, Sequelize } from 'sequelize';
-import { sequelize } from '@trz-api/utils/dbHelper';
 import { UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { sequelize } from '@trz-api/utils/dbHelper';
+import { DataTypes, Model, Sequelize } from 'sequelize';
 
 class UserModel extends Model {}
 UserModel.init(
@@ -37,18 +37,14 @@ export const getUserByGithubId = async (githubId: string) => {
     )?.toJSON() as UserHeader | null;
 };
 
-export const findOrCreateUser = async (user: UserHeader) => {
-    return await UserModel.upsert({
-        where: { id: user.id },
-        defaults: {
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            profilePicture: user.profilePicture,
-            githubUserId: user.githubUserId,
-            archived: false,
-        },
-    });
+export const getAllUsers = async () => {
+    return (
+        await UserModel.findAll({
+            attributes: {
+                exclude: ['createdAt', 'updatedAt'],
+            },
+        })
+    ).map((user) => user.toJSON() as UserHeader);
 };
 
 export const createUser = async (user: UserHeader) => {

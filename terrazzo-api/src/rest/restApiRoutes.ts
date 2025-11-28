@@ -1,5 +1,6 @@
 import { RestRequestBody, RestRequestParams, RestResponse, RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
 import { UserId } from '@mosaiq/terrazzo-common/types';
+import { isDev } from '@mosaiq/terrazzo-common/utils/envUtils';
 import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
 import { checkUsernameTaken, getOrCreateUserByGithubAccessToken, setupUser } from '@trz-api/controllers/userController';
 import { githubAuth, revokeGithubAuth } from '@trz-api/utils/githubUtils';
@@ -108,6 +109,34 @@ router.post(RestRoutes.IMPORT_FROM_TRELLO, async (req, res) => {
     try {
         const boardId = await createTerrazzoBoardFromTrelloBoard(params.parentId, body);
         res.status(200).send(boardId);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.post(RestRoutes.DEV_CREATE_FAKE_USER, async (req, res) => {
+    try {
+        if (!isDev()) {
+            res.status(403).send('Forbidden');
+            return;
+        }
+        const newUser = await import('@trz-api/controllers/devToolsController').then((module) => module.DEV_createNewFakeUser());
+        res.status(200).send(newUser);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.get(RestRoutes.DEV_GET_ALL_DEV_USERS, async (req, res) => {
+    try {
+        if (!isDev()) {
+            res.status(403).send('Forbidden');
+            return;
+        }
+        const devUsers = await import('@trz-api/controllers/devToolsController').then((module) => module.DEV_getAllDevUsers());
+        res.status(200).send(devUsers);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');

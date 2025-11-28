@@ -13,6 +13,7 @@ import { ContextMenuProvider } from 'mantine-contextmenu';
 import 'mantine-contextmenu/styles.layer.css';
 import { BrowserRouter } from 'react-router-dom';
 import { ModuleSettingsModal } from './components/ModuleSettings/ModuleSettingsModal';
+import { DevProvider } from './dev/devContext';
 import Router from './router';
 
 const theme = createTheme({});
@@ -31,17 +32,19 @@ const App = () => {
         >
             <BrowserRouter>
                 <Notifications />
-                <UserProvider>
-                    <SocketProvider>
-                        <TRZProvider>
-                            <ModalsProvider modals={modals}>
-                                <ContextMenuProvider>
-                                    <Router />
-                                </ContextMenuProvider>
-                            </ModalsProvider>
-                        </TRZProvider>
-                    </SocketProvider>
-                </UserProvider>
+                <DevProvider>
+                    <UserProvider>
+                        <SocketProvider>
+                            <TRZProvider>
+                                <ModalsProvider modals={modals}>
+                                    <ContextMenuProvider>
+                                        <Router />
+                                    </ContextMenuProvider>
+                                </ModalsProvider>
+                            </TRZProvider>
+                        </SocketProvider>
+                    </UserProvider>
+                </DevProvider>
             </BrowserRouter>
         </MantineProvider>
     );

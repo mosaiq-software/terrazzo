@@ -32,7 +32,6 @@ export async function checkUsernameTaken(username: string) {
     return user != null;
 }
 
-//Creates
 export async function createNewUser(username: string, firstName: string, lastName: string, profilePicture: string, githubUserId: string) {
     if (username.length > 13) {
         throw new Error('Username must be 13 characters or less');
@@ -60,8 +59,6 @@ export async function createNewUser(username: string, firstName: string, lastNam
 
     return newUser;
 }
-
-//Updates
 
 export async function setupUser(userId: UserId, username: string, firstName: string, lastName: string) {
     const user = await getUserById(userId);

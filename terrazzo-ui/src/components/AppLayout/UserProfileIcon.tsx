@@ -1,6 +1,7 @@
 import { Avatar, Menu, UnstyledButton } from '@mantine/core';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useUser } from '@trz/contexts/user-context';
+import { DevUserSwitcherMenu } from '@trz/dev/devUserSwitcherMenu';
 import { useNavigate } from 'react-router';
 
 export const UserProfileIcon = () => {
@@ -14,6 +15,7 @@ export const UserProfileIcon = () => {
             offset={2}
             withArrow
             arrowPosition="center"
+            trigger="hover"
         >
             <Menu.Target>
                 <UnstyledButton
@@ -37,6 +39,7 @@ export const UserProfileIcon = () => {
                 >
                     Settings
                 </Menu.Item>
+                <DevUserSwitcherMenu />
                 <Menu.Item
                     color="red"
                     onClick={() => {
