@@ -1,17 +1,16 @@
-import { Server } from 'socket.io';
 import { ServerSE, ServerSocketIOEvent, SocketHandshakeAuth } from '@mosaiq/terrazzo-common/socketTypes';
-import { registerCustomSocketEvents } from './socketCustomHandlers';
+import { instrument } from '@socket.io/admin-ui';
+import { getUserPreview } from '@trz-api/controllers/userController';
+import * as socketListeners from '@trz-api/listeners';
+import { YSocketIO } from '@trz-api/utils/y-socket-io';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import { getPrivateGitHubUserData } from './githubUtils';
 import { registerEngineSocketEvents } from './socketEngineHandlers';
 import { SocketData } from './socketTypes';
 import { loginSocket, setSocketData } from './socketUtils';
-import { instrument } from '@socket.io/admin-ui';
-import { getPrivateGitHubUserData } from './githubUtils';
-import { getUserPreview } from '@trz-api/controllers/userController';
-import { createServer } from 'http';
-import { YSocketIO } from '@trz-api/utils/y-socket-io';
-import * as socketListeners from '@trz-api/listeners';
 
-const listenerRegistrars = [registerCustomSocketEvents, registerEngineSocketEvents, ...Object.values(socketListeners)];
+const listenerRegistrars = [registerEngineSocketEvents, ...Object.values(socketListeners)];
 
 const initSockets = () => {
     console.info('Starting sockets');

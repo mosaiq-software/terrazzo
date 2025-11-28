@@ -25,7 +25,6 @@ export interface OrganizationHeader {
 }
 export interface Organization extends OrganizationHeader {
     members: Member[];
-    invites: Invite[];
 }
 
 export interface BoardHeader extends ModuleHeader {
@@ -117,21 +116,13 @@ export interface Member {
     record: MembershipRecord;
 }
 
-export interface InviteRecord {
-    id: InviteId;
-    toUser: UserId;
-    fromUser: UserId;
-    createdAt: number;
-    entityId: UID;
-    userRole: PermissionLevel;
-}
 export interface Invite {
     id: InviteId;
-    toUser: UserHeader;
-    fromUser: UserHeader;
+    forOrganizationId: OrganizationId;
+    maxUses: number | null;
+    uses: number;
+    createdById: UserId;
     createdAt: number;
-    entity: OrganizationHeader;
-    userRole: PermissionLevel;
 }
 
 export interface GithubUserProfile {

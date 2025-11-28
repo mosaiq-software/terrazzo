@@ -1,4 +1,4 @@
-import { Board, BoardId, BoardRes, Card, CardId, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, ModuleHeaderWithChildren, Organization, OrganizationHeader, OrganizationId, PermissionLevel, QueryResult, TextBlock, TextBlockId, UID, UserHeader, UserId } from './types';
+import { Board, BoardId, BoardRes, Card, CardId, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, ModuleHeaderWithChildren, Organization, OrganizationHeader, OrganizationId, QueryResult, TextBlock, TextBlockId, UID, UserHeader, UserId } from './types';
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -36,6 +36,7 @@ export enum ClientSE {
     GET_DOCUMENT = 'GET_DOCUMENT',
     GET_DIRECTORY = 'GET_DIRECTORY',
     GET_USERS_DIRECTORY_STRUCTURE = 'GET_USERS_DIRECTORY_STRUCTURE',
+    GET_INVITES_FOR_ORG = 'GET_INVITES_FOR_ORG',
 
     PREVIEW_ORGANIZATION = 'PREVIEW_ORGANIZATION',
     PREVIEW_USER = 'PREVIEW_USER',
@@ -48,6 +49,7 @@ export enum ClientSE {
     CREATE_DUPLICATE_CARD = 'CREATE_DUPLICATE_CARD',
     CREATE_DOCUMENT = 'CREATE_DOCUMENT',
     CREATE_DIRECTORY = 'CREATE_DIRECTORY',
+    CREATE_INVITE = 'CREATE_INVITE',
 
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
     UPDATE_BOARD_FIELD = 'UPDATE_BOARD_FIELD',
@@ -60,9 +62,9 @@ export enum ClientSE {
     UPDATE_DIRECTORY_FIELD = 'UPDATE_DIRECTORY_FIELD',
 
     DELETE_BOARD_LABEL = 'DELETE_BOARD_LABEL',
+    DELETE_INVITE = 'DELETE_INVITE',
 
-    SEND_INVITE = 'SEND_INVITE',
-    RESPOND_INVITE = 'RESPOND_INVITE',
+    USE_INVITE = 'USE_INVITE',
 }
 export interface ClientSEPayload {
     // Client to Server
@@ -84,6 +86,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_DOCUMENT]: DocumentId;
     [ClientSE.GET_DIRECTORY]: DirectoryId;
     [ClientSE.GET_USERS_DIRECTORY_STRUCTURE]: { userId: UserId; orgId: OrganizationId };
+    [ClientSE.GET_INVITES_FOR_ORG]: OrganizationId;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationId;
     [ClientSE.PREVIEW_USER]: UserId;
@@ -96,6 +99,7 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_DUPLICATE_CARD]: { cardId: CardId };
     [ClientSE.CREATE_DOCUMENT]: { title: string; parentId: UID };
     [ClientSE.CREATE_DIRECTORY]: { name: string; parentId: DirectoryId };
+    [ClientSE.CREATE_INVITE]: { orgId: OrganizationId; maxUses: number | null };
 
     [ClientSE.UPDATE_ORG_FIELD]: Partial<Organization> & { id: OrganizationId };
     [ClientSE.UPDATE_BOARD_FIELD]: Partial<Board> & { id: BoardId };
@@ -108,9 +112,9 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
 
     [ClientSE.DELETE_BOARD_LABEL]: { boardId: BoardId; labelId: LabelId };
+    [ClientSE.DELETE_INVITE]: { inviteId: InviteId };
 
-    [ClientSE.SEND_INVITE]: { toUsername: string; entityId: UID; role: PermissionLevel };
-    [ClientSE.RESPOND_INVITE]: { inviteId: InviteId; response: boolean };
+    [ClientSE.USE_INVITE]: { inviteId: InviteId };
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
@@ -132,6 +136,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_DOCUMENT]: DocumentHeader | undefined;
     [ClientSE.GET_DIRECTORY]: DirectoryHeader | undefined;
     [ClientSE.GET_USERS_DIRECTORY_STRUCTURE]: ModuleHeaderWithChildren | undefined;
+    [ClientSE.GET_INVITES_FOR_ORG]: Invite[] | undefined;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationHeader | undefined;
     [ClientSE.PREVIEW_USER]: UserHeader | undefined;
@@ -144,6 +149,7 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_DUPLICATE_CARD]: CardId | undefined;
     [ClientSE.CREATE_DOCUMENT]: DocumentHeader | undefined;
     [ClientSE.CREATE_DIRECTORY]: DirectoryHeader | undefined;
+    [ClientSE.CREATE_INVITE]: Invite | undefined;
 
     [ClientSE.UPDATE_ORG_FIELD]: undefined;
     [ClientSE.UPDATE_BOARD_FIELD]: undefined;
@@ -156,9 +162,9 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_DIRECTORY_FIELD]: undefined;
 
     [ClientSE.DELETE_BOARD_LABEL]: undefined;
+    [ClientSE.DELETE_INVITE]: undefined;
 
-    [ClientSE.SEND_INVITE]: Invite | undefined;
-    [ClientSE.RESPOND_INVITE]: undefined;
+    [ClientSE.USE_INVITE]: boolean;
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
 
@@ -188,8 +194,6 @@ export enum ServerSE {
     UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
     UPDATE_DIRECTORY_FIELD = 'UPDATE_DIRECTORY_FIELD',
     UPDATE_USERS_DIRECTORY_STRUCTURE = 'UPDATE_USERS_DIRECTORY_STRUCTURE',
-
-    RECEIVE_INVITE = 'RECEIVE_INVITE',
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -216,8 +220,6 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ServerSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
     [ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE]: { userId: UserId; orgId: OrganizationId; directoryStructure: ModuleHeaderWithChildren };
-
-    [ServerSE.RECEIVE_INVITE]: Invite;
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -244,8 +246,6 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_DOCUMENT_FIELD]: void;
     [ServerSE.UPDATE_DIRECTORY_FIELD]: void;
     [ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE]: void;
-
-    [ServerSE.RECEIVE_INVITE]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
 

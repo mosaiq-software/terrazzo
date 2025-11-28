@@ -3,7 +3,6 @@ import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils'
 import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrg, getOrgById, updateOrg } from '@trz-api/persistence/organizationPersistence';
 import { getUserById } from '@trz-api/persistence/userPersistence';
-import { getInvitesForEntity } from './inviteController';
 import { getMembersInOrg } from './membershipController';
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
@@ -25,11 +24,9 @@ export async function getFullOrganization(orgId: OrganizationId) {
         throw new Error('No Org found with id ' + orgId);
     }
     const members = await getMembersInOrg(orgId);
-    const invites = await getInvitesForEntity(orgId);
     const org: Organization = {
         ...orgHeader,
         members: members,
-        invites: invites,
     };
     return org;
 }

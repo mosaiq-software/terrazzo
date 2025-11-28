@@ -1,4 +1,4 @@
-import { InviteId, InviteRecord, OrganizationId, UID, UserId } from '@mosaiq/terrazzo-common/types';
+import { Invite, InviteId, OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model } from 'sequelize';
 
@@ -9,72 +9,39 @@ InviteModel.init(
             type: DataTypes.STRING,
             primaryKey: true,
         },
-        toUser: DataTypes.STRING,
-        fromUser: DataTypes.STRING,
+        forOrganizationId: DataTypes.STRING,
+        maxUses: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        uses: DataTypes.INTEGER,
+        createdById: DataTypes.STRING,
         createdAt: DataTypes.STRING,
-        entityId: DataTypes.STRING,
-        userRole: DataTypes.TINYINT,
     },
-    { sequelize }
+    { sequelize, timestamps: false }
 );
 
 export const getInviteRecordById = async (id: InviteId) => {
-    return (
-        await InviteModel.findByPk(id, {
-            attributes: {
-                exclude: ['updatedAt'],
-            },
-        })
-    )?.toJSON() as InviteRecord | undefined;
+    return (await InviteModel.findByPk(id, {}))?.toJSON() as Invite | undefined;
 };
 
-export const getInviteRecordsToUser = async (userId: UserId) => {
+export const getAllInviteRecordsForOrganization = async (orgId: OrganizationId) => {
     return (
         await InviteModel.findAll({
-            where: { toUser: userId },
+            where: { forOrganizationId: orgId },
             order: [['createdAt', 'DESC']],
-            attributes: {
-                exclude: ['updatedAt'],
-            },
         })
-    ).map((prj) => prj.toJSON()) as InviteRecord[];
+    ).map((inv) => inv.toJSON()) as Invite[];
 };
 
-export const getInviteRecordsToUserInEntity = async (userId: UserId, entityId: UID) => {
-    return (
-        await InviteModel.findAll({
-            where: { toUser: userId, entityId },
-            order: [['createdAt', 'DESC']],
-            attributes: {
-                exclude: ['updatedAt'],
-            },
-        })
-    ).map((prj) => prj.toJSON()) as InviteRecord[];
-};
-
-export const getAllInviteRecordsForEntity = async (entityId: OrganizationId) => {
-    return (
-        await InviteModel.findAll({
-            where: { entityId },
-            order: [['createdAt', 'DESC']],
-            attributes: {
-                exclude: ['updatedAt'],
-            },
-        })
-    ).map((prj) => prj.toJSON()) as InviteRecord[];
-};
-
-export const createInviteRecord = async (invite: InviteRecord) => {
-    return await InviteModel.create({
-        id: invite.id,
-        toUser: invite.toUser,
-        fromUser: invite.fromUser,
-        createdAt: invite.createdAt,
-        entityId: invite.entityId,
-        userRole: invite.userRole,
-    });
+export const createInviteRecord = async (invite: Invite) => {
+    return await InviteModel.create({ ...invite });
 };
 
 export const deleteInviteRecord = async (inviteId: InviteId) => {
     return await InviteModel.destroy({ where: { id: inviteId } });
+};
+
+export const updateInviteRecord = async (invite: Partial<Invite> & { id: InviteId }) => {
+    return await InviteModel.update({ ...invite }, { where: { id: invite.id } });
 };
