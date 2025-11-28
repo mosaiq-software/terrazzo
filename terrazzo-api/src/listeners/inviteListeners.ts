@@ -1,5 +1,6 @@
 import { ClientSE, ClientSEPayload, ClientSEReply } from '@mosaiq/terrazzo-common/socketTypes';
 import { createInvite, deleteInvite, getAllInvitesForOrg, useInvite } from '@trz-api/controllers/inviteController';
+import { getInviteRecordById } from '@trz-api/persistence/invitePersistence';
 import { getSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
@@ -55,6 +56,19 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
         } catch (error: any) {
             console.error('Error using invite', error);
             reply(false, error.message);
+        }
+    });
+
+    socket.on(ClientSE.GET_INVITE, async (data: ClientSEPayload[ClientSE.GET_INVITE], reply: ClientSEReply<ClientSE.GET_INVITE>) => {
+        try {
+            if (!data) {
+                throw new Error('No data provided');
+            }
+            const invite = await getInviteRecordById(data);
+            reply(invite);
+        } catch (error: any) {
+            console.error('Error getting invite', error);
+            reply(undefined, error.message);
         }
     });
 };

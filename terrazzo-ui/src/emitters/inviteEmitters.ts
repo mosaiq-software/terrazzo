@@ -1,16 +1,27 @@
 import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { InviteId, OrganizationId, PermissionLevel } from '@mosaiq/terrazzo-common/types';
+import { InviteId, OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
-export const sendInvite = async (sockCtx: SocketContextType, toUsername: string, entityId: OrganizationId, role: PermissionLevel) => {
-    try {
-        const invite = await sockCtx.emit(ClientSE.SEND_INVITE, { toUsername, entityId, role });
-        return invite;
-    } catch (e) {
-        return undefined;
-    }
+export const getAllInvitesForOrg = async (sockCtx: SocketContextType, orgId: OrganizationId) => {
+    const invites = await sockCtx.emit(ClientSE.GET_INVITES_FOR_ORG, orgId);
+    return invites;
 };
 
-export const replyInvite = async (sockCtx: SocketContextType, inviteId: InviteId, accept: boolean) => {
-    await sockCtx.emit(ClientSE.RESPOND_INVITE, { inviteId, response: accept });
+export const deleteInvite = async (sockCtx: SocketContextType, inviteId: InviteId) => {
+    await sockCtx.emit(ClientSE.DELETE_INVITE, { inviteId });
+};
+
+export const acceptInvite = async (sockCtx: SocketContextType, inviteId: InviteId) => {
+    const success = await sockCtx.emit(ClientSE.USE_INVITE, { inviteId });
+    return success;
+};
+
+export const createInvite = async (sockCtx: SocketContextType, orgId: OrganizationId, maxUses: number | null) => {
+    const invite = await sockCtx.emit(ClientSE.CREATE_INVITE, { orgId, maxUses });
+    return invite;
+};
+
+export const getInvite = async (sockCtx: SocketContextType, inviteId: InviteId) => {
+    const invite = await sockCtx.emit(ClientSE.GET_INVITE, inviteId);
+    return invite;
 };

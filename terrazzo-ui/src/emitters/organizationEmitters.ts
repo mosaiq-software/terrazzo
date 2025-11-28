@@ -24,3 +24,8 @@ export const updateOrgField = async (sockCtx: SocketContextType, id: Organizatio
 export const getOrganizationsForUser = async (sockCtx: SocketContextType, userId: UserId) => {
     return await sockCtx.emit(ClientSE.GET_USERS_ORGANIZATIONS, userId);
 };
+
+export const getOrganizationPreview = async (sockCtx: SocketContextType, orgId: OrganizationId): Promise<OrganizationHeader | undefined> => {
+    const orgHeader = await sockCtx.emit(ClientSE.PREVIEW_ORGANIZATION, orgId);
+    return orgHeader;
+};

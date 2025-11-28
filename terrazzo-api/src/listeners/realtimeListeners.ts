@@ -1,5 +1,5 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
-import { joinRoom, leaveRoom, getSocketData, setSocketData, broadcastToMyRooms } from '@trz-api/utils/socketUtils';
+import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
+import { broadcastToMyRooms, getSocketData, joinRoom, leaveRoom, setSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
@@ -27,6 +27,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             socketData.user.mouseRoomData = data;
             setSocketData(socket, socketData);
             broadcastToMyRooms<ServerSE.MOUSE_MOVE>(socket, ServerSE.MOUSE_MOVE, { sid: socket.id, data: data }, [RoomType.MOUSE], false);
+            reply(undefined);
         } catch (error: any) {
             reply(undefined, error.message);
         }
@@ -38,6 +39,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
             socketData.user.idle = data;
             setSocketData(socket, socketData);
             broadcastToMyRooms<ServerSE.USER_IDLE>(socket, ServerSE.USER_IDLE, { sid: socket.id, idle: data }, [RoomType.MOUSE, RoomType.TEXT], false);
+            reply(undefined);
         } catch (error: any) {
             reply(undefined, error.message);
         }

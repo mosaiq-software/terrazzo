@@ -1,5 +1,6 @@
 import { Invite, InviteId, MembershipRecord, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common/types';
-import { createInviteRecord, deleteInviteRecord, getAllInviteRecordsForOrganization, getInviteRecordById, updateInviteRecord } from '@trz-api/persistence/invitePersistence';
+import { isInviteExpired } from '@mosaiq/terrazzo-common/utils/inviteUtils';
+import { createInviteRecord, getAllInviteRecordsForOrganization, getInviteRecordById, updateInviteRecord } from '@trz-api/persistence/invitePersistence';
 import { upsertMembership } from './membershipController';
 
 export const getAllInvitesForOrg = async (orgId: OrganizationId): Promise<Invite[]> => {
@@ -14,13 +15,14 @@ export const createInvite = async (orgId: OrganizationId, maxUses: number | null
         uses: 0,
         createdById: createdById,
         createdAt: Date.now(),
+        revokedAt: null,
     };
     await createInviteRecord(invite);
     return invite;
 };
 
 export const deleteInvite = async (inviteId: InviteId): Promise<void> => {
-    await deleteInviteRecord(inviteId);
+    await updateInviteRecord({ id: inviteId, revokedAt: Date.now() });
 };
 
 export const useInvite = async (inviteId: InviteId, userId: UserId): Promise<boolean> => {
@@ -29,8 +31,9 @@ export const useInvite = async (inviteId: InviteId, userId: UserId): Promise<boo
         if (!invite) {
             throw new Error('Invite not found');
         }
-        if (invite.maxUses !== null && invite.uses >= invite.maxUses) {
-            throw new Error('Invite has reached its maximum number of uses');
+        if (isInviteExpired(invite)) {
+            console.warn('Attempted to use expired invite:', inviteId);
+            return false;
         }
 
         await updateInviteRecord({ id: invite.id, uses: invite.uses + 1 });

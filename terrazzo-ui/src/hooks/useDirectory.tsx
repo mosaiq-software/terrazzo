@@ -18,7 +18,7 @@ export const useDirectory = (directoryId?: DirectoryId) => {
             if (!directoryId || !sockCtx.connected) {
                 return;
             }
-            if (directory && directory.id === directoryId) {
+            if (directory?.id === directoryId) {
                 return;
             }
             try {
@@ -30,7 +30,7 @@ export const useDirectory = (directoryId?: DirectoryId) => {
             }
         };
         fetchDirectoryData();
-    }, [directoryId, sockCtx.connected, directory]);
+    }, [directoryId, sockCtx.connected]);
 
     useSocketListener(ServerSE.UPDATE_DIRECTORY_FIELD, (payload) => {
         if (payload.id !== directoryId) {

@@ -1,32 +1,18 @@
 import { Box, Burger, Button, Divider, Group, Kbd, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { useHotkeys, useLocalStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
-import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { DirectoryListItemContextMenu } from '@trz/components/AppLayout/DirectoryListItemContextMenu';
 import { DirectoryTree } from '@trz/components/AppLayout/DirectoryTree';
 import { OrganizationSelectorMenu } from '@trz/components/AppLayout/OrganizationSelectorMenu';
 import { SearchBar } from '@trz/components/AutoComplete/Searchbar';
 import { UserProfileIcon } from '@trz/components/UserProfileIcon';
-import { useSocket } from '@trz/contexts/socket-context';
 import { useTRZ } from '@trz/contexts/TRZ-context';
-import { replyInvite } from '@trz/emitters';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { NoteType, notify } from '@trz/util/notifications';
 import { useContextMenu } from 'mantine-contextmenu';
-import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { NavLink, Outlet } from 'react-router-dom';
 import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
 
-interface TRZAppLayoutProps {
-    children: any;
-}
-const TRZAppLayout = (props: TRZAppLayoutProps) => {
+const TRZAppLayout = () => {
     const trz = useTRZ();
-    const sockCtx = useSocket();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const params = useParams();
-    const boardId = params.boardId;
     const { showContextMenu } = useContextMenu();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage<boolean>({ key: LocalStorageKey.SIDEBAR_COLLAPSED, defaultValue: false });
@@ -40,25 +26,6 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
         ],
         ['/', () => {}],
     ]);
-
-    useSocketListener<ServerSE.RECEIVE_INVITE>(ServerSE.RECEIVE_INVITE, (payload) => {
-        notify(NoteType.INVITE_RECEIVED, [fullName(payload.fromUser), payload.entity.name], {
-            primary: async () => {
-                try {
-                    replyInvite(sockCtx, payload.id, true);
-                } catch (e) {
-                    notify(NoteType.GENERIC_ERROR, e);
-                }
-            },
-            secondary: () => {
-                try {
-                    replyInvite(sockCtx, payload.id, false);
-                } catch (e) {
-                    notify(NoteType.GENERIC_ERROR, e);
-                }
-            },
-        });
-    });
 
     return (
         <Group
@@ -311,7 +278,9 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                         <UserProfileIcon />
                     </Group>
                 </Group>
-                <Box style={{}}>{props.children}</Box>
+                <Box style={{}}>
+                    <Outlet />
+                </Box>
             </Stack>
         </Group>
     );

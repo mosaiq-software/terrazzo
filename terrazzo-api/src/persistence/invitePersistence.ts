@@ -17,6 +17,10 @@ InviteModel.init(
         uses: DataTypes.INTEGER,
         createdById: DataTypes.STRING,
         createdAt: DataTypes.STRING,
+        revokedAt: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
     },
     { sequelize, timestamps: false }
 );
@@ -36,10 +40,6 @@ export const getAllInviteRecordsForOrganization = async (orgId: OrganizationId) 
 
 export const createInviteRecord = async (invite: Invite) => {
     return await InviteModel.create({ ...invite });
-};
-
-export const deleteInviteRecord = async (inviteId: InviteId) => {
-    return await InviteModel.destroy({ where: { id: inviteId } });
 };
 
 export const updateInviteRecord = async (invite: Partial<Invite> & { id: InviteId }) => {

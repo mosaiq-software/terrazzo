@@ -6,10 +6,12 @@ import HomePage from '@trz/pages/HomePage';
 import LandingPage from '@trz/pages/LandingPage';
 import OrganizationPage from '@trz/pages/OrganizationPage';
 import UserSettingsPage from '@trz/pages/UserSettingsPage';
-import ContentPageWrapper from '@trz/wrappers/ContentPageWrapper';
 import { Outlet, Route, Routes } from 'react-router-dom';
 import { NotFound, PageErrors } from './components/NotFound';
 import DocumentPage from './pages/DocumentPage';
+import { AuthWrapper } from './wrappers/authWrapper';
+import TRZAppLayout from './wrappers/TRZAppLayout';
+import InvitePage from './pages/InvitePage';
 
 const Router = () => {
     return (
@@ -35,31 +37,37 @@ const Router = () => {
                 path="/create-account"
                 element={<SetUpAccount />}
             />
-            <Route element={<ContentPageWrapper />}>
+            <Route element={<AuthWrapper />}>
                 <Route
-                    path="/dashboard"
-                    element={<HomePage />}
+                    path="/invite/:inviteId"
+                    element={<InvitePage />}
                 />
-                <Route
-                    path="/board/:boardId/"
-                    element={<BoardPage />}
-                />
-                <Route
-                    path="/card/:cardId"
-                    element={<BoardPage />}
-                />
-                <Route
-                    path="/org/:orgId/:tabId?"
-                    element={<OrganizationPage />}
-                />
-                <Route
-                    path="/doc/:documentId"
-                    element={<DocumentPage />}
-                />
-                <Route
-                    path="/settings"
-                    element={<UserSettingsPage />}
-                />
+                <Route element={<TRZAppLayout />}>
+                    <Route
+                        path="/dashboard"
+                        element={<HomePage />}
+                    />
+                    <Route
+                        path="/board/:boardId/"
+                        element={<BoardPage />}
+                    />
+                    <Route
+                        path="/card/:cardId"
+                        element={<BoardPage />}
+                    />
+                    <Route
+                        path="/org/:orgId/:tabId?"
+                        element={<OrganizationPage />}
+                    />
+                    <Route
+                        path="/doc/:documentId"
+                        element={<DocumentPage />}
+                    />
+                    <Route
+                        path="/settings"
+                        element={<UserSettingsPage />}
+                    />
+                </Route>
             </Route>
 
             {/* A catch-all route to redirect to the error page */}

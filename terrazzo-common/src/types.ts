@@ -123,6 +123,7 @@ export interface Invite {
     uses: number;
     createdById: UserId;
     createdAt: number;
+    revokedAt: number | null;
 }
 
 export interface GithubUserProfile {

@@ -1,6 +1,6 @@
 import { MembershipRecord, ModuleHeader, ModuleHeaderWithChildren, OrganizationHeader, OrganizationId, OrgMembershipLevel, PermissionLevel, PermissionRecord, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common/types';
 import { getModulesByOrgIdDb } from '@trz-api/persistence/modulePersistence';
-import { getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser, upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
+import { deleteOrganizationMembership, getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser, updateOrganizationMembership, upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
 import { populateMemberships } from './userController';
 
@@ -23,6 +23,19 @@ export const getOrgsForUser = async (userId: UserId) => {
 
 export const upsertMembership = async (membershipRecord: MembershipRecord) => {
     return await upsertOrganizationMembership(membershipRecord);
+};
+
+export const updateMembership = async (userId: UserId, orgId: OrganizationId, newLevel: OrgMembershipLevel) => {
+    const record: MembershipRecord = {
+        userId,
+        orgId,
+        permissionLevel: newLevel,
+    };
+    await updateOrganizationMembership(record);
+};
+
+export const removeMembership = async (userId: UserId, orgId: OrganizationId) => {
+    await deleteOrganizationMembership(userId, orgId);
 };
 
 /**

@@ -39,6 +39,7 @@ export const registerBoardListeners = (socket: Socket, io: Server) => {
             await updateBoardFromPartial(data.id, data);
             broadcast<ServerSE.UPDATE_BOARD_FIELD>(socket, ServerSE.UPDATE_BOARD_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
             await broadcastUniqueUpdatesForUpdatedModule(socket, io, data.id);
+            reply(undefined);
         } catch (error: any) {
             console.error('Error updating board fields', error);
             reply(undefined, error.message);

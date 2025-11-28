@@ -1,4 +1,4 @@
-import { Board, BoardId, BoardRes, Card, CardId, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, ModuleHeaderWithChildren, Organization, OrganizationHeader, OrganizationId, QueryResult, TextBlock, TextBlockId, UID, UserHeader, UserId } from './types';
+import { Board, BoardId, BoardRes, Card, CardId, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, ModuleHeaderWithChildren, Organization, OrganizationHeader, OrganizationId, OrgMembershipLevel, QueryResult, TextBlock, TextBlockId, UID, UserHeader, UserId } from './types';
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -37,6 +37,7 @@ export enum ClientSE {
     GET_DIRECTORY = 'GET_DIRECTORY',
     GET_USERS_DIRECTORY_STRUCTURE = 'GET_USERS_DIRECTORY_STRUCTURE',
     GET_INVITES_FOR_ORG = 'GET_INVITES_FOR_ORG',
+    GET_INVITE = 'GET_INVITE',
 
     PREVIEW_ORGANIZATION = 'PREVIEW_ORGANIZATION',
     PREVIEW_USER = 'PREVIEW_USER',
@@ -60,9 +61,11 @@ export enum ClientSE {
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
     UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
     UPDATE_DIRECTORY_FIELD = 'UPDATE_DIRECTORY_FIELD',
+    UPDATE_MEMBERSHIP = 'UPDATE_MEMBERSHIP',
 
     DELETE_BOARD_LABEL = 'DELETE_BOARD_LABEL',
     DELETE_INVITE = 'DELETE_INVITE',
+    DELETE_MEMBERSHIP = 'DELETE_MEMBERSHIP',
 
     USE_INVITE = 'USE_INVITE',
 }
@@ -87,6 +90,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_DIRECTORY]: DirectoryId;
     [ClientSE.GET_USERS_DIRECTORY_STRUCTURE]: { userId: UserId; orgId: OrganizationId };
     [ClientSE.GET_INVITES_FOR_ORG]: OrganizationId;
+    [ClientSE.GET_INVITE]: InviteId;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationId;
     [ClientSE.PREVIEW_USER]: UserId;
@@ -110,9 +114,11 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ClientSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ClientSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
+    [ClientSE.UPDATE_MEMBERSHIP]: { userId: UserId; orgId: OrganizationId; newPermissionLevel: OrgMembershipLevel };
 
     [ClientSE.DELETE_BOARD_LABEL]: { boardId: BoardId; labelId: LabelId };
     [ClientSE.DELETE_INVITE]: { inviteId: InviteId };
+    [ClientSE.DELETE_MEMBERSHIP]: { userId: UserId; orgId: OrganizationId };
 
     [ClientSE.USE_INVITE]: { inviteId: InviteId };
 }
@@ -137,6 +143,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_DIRECTORY]: DirectoryHeader | undefined;
     [ClientSE.GET_USERS_DIRECTORY_STRUCTURE]: ModuleHeaderWithChildren | undefined;
     [ClientSE.GET_INVITES_FOR_ORG]: Invite[] | undefined;
+    [ClientSE.GET_INVITE]: Invite | undefined;
 
     [ClientSE.PREVIEW_ORGANIZATION]: OrganizationHeader | undefined;
     [ClientSE.PREVIEW_USER]: UserHeader | undefined;
@@ -160,9 +167,11 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_CARDS_LABELS]: undefined;
     [ClientSE.UPDATE_DOCUMENT_FIELD]: undefined;
     [ClientSE.UPDATE_DIRECTORY_FIELD]: undefined;
+    [ClientSE.UPDATE_MEMBERSHIP]: undefined;
 
     [ClientSE.DELETE_BOARD_LABEL]: undefined;
     [ClientSE.DELETE_INVITE]: undefined;
+    [ClientSE.DELETE_MEMBERSHIP]: undefined;
 
     [ClientSE.USE_INVITE]: boolean;
 }

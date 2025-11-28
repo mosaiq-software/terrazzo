@@ -1,11 +1,9 @@
 import { Center, Loader } from '@mantine/core';
 import { useUser } from '@trz/contexts/user-context';
 import { useEffect } from 'react';
+import { Outlet } from 'react-router';
 
-interface AuthWrapperProps {
-    children: any;
-}
-export const AuthWrapper = (props: AuthWrapperProps) => {
+export const AuthWrapper = () => {
     const usr = useUser();
 
     useEffect(() => {
@@ -28,5 +26,5 @@ export const AuthWrapper = (props: AuthWrapperProps) => {
         );
     }
 
-    return props.children;
+    return <Outlet />;
 };
