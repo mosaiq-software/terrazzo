@@ -166,7 +166,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                                 order={4}
                                 c="#fff"
                             >
-                                Pending Invites
+                                Invites
                             </Title>
                             {isAdmin && (
                                 <Button
@@ -189,6 +189,14 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                             </Text>
                         ) : (
                             <Stack gap="sm">
+                                {sortedInvites.nonExpiredInvites.length > 0 && (
+                                    <Text
+                                        c="dimmed"
+                                        fz="sm"
+                                    >
+                                        Pending Invites
+                                    </Text>
+                                )}
                                 {[...sortedInvites.nonExpiredInvites].map((invite) => (
                                     <InviteRow
                                         key={invite.id}
@@ -197,7 +205,15 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                                         onDeleteInvite={() => handleDeleteInvite(invite)}
                                     />
                                 ))}
-                                <Divider />
+                                {sortedInvites.expiredInvites.length > 0 && sortedInvites.nonExpiredInvites.length > 0 && <Divider />}
+                                {sortedInvites.expiredInvites.length > 0 && (
+                                    <Text
+                                        c="dimmed"
+                                        fz="sm"
+                                    >
+                                        Past Invites
+                                    </Text>
+                                )}
                                 {[...sortedInvites.expiredInvites].map((invite) => (
                                     <InviteRow
                                         key={invite.id}

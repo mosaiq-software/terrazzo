@@ -1,0 +1,145 @@
+import { ActionIcon, Avatar, Box, Group, Menu, Text } from '@mantine/core';
+import { IconType } from 'react-icons';
+import { HiDotsVertical } from 'react-icons/hi';
+
+export interface ActionRowMenuItem {
+    label: string;
+    onClick: () => void;
+    icon?: React.ReactNode;
+    color?: string;
+    disabled?: boolean;
+}
+
+interface ActionRowProps {
+    icon?: string | IconType;
+    iconColor?: string;
+    title: string;
+    subtitle?: string;
+    items?: React.ReactNode[];
+    menuLabel?: string;
+    menuItems?: ('-' | ActionRowMenuItem)[];
+    disabled?: boolean;
+}
+
+export const ActionRow = (props: ActionRowProps) => {
+    const iconIsString = typeof props.icon === 'string';
+    return (
+        <Group
+            w="100%"
+            px="md"
+            py="sm"
+            bg="#212226"
+            style={{
+                borderRadius: '8px',
+                opacity: props.disabled ? 0.5 : 1,
+            }}
+            justify="space-between"
+            wrap="nowrap"
+        >
+            <Group
+                gap="md"
+                wrap="nowrap"
+                style={{ flex: 1, overflow: 'hidden' }}
+            >
+                {iconIsString ? (
+                    <Avatar
+                        src={props.icon as string}
+                        size={40}
+                        radius="xl"
+                    />
+                ) : (
+                    <Box
+                        style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            backgroundColor: props.iconColor || 'rgba(64, 192, 207, 0.2)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        {props.icon &&
+                            typeof props.icon === 'function' &&
+                            props.icon({
+                                size: 20,
+                                color: props.iconColor || 'rgba(64, 192, 207, 0.8)',
+                            })}
+                    </Box>
+                )}
+                <div style={{ flex: 1, overflow: 'hidden' }}>
+                    <Group gap="xs">
+                        <Text
+                            c="white"
+                            fw={500}
+                            size="sm"
+                            style={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {props.title}
+                        </Text>{' '}
+                    </Group>
+                    <Text
+                        c="dimmed"
+                        size="xs"
+                        style={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        {props.subtitle}
+                    </Text>
+                </div>
+            </Group>
+
+            <Group
+                gap="sm"
+                wrap="nowrap"
+            >
+                {props.items?.map((item, index) => (
+                    <Box key={index}>{item}</Box>
+                ))}
+                {props.menuItems && props.menuItems.length > 0 && (
+                    <Menu
+                        position="bottom-end"
+                        withArrow
+                        shadow="md"
+                    >
+                        <Menu.Target>
+                            <ActionIcon
+                                variant="subtle"
+                                c="white"
+                                size="lg"
+                            >
+                                <HiDotsVertical size={18} />
+                            </ActionIcon>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                            <Menu.Label>{props.menuLabel}</Menu.Label>
+                            {props.menuItems?.map((item, index) => {
+                                if (item === '-') {
+                                    return <Menu.Divider key={index} />;
+                                }
+                                return (
+                                    <Menu.Item
+                                        key={index}
+                                        color={item.color}
+                                        leftSection={item.icon}
+                                        onClick={item.onClick}
+                                        disabled={item.disabled}
+                                    >
+                                        {item.label}
+                                    </Menu.Item>
+                                );
+                            })}
+                        </Menu.Dropdown>
+                    </Menu>
+                )}
+            </Group>
+        </Group>
+    );
+};

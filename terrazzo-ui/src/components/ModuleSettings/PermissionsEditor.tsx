@@ -1,12 +1,14 @@
-import { Avatar, ComboboxItem, Fieldset, Group, Select, Stack, Text, Tooltip } from '@mantine/core';
+import { ComboboxItem, Divider, Fieldset, Group, Select, Stack, Text } from '@mantine/core';
 import { OrgMembershipLevel, PermissionLevel, PermissionRecord, UID, UserHeader } from '@mosaiq/terrazzo-common/types';
 import { overlayPermissionLevels } from '@mosaiq/terrazzo-common/utils/permissionUtils';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { usePermissions } from '@trz/hooks/usePermissions';
 import { useMemo } from 'react';
+import { IconType } from 'react-icons';
 import { IoMdGlobe } from 'react-icons/io';
-import { MdAdd, MdBeachAccess } from 'react-icons/md';
+import { MdAdd, MdBeachAccess, MdPersonRemove } from 'react-icons/md';
+import { ActionRow } from '../ActionRow';
 
 interface PermissionsEditorProps {
     moduleId: UID;
@@ -53,9 +55,10 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
     return (
         <Fieldset legend="Permissions">
             <Stack>
+                <Text>Broad Access</Text>
                 <PermissionRow
                     title="Anyone on the Internet"
-                    icon={<IoMdGlobe />}
+                    icon={IoMdGlobe}
                     permissionLevel={mergedPermissionRecord.anyonePermissionLevel ?? PermissionLevel.NONE}
                     onChangeLevel={(newLevel) => {
                         const newRecord = { ...mergedPermissionRecord, anyonePermissionLevel: newLevel };
@@ -66,7 +69,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                 />
                 <PermissionRow
                     title={`Anyone in ${trz.selectedOrganization?.name ?? 'Organization'}`}
-                    icon={<MdBeachAccess />}
+                    icon={MdBeachAccess}
                     permissionLevel={mergedPermissionRecord.orgPermissionLevel ?? PermissionLevel.NONE}
                     onChangeLevel={(newLevel) => {
                         const newRecord = { ...mergedPermissionRecord, orgPermissionLevel: newLevel };
@@ -75,17 +78,14 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                     tooltip={`Everyone in ${trz.selectedOrganization?.name ?? 'the organization'} has this level of access.`}
                     minimumPermissionLevel={inheritedPerms.orgPermissionLevel ?? PermissionLevel.NONE}
                 />
+                <Divider my={'xs'} />
+                <Text>Specific Members</Text>
                 {members.explicitPerms.map(({ user, permission }) => {
                     return (
                         <PermissionRow
                             key={user.id}
                             title={fullName(user)}
-                            icon={
-                                <Avatar
-                                    src={user.profilePicture}
-                                    size={20}
-                                />
-                            }
+                            icon={user.profilePicture}
                             permissionLevel={permission}
                             onChangeLevel={(newLevel) => {
                                 const newUserPermissionLevels = { ...mergedPermissionRecord.userPermissionLevels, [user.id]: newLevel };
@@ -94,6 +94,12 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                             }}
                             tooltip={`${fullName(user)} has this specific permission level.`}
                             minimumPermissionLevel={inheritedPerms.userPermissionLevels[user.id] ?? PermissionLevel.NONE}
+                            onDeletePermission={() => {
+                                const newUserPermissionLevels = { ...mergedPermissionRecord.userPermissionLevels };
+                                delete newUserPermissionLevels[user.id];
+                                const newRecord = { ...mergedPermissionRecord, userPermissionLevels: newUserPermissionLevels };
+                                props.onChangeRecord(newRecord);
+                            }}
                         />
                     );
                 })}
@@ -105,17 +111,14 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                         props.onChangeRecord(newRecord);
                     }}
                 />
+                <Divider my={'xs'} />
+                <Text>Organization Admins</Text>
                 {/* Show admins as disabled rows */}
                 {members.orgAdmins.map((user) => (
                     <PermissionRow
                         key={user.id}
                         title={fullName(user)}
-                        icon={
-                            <Avatar
-                                src={user.profilePicture}
-                                size={20}
-                            />
-                        }
+                        icon={user.profilePicture}
                         permissionLevel={PermissionLevel.ADMIN}
                         disabled={true}
                         onChangeLevel={() => {}}
@@ -130,12 +133,13 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
 
 interface PermissionRowProps {
     title: string;
-    icon?: React.ReactNode;
+    icon?: string | IconType;
     permissionLevel: PermissionLevel;
     minimumPermissionLevel: PermissionLevel;
     disabled?: boolean;
     tooltip?: string;
     onChangeLevel: (newLevel: PermissionLevel) => void;
+    onDeletePermission?: () => void;
 }
 const PermissionRow = (props: PermissionRowProps) => {
     const data: ComboboxItem[] = permissionLevelOptions.map((value, index) => ({
@@ -143,21 +147,15 @@ const PermissionRow = (props: PermissionRowProps) => {
         label: value.toString(),
         disabled: index < props.minimumPermissionLevel,
     }));
+
     return (
-        <Tooltip
-            label={props.tooltip ?? ''}
-            disabled={!props.tooltip}
-            withArrow
-            openDelay={200}
-        >
-            <Group
-                bg={props.disabled ? '#00000020' : undefined}
-                px={10}
-                py={5}
-            >
-                {props.icon}
-                <Text>{props.title}</Text>
+        <ActionRow
+            icon={props.icon}
+            title={props.title}
+            disabled={props.disabled}
+            items={[
                 <Select
+                    key="permission-select"
                     label={props.minimumPermissionLevel ? `At least ${permissionLevelOptions[props.minimumPermissionLevel]} (inherited from parent directory)` : undefined}
                     disabled={props.disabled}
                     data={data}
@@ -166,9 +164,22 @@ const PermissionRow = (props: PermissionRowProps) => {
                         const newLevel = Number(value) as PermissionLevel;
                         props.onChangeLevel(newLevel);
                     }}
-                />
-            </Group>
-        </Tooltip>
+                />,
+            ]}
+            menuLabel="Manage Permission"
+            menuItems={
+                props.onDeletePermission && !props.disabled
+                    ? [
+                          {
+                              label: 'Remove Explicit Permission',
+                              onClick: () => props.onDeletePermission?.(),
+                              icon: <MdPersonRemove size={16} />,
+                              color: 'red',
+                          },
+                      ]
+                    : []
+            }
+        />
     );
 };
 
