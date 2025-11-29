@@ -1,18 +1,31 @@
-import { Avatar, Fieldset, Group, Select, Stack, Text, Tooltip } from '@mantine/core';
-import { OrgMembershipLevel, PermissionLevel, PermissionRecord, UserHeader } from '@mosaiq/terrazzo-common/types';
+import { Avatar, ComboboxItem, Fieldset, Group, Select, Stack, Text, Tooltip } from '@mantine/core';
+import { OrgMembershipLevel, PermissionLevel, PermissionRecord, UID, UserHeader } from '@mosaiq/terrazzo-common/types';
+import { overlayPermissionLevels } from '@mosaiq/terrazzo-common/utils/permissionUtils';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useTRZ } from '@trz/contexts/TRZ-context';
+import { usePermissions } from '@trz/hooks/usePermissions';
 import { useMemo } from 'react';
 import { IoMdGlobe } from 'react-icons/io';
 import { MdAdd, MdBeachAccess } from 'react-icons/md';
 
 interface PermissionsEditorProps {
-    permissionRecord: PermissionRecord;
+    moduleId: UID;
+    editedPermissionRecord: Partial<PermissionRecord>;
     onChangeRecord: (newRecord: PermissionRecord) => void;
 }
 
 export const PermissionsEditor = (props: PermissionsEditorProps) => {
     const trz = useTRZ();
+    const { explicitPerms, inheritedPerms, combinedPerms } = usePermissions(props.moduleId);
+    const mergedPermissionRecord: PermissionRecord = useMemo(() => {
+        return overlayPermissionLevels(combinedPerms, {
+            anyonePermissionLevel: props.editedPermissionRecord.anyonePermissionLevel ?? null,
+            orgPermissionLevel: props.editedPermissionRecord.orgPermissionLevel ?? null,
+            userPermissionLevels: {
+                ...props.editedPermissionRecord.userPermissionLevels,
+            },
+        });
+    }, [combinedPerms, props.editedPermissionRecord]);
 
     const members = useMemo(() => {
         const isOrgAdmin: UserHeader[] = [];
@@ -21,7 +34,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
 
         for (const mem of trz.selectedOrganization?.members || []) {
             const isAdmin = mem.record.permissionLevel === OrgMembershipLevel.ADMIN;
-            const level = props.permissionRecord.userPermissionLevels[mem.user.id];
+            const level = mergedPermissionRecord.userPermissionLevels[mem.user.id];
             if (isAdmin) {
                 isOrgAdmin.push(mem.user);
             } else if (level !== undefined) {
@@ -35,7 +48,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
             explicitPerms: hasExplicitPerms,
             others: otherOrgMembers,
         };
-    }, [props.permissionRecord.userPermissionLevels, trz.selectedOrganization?.members]);
+    }, [mergedPermissionRecord.userPermissionLevels, trz.selectedOrganization?.members]);
 
     return (
         <Fieldset legend="Permissions">
@@ -43,22 +56,24 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                 <PermissionRow
                     title="Anyone on the Internet"
                     icon={<IoMdGlobe />}
-                    permissionLevel={props.permissionRecord.anyonePermissionLevel ?? PermissionLevel.NONE}
+                    permissionLevel={mergedPermissionRecord.anyonePermissionLevel ?? PermissionLevel.NONE}
                     onChangeLevel={(newLevel) => {
-                        const newRecord = { ...props.permissionRecord, anyonePermissionLevel: newLevel };
+                        const newRecord = { ...mergedPermissionRecord, anyonePermissionLevel: newLevel };
                         props.onChangeRecord(newRecord);
                     }}
                     tooltip="Anyone with the link has this level of access."
+                    minimumPermissionLevel={inheritedPerms.anyonePermissionLevel ?? PermissionLevel.NONE}
                 />
                 <PermissionRow
                     title={`Anyone in ${trz.selectedOrganization?.name ?? 'Organization'}`}
                     icon={<MdBeachAccess />}
-                    permissionLevel={props.permissionRecord.orgPermissionLevel ?? PermissionLevel.NONE}
+                    permissionLevel={mergedPermissionRecord.orgPermissionLevel ?? PermissionLevel.NONE}
                     onChangeLevel={(newLevel) => {
-                        const newRecord = { ...props.permissionRecord, orgPermissionLevel: newLevel };
+                        const newRecord = { ...mergedPermissionRecord, orgPermissionLevel: newLevel };
                         props.onChangeRecord(newRecord);
                     }}
                     tooltip={`Everyone in ${trz.selectedOrganization?.name ?? 'the organization'} has this level of access.`}
+                    minimumPermissionLevel={inheritedPerms.orgPermissionLevel ?? PermissionLevel.NONE}
                 />
                 {members.explicitPerms.map(({ user, permission }) => {
                     return (
@@ -73,19 +88,20 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                             }
                             permissionLevel={permission}
                             onChangeLevel={(newLevel) => {
-                                const newUserPermissionLevels = { ...props.permissionRecord.userPermissionLevels, [user.id]: newLevel };
-                                const newRecord = { ...props.permissionRecord, userPermissionLevels: newUserPermissionLevels };
+                                const newUserPermissionLevels = { ...mergedPermissionRecord.userPermissionLevels, [user.id]: newLevel };
+                                const newRecord = { ...mergedPermissionRecord, userPermissionLevels: newUserPermissionLevels };
                                 props.onChangeRecord(newRecord);
                             }}
                             tooltip={`${fullName(user)} has this specific permission level.`}
+                            minimumPermissionLevel={inheritedPerms.userPermissionLevels[user.id] ?? PermissionLevel.NONE}
                         />
                     );
                 })}
                 <AddMemberRow
                     addableUsers={members.others}
                     onAddUser={(user, level) => {
-                        const newUserPermissionLevels = { ...props.permissionRecord.userPermissionLevels, [user.id]: level };
-                        const newRecord = { ...props.permissionRecord, userPermissionLevels: newUserPermissionLevels };
+                        const newUserPermissionLevels = { ...mergedPermissionRecord.userPermissionLevels, [user.id]: level };
+                        const newRecord = { ...mergedPermissionRecord, userPermissionLevels: newUserPermissionLevels };
                         props.onChangeRecord(newRecord);
                     }}
                 />
@@ -104,6 +120,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                         disabled={true}
                         onChangeLevel={() => {}}
                         tooltip="Organization Admins have full access and cannot have their permissions changed here."
+                        minimumPermissionLevel={PermissionLevel.ADMIN}
                     />
                 ))}
             </Stack>
@@ -115,11 +132,17 @@ interface PermissionRowProps {
     title: string;
     icon?: React.ReactNode;
     permissionLevel: PermissionLevel;
+    minimumPermissionLevel: PermissionLevel;
     disabled?: boolean;
     tooltip?: string;
     onChangeLevel: (newLevel: PermissionLevel) => void;
 }
 const PermissionRow = (props: PermissionRowProps) => {
+    const data: ComboboxItem[] = permissionLevelOptions.map((value, index) => ({
+        value: index.toString(),
+        label: value.toString(),
+        disabled: index < props.minimumPermissionLevel,
+    }));
     return (
         <Tooltip
             label={props.tooltip ?? ''}
@@ -135,11 +158,12 @@ const PermissionRow = (props: PermissionRowProps) => {
                 {props.icon}
                 <Text>{props.title}</Text>
                 <Select
+                    label={props.minimumPermissionLevel ? `At least ${permissionLevelOptions[props.minimumPermissionLevel]} (inherited from parent directory)` : undefined}
                     disabled={props.disabled}
-                    data={permissionLevelOptions}
-                    value={permissionLevelOptions[props.permissionLevel]}
+                    data={data}
+                    value={props.permissionLevel.toString()}
                     onChange={(value) => {
-                        const newLevel = permissionLevelOptions.indexOf(value!);
+                        const newLevel = Number(value) as PermissionLevel;
                         props.onChangeLevel(newLevel);
                     }}
                 />

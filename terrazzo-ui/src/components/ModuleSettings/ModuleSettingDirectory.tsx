@@ -46,10 +46,11 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
                 }}
             />
             <PermissionsEditor
-                permissionRecord={{
-                    anyonePermissionLevel: directoryEdits.anyonePermissionLevel ?? directory.anyonePermissionLevel,
-                    orgPermissionLevel: directoryEdits.orgPermissionLevel ?? directory.orgPermissionLevel,
-                    userPermissionLevels: directoryEdits.userPermissionLevels ?? directory.userPermissionLevels,
+                moduleId={props.directoryId}
+                editedPermissionRecord={{
+                    anyonePermissionLevel: directoryEdits.anyonePermissionLevel,
+                    orgPermissionLevel: directoryEdits.orgPermissionLevel,
+                    userPermissionLevels: directoryEdits.userPermissionLevels,
                 }}
                 onChangeRecord={(newRecord) => {
                     setDirectoryEdits({ ...directoryEdits, ...newRecord });

@@ -1,12 +1,13 @@
 import { useLocalStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { ModuleHeaderWithChildren, Organization, OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common/types';
+import { ModuleHeaderWithChildren, Organization, OrganizationHeader, OrganizationId, PermissionRecord, UID } from '@mosaiq/terrazzo-common/types';
+import { overlayPermissionLevels } from '@mosaiq/terrazzo-common/utils/permissionUtils';
 import { createOrganization, getOrganizationData, getOrganizationsForUser, getUserDirectoryStructure } from '@trz/emitters';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useSocket } from './socket-context';
 import { useUser } from './user-context';
 
@@ -20,6 +21,14 @@ export type TRZContextType = {
     createOrganization: (orgName: string) => Promise<OrganizationHeader | undefined>;
     pageTitle: string;
     setPageTitle: React.Dispatch<React.SetStateAction<string>>;
+    permissionRecords: Record<
+        UID,
+        {
+            explicitPerms: PermissionRecord;
+            inheritedPerms: PermissionRecord;
+            combinedPerms: PermissionRecord;
+        }
+    >;
 };
 
 const TRZContext = createContext<TRZContextType | undefined>(undefined);
@@ -89,6 +98,45 @@ const TRZProvider: React.FC<any> = ({ children }) => {
         [selectedOrganization, userCtx.userData]
     );
 
+    const permissionRecords = useMemo(() => {
+        const permRecords: Record<
+            UID,
+            {
+                explicitPerms: PermissionRecord;
+                inheritedPerms: PermissionRecord;
+                combinedPerms: PermissionRecord;
+            }
+        > = {};
+        const traverse = (module: ModuleHeaderWithChildren, parentId: UID | null) => {
+            const parentPerms = parentId ? permRecords[parentId].combinedPerms : null;
+            const explicitPerms: PermissionRecord = {
+                anyonePermissionLevel: module.anyonePermissionLevel,
+                orgPermissionLevel: module.orgPermissionLevel,
+                userPermissionLevels: { ...module.userPermissionLevels },
+            };
+            const inheritedPerms: PermissionRecord = parentPerms ?? {
+                anyonePermissionLevel: null,
+                orgPermissionLevel: null,
+                userPermissionLevels: {},
+            };
+            const combinedPerms = overlayPermissionLevels(inheritedPerms, explicitPerms);
+            permRecords[module.id] = {
+                explicitPerms,
+                inheritedPerms,
+                combinedPerms,
+            };
+            if (module.children) {
+                for (const child of module.children) {
+                    traverse(child, module.id);
+                }
+            }
+        };
+        if (userDirectoryStructure) {
+            traverse(userDirectoryStructure, null);
+        }
+        return permRecords;
+    }, [userDirectoryStructure]);
+
     const selectOrganization = async (orgId: OrganizationId) => {
         try {
             setLastSelectedOrgId(orgId);
@@ -136,6 +184,7 @@ const TRZProvider: React.FC<any> = ({ children }) => {
                 createOrganization: createOrg,
                 pageTitle,
                 setPageTitle,
+                permissionRecords,
             }}
         >
             {children}

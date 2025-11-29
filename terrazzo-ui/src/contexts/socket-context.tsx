@@ -21,7 +21,6 @@ const SocketProvider: React.FC<any> = ({ children }) => {
     // const [userLookup, setUserLookup] = useState<{[userId:UserId]:UserHeader}>({});
 
     useEffect(() => {
-        console.log('Socket effect running', import.meta.env);
         if (!import.meta.env.SOCKET_URL) {
             throw new Error('SOCKET_URL environment variable is not set');
         }

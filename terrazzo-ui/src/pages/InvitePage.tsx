@@ -33,17 +33,22 @@ const InvitePage = (): React.JSX.Element => {
             setAccepting(true);
             const success = await acceptInvite(sockCtx, invite.id);
             if (!success) {
-                notify(NoteType.GENERIC_ERROR, new Error('Failed to accept invite'));
+                notify(NoteType.GENERIC_ERROR, 'Failed to accept invite');
                 setAccepting(false);
                 return;
             }
             await new Promise((resolve) => setTimeout(resolve, 500));
             trz.selectOrganization(invite.forOrganizationId);
+            navigate(`/org/${invite.forOrganizationId}`);
         } catch (err) {
             navigate('/');
         }
         setAccepting(false);
     };
+
+    if (!usr.userData) {
+        return <Loader />;
+    }
 
     return (
         <Center
@@ -59,10 +64,10 @@ const InvitePage = (): React.JSX.Element => {
                     <Loader />
                 ) : (
                     <>
-                        <Text>You have been invited to join</Text>
+                        <Text>{`Hi ${usr.userData.firstName}, you have been invited to join`}</Text>
                         <Avatar
                             src={invitingOrg?.logoUrl || undefined}
-                            size={80}
+                            size={100}
                             radius="md"
                         />
                         <Title>{invitingOrg?.name || 'Unknown Organization'}</Title>
@@ -86,7 +91,7 @@ const InvitePage = (): React.JSX.Element => {
                                     onClick={handleAcceptInvite}
                                     loading={accepting}
                                 >
-                                    Accept Invite
+                                    {`Accept Invite as @${usr.userData.username}`}
                                 </Button>
                                 <Button
                                     variant="subtle"

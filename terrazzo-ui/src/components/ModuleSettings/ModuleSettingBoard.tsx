@@ -59,10 +59,11 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
                 }}
             />
             <PermissionsEditor
-                permissionRecord={{
-                    anyonePermissionLevel: boardEdits.anyonePermissionLevel ?? boardData.anyonePermissionLevel,
-                    orgPermissionLevel: boardEdits.orgPermissionLevel ?? boardData.orgPermissionLevel,
-                    userPermissionLevels: boardEdits.userPermissionLevels ?? boardData.userPermissionLevels,
+                moduleId={props.boardId}
+                editedPermissionRecord={{
+                    anyonePermissionLevel: boardEdits.anyonePermissionLevel,
+                    orgPermissionLevel: boardEdits.orgPermissionLevel,
+                    userPermissionLevels: boardEdits.userPermissionLevels,
                 }}
                 onChangeRecord={(newRecord) => {
                     setBoardEdits({ ...boardEdits, ...newRecord });
