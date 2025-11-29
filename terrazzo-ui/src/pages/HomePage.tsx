@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Center, Divider, Flex, Group, HoverCard, Kbd, Loader, ScrollArea, Stack, Text, Title, Tooltip, UnstyledButton } from '@mantine/core';
+import { Avatar, Box, Button, Center, Divider, Flex, Group, Loader, ScrollArea, Stack, Title, UnstyledButton } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useTRZ } from '@trz/contexts/TRZ-context';
@@ -41,57 +41,6 @@ const HomePage = (): React.JSX.Element => {
                         >
                             Welcome {usr.userData?.firstName ?? ''}
                         </Title>
-                        <Group gap="md">
-                            <Button
-                                variant="subtle"
-                                onClick={() => {
-                                    modals.openContextModal({
-                                        modal: 'organization',
-                                        title: 'Create New Organization',
-                                        innerProps: {},
-                                    });
-                                }}
-                                mx="4"
-                                px="8"
-                            >
-                                Create Organization
-                            </Button>
-                            <HoverCard
-                                width={280}
-                                shadow="md"
-                                arrowPosition="center"
-                                withArrow
-                            >
-                                <HoverCard.Target>
-                                    <Button
-                                        variant="outline"
-                                        mx="4"
-                                        px="8"
-                                    >
-                                        Join Organization
-                                    </Button>
-                                </HoverCard.Target>
-                                <HoverCard.Dropdown>
-                                    <Text fz={'sm'}>
-                                        Send your username
-                                        <Tooltip label={'Copy'}>
-                                            <Button
-                                                variant="subtle"
-                                                onClick={() => {
-                                                    clipboard.copy(usr.userData?.username ?? '');
-                                                }}
-                                                mx="2"
-                                                px="4"
-                                                size={'xs'}
-                                            >
-                                                <Kbd fz="xs">{clipboard.copied ? 'Copied!' : usr.userData?.username}</Kbd>
-                                            </Button>
-                                        </Tooltip>
-                                        to someone to get invited!
-                                    </Text>
-                                </HoverCard.Dropdown>
-                            </HoverCard>
-                        </Group>
                     </Flex>
                     <Divider
                         color="#5B5857"
