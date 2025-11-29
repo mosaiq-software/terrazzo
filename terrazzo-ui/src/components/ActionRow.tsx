@@ -19,6 +19,7 @@ interface ActionRowProps {
     menuLabel?: string;
     menuItems?: ('-' | ActionRowMenuItem)[];
     disabled?: boolean;
+    bg?: string;
 }
 
 export const ActionRow = (props: ActionRowProps) => {
@@ -28,7 +29,7 @@ export const ActionRow = (props: ActionRowProps) => {
             w="100%"
             px="md"
             py="sm"
-            bg="#212226"
+            bg={props.bg || '#212226'}
             style={{
                 borderRadius: '8px',
                 opacity: props.disabled ? 0.5 : 1,

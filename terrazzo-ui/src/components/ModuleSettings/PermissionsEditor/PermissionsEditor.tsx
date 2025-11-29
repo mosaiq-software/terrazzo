@@ -1,14 +1,15 @@
-import { ComboboxItem, Divider, Fieldset, Group, Select, Stack, Text } from '@mantine/core';
+import { Accordion, Divider, Fieldset, Stack, Text } from '@mantine/core';
 import { OrgMembershipLevel, PermissionLevel, PermissionRecord, UID, UserHeader } from '@mosaiq/terrazzo-common/types';
 import { overlayPermissionLevels } from '@mosaiq/terrazzo-common/utils/permissionUtils';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useTRZ } from '@trz/contexts/TRZ-context';
 import { usePermissions } from '@trz/hooks/usePermissions';
 import { useMemo } from 'react';
-import { IconType } from 'react-icons';
 import { IoMdGlobe } from 'react-icons/io';
-import { MdAdd, MdBeachAccess, MdPersonRemove } from 'react-icons/md';
-import { ActionRow } from '../ActionRow';
+import { MdBeachAccess } from 'react-icons/md';
+import { PermissionEditorRow } from './PermissionEditorRow';
+import { PermissionsEditorAddRow } from './PermissionsEditorAddRow';
+import { permissionLevelOptionsAlt } from './PermissionsEditorShared';
 
 interface PermissionsEditorProps {
     moduleId: UID;
@@ -56,7 +57,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
         <Fieldset legend="Permissions">
             <Stack>
                 <Text>Broad Access</Text>
-                <PermissionRow
+                <PermissionEditorRow
                     title="Anyone on the Internet"
                     icon={IoMdGlobe}
                     permissionLevel={mergedPermissionRecord.anyonePermissionLevel ?? PermissionLevel.NONE}
@@ -64,10 +65,10 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                         const newRecord = { ...mergedPermissionRecord, anyonePermissionLevel: newLevel };
                         props.onChangeRecord(newRecord);
                     }}
-                    tooltip="Anyone with the link has this level of access."
+                    tooltip={`Anyone on the internet ${permissionLevelOptionsAlt[mergedPermissionRecord.anyonePermissionLevel ?? PermissionLevel.NONE]}`}
                     minimumPermissionLevel={inheritedPerms.anyonePermissionLevel ?? PermissionLevel.NONE}
                 />
-                <PermissionRow
+                <PermissionEditorRow
                     title={`Anyone in ${trz.selectedOrganization?.name ?? 'Organization'}`}
                     icon={MdBeachAccess}
                     permissionLevel={mergedPermissionRecord.orgPermissionLevel ?? PermissionLevel.NONE}
@@ -75,14 +76,14 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                         const newRecord = { ...mergedPermissionRecord, orgPermissionLevel: newLevel };
                         props.onChangeRecord(newRecord);
                     }}
-                    tooltip={`Everyone in ${trz.selectedOrganization?.name ?? 'the organization'} has this level of access.`}
+                    tooltip={`Everyone in ${trz.selectedOrganization?.name ?? 'the organization'} ${permissionLevelOptionsAlt[mergedPermissionRecord.orgPermissionLevel ?? PermissionLevel.NONE]}`}
                     minimumPermissionLevel={inheritedPerms.orgPermissionLevel ?? PermissionLevel.NONE}
                 />
                 <Divider my={'xs'} />
                 <Text>Specific Members</Text>
                 {members.explicitPerms.map(({ user, permission }) => {
                     return (
-                        <PermissionRow
+                        <PermissionEditorRow
                             key={user.id}
                             title={fullName(user)}
                             icon={user.profilePicture}
@@ -92,7 +93,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                                 const newRecord = { ...mergedPermissionRecord, userPermissionLevels: newUserPermissionLevels };
                                 props.onChangeRecord(newRecord);
                             }}
-                            tooltip={`${fullName(user)} has this specific permission level.`}
+                            tooltip={`${fullName(user)} ${permissionLevelOptionsAlt[permission]}`}
                             minimumPermissionLevel={inheritedPerms.userPermissionLevels[user.id] ?? PermissionLevel.NONE}
                             onDeletePermission={() => {
                                 const newUserPermissionLevels = { ...mergedPermissionRecord.userPermissionLevels };
@@ -103,7 +104,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                         />
                     );
                 })}
-                <AddMemberRow
+                <PermissionsEditorAddRow
                     addableUsers={members.others}
                     onAddUser={(user, level) => {
                         const newUserPermissionLevels = { ...mergedPermissionRecord.userPermissionLevels, [user.id]: level };
@@ -112,101 +113,34 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                     }}
                 />
                 <Divider my={'xs'} />
-                <Text>Organization Admins</Text>
-                {/* Show admins as disabled rows */}
-                {members.orgAdmins.map((user) => (
-                    <PermissionRow
-                        key={user.id}
-                        title={fullName(user)}
-                        icon={user.profilePicture}
-                        permissionLevel={PermissionLevel.ADMIN}
-                        disabled={true}
-                        onChangeLevel={() => {}}
-                        tooltip="Organization Admins have full access and cannot have their permissions changed here."
-                        minimumPermissionLevel={PermissionLevel.ADMIN}
-                    />
-                ))}
+                <Accordion variant="">
+                    <Accordion.Item value="org-admins">
+                        <Accordion.Control>Organization Admins ({members.orgAdmins.length})</Accordion.Control>
+                        <Accordion.Panel>
+                            <Stack gap="xs">
+                                <Text
+                                    c="dimmed"
+                                    fz="sm"
+                                >
+                                    Organization Admins have full access and cannot have their permissions changed here.
+                                </Text>
+                                {members.orgAdmins.map((user) => (
+                                    <PermissionEditorRow
+                                        key={user.id}
+                                        title={fullName(user)}
+                                        icon={user.profilePicture}
+                                        permissionLevel={PermissionLevel.ADMIN}
+                                        disabled={true}
+                                        onChangeLevel={() => {}}
+                                        tooltip="Organization Admins have full access and cannot have their permissions changed here."
+                                        minimumPermissionLevel={PermissionLevel.ADMIN}
+                                    />
+                                ))}
+                            </Stack>
+                        </Accordion.Panel>
+                    </Accordion.Item>
+                </Accordion>
             </Stack>
         </Fieldset>
     );
 };
-
-interface PermissionRowProps {
-    title: string;
-    icon?: string | IconType;
-    permissionLevel: PermissionLevel;
-    minimumPermissionLevel: PermissionLevel;
-    disabled?: boolean;
-    tooltip?: string;
-    onChangeLevel: (newLevel: PermissionLevel) => void;
-    onDeletePermission?: () => void;
-}
-const PermissionRow = (props: PermissionRowProps) => {
-    const data: ComboboxItem[] = permissionLevelOptions.map((value, index) => ({
-        value: index.toString(),
-        label: value.toString(),
-        disabled: index < props.minimumPermissionLevel,
-    }));
-
-    return (
-        <ActionRow
-            icon={props.icon}
-            title={props.title}
-            disabled={props.disabled}
-            items={[
-                <Select
-                    key="permission-select"
-                    label={props.minimumPermissionLevel ? `At least ${permissionLevelOptions[props.minimumPermissionLevel]} (inherited from parent directory)` : undefined}
-                    disabled={props.disabled}
-                    data={data}
-                    value={props.permissionLevel.toString()}
-                    onChange={(value) => {
-                        const newLevel = Number(value) as PermissionLevel;
-                        props.onChangeLevel(newLevel);
-                    }}
-                />,
-            ]}
-            menuLabel="Manage Permission"
-            menuItems={
-                props.onDeletePermission && !props.disabled
-                    ? [
-                          {
-                              label: 'Remove Explicit Permission',
-                              onClick: () => props.onDeletePermission?.(),
-                              icon: <MdPersonRemove size={16} />,
-                              color: 'red',
-                          },
-                      ]
-                    : []
-            }
-        />
-    );
-};
-
-interface AddMemberRowProps {
-    addableUsers: UserHeader[];
-    onAddUser: (user: UserHeader, level: PermissionLevel) => void;
-}
-const AddMemberRow = (props: AddMemberRowProps) => {
-    if (props.addableUsers.length === 0) {
-        return null;
-    }
-    return (
-        <Group>
-            <MdAdd />
-            <Select
-                label="Add Member"
-                placeholder="Select a user to add"
-                data={props.addableUsers.map((user) => ({ value: user.id, label: fullName(user) }))}
-                onChange={(value) => {
-                    const userToAdd = props.addableUsers.find((user) => user.id === value);
-                    if (userToAdd) {
-                        props.onAddUser(userToAdd, PermissionLevel.VIEW);
-                    }
-                }}
-            />
-        </Group>
-    );
-};
-
-const permissionLevelOptions = ['No Access', 'Viewer', 'Editor', 'Admin'];

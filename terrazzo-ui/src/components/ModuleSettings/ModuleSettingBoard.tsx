@@ -6,7 +6,7 @@ import { useBoard } from '@trz/hooks/useBoard';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
 import { LabelEditor } from './LabelEditor';
-import { PermissionsEditor } from './PermissionsEditor';
+import { PermissionsEditor } from './PermissionsEditor/PermissionsEditor';
 
 interface ModuleSettingsBoardProps {
     boardId: BoardId;

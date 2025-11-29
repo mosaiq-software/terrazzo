@@ -5,7 +5,7 @@ import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
 import { useDirectory } from '@trz/hooks/useDirectory';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
-import { PermissionsEditor } from './PermissionsEditor';
+import { PermissionsEditor } from './PermissionsEditor/PermissionsEditor';
 
 interface ModuleSettingsDirectoryProps {
     directoryId: DirectoryId;

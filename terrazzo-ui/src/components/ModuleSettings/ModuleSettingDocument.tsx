@@ -5,7 +5,7 @@ import { updateDocumentMetadata } from '@trz/emitters';
 import { useDocument } from '@trz/hooks/useDocument';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
-import { PermissionsEditor } from './PermissionsEditor';
+import { PermissionsEditor } from './PermissionsEditor/PermissionsEditor';
 
 interface ModuleSettingsDocumentProps {
     documentId: DocumentId;
