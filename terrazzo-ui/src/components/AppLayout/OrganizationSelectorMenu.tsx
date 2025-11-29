@@ -1,7 +1,7 @@
 import { Avatar, Button, Divider, Group, Menu, Text, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { useTRZ } from '@trz/contexts/TRZ-context';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdMailOutline } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 
 interface OrganizationSelectorMenuProps {
@@ -97,6 +97,35 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                     </Menu.Item>
                 ))}
                 <Divider my="xs" />
+                <Menu.Item
+                    onClick={() => {
+                        modals.openContextModal({
+                            modal: 'joinOrganization',
+                            title: 'Join Organization',
+                            innerProps: {},
+                        });
+                    }}
+                >
+                    <Group
+                        wrap="nowrap"
+                        gap={8}
+                        px={0}
+                    >
+                        <MdMailOutline
+                            size={'1.25rem'}
+                            color="subtle"
+                        />
+                        <Text
+                            c="subtle"
+                            style={{
+                                textWrap: 'nowrap',
+                                textAlign: 'left',
+                            }}
+                        >
+                            Join Organization
+                        </Text>
+                    </Group>
+                </Menu.Item>
                 <Menu.Item
                     onClick={() => {
                         modals.openContextModal({

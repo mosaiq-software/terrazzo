@@ -14,6 +14,7 @@ import 'mantine-contextmenu/styles.layer.css';
 import { BrowserRouter } from 'react-router-dom';
 import { ModuleSettingsModal } from './components/ModuleSettings/ModuleSettingsModal';
 import Router from './router';
+import { JoinOrganizationModal } from './components/Modals/JoinOrganization';
 
 const theme = createTheme({});
 
@@ -21,6 +22,7 @@ const modals = {
     organization: CreateOrganizationModal,
     board: CreateBoardModal,
     moduleSettings: ModuleSettingsModal,
+    joinOrganization: JoinOrganizationModal,
 };
 
 const App = () => {
