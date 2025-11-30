@@ -1,5 +1,6 @@
 import { Avatar, Button } from '@mantine/core';
 import { modals } from '@mantine/modals';
+import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useUser } from '@trz/contexts/user-context';
 import { FaBell } from 'react-icons/fa';
 
@@ -98,6 +99,8 @@ const Navbar = () => {
                     }}
                     onClick={() => usr.logoutAll()}
                     src={usr.userData?.profilePicture}
+                    name={fullName(usr.userData)}
+                    color={'initials'}
                 />
             </div>
         </div>

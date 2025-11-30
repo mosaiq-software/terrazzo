@@ -1,5 +1,6 @@
 import { Avatar, Text, Tooltip } from '@mantine/core';
 import { UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getUserHeader } from '@trz/emitters';
@@ -58,7 +59,7 @@ export const AvatarRow = (props: AvatarRowProps) => {
                         <Avatar
                             src={user.profilePicture}
                             size="sm"
-                            name={user.firstName + ' ' + user.lastName}
+                            name={fullName(user)}
                             color="initials"
                         />
                     </Tooltip>

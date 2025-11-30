@@ -86,6 +86,8 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
                             <Avatar
                                 src={memRec.user.profilePicture}
                                 size={20}
+                                name={fullName(memRec.user)}
+                                color="initials"
                             />
                         ),
                     })) || []

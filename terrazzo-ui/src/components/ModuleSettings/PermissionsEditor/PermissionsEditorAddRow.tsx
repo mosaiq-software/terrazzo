@@ -25,6 +25,8 @@ export const PermissionsEditorAddRow = (props: PermissionEditorAddRowProps) => {
                     src={user.profilePicture}
                     alt={fullName(user)}
                     size={20}
+                    name={fullName(user)}
+                    color="initials"
                 >
                     {fullName(user).charAt(0).toUpperCase()}
                 </Avatar>

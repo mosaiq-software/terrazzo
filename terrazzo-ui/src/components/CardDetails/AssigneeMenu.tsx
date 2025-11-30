@@ -64,6 +64,8 @@ export const AssigneeMenu = (props: AssigneeMenuProps) => {
                                     <Avatar
                                         src={memRec.user.profilePicture}
                                         size={24}
+                                        name={fullName(memRec.user)}
+                                        color="initials"
                                     />
                                 }
                                 onClick={() => {

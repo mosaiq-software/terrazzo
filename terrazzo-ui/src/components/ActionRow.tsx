@@ -47,6 +47,8 @@ export const ActionRow = (props: ActionRowProps) => {
                         src={props.icon as string}
                         size={40}
                         radius="xl"
+                        name={props.title}
+                        color={'initials'}
                     />
                 ) : (
                     <Box

@@ -8,7 +8,7 @@ import { acceptInvite } from '@trz/emitters';
 import { useInvite } from '@trz/hooks/useInvite';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const InvitePage = (): React.JSX.Element => {
@@ -25,7 +25,9 @@ const InvitePage = (): React.JSX.Element => {
         setTitle(`Invite | Terrazzo`);
     }, []);
 
-    const handleAcceptInvite = async () => {
+    const userIsInOrg = useMemo(() => orgCtx.allOrganizations.some((org) => org.id === invite?.forOrganizationId), [orgCtx.allOrganizations, invite]);
+
+    const handleAcceptInvite = useCallback(async () => {
         if (!invite) {
             return;
         }
@@ -43,7 +45,7 @@ const InvitePage = (): React.JSX.Element => {
             navigate('/');
         }
         setAccepting(false);
-    };
+    }, [invite, sockCtx, orgCtx]);
 
     if (!usr.userData) {
         return <Loader />;
@@ -63,12 +65,14 @@ const InvitePage = (): React.JSX.Element => {
                     <Loader />
                 ) : (
                     <>
-                        <Text>{`Hi ${usr.userData.firstName}, you have been invited to join`}</Text>
                         <Avatar
                             src={invitingOrg?.logoUrl || undefined}
                             size={100}
                             radius="md"
+                            name={invitingOrg?.name}
+                            color={'initials'}
                         />
+                        <Text>{userIsInOrg ? `Hi ${usr.userData.firstName}, welcome back to` : `Hi ${usr.userData.firstName}, you have been invited to join`}</Text>
                         <Title>{invitingOrg?.name || 'Unknown Organization'}</Title>
                         <Text>{invitingOrg?.description || null}</Text>
                         <Space h="1rem" />
@@ -90,16 +94,18 @@ const InvitePage = (): React.JSX.Element => {
                                     onClick={handleAcceptInvite}
                                     loading={accepting}
                                 >
-                                    {`Accept Invite as @${usr.userData.username}`}
+                                    {`${userIsInOrg ? 'Continue as' : 'Accept Invite as'} @${usr.userData.username}`}
                                 </Button>
-                                <Button
-                                    variant="subtle"
-                                    fullWidth
-                                    onClick={() => navigate('/dashboard')}
-                                    disabled={accepting}
-                                >
-                                    Decline
-                                </Button>
+                                {!userIsInOrg && (
+                                    <Button
+                                        variant="subtle"
+                                        fullWidth
+                                        onClick={() => navigate('/dashboard')}
+                                        disabled={accepting}
+                                    >
+                                        Decline
+                                    </Button>
+                                )}
                             </>
                         )}
                     </>

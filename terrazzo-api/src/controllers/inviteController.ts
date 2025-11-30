@@ -1,6 +1,7 @@
 import { Invite, InviteId, MembershipRecord, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common/types';
 import { isInviteExpired } from '@mosaiq/terrazzo-common/utils/inviteUtils';
 import { createInviteRecord, getAllInviteRecordsForOrganization, getInviteRecordById, updateInviteRecord } from '@trz-api/persistence/invitePersistence';
+import { getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
 import { upsertMembership } from './membershipController';
 
 export const getAllInvitesForOrg = async (orgId: OrganizationId): Promise<Invite[]> => {
@@ -34,6 +35,13 @@ export const useInvite = async (inviteId: InviteId, userId: UserId): Promise<boo
         if (isInviteExpired(invite)) {
             console.warn('Attempted to use expired invite:', inviteId);
             return false;
+        }
+
+        // check if the user is already a member of the organization, if so, do not add them again but dont fail
+        const usersMemberships = await getOrganizationMembershipsForUser(userId);
+        if (usersMemberships.find((m) => m.orgId === invite.forOrganizationId)) {
+            console.warn('User is already a member of the organization:', userId, invite.forOrganizationId);
+            return true;
         }
 
         await updateInviteRecord({ id: invite.id, uses: invite.uses + 1 });
