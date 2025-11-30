@@ -50,7 +50,8 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
                 throw new Error('No org data provided');
             }
             await updateOrganizationFromPartial(data.id, data);
-            broadcast<ServerSE.UPDATE_ORG_FIELD>(socket, ServerSE.UPDATE_ORG_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
+            broadcast(socket, ServerSE.UPDATE_ORG_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
+            reply(undefined);
         } catch (error: any) {
             console.error('Error updating org fields', error);
             reply(undefined, error.message);

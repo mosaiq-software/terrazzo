@@ -203,6 +203,7 @@ export enum ServerSE {
     UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
     UPDATE_DIRECTORY_FIELD = 'UPDATE_DIRECTORY_FIELD',
     UPDATE_USERS_DIRECTORY_STRUCTURE = 'UPDATE_USERS_DIRECTORY_STRUCTURE',
+    UPDATE_USERS_ORGANIZATIONS = 'UPDATE_USERS_ORGANIZATIONS',
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -229,6 +230,7 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ServerSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
     [ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE]: { userId: UserId; orgId: OrganizationId; directoryStructure: ModuleHeaderWithChildren };
+    [ServerSE.UPDATE_USERS_ORGANIZATIONS]: { userId: UserId; organizations: OrganizationHeader[] };
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -255,6 +257,7 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_DOCUMENT_FIELD]: void;
     [ServerSE.UPDATE_DIRECTORY_FIELD]: void;
     [ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE]: void;
+    [ServerSE.UPDATE_USERS_ORGANIZATIONS]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
 

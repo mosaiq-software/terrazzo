@@ -8,6 +8,7 @@ import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useSocket } from './socket-context';
 import { useUser } from './user-context';
 
@@ -36,6 +37,7 @@ const TRZContext = createContext<TRZContextType | undefined>(undefined);
 const TRZProvider: React.FC<any> = ({ children }) => {
     const userCtx = useUser();
     const sockCtx = useSocket();
+    const navigate = useNavigate();
     const [animationDuration] = useState<number>(500);
     const [navbarHeight, setNavbarHeight] = useState<number>(50);
     const [selectedOrganization, setSelectedOrganization] = useState<Organization | undefined>(undefined);
@@ -87,7 +89,7 @@ const TRZProvider: React.FC<any> = ({ children }) => {
         fetchUserDirectoryStructure();
     }, [userCtx.userData?.id, selectedOrganization, sockCtx.connected]);
 
-    useSocketListener<ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE>(
+    useSocketListener(
         ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE,
         (payload) => {
             if (payload.userId !== userCtx.userData?.id || payload.orgId !== selectedOrganization?.id) {
@@ -96,6 +98,24 @@ const TRZProvider: React.FC<any> = ({ children }) => {
             setUserDirectoryStructure(payload.directoryStructure);
         },
         [selectedOrganization, userCtx.userData]
+    );
+
+    useSocketListener(
+        ServerSE.UPDATE_USERS_ORGANIZATIONS,
+        (payload) => {
+            if (payload.userId !== userCtx.userData?.id) {
+                return;
+            }
+            setAllOrganizations(payload.organizations);
+
+            // if the user's selected organization was removed, clear it
+            if (selectedOrganization && !payload.organizations.find((org) => org.id === selectedOrganization.id)) {
+                setSelectedOrganization(undefined);
+                setLastSelectedOrgId(undefined);
+                navigate('/dashboard');
+            }
+        },
+        [userCtx.userData]
     );
 
     const permissionRecords = useMemo(() => {

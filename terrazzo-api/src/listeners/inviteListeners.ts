@@ -1,7 +1,9 @@
-import { ClientSE, ClientSEPayload, ClientSEReply } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
+import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { createInvite, deleteInvite, getAllInvitesForOrg, useInvite } from '@trz-api/controllers/inviteController';
+import { getFullOrganization } from '@trz-api/controllers/organizationController';
 import { getInviteRecordById } from '@trz-api/persistence/invitePersistence';
-import { getSocketData } from '@trz-api/utils/socketUtils';
+import { broadcast, getSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerInviteListeners = (socket: Socket, io: Server) => {
@@ -52,6 +54,17 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
             }
             const socketData = getSocketData(socket);
             const success = await useInvite(data.inviteId, socketData.user.user.id);
+            if (success) {
+                const invite = await getInviteRecordById(data.inviteId);
+                if (!invite) {
+                    throw new Error('Failed to fetch invite after use');
+                }
+                const organization = await getFullOrganization(invite.forOrganizationId);
+                if (!organization) {
+                    throw new Error('Failed to fetch updated organization data');
+                }
+                broadcast(socket, ServerSE.UPDATE_ORG_FIELD, organization, [getRoomCode(RoomType.DATA, invite.forOrganizationId)]);
+            }
             reply(success);
         } catch (error: any) {
             console.error('Error using invite', error);
