@@ -5,7 +5,7 @@ import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { useUser } from '@trz/contexts/user-context';
 import { setTitle } from '@trz/util/tabUtils';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const HomePage = (): React.JSX.Element => {
@@ -19,7 +19,6 @@ const HomePage = (): React.JSX.Element => {
         setTitle(`Dashboard | Terrazzo`);
     }, []);
 
-    const orgs = useMemo(() => orgCtx.allOrganizations.filter((e) => !e.archived), [orgCtx.allOrganizations]);
     return (
         <ScrollArea
             bg="#15161A"
@@ -62,46 +61,45 @@ const HomePage = (): React.JSX.Element => {
                         >
                             Organizations
                         </Title>
-                        {orgs &&
-                            orgs.map((org) => {
-                                return (
-                                    <Stack
-                                        key={org.id}
-                                        w="100%"
+                        {orgCtx.allOrganizations.map((org) => {
+                            return (
+                                <Stack
+                                    key={org.id}
+                                    w="100%"
+                                >
+                                    <UnstyledButton
+                                        variant="subtle"
+                                        c="white"
+                                        onClick={() => navigate('/org/' + org.id)}
+                                        w={'100%'}
                                     >
-                                        <UnstyledButton
-                                            variant="subtle"
-                                            c="white"
-                                            onClick={() => navigate('/org/' + org.id)}
-                                            w={'100%'}
-                                        >
-                                            <Group justify="space-between">
-                                                <Group>
-                                                    <Avatar
-                                                        src={org.logoUrl ?? undefined}
-                                                        name={org.name}
-                                                        color={'initials'}
-                                                        size={'50'}
-                                                        radius={'lg'}
-                                                    />
-                                                    <Title
-                                                        order={3}
-                                                        c="#fff"
-                                                        td="none"
-                                                    >
-                                                        {org.name}
-                                                    </Title>
-                                                </Group>
-                                                {/* <AvatarRow
+                                        <Group justify="space-between">
+                                            <Group>
+                                                <Avatar
+                                                    src={org.logoUrl ?? undefined}
+                                                    name={org.name}
+                                                    color={'initials'}
+                                                    size={'50'}
+                                                    radius={'lg'}
+                                                />
+                                                <Title
+                                                    order={3}
+                                                    c="#fff"
+                                                    td="none"
+                                                >
+                                                    {org.name}
+                                                </Title>
+                                            </Group>
+                                            {/* <AvatarRow
                                                     users={org.members.map((m) => m.user)}
                                                     maxUsers={10}
                                                 /> */}
-                                            </Group>
-                                        </UnstyledButton>
-                                    </Stack>
-                                );
-                            })}
-                        {orgs?.length == 0 && (
+                                        </Group>
+                                    </UnstyledButton>
+                                </Stack>
+                            );
+                        })}
+                        {orgCtx.allOrganizations.length == 0 && (
                             <Button
                                 variant="outline"
                                 onClick={() => {

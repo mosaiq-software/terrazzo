@@ -82,7 +82,7 @@ export async function setupUser(userId: UserId, username: string, firstName: str
 
     // create a default personal org for the user to have projects in
     try {
-        const personalOrgId: OrganizationId = await addOrganization(firstName + "'s Space", user.id, true);
+        const personalOrgId: OrganizationId = await addOrganization(firstName + "'s Space", user.id);
         const orgMembershipRecord: MembershipRecord = {
             orgId: personalOrgId,
             userId: user.id,

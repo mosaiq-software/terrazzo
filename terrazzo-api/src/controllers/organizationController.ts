@@ -17,7 +17,7 @@ export async function getOrganizationPreview(orgId: OrganizationId) {
     }
 }
 
-export async function addOrganization(name: string, creator: UserId, isPersonal: boolean) {
+export async function addOrganization(name: string, creator: UserId) {
     if (name.length === 0 || name.length > 50) {
         throw new Error('Name must be 0 - 50 characters');
     }
@@ -30,9 +30,7 @@ export async function addOrganization(name: string, creator: UserId, isPersonal:
     const newOrg: OrganizationHeader = {
         id: crypto.randomUUID(),
         name,
-        archived: false,
         createdAt: Date.now(),
-        isPersonalOrg: isPersonal,
         logoUrl: '',
         description: '',
     };

@@ -24,7 +24,7 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
                 throw new Error('No card data provided');
             }
             const socketData = getSocketData(socket);
-            const orgId = await addOrganization(data.name, socketData.user.user.id, false);
+            const orgId = await addOrganization(data.name, socketData.user.user.id);
             reply(orgId);
         } catch (error: any) {
             console.error('Error creating card', error);

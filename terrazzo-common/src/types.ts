@@ -17,10 +17,8 @@ export type DirectoryId = UID;
 export interface OrganizationHeader {
     id: OrganizationId;
     name: string;
-    archived: boolean;
     createdAt: number;
     logoUrl: URL;
-    isPersonalOrg: boolean;
     description: string;
 }
 

@@ -136,10 +136,8 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                 const newOrg: OrganizationHeader = {
                     id: orgId,
                     name: orgName,
-                    archived: false,
                     createdAt: Date.now(),
                     logoUrl: '',
-                    isPersonalOrg: false,
                     description: '',
                 };
                 setAllOrganizations((prev) => [...prev, newOrg]);
