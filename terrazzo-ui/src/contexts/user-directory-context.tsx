@@ -33,7 +33,10 @@ const UserDirectoryProvider: React.FC<any> = ({ children }) => {
 
     useEffect(() => {
         const fetchUserDirectoryStructure = async () => {
-            if (!userCtx.userData?.id || !org.active || !sockCtx.connected) return;
+            if (!userCtx.userData?.id || !org.active || !sockCtx.connected) {
+                setUserDirectoryStructure(undefined);
+                return;
+            }
             try {
                 const directoryStructure = await getUserDirectoryStructure(sockCtx, userCtx.userData.id, org.active.id);
                 setUserDirectoryStructure(directoryStructure || undefined);

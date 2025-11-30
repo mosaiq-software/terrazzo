@@ -19,13 +19,13 @@ const OrganizationPage = (): React.JSX.Element => {
     const navigate = useNavigate();
     const orgId = params.orgId as OrganizationId | undefined;
     const tabId = params.tabId;
-    const org = useOrg();
-    setTitle(`${org.active?.name ?? 'Organization'} | Terrazzo`);
+    const orgCtx = useOrg();
+    setTitle(`${orgCtx.active?.name ?? 'Organization'} | Terrazzo`);
 
-    if (org.active === undefined) {
+    if (orgCtx.active === undefined) {
         return <Loader />;
     }
-    if (org.active === null || !orgId) {
+    if (orgCtx.active === null || !orgId) {
         return (
             <NotFound
                 itemType="organization"
@@ -34,7 +34,7 @@ const OrganizationPage = (): React.JSX.Element => {
         );
     }
 
-    const myMembershipRecord = org.members.find((m) => m.user.id === userCtx.userData?.id)?.record;
+    const myMembershipRecord = orgCtx.members.find((m) => m.user.id === userCtx.userData?.id)?.record;
     if (!myMembershipRecord) {
         return (
             <NotFound
@@ -45,18 +45,18 @@ const OrganizationPage = (): React.JSX.Element => {
     }
 
     const tabs: any = {
-        Organization: <OrgTabCards orgData={org.active} />,
+        Organization: <OrgTabCards orgData={orgCtx.active} />,
         Members: (
             <OrgTabMembers
                 myMembershipRecord={myMembershipRecord}
-                orgData={org.active}
-                members={org.members}
+                orgData={orgCtx.active}
+                members={orgCtx.members}
             />
         ),
         Settings: (
             <OrgTabSettings
                 myMembershipRecord={myMembershipRecord}
-                orgData={org.active}
+                orgData={orgCtx.active}
             />
         ),
     };
@@ -86,15 +86,15 @@ const OrganizationPage = (): React.JSX.Element => {
                         pl="50"
                     >
                         <Avatar
-                            src={org.active.logoUrl ?? undefined}
-                            name={org.active.name}
+                            src={orgCtx.active.logoUrl ?? undefined}
+                            name={orgCtx.active.name}
                             color={'initials'}
                             size={'75'}
                             radius={'lg'}
                         />
                         <Flex direction="column">
-                            <Title c="white">{org.active.name}</Title>
-                            <Text c="#6C6C6C">{org.active.description}</Text>
+                            <Title c="white">{orgCtx.active.name}</Title>
+                            <Text c="#6C6C6C">{orgCtx.active.description}</Text>
                         </Flex>
                     </Group>
                     <Tabs
@@ -125,7 +125,7 @@ const OrganizationPage = (): React.JSX.Element => {
                                 align="center"
                             >
                                 <AvatarRow
-                                    users={org.members.map((m) => m.user)}
+                                    users={orgCtx.members.map((m) => m.user)}
                                     maxUsers={5}
                                 />
                             </Flex>

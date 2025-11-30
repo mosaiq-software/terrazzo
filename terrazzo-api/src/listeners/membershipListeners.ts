@@ -1,8 +1,6 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { OrganizationId, UserId } from '@mosaiq/terrazzo-common/types';
-import { getRoomCode, RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
-import { getMembersInOrg, getOrgsForUser, removeMembership, updateMembership } from '@trz-api/controllers/membershipController';
-import { broadcast } from '@trz-api/utils/socketUtils';
+import { ClientSE, ClientSEPayload, ClientSEReply } from '@mosaiq/terrazzo-common/socketTypes';
+import { getMembersInOrg, removeMembership, updateMembership } from '@trz-api/controllers/membershipController';
+import { syncMembersInOrg, syncUsersOrgs } from '@trz-api/utils/broadcasters';
 import { Server, Socket } from 'socket.io';
 
 export const registerMembershipListeners = (socket: Socket, io: Server) => {
@@ -48,22 +46,4 @@ export const registerMembershipListeners = (socket: Socket, io: Server) => {
             reply(undefined, error.message);
         }
     });
-};
-
-const syncMembersInOrg = async (socket: Socket, orgId: OrganizationId) => {
-    try {
-        const allMembers = await getMembersInOrg(orgId);
-        broadcast(socket, ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS, { members: allMembers, orgId: orgId }, [getRoomCode(RoomType.DATA, orgId, RoomSpecifier.MEMBERSHIP)]);
-    } catch (error: any) {
-        console.error('Error syncing organization memberships', error);
-    }
-};
-
-const syncUsersOrgs = async (socket: Socket, userId: UserId) => {
-    try {
-        const usersOrgs = await getOrgsForUser(userId);
-        broadcast(socket, ServerSE.UPDATE_USERS_ORGANIZATIONS, { userId: userId, organizations: usersOrgs }, [getRoomCode(RoomType.USER, userId)]);
-    } catch (error: any) {
-        console.error('Error syncing users organizations', error);
-    }
 };

@@ -20,9 +20,8 @@ const CreateOrganization = (props: ContextModalProps<{ modalBody: string }>): Re
         }
         const orgHeader = await orgCtx.createOrganization(orgName);
         if (orgHeader) {
-            orgCtx.selectOrganization(orgHeader.id);
             setOrgName('');
-            navigate(`/org/${orgHeader.id}`);
+            await orgCtx.selectAndGoToOrganization(orgHeader.id);
             handleClose();
         }
     }

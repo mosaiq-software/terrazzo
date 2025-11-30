@@ -32,17 +32,21 @@ export const useDirectory = (directoryId?: DirectoryId) => {
         fetchDirectoryData();
     }, [directoryId, sockCtx.connected]);
 
-    useSocketListener(ServerSE.UPDATE_DIRECTORY_FIELD, (payload) => {
-        if (payload.id !== directoryId) {
-            return;
-        }
-        setDirectory((prev) => {
-            if (!prev) {
-                return prev;
+    useSocketListener(
+        ServerSE.UPDATE_DIRECTORY_FIELD,
+        (payload) => {
+            if (payload.id !== directoryId) {
+                return;
             }
-            return { ...updateBaseFromPartial(prev, payload) };
-        });
-    });
+            setDirectory((prev) => {
+                if (!prev) {
+                    return prev;
+                }
+                return { ...updateBaseFromPartial(prev, payload) };
+            });
+        },
+        [directoryId]
+    );
 
     return directory;
 };

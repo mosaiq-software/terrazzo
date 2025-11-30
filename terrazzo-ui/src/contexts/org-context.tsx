@@ -8,14 +8,15 @@ import { useOrgMembers } from '@trz/hooks/useOrgMembers';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useSocket } from './socket-context';
 import { useUser } from './user-context';
 
 export type OrgContextType = {
     active: OrganizationHeader | undefined;
-    selectOrganization: (orgId: OrganizationId) => void;
+    selectOrganization: (orgId: OrganizationId | null | undefined) => Promise<void>;
+    selectAndGoToOrganization: (orgId: OrganizationId | null | undefined) => Promise<void>;
     allOrganizations: OrganizationHeader[];
     members: Member[];
     createOrganization: (orgName: string) => Promise<OrganizationHeader | undefined>;
@@ -69,68 +70,93 @@ const OrgProvider: React.FC<any> = ({ children }) => {
             }
             setAllOrganizations(payload.organizations);
 
-            // if the user's selected organization was removed, clear it
+            // if the user's selected organization was removed, clear it (user was removed from organization)
             if (selectedOrganization && !payload.organizations.find((org) => org.id === selectedOrganization.id)) {
-                setSelectedOrganization(undefined);
-                setLastSelectedOrgId(undefined);
+                selectAndGoToOrganization(null);
+            }
+        },
+        [userCtx.userData, selectedOrganization]
+    );
+
+    useSocketListener(
+        ServerSE.UPDATE_ORG_FIELD,
+        (payload) => {
+            if (!selectedOrganization || payload.id !== selectedOrganization.id) {
+                return;
+            }
+            setSelectedOrganization((prev) => {
+                if (!prev) {
+                    return prev;
+                }
+                return updateBaseFromPartial(prev, payload);
+            });
+        },
+        [selectedOrganization]
+    );
+
+    const selectOrganization = useCallback(
+        async (orgId: OrganizationId | null | undefined) => {
+            try {
+                setLastSelectedOrgId(orgId ?? undefined);
+                if (!orgId) {
+                    setSelectedOrganization(undefined);
+                    return;
+                }
+                const orgHeader = await getOrganizationData(sockCtx, orgId);
+                if (!orgHeader) {
+                    throw new Error(`Failed to fetch organization data for ID ${orgId}.`);
+                }
+                setSelectedOrganization(orgHeader);
+            } catch (e: any) {
+                notify(NoteType.ORG_DATA_ERROR, e);
+            }
+        },
+        [sockCtx, notify]
+    );
+
+    const selectAndGoToOrganization = useCallback(
+        async (orgId: OrganizationId | null | undefined) => {
+            await selectOrganization(orgId);
+            if (orgId) {
+                navigate(`/org/${orgId}`);
+            } else {
                 navigate('/dashboard');
             }
         },
-        [userCtx.userData]
+        [selectOrganization, navigate]
     );
 
-    useSocketListener(ServerSE.UPDATE_ORG_FIELD, (payload) => {
-        if (!selectedOrganization || payload.id !== selectedOrganization.id) {
-            return;
-        }
-        setSelectedOrganization((prev) => {
-            if (!prev) {
-                return prev;
+    const createOrg = useCallback(
+        async (orgName: string) => {
+            try {
+                const orgId = await createOrganization(sockCtx, orgName);
+                if (!orgId) {
+                    throw new Error('Organization creation failed');
+                }
+                const newOrg: OrganizationHeader = {
+                    id: orgId,
+                    name: orgName,
+                    archived: false,
+                    createdAt: Date.now(),
+                    logoUrl: '',
+                    isPersonalOrg: false,
+                    description: '',
+                };
+                setAllOrganizations((prev) => [...prev, newOrg]);
+                return newOrg;
+            } catch (e) {
+                notify(NoteType.ORG_CREATION_ERROR, e);
             }
-            return updateBaseFromPartial(prev, payload);
-        });
-    });
-
-    const selectOrganization = async (orgId: OrganizationId) => {
-        try {
-            setLastSelectedOrgId(orgId);
-            const orgHeader = await getOrganizationData(sockCtx, orgId);
-            if (!orgHeader) {
-                throw new Error(`Failed to fetch organization data for ID ${orgId}.`);
-            }
-            setSelectedOrganization(orgHeader);
-        } catch (e: any) {
-            notify(NoteType.ORG_DATA_ERROR, e);
-        }
-    };
-
-    const createOrg = async (orgName: string) => {
-        try {
-            const orgId = await createOrganization(sockCtx, orgName);
-            if (!orgId) {
-                throw new Error('Organization creation failed');
-            }
-            const newOrg: OrganizationHeader = {
-                id: orgId,
-                name: orgName,
-                archived: false,
-                createdAt: Date.now(),
-                logoUrl: '',
-                isPersonalOrg: false,
-                description: '',
-            };
-            setAllOrganizations((prev) => [...prev, newOrg]);
-            return newOrg;
-        } catch (e) {
-            notify(NoteType.ORG_CREATION_ERROR, e);
-        }
-    };
+        },
+        [sockCtx, notify]
+    );
 
     return (
         <OrgContext.Provider
             value={{
                 active: selectedOrganization,
                 selectOrganization,
+                selectAndGoToOrganization,
                 allOrganizations,
                 createOrganization: createOrg,
                 members,

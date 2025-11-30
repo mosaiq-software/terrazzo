@@ -46,17 +46,21 @@ export const useDocument = (documentId?: DocumentId) => {
         fetchLastEditor();
     }, [document?.lastModifiedByUserId, sockCtx.connected]);
 
-    useSocketListener(ServerSE.UPDATE_DOCUMENT_FIELD, (payload) => {
-        if (payload.id !== documentId) {
-            return;
-        }
-        setDocument((prev) => {
-            if (!prev) {
-                return prev;
+    useSocketListener(
+        ServerSE.UPDATE_DOCUMENT_FIELD,
+        (payload) => {
+            if (payload.id !== documentId) {
+                return;
             }
-            return { ...updateBaseFromPartial(prev, payload) };
-        });
-    });
+            setDocument((prev) => {
+                if (!prev) {
+                    return prev;
+                }
+                return { ...updateBaseFromPartial(prev, payload) };
+            });
+        },
+        [documentId]
+    );
 
     return { document, lastEditor };
 };

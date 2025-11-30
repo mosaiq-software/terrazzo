@@ -32,12 +32,16 @@ export const useOrgInvites = (orgId?: OrganizationId) => {
         fetchInvites();
     }, [orgId, sockCtx.connected]);
 
-    useSocketListener(ServerSE.UPDATE_ORGANIZATION_INVITES, (payload) => {
-        if (payload.orgId !== orgId) {
-            return;
-        }
-        setInvites(payload.invites);
-    });
+    useSocketListener(
+        ServerSE.UPDATE_ORGANIZATION_INVITES,
+        (payload) => {
+            if (payload.orgId !== orgId) {
+                return;
+            }
+            setInvites(payload.invites);
+        },
+        [orgId]
+    );
 
     return invites;
 };

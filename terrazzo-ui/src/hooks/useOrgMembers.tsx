@@ -32,12 +32,16 @@ export const useOrgMembers = (orgId?: OrganizationId) => {
         fetchMembershipRecords();
     }, [orgId, sockCtx.connected]);
 
-    useSocketListener(ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS, (payload) => {
-        if (payload.orgId !== orgId) {
-            return;
-        }
-        setMembers(payload.members);
-    });
+    useSocketListener(
+        ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS,
+        (payload) => {
+            if (payload.orgId !== orgId) {
+                return;
+            }
+            setMembers([...payload.members]);
+        },
+        [orgId]
+    );
 
     return members;
 };

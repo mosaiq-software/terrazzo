@@ -38,8 +38,7 @@ const InvitePage = (): React.JSX.Element => {
                 return;
             }
             await new Promise((resolve) => setTimeout(resolve, 500));
-            orgCtx.selectOrganization(invite.forOrganizationId);
-            navigate(`/org/${invite.forOrganizationId}`);
+            await orgCtx.selectAndGoToOrganization(invite.forOrganizationId);
         } catch (err) {
             navigate('/');
         }

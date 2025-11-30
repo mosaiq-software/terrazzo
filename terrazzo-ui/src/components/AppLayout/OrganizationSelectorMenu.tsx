@@ -72,8 +72,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                             gap={8}
                             px={0}
                             onClick={() => {
-                                orgCtx.selectOrganization(org.id);
-                                navigate(`/org/${org.id}`);
+                                orgCtx.selectAndGoToOrganization(org.id);
                             }}
                         >
                             <Avatar

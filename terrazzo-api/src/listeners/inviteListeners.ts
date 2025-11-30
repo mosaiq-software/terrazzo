@@ -1,9 +1,8 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { InviteId } from '@mosaiq/terrazzo-common/types';
-import { getRoomCode, RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { ClientSE, ClientSEPayload, ClientSEReply } from '@mosaiq/terrazzo-common/socketTypes';
 import { createInvite, deleteInvite, getAllInvitesForOrg, useInvite } from '@trz-api/controllers/inviteController';
 import { getInviteRecordById } from '@trz-api/persistence/invitePersistence';
-import { broadcast, getSocketData } from '@trz-api/utils/socketUtils';
+import { syncMembersInOrg, syncOrgInvites, syncOrgInvitesFromInviteId } from '@trz-api/utils/broadcasters';
+import { getSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerInviteListeners = (socket: Socket, io: Server) => {
@@ -27,7 +26,7 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
             }
             const socketData = getSocketData(socket);
             const invite = await createInvite(data.orgId, data.maxUses, socketData.user.user.id);
-            await syncOrgInvites(socket, invite.id);
+            await syncOrgInvitesFromInviteId(socket, invite.id);
             reply(invite);
         } catch (error: any) {
             console.error('Error creating invite', error);
@@ -41,7 +40,7 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
                 throw new Error('No data provided');
             }
             await deleteInvite(data.inviteId);
-            await syncOrgInvites(socket, data.inviteId);
+            await syncOrgInvitesFromInviteId(socket, data.inviteId);
             reply(undefined);
         } catch (error: any) {
             console.error('Error deleting invite', error);
@@ -57,7 +56,12 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
             const socketData = getSocketData(socket);
             const success = await useInvite(data.inviteId, socketData.user.user.id);
             if (success) {
-                await syncOrgInvites(socket, data.inviteId);
+                const inviteRecord = await getInviteRecordById(data.inviteId);
+                if (!inviteRecord) {
+                    throw new Error('Invite not found for syncing org invites');
+                }
+                await syncOrgInvites(socket, inviteRecord.forOrganizationId);
+                await syncMembersInOrg(socket, inviteRecord.forOrganizationId);
             }
             reply(success);
         } catch (error: any) {
@@ -78,17 +82,4 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
             reply(undefined, error.message);
         }
     });
-};
-
-const syncOrgInvites = async (socket: Socket, inviteId: InviteId) => {
-    try {
-        const inviteRecord = await getInviteRecordById(inviteId);
-        if (!inviteRecord) {
-            throw new Error('Invite not found for syncing org invites');
-        }
-        const invites = await getAllInvitesForOrg(inviteRecord.forOrganizationId);
-        broadcast(socket, ServerSE.UPDATE_ORGANIZATION_INVITES, { invites: invites, orgId: inviteRecord.forOrganizationId }, [getRoomCode(RoomType.DATA, inviteRecord.forOrganizationId, RoomSpecifier.INVITES)]);
-    } catch (error: any) {
-        console.error('Error syncing org invites', error);
-    }
 };
