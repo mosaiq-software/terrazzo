@@ -1,5 +1,5 @@
 import { PermissionLevel, PermissionRecord, UID } from '@mosaiq/terrazzo-common/types';
-import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useDirectoryContext } from '@trz/contexts/user-directory-context';
 
 const DEFAULT_PERMISSION_RECORD: PermissionRecord = {
     anyonePermissionLevel: PermissionLevel.NONE,
@@ -8,8 +8,8 @@ const DEFAULT_PERMISSION_RECORD: PermissionRecord = {
 };
 
 export const usePermissions = (moduleId: UID) => {
-    const trz = useTRZ();
-    const permissionRecord = trz.permissionRecords[moduleId] || DEFAULT_PERMISSION_RECORD;
+    const dirCtx = useDirectoryContext();
+    const permissionRecord = dirCtx.permissionRecords[moduleId] || DEFAULT_PERMISSION_RECORD;
 
     return permissionRecord;
 };

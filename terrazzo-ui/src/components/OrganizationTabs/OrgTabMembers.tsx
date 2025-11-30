@@ -1,10 +1,12 @@
 import { Box, Button, Divider, Group, Stack, Tabs, Text, Title } from '@mantine/core';
-import { Invite, Member, MembershipRecord, OrgMembershipLevel, Organization } from '@mosaiq/terrazzo-common/types';
+import { useClipboard } from '@mantine/hooks';
+import { Invite, Member, MembershipRecord, OrganizationHeader, OrgMembershipLevel } from '@mosaiq/terrazzo-common/types';
 import { isInviteExpired } from '@mosaiq/terrazzo-common/utils/inviteUtils';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUser } from '@trz/contexts/user-context';
 import { createInvite, deleteInvite, removeUserFromOrg, updateUsersOrgMembership } from '@trz/emitters';
 import { useOrgInvites } from '@trz/hooks/useOrgInvites';
+import { getInviteLink } from '@trz/util/linkUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useMemo } from 'react';
 import { MdAdd, MdOutlineMailOutline, MdOutlinePerson } from 'react-icons/md';
@@ -13,12 +15,14 @@ import { MemberRow } from './MemberRow';
 
 interface OrgTabMembersProps {
     myMembershipRecord: MembershipRecord;
-    orgData: Organization;
+    orgData: OrganizationHeader;
+    members: Member[];
 }
 export const OrgTabMembers = (props: OrgTabMembersProps) => {
     const sockCtx = useSocket();
     const userCtx = useUser();
-    const { invites, refresh } = useOrgInvites(props.orgData.id);
+    const invites = useOrgInvites(props.orgData.id);
+    const clipboard = useClipboard();
 
     const sortedInvites = useMemo(() => {
         const timeSortedInvites = [...invites].sort((a, b) => b.createdAt - a.createdAt);
@@ -34,8 +38,13 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
 
     const handleCreateInvite = async () => {
         try {
-            await createInvite(sockCtx, props.orgData.id, 1);
-            refresh();
+            const invite = await createInvite(sockCtx, props.orgData.id, 1);
+            if (!invite) {
+                notify(NoteType.GENERIC_ERROR, new Error('Failed to create invite'));
+                return;
+            }
+            clipboard.copy(getInviteLink(invite.id));
+            notify(NoteType.CHANGES_SAVED, 'Invite created and copied to clipboard!');
         } catch (err) {
             notify(NoteType.GENERIC_ERROR, err);
         }
@@ -44,23 +53,22 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
     const handleDeleteInvite = async (invite: Invite) => {
         try {
             await deleteInvite(sockCtx, invite.id);
-            refresh();
         } catch (err) {
             notify(NoteType.GENERIC_ERROR, err);
         }
     };
 
-    const handleRemoveMember = async (member: Member) => {
+    const handleRemoveMember = async (member: MembershipRecord) => {
         try {
-            await removeUserFromOrg(sockCtx, member.user.id, props.orgData.id);
+            await removeUserFromOrg(sockCtx, member.userId, props.orgData.id);
         } catch (err) {
             notify(NoteType.GENERIC_ERROR, err);
         }
     };
 
-    const handleChangeRole = async (member: Member, newRole: OrgMembershipLevel) => {
+    const handleChangeRole = async (member: MembershipRecord, newRole: OrgMembershipLevel) => {
         try {
-            await updateUsersOrgMembership(sockCtx, member.user.id, props.orgData.id, newRole);
+            await updateUsersOrgMembership(sockCtx, member.userId, props.orgData.id, newRole);
         } catch (err) {
             notify(NoteType.GENERIC_ERROR, err);
         }
@@ -108,7 +116,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                         value="members"
                         leftSection={<MdOutlinePerson size={18} />}
                     >
-                        Members ({props.orgData.members.length})
+                        Members ({props.members.length})
                     </Tabs.Tab>
                     <Tabs.Tab
                         value="invites"
@@ -137,7 +145,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                             </Title>
                         </Group>
                         <Stack gap="sm">
-                            {props.orgData.members.map((member) => (
+                            {props.members.map((member) => (
                                 <MemberRow
                                     key={member.user.id}
                                     member={member}
@@ -175,7 +183,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                                     variant="light"
                                     size="sm"
                                 >
-                                    Create Invite
+                                    Create & Copy Invite
                                 </Button>
                             )}
                         </Group>

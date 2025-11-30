@@ -1,8 +1,14 @@
 import { RoomId, RoomType } from '../socketTypes';
 import { NonEmptyArray, UID } from '../types';
 
-export const getRoomCode = (roomType: RoomType, uid: UID): RoomId => {
-    return `${roomType}@${uid}`;
+export enum RoomSpecifier {
+    DEFAULT = 'default',
+    MEMBERSHIP = 'membership',
+    INVITES = 'invites',
+}
+
+export const getRoomCode = (roomType: RoomType, uid: UID, specifier: string = RoomSpecifier.DEFAULT): RoomId => {
+    return `${roomType}@${uid}@${specifier}`;
 };
 
 /**

@@ -6,15 +6,17 @@ import { Notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
 import { CreateBoardModal } from '@trz/components/Modals/CreateBoard';
 import { CreateOrganizationModal } from '@trz/components/Modals/CreateOrganization';
-import { TRZProvider } from '@trz/contexts/TRZ-context';
 import { SocketProvider } from '@trz/contexts/socket-context';
 import { UserProvider } from '@trz/contexts/user-context';
 import { ContextMenuProvider } from 'mantine-contextmenu';
 import 'mantine-contextmenu/styles.layer.css';
 import { BrowserRouter } from 'react-router-dom';
-import { ModuleSettingsModal } from './components/ModuleSettings/ModuleSettingsModal';
-import Router from './router';
 import { JoinOrganizationModal } from './components/Modals/JoinOrganization';
+import { ModuleSettingsModal } from './components/ModuleSettings/ModuleSettingsModal';
+import { OrgProvider } from './contexts/org-context';
+import { UiProvider } from './contexts/ui-context';
+import Router from './router';
+import { UserDirectoryProvider } from './contexts/user-directory-context';
 
 const theme = createTheme({});
 
@@ -35,13 +37,17 @@ const App = () => {
                 <Notifications />
                 <UserProvider>
                     <SocketProvider>
-                        <TRZProvider>
-                            <ModalsProvider modals={modals}>
-                                <ContextMenuProvider>
-                                    <Router />
-                                </ContextMenuProvider>
-                            </ModalsProvider>
-                        </TRZProvider>
+                        <UiProvider>
+                            <OrgProvider>
+                                <UserDirectoryProvider>
+                                    <ModalsProvider modals={modals}>
+                                        <ContextMenuProvider>
+                                            <Router />
+                                        </ContextMenuProvider>
+                                    </ModalsProvider>
+                                </UserDirectoryProvider>
+                            </OrgProvider>
+                        </UiProvider>
                     </SocketProvider>
                 </UserProvider>
             </BrowserRouter>

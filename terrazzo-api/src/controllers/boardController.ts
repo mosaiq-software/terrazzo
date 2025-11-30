@@ -5,7 +5,6 @@ import { BoardModelType, createBoard, getBoardById, updateBoard } from '@trz-api
 import { createLabelOnBoard, deleteLabel, deleteLabelingOnCardsByLabelId, getLabelById, getLabelsByBoardId, updateLabel } from '@trz-api/persistence/labelPersistence';
 import { getModuleByIdDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
-import { getMembersInOrg } from './membershipController';
 import { createNewModule } from './moduleController';
 
 export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefined> {
@@ -15,16 +14,16 @@ export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefine
         throw new Error('Board not found');
     }
 
-    const orgMembers = await getMembersInOrg(moduleModel.orgId);
+    const lists = await getListAndCardIdsOnBoard(boardID, false);
+    const labels = await getLabelsByBoardId(boardID);
 
     try {
         const board: BoardRes = {
             ...moduleModel,
             ...boardModel,
             type: TrzModuleType.Board,
-            lists: await getListAndCardIdsOnBoard(boardID, false),
-            labels: await getLabelsByBoardId(boardID),
-            members: orgMembers,
+            lists: lists,
+            labels: labels,
         };
         return board;
     } catch (e) {

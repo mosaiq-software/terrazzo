@@ -1,6 +1,7 @@
 import { Avatar, Button, Divider, Group, Menu, Text, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useOrg } from '@trz/contexts/org-context';
+import { useUI } from '@trz/contexts/ui-context';
 import { MdAdd, MdMailOutline } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 
@@ -8,8 +9,10 @@ interface OrganizationSelectorMenuProps {
     sidebarCollapsed: boolean;
 }
 export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) => {
-    const trz = useTRZ();
     const navigate = useNavigate();
+    const orgCtx = useOrg();
+    const uiCtx = useUI();
+
     return (
         <Menu
             position={props.sidebarCollapsed ? 'right-start' : 'bottom-start'}
@@ -20,7 +23,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
             <Menu.Target>
                 <Tooltip
                     disabled={!props.sidebarCollapsed}
-                    label={trz.selectedOrganization?.name}
+                    label={orgCtx.active?.name}
                     withArrow
                     arrowPosition="side"
                     position="right"
@@ -32,14 +35,14 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                         variant={'subtle'}
                         px={0}
                         onClick={() => {
-                            if (!trz.selectedOrganization) return;
-                            navigate(`/org/${trz.selectedOrganization.id}`);
+                            if (!orgCtx.active) return;
+                            navigate(`/org/${orgCtx.active.id}`);
                         }}
                     >
-                        {trz.selectedOrganization && (
+                        {orgCtx.active && (
                             <Avatar
-                                src={trz.selectedOrganization.logoUrl ?? undefined}
-                                name={trz.selectedOrganization.name}
+                                src={orgCtx.active.logoUrl ?? undefined}
+                                name={orgCtx.active.name}
                                 color={'initials'}
                                 display={'inline-block'}
                                 size={'sm'}
@@ -48,28 +51,28 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                         <Text
                             c="#fff"
                             style={{
-                                transition: `padding ${trz.animationDuration}ms, width ${trz.animationDuration}ms`,
+                                transition: `padding ${uiCtx.animationDuration}ms, width ${uiCtx.animationDuration}ms`,
                                 textWrap: 'nowrap',
                                 textAlign: 'left',
                                 width: props.sidebarCollapsed ? '0px' : '220px',
                                 paddingLeft: props.sidebarCollapsed ? '0px' : '5px',
                             }}
                         >
-                            {trz.selectedOrganization?.name ?? 'Select Organization'}
+                            {orgCtx.active?.name ?? 'Select Organization'}
                         </Text>
                     </Button>
                 </Tooltip>
             </Menu.Target>
             <Menu.Dropdown>
                 <Menu.Label>Switch Organization</Menu.Label>
-                {trz.allOrganizations.map((org) => (
+                {orgCtx.allOrganizations.map((org) => (
                     <Menu.Item key={org.id}>
                         <Group
                             wrap="nowrap"
                             gap={8}
                             px={0}
                             onClick={() => {
-                                trz.selectOrganization(org.id);
+                                orgCtx.selectOrganization(org.id);
                                 navigate(`/org/${org.id}`);
                             }}
                         >

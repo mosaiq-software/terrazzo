@@ -1,12 +1,14 @@
 import { Avatar, Divider } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { Priority } from '@mosaiq/terrazzo-common/constants';
-import { CardId, Label, Member } from '@mosaiq/terrazzo-common/types';
+import { CardId, Label } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUser } from '@trz/contexts/user-context';
 import { createDuplicateCard, updateCardAssignee, updateCardField, updateCardsLabels } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
+import { getCardLink } from '@trz/util/linkUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
 import { MdBarChart, MdCheckBox, MdDocumentScanner, MdLabel, MdLink, MdOutlineCheckBoxOutlineBlank, MdOutlineRadioButtonUnchecked, MdRadioButtonChecked } from 'react-icons/md';
@@ -19,11 +21,11 @@ interface CardContextMenuProps {
     cardId: CardId;
     onClose: () => void;
     boardLabels: Label[];
-    boardMembers: Member[];
 }
 export const CardContextMenu = (props: CardContextMenuProps) => {
     const sockCtx = useSocket();
     const userCtx = useUser();
+    const orgCtx = useOrg();
     const card = useCard(props.cardId, false, true);
     const clipboard = useClipboard();
 
@@ -76,7 +78,7 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
                 title={`Assignees${card.assignees.length > 0 ? ` (${card.assignees.length})` : ''}`}
                 icon={<FaUserPlus size={16} />}
                 items={
-                    props.boardMembers.map((memRec) => ({
+                    orgCtx.members.map((memRec) => ({
                         id: memRec.user.id,
                         label: fullName(memRec.user),
                         rightIcon: card.assignees.includes(memRec.user.id) ? <MdCheckBox size={16} /> : <MdOutlineCheckBoxOutlineBlank size={16} />,
@@ -123,9 +125,7 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
                 icon={<MdLink size={16} />}
                 text="Copy Link"
                 onClick={async () => {
-                    const topDomain = window.location.origin;
-                    const cardLink = `${topDomain}/card/${card.id}`;
-                    clipboard.copy(cardLink);
+                    clipboard.copy(getCardLink(card.id));
                 }}
             />
             <ContextMenuButton

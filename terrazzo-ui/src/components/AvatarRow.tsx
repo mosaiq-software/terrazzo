@@ -1,5 +1,6 @@
 import { Avatar, Text, Tooltip } from '@mantine/core';
 import { UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getUserHeader } from '@trz/emitters';
 import { useEffect, useState } from 'react';
@@ -10,6 +11,7 @@ interface AvatarRowProps {
 }
 export const AvatarRow = (props: AvatarRowProps) => {
     const sockCtx = useSocket();
+    const orgCtx = useOrg();
     const [users, setUsers] = useState<UserHeader[]>([]);
 
     useEffect(() => {
@@ -22,7 +24,10 @@ export const AvatarRow = (props: AvatarRowProps) => {
             const list: UserHeader[] = [];
             for (const uObj of props.users) {
                 if (typeof uObj === 'string') {
-                    const user = await getUserHeader(sockCtx, uObj);
+                    let user = orgCtx.members.find((m) => m.user.id === uObj)?.user;
+                    if (!user) {
+                        user = await getUserHeader(sockCtx, uObj);
+                    }
                     if (user) {
                         list.push(user);
                     }

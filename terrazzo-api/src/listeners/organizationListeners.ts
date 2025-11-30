@@ -1,24 +1,12 @@
 import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { getOrgsForUser } from '@trz-api/controllers/membershipController';
-import { addOrganization, getFullOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
+import { addOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { broadcast, getSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerOrganizationListeners = (socket: Socket, io: Server) => {
     socket.on(ClientSE.GET_ORGANIZATION, async (data: ClientSEPayload[ClientSE.GET_ORGANIZATION], reply: ClientSEReply<ClientSE.GET_ORGANIZATION>) => {
-        try {
-            if (!data) {
-                throw new Error('No org id provided');
-            }
-            const org = await getFullOrganization(data);
-            reply(org);
-        } catch (error: any) {
-            reply(undefined, error.message);
-        }
-    });
-
-    socket.on(ClientSE.PREVIEW_ORGANIZATION, async (data: ClientSEPayload[ClientSE.PREVIEW_ORGANIZATION], reply: ClientSEReply<ClientSE.PREVIEW_ORGANIZATION>) => {
         try {
             if (!data) {
                 throw new Error('No org id provided');

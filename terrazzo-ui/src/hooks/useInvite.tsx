@@ -1,6 +1,6 @@
 import { Invite, InviteId, OrganizationHeader } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
-import { getInvite, getOrganizationPreview } from '@trz/emitters';
+import { getInvite, getOrganizationData } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
 
@@ -27,7 +27,7 @@ export const useInvite = (inviteId?: InviteId) => {
             }
 
             try {
-                const orgRes = await getOrganizationPreview(sockCtx, inviteRes.forOrganizationId);
+                const orgRes = await getOrganizationData(sockCtx, inviteRes.forOrganizationId);
                 if (!orgRes) {
                     throw new Error('Failed to fetch inviting organization');
                 }

@@ -1,9 +1,9 @@
-import { MembershipRecord, ModuleHeader, ModuleHeaderWithChildren, OrganizationHeader, OrganizationId, OrgMembershipLevel, PermissionLevel, TrzModuleType, UserId } from '@mosaiq/terrazzo-common/types';
+import { Member, MembershipRecord, ModuleHeader, ModuleHeaderWithChildren, OrganizationHeader, OrganizationId, OrgMembershipLevel, PermissionLevel, TrzModuleType, UserId } from '@mosaiq/terrazzo-common/types';
 import { calculateEffectivePermissions } from '@mosaiq/terrazzo-common/utils/permissionUtils';
 import { getModulesByOrgIdDb } from '@trz-api/persistence/modulePersistence';
 import { deleteOrganizationMembership, getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser, updateOrganizationMembership, upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
-import { populateMemberships } from './userController';
+import { getUserById } from '@trz-api/persistence/userPersistence';
 
 export const getMembersInOrg = async (orgId: OrganizationId) => {
     const org = await getOrgById(orgId);
@@ -12,6 +12,20 @@ export const getMembersInOrg = async (orgId: OrganizationId) => {
     }
     const records = await getOrganizationMembershipsForOrg(orgId);
     const members = populateMemberships(records);
+    return members;
+};
+
+const populateMemberships = async (records: MembershipRecord[]) => {
+    const members = (
+        await Promise.all(
+            records.map(async (r) => {
+                return {
+                    record: r,
+                    user: await getUserById(r.userId),
+                };
+            })
+        )
+    ).filter((m) => !!m.user) as Member[];
     return members;
 };
 

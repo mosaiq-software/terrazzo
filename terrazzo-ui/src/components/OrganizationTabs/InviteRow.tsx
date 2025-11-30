@@ -4,6 +4,7 @@ import { Invite } from '@mosaiq/terrazzo-common/types';
 import { isInviteExpired } from '@mosaiq/terrazzo-common/utils/inviteUtils';
 import { formatTimeAgo } from '@trz/util/dateUtils';
 import { uuidToReadableUuid } from '@trz/util/idUtils';
+import { getInviteLink } from '@trz/util/linkUtils';
 import { MdContentCopy, MdDelete, MdLink } from 'react-icons/md';
 import { ActionRow } from '../ActionRow';
 
@@ -14,7 +15,7 @@ interface InviteRowProps {
 }
 
 export const InviteRow = (props: InviteRowProps) => {
-    const inviteUrl = `${window.location.origin}/invite/${props.invite.id}`;
+    const inviteUrl = getInviteLink(props.invite.id);
     const clipboard = useClipboard({ timeout: 2000 });
     const isUnlimited = props.invite.maxUses === null;
     const usesRemaining = isUnlimited ? null : (props.invite.maxUses ?? 0) - props.invite.uses;

@@ -9,7 +9,7 @@ import { useRoom } from './useRoom';
 import { useSocketListener } from './useSocketListener';
 
 export const useDirectory = (directoryId?: DirectoryId) => {
-    useRoom(RoomType.DATA, directoryId, false);
+    useRoom(RoomType.DATA, directoryId);
     const [directory, setDirectory] = useState<DirectoryHeader | undefined>(undefined);
     const sockCtx = useSocket();
 

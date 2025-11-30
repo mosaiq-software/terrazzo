@@ -1,7 +1,8 @@
-import { Avatar, Box, Button, Center, Divider, Flex, Group, Loader, ScrollArea, Stack, Title, UnstyledButton } from '@mantine/core';
+import { Avatar, Box, Button, Center, Divider, Flex, Group, ScrollArea, Stack, Title, UnstyledButton } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useOrg } from '@trz/contexts/org-context';
+import { useUI } from '@trz/contexts/ui-context';
 import { useUser } from '@trz/contexts/user-context';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { useEffect, useMemo } from 'react';
@@ -9,7 +10,8 @@ import { useNavigate } from 'react-router-dom';
 
 const HomePage = (): React.JSX.Element => {
     const usr = useUser();
-    const trz = useTRZ();
+    const uiCtx = useUI();
+    const orgCtx = useOrg();
     const navigate = useNavigate();
     const clipboard = useClipboard();
 
@@ -17,12 +19,11 @@ const HomePage = (): React.JSX.Element => {
         setTitle(`Dashboard | Terrazzo`);
     }, []);
 
-    const orgs = useMemo(() => trz?.allOrganizations.filter((e) => !e.archived), [trz?.allOrganizations]);
-
+    const orgs = useMemo(() => orgCtx.allOrganizations.filter((e) => !e.archived), [orgCtx.allOrganizations]);
     return (
         <ScrollArea
             bg="#15161A"
-            h={`calc(100vh - ${trz.navbarHeight}px)`}
+            h={`calc(100vh - ${uiCtx.navbarHeight}px)`}
         >
             <Center h="100%">
                 <Stack
@@ -115,14 +116,6 @@ const HomePage = (): React.JSX.Element => {
                             >
                                 Create your own Organization
                             </Button>
-                        )}
-                        {!trz && (
-                            <Center
-                                w="100%"
-                                h="100%"
-                            >
-                                <Loader type="bars" />
-                            </Center>
                         )}
                     </Box>
                 </Stack>

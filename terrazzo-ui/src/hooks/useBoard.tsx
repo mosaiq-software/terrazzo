@@ -12,7 +12,7 @@ export const useBoard = (boardId?: BoardId) => {
     const [boardData, setBoardData] = useState<BoardHeader | undefined>(undefined);
     const [boardLabels, setBoardLabels] = useState<Label[]>([]);
     const sockCtx = useSocket();
-    useRoom(RoomType.DATA, boardId, false);
+    useRoom(RoomType.DATA, boardId);
 
     useEffect(() => {
         const fetchBoardData = async () => {

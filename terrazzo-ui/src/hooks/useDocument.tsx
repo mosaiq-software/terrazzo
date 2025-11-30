@@ -9,7 +9,7 @@ import { useRoom } from './useRoom';
 import { useSocketListener } from './useSocketListener';
 
 export const useDocument = (documentId?: DocumentId) => {
-    useRoom(RoomType.DATA, documentId, false);
+    useRoom(RoomType.DATA, documentId);
 
     const [document, setDocument] = useState<DocumentHeader | undefined>(undefined);
     const [lastEditor, setLastEditor] = useState<UserHeader | null>(null);

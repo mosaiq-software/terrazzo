@@ -1,9 +1,8 @@
-import { MembershipRecord, Organization, OrganizationHeader, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common/types';
+import { MembershipRecord, OrganizationHeader, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrg, getOrgById, updateOrg } from '@trz-api/persistence/organizationPersistence';
 import { getUserById } from '@trz-api/persistence/userPersistence';
-import { getMembersInOrg } from './membershipController';
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
@@ -16,19 +15,6 @@ export async function getOrganizationPreview(orgId: OrganizationId) {
         console.error(e);
         throw e;
     }
-}
-
-export async function getFullOrganization(orgId: OrganizationId) {
-    const orgHeader = await getOrgById(orgId);
-    if (!orgHeader) {
-        throw new Error('No Org found with id ' + orgId);
-    }
-    const members = await getMembersInOrg(orgId);
-    const org: Organization = {
-        ...orgHeader,
-        members: members,
-    };
-    return org;
 }
 
 export async function addOrganization(name: string, creator: UserId, isPersonal: boolean) {

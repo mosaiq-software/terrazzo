@@ -23,9 +23,6 @@ export interface OrganizationHeader {
     isPersonalOrg: boolean;
     description: string;
 }
-export interface Organization extends OrganizationHeader {
-    members: Member[];
-}
 
 export interface BoardHeader extends ModuleHeader {
     type: TrzModuleType.Board;
@@ -35,7 +32,6 @@ export interface BoardHeader extends ModuleHeader {
 export interface Board extends BoardHeader {
     lists: List[];
     labels: Label[];
-    members: Member[];
 }
 export interface BoardRes extends Omit<Board, 'lists'> {
     lists: { listId: ListId; cardIds: CardId[] }[];

@@ -5,27 +5,27 @@ import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
 import { OrgTabSettings } from '@trz/components/OrganizationTabs/OrgTabSettings';
-import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useOrg } from '@trz/contexts/org-context';
+import { useUI } from '@trz/contexts/ui-context';
 import { useUser } from '@trz/contexts/user-context';
-import { useOrganization } from '@trz/hooks/useOrganization';
 import { setTitle } from '@trz/util/tabUtils';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const OrganizationPage = (): React.JSX.Element => {
     const params = useParams();
-    const trz = useTRZ();
+    const uiCtx = useUI();
     const userCtx = useUser();
     const navigate = useNavigate();
     const orgId = params.orgId as OrganizationId | undefined;
     const tabId = params.tabId;
-    const { orgData } = useOrganization(orgId);
-    setTitle(`${orgData?.name ?? 'Organization'} | Terrazzo`);
+    const org = useOrg();
+    setTitle(`${org.active?.name ?? 'Organization'} | Terrazzo`);
 
-    if (orgData === undefined) {
+    if (org.active === undefined) {
         return <Loader />;
     }
-    if (orgData === null || !orgId) {
+    if (org.active === null || !orgId) {
         return (
             <NotFound
                 itemType="organization"
@@ -34,7 +34,7 @@ const OrganizationPage = (): React.JSX.Element => {
         );
     }
 
-    const myMembershipRecord = orgData.members.find((m) => m.user.id === userCtx.userData?.id)?.record;
+    const myMembershipRecord = org.members.find((m) => m.user.id === userCtx.userData?.id)?.record;
     if (!myMembershipRecord) {
         return (
             <NotFound
@@ -45,17 +45,18 @@ const OrganizationPage = (): React.JSX.Element => {
     }
 
     const tabs: any = {
-        Organization: <OrgTabCards orgData={orgData} />,
+        Organization: <OrgTabCards orgData={org.active} />,
         Members: (
             <OrgTabMembers
                 myMembershipRecord={myMembershipRecord}
-                orgData={orgData}
+                orgData={org.active}
+                members={org.members}
             />
         ),
         Settings: (
             <OrgTabSettings
                 myMembershipRecord={myMembershipRecord}
-                orgData={orgData}
+                orgData={org.active}
             />
         ),
     };
@@ -69,7 +70,7 @@ const OrganizationPage = (): React.JSX.Element => {
     };
 
     return (
-        <ScrollArea h={`calc(100vh - ${trz.navbarHeight}px)`}>
+        <ScrollArea h={`calc(100vh - ${uiCtx.navbarHeight}px)`}>
             <Stack
                 bg="#15161A"
                 mih="100vh"
@@ -85,15 +86,15 @@ const OrganizationPage = (): React.JSX.Element => {
                         pl="50"
                     >
                         <Avatar
-                            src={orgData.logoUrl ?? undefined}
-                            name={orgData.name}
+                            src={org.active.logoUrl ?? undefined}
+                            name={org.active.name}
                             color={'initials'}
                             size={'75'}
                             radius={'lg'}
                         />
                         <Flex direction="column">
-                            <Title c="white">{orgData.name}</Title>
-                            <Text c="#6C6C6C">{orgData.description}</Text>
+                            <Title c="white">{org.active.name}</Title>
+                            <Text c="#6C6C6C">{org.active.description}</Text>
                         </Flex>
                     </Group>
                     <Tabs
@@ -124,7 +125,7 @@ const OrganizationPage = (): React.JSX.Element => {
                                 align="center"
                             >
                                 <AvatarRow
-                                    users={orgData.members.map((m) => m.user)}
+                                    users={org.members.map((m) => m.user)}
                                     maxUsers={5}
                                 />
                             </Flex>

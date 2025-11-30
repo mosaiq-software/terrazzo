@@ -1,7 +1,7 @@
 import { Button, Group, Text } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { ModuleHeaderWithChildren, TrzModuleType } from '@mosaiq/terrazzo-common/types';
-import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useUI } from '@trz/contexts/ui-context';
 import { useContextMenu } from 'mantine-contextmenu';
 import { FaChevronDown } from 'react-icons/fa';
 import { IoDocumentOutline } from 'react-icons/io5';
@@ -16,10 +16,10 @@ interface DirectoryTreeItemProps {
     indent: number;
 }
 export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
-    const trz = useTRZ();
     const navigate = useNavigate();
     const location = useLocation();
     const { showContextMenu } = useContextMenu();
+    const uiCtx = useUI();
 
     const [collapsed, setCollapsed, deleteCollapsed] = useLocalStorage<boolean | undefined>({ key: `directory-tree-item-collapsed-${props.directoryListItem.id}`, defaultValue: undefined });
 
@@ -51,7 +51,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                     overflow: 'hidden',
                     width: props.sidebarCollapsed ? '0px' : '100%',
                     height: props.sidebarCollapsed ? '0px' : '36px',
-                    transition: `height ${trz.animationDuration}ms, width ${trz.animationDuration}ms, padding ${trz.animationDuration}ms`,
+                    transition: `height ${uiCtx.animationDuration}ms, width ${uiCtx.animationDuration}ms, padding ${uiCtx.animationDuration}ms`,
                 }}
                 onContextMenuCapture={showContextMenu((close) => (
                     <DirectoryListItemContextMenu
@@ -78,7 +78,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                     <Text
                         c="#fff"
                         style={{
-                            transition: `padding ${trz.animationDuration}ms, width ${trz.animationDuration}ms`,
+                            transition: `padding ${uiCtx.animationDuration}ms, width ${uiCtx.animationDuration}ms`,
                             textWrap: 'nowrap',
                             textAlign: 'left',
                             width: props.sidebarCollapsed ? '0px' : '100%',

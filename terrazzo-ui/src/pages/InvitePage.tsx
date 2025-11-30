@@ -1,8 +1,8 @@
 import { Avatar, Button, Center, Loader, Space, Stack, Text, Title } from '@mantine/core';
 import { InviteId } from '@mosaiq/terrazzo-common/types';
 import { isInviteExpired } from '@mosaiq/terrazzo-common/utils/inviteUtils';
+import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useTRZ } from '@trz/contexts/TRZ-context';
 import { useUser } from '@trz/contexts/user-context';
 import { acceptInvite } from '@trz/emitters';
 import { useInvite } from '@trz/hooks/useInvite';
@@ -16,7 +16,7 @@ const InvitePage = (): React.JSX.Element => {
     const inviteId = params.inviteId as InviteId | undefined;
     const { invite, invitingOrg } = useInvite(inviteId);
     const usr = useUser();
-    const trz = useTRZ();
+    const orgCtx = useOrg();
     const sockCtx = useSocket();
     const navigate = useNavigate();
     const [accepting, setAccepting] = React.useState(false);
@@ -38,7 +38,7 @@ const InvitePage = (): React.JSX.Element => {
                 return;
             }
             await new Promise((resolve) => setTimeout(resolve, 500));
-            trz.selectOrganization(invite.forOrganizationId);
+            orgCtx.selectOrganization(invite.forOrganizationId);
             navigate(`/org/${invite.forOrganizationId}`);
         } catch (err) {
             navigate('/');

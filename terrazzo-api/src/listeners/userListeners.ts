@@ -4,7 +4,7 @@ import { getUserPreview } from '@trz-api/controllers/userController';
 import { Server, Socket } from 'socket.io';
 
 export const registerUserListeners = (socket: Socket, io: Server) => {
-    socket.on(ClientSE.PREVIEW_USER, async (data: ClientSEPayload[ClientSE.PREVIEW_USER], reply: ClientSEReply<ClientSE.PREVIEW_USER>) => {
+    socket.on(ClientSE.GET_USER, async (data: ClientSEPayload[ClientSE.GET_USER], reply: ClientSEReply<ClientSE.GET_USER>) => {
         try {
             if (!data) {
                 throw new Error('No user id provided');

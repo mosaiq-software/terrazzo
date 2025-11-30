@@ -1,15 +1,15 @@
 import { Button, Container, Flex, TextInput } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
-import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useOrg } from '@trz/contexts/org-context';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const CreateOrganization = (props: ContextModalProps<{ modalBody: string }>): React.JSX.Element => {
     const [orgName, setOrgName] = React.useState('');
     const [errorName, setErrorName] = useState('');
-    const trz = useTRZ();
     const navigate = useNavigate();
+    const orgCtx = useOrg();
 
     async function onSubmit() {
         setErrorName('');
@@ -18,9 +18,9 @@ const CreateOrganization = (props: ContextModalProps<{ modalBody: string }>): Re
             setErrorName('Enter a name');
             return;
         }
-        const orgHeader = await trz.createOrganization(orgName);
+        const orgHeader = await orgCtx.createOrganization(orgName);
         if (orgHeader) {
-            trz.selectOrganization(orgHeader.id);
+            orgCtx.selectOrganization(orgHeader.id);
             setOrgName('');
             navigate(`/org/${orgHeader.id}`);
             handleClose();
