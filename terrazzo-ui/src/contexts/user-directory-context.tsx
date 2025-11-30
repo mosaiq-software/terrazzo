@@ -1,6 +1,7 @@
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { ModuleHeaderWithChildren, PermissionRecord, UID } from '@mosaiq/terrazzo-common/types';
 import { overlayPermissionLevels } from '@mosaiq/terrazzo-common/utils/permissionUtils';
+import { RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { getUserDirectoryStructure } from '@trz/emitters';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
@@ -29,7 +30,7 @@ const UserDirectoryProvider: React.FC<any> = ({ children }) => {
     const sockCtx = useSocket();
     const org = useOrg();
     const [userDirectoryStructure, setUserDirectoryStructure] = useState<ModuleHeaderWithChildren | undefined>(undefined);
-    useRoom(RoomType.DATA, org.active?.id);
+    useRoom(RoomType.DATA, org.active?.id, RoomSpecifier.STRUCTURE);
 
     useEffect(() => {
         const fetchUserDirectoryStructure = async () => {

@@ -1,6 +1,6 @@
 import { RoomId, RoomType, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-common/socketTypes';
 import { NonEmptyArray, UID, UserId } from '@mosaiq/terrazzo-common/types';
-import { getRoomCode, getRoomType } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { getRoomCode, getRoomType, RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { getOrgDirectoryTreeForUsers } from '@trz-api/controllers/membershipController';
 import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
 import { getOrganizationMembershipsForOrg } from '@trz-api/persistence/organizationMembershipPersistence';
@@ -127,7 +127,7 @@ export const broadcastUniqueUpdatesForUpdatedModule = async (socket: Socket, io:
     const targetUserIds = targetUsers.map((u) => u.user.id);
     const userOrgDirectoryStructures = await getOrgDirectoryTreeForUsers(orgId, targetUserIds);
     for (const userId of targetUserIds) {
-        const userRoomId = getRoomCode(RoomType.USER, userId);
+        const userRoomId = getRoomCode(RoomType.USER, userId, RoomSpecifier.STRUCTURE);
         const usersDirectoryStructure = userOrgDirectoryStructures[userId];
         if (usersDirectoryStructure) {
             broadcast<ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE>(
