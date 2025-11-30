@@ -58,7 +58,8 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
             <Stack>
                 <Text>Broad Access</Text>
                 <PermissionEditorRow
-                    title="Anyone on the Internet"
+                    title="Public"
+                    subtitle="Anyone with a link"
                     icon={IoMdGlobe}
                     permissionLevel={mergedPermissionRecord.anyonePermissionLevel ?? PermissionLevel.NONE}
                     onChangeLevel={(newLevel) => {
@@ -69,8 +70,9 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                     minimumPermissionLevel={inheritedPerms.anyonePermissionLevel ?? PermissionLevel.NONE}
                 />
                 <PermissionEditorRow
-                    title={`Anyone in ${orgCtx.active?.name ?? 'Organization'}`}
-                    icon={MdBeachAccess}
+                    title="Organization"
+                    subtitle={`Anyone in ${orgCtx.active?.name ?? 'Organization'}`}
+                    icon={orgCtx.active?.logoUrl ?? MdBeachAccess}
                     permissionLevel={mergedPermissionRecord.orgPermissionLevel ?? PermissionLevel.NONE}
                     onChangeLevel={(newLevel) => {
                         const newRecord = { ...mergedPermissionRecord, orgPermissionLevel: newLevel };
@@ -86,6 +88,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                         <PermissionEditorRow
                             key={user.id}
                             title={fullName(user)}
+                            subtitle={`@${user.username}`}
                             icon={user.profilePicture}
                             permissionLevel={permission}
                             onChangeLevel={(newLevel) => {
@@ -128,6 +131,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                                     <PermissionEditorRow
                                         key={user.id}
                                         title={fullName(user)}
+                                        subtitle={`@${user.username}`}
                                         icon={user.profilePicture}
                                         permissionLevel={PermissionLevel.ADMIN}
                                         disabled={true}

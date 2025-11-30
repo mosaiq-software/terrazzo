@@ -7,6 +7,7 @@ import { permissionLevelOptions } from './PermissionsEditorShared';
 
 interface PermissionEditorRowProps {
     title: string;
+    subtitle?: string;
     icon?: string | IconType;
     permissionLevel: PermissionLevel;
     minimumPermissionLevel: PermissionLevel;
@@ -33,6 +34,7 @@ export const PermissionEditorRow = (props: PermissionEditorRowProps) => {
                 <ActionRow
                     icon={props.icon}
                     title={props.title}
+                    subtitle={props.subtitle}
                     disabled={props.disabled}
                     bg="#2e2e2e"
                     items={[
