@@ -1,4 +1,3 @@
-import { OrganizationHeader } from '@mosaiq/terrazzo-common/types';
 import React, { createContext, useContext, useState } from 'react';
 
 export type UiContextType = {
@@ -13,7 +12,6 @@ const UiContext = createContext<UiContextType | undefined>(undefined);
 const UiProvider: React.FC<any> = ({ children }) => {
     const [animationDuration] = useState<number>(500);
     const [navbarHeight, setNavbarHeight] = useState<number>(50);
-    const [selectedOrganization, setSelectedOrganization] = useState<OrganizationHeader | undefined>(undefined);
     const [pageTitle, setPageTitle] = useState<string>('');
 
     return (
