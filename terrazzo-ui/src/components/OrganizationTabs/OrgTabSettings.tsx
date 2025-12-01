@@ -1,15 +1,15 @@
 import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title } from '@mantine/core';
-import { MembershipRecord, Organization, OrganizationHeader } from '@mosaiq/terrazzo-common/types';
+import { MembershipRecord, OrganizationHeader } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
 import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
-import { updateOrgField } from '@trz/emitters';
+import { removeUserFromOrg, updateOrgField } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface OrgTabSettingsProps {
     myMembershipRecord: MembershipRecord;
-    orgData: Organization;
+    orgData: OrganizationHeader;
 }
 export const OrgTabSettings = (props: OrgTabSettingsProps) => {
     const [editedSettings, setEditedSettings] = useState<Partial<OrganizationHeader>>({});
@@ -116,6 +116,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                             w="min-content"
                             onClick={async () => {
                                 try {
+                                    await removeUserFromOrg(sockCtx, props.myMembershipRecord.userId, props.orgData.id);
                                     notify(NoteType.LEFT_ENTITY, [props.orgData.name]);
                                     navigate(DEFAULT_AUTHED_ROUTE);
                                 } catch (e) {
@@ -124,22 +125,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                             }}
                         >
                             Leave Organization
-                        </Button>
-                        <Button
-                            variant="light"
-                            color="red"
-                            w="min-content"
-                            onClick={async () => {
-                                try {
-                                    updateOrgField(sockCtx, props.orgData.id, { archived: true });
-                                    notify(NoteType.CHANGES_SAVED);
-                                    navigate(DEFAULT_AUTHED_ROUTE);
-                                } catch (e) {
-                                    notify(NoteType.ORG_DATA_ERROR, e);
-                                }
-                            }}
-                        >
-                            Archive Organization
                         </Button>
                     </Group>
                 </Stack>

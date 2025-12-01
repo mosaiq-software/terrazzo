@@ -1,24 +1,12 @@
 import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { getOrgsForUser } from '@trz-api/controllers/membershipController';
-import { addOrganization, getFullOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
+import { addOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { broadcast, getSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerOrganizationListeners = (socket: Socket, io: Server) => {
     socket.on(ClientSE.GET_ORGANIZATION, async (data: ClientSEPayload[ClientSE.GET_ORGANIZATION], reply: ClientSEReply<ClientSE.GET_ORGANIZATION>) => {
-        try {
-            if (!data) {
-                throw new Error('No org id provided');
-            }
-            const org = await getFullOrganization(data);
-            reply(org);
-        } catch (error: any) {
-            reply(undefined, error.message);
-        }
-    });
-
-    socket.on(ClientSE.PREVIEW_ORGANIZATION, async (data: ClientSEPayload[ClientSE.PREVIEW_ORGANIZATION], reply: ClientSEReply<ClientSE.PREVIEW_ORGANIZATION>) => {
         try {
             if (!data) {
                 throw new Error('No org id provided');
@@ -36,7 +24,7 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
                 throw new Error('No card data provided');
             }
             const socketData = getSocketData(socket);
-            const orgId = await addOrganization(data.name, socketData.user.user.id, false);
+            const orgId = await addOrganization(data.name, socketData.user.user.id);
             reply(orgId);
         } catch (error: any) {
             console.error('Error creating card', error);
@@ -50,7 +38,8 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
                 throw new Error('No org data provided');
             }
             await updateOrganizationFromPartial(data.id, data);
-            broadcast<ServerSE.UPDATE_ORG_FIELD>(socket, ServerSE.UPDATE_ORG_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
+            broadcast(socket, ServerSE.UPDATE_ORG_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
+            reply(undefined);
         } catch (error: any) {
             console.error('Error updating org fields', error);
             reply(undefined, error.message);

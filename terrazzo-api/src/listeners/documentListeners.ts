@@ -34,6 +34,7 @@ export const registerDocumentListeners = (socket: Socket, io: Server) => {
             }
             broadcast<ServerSE.UPDATE_DOCUMENT_FIELD>(socket, ServerSE.UPDATE_DOCUMENT_FIELD, updatedDocument, [getRoomCode(RoomType.DATA, data.id)]);
             await broadcastUniqueUpdatesForUpdatedModule(socket, io, data.id);
+            reply(undefined);
         } catch (error: any) {
             reply(undefined, error.message);
         }

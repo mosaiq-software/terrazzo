@@ -6,7 +6,7 @@ import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/Col
 import EditableTextbox from '@trz/components/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useUI } from '@trz/contexts/ui-context';
 import { useUser } from '@trz/contexts/user-context';
 import { updateDocumentMetadata } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
@@ -20,7 +20,7 @@ import { useParams } from 'react-router-dom';
 const DocumentPage = (): React.JSX.Element => {
     const params = useParams();
     const sockCtx = useSocket();
-    const trz = useTRZ();
+    const uiCtx = useUI();
     const docId = params.documentId as DocumentId | undefined;
     const idle = useIdle(IDLE_TIMEOUT_MS);
     const usr = useUser();
@@ -56,7 +56,7 @@ const DocumentPage = (): React.JSX.Element => {
     }
 
     return (
-        <ScrollArea h={`calc(100vh - ${trz.navbarHeight}px)`}>
+        <ScrollArea h={`calc(100vh - ${uiCtx.navbarHeight}px)`}>
             <Stack
                 bg="#15161A"
                 mih="100vh"

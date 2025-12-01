@@ -1,6 +1,6 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSEPayload, ServerSE, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
-import { getSocketData, setSocketData, broadcastToMyRooms } from '@trz-api/utils/socketUtils';
+import { broadcastToMyRooms, getSocketData, setSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerTextListeners = (socket: Socket, io: Server) => {
@@ -27,6 +27,7 @@ export const registerTextListeners = (socket: Socket, io: Server) => {
             setSocketData(socket, socketData);
             const payload: ServerSEPayload[ServerSE.TEXT_CARET] = { sid: socket.id, caret: data };
             broadcastToMyRooms(socket, ServerSE.TEXT_CARET, payload, [RoomType.TEXT], false);
+            reply(undefined);
         } catch (error: any) {
             reply(undefined, error.message);
         }

@@ -10,10 +10,8 @@ OrgModel.init(
             primaryKey: true,
         },
         name: DataTypes.STRING,
-        archived: DataTypes.BOOLEAN,
         createdAt: DataTypes.INTEGER,
         logoUrl: DataTypes.STRING,
-        isPersonalOrg: DataTypes.BOOLEAN,
         description: DataTypes.TEXT,
     },
     { sequelize }
@@ -33,10 +31,8 @@ export const createOrg = async (org: OrganizationHeader) => {
     return await OrgModel.create({
         id: org.id,
         name: org.name,
-        archived: false,
         createdAt: org.createdAt,
         logoUrl: org.logoUrl,
-        isPersonalOrg: org.isPersonalOrg,
         description: org.description,
     });
 };
@@ -45,7 +41,6 @@ export const updateOrg = async (org: OrganizationHeader) => {
     return await OrgModel.update(
         {
             name: org.name,
-            archived: org.archived,
             logoUrl: org.logoUrl,
             description: org.description,
         },

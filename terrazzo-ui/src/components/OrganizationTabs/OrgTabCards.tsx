@@ -1,8 +1,8 @@
 import { Box, Title } from '@mantine/core';
-import { Organization } from '@mosaiq/terrazzo-common/types';
+import { OrganizationHeader } from '@mosaiq/terrazzo-common/types';
 
 interface OrgTabCardsProps {
-    orgData: Organization;
+    orgData: OrganizationHeader;
 }
 export const OrgTabCards = (props: OrgTabCardsProps) => {
     return (

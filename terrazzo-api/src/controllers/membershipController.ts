@@ -1,8 +1,9 @@
-import { MembershipRecord, ModuleHeader, ModuleHeaderWithChildren, OrganizationHeader, OrganizationId, OrgMembershipLevel, PermissionLevel, PermissionRecord, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common/types';
+import { Member, MembershipRecord, ModuleHeader, ModuleHeaderWithChildren, OrganizationHeader, OrganizationId, OrgMembershipLevel, PermissionLevel, TrzModuleType, UserId } from '@mosaiq/terrazzo-common/types';
+import { calculateEffectivePermissions } from '@mosaiq/terrazzo-common/utils/permissionUtils';
 import { getModulesByOrgIdDb } from '@trz-api/persistence/modulePersistence';
-import { getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
+import { deleteOrganizationMembership, getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser, updateOrganizationMembership, upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
-import { populateMemberships } from './userController';
+import { getUserById } from '@trz-api/persistence/userPersistence';
 
 export const getMembersInOrg = async (orgId: OrganizationId) => {
     const org = await getOrgById(orgId);
@@ -14,6 +15,20 @@ export const getMembersInOrg = async (orgId: OrganizationId) => {
     return members;
 };
 
+const populateMemberships = async (records: MembershipRecord[]) => {
+    const members = (
+        await Promise.all(
+            records.map(async (r) => {
+                return {
+                    record: r,
+                    user: await getUserById(r.userId),
+                };
+            })
+        )
+    ).filter((m) => !!m.user) as Member[];
+    return members;
+};
+
 export const getOrgsForUser = async (userId: UserId) => {
     const records = await getOrganizationMembershipsForUser(userId);
     const orgIds = records.map((r) => r.orgId);
@@ -21,71 +36,21 @@ export const getOrgsForUser = async (userId: UserId) => {
     return orgs.filter((o) => !!o);
 };
 
-/**
- * Returns the maximum of two permission levels, treating undefined or null as PermissionLevel.NONE.
- */
-const maxPermissionLevel = (levelA: PermissionLevel | undefined | null, levelB: PermissionLevel | undefined | null) => {
-    const a = levelA ?? PermissionLevel.NONE;
-    const b = levelB ?? PermissionLevel.NONE;
-    return Math.max(a, b);
+export const upsertMembership = async (membershipRecord: MembershipRecord) => {
+    return await upsertOrganizationMembership(membershipRecord);
 };
 
-/**
- * Overlays childPermissions on top of parentPermissions, returning the merged result.
- * For each permission level (anyone, org, user), the higher of the two levels is taken.
- */
-const overlayPermissionLevels = (parentPermissions: PermissionRecord, childPermissions: PermissionRecord) => {
-    const anyonePermissionLevel = maxPermissionLevel(parentPermissions.anyonePermissionLevel, childPermissions.anyonePermissionLevel);
-    const orgPermissionLevel = maxPermissionLevel(parentPermissions.orgPermissionLevel, childPermissions.orgPermissionLevel);
-    const userPermissionLevels: Record<UserId, PermissionLevel> = { ...childPermissions.userPermissionLevels };
-    for (const [userId, level] of Object.entries(parentPermissions.userPermissionLevels)) {
-        // explicitly cast userId to UserId type because for some reason TS infers the record iterator key as string
-        const existingLevel = userPermissionLevels[userId as UserId];
-        userPermissionLevels[userId as UserId] = maxPermissionLevel(level, existingLevel);
-    }
-    const mergedPermissions: PermissionRecord = {
-        anyonePermissionLevel,
-        orgPermissionLevel,
-        userPermissionLevels,
+export const updateMembership = async (userId: UserId, orgId: OrganizationId, newLevel: OrgMembershipLevel) => {
+    const record: MembershipRecord = {
+        userId,
+        orgId,
+        permissionLevel: newLevel,
     };
-    return mergedPermissions;
+    await updateOrganizationMembership(record);
 };
 
-/**
- * Calculates the effective permissions for all modules in the org, starting from the root module.
- * Effective permissions are calculated by overlaying parent module permissions onto child modules.
- */
-const calculateEffectivePermissions = (allModules: ModuleHeader[], rootOfAllModules: ModuleHeader) => {
-    // So that we dont need to filter every time, cache child modules by parentId
-    const moduleParentMap: Record<UID, ModuleHeader[]> = {};
-    for (const mod of allModules) {
-        if (!moduleParentMap[mod.parentId]) {
-            moduleParentMap[mod.parentId] = [];
-        }
-        moduleParentMap[mod.parentId].push(mod);
-    }
-
-    /**
-     * Recursively calculates effective permissions for child modules given a parent module.
-     */
-    const recursivelyCalculateEffectivePermissions = (parentModule: ModuleHeader): ModuleHeaderWithChildren[] => {
-        const childModules = moduleParentMap[parentModule.id] || [];
-        const updatedChildModules: ModuleHeaderWithChildren[] = [];
-        for (const childModule of childModules) {
-            const mergedPermissions = overlayPermissionLevels(parentModule, childModule);
-            const updatedChildModule: ModuleHeaderWithChildren = {
-                ...childModule,
-                anyonePermissionLevel: mergedPermissions.anyonePermissionLevel,
-                orgPermissionLevel: mergedPermissions.orgPermissionLevel,
-                userPermissionLevels: mergedPermissions.userPermissionLevels,
-            };
-            updatedChildModule.children = recursivelyCalculateEffectivePermissions(updatedChildModule);
-            updatedChildModules.push(updatedChildModule);
-        }
-        return updatedChildModules;
-    };
-    const effectiveModules = recursivelyCalculateEffectivePermissions(rootOfAllModules);
-    return effectiveModules;
+export const removeMembership = async (userId: UserId, orgId: OrganizationId) => {
+    await deleteOrganizationMembership(userId, orgId);
 };
 
 /**
@@ -139,7 +104,7 @@ const trimDirectoryTreeForUser = (rootModule: ModuleHeaderWithChildren, userId: 
      * Recursively trims the directory tree for the user
      */
     const recursivelyTrim = (module: ModuleHeaderWithChildren): ModuleHeaderWithChildren | null => {
-        if (!userHasAccess(module)) {
+        if (!userHasAccess(module) && module.type !== TrzModuleType.Organization) {
             return null;
         }
         if (!module.children || module.children.length === 0) {

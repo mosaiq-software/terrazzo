@@ -197,10 +197,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                 card={card}
                                 boardLabels={boardMeta.labels}
                             />
-                            <AssigneeMenu
-                                card={card}
-                                boardMembers={boardMeta.members}
-                            />
+                            <AssigneeMenu card={card} />
                             <Tooltip label={`${joinedCard ? 'Leave' : 'Join'} Card`}>
                                 <ActionIcon
                                     variant="subtle"

@@ -44,55 +44,67 @@ export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean
         fetchCardData();
     }, [cardId, sockCtx.connected, shouldFetch]);
 
-    useSocketListener<ServerSE.UPDATE_CARD_FIELD>(ServerSE.UPDATE_CARD_FIELD, (payload) => {
-        if (payload.id !== cardId) {
-            return;
-        }
-        setCard((prev) => {
-            if (!prev) {
-                return prev;
+    useSocketListener(
+        ServerSE.UPDATE_CARD_FIELD,
+        (payload) => {
+            if (payload.id !== cardId) {
+                return;
             }
-            return { ...updateBaseFromPartial(prev, payload) };
-        });
-    });
+            setCard((prev) => {
+                if (!prev) {
+                    return prev;
+                }
+                return { ...updateBaseFromPartial(prev, payload) };
+            });
+        },
+        [cardId]
+    );
 
-    useSocketListener<ServerSE.UPDATE_CARDS_LABELS>(ServerSE.UPDATE_CARDS_LABELS, (payload) => {
-        if (payload.cardId !== cardId) {
-            return;
-        }
-        setCard((prev) => {
-            if (!prev) {
-                return prev;
+    useSocketListener(
+        ServerSE.UPDATE_CARDS_LABELS,
+        (payload) => {
+            if (payload.cardId !== cardId) {
+                return;
             }
-            prev.labels = payload.labelIds;
-            return { ...prev };
-        });
-    });
+            setCard((prev) => {
+                if (!prev) {
+                    return prev;
+                }
+                prev.labels = payload.labelIds;
+                return { ...prev };
+            });
+        },
+        [cardId]
+    );
 
-    useSocketListener<ServerSE.UPDATE_CARD_ASSIGNEE>(ServerSE.UPDATE_CARD_ASSIGNEE, (payload) => {
-        if (payload.cardId !== cardId) {
-            return;
-        }
-        setCard((prev) => {
-            if (!prev) {
+    useSocketListener(
+        ServerSE.UPDATE_CARD_ASSIGNEE,
+        (payload) => {
+            if (payload.cardId !== cardId) {
+                return;
+            }
+            setCard((prev) => {
+                if (!prev) {
+                    return prev;
+                }
+                const assigned = prev.assignees.includes(payload.userId);
+                if (payload.assigned && !assigned) {
+                    return {
+                        ...prev,
+                        assignees: [...prev.assignees, payload.userId],
+                    };
+                }
+                if (!payload.assigned && assigned) {
+                    return {
+                        ...prev,
+                        assignees: prev.assignees.filter((a) => a !== payload.userId),
+                    };
+                }
                 return prev;
-            }
-            const assigned = prev.assignees.includes(payload.userId);
-            if (payload.assigned && !assigned) {
-                return {
-                    ...prev,
-                    assignees: [...prev.assignees, payload.userId],
-                };
-            }
-            if (!payload.assigned && assigned) {
-                return {
-                    ...prev,
-                    assignees: prev.assignees.filter((a) => a !== payload.userId),
-                };
-            }
-            return prev;
-        });
-    });
+            });
+        },
+        [cardId]
+    );
 
     return card;
 };

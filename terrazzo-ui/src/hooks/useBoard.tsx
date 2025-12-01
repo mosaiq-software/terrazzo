@@ -12,7 +12,7 @@ export const useBoard = (boardId?: BoardId) => {
     const [boardData, setBoardData] = useState<BoardHeader | undefined>(undefined);
     const [boardLabels, setBoardLabels] = useState<Label[]>([]);
     const sockCtx = useSocket();
-    useRoom(RoomType.DATA, boardId, false);
+    useRoom(RoomType.DATA, boardId);
 
     useEffect(() => {
         const fetchBoardData = async () => {
@@ -31,24 +31,32 @@ export const useBoard = (boardId?: BoardId) => {
         fetchBoardData();
     }, [boardId, sockCtx.connected]);
 
-    useSocketListener<ServerSE.UPDATE_BOARD_FIELD>(ServerSE.UPDATE_BOARD_FIELD, (payload) => {
-        if (boardId !== payload.id) {
-            return;
-        }
-        setBoardData((prev) => {
-            if (!prev) {
-                return prev;
+    useSocketListener<ServerSE.UPDATE_BOARD_FIELD>(
+        ServerSE.UPDATE_BOARD_FIELD,
+        (payload) => {
+            if (boardId !== payload.id) {
+                return;
             }
-            return updateBaseFromPartial(prev, payload);
-        });
-    });
+            setBoardData((prev) => {
+                if (!prev) {
+                    return prev;
+                }
+                return updateBaseFromPartial(prev, payload);
+            });
+        },
+        [boardId]
+    );
 
-    useSocketListener<ServerSE.UPDATE_BOARD_LABELS>(ServerSE.UPDATE_BOARD_LABELS, (payload) => {
-        if (boardId !== payload.boardId) {
-            return;
-        }
-        setBoardLabels(payload.labels);
-    });
+    useSocketListener<ServerSE.UPDATE_BOARD_LABELS>(
+        ServerSE.UPDATE_BOARD_LABELS,
+        (payload) => {
+            if (boardId !== payload.boardId) {
+                return;
+            }
+            setBoardLabels(payload.labels);
+        },
+        [boardId]
+    );
 
     return { boardData, boardLabels };
 };

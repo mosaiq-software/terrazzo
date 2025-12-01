@@ -65,7 +65,6 @@ const CardElement = (props: CardElementProps) => {
                     cardId={props.cardId}
                     onClose={close}
                     boardLabels={boardMeta.labels}
-                    boardMembers={boardMeta.members}
                 />
             ))}
         >

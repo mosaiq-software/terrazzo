@@ -30,7 +30,6 @@ const UserProvider: React.FC<any> = ({ children }) => {
     useEffect(() => {
         const tryLogin = async () => {
             const savedToken = localStorage.getItem(LocalStorageKey.GITHUB_ACCESS_TOKEN);
-            console.log('Trying saved token:', savedToken);
             if (!savedToken) {
                 return;
             }

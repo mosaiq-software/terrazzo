@@ -17,8 +17,8 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
     socket.on(ClientSE.CREATE_DIRECTORY, async (data: ClientSEPayload[ClientSE.CREATE_DIRECTORY], reply: ClientSEReply<ClientSE.CREATE_DIRECTORY>) => {
         try {
             const directoryHeader = await createDirectory(data.name, data.parentId);
-            reply(directoryHeader);
             await broadcastUniqueUpdatesForUpdatedModule(socket, io, directoryHeader.id);
+            reply(directoryHeader);
         } catch (error: any) {
             reply(undefined, error.message);
         }
@@ -33,6 +33,7 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
             }
             broadcast<ServerSE.UPDATE_DIRECTORY_FIELD>(socket, ServerSE.UPDATE_DIRECTORY_FIELD, updatedDir, [getRoomCode(RoomType.DATA, data.id)]);
             await broadcastUniqueUpdatesForUpdatedModule(socket, io, data.id);
+            reply(undefined);
         } catch (error: any) {
             reply(undefined, error.message);
         }

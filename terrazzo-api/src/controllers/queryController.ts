@@ -12,7 +12,7 @@ const getAllQueryableDataForUser = async (userId: UserId) => {
     for (const om of orgMemberships) {
         allOrgIds.add(om.orgId);
         const org = await getOrgById(om.orgId);
-        if (!org || org.archived) continue;
+        if (!org) continue;
     }
 
     const queryableData: QueryableDatapoint[] = [];

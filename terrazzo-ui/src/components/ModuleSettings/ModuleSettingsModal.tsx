@@ -1,9 +1,8 @@
-import { Alert, Button, Container, ScrollArea, Stack, Text } from '@mantine/core';
+import { Alert, Button, Container, Stack, Text } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
 import { ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common/types';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useTRZ } from '@trz/contexts/TRZ-context';
 import { updateBoardField, updateDocumentMetadata } from '@trz/emitters';
 import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -16,7 +15,6 @@ interface ModuleSettingsGenericProps {
 }
 
 const ModuleSettings = (props: ContextModalProps<ModuleSettingsGenericProps>) => {
-    const trz = useTRZ();
     const sockCtx = useSocket();
 
     const handleClose = () => {
@@ -98,11 +96,7 @@ const ModuleSettings = (props: ContextModalProps<ModuleSettingsGenericProps>) =>
         }
     }
 
-    return (
-        <Container onKeyDown={getHotkeyHandler([['Escape', handleClose]])}>
-            <ScrollArea h={`calc(100vh - ${trz.navbarHeight}px)`}>{Settings}</ScrollArea>
-        </Container>
-    );
+    return <Container onKeyDown={getHotkeyHandler([['Escape', handleClose]])}>{Settings}</Container>;
 };
 
 export const ModuleSettingsModal = (props: ContextModalProps<ModuleSettingsGenericProps>) => <ModuleSettings {...props} />;

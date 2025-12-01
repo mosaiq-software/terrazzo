@@ -17,15 +17,9 @@ export type DirectoryId = UID;
 export interface OrganizationHeader {
     id: OrganizationId;
     name: string;
-    archived: boolean;
     createdAt: number;
     logoUrl: URL;
-    isPersonalOrg: boolean;
     description: string;
-}
-export interface Organization extends OrganizationHeader {
-    members: Member[];
-    invites: Invite[];
 }
 
 export interface BoardHeader extends ModuleHeader {
@@ -36,7 +30,6 @@ export interface BoardHeader extends ModuleHeader {
 export interface Board extends BoardHeader {
     lists: List[];
     labels: Label[];
-    members: Member[];
 }
 export interface BoardRes extends Omit<Board, 'lists'> {
     lists: { listId: ListId; cardIds: CardId[] }[];
@@ -117,21 +110,14 @@ export interface Member {
     record: MembershipRecord;
 }
 
-export interface InviteRecord {
-    id: InviteId;
-    toUser: UserId;
-    fromUser: UserId;
-    createdAt: number;
-    entityId: UID;
-    userRole: PermissionLevel;
-}
 export interface Invite {
     id: InviteId;
-    toUser: UserHeader;
-    fromUser: UserHeader;
+    forOrganizationId: OrganizationId;
+    maxUses: number | null;
+    uses: number;
+    createdById: UserId;
     createdAt: number;
-    entity: OrganizationHeader;
-    userRole: PermissionLevel;
+    revokedAt: number | null;
 }
 
 export interface GithubUserProfile {

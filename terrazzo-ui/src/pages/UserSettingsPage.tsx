@@ -1,25 +1,23 @@
-import { Anchor, Box, Fieldset, Group, ScrollArea, Space, Stack, Text, Title } from '@mantine/core';
+import { Box, Fieldset, Group, ScrollArea, Space, Stack, Title } from '@mantine/core';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useUI } from '@trz/contexts/ui-context';
 import { useUser } from '@trz/contexts/user-context';
 import { setTitle } from '@trz/util/tabUtils';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const UserSettingsPage = (): React.JSX.Element => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const sockCtx = useSocket();
-    const trz = useTRZ();
+    const uiCtx = useUI();
     const userCtx = useUser();
     const navigate = useNavigate();
 
     useEffect(() => {
         setTitle(`My Settings | Terrazzo`);
     }, []);
-
-    const archivedOrgs = useMemo(() => trz?.allOrganizations.filter((e) => e.archived) ?? [], [trz?.allOrganizations]);
 
     if (!userCtx.userData) {
         return (
@@ -31,7 +29,7 @@ const UserSettingsPage = (): React.JSX.Element => {
     }
 
     return (
-        <ScrollArea h={`calc(100vh - ${trz.navbarHeight}px)`}>
+        <ScrollArea h={`calc(100vh - ${uiCtx.navbarHeight}px)`}>
             <Stack
                 bg="#15161A"
                 mih="100vh"
@@ -102,25 +100,6 @@ const UserSettingsPage = (): React.JSX.Element => {
                                     Save
                                 </Button> */}
                             </Stack>
-                        </Fieldset>
-                        <Fieldset
-                            legend="Archive"
-                            bg="transparent"
-                        >
-                            {archivedOrgs.length === 0 ? (
-                                <Text>Nothing archived yet!</Text>
-                            ) : (
-                                <Stack>
-                                    {archivedOrgs.map((org) => (
-                                        <Anchor
-                                            key={org.id}
-                                            href={`/org/${org.id}`}
-                                        >
-                                            {org.name}
-                                        </Anchor>
-                                    ))}
-                                </Stack>
-                            )}
                         </Fieldset>
                         {/* <Divider /> */}
                         <Space />

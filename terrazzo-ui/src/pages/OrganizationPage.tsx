@@ -1,65 +1,31 @@
-import { Avatar, Box, Button, Center, Flex, Group, Loader, ScrollArea, Stack, Tabs, Text, Title } from '@mantine/core';
-import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { Organization, OrganizationId } from '@mosaiq/terrazzo-common/types';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { Avatar, Box, Flex, Group, Loader, ScrollArea, Stack, Tabs, Text, Title } from '@mantine/core';
+import { OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { AvatarRow } from '@trz/components/AvatarRow';
 import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
 import { OrgTabSettings } from '@trz/components/OrganizationTabs/OrgTabSettings';
-import { useSocket } from '@trz/contexts/socket-context';
-import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useOrg } from '@trz/contexts/org-context';
+import { useUI } from '@trz/contexts/ui-context';
 import { useUser } from '@trz/contexts/user-context';
-import { getOrganizationData, updateOrgField } from '@trz/emitters';
-import { useRoom } from '@trz/hooks/useRoom';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const OrganizationPage = (): React.JSX.Element => {
     const params = useParams();
-    const sockCtx = useSocket();
-    const trz = useTRZ();
+    const uiCtx = useUI();
     const userCtx = useUser();
     const navigate = useNavigate();
-    const [orgData, setOrgData] = useState<Organization | undefined | null>();
     const orgId = params.orgId as OrganizationId | undefined;
     const tabId = params.tabId;
-    useRoom(RoomType.DATA, orgId, false);
+    const orgCtx = useOrg();
+    setTitle(`${orgCtx.active?.name ?? 'Organization'} | Terrazzo`);
 
-    useEffect(() => {
-        const fetchOrgData = async () => {
-            if (!orgId || !sockCtx.connected) {
-                return;
-            }
-            try {
-                const org = await getOrganizationData(sockCtx, orgId);
-                setOrgData(org ?? null);
-                setTitle(`${org?.name ?? 'Organization'} | Terrazzo`);
-            } catch (err) {
-                notify(NoteType.ORG_DATA_ERROR, err);
-                navigate('/dashboard');
-                return;
-            }
-        };
-        fetchOrgData();
-    }, [orgId, sockCtx.connected]);
-
-    useSocketListener<ServerSE.UPDATE_ORG_FIELD>(ServerSE.UPDATE_ORG_FIELD, (payload) => {
-        setOrgData((prev) => {
-            if (!prev) {
-                return prev;
-            }
-            return updateBaseFromPartial(prev, payload);
-        });
-    });
-
-    if (orgData === undefined) {
+    if (orgCtx.active === undefined) {
         return <Loader />;
     }
-    if (orgData === null || !orgId) {
+    if (orgCtx.active === null || !orgId) {
         return (
             <NotFound
                 itemType="organization"
@@ -68,7 +34,7 @@ const OrganizationPage = (): React.JSX.Element => {
         );
     }
 
-    const myMembershipRecord = orgData.members.find((m) => m.user.id === userCtx.userData?.id)?.record;
+    const myMembershipRecord = orgCtx.members.find((m) => m.user.id === userCtx.userData?.id)?.record;
     if (!myMembershipRecord) {
         return (
             <NotFound
@@ -79,17 +45,18 @@ const OrganizationPage = (): React.JSX.Element => {
     }
 
     const tabs: any = {
-        Organization: <OrgTabCards orgData={orgData} />,
+        Organization: <OrgTabCards orgData={orgCtx.active} />,
         Members: (
             <OrgTabMembers
                 myMembershipRecord={myMembershipRecord}
-                orgData={orgData}
+                orgData={orgCtx.active}
+                members={orgCtx.members}
             />
         ),
         Settings: (
             <OrgTabSettings
                 myMembershipRecord={myMembershipRecord}
-                orgData={orgData}
+                orgData={orgCtx.active}
             />
         ),
     };
@@ -103,7 +70,7 @@ const OrganizationPage = (): React.JSX.Element => {
     };
 
     return (
-        <ScrollArea h={`calc(100vh - ${trz.navbarHeight}px)`}>
+        <ScrollArea h={`calc(100vh - ${uiCtx.navbarHeight}px)`}>
             <Stack
                 bg="#15161A"
                 mih="100vh"
@@ -119,15 +86,15 @@ const OrganizationPage = (): React.JSX.Element => {
                         pl="50"
                     >
                         <Avatar
-                            src={orgData.logoUrl ?? undefined}
-                            name={orgData.name}
+                            src={orgCtx.active.logoUrl ?? undefined}
+                            name={orgCtx.active.name}
                             color={'initials'}
                             size={'75'}
                             radius={'lg'}
                         />
                         <Flex direction="column">
-                            <Title c="white">{orgData.name}</Title>
-                            <Text c="#6C6C6C">{orgData.description}</Text>
+                            <Title c="white">{orgCtx.active.name}</Title>
+                            <Text c="#6C6C6C">{orgCtx.active.description}</Text>
                         </Flex>
                     </Group>
                     <Tabs
@@ -158,40 +125,14 @@ const OrganizationPage = (): React.JSX.Element => {
                                 align="center"
                             >
                                 <AvatarRow
-                                    users={orgData.members.map((m) => m.user)}
+                                    users={orgCtx.members.map((m) => m.user)}
                                     maxUsers={5}
                                 />
                             </Flex>
                         </Tabs.List>
                     </Tabs>
                 </Box>
-                {!orgData.archived && tabs[getTab()]}
-                {orgData.archived && (
-                    <Center>
-                        <Stack>
-                            <Title
-                                c="#fff"
-                                ta="center"
-                                order={3}
-                            >
-                                This Organization is archived
-                            </Title>
-                            <Button
-                                variant="default"
-                                onClick={async () => {
-                                    try {
-                                        updateOrgField(sockCtx, orgId, { archived: false });
-                                        notify(NoteType.CHANGES_SAVED);
-                                    } catch (e) {
-                                        notify(NoteType.ORG_DATA_ERROR, e);
-                                    }
-                                }}
-                            >
-                                Unarchive Organization
-                            </Button>
-                        </Stack>
-                    </Center>
-                )}
+                {tabs[getTab()]}
             </Stack>
         </ScrollArea>
     );

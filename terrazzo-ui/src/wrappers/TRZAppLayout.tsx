@@ -1,32 +1,22 @@
 import { Box, Burger, Button, Divider, Group, Kbd, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { useHotkeys, useLocalStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
-import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { DirectoryListItemContextMenu } from '@trz/components/AppLayout/DirectoryListItemContextMenu';
 import { DirectoryTree } from '@trz/components/AppLayout/DirectoryTree';
 import { OrganizationSelectorMenu } from '@trz/components/AppLayout/OrganizationSelectorMenu';
 import { SearchBar } from '@trz/components/AutoComplete/Searchbar';
 import { UserProfileIcon } from '@trz/components/UserProfileIcon';
-import { useSocket } from '@trz/contexts/socket-context';
-import { useTRZ } from '@trz/contexts/TRZ-context';
-import { replyInvite } from '@trz/emitters';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { NoteType, notify } from '@trz/util/notifications';
+import { useOrg } from '@trz/contexts/org-context';
+import { useUI } from '@trz/contexts/ui-context';
+import { useDirectoryContext } from '@trz/contexts/user-directory-context';
 import { useContextMenu } from 'mantine-contextmenu';
-import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { NavLink, Outlet } from 'react-router-dom';
 import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
 
-interface TRZAppLayoutProps {
-    children: any;
-}
-const TRZAppLayout = (props: TRZAppLayoutProps) => {
-    const trz = useTRZ();
-    const sockCtx = useSocket();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const params = useParams();
-    const boardId = params.boardId;
+const TRZAppLayout = () => {
+    const uiCtx = useUI();
+    const org = useOrg();
+    const dirCtx = useDirectoryContext();
     const { showContextMenu } = useContextMenu();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage<boolean>({ key: LocalStorageKey.SIDEBAR_COLLAPSED, defaultValue: false });
@@ -40,25 +30,6 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
         ],
         ['/', () => {}],
     ]);
-
-    useSocketListener<ServerSE.RECEIVE_INVITE>(ServerSE.RECEIVE_INVITE, (payload) => {
-        notify(NoteType.INVITE_RECEIVED, [fullName(payload.fromUser), payload.entity.name], {
-            primary: async () => {
-                try {
-                    replyInvite(sockCtx, payload.id, true);
-                } catch (e) {
-                    notify(NoteType.GENERIC_ERROR, e);
-                }
-            },
-            secondary: () => {
-                try {
-                    replyInvite(sockCtx, payload.id, false);
-                } catch (e) {
-                    notify(NoteType.GENERIC_ERROR, e);
-                }
-            },
-        });
-    });
 
     return (
         <Group
@@ -74,7 +45,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
             <Stack
                 px={sidebarCollapsed ? '10px' : '15px'}
                 style={{
-                    transition: `padding ${trz.animationDuration}ms`,
+                    transition: `padding ${uiCtx.animationDuration}ms`,
                 }}
                 bg="#0c0c10"
                 h="100vh"
@@ -96,7 +67,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                         }
                     >
                         <Burger
-                            transitionDuration={trz.animationDuration}
+                            transitionDuration={uiCtx.animationDuration}
                             opened={!sidebarCollapsed}
                             size="20px"
                             p="5px"
@@ -114,7 +85,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                             justifyContent: 'flex-end',
                             textDecoration: 'none',
                             width: sidebarCollapsed ? '0px' : '200px',
-                            transition: `width ${trz.animationDuration}ms`,
+                            transition: `width ${uiCtx.animationDuration}ms`,
                             overflow: 'hidden',
                         }}
                     >
@@ -154,10 +125,10 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                             zIndex: 1,
                         }}
                     >
-                        {trz.userDirectoryStructure && (
+                        {dirCtx.userDirectoryStructure && (
                             <DirectoryTree
                                 sidebarCollapsed={sidebarCollapsed}
-                                directoryTreeRoot={trz.userDirectoryStructure}
+                                directoryTreeRoot={dirCtx.userDirectoryStructure}
                             />
                         )}
                     </Box>
@@ -171,11 +142,11 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                             zIndex: 0,
                         }}
                         onContextMenuCapture={showContextMenu((close) =>
-                            trz.selectedOrganization ? (
+                            org.active ? (
                                 <DirectoryListItemContextMenu
                                     onClose={close}
-                                    parentId={trz.selectedOrganization.id}
-                                    parentName={trz.selectedOrganization.name}
+                                    parentId={org.active.id}
+                                    parentName={org.active.name}
                                     allowAddItem={true}
                                 />
                             ) : (
@@ -195,7 +166,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                 <Group
                     style={{
                         justifyContent: 'space-between',
-                        height: `${trz.navbarHeight}px`,
+                        height: `${uiCtx.navbarHeight}px`,
                         padding: '10px',
                         background: '#0c0c10',
                         gap: 0,
@@ -206,7 +177,7 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                             pl="lg"
                             c="#fff"
                         >
-                            {trz.pageTitle}
+                            {uiCtx.pageTitle}
                         </Text>
                     </Group>
                     <Group>
@@ -311,7 +282,9 @@ const TRZAppLayout = (props: TRZAppLayoutProps) => {
                         <UserProfileIcon />
                     </Group>
                 </Group>
-                <Box style={{}}>{props.children}</Box>
+                <Box style={{}}>
+                    <Outlet />
+                </Box>
             </Stack>
         </Group>
     );

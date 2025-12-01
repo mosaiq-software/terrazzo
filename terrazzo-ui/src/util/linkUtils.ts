@@ -1,0 +1,9 @@
+import { CardId, InviteId } from '@mosaiq/terrazzo-common/types';
+
+export const getInviteLink = (inviteId: InviteId) => {
+    return `${window.location.origin}/invite/${inviteId}`;
+};
+
+export const getCardLink = (cardId: CardId) => {
+    return `${window.location.origin}/card/${cardId}`;
+};

@@ -14,13 +14,10 @@ export const UserProfileIcon = () => {
             offset={2}
             withArrow
             arrowPosition="center"
+            trigger="hover"
         >
             <Menu.Target>
-                <UnstyledButton
-                    onClick={() => {
-                        console.log('User profile...');
-                    }}
-                >
+                <UnstyledButton onClick={() => {}}>
                     <Avatar
                         size={'1.75rem'}
                         src={usr.userData?.profilePicture}

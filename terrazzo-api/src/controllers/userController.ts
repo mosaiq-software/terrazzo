@@ -1,4 +1,4 @@
-import { BoardId, List, Member, MembershipRecord, OrganizationId, OrgMembershipLevel, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { BoardId, List, MembershipRecord, OrganizationId, OrgMembershipLevel, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
 import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createUser, getUserByGithubId, getUserById, getUserByUsername, updateUser } from '@trz-api/persistence/userPersistence';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
@@ -82,7 +82,7 @@ export async function setupUser(userId: UserId, username: string, firstName: str
 
     // create a default personal org for the user to have projects in
     try {
-        const personalOrgId: OrganizationId = await addOrganization(firstName + "'s Space", user.id, true);
+        const personalOrgId: OrganizationId = await addOrganization(firstName + "'s Space", user.id);
         const orgMembershipRecord: MembershipRecord = {
             orgId: personalOrgId,
             userId: user.id,
@@ -111,18 +111,4 @@ export const getUserPreview = async (userId: UserId) => {
         throw new Error('No user found');
     }
     return user;
-};
-
-export const populateMemberships = async (records: MembershipRecord[]) => {
-    const members = (
-        await Promise.all(
-            records.map(async (r) => {
-                return {
-                    record: r,
-                    user: await getUserById(r.userId),
-                };
-            })
-        )
-    ).filter((m) => !!m.user) as Member[];
-    return members;
 };

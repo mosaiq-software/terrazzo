@@ -1,6 +1,7 @@
 import { Avatar, Button, Menu, Stack } from '@mantine/core';
-import { Card, Member } from '@mosaiq/terrazzo-common/types';
+import { Card } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardAssignee } from '@trz/emitters';
 import { MdOutlineAddCircle } from 'react-icons/md';
@@ -8,11 +9,11 @@ import { AvatarRow } from '../AvatarRow';
 
 interface AssigneeMenuProps {
     card: Card;
-    boardMembers: Member[];
 }
 
 export const AssigneeMenu = (props: AssigneeMenuProps) => {
     const sockCtx = useSocket();
+    const orgCtx = useOrg();
 
     return (
         <Menu
@@ -47,7 +48,7 @@ export const AssigneeMenu = (props: AssigneeMenuProps) => {
             >
                 <Menu.Label>Assignees</Menu.Label>
                 <Stack gap={1}>
-                    {props.boardMembers.map((memRec) => {
+                    {orgCtx.members.map((memRec) => {
                         const isMember = props.card.assignees.includes(memRec.user.id);
                         return (
                             <Button
@@ -63,6 +64,8 @@ export const AssigneeMenu = (props: AssigneeMenuProps) => {
                                     <Avatar
                                         src={memRec.user.profilePicture}
                                         size={24}
+                                        name={fullName(memRec.user)}
+                                        color="initials"
                                     />
                                 }
                                 onClick={() => {

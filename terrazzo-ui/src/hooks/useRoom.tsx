@@ -1,13 +1,13 @@
 import { ClientSE, RoomType, ServerSE, SocketId, UserData } from '@mosaiq/terrazzo-common/socketTypes';
 import { UID } from '@mosaiq/terrazzo-common/types';
-import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { getRoomCode, RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect } from 'react';
 import { useMap } from './useMap';
 
-export function useRoom(roomType: RoomType, roomId: UID | null | undefined, trackUsers: boolean): [Map<string, UserData>, (map: [string, UserData][] | Map<string, UserData>) => void] {
+export function useRoom(roomType: RoomType, roomId: UID | null | undefined, specifier?: RoomSpecifier, trackUsers: boolean = false): [Map<string, UserData>, (map: [string, UserData][] | Map<string, UserData>) => void] {
     const [roomUsers, setRoomUsers] = useMap<SocketId, UserData>([]);
     const sockCtx = useSocket();
 
@@ -17,9 +17,9 @@ export function useRoom(roomType: RoomType, roomId: UID | null | undefined, trac
         }
         if (roomId) {
             sockCtx
-                .emit(ClientSE.JOIN_ROOM, getRoomCode(roomType, roomId))
+                .emit(ClientSE.JOIN_ROOM, getRoomCode(roomType, roomId, specifier))
                 .then((res) => {
-                    if (res) {
+                    if (res && trackUsers) {
                         setRoomUsers(res.map((r) => [r.sid, r]));
                     }
                 })
@@ -30,7 +30,7 @@ export function useRoom(roomType: RoomType, roomId: UID | null | undefined, trac
 
         return () => {
             if (roomId) {
-                sockCtx.emit(ClientSE.LEAVE_ROOM, getRoomCode(roomType, roomId)).catch((e) => {
+                sockCtx.emit(ClientSE.LEAVE_ROOM, getRoomCode(roomType, roomId, specifier)).catch((e) => {
                     notify(NoteType.SOCKET_ROOM_ERROR, [roomId, e]);
                 });
             }

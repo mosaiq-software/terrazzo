@@ -1,8 +1,8 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, RoomType } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { BoardId } from '@mosaiq/terrazzo-common/types';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
-import { createBoardLabel, updateBoardLabels, removeBoardLabel } from '@trz-api/controllers/boardController';
-import { setCardsLabels, getBoardIDFromCardID } from '@trz-api/controllers/cardController';
+import { createBoardLabel, removeBoardLabel, updateBoardLabels } from '@trz-api/controllers/boardController';
+import { getBoardIDFromCardID, setCardsLabels } from '@trz-api/controllers/cardController';
 import { broadcast } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
@@ -15,6 +15,7 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             const boardId: BoardId = data.boardId;
             const labels = await createBoardLabel(boardId, data.name, data.color);
             broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
+            reply(undefined);
         } catch (error: any) {
             console.error('Error creating board label', error);
             reply(undefined, error.message);
@@ -29,6 +30,7 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             const boardId: BoardId = data.boardId;
             const labels = await updateBoardLabels(boardId, data.label);
             broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
+            reply(undefined);
         } catch (error: any) {
             console.error('Error updating board labels', error);
             reply(undefined, error.message);
@@ -43,6 +45,7 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             const boardId: BoardId = data.boardId;
             const labels = await removeBoardLabel(boardId, data.labelId);
             broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
+            reply(undefined);
         } catch (error: any) {
             console.error('Error deleting board labels', error);
             reply(undefined, error.message);
@@ -59,6 +62,7 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             if (boardId) {
                 broadcast<ServerSE.UPDATE_CARDS_LABELS>(socket, ServerSE.UPDATE_CARDS_LABELS, data, [getRoomCode(RoomType.DATA, boardId)]);
             }
+            reply(undefined);
         } catch (error: any) {
             console.error('Error deleting board labels', error);
             reply(undefined, error.message);

@@ -1,8 +1,9 @@
 import { RoomId, RoomType, ServerSE, ServerSEPayload, UserData } from '@mosaiq/terrazzo-common/socketTypes';
 import { NonEmptyArray, UID, UserId } from '@mosaiq/terrazzo-common/types';
-import { getRoomCode, getRoomType } from '@mosaiq/terrazzo-common/utils/socketUtils';
-import { getMembersInOrg, getOrgDirectoryTreeForUsers } from '@trz-api/controllers/membershipController';
+import { getRoomCode, getRoomType, RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { getOrgDirectoryTreeForUsers } from '@trz-api/controllers/membershipController';
 import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
+import { getOrganizationMembershipsForOrg } from '@trz-api/persistence/organizationMembershipPersistence';
 import { Server, Socket } from 'socket.io';
 import { SocketData } from './socketTypes';
 
@@ -118,15 +119,15 @@ export const broadcastUniqueUpdatesForUpdatedModule = async (socket: Socket, io:
         throw new Error(`Module ${moduleId} not found`);
     }
     const orgId = module.orgId;
-    const members = await getMembersInOrg(orgId);
+    const membershipRecords = await getOrganizationMembershipsForOrg(orgId);
     const socketsSubscribedToOrgRoom = await getUsersInRoom(io, getRoomCode(RoomType.DATA, orgId));
     // only broadcast to members who have access to the module
-    const memberIds = members.map((m) => m.user.id);
+    const memberIds = membershipRecords.map((m) => m.userId);
     const targetUsers = socketsSubscribedToOrgRoom.filter((s) => memberIds.includes(s.user.id));
     const targetUserIds = targetUsers.map((u) => u.user.id);
     const userOrgDirectoryStructures = await getOrgDirectoryTreeForUsers(orgId, targetUserIds);
     for (const userId of targetUserIds) {
-        const userRoomId = getRoomCode(RoomType.USER, userId);
+        const userRoomId = getRoomCode(RoomType.USER, userId, RoomSpecifier.STRUCTURE);
         const usersDirectoryStructure = userOrgDirectoryStructures[userId];
         if (usersDirectoryStructure) {
             broadcast<ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE>(

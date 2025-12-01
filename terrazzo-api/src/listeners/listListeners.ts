@@ -1,6 +1,6 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, RoomType, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
-import { getListRes, addList, updateListFromPartial, getBoardIDFromListID, moveList } from '@trz-api/controllers/listController';
+import { addList, getBoardIDFromListID, getListRes, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
 import { broadcast } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
@@ -44,6 +44,7 @@ export const registerListListeners = (socket: Socket, io: Server) => {
             if (boardId) {
                 broadcast<ServerSE.UPDATE_LIST_FIELD>(socket, ServerSE.UPDATE_LIST_FIELD, data, [getRoomCode(RoomType.DATA, boardId)]);
             }
+            reply(undefined);
         } catch (error: any) {
             console.error('Error updating list fields', error);
             reply(undefined, error.message);
@@ -58,6 +59,7 @@ export const registerListListeners = (socket: Socket, io: Server) => {
             if (boardId) {
                 broadcast<ServerSE.MOVE_LIST>(socket, ServerSE.MOVE_LIST, payload, [getRoomCode(RoomType.DATA, boardId)], false);
             }
+            reply(undefined);
         } catch (error: any) {
             reply(undefined, error.message);
         }

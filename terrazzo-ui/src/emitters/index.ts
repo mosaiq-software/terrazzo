@@ -4,6 +4,7 @@ export * from './documentEmitters';
 export * from './inviteEmitters';
 export * from './labelEmitters';
 export * from './listEmitters';
+export * from './membershipEmitters';
 export * from './organizationEmitters';
 export * from './queryEmitters';
 export * from './userEmitters';

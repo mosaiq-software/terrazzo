@@ -1,9 +1,9 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, ServerSE, RoomType, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/assignmentController';
-import { getSingleFullCard, addCard, getBoardIDFromCardID, duplicateCard, updateCardFromPartial, moveCardToList } from '@trz-api/controllers/cardController';
+import { addCard, duplicateCard, getBoardIDFromCardID, getSingleFullCard, moveCardToList, updateCardFromPartial } from '@trz-api/controllers/cardController';
 import { getBoardIDFromListID } from '@trz-api/controllers/listController';
-import { getSocketData, broadcast } from '@trz-api/utils/socketUtils';
+import { broadcast, getSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerCardListeners = (socket: Socket, io: Server) => {
@@ -68,6 +68,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
             if (boardId) {
                 broadcast<ServerSE.UPDATE_CARD_FIELD>(socket, ServerSE.UPDATE_CARD_FIELD, data, [getRoomCode(RoomType.DATA, boardId)]);
             }
+            reply(undefined);
         } catch (error: any) {
             console.error('Error updating card fields', error);
             reply(undefined, error.message);
@@ -82,6 +83,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
             if (boardId) {
                 broadcast<ServerSE.MOVE_CARD>(socket, ServerSE.MOVE_CARD, payload, [getRoomCode(RoomType.DATA, boardId)], false);
             }
+            reply(undefined);
         } catch (error: any) {
             reply(undefined, error.message);
         }
@@ -100,6 +102,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
             const payload: ServerSEPayload[ServerSE.UPDATE_CARD_ASSIGNEE] = data;
             broadcast<ServerSE.UPDATE_CARD_ASSIGNEE>(socket, ServerSE.UPDATE_CARD_ASSIGNEE, payload, [getRoomCode(RoomType.DATA, boardId)]);
             broadcast<ServerSE.UPDATE_CARD_ASSIGNEE>(socket, ServerSE.UPDATE_CARD_ASSIGNEE, payload, [getRoomCode(RoomType.USER, data.userId)]);
+            reply(undefined);
         } catch (error: any) {
             reply(undefined, error.message);
         }

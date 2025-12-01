@@ -3,14 +3,14 @@ import { DragAbortEvent, DragCancelEvent, DragOverEvent } from '@dnd-kit/core/di
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Container } from '@mantine/core';
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardId, BoardRes, CardId, Label, ListId, Member, UID } from '@mosaiq/terrazzo-common/types';
+import { BoardId, BoardRes, CardId, Label, ListId, UID } from '@mosaiq/terrazzo-common/types';
 import { arrayMoveInPlace, updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import CardDetails from '@trz/components/CardDetails/CardDetails';
 import CreateList from '@trz/components/CreateList';
 import SortableList from '@trz/components/DragAndDrop/SortableList';
 import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useTRZ } from '@trz/contexts/TRZ-context';
+import { useUI } from '@trz/contexts/ui-context';
 import { createList, emitMoveCard, emitMoveList, getBoardData, getCardData, getListData } from '@trz/emitters';
 import { useMap } from '@trz/hooks/useMap';
 import { useRoom } from '@trz/hooks/useRoom';
@@ -31,7 +31,6 @@ export const BoardContext = createContext<BoardContextType | undefined>(undefine
 
 interface BoardMetadataContextType {
     labels: Label[];
-    members: Member[];
     id: BoardId;
 }
 const BoardMetadataContext = createContext<BoardMetadataContextType | undefined>(undefined);
@@ -53,11 +52,11 @@ const BoardPage = (): React.JSX.Element => {
     const [boardId, setBoardId] = useState<BoardId>(params.boardId as BoardId);
     const cardId = params.cardId as CardId;
     const sockCtx = useSocket();
-    const trz = useTRZ();
+    const uiCtx = useUI();
     const [listToCardsMap, setListMap] = useMap<ListId, CardId[]>();
     const [cardToListMap, setCardMap] = useMap<CardId, ListId>();
     const listKeys = Array.from(listToCardsMap.keys());
-    useRoom(RoomType.DATA, boardId, false);
+    useRoom(RoomType.DATA, boardId);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -108,7 +107,7 @@ const BoardPage = (): React.JSX.Element => {
                 if (!cardId) {
                     setTitle(`${boardRes.name} | Terrazzo`);
                 }
-                trz.setPageTitle(boardRes.name ?? '');
+                uiCtx.setPageTitle(boardRes.name ?? '');
 
                 const tempListMap = new Map<ListId, CardId[]>();
                 const tempCardMap = new Map<CardId, ListId>();
@@ -146,7 +145,7 @@ const BoardPage = (): React.JSX.Element => {
         };
         fetchBoardData();
         return () => {
-            trz.setPageTitle('');
+            uiCtx.setPageTitle('');
         };
     }, [boardId, sockCtx.connected, cardId]);
 
@@ -156,7 +155,7 @@ const BoardPage = (): React.JSX.Element => {
         }
         if (payload.name) {
             setTitle(`${payload.name} | Terrazzo`);
-            trz.setPageTitle(payload.name);
+            uiCtx.setPageTitle(payload.name);
         }
         setBoardData((prev) => {
             if (!prev) {
@@ -436,7 +435,7 @@ const BoardPage = (): React.JSX.Element => {
     return (
         // <Profiler onRender={onRender} id={"board"}>
         <Container
-            h={`calc(100vh - ${trz.navbarHeight}px)`}
+            h={`calc(100vh - ${uiCtx.navbarHeight}px)`}
             fluid
             maw="100%"
             p="lg"
@@ -461,7 +460,6 @@ const BoardPage = (): React.JSX.Element => {
                 <BoardMetadataContext.Provider
                     value={{
                         labels: boardData.labels,
-                        members: boardData.members,
                         id: boardData.id,
                     }}
                 >

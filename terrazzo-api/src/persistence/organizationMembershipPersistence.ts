@@ -37,6 +37,15 @@ export const upsertOrganizationMembership = async (membershipRecord: MembershipR
     await OrganizationMembershipModel.upsert({ ...membershipRecord });
 };
 
+export const updateOrganizationMembership = async (membershipRecord: MembershipRecord) => {
+    await OrganizationMembershipModel.update(
+        {
+            permissionLevel: membershipRecord.permissionLevel,
+        },
+        { where: { userId: membershipRecord.userId, orgId: membershipRecord.orgId } }
+    );
+};
+
 export const deleteOrganizationMembership = async (userId: UserId, orgId: OrganizationId) => {
     await OrganizationMembershipModel.destroy({ where: { userId, orgId } });
 };

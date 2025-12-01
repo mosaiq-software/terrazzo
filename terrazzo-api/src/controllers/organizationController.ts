@@ -1,10 +1,8 @@
-import { MembershipRecord, Organization, OrganizationHeader, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common/types';
+import { MembershipRecord, OrganizationHeader, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrg, getOrgById, updateOrg } from '@trz-api/persistence/organizationPersistence';
 import { getUserById } from '@trz-api/persistence/userPersistence';
-import { getInvitesForEntity } from './inviteController';
-import { getMembersInOrg } from './membershipController';
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
@@ -19,22 +17,7 @@ export async function getOrganizationPreview(orgId: OrganizationId) {
     }
 }
 
-export async function getFullOrganization(orgId: OrganizationId) {
-    const orgHeader = await getOrgById(orgId);
-    if (!orgHeader) {
-        throw new Error('No Org found with id ' + orgId);
-    }
-    const members = await getMembersInOrg(orgId);
-    const invites = await getInvitesForEntity(orgId);
-    const org: Organization = {
-        ...orgHeader,
-        members: members,
-        invites: invites,
-    };
-    return org;
-}
-
-export async function addOrganization(name: string, creator: UserId, isPersonal: boolean) {
+export async function addOrganization(name: string, creator: UserId) {
     if (name.length === 0 || name.length > 50) {
         throw new Error('Name must be 0 - 50 characters');
     }
@@ -47,9 +30,7 @@ export async function addOrganization(name: string, creator: UserId, isPersonal:
     const newOrg: OrganizationHeader = {
         id: crypto.randomUUID(),
         name,
-        archived: false,
         createdAt: Date.now(),
-        isPersonalOrg: isPersonal,
         logoUrl: '',
         description: '',
     };

@@ -9,7 +9,7 @@ import { useRoom } from './useRoom';
 import { useSocketListener } from './useSocketListener';
 
 export const useDirectory = (directoryId?: DirectoryId) => {
-    useRoom(RoomType.DATA, directoryId, false);
+    useRoom(RoomType.DATA, directoryId);
     const [directory, setDirectory] = useState<DirectoryHeader | undefined>(undefined);
     const sockCtx = useSocket();
 
@@ -18,7 +18,7 @@ export const useDirectory = (directoryId?: DirectoryId) => {
             if (!directoryId || !sockCtx.connected) {
                 return;
             }
-            if (directory && directory.id === directoryId) {
+            if (directory?.id === directoryId) {
                 return;
             }
             try {
@@ -30,19 +30,23 @@ export const useDirectory = (directoryId?: DirectoryId) => {
             }
         };
         fetchDirectoryData();
-    }, [directoryId, sockCtx.connected, directory]);
+    }, [directoryId, sockCtx.connected]);
 
-    useSocketListener(ServerSE.UPDATE_DIRECTORY_FIELD, (payload) => {
-        if (payload.id !== directoryId) {
-            return;
-        }
-        setDirectory((prev) => {
-            if (!prev) {
-                return prev;
+    useSocketListener(
+        ServerSE.UPDATE_DIRECTORY_FIELD,
+        (payload) => {
+            if (payload.id !== directoryId) {
+                return;
             }
-            return { ...updateBaseFromPartial(prev, payload) };
-        });
-    });
+            setDirectory((prev) => {
+                if (!prev) {
+                    return prev;
+                }
+                return { ...updateBaseFromPartial(prev, payload) };
+            });
+        },
+        [directoryId]
+    );
 
     return directory;
 };

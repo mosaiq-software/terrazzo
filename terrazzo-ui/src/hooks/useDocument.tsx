@@ -9,7 +9,7 @@ import { useRoom } from './useRoom';
 import { useSocketListener } from './useSocketListener';
 
 export const useDocument = (documentId?: DocumentId) => {
-    useRoom(RoomType.DATA, documentId, false);
+    useRoom(RoomType.DATA, documentId);
 
     const [document, setDocument] = useState<DocumentHeader | undefined>(undefined);
     const [lastEditor, setLastEditor] = useState<UserHeader | null>(null);
@@ -46,17 +46,21 @@ export const useDocument = (documentId?: DocumentId) => {
         fetchLastEditor();
     }, [document?.lastModifiedByUserId, sockCtx.connected]);
 
-    useSocketListener(ServerSE.UPDATE_DOCUMENT_FIELD, (payload) => {
-        if (payload.id !== documentId) {
-            return;
-        }
-        setDocument((prev) => {
-            if (!prev) {
-                return prev;
+    useSocketListener(
+        ServerSE.UPDATE_DOCUMENT_FIELD,
+        (payload) => {
+            if (payload.id !== documentId) {
+                return;
             }
-            return { ...updateBaseFromPartial(prev, payload) };
-        });
-    });
+            setDocument((prev) => {
+                if (!prev) {
+                    return prev;
+                }
+                return { ...updateBaseFromPartial(prev, payload) };
+            });
+        },
+        [documentId]
+    );
 
     return { document, lastEditor };
 };
