@@ -1,6 +1,6 @@
 import { Box, ComboboxItem, Select, Tooltip } from '@mantine/core';
 import { PermissionLevel } from '@mosaiq/terrazzo-common/types';
-import { ActionRow } from '@trz/components/ActionRow';
+import { ActionRow } from '@trz/components/UI/ActionRow';
 import { IconType } from 'react-icons';
 import { MdPersonRemove } from 'react-icons/md';
 import { permissionLevelOptions } from './PermissionsEditorShared';

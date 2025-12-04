@@ -6,7 +6,7 @@ import { createBoardLabel, deleteBoardLabel, updateBoardLabel } from '@trz/emitt
 import { colorIsDarkAdvanced, generateRandomColor } from '@trz/util/colorUtils';
 import { useState } from 'react';
 import { MdOutlineAdd, MdOutlineCheck, MdOutlineClose, MdOutlineDelete, MdOutlineEdit } from 'react-icons/md';
-import { RingHoldingButton } from '../RingHoldingButton';
+import { RingHoldingButton } from '../UI/RingHoldingButton';
 
 interface LabelEditorProps {
     labels: Label[];

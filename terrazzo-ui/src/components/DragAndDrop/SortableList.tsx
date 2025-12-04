@@ -3,7 +3,7 @@ import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS, Transform } from '@dnd-kit/utilities';
 import { CardId, ListId } from '@mosaiq/terrazzo-common/types';
-import ListElement from '@trz/components/ListElement';
+import ListElement from '@trz/components/Boards/ListElement';
 import React, { useEffect, useState } from 'react';
 
 interface SortableListProps {

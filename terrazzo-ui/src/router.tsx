@@ -7,11 +7,11 @@ import LandingPage from '@trz/pages/LandingPage';
 import OrganizationPage from '@trz/pages/OrganizationPage';
 import UserSettingsPage from '@trz/pages/UserSettingsPage';
 import { Outlet, Route, Routes } from 'react-router-dom';
-import { NotFound, PageErrors } from './components/NotFound';
+import AppLayout from './components/AppLayout/AppLayout';
+import { NotFound, PageErrors } from './components/UI/NotFound';
 import DocumentPage from './pages/DocumentPage';
-import { AuthWrapper } from './wrappers/authWrapper';
-import TRZAppLayout from './wrappers/TRZAppLayout';
 import InvitePage from './pages/InvitePage';
+import { AuthWrapper } from './wrappers/authWrapper';
 
 const Router = () => {
     return (
@@ -42,7 +42,7 @@ const Router = () => {
                     path="/invite/:inviteId"
                     element={<InvitePage />}
                 />
-                <Route element={<TRZAppLayout />}>
+                <Route element={<AppLayout />}>
                     <Route
                         path="/dashboard"
                         element={<HomePage />}

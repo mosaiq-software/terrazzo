@@ -1,10 +1,10 @@
 import { Avatar, Box, Flex, Group, Loader, ScrollArea, Stack, Tabs, Text, Title } from '@mantine/core';
 import { OrganizationId } from '@mosaiq/terrazzo-common/types';
-import { AvatarRow } from '@trz/components/AvatarRow';
-import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
 import { OrgTabSettings } from '@trz/components/OrganizationTabs/OrgTabSettings';
+import { AvatarRow } from '@trz/components/UI/AvatarRow';
+import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { useUser } from '@trz/contexts/user-context';
