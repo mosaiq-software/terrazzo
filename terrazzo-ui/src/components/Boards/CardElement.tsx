@@ -60,7 +60,7 @@ const CardElement = (props: CardElementProps) => {
                     : undefined),
             }}
             onClick={onOpenCardModal}
-            onContextMenuCapture={showContextMenu((close) => (
+            onContextMenu={showContextMenu((close) => (
                 <CardContextMenu
                     cardId={props.cardId}
                     onClose={close}
@@ -105,6 +105,7 @@ const CardElement = (props: CardElementProps) => {
                         <AvatarRow
                             users={card.assignees}
                             maxUsers={3}
+                            showProfilePopover={!props.dragging && !props.isOverlay}
                         />
                         <PriorityChip priority={card.priority} />
                     </Group>

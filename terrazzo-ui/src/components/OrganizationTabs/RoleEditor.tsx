@@ -2,8 +2,8 @@ import { Button, ColorInput, Group, Stack } from '@mantine/core';
 import { Role, RoleId } from '@mosaiq/terrazzo-common/types';
 import { useCallback, useEffect, useState } from 'react';
 import { MdOutlineDelete } from 'react-icons/md';
-import EditableTextbox from '../EditableTextbox';
 import { RingHoldingButton } from '../UI/RingHoldingButton';
+import EditableTextbox from '../UI/EditableTextbox';
 
 interface RoleEditorProps {
     role: Role;

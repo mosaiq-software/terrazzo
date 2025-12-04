@@ -135,6 +135,7 @@ const OrganizationPage = (): React.JSX.Element => {
                                 <AvatarRow
                                     users={orgCtx.members.map((m) => m.user)}
                                     maxUsers={5}
+                                    showProfilePopover
                                 />
                             </Flex>
                         </Tabs.List>

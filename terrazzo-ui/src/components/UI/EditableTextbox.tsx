@@ -1,5 +1,5 @@
 import { Group, Input, InputProps, Text, TextProps, Title, TitleProps } from '@mantine/core';
-import { captureDraggableEvents, captureEvent, forAllClickEvents } from '@trz/util/eventUtils';
+import { captureDraggableEvents, completelyCaptureEvent, forAllClickEvents, noEventBubble } from '@trz/util/eventUtils';
 import React, { CSSProperties } from 'react';
 import { MdEdit } from 'react-icons/md';
 
@@ -34,11 +34,6 @@ const EditableTextbox = (props: EditableTextboxProps) => {
         setEditingValue(value);
     };
 
-    const noBubble = (e) => {
-        e.stopPropagation();
-        e.nativeEvent.stopImmediatePropagation();
-    };
-
     let TextElement: React.ReactElement;
     if (type === 'title') {
         TextElement = <Title {...titleProps}>{value || placeholder}</Title>;
@@ -54,18 +49,17 @@ const EditableTextbox = (props: EditableTextboxProps) => {
             {editingValue !== null && (
                 <Input
                     value={editingValue}
-                    {...captureDraggableEvents(captureEvent, {
-                        ...forAllClickEvents(noBubble),
-                        onChange: (event) => setEditingValue(event.currentTarget.value),
-                        onBlur: onSaveChanges,
-                        onKeyDown: (event) => {
-                            if (event.key === 'Enter') {
-                                onSaveChanges();
-                            } else if (event.key === 'Escape') {
-                                onDiscardChanges();
-                            }
-                        },
-                    })}
+                    {...captureDraggableEvents(completelyCaptureEvent)}
+                    {...forAllClickEvents(noEventBubble)}
+                    onChange={(event) => setEditingValue(event.currentTarget.value)}
+                    onBlur={onSaveChanges}
+                    onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+                        if (event.key === 'Enter') {
+                            onSaveChanges();
+                        } else if (event.key === 'Escape') {
+                            onDiscardChanges();
+                        }
+                    }}
                     autoFocus
                     {...inputProps}
                 />

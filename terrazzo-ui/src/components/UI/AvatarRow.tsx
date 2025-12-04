@@ -1,14 +1,15 @@
 import { Avatar, Text, Tooltip } from '@mantine/core';
 import { UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getUserHeader } from '@trz/emitters';
 import { useEffect, useState } from 'react';
+import { UserAvatar } from './UserAvatar';
 
 interface AvatarRowProps {
     users: (UserHeader | UserId)[];
     maxUsers: number;
+    showProfilePopover?: boolean;
 }
 export const AvatarRow = (props: AvatarRowProps) => {
     const sockCtx = useSocket();
@@ -56,11 +57,10 @@ export const AvatarRow = (props: AvatarRowProps) => {
                         withArrow
                         radius="lg"
                     >
-                        <Avatar
-                            src={user.profilePicture}
+                        <UserAvatar
+                            user={user}
                             size="sm"
-                            name={fullName(user)}
-                            color="initials"
+                            showProfilePopover={props.showProfilePopover}
                         />
                     </Tooltip>
                 ))

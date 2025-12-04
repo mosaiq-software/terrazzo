@@ -1,10 +1,32 @@
-export const captureEvent = (e: any) => {
+import React from 'react';
+
+export type EventCaptureFunction = (e: React.SyntheticEvent) => void;
+/**
+ * A mapping of event names to override functions
+ * Any type is used here to allow for flexibility in the event parameter type
+ * depending on the specific event (e.g., MouseEvent, KeyboardEvent, etc.)
+ * Type safety must be ensured by the caller.
+ */
+export type EventOverrideFunction = {
+    [key: string]: (e: any) => void;
+};
+
+export const eventNoop: EventCaptureFunction = (e: React.SyntheticEvent) => {
+    // do nothing
+};
+
+export const completelyCaptureEvent = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 };
 
-export const captureAllEvents = (cb: any, overrides: any) => {
+export const noEventBubble = (e: React.SyntheticEvent) => {
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+};
+
+export const captureAllEvents = (cb: EventCaptureFunction, overrides?: EventOverrideFunction) => {
     return {
         onCopy: cb,
         onCopyCapture: cb,
@@ -166,12 +188,11 @@ export const captureAllEvents = (cb: any, overrides: any) => {
         onAnimationIterationCapture: cb,
         onTransitionEnd: cb,
         onTransitionEndCapture: cb,
-
         ...overrides,
     };
 };
 
-export const captureDraggableEvents = (cb: any, overrides: any) => {
+export const captureDraggableEvents = (cb: EventCaptureFunction, overrides?: EventOverrideFunction) => {
     return {
         onDrag: cb,
         onDragCapture: cb,
@@ -190,24 +211,41 @@ export const captureDraggableEvents = (cb: any, overrides: any) => {
         onDrop: cb,
         onDropCapture: cb,
         onPointerDown: cb,
+        onPointerDownCapture: cb,
         ...overrides,
     };
 };
 
-export const forAllClickEvents = (cb: any) => {
+export const forAllClickEvents = (cb: EventCaptureFunction, overrides?: EventOverrideFunction) => {
     return {
         onPointerDown: cb,
+        onPointerDownCapture: cb,
         onClick: cb,
+        onClickCapture: cb,
         onMouseDown: cb,
+        onMouseDownCapture: cb,
         onTouchStart: cb,
+        onTouchStartCapture: cb,
+        onContextMenu: cb,
+        onContextMenuCapture: cb,
+        onAuxClick: cb,
+        onAuxClickCapture: cb,
+        ...overrides,
     };
 };
 
-export const forAllReleaseEvents = (cb: any) => {
+export const forAllReleaseEvents = (cb: EventCaptureFunction, overrides?: EventOverrideFunction) => {
     return {
         onMouseUp: cb,
+        onMouseUpCapture: cb,
         onMouseLeave: cb,
+        onMouseLeaveCapture: cb,
         onPointerLeave: cb,
+        onPointerLeaveCapture: cb,
         onPointerUp: cb,
+        onPointerUpCapture: cb,
+        onTouchEnd: cb,
+        onTouchEndCapture: cb,
+        ...overrides,
     };
 };
