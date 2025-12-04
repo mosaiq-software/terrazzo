@@ -9,6 +9,7 @@ import { UserAvatar } from './UserAvatar';
 interface AvatarRowProps {
     users: (UserHeader | UserId)[];
     maxUsers: number;
+    showProfilePopover?: boolean;
 }
 export const AvatarRow = (props: AvatarRowProps) => {
     const sockCtx = useSocket();
@@ -59,7 +60,7 @@ export const AvatarRow = (props: AvatarRowProps) => {
                         <UserAvatar
                             user={user}
                             size="sm"
-                            showProfilePopover
+                            showProfilePopover={props.showProfilePopover}
                         />
                     </Tooltip>
                 ))

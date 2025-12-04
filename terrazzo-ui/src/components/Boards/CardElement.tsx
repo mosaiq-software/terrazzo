@@ -105,6 +105,7 @@ const CardElement = (props: CardElementProps) => {
                         <AvatarRow
                             users={card.assignees}
                             maxUsers={3}
+                            showProfilePopover
                         />
                         <PriorityChip priority={card.priority} />
                     </Group>

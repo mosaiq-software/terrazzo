@@ -16,10 +16,11 @@ export const UserAvatar = (props: UserAvatarProps) => {
                 position="bottom"
                 withArrow
                 shadow="md"
-                trigger="click-hover"
+                trigger="hover"
                 closeOnClickOutside
                 withinPortal
                 openDelay={300}
+                disabled={!props.showProfilePopover}
             >
                 <Menu.Target>
                     <Avatar
