@@ -51,9 +51,9 @@ const EditableTextbox = (props: EditableTextboxProps) => {
                     value={editingValue}
                     {...captureDraggableEvents(captureEvent, {
                         ...forAllClickEvents(noEventBubble),
-                        onChange: (event) => setEditingValue(event.currentTarget.value),
+                        onChange: (event: React.ChangeEvent<HTMLInputElement>) => setEditingValue(event.currentTarget.value),
                         onBlur: onSaveChanges,
-                        onKeyDown: (event) => {
+                        onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
                             if (event.key === 'Enter') {
                                 onSaveChanges();
                             } else if (event.key === 'Escape') {

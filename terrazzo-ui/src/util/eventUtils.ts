@@ -1,15 +1,28 @@
-export const captureEvent = (e: any) => {
+import React from 'react';
+
+export type EventCaptureFunction = (e: React.SyntheticEvent) => void;
+/**
+ * A mapping of event names to override functions
+ * Any type is used here to allow for flexibility in the event parameter type
+ * depending on the specific event (e.g., MouseEvent, KeyboardEvent, etc.)
+ * Type safety must be ensured by the caller.
+ */
+export type EventOverrideFunction = {
+    [key: string]: (e: any) => void;
+};
+
+export const captureEvent = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 };
 
-export const noEventBubble = (e) => {
+export const noEventBubble = (e: React.SyntheticEvent) => {
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 };
 
-export const captureAllEvents = (cb: any, overrides: any) => {
+export const captureAllEvents = (cb: EventCaptureFunction, overrides: EventOverrideFunction) => {
     return {
         onCopy: cb,
         onCopyCapture: cb,
@@ -171,12 +184,11 @@ export const captureAllEvents = (cb: any, overrides: any) => {
         onAnimationIterationCapture: cb,
         onTransitionEnd: cb,
         onTransitionEndCapture: cb,
-
         ...overrides,
     };
 };
 
-export const captureDraggableEvents = (cb: any, overrides: any) => {
+export const captureDraggableEvents = (cb: EventCaptureFunction, overrides: EventOverrideFunction) => {
     return {
         onDrag: cb,
         onDragCapture: cb,
@@ -200,7 +212,7 @@ export const captureDraggableEvents = (cb: any, overrides: any) => {
     };
 };
 
-export const forAllClickEvents = (cb: any) => {
+export const forAllClickEvents = (cb: EventCaptureFunction) => {
     return {
         onPointerDown: cb,
         onPointerDownCapture: cb,
@@ -215,7 +227,7 @@ export const forAllClickEvents = (cb: any) => {
     };
 };
 
-export const forAllReleaseEvents = (cb: any) => {
+export const forAllReleaseEvents = (cb: EventCaptureFunction) => {
     return {
         onMouseUp: cb,
         onMouseUpCapture: cb,
