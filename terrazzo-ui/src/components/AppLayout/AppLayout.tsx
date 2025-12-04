@@ -1,6 +1,7 @@
 import { Box, Burger, Button, Divider, Group, Kbd, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { useHotkeys, useLocalStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
+import TerrazzoLogo from '@trz/assets//terrazzo-logo.svg?react';
 import { DirectoryListItemContextMenu } from '@trz/components/AppLayout/DirectorySidebar/DirectoryListItemContextMenu';
 import { DirectoryTree } from '@trz/components/AppLayout/DirectorySidebar/DirectoryTree';
 import { OrganizationSelectorMenu } from '@trz/components/AppLayout/DirectorySidebar/OrganizationSelectorMenu';
@@ -11,7 +12,6 @@ import { useUI } from '@trz/contexts/ui-context';
 import { useDirectoryContext } from '@trz/contexts/user-directory-context';
 import { useContextMenu } from 'mantine-contextmenu';
 import { NavLink, Outlet } from 'react-router-dom';
-import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
 
 const AppLayout = () => {
     const uiCtx = useUI();
