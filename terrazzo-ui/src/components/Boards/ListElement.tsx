@@ -10,7 +10,7 @@ import { createCard, getListData, updateListField } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { BoardContext } from '@trz/pages/BoardPage';
 import { LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
-import { captureDraggableEvents, captureEvent, forAllClickEvents } from '@trz/util/eventUtils';
+import { captureDraggableEvents, completelyCaptureEvent } from '@trz/util/eventUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import React, { useContext, useEffect, useState } from 'react';
 import { FaArchive } from 'react-icons/fa';
@@ -194,12 +194,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                 >
                     <Menu.Target>
                         <Button
-                            {...captureDraggableEvents(
-                                captureEvent,
-                                forAllClickEvents((e) => {
-                                    captureEvent(e);
-                                })
-                            )}
+                            {...captureDraggableEvents(completelyCaptureEvent)}
                             variant="subtle"
                             c="#ffffff"
                             h="100%"
@@ -208,14 +203,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                             <HiDotsVertical />
                         </Button>
                     </Menu.Target>
-                    <Menu.Dropdown
-                        {...captureDraggableEvents(
-                            captureEvent,
-                            forAllClickEvents((e) => {
-                                captureEvent(e);
-                            })
-                        )}
-                    >
+                    <Menu.Dropdown {...captureDraggableEvents(completelyCaptureEvent)}>
                         <Menu.Label>Settings</Menu.Label>
                         <Menu.Item
                             onClick={onArchive}
