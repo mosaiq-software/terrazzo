@@ -4,6 +4,7 @@ import { AvatarRow } from '@trz/components/AvatarRow';
 import { NotFound, PageErrors } from '@trz/components/NotFound';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
+import { OrgTabRoles } from '@trz/components/OrganizationTabs/OrgTabRoles';
 import { OrgTabSettings } from '@trz/components/OrganizationTabs/OrgTabSettings';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
@@ -51,6 +52,13 @@ const OrganizationPage = (): React.JSX.Element => {
                 myMembershipRecord={myMembershipRecord}
                 orgData={orgCtx.active}
                 members={orgCtx.members}
+            />
+        ),
+        Roles: (
+            <OrgTabRoles
+                myMembershipRecord={myMembershipRecord}
+                orgData={orgCtx.active}
+                roles={orgCtx.roles}
             />
         ),
         Settings: (

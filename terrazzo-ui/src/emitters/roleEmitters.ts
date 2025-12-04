@@ -7,7 +7,7 @@ export const getRolesForOrg = async (sockCtx: SocketContextType, orgId: Organiza
 };
 
 export const createRoleOnOrg = async (sockCtx: SocketContextType, name: string, color: string, orgId: OrganizationId) => {
-    await sockCtx.emit(ClientSE.CREATE_ROLE, { name, color, orgId });
+    return await sockCtx.emit(ClientSE.CREATE_ROLE, { name, color, orgId });
 };
 
 export const updateRole = async (sockCtx: SocketContextType, role: Role) => {

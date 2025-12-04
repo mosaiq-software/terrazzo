@@ -1,6 +1,7 @@
-import { Input, InputProps, Text, TextProps, Title, TitleProps } from '@mantine/core';
+import { Group, Input, InputProps, Text, TextProps, Title, TitleProps } from '@mantine/core';
 import { captureDraggableEvents, captureEvent, forAllClickEvents } from '@trz/util/eventUtils';
 import React, { CSSProperties } from 'react';
+import { MdEdit } from 'react-icons/md';
 
 interface EditableTextboxProps {
     value: string;
@@ -11,6 +12,7 @@ interface EditableTextboxProps {
     textProps?: TextProps;
     inputProps?: InputProps;
     style?: CSSProperties;
+    showEditIcon?: boolean;
 }
 const EditableTextbox = (props: EditableTextboxProps) => {
     const { value, onChange, placeholder, type, titleProps, textProps, inputProps, style } = props;
@@ -37,6 +39,13 @@ const EditableTextbox = (props: EditableTextboxProps) => {
         e.nativeEvent.stopImmediatePropagation();
     };
 
+    let TextElement: React.ReactElement;
+    if (type === 'title') {
+        TextElement = <Title {...titleProps}>{value || placeholder}</Title>;
+    } else {
+        TextElement = <Text {...textProps}>{value || placeholder}</Text>;
+    }
+
     return (
         <div
             onClick={onEdit}
@@ -62,8 +71,23 @@ const EditableTextbox = (props: EditableTextboxProps) => {
                 />
             )}
             <div style={style}>
-                {editingValue === null && type === 'title' && <Title {...titleProps}>{value || placeholder}</Title>}
-                {editingValue === null && type === 'text' && <Text {...textProps}>{value || placeholder}</Text>}
+                {editingValue === null && type === 'title' && (
+                    <Group
+                        gap={4}
+                        align="center"
+                        style={{
+                            cursor: 'pointer',
+                        }}
+                    >
+                        {props.showEditIcon && (
+                            <MdEdit
+                                color="subtle"
+                                style={{ marginTop: '2px' }}
+                            />
+                        )}
+                        {TextElement}
+                    </Group>
+                )}
             </div>
         </div>
     );

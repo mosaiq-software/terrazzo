@@ -23,7 +23,7 @@ export const updateRole = async (role: Role) => {
 export const deleteRole = async (roleId: RoleId) => {
     const role = await getRoleByIdDb(roleId);
     if (!role) {
-        throw new Error('Role not found');
+        throw new Error(`Role with ID ${roleId} not found`);
     }
     await deleteRoleDb(roleId);
     return role;

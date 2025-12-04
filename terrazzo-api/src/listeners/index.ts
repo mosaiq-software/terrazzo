@@ -9,5 +9,6 @@ export * from './membershipListeners';
 export * from './organizationListeners';
 export * from './queryListeners';
 export * from './realtimeListeners';
+export * from './roleListeners';
 export * from './textListeners';
 export * from './userListeners';
