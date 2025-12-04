@@ -1,15 +1,15 @@
 import { Group, Paper, Text } from '@mantine/core';
 import { useInViewport } from '@mantine/hooks';
 import { CardId } from '@mosaiq/terrazzo-common/types';
-import { AvatarRow } from '@trz/components/AvatarRow';
-import { PriorityChip } from '@trz/components/CardDetails/PriorityButtons';
+import { AvatarRow } from '@trz/components/UI/AvatarRow';
 import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';
 import { useContextMenu } from 'mantine-contextmenu';
 import React from 'react';
-import { useCard } from '../hooks/useCard';
+import { useCard } from '../../hooks/useCard';
 import { CardContextMenu } from './CardDetails/CardContextMenu';
 import { LabelDisplay } from './CardDetails/LabelsMenu';
+import { PriorityChip } from './CardDetails/PriorityButtons';
 
 interface CardElementProps {
     cardId: CardId;

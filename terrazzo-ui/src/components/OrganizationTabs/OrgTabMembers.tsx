@@ -12,7 +12,7 @@ import { useMemo } from 'react';
 import { HiDotsVertical } from 'react-icons/hi';
 import { IoChevronDown } from 'react-icons/io5';
 import { MdOutlineMailOutline, MdOutlinePerson } from 'react-icons/md';
-import { InfinityChar } from '../InfinityChar';
+import { InfinityChar } from '../UI/InfinityChar';
 import { InviteRow } from './InviteRow';
 import { MemberRow } from './MemberRow';
 

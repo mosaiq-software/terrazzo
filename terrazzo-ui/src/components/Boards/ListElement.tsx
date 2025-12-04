@@ -4,7 +4,7 @@ import { getHotkeyHandler, useClickOutside } from '@mantine/hooks';
 import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { CardId, ListHeader, ListId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
-import EditableTextbox from '@trz/components/EditableTextbox';
+import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createCard, getListData, updateListField } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
@@ -15,7 +15,7 @@ import { NoteType, notify } from '@trz/util/notifications';
 import React, { useContext, useEffect, useState } from 'react';
 import { FaArchive } from 'react-icons/fa';
 import { HiDotsVertical } from 'react-icons/hi';
-import SortableCard from './DragAndDrop/SortableCard';
+import SortableCard from '../DragAndDrop/SortableCard';
 
 interface ListElementProps {
     listId: ListId;

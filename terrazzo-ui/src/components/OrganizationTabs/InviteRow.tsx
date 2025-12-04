@@ -6,8 +6,8 @@ import { formatTimeAgo } from '@trz/util/dateUtils';
 import { uuidToReadableUuid } from '@trz/util/idUtils';
 import { getInviteLink } from '@trz/util/linkUtils';
 import { MdContentCopy, MdDelete, MdLink } from 'react-icons/md';
-import { ActionRow } from '../ActionRow';
-import { InfinityChar } from '../InfinityChar';
+import { ActionRow } from '../UI/ActionRow';
+import { InfinityChar } from '../UI/InfinityChar';
 
 interface InviteRowProps {
     invite: Invite;

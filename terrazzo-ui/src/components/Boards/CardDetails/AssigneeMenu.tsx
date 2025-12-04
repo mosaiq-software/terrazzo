@@ -1,11 +1,11 @@
 import { Avatar, Button, Menu, Stack } from '@mantine/core';
 import { Card } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { AvatarRow } from '@trz/components/UI/AvatarRow';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardAssignee } from '@trz/emitters';
 import { MdOutlineAddCircle } from 'react-icons/md';
-import { AvatarRow } from '../AvatarRow';
 
 interface AssigneeMenuProps {
     card: Card;

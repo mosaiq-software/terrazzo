@@ -1,13 +1,13 @@
 import { modals } from '@mantine/modals';
 import { ModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common/types';
+import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
+import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
+import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createDocument } from '@trz/emitters';
 import { createDirectory } from '@trz/emitters/directoryEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { MdAdd, MdSettings } from 'react-icons/md';
-import { ContextMenuButton } from '../ContextMenu/ContextMenuButton';
-import { ContextMenuLayout } from '../ContextMenu/ContextMenuLayout';
-import { ContextMenuSelectorMenu } from '../ContextMenu/ContextMenuSelectorMenu';
 
 interface DirectoryListItemContextMenuProps {
     moduleHeader?: ModuleHeader;

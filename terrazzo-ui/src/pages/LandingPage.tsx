@@ -2,7 +2,7 @@ import { Anchor, Box, Button, Center, Container, Divider, Flex, Group, Stack, Te
 import { useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
-import { UserProfileIcon } from '@trz/components/UserProfileIcon';
+import { UserProfileIcon } from '@trz/components/AppLayout/Navbar/UserProfileIcon';
 import { useUser } from '@trz/contexts/user-context';
 import { setTitle } from '@trz/util/tabUtils';
 import mosaiqLogo from '../assets/mosaiq-logo.png';

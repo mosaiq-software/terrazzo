@@ -2,7 +2,7 @@ import { Group, Text, Tooltip } from '@mantine/core';
 import { Member, MembershipRecord, OrgMembershipLevel } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { MdAdminPanelSettings, MdPerson, MdPersonRemove } from 'react-icons/md';
-import { ActionRow } from '../ActionRow';
+import { ActionRow } from '../UI/ActionRow';
 
 interface MemberRowProps {
     member: Member;

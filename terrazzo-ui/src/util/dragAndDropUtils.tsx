@@ -1,7 +1,7 @@
 import { defaultDropAnimationSideEffects, DropAnimation } from '@dnd-kit/core';
 import { CardId, ListId, UID } from '@mosaiq/terrazzo-common/types';
-import CardElement from '@trz/components/CardElement';
-import ListElement from '@trz/components/ListElement';
+import CardElement from '@trz/components/Boards/CardElement';
+import ListElement from '@trz/components/Boards/ListElement';
 
 export const horizontalCollisionDetection = (args): string | null => {
     // Get the horizontally closest list
