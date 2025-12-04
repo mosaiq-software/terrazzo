@@ -1,7 +1,7 @@
 import { Avatar, Group, MantineSize, Menu, Stack, Text } from '@mantine/core';
 import { UserHeader } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
-import { completelyCaptureEvent, forAllClickEvents } from '@trz/util/eventUtils';
+import { completelyCaptureEvent, forAllClickEvents, noEventBubble } from '@trz/util/eventUtils';
 
 interface UserAvatarProps {
     user: UserHeader;
@@ -32,8 +32,7 @@ export const UserAvatar = (props: UserAvatarProps) => {
                     }}
                     onClick={(e) => {
                         if (props.showProfilePopover) {
-                            e.preventDefault();
-                            e.stopPropagation();
+                            completelyCaptureEvent(e);
                         }
                     }}
                 />
@@ -41,7 +40,7 @@ export const UserAvatar = (props: UserAvatarProps) => {
             <Menu.Dropdown>
                 <Stack
                     p={'sm'}
-                    {...forAllClickEvents(completelyCaptureEvent)}
+                    {...forAllClickEvents(noEventBubble)}
                 >
                     <Group gap="sm">
                         <Avatar

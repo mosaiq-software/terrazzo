@@ -105,7 +105,7 @@ const CardElement = (props: CardElementProps) => {
                         <AvatarRow
                             users={card.assignees}
                             maxUsers={3}
-                            showProfilePopover
+                            showProfilePopover={!props.dragging && !props.isOverlay}
                         />
                         <PriorityChip priority={card.priority} />
                     </Group>
