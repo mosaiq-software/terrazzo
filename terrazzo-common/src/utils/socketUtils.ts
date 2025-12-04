@@ -6,6 +6,7 @@ export enum RoomSpecifier {
     MEMBERSHIP = 'membership',
     INVITES = 'invites',
     STRUCTURE = 'structure',
+    ROLES = 'roles',
 }
 
 export const getRoomCode = (roomType: RoomType, uid: UID, specifier: string = RoomSpecifier.DEFAULT): RoomId => {

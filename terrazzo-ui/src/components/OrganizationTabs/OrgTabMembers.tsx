@@ -116,6 +116,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
             <Tabs
                 orientation="vertical"
                 defaultValue="members"
+                keepMounted={false}
                 style={{
                     width: '100%',
                 }}

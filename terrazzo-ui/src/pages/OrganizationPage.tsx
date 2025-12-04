@@ -2,6 +2,7 @@ import { Avatar, Box, Flex, Group, Loader, ScrollArea, Stack, Tabs, Text, Title 
 import { OrganizationId } from '@mosaiq/terrazzo-common/types';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
+import { OrgTabRoles } from '@trz/components/OrganizationTabs/OrgTabRoles';
 import { OrgTabSettings } from '@trz/components/OrganizationTabs/OrgTabSettings';
 import { AvatarRow } from '@trz/components/UI/AvatarRow';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
@@ -51,6 +52,13 @@ const OrganizationPage = (): React.JSX.Element => {
                 myMembershipRecord={myMembershipRecord}
                 orgData={orgCtx.active}
                 members={orgCtx.members}
+            />
+        ),
+        Roles: (
+            <OrgTabRoles
+                myMembershipRecord={myMembershipRecord}
+                orgData={orgCtx.active}
+                roles={orgCtx.roles}
             />
         ),
         Settings: (

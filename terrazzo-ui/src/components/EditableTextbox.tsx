@@ -70,8 +70,8 @@ const EditableTextbox = (props: EditableTextboxProps) => {
                     {...inputProps}
                 />
             )}
-            <div style={style}>
-                {editingValue === null && type === 'title' && (
+            {editingValue === null && (
+                <div style={style}>
                     <Group
                         gap={4}
                         align="center"
@@ -87,8 +87,8 @@ const EditableTextbox = (props: EditableTextboxProps) => {
                         )}
                         {TextElement}
                     </Group>
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 };
