@@ -2,7 +2,6 @@ import { ActionIcon, Box, Button, Center, Group, Loader, Modal, Stack, Text, Too
 import { useClipboard, useIdle } from '@mantine/hooks';
 import { CardId } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
-import { PriorityButtons } from '@trz/components/CardDetails/PriorityButtons';
 import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/CollaborativeTextArea';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { useSocket } from '@trz/contexts/socket-context';
@@ -19,6 +18,7 @@ import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
 import { MdFileCopy } from 'react-icons/md';
 import { AssigneeMenu } from './AssigneeMenu';
 import { LabelsMenu } from './LabelsMenu';
+import { PriorityButtons } from './PriorityButtons';
 
 interface CardDetailsProps {
     cardId: CardId;

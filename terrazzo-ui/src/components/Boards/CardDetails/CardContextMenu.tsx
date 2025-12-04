@@ -12,10 +12,10 @@ import { getCardLink } from '@trz/util/linkUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
 import { MdBarChart, MdCheckBox, MdDocumentScanner, MdLabel, MdLink, MdOutlineCheckBoxOutlineBlank, MdOutlineRadioButtonUnchecked, MdRadioButtonChecked } from 'react-icons/md';
-import { ContextMenuButton } from '../ContextMenu/ContextMenuButton';
-import { ContextMenuLayout } from '../ContextMenu/ContextMenuLayout';
-import { ContextMenuSelectorMenu } from '../ContextMenu/ContextMenuSelectorMenu';
 import { priorityColors, PriorityIcons } from './PriorityButtons';
+import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
+import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
+import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';
 
 interface CardContextMenuProps {
     cardId: CardId;
