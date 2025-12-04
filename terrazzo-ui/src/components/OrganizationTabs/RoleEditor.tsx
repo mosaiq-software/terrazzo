@@ -3,7 +3,7 @@ import { Role, RoleId } from '@mosaiq/terrazzo-common/types';
 import { useCallback, useEffect, useState } from 'react';
 import { MdOutlineDelete } from 'react-icons/md';
 import EditableTextbox from '../EditableTextbox';
-import { RingHoldingButton } from '../RingHoldingButton';
+import { RingHoldingButton } from '../UI/RingHoldingButton';
 
 interface RoleEditorProps {
     role: Role;
@@ -13,7 +13,7 @@ interface RoleEditorProps {
 export const RoleEditor = (props: RoleEditorProps) => {
     const [editingRole, setEditingRole] = useState<Role>(props.role);
 
-    const changed = JSON.stringify(editingRole) !== JSON.stringify(props.role);
+    const changed = editingRole.name !== props.role.name || editingRole.color !== props.role.color;
 
     useEffect(() => {
         setEditingRole(props.role);
@@ -23,7 +23,7 @@ export const RoleEditor = (props: RoleEditorProps) => {
         props.onSave(editingRole);
     }, [editingRole, props]);
 
-    const change = useCallback((field: keyof Role, value: any) => {
+    const change = useCallback(<K extends keyof Role>(field: K, value: Role[K]) => {
         setEditingRole((prev) => ({
             ...prev,
             [field]: value,
@@ -73,7 +73,7 @@ export const RoleEditor = (props: RoleEditorProps) => {
                     <MdOutlineDelete />
                 </RingHoldingButton>
             </Group>
-            <Stack gap="sm"></Stack>
+            <Stack gap="sm">{/* TODO Permissions editor */}</Stack>
             <Button
                 disabled={!changed}
                 onClick={handleSave}

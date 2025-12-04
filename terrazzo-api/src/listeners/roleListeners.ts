@@ -57,7 +57,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
             broadcast(socket, ServerSE.UPDATE_ORGANIZATION_ROLES, { orgId: role.orgId, roles }, [getRoomCode(RoomType.DATA, role.orgId, RoomSpecifier.ROLES)]);
             reply(undefined);
         } catch (error: any) {
-            console.error('Error deleting board labels', error);
+            console.error('Error deleting role', error);
             reply(undefined, error.message);
         }
     });
