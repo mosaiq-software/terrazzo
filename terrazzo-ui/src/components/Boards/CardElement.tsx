@@ -60,7 +60,7 @@ const CardElement = (props: CardElementProps) => {
                     : undefined),
             }}
             onClick={onOpenCardModal}
-            onContextMenuCapture={showContextMenu((close) => (
+            onContextMenu={showContextMenu((close) => (
                 <CardContextMenu
                     cardId={props.cardId}
                     onClose={close}

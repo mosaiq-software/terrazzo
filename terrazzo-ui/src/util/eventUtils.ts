@@ -4,6 +4,11 @@ export const captureEvent = (e: any) => {
     e.nativeEvent.stopImmediatePropagation();
 };
 
+export const noEventBubble = (e) => {
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+};
+
 export const captureAllEvents = (cb: any, overrides: any) => {
     return {
         onCopy: cb,
@@ -200,6 +205,7 @@ export const forAllClickEvents = (cb: any) => {
         onClick: cb,
         onMouseDown: cb,
         onTouchStart: cb,
+        onContextMenu: cb,
     };
 };
 
