@@ -13,6 +13,7 @@ export type InviteId = UID;
 export type AssignmentId = UID;
 export type DocumentId = UID;
 export type DirectoryId = UID;
+export type RoleId = UID;
 
 export interface OrganizationHeader {
     id: OrganizationId;
@@ -196,4 +197,11 @@ export interface ModuleHeader extends PermissionRecord {
 
 export interface ModuleHeaderWithChildren extends ModuleHeader {
     children?: ModuleHeaderWithChildren[];
+}
+
+export interface Role {
+    id: RoleId;
+    orgId: OrganizationId;
+    name: string;
+    color: string;
 }

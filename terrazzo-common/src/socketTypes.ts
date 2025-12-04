@@ -1,4 +1,4 @@
-import { Board, BoardId, BoardRes, Card, CardId, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, Member, ModuleHeaderWithChildren, OrganizationHeader, OrganizationId, OrgMembershipLevel, QueryResult, TextBlock, TextBlockId, UID, UserHeader, UserId } from './types';
+import { Board, BoardId, BoardRes, Card, CardId, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, Member, ModuleHeaderWithChildren, OrganizationHeader, OrganizationId, OrgMembershipLevel, QueryResult, Role, RoleId, TextBlock, TextBlockId, UID, UserHeader, UserId } from './types';
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -40,6 +40,7 @@ export enum ClientSE {
     GET_INVITE = 'GET_INVITE',
     GET_USER = 'GET_USER',
     GET_ORGANIZATION_MEMBERSHIPS = 'GET_ORGANIZATION_MEMBERSHIPS',
+    GET_ROLES_FOR_ORG = 'GET_ROLES_FOR_ORG',
 
     CREATE_ORG = 'CREATE_ORG',
     CREATE_BOARD = 'CREATE_BOARD',
@@ -50,6 +51,7 @@ export enum ClientSE {
     CREATE_DOCUMENT = 'CREATE_DOCUMENT',
     CREATE_DIRECTORY = 'CREATE_DIRECTORY',
     CREATE_INVITE = 'CREATE_INVITE',
+    CREATE_ROLE = 'CREATE_ROLE',
 
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
     UPDATE_BOARD_FIELD = 'UPDATE_BOARD_FIELD',
@@ -61,10 +63,12 @@ export enum ClientSE {
     UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
     UPDATE_DIRECTORY_FIELD = 'UPDATE_DIRECTORY_FIELD',
     UPDATE_MEMBERSHIP = 'UPDATE_MEMBERSHIP',
+    UPDATE_ROLE = 'UPDATE_ROLE',
 
     DELETE_BOARD_LABEL = 'DELETE_BOARD_LABEL',
     DELETE_INVITE = 'DELETE_INVITE',
     DELETE_MEMBERSHIP = 'DELETE_MEMBERSHIP',
+    DELETE_ROLE = 'DELETE_ROLE',
 
     USE_INVITE = 'USE_INVITE',
 }
@@ -92,6 +96,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_INVITE]: InviteId;
     [ClientSE.GET_USER]: UserId;
     [ClientSE.GET_ORGANIZATION_MEMBERSHIPS]: OrganizationId;
+    [ClientSE.GET_ROLES_FOR_ORG]: OrganizationId;
 
     [ClientSE.CREATE_ORG]: { name: string };
     [ClientSE.CREATE_BOARD]: { name: string; boardCode: string; parentId: DirectoryId };
@@ -102,6 +107,7 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_DOCUMENT]: { title: string; parentId: UID };
     [ClientSE.CREATE_DIRECTORY]: { name: string; parentId: DirectoryId };
     [ClientSE.CREATE_INVITE]: { orgId: OrganizationId; maxUses: number | null };
+    [ClientSE.CREATE_ROLE]: { orgId: OrganizationId; name: string; color: string };
 
     [ClientSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
     [ClientSE.UPDATE_BOARD_FIELD]: Partial<Board> & { id: BoardId };
@@ -113,10 +119,12 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ClientSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
     [ClientSE.UPDATE_MEMBERSHIP]: { userId: UserId; orgId: OrganizationId; newPermissionLevel: OrgMembershipLevel };
+    [ClientSE.UPDATE_ROLE]: Role;
 
     [ClientSE.DELETE_BOARD_LABEL]: { boardId: BoardId; labelId: LabelId };
     [ClientSE.DELETE_INVITE]: { inviteId: InviteId };
     [ClientSE.DELETE_MEMBERSHIP]: { userId: UserId; orgId: OrganizationId };
+    [ClientSE.DELETE_ROLE]: { roleId: RoleId };
 
     [ClientSE.USE_INVITE]: { inviteId: InviteId };
 }
@@ -144,6 +152,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_INVITE]: Invite | undefined;
     [ClientSE.GET_USER]: UserHeader | undefined;
     [ClientSE.GET_ORGANIZATION_MEMBERSHIPS]: Member[] | undefined;
+    [ClientSE.GET_ROLES_FOR_ORG]: Role[] | undefined;
 
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
     [ClientSE.CREATE_BOARD]: BoardId | undefined;
@@ -154,6 +163,7 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_DOCUMENT]: DocumentHeader | undefined;
     [ClientSE.CREATE_DIRECTORY]: DirectoryHeader | undefined;
     [ClientSE.CREATE_INVITE]: Invite | undefined;
+    [ClientSE.CREATE_ROLE]: Role | undefined;
 
     [ClientSE.UPDATE_ORG_FIELD]: undefined;
     [ClientSE.UPDATE_BOARD_FIELD]: undefined;
@@ -165,10 +175,12 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_DOCUMENT_FIELD]: undefined;
     [ClientSE.UPDATE_DIRECTORY_FIELD]: undefined;
     [ClientSE.UPDATE_MEMBERSHIP]: undefined;
+    [ClientSE.UPDATE_ROLE]: undefined;
 
     [ClientSE.DELETE_BOARD_LABEL]: undefined;
     [ClientSE.DELETE_INVITE]: undefined;
     [ClientSE.DELETE_MEMBERSHIP]: undefined;
+    [ClientSE.DELETE_ROLE]: undefined;
 
     [ClientSE.USE_INVITE]: boolean;
 }
@@ -203,6 +215,7 @@ export enum ServerSE {
     UPDATE_USERS_ORGANIZATIONS = 'UPDATE_USERS_ORGANIZATIONS',
     UPDATE_ORGANIZATION_MEMBERSHIPS = 'UPDATE_ORGANIZATION_MEMBERSHIPS',
     UPDATE_ORGANIZATION_INVITES = 'UPDATE_ORGANIZATION_INVITES',
+    UPDATE_ORGANIZATION_ROLES = 'UPDATE_ORGANIZATION_ROLES',
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -232,6 +245,7 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_USERS_ORGANIZATIONS]: { userId: UserId; organizations: OrganizationHeader[] };
     [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: { orgId: OrganizationId; members: Member[] };
     [ServerSE.UPDATE_ORGANIZATION_INVITES]: { orgId: OrganizationId; invites: Invite[] };
+    [ServerSE.UPDATE_ORGANIZATION_ROLES]: { orgId: OrganizationId; roles: Role[] };
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -261,6 +275,7 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_USERS_ORGANIZATIONS]: void;
     [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: void;
     [ServerSE.UPDATE_ORGANIZATION_INVITES]: void;
+    [ServerSE.UPDATE_ORGANIZATION_ROLES]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
 
