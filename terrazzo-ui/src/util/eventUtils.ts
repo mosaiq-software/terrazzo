@@ -195,6 +195,7 @@ export const captureDraggableEvents = (cb: any, overrides: any) => {
         onDrop: cb,
         onDropCapture: cb,
         onPointerDown: cb,
+        onPointerDownCapture: cb,
         ...overrides,
     };
 };
@@ -202,18 +203,29 @@ export const captureDraggableEvents = (cb: any, overrides: any) => {
 export const forAllClickEvents = (cb: any) => {
     return {
         onPointerDown: cb,
+        onPointerDownCapture: cb,
         onClick: cb,
+        onClickCapture: cb,
         onMouseDown: cb,
+        onMouseDownCapture: cb,
         onTouchStart: cb,
+        onTouchStartCapture: cb,
         onContextMenu: cb,
+        onContextMenuCapture: cb,
     };
 };
 
 export const forAllReleaseEvents = (cb: any) => {
     return {
         onMouseUp: cb,
+        onMouseUpCapture: cb,
         onMouseLeave: cb,
+        onMouseLeaveCapture: cb,
         onPointerLeave: cb,
+        onPointerLeaveCapture: cb,
         onPointerUp: cb,
+        onPointerUpCapture: cb,
+        onTouchEnd: cb,
+        onTouchEndCapture: cb,
     };
 };
