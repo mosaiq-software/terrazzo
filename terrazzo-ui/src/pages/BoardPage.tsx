@@ -149,30 +149,38 @@ const BoardPage = (): React.JSX.Element => {
         };
     }, [boardId, sockCtx.connected, cardId]);
 
-    useSocketListener<ServerSE.UPDATE_BOARD_FIELD>(ServerSE.UPDATE_BOARD_FIELD, (payload) => {
-        if (payload.id !== boardId) {
-            return;
-        }
-        if (payload.name) {
-            setTitle(`${payload.name} | Terrazzo`);
-            uiCtx.setPageTitle(payload.name);
-        }
-        setBoardData((prev) => {
-            if (!prev) {
-                return prev;
+    useSocketListener(
+        ServerSE.UPDATE_BOARD_FIELD,
+        (payload) => {
+            if (payload.id !== boardId) {
+                return;
             }
-            return { ...updateBaseFromPartial(prev, payload as Partial<BoardRes>) };
-        });
-    });
+            if (payload.name) {
+                setTitle(`${payload.name} | Terrazzo`);
+                uiCtx.setPageTitle(payload.name);
+            }
+            setBoardData((prev) => {
+                if (!prev) {
+                    return prev;
+                }
+                return { ...updateBaseFromPartial(prev, payload as Partial<BoardRes>) };
+            });
+        },
+        [boardId]
+    );
 
-    useSocketListener<ServerSE.ADD_LIST>(ServerSE.ADD_LIST, (payload) => {
-        if (payload.boardId !== boardId) {
-            return;
-        }
-        listToCardsMap.set(payload.id, []);
-    });
+    useSocketListener(
+        ServerSE.ADD_LIST,
+        (payload) => {
+            if (payload.boardId !== boardId) {
+                return;
+            }
+            listToCardsMap.set(payload.id, []);
+        },
+        [boardId]
+    );
 
-    useSocketListener<ServerSE.ADD_CARD>(ServerSE.ADD_CARD, (payload) => {
+    useSocketListener(ServerSE.ADD_CARD, (payload) => {
         if (!listToCardsMap.has(payload.listId)) {
             console.warn('Tried to add a card to an non-existent list');
             return;
@@ -185,11 +193,11 @@ const BoardPage = (): React.JSX.Element => {
         }
     });
 
-    useSocketListener<ServerSE.MOVE_LIST>(ServerSE.MOVE_LIST, (payload) => {
+    useSocketListener(ServerSE.MOVE_LIST, (payload) => {
         moveListToPos(payload.listId, payload.position);
     });
 
-    useSocketListener<ServerSE.MOVE_CARD>(ServerSE.MOVE_CARD, (payload) => {
+    useSocketListener(ServerSE.MOVE_CARD, (payload) => {
         moveCardToListAndPos(payload.cardId, payload.toList, payload.position);
     });
 
