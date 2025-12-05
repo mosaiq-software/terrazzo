@@ -1,13 +1,13 @@
 import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, UserId } from '@mosaiq/terrazzo-common/types';
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
-import { getAssignmentsForCard } from '@trz-api/persistence/assignmentPersistence';
 import { getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
+import { getCardAssignmentsForCard } from '@trz-api/persistence/cardAssignmentPersistence';
 import { createCardOnList, getCardById, getCardsByListIdDown, getCardsByListIdShortUp, updateCard, updateCardList, updateCardOrder } from '@trz-api/persistence/cardPersistence';
 import { addLabelToCard, deleteLabelsOnCard, getLabelsOnCard } from '@trz-api/persistence/labelPersistence';
 import { getListById } from '@trz-api/persistence/listPersistence';
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
-import { getUserById } from '@trz-api/persistence/userPersistence';
-import { addAssigneeToCard } from './assignmentController';
+import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
+import { addAssigneeToCard } from './cardAssignmentController';
 import { createTextBlockWithEncodedData, createTextBlockWithPlaintext } from './textBlockController';
 
 export const MOVING_LIST_ORDER = -10000;
@@ -93,7 +93,7 @@ export async function addCard(listID: ListId, cardName: string, description?: st
         order: await getNextCardOrder(listID),
         createdAt: Date.now(),
         createdById: createdById ?? null,
-        createdBy: createdById ? await getUserById(createdById) : null,
+        createdBy: createdById ? await getUserHeaderByIdDb(createdById) : undefined,
     };
     try {
         const descBlock = await createTextBlockWithPlaintext(description);
@@ -155,7 +155,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         order: await getNextCardOrder(list.id),
         createdAt: Date.now(),
         createdById: createdById ?? null,
-        createdBy: createdById ? await getUserById(createdById) : null,
+        createdBy: createdById ? await getUserHeaderByIdDb(createdById) : undefined,
     };
 
     try {
@@ -299,9 +299,9 @@ export const populateCards = async (cardHeaders: CardHeader[]): Promise<Card[]> 
         cardHeaders.map(async (c: CardHeader) => {
             const cc: Card = {
                 ...c,
-                assignees: await getAssignmentsForCard(c.id),
+                assignees: await getCardAssignmentsForCard(c.id),
                 labels: await getLabelsOnCard(c.id),
-                createdBy: c.createdById ? await getUserById(c.createdById) : null,
+                createdBy: c.createdById ? await getUserHeaderByIdDb(c.createdById) : undefined,
             };
             return cc;
         })
