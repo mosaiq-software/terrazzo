@@ -1,6 +1,8 @@
 import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { getRoomCode, RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
 import { createRole, deleteRole, getRolesForOrg, updateRole } from '@trz-api/controllers/roleController';
+import { getRoleIdsForUserInOrg, setRoleIdsForUserInOrg } from '@trz-api/persistence/roleAssignmentPersistence';
+import { syncRolesForUserInOrg } from '@trz-api/utils/broadcasters';
 import { broadcast } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
@@ -58,6 +60,33 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
             reply(undefined);
         } catch (error: any) {
             console.error('Error deleting role', error);
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.GET_ROLES_FOR_USER_IN_ORG, async (data: ClientSEPayload[ClientSE.GET_ROLES_FOR_USER_IN_ORG], reply: ClientSEReply<ClientSE.GET_ROLES_FOR_USER_IN_ORG>) => {
+        try {
+            if (!data) {
+                throw new Error('No data provided');
+            }
+            const roleIds = await getRoleIdsForUserInOrg(data.userId, data.orgId);
+            reply(roleIds);
+        } catch (error: any) {
+            console.error('Error getting roles for user in organization', error);
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG, async (data: ClientSEPayload[ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG], reply: ClientSEReply<ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG>) => {
+        try {
+            if (!data) {
+                throw new Error('No data provided');
+            }
+            await setRoleIdsForUserInOrg(data.userId, data.orgId, data.roleIds);
+            await syncRolesForUserInOrg(socket, data.userId, data.orgId);
+            reply(undefined);
+        } catch (error: any) {
+            console.error('Error updating roles for user in organization', error);
             reply(undefined, error.message);
         }
     });

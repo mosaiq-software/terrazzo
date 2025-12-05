@@ -4,6 +4,7 @@ import { getRoomCode, RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socket
 import { getAllInvitesForOrg } from '@trz-api/controllers/inviteController';
 import { getMembersInOrg, getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { getInviteRecordById } from '@trz-api/persistence/invitePersistence';
+import { getRoleIdsForUserInOrg } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
 import { broadcast } from './socketUtils';
 
@@ -52,5 +53,15 @@ export const syncUsersOrgs = async (socket: Socket, userId: UserId) => {
         broadcast(socket, ServerSE.UPDATE_USERS_ORGANIZATIONS, { userId: userId, organizations: usersOrgs }, [getRoomCode(RoomType.USER, userId)]);
     } catch (error: any) {
         console.error('Error syncing users organizations', error);
+    }
+};
+
+export const syncRolesForUserInOrg = async (socket: Socket, userId: UserId, orgId: OrganizationId) => {
+    try {
+        const roleIds = await getRoleIdsForUserInOrg(userId, orgId);
+        const roomKey = `${orgId}_${userId}`;
+        broadcast(socket, ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG, { userId, orgId, roleIds }, [getRoomCode(RoomType.DATA, roomKey, RoomSpecifier.ROLE_ASSIGNMENTS)]);
+    } catch (error: any) {
+        console.error('Error syncing roles for user in organization', error);
     }
 };

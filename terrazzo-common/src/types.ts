@@ -125,7 +125,7 @@ export interface GithubUserProfile {
     name: string;
 }
 
-export interface Assignment {
+export interface CardAssignment {
     id: AssignmentId;
     userId: UserId;
     cardId: CardId;

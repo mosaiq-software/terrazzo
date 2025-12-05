@@ -1,5 +1,5 @@
 import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { OrganizationId, Role, RoleId } from '@mosaiq/terrazzo-common/types';
+import { OrganizationId, Role, RoleId, UserId } from '@mosaiq/terrazzo-common/types';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
 export const getRolesForOrg = async (sockCtx: SocketContextType, orgId: OrganizationId): Promise<Role[] | undefined> => {
@@ -16,4 +16,12 @@ export const updateRole = async (sockCtx: SocketContextType, role: Role) => {
 
 export const deleteRole = async (sockCtx: SocketContextType, roleId: RoleId) => {
     await sockCtx.emit(ClientSE.DELETE_ROLE, { roleId });
+};
+
+export const getRoleIdsForUserInOrg = async (sockCtx: SocketContextType, userId: UserId, orgId: OrganizationId): Promise<RoleId[] | undefined> => {
+    return await sockCtx.emit(ClientSE.GET_ROLES_FOR_USER_IN_ORG, { userId, orgId });
+};
+
+export const setRoleIdsForUserInOrg = async (sockCtx: SocketContextType, userId: UserId, orgId: OrganizationId, roleIds: RoleId[]) => {
+    await sockCtx.emit(ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG, { userId, orgId, roleIds });
 };
