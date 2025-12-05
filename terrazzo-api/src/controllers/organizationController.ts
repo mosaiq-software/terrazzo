@@ -2,7 +2,7 @@ import { MembershipRecord, OrganizationHeader, OrganizationId, OrgMembershipLeve
 import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
 import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrg, getOrgById, updateOrg } from '@trz-api/persistence/organizationPersistence';
-import { getUserById } from '@trz-api/persistence/userPersistence';
+import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
@@ -22,7 +22,7 @@ export async function addOrganization(name: string, creator: UserId) {
         throw new Error('Name must be 0 - 50 characters');
     }
 
-    const user = await getUserById(creator);
+    const user = await getUserHeaderByIdDb(creator);
     if (!user) {
         throw new Error('Org must have a creator');
     }

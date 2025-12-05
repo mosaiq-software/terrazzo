@@ -1,6 +1,6 @@
 import { BoardId, List, MembershipRecord, OrganizationId, OrgMembershipLevel, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
 import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
-import { createUser, getUserByGithubId, getUserById, getUserByUsername, updateUser } from '@trz-api/persistence/userPersistence';
+import { createUserHeaderDb, getUserHeaderByGithubIdDb, getUserHeaderByIdDb, getUserHeaderByUsernameDb, updateUserHeaderDb } from '@trz-api/persistence/userPersistence';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
 import { addBoard } from './boardController';
 import { addCard } from './cardController';
@@ -13,7 +13,7 @@ export async function getOrCreateUserByGithubAccessToken(accessToken: string) {
     if (!githubData) {
         throw new Error('Cant find an account with that access token');
     }
-    let user = await getUserByGithubId(githubData.id);
+    let user = await getUserHeaderByGithubIdDb(githubData.id);
 
     try {
         if (user == null) {
@@ -28,7 +28,7 @@ export async function getOrCreateUserByGithubAccessToken(accessToken: string) {
 }
 
 export async function checkUsernameTaken(username: string) {
-    const user = await getUserByUsername(username);
+    const user = await getUserHeaderByUsernameDb(username);
     return user != null;
 }
 
@@ -37,7 +37,7 @@ export async function createNewUser(username: string, firstName: string, lastNam
     if (username.length > 13) {
         throw new Error('Username must be 13 characters or less');
     }
-    if ((await getUserByUsername(username)) != null) {
+    if ((await getUserHeaderByUsernameDb(username)) != null) {
         throw new Error('Username already exists');
     }
 
@@ -53,7 +53,7 @@ export async function createNewUser(username: string, firstName: string, lastNam
     };
 
     try {
-        await createUser(newUser);
+        await createUserHeaderDb(newUser);
     } catch (e) {
         throw new Error('Failed to create user' + e);
     }
@@ -64,7 +64,7 @@ export async function createNewUser(username: string, firstName: string, lastNam
 //Updates
 
 export async function setupUser(userId: UserId, username: string, firstName: string, lastName: string) {
-    const user = await getUserById(userId);
+    const user = await getUserHeaderByIdDb(userId);
 
     if (user == null) {
         throw new Error('User not found');
@@ -75,7 +75,7 @@ export async function setupUser(userId: UserId, username: string, firstName: str
     user.lastName = lastName;
 
     try {
-        await updateUser(user);
+        await updateUserHeaderDb(user);
     } catch (e) {
         throw new Error('Failed to update user' + e);
     }
@@ -106,9 +106,16 @@ export async function setupUser(userId: UserId, username: string, firstName: str
 }
 
 export const getUserPreview = async (userId: UserId) => {
-    const user = await getUserById(userId);
+    const user = await getUserHeaderByIdDb(userId);
     if (!user) {
         throw new Error('No user found');
     }
     return user;
+};
+
+export const updateUserData = async (userData: Partial<UserHeader> & { id: UserId }) => {
+    const updated = await updateUserHeaderDb(userData);
+    if (updated === 0) {
+        throw new Error('No user found to update');
+    }
 };

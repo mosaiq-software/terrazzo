@@ -1,6 +1,6 @@
 import { readSessionStorageValue, useSessionStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
-import { User, UserHeader } from '@mosaiq/terrazzo-common/types';
+import { UserHeader } from '@mosaiq/terrazzo-common/types';
 import { getUserDataFromGithub, revokeUserAccessToGithubAuth, tryLoginWithGithub } from '@trz/util/githubAuth';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setUpUserData } from '@trz/util/userUtils';
@@ -12,7 +12,7 @@ type UserContextType = {
     githubLogin: (code: string | undefined) => Promise<void>;
     logoutAll: () => void;
     userData: UserHeader | null;
-    setUser: (newUser: User) => void;
+    setUser: (newUser: UserHeader) => void;
     setUpAccount: (username: string, firstName: string, lastName: string) => Promise<void>;
 };
 const UserContext = createContext<UserContextType | undefined>(undefined);

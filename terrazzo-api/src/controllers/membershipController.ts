@@ -3,7 +3,7 @@ import { calculateEffectivePermissions } from '@mosaiq/terrazzo-common/utils/per
 import { getModulesByOrgIdDb } from '@trz-api/persistence/modulePersistence';
 import { deleteOrganizationMembership, getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser, updateOrganizationMembership, upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
-import { getUserById } from '@trz-api/persistence/userPersistence';
+import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 
 export const getMembersInOrg = async (orgId: OrganizationId) => {
     const org = await getOrgById(orgId);
@@ -21,7 +21,7 @@ const populateMemberships = async (records: MembershipRecord[]) => {
             records.map(async (r) => {
                 return {
                     record: r,
-                    user: await getUserById(r.userId),
+                    user: await getUserHeaderByIdDb(r.userId),
                 };
             })
         )
