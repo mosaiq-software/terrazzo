@@ -136,6 +136,8 @@ const OrganizationPage = (): React.JSX.Element => {
                                     users={orgCtx.members.map((m) => m.user)}
                                     maxUsers={5}
                                     showProfilePopover
+                                    showTooltip
+                                    animateOnHover
                                 />
                             </Flex>
                         </Tabs.List>

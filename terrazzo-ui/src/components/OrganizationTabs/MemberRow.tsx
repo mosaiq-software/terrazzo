@@ -25,6 +25,7 @@ export const MemberRow = (props: MemberRowProps) => {
                 <RolesList
                     userId={props.member.user.id}
                     key="roles-list"
+                    containerProps={{ maw: 300 }}
                 />,
                 <Tooltip
                     key="role-tooltip"

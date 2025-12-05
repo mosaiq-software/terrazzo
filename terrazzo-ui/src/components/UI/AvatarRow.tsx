@@ -4,12 +4,14 @@ import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getUserHeader } from '@trz/emitters';
 import { useEffect, useState } from 'react';
-import { UserAvatar } from './UserAvatar';
+import { UserAvatar } from './UserAvatar/UserAvatar';
 
 interface AvatarRowProps {
     users: (UserHeader | UserId)[];
     maxUsers: number;
     showProfilePopover?: boolean;
+    showTooltip?: boolean;
+    animateOnHover?: boolean;
 }
 export const AvatarRow = (props: AvatarRowProps) => {
     const sockCtx = useSocket();
@@ -50,19 +52,14 @@ export const AvatarRow = (props: AvatarRowProps) => {
             {
                 // only take the first n users
                 users.slice(0, props.maxUsers).map((user, index) => (
-                    <Tooltip
+                    <UserAvatar
+                        user={user}
+                        size="sm"
+                        showProfilePopover={props.showProfilePopover}
+                        showTooltip={props.showTooltip}
+                        animateOnHover={props.animateOnHover}
                         key={user.id}
-                        label={user.firstName + ' ' + user.lastName + '(' + user.username + ')'}
-                        position="bottom"
-                        withArrow
-                        radius="lg"
-                    >
-                        <UserAvatar
-                            user={user}
-                            size="sm"
-                            showProfilePopover={props.showProfilePopover}
-                        />
-                    </Tooltip>
+                    />
                 ))
             }
             {
