@@ -36,7 +36,7 @@ export const getModuleByIdDb = async (id: UID) => {
     return model?.toJSON();
 };
 
-export const getModulesByParentIdDb = async (parentId: UID | undefined) => {
+export const getModulesByParentIdDb = async (parentId: UID) => {
     const models = await ModuleModel.findAll({
         where: { parentId },
     });

@@ -184,7 +184,7 @@ const BoardPage = (): React.JSX.Element => {
         ServerSE.ADD_CARD,
         (payload) => {
             if (!listToCardsMap.has(payload.listId)) {
-                console.warn('Tried to add a card to an non-existent list');
+                console.warn('Tried to add a card to a non-existent list');
                 return;
             }
             cardToListMap.set(payload.id, payload.listId);
