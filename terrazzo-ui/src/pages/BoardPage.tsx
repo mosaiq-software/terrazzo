@@ -177,21 +177,25 @@ const BoardPage = (): React.JSX.Element => {
             }
             listToCardsMap.set(payload.id, []);
         },
-        [boardId]
+        [boardId, listToCardsMap]
     );
 
-    useSocketListener(ServerSE.ADD_CARD, (payload) => {
-        if (!listToCardsMap.has(payload.listId)) {
-            console.warn('Tried to add a card to an non-existent list');
-            return;
-        }
-        cardToListMap.set(payload.id, payload.listId);
-        const list = listToCardsMap.get(payload.listId);
-        if (list) {
-            list.push(payload.id);
-            listToCardsMap.set(payload.listId, list);
-        }
-    });
+    useSocketListener(
+        ServerSE.ADD_CARD,
+        (payload) => {
+            if (!listToCardsMap.has(payload.listId)) {
+                console.warn('Tried to add a card to an non-existent list');
+                return;
+            }
+            cardToListMap.set(payload.id, payload.listId);
+            const list = listToCardsMap.get(payload.listId);
+            if (list) {
+                list.push(payload.id);
+                listToCardsMap.set(payload.listId, list);
+            }
+        },
+        [listToCardsMap, cardToListMap]
+    );
 
     useSocketListener(ServerSE.MOVE_LIST, (payload) => {
         moveListToPos(payload.listId, payload.position);
@@ -200,6 +204,19 @@ const BoardPage = (): React.JSX.Element => {
     useSocketListener(ServerSE.MOVE_CARD, (payload) => {
         moveCardToListAndPos(payload.cardId, payload.toList, payload.position);
     });
+
+    useSocketListener(
+        ServerSE.UPDATE_LIST_FIELD,
+        (payload) => {
+            if (!listToCardsMap.has(payload.id)) {
+                return;
+            }
+            if (payload.archived) {
+                listToCardsMap.delete(payload.id);
+            }
+        },
+        [listToCardsMap]
+    );
 
     const openModal = useCallback((card: CardId) => {
         window.history.replaceState(null, '', `/card/${card}`);
@@ -222,110 +239,122 @@ const BoardPage = (): React.JSX.Element => {
         ));
     }, [listKeys.join(), boardData?.boardCode]);
 
-    const moveListToPos = useCallback((listId: ListId, position: number) => {
-        const list = listToCardsMap.get(listId);
-        if (!list) {
-            console.error('List not found', listId);
-            return;
-        }
-
-        const entries = Array.from(listToCardsMap.entries());
-        const index = entries.findIndex((l) => l[0] === listId);
-        if (index < 0) {
-            console.error('Error moving list, list not found in prev lists');
-            return;
-        }
-        arrayMoveInPlace(entries, index, position);
-        setListMap(entries);
-    }, []);
-
-    const moveCardToListAndPos = useCallback((cardId: CardId, toList: ListId, position?: number) => {
-        const currentListId = cardToListMap.get(cardId);
-        if (!currentListId) {
-            throw new Error('a Card not in any list');
-        }
-        let currentListCards = listToCardsMap.get(currentListId);
-        if (!currentListCards) {
-            throw new Error('a Current list not found');
-        }
-        currentListCards = currentListCards.filter((c) => c !== cardId);
-
-        let newListCards = listToCardsMap.get(toList);
-        if (currentListId === toList) {
-            newListCards = currentListCards;
-        }
-        if (!newListCards) {
-            throw new Error('a No new list found');
-        }
-        if (position !== undefined) {
-            newListCards.splice(position, 0, cardId);
-        } else {
-            newListCards.push(cardId);
-        }
-
-        listToCardsMap.set(toList, newListCards);
-        listToCardsMap.set(currentListId, currentListCards);
-        cardToListMap.set(cardId, toList);
-    }, []);
-
-    const handleDragStart = useCallback((event: DragStartEvent) => {
-        const activeId = event.active.id.toString() as UID;
-        if (listToCardsMap.has(activeId)) {
-            // is dragging list
-            setActiveObject(activeId);
-            setDraggingObject({ list: activeId });
-        } else {
-            // is dragging card
-            setActiveObject(activeId);
-            setDraggingObject({ card: activeId });
-        }
-    }, []);
-
-    const handleDragOver = useCallback((event: DragOverEvent) => {
-        const { active, over } = event;
-        const activeId = active.id.toString() as UID;
-        const overId = over?.id.toString() as UID;
-        if (activeId === overId) {
-            return;
-        }
-        if (listToCardsMap.has(activeId)) {
-            // is dragging list
-            return;
-        }
-        if (!overId) {
-            return;
-        }
-        // is dragging card
-        if (listToCardsMap.has(overId)) {
-            // is over a list - put that card into the list
-            const currentListId = cardToListMap.get(activeId);
-            if (overId !== currentListId) {
-                moveCardToListAndPos(activeId, overId);
+    const moveListToPos = useCallback(
+        (listId: ListId, position: number) => {
+            const list = listToCardsMap.get(listId);
+            if (!list) {
+                console.error('List not found', listId);
+                return;
             }
-            return;
-        }
 
-        // is over a card - get the list and put it in
-        const currentListId = cardToListMap.get(activeId);
-        const newListId = cardToListMap.get(overId);
-        if (!newListId) {
-            console.error('No listid found', overId);
-            return;
-        }
-        const newListCards = listToCardsMap.get(newListId);
-        if (!newListCards) {
-            console.error('No list found', overId);
-            return;
-        }
+            const entries = Array.from(listToCardsMap.entries());
+            const index = entries.findIndex((l) => l[0] === listId);
+            if (index < 0) {
+                console.error('Error moving list, list not found in prev lists');
+                return;
+            }
+            arrayMoveInPlace(entries, index, position);
+            setListMap(entries);
+        },
+        [listToCardsMap]
+    );
 
-        let injectPos: number | undefined = undefined;
-        if (newListId !== currentListId) {
-            const oldPos = newListCards.findIndex((c) => c === overId);
-            injectPos = oldPos >= 0 ? oldPos : newListCards.length + 1;
-        }
+    const moveCardToListAndPos = useCallback(
+        (cardId: CardId, toList: ListId, position?: number) => {
+            const currentListId = cardToListMap.get(cardId);
+            if (!currentListId) {
+                throw new Error('a Card not in any list');
+            }
+            let currentListCards = listToCardsMap.get(currentListId);
+            if (!currentListCards) {
+                throw new Error('a Current list not found');
+            }
+            currentListCards = currentListCards.filter((c) => c !== cardId);
 
-        moveCardToListAndPos(activeId, newListId, injectPos);
-    }, []);
+            let newListCards = listToCardsMap.get(toList);
+            if (currentListId === toList) {
+                newListCards = currentListCards;
+            }
+            if (!newListCards) {
+                throw new Error('a No new list found');
+            }
+            if (position !== undefined) {
+                newListCards.splice(position, 0, cardId);
+            } else {
+                newListCards.push(cardId);
+            }
+
+            listToCardsMap.set(toList, newListCards);
+            listToCardsMap.set(currentListId, currentListCards);
+            cardToListMap.set(cardId, toList);
+        },
+        [cardToListMap, listToCardsMap]
+    );
+
+    const handleDragStart = useCallback(
+        (event: DragStartEvent) => {
+            const activeId = event.active.id.toString() as UID;
+            if (listToCardsMap.has(activeId)) {
+                // is dragging list
+                setActiveObject(activeId);
+                setDraggingObject({ list: activeId });
+            } else {
+                // is dragging card
+                setActiveObject(activeId);
+                setDraggingObject({ card: activeId });
+            }
+        },
+        [listToCardsMap]
+    );
+
+    const handleDragOver = useCallback(
+        (event: DragOverEvent) => {
+            const { active, over } = event;
+            const activeId = active.id.toString() as UID;
+            const overId = over?.id.toString() as UID;
+            if (activeId === overId) {
+                return;
+            }
+            if (listToCardsMap.has(activeId)) {
+                // is dragging list
+                return;
+            }
+            if (!overId) {
+                return;
+            }
+            // is dragging card
+            if (listToCardsMap.has(overId)) {
+                // is over a list - put that card into the list
+                const currentListId = cardToListMap.get(activeId);
+                if (overId !== currentListId) {
+                    moveCardToListAndPos(activeId, overId);
+                }
+                return;
+            }
+
+            // is over a card - get the list and put it in
+            const currentListId = cardToListMap.get(activeId);
+            const newListId = cardToListMap.get(overId);
+            if (!newListId) {
+                console.error('No listid found', overId);
+                return;
+            }
+            const newListCards = listToCardsMap.get(newListId);
+            if (!newListCards) {
+                console.error('No list found', overId);
+                return;
+            }
+
+            let injectPos: number | undefined = undefined;
+            if (newListId !== currentListId) {
+                const oldPos = newListCards.findIndex((c) => c === overId);
+                injectPos = oldPos >= 0 ? oldPos : newListCards.length + 1;
+            }
+
+            moveCardToListAndPos(activeId, newListId, injectPos);
+        },
+        [cardToListMap, listToCardsMap]
+    );
 
     const handleDragEnd = useCallback(
         (event: DragEndEvent) => {
@@ -372,7 +401,7 @@ const BoardPage = (): React.JSX.Element => {
             moveCardToListAndPos(activeId, newListId, newIndex);
             emitMoveCard(sockCtx, activeId, newListId, newIndex);
         },
-        [sockCtx.connected]
+        [sockCtx.connected, listToCardsMap, cardToListMap]
     );
 
     const handleDragAbort = useCallback((event: DragAbortEvent) => {
@@ -386,46 +415,49 @@ const BoardPage = (): React.JSX.Element => {
         setDraggingObject({});
     }, []);
 
-    const collisionDetectionStrategy: CollisionDetection = useCallback((args) => {
-        // Get the closest list horizontally
-        const onlyListArgs = { ...args, droppableContainers: args.droppableContainers.filter((container) => listToCardsMap.has(container.id.toString() as UID)) };
-        let intersectingId = horizontalCollisionDetection(onlyListArgs) as UID;
+    const collisionDetectionStrategy: CollisionDetection = useCallback(
+        (args) => {
+            // Get the closest list horizontally
+            const onlyListArgs = { ...args, droppableContainers: args.droppableContainers.filter((container) => listToCardsMap.has(container.id.toString() as UID)) };
+            let intersectingId = horizontalCollisionDetection(onlyListArgs) as UID;
 
-        // If theres no intersection, fall back to the last known intersected item
-        if (!intersectingId) {
-            //TODO check if this is causing the weird offset issues
-            return lastOverId.current ? [{ id: lastOverId.current }] : [];
-        }
+            // If theres no intersection, fall back to the last known intersected item
+            if (!intersectingId) {
+                //TODO check if this is causing the weird offset issues
+                return lastOverId.current ? [{ id: lastOverId.current }] : [];
+            }
 
-        // If dragging a list, easy - collide with another list
-        if (args.active.data.current?.type === 'list') {
-            return [{ id: intersectingId }];
-        }
-
-        // If dragging a card, find which list you're closest to
-        if (args.active.data.current?.type === 'card') {
-            const list = listToCardsMap.get(intersectingId);
-            if (list) {
-                // If the list is empty, just intersect with the list
-                // If the list has cards, find the closest card to intersect with
-                if (list.length > 0) {
-                    const onlyCardsInThisListArgs = {
-                        ...args,
-                        droppableContainers: args.droppableContainers.filter(
-                            (droppable) =>
-                                droppable.id !== intersectingId && // dont intersect with the actual list
-                                !!list.find((c) => c === droppable.id) // only intersect with cards in this list
-                        ),
-                    };
-                    intersectingId = closestCenter(onlyCardsInThisListArgs)[0]?.id.toString() as UID;
-                }
-                lastOverId.current = intersectingId;
+            // If dragging a list, easy - collide with another list
+            if (args.active.data.current?.type === 'list') {
                 return [{ id: intersectingId }];
             }
-            return lastOverId.current ? [{ id: lastOverId.current }] : [];
-        }
-        return [];
-    }, []);
+
+            // If dragging a card, find which list you're closest to
+            if (args.active.data.current?.type === 'card') {
+                const list = listToCardsMap.get(intersectingId);
+                if (list) {
+                    // If the list is empty, just intersect with the list
+                    // If the list has cards, find the closest card to intersect with
+                    if (list.length > 0) {
+                        const onlyCardsInThisListArgs = {
+                            ...args,
+                            droppableContainers: args.droppableContainers.filter(
+                                (droppable) =>
+                                    droppable.id !== intersectingId && // dont intersect with the actual list
+                                    !!list.find((c) => c === droppable.id) // only intersect with cards in this list
+                            ),
+                        };
+                        intersectingId = closestCenter(onlyCardsInThisListArgs)[0]?.id.toString() as UID;
+                    }
+                    lastOverId.current = intersectingId;
+                    return [{ id: intersectingId }];
+                }
+                return lastOverId.current ? [{ id: lastOverId.current }] : [];
+            }
+            return [];
+        },
+        [listToCardsMap]
+    );
 
     if ((!boardId && !cardId) || !boardData) {
         return (
