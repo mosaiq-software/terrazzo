@@ -38,6 +38,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
         const newLabel: Label = {
             id: TEMPORARY_ID,
             name: '',
+            boardId: props.boardId,
             color: generateRandomColor(),
         };
         setEditingLabel(newLabel);

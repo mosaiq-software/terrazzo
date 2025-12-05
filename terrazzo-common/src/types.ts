@@ -77,6 +77,7 @@ export interface UserHeader {
 
 export interface Label {
     id: LabelId;
+    boardId: BoardId;
     name: string;
     color: string;
 }

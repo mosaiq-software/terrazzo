@@ -1,8 +1,8 @@
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '@trz-api/utils/dbHelper';
 import { TextBlock, TextBlockId } from '@mosaiq/terrazzo-common/types';
+import { sequelize } from '@trz-api/utils/dbHelper';
+import { DataTypes, Model } from 'sequelize';
 
-class TextBlockModel extends Model {}
+class TextBlockModel extends Model<TextBlock> {}
 TextBlockModel.init(
     {
         id: {
@@ -15,24 +15,25 @@ TextBlockModel.init(
 );
 
 export const getTextBlockById = async (id: TextBlockId) => {
-    return (await TextBlockModel.findByPk(id))?.toJSON() as TextBlock | null;
+    const model = await TextBlockModel.findByPk(id);
+    return model?.toJSON();
 };
 
 export const createTextBlock = async (text?: string) => {
     const uid = crypto.randomUUID();
-    return (
-        await TextBlockModel.create({
-            id: uid,
-            text: text ?? '',
-        })
-    ).toJSON() as TextBlock;
+    const model = await TextBlockModel.create({
+        id: uid,
+        text: text ?? '',
+    });
+    return model.toJSON();
 };
 
 export const writeTextBlock = async (id: TextBlockId, text: string) => {
-    return await TextBlockModel.update(
+    const [updated] = await TextBlockModel.update(
         {
             text,
         },
         { where: { id: id } }
     );
+    return updated;
 };

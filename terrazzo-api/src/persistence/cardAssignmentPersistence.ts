@@ -2,7 +2,7 @@ import { AssignmentId, CardAssignment, CardId, UserId } from '@mosaiq/terrazzo-c
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model } from 'sequelize';
 
-class CardAssignmentModel extends Model {}
+class CardAssignmentModel extends Model<CardAssignment> {}
 CardAssignmentModel.init(
     {
         id: {
@@ -16,29 +16,35 @@ CardAssignmentModel.init(
 );
 
 export const getCardAssignmentById = async (asnId: AssignmentId) => {
-    return (await CardAssignmentModel.findByPk(asnId))?.toJSON() as CardAssignment | null;
+    const model = await CardAssignmentModel.findByPk(asnId);
+    return model?.toJSON();
 };
 
 export const getCardAssignmentsForUser = async (userId: UserId): Promise<CardId[]> => {
-    return (await CardAssignmentModel.findAll({ where: { userId } })).map((asn) => (asn.toJSON() as CardAssignment).cardId);
+    const models = await CardAssignmentModel.findAll({ where: { userId } });
+    return models.map((asn) => asn.toJSON().cardId);
 };
 
 export const getCardAssignmentsForCard = async (cardId: CardId): Promise<UserId[]> => {
-    return (await CardAssignmentModel.findAll({ where: { cardId } })).map((asn) => (asn.toJSON() as CardAssignment).userId);
+    const models = await CardAssignmentModel.findAll({ where: { cardId } });
+    return models.map((asn) => asn.toJSON().userId);
 };
 
 export const getCardAssignmentRecordsForUserOnCard = async (userId: UserId, cardId: CardId): Promise<CardAssignment[]> => {
-    return (await CardAssignmentModel.findAll({ where: { cardId, userId } })).map((asn) => asn.toJSON() as CardAssignment);
+    const models = await CardAssignmentModel.findAll({ where: { cardId, userId } });
+    return models.map((asn) => asn.toJSON());
 };
 
 export const createCardAssignmentRecord = async (userId: UserId, cardId: CardId) => {
-    return await CardAssignmentModel.create({
+    const model = await CardAssignmentModel.create({
         id: crypto.randomUUID(),
         userId,
         cardId,
     });
+    return model.toJSON();
 };
 
 export const deleteCardAssignmentRecord = async (asnId: AssignmentId) => {
-    return await CardAssignmentModel.destroy({ where: { id: asnId } });
+    const deleted = await CardAssignmentModel.destroy({ where: { id: asnId } });
+    return deleted;
 };

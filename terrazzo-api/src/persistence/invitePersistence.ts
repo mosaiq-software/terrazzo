@@ -2,7 +2,7 @@ import { Invite, InviteId, OrganizationId } from '@mosaiq/terrazzo-common/types'
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model } from 'sequelize';
 
-class InviteModel extends Model {}
+class InviteModel extends Model<Invite> {}
 InviteModel.init(
     {
         id: {
@@ -26,22 +26,24 @@ InviteModel.init(
 );
 
 export const getInviteRecordById = async (id: InviteId) => {
-    return (await InviteModel.findByPk(id, {}))?.toJSON() as Invite | undefined;
+    const model = await InviteModel.findByPk(id, {});
+    return model?.toJSON();
 };
 
 export const getAllInviteRecordsForOrganization = async (orgId: OrganizationId) => {
-    return (
-        await InviteModel.findAll({
-            where: { forOrganizationId: orgId },
-            order: [['createdAt', 'DESC']],
-        })
-    ).map((inv) => inv.toJSON()) as Invite[];
+    const models = await InviteModel.findAll({
+        where: { forOrganizationId: orgId },
+        order: [['createdAt', 'DESC']],
+    });
+    return models.map((inv) => inv.toJSON());
 };
 
 export const createInviteRecord = async (invite: Invite) => {
-    return await InviteModel.create({ ...invite });
+    const model = await InviteModel.create({ ...invite });
+    return model.toJSON();
 };
 
 export const updateInviteRecord = async (invite: Partial<Invite> & { id: InviteId }) => {
-    return await InviteModel.update({ ...invite }, { where: { id: invite.id } });
+    const [updated] = await InviteModel.update({ ...invite }, { where: { id: invite.id } });
+    return updated;
 };

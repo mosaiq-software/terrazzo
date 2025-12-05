@@ -5,7 +5,7 @@ import { DataTypes, Model } from 'sequelize';
 export interface DirectoryModelType {
     id: DirectoryId;
 }
-class DirectoryModel extends Model {}
+class DirectoryModel extends Model<DirectoryModelType> {}
 DirectoryModel.init(
     {
         id: {
@@ -17,13 +17,16 @@ DirectoryModel.init(
 );
 
 export const getDirectoryByIdDb = async (id: DirectoryId) => {
-    return (await DirectoryModel.findByPk(id, {}))?.toJSON() as DirectoryModelType | undefined;
+    const model = await DirectoryModel.findByPk(id, {});
+    return model?.toJSON();
 };
 
 export const createDirectoryDb = async (document: DirectoryModelType) => {
-    return await DirectoryModel.create({ ...document });
+    const model = await DirectoryModel.create({ ...document });
+    return model.toJSON();
 };
 
 export const updateDirectoryDb = async (id: DirectoryId, document: Partial<DirectoryModelType>) => {
-    return await DirectoryModel.update({ ...document }, { where: { id: id } });
+    const [updated] = await DirectoryModel.update({ ...document }, { where: { id: id } });
+    return updated;
 };

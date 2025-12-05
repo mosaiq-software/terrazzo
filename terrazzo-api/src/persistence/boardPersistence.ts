@@ -7,7 +7,7 @@ export interface BoardModelType {
     boardCode: string;
     totalCards: number;
 }
-class BoardModel extends Model {}
+class BoardModel extends Model<BoardModelType> {}
 BoardModel.init(
     {
         id: {
@@ -21,17 +21,21 @@ BoardModel.init(
 );
 
 export const getBoards = async () => {
-    return (await BoardModel.findAll()).map((board) => board.toJSON()) as BoardModelType[];
+    const models = await BoardModel.findAll();
+    return models.map((board) => board.toJSON());
 };
 
 export const getBoardById = async (id: BoardId) => {
-    return (await BoardModel.findByPk(id, {}))?.toJSON() as BoardModelType | undefined;
+    const model = await BoardModel.findByPk(id, {});
+    return model?.toJSON();
 };
 
 export const createBoard = async (board: BoardModelType) => {
-    return await BoardModel.create({ ...board });
+    const model = await BoardModel.create({ ...board });
+    return model.toJSON();
 };
 
 export const updateBoard = async (boardID: BoardId, board: Partial<BoardModelType>) => {
-    return await BoardModel.update({ ...board }, { where: { id: boardID } });
+    const [updated] = await BoardModel.update({ ...board }, { where: { id: boardID } });
+    return updated;
 };
