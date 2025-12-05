@@ -1,8 +1,8 @@
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '@trz-api/utils/dbHelper';
 import { BoardId, CardId, Label, LabelId } from '@mosaiq/terrazzo-common/types';
+import { sequelize } from '@trz-api/utils/dbHelper';
+import { DataTypes, Model } from 'sequelize';
 
-class LabelModel extends Model {}
+class LabelModel extends Model<Label> {}
 LabelModel.init(
     {
         id: {
@@ -16,7 +16,11 @@ LabelModel.init(
     { sequelize }
 );
 
-class LabeledCardModel extends Model {}
+interface LabeledCard {
+    labelId: LabelId;
+    cardId: CardId;
+}
+class LabeledCardModel extends Model<LabeledCard> {}
 LabeledCardModel.init(
     {
         labelId: { type: DataTypes.STRING, primaryKey: true },
@@ -29,56 +33,65 @@ LabeledCardModel.init(
 );
 
 export const getLabelById = async (id: LabelId) => {
-    return (await LabelModel.findByPk(id))?.toJSON() as Label | null;
+    const model = await LabelModel.findByPk(id);
+    return model?.toJSON();
 };
 
 export const getLabelsByBoardId = async (boardId: BoardId) => {
-    return (await LabelModel.findAll({ where: { boardId } })).map((label) => label.toJSON()) as Label[];
+    const models = await LabelModel.findAll({ where: { boardId } });
+    return models.map((label) => label.toJSON());
 };
 
 export const createLabelOnBoard = async (label: Label, boardId: BoardId) => {
-    return await LabelModel.create({
+    const model = await LabelModel.create({
         id: label.id,
         boardId,
         name: label.name,
         color: label.color,
     });
+    return model.toJSON();
 };
 
 export const updateLabel = async (label: Label) => {
-    return await LabelModel.update(
+    const [updated] = await LabelModel.update(
         {
             name: label.name,
             color: label.color,
         },
         { where: { id: label.id } }
     );
+    return updated;
 };
 
 export const deleteLabel = async (id: LabelId) => {
-    return await LabelModel.destroy({ where: { id } });
+    const deleted = await LabelModel.destroy({ where: { id } });
+    return deleted;
 };
 
 export const deleteLabelsByBoardId = async (boardId: BoardId) => {
-    return await LabelModel.destroy({ where: { boardId } });
+    const deleted = await LabelModel.destroy({ where: { boardId } });
+    return deleted;
 };
 
 export const getLabelsOnCard = async (cardId: CardId) => {
-    return (await LabeledCardModel.findAll({ where: { cardId } })).map((label) => label.toJSON().labelId) as LabelId[];
+    const models = await LabeledCardModel.findAll({ where: { cardId } });
+    return models.map((label) => label.toJSON().labelId);
 };
 
 export const deleteLabelingOnCardsByLabelId = async (labelId: LabelId) => {
-    return await LabeledCardModel.destroy({ where: { labelId } });
+    const deleted = await LabeledCardModel.destroy({ where: { labelId } });
+    return deleted;
 };
 
 export const deleteLabelsOnCard = async (cardId: CardId) => {
-    return await LabeledCardModel.destroy({ where: { cardId } });
+    const deleted = await LabeledCardModel.destroy({ where: { cardId } });
+    return deleted;
 };
 
 export const addLabelToCard = async (labelId: LabelId, cardId: CardId) => {
-    return await LabeledCardModel.create({
-        id: crypto.randomUUID(),
-        cardId,
+    const model = await LabeledCardModel.create({
         labelId,
+        cardId,
     });
+    return model.toJSON();
 };

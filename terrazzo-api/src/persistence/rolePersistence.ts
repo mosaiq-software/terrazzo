@@ -2,7 +2,7 @@ import { OrganizationId, Role, RoleId } from '@mosaiq/terrazzo-common/types';
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model } from 'sequelize';
 
-class RoleModel extends Model {}
+class RoleModel extends Model<Role> {}
 RoleModel.init(
     {
         id: {
@@ -17,27 +17,32 @@ RoleModel.init(
 );
 
 export const getRoleByIdDb = async (id: RoleId) => {
-    return (await RoleModel.findByPk(id))?.toJSON() as Role | null;
+    const model = await RoleModel.findByPk(id);
+    return model?.toJSON();
 };
 
 export const getRolesByOrgIdDb = async (orgId: OrganizationId) => {
-    return (await RoleModel.findAll({ where: { orgId } })).map((role) => role.toJSON()) as Role[];
+    const models = await RoleModel.findAll({ where: { orgId } });
+    return models.map((role) => role.toJSON());
 };
 
 export const createRoleOnOrgDb = async (role: Role) => {
-    await RoleModel.create({ ...role });
+    const model = await RoleModel.create({ ...role });
+    return model.toJSON();
 };
 
 export const updateRoleDb = async (role: Partial<Role> & { id: RoleId }) => {
-    await RoleModel.update(
+    const [updated] = await RoleModel.update(
         {
             name: role.name,
             color: role.color,
         },
         { where: { id: role.id } }
     );
+    return updated;
 };
 
 export const deleteRoleDb = async (id: RoleId) => {
-    await RoleModel.destroy({ where: { id } });
+    const deleted = await RoleModel.destroy({ where: { id } });
+    return deleted;
 };

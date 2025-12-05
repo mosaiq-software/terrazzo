@@ -2,7 +2,7 @@ import { MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-commo
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model } from 'sequelize';
 
-class OrganizationMembershipModel extends Model {}
+class OrganizationMembershipModel extends Model<MembershipRecord> {}
 OrganizationMembershipModel.init(
     {
         userId: {
@@ -22,15 +22,18 @@ OrganizationMembershipModel.init(
 );
 
 export const getOrganizationMembership = async (userId: UserId, orgId: OrganizationId) => {
-    return (await OrganizationMembershipModel.findOne({ where: { userId, orgId } }))?.toJSON() as MembershipRecord | null;
+    const model = await OrganizationMembershipModel.findOne({ where: { userId, orgId } });
+    return model?.toJSON();
 };
 
 export const getOrganizationMembershipsForUser = async (userId: UserId) => {
-    return (await OrganizationMembershipModel.findAll({ where: { userId } })).map((membership) => membership.toJSON()) as MembershipRecord[];
+    const models = await OrganizationMembershipModel.findAll({ where: { userId } });
+    return models.map((membership) => membership.toJSON());
 };
 
 export const getOrganizationMembershipsForOrg = async (orgId: OrganizationId) => {
-    return (await OrganizationMembershipModel.findAll({ where: { orgId } })).map((membership) => membership.toJSON()) as MembershipRecord[];
+    const models = await OrganizationMembershipModel.findAll({ where: { orgId } });
+    return models.map((membership) => membership.toJSON());
 };
 
 export const upsertOrganizationMembership = async (membershipRecord: MembershipRecord) => {
@@ -38,14 +41,16 @@ export const upsertOrganizationMembership = async (membershipRecord: MembershipR
 };
 
 export const updateOrganizationMembership = async (membershipRecord: MembershipRecord) => {
-    await OrganizationMembershipModel.update(
+    const [updated] = await OrganizationMembershipModel.update(
         {
             permissionLevel: membershipRecord.permissionLevel,
         },
         { where: { userId: membershipRecord.userId, orgId: membershipRecord.orgId } }
     );
+    return updated;
 };
 
 export const deleteOrganizationMembership = async (userId: UserId, orgId: OrganizationId) => {
-    await OrganizationMembershipModel.destroy({ where: { userId, orgId } });
+    const deleted = await OrganizationMembershipModel.destroy({ where: { userId, orgId } });
+    return deleted;
 };

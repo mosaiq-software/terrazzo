@@ -8,7 +8,7 @@ export interface DocumentModelType {
     lastModifiedAt: number;
     lastModifiedByUserId: UserId;
 }
-class DocumentModel extends Model {}
+class DocumentModel extends Model<DocumentModelType> {}
 DocumentModel.init(
     {
         id: {
@@ -23,26 +23,28 @@ DocumentModel.init(
 );
 
 export const getDocumentByIdDb = async (id: DocumentId) => {
-    return (await DocumentModel.findByPk(id, {}))?.toJSON() as DocumentModelType | undefined;
+    const model = await DocumentModel.findByPk(id, {});
+    return model?.toJSON();
 };
 
 export const createDocumentDb = async (document: DocumentModelType) => {
-    await DocumentModel.create({ ...document });
+    const model = await DocumentModel.create({ ...document });
+    return model.toJSON();
 };
 
 export const updateDocumentDb = async (id: DocumentId, document: Partial<DocumentModelType>) => {
-    await DocumentModel.update(
+    const [updated] = await DocumentModel.update(
         {
             ...document,
         },
         { where: { id: id } }
     );
+    return updated;
 };
 
 export const getDocumentByTextBlockIdDb = async (textBlockId: string) => {
-    return (
-        await DocumentModel.findOne({
-            where: { textBlockId },
-        })
-    )?.toJSON() as DocumentModelType | undefined;
+    const model = await DocumentModel.findOne({
+        where: { textBlockId },
+    });
+    return model?.toJSON();
 };

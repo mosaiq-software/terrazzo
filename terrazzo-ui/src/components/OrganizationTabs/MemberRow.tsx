@@ -2,6 +2,7 @@ import { Group, Text, Tooltip } from '@mantine/core';
 import { Member, MembershipRecord, OrgMembershipLevel } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { MdAdminPanelSettings, MdPerson, MdPersonRemove } from 'react-icons/md';
+import { RolesList } from '../Roles/RolesList';
 import { ActionRow } from '../UI/ActionRow';
 
 interface MemberRowProps {
@@ -21,6 +22,11 @@ export const MemberRow = (props: MemberRowProps) => {
             title={fullName(props.member.user) + (props.isCurrentUser ? ' (You)' : '')}
             subtitle={`@${props.member.user.username}`}
             items={[
+                <RolesList
+                    userId={props.member.user.id}
+                    key="roles-list"
+                    containerProps={{ maw: 300 }}
+                />,
                 <Tooltip
                     key="role-tooltip"
                     label={isAdmin ? 'Admin' : 'Member'}

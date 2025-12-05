@@ -63,7 +63,7 @@ export interface CardHeader {
 export interface Card extends CardHeader {
     labels: LabelId[];
     assignees: UserId[];
-    createdBy: UserHeader | null;
+    createdBy: UserHeader | undefined;
 }
 
 export interface UserHeader {
@@ -74,12 +74,10 @@ export interface UserHeader {
     profilePicture: URL;
     githubUserId: string;
 }
-export interface User extends UserHeader {
-    organizationIds: OrganizationId[];
-}
 
 export interface Label {
     id: LabelId;
+    boardId: BoardId;
     name: string;
     color: string;
 }
@@ -128,7 +126,7 @@ export interface GithubUserProfile {
     name: string;
 }
 
-export interface Assignment {
+export interface CardAssignment {
     id: AssignmentId;
     userId: UserId;
     cardId: CardId;

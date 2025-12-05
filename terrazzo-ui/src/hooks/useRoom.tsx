@@ -7,7 +7,7 @@ import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect } from 'react';
 import { useMap } from './useMap';
 
-export function useRoom(roomType: RoomType, roomId: UID | null | undefined, specifier?: RoomSpecifier, trackUsers: boolean = false): [Map<string, UserData>, (map: [string, UserData][] | Map<string, UserData>) => void] {
+export function useRoom(roomType: RoomType, roomId: UID | string | null | undefined, specifier?: RoomSpecifier, trackUsers: boolean = false): [Map<string, UserData>, (map: [string, UserData][] | Map<string, UserData>) => void] {
     const [roomUsers, setRoomUsers] = useMap<SocketId, UserData>([]);
     const sockCtx = useSocket();
 

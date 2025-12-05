@@ -1,6 +1,5 @@
-import { GithubUserProfile, User } from '@mosaiq/terrazzo-common/types';
+import { GithubUserProfile } from '@mosaiq/terrazzo-common/types';
 import axios from 'axios';
-import { Request, Response } from 'express';
 import queryString from 'query-string';
 
 export const githubAuth = async (code: string) => {

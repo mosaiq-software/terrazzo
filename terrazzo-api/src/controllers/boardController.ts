@@ -62,6 +62,7 @@ export async function createBoardLabel(boardId: BoardId, name: string, color: st
     const label: Label = {
         name,
         color,
+        boardId,
         id: crypto.randomUUID(),
     };
     await createLabelOnBoard(label, boardId);
@@ -72,6 +73,7 @@ export async function createBoardLabelSingle(boardId: BoardId, name: string, col
     const label: Label = {
         name,
         color,
+        boardId,
         id: crypto.randomUUID(),
     };
     await createLabelOnBoard(label, boardId);

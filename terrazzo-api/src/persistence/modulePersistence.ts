@@ -2,7 +2,7 @@ import { ModuleHeader, UID } from '@mosaiq/terrazzo-common/types';
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model } from 'sequelize';
 
-class ModuleModel extends Model {}
+class ModuleModel extends Model<ModuleHeader> {}
 ModuleModel.init(
     {
         id: {
@@ -32,34 +32,35 @@ ModuleModel.init(
 );
 
 export const getModuleByIdDb = async (id: UID) => {
-    return (await ModuleModel.findByPk(id, {}))?.toJSON() as ModuleHeader | undefined;
+    const model = await ModuleModel.findByPk(id, {});
+    return model?.toJSON();
 };
 
-export const getModulesByParentIdDb = async (parentId: UID | null) => {
-    return (
-        await ModuleModel.findAll({
-            where: { parentId },
-        })
-    ).map((mdl) => mdl.toJSON()) as ModuleHeader[];
+export const getModulesByParentIdDb = async (parentId: UID) => {
+    const models = await ModuleModel.findAll({
+        where: { parentId },
+    });
+    return models.map((mdl) => mdl.toJSON());
 };
 
 export const getModulesByOrgIdDb = async (orgId: UID) => {
-    return (
-        await ModuleModel.findAll({
-            where: { orgId },
-        })
-    ).map((mdl) => mdl.toJSON()) as ModuleHeader[];
+    const models = await ModuleModel.findAll({
+        where: { orgId },
+    });
+    return models.map((mdl) => mdl.toJSON());
 };
 
 export const createModuleDb = async (module: ModuleHeader) => {
-    return await ModuleModel.create({ ...module });
+    const model = await ModuleModel.create({ ...module });
+    return model.toJSON();
 };
 
 export const updateModuleDb = async (id: UID, module: Partial<ModuleHeader>) => {
-    return await ModuleModel.update(
+    const [updated] = await ModuleModel.update(
         {
             ...module,
         },
         { where: { id: id } }
     );
+    return updated;
 };

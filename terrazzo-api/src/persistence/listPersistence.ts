@@ -1,8 +1,8 @@
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from '@trz-api/utils/dbHelper';
 import { BoardId, ListHeader, ListId } from '@mosaiq/terrazzo-common/types';
+import { sequelize } from '@trz-api/utils/dbHelper';
+import { DataTypes, Model } from 'sequelize';
 
-class ListModel extends Model {}
+class ListModel extends Model<ListHeader> {}
 ListModel.init(
     {
         id: {
@@ -18,42 +18,45 @@ ListModel.init(
 );
 
 export const getListById = async (id: ListId) => {
-    return (await ListModel.findByPk(id))?.toJSON() as ListHeader | null;
+    const model = await ListModel.findByPk(id);
+    return model?.toJSON();
 };
 
 export const getListsByBoardId = async (boardId: BoardId) => {
-    return (await ListModel.findAll({ where: { boardId } })).map((list) => list.toJSON()) as ListHeader[];
+    const models = await ListModel.findAll({ where: { boardId } });
+    return models.map((list) => list.toJSON());
 };
 
 export const getListsByBoardIdOrder = async (boardId: BoardId, archived: boolean) => {
-    return (
-        await ListModel.findAll({
-            where: { boardId, archived },
-            order: [['order', 'ASC']],
-            attributes: {
-                exclude: ['createdAt', 'updatedAt'],
-            },
-        })
-    ).map((list) => list.toJSON()) as ListHeader[];
+    const models = await ListModel.findAll({
+        where: { boardId, archived },
+        order: [['order', 'ASC']],
+        attributes: {
+            exclude: ['createdAt', 'updatedAt'],
+        },
+    });
+    return models.map((list) => list.toJSON());
 };
 
 export const getNextListOrder = async (boardId: BoardId) => {
-    const list = (await ListModel.findAll({ where: { boardId }, order: [['order', 'DESC']] })).map((list) => list.toJSON()) as ListHeader[];
+    const models = await ListModel.findAll({ where: { boardId }, order: [['order', 'DESC']] });
+    const list = models.map((list) => list.toJSON());
     return list ? list.length : 0;
 };
 
 export const createListOnBoard = async (list: ListHeader, boardId: BoardId) => {
-    return await ListModel.create({
+    const model = await ListModel.create({
         id: list.id,
         boardId,
         name: list.name,
         archived: false,
         order: list.order,
     });
+    return model.toJSON();
 };
 
 export const updateList = async (list: ListHeader) => {
-    return await ListModel.update(
+    const [updated] = await ListModel.update(
         {
             name: list.name,
             archived: list.archived,
@@ -61,10 +64,13 @@ export const updateList = async (list: ListHeader) => {
         },
         { where: { id: list.id } }
     );
+    return updated;
 };
 
 export const getListsBoardId = async (listId: ListId) => {
-    return ((await ListModel.findByPk(listId))?.toJSON() as ListHeader).boardId ?? null;
+    const model = await ListModel.findByPk(listId);
+    const list = model?.toJSON();
+    return list?.boardId ?? null;
 };
 
 export const updateListOrder = async (lists: ListHeader[]) => {

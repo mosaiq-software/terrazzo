@@ -3,6 +3,9 @@ import { useClipboard } from '@mantine/hooks';
 import { Priority } from '@mosaiq/terrazzo-common/constants';
 import { CardId, Label } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
+import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
+import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUser } from '@trz/contexts/user-context';
@@ -13,9 +16,6 @@ import { NoteType, notify } from '@trz/util/notifications';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
 import { MdBarChart, MdCheckBox, MdDocumentScanner, MdLabel, MdLink, MdOutlineCheckBoxOutlineBlank, MdOutlineRadioButtonUnchecked, MdRadioButtonChecked } from 'react-icons/md';
 import { priorityColors, PriorityIcons } from './PriorityButtons';
-import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
-import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
-import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';
 
 interface CardContextMenuProps {
     cardId: CardId;
@@ -30,7 +30,6 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
     const clipboard = useClipboard();
 
     if (!card) {
-        console.error('No card in context menu');
         return null;
     }
 

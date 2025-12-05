@@ -106,6 +106,8 @@ const CardElement = (props: CardElementProps) => {
                             users={card.assignees}
                             maxUsers={3}
                             showProfilePopover={!props.dragging && !props.isOverlay}
+                            showTooltip={!props.dragging && !props.isOverlay}
+                            animateOnHover
                         />
                         <PriorityChip priority={card.priority} />
                     </Group>
