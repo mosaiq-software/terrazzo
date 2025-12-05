@@ -38,7 +38,6 @@ export const useRoleForUserInOrg = (userId: UserId | undefined, orgId: Organizat
     useSocketListener(
         ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG,
         (payload) => {
-            console.log('Received UPDATE_ROLES_FOR_USER_IN_ORG payload:', payload, 'for userId:', userId, 'and orgId:', orgId);
             if (payload.orgId !== orgId || payload.userId !== userId) {
                 return;
             }

@@ -21,7 +21,7 @@ export const RolesList = (props: RolesListProps) => {
 
     const handleToggleRole = useCallback(
         async (roleId: RoleId, state: boolean) => {
-            if (!orgCtx.active) {
+            if (!orgCtx.active?.id) {
                 throw new Error('No active organization');
             }
             try {
@@ -40,7 +40,7 @@ export const RolesList = (props: RolesListProps) => {
         [roles, sockCtx, props.userId, orgCtx.active?.id]
     );
 
-    const assignedRoles = useMemo(() => orgCtx.roles.filter((role) => !roles.find((r) => r.id === role.id)), [orgCtx.roles, roles]);
+    const unAssignedRoles = useMemo(() => orgCtx.roles.filter((role) => !roles.find((r) => r.id === role.id)), [orgCtx.roles, roles]);
     return (
         <Group
             gap="xs"
@@ -109,7 +109,7 @@ export const RolesList = (props: RolesListProps) => {
                         gap={6}
                         p="xs"
                     >
-                        {assignedRoles.map((role) => (
+                        {unAssignedRoles.map((role) => (
                             <Box
                                 key={role.id}
                                 onClick={(e) => {
@@ -126,7 +126,7 @@ export const RolesList = (props: RolesListProps) => {
                                 />
                             </Box>
                         ))}
-                        {assignedRoles.length === 0 && (
+                        {unAssignedRoles.length === 0 && (
                             <Box
                                 style={{
                                     color: '#888',

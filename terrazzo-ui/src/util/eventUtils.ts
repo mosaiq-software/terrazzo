@@ -122,7 +122,6 @@ export const captureDraggableEvents = (cb: EventCaptureFunction, overrides?: Eve
         onDragOver: cb,
         onDragStart: cb,
         onDrop: cb,
-        onDropCapture: cb,
         onPointerDown: cb,
         ...overrides,
     };
