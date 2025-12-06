@@ -47,16 +47,16 @@ const ModuleSettings = (props: ContextModalProps<ModuleSettingsGenericProps>) =>
     if (props.innerProps.moduleHeader.archived) {
         Settings = (
             <Alert
-                title="Archived Board"
+                title="Archived Module"
                 color="yellow"
             >
                 <Stack>
-                    <Text>This board is archived and can only be viewed.</Text>
+                    <Text>This module is archived and can only be viewed.</Text>
                     <Button
                         variant="subtle"
                         onClick={handleUnarchive}
                     >
-                        Unarchive Board
+                        Unarchive Module
                     </Button>
                 </Stack>
             </Alert>

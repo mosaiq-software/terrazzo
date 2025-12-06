@@ -1,11 +1,11 @@
-import { Button, Loader, Stack, TextInput } from '@mantine/core';
+import { Loader } from '@mantine/core';
 import { DirectoryHeader, DirectoryId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
 import { useDirectory } from '@trz/hooks/useDirectory';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
-import { PermissionsEditor } from './PermissionsEditor/PermissionsEditor';
+import { ModuleSettingsLayout } from './ModuleSettingsLayout';
 
 interface ModuleSettingsDirectoryProps {
     directoryId: DirectoryId;
@@ -21,7 +21,6 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
         try {
             await updateDirectoryMetadata(sockCtx, props.directoryId, directoryEdits);
             setDirectoryEdits({});
-            props.onClose();
         } catch (e) {
             notify(NoteType.DOC_UPDATE_ERROR, e);
         }
@@ -32,31 +31,20 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
     }
 
     return (
-        <Stack>
-            <TextInput
-                labelProps={{
-                    c: 'white',
-                }}
-                label="Directory Name"
-                placeholder="My Directory"
-                required
-                value={directoryEdits.name ?? directory.name ?? ''}
-                onChange={(e) => {
-                    setDirectoryEdits({ ...directoryEdits, name: e.target.value });
-                }}
-            />
-            <PermissionsEditor
-                desiredPermissions={directoryEdits.desiredPermissions ?? directory.desiredPermissions}
-                onChange={(newPermissions) => {
-                    setDirectoryEdits({ ...directoryEdits, desiredPermissions: newPermissions });
-                }}
-            />
-            <Button
-                disabled={Object.keys(directoryEdits).length === 0}
-                onClick={onSave}
-            >
-                Save Changes
-            </Button>
-        </Stack>
+        <ModuleSettingsLayout
+            moduleHeader={{
+                ...directory,
+                ...directoryEdits,
+            }}
+            onChangeTitle={(newTitle) => {
+                setDirectoryEdits({ ...directoryEdits, name: newTitle });
+            }}
+            onChangePermissions={(newPermissions) => {
+                setDirectoryEdits({ ...directoryEdits, desiredPermissions: newPermissions });
+            }}
+            saved={Object.keys(directoryEdits).length === 0}
+            onSave={onSave}
+            onClose={props.onClose}
+        />
     );
 };

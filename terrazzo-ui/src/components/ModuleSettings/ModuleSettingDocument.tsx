@@ -1,11 +1,11 @@
-import { Button, Loader, Stack, TextInput } from '@mantine/core';
+import { Loader } from '@mantine/core';
 import { DocumentHeader, DocumentId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateDocumentMetadata } from '@trz/emitters';
 import { useDocument } from '@trz/hooks/useDocument';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
-import { PermissionsEditor } from './PermissionsEditor/PermissionsEditor';
+import { ModuleSettingsLayout } from './ModuleSettingsLayout';
 
 interface ModuleSettingsDocumentProps {
     documentId: DocumentId;
@@ -21,7 +21,6 @@ export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
         try {
             await updateDocumentMetadata(sockCtx, props.documentId, documentEdits);
             setDocumentEdits({});
-            props.onClose();
         } catch (e) {
             notify(NoteType.DOC_UPDATE_ERROR, e);
         }
@@ -32,31 +31,20 @@ export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
     }
 
     return (
-        <Stack>
-            <TextInput
-                labelProps={{
-                    c: 'white',
-                }}
-                label="Document Name"
-                placeholder="My Document"
-                required
-                value={documentEdits.name ?? document.name ?? ''}
-                onChange={(e) => {
-                    setDocumentEdits({ ...documentEdits, name: e.target.value });
-                }}
-            />
-            <PermissionsEditor
-                desiredPermissions={documentEdits.desiredPermissions ?? document.desiredPermissions}
-                onChange={(newPermissions) => {
-                    setDocumentEdits({ ...documentEdits, desiredPermissions: newPermissions });
-                }}
-            />
-            <Button
-                disabled={Object.keys(documentEdits).length === 0}
-                onClick={onSave}
-            >
-                Save Changes
-            </Button>
-        </Stack>
+        <ModuleSettingsLayout
+            moduleHeader={{
+                ...document,
+                ...documentEdits,
+            }}
+            onChangeTitle={(newTitle) => {
+                setDocumentEdits({ ...documentEdits, name: newTitle });
+            }}
+            onChangePermissions={(newPermissions) => {
+                setDocumentEdits({ ...documentEdits, desiredPermissions: newPermissions });
+            }}
+            saved={Object.keys(documentEdits).length === 0}
+            onSave={onSave}
+            onClose={props.onClose}
+        />
     );
 };
