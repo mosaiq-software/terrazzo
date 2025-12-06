@@ -5,7 +5,7 @@ export const getRolesForOrg = async (orgId: OrganizationId) => {
     return await getRolesByOrgIdDb(orgId);
 };
 
-export const createRole = async (name: string, color: string, orgId: OrganizationId) => {
+export const createRole = async (name: string, color: string, orgId: OrganizationId, defaultPermissions: PermissionFlag[] = []) => {
     const nextOrder = await getNextRoleOrderDb(orgId);
     const role: Role = {
         id: crypto.randomUUID(),
@@ -13,7 +13,7 @@ export const createRole = async (name: string, color: string, orgId: Organizatio
         color,
         orgId,
         order: nextOrder,
-        defaultPermissions: [],
+        defaultPermissions: defaultPermissions,
     };
     await createRoleOnOrgDb(role);
     return role;

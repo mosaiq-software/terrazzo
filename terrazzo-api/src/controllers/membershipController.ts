@@ -1,5 +1,5 @@
-import { Member, MembershipRecord, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common';
-import { deleteOrganizationMembership, getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser, updateOrganizationMembership, upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
+import { Member, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
+import { deleteOrganizationMembership, getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser, upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 
@@ -9,21 +9,24 @@ export const getMembersInOrg = async (orgId: OrganizationId) => {
         throw new Error('Org not found');
     }
     const records = await getOrganizationMembershipsForOrg(orgId);
-    const members = populateMemberships(records);
+    const members = await populateMemberships(records);
     return members;
 };
 
 const populateMemberships = async (records: MembershipRecord[]) => {
-    const members = (
-        await Promise.all(
-            records.map(async (r) => {
-                return {
-                    record: r,
-                    user: await getUserHeaderByIdDb(r.userId),
-                };
-            })
-        )
-    ).filter((m) => !!m.user) as Member[];
+    const memberPromises = records.map(async (r) => {
+        const user = await getUserHeaderByIdDb(r.userId);
+        if (!user) {
+            return undefined;
+        }
+        const member: Member = {
+            user: user,
+            ...r,
+        };
+        return member;
+    });
+    const membersWithUndefined = await Promise.all(memberPromises);
+    const members = membersWithUndefined.filter((m) => !!m);
     return members;
 };
 
@@ -36,15 +39,6 @@ export const getOrgsForUser = async (userId: UserId) => {
 
 export const upsertMembership = async (membershipRecord: MembershipRecord) => {
     return await upsertOrganizationMembership(membershipRecord);
-};
-
-export const updateMembership = async (userId: UserId, orgId: OrganizationId, newLevel: OrgMembershipLevel) => {
-    const record: MembershipRecord = {
-        userId,
-        orgId,
-        permissionLevel: newLevel,
-    };
-    await updateOrganizationMembership(record);
 };
 
 export const removeMembership = async (userId: UserId, orgId: OrganizationId) => {

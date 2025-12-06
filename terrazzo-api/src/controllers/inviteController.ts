@@ -1,4 +1,4 @@
-import { Invite, InviteId, isInviteExpired, MembershipRecord, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common';
+import { Invite, InviteId, isInviteExpired, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
 import { createInviteRecord, getAllInviteRecordsForOrganization, getInviteRecordById, updateInviteRecord } from '@trz-api/persistence/invitePersistence';
 import { getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
 import { upsertMembership } from './membershipController';
@@ -48,7 +48,7 @@ export const useInvite = async (inviteId: InviteId, userId: UserId): Promise<boo
         const membershipRecord: MembershipRecord = {
             userId: userId,
             orgId: invite.forOrganizationId,
-            permissionLevel: OrgMembershipLevel.MEMBER,
+            joinedAt: Date.now(),
         };
         await upsertMembership(membershipRecord);
         return true;

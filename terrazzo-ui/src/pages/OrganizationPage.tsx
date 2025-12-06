@@ -35,8 +35,8 @@ const OrganizationPage = (): React.JSX.Element => {
         );
     }
 
-    const myMembershipRecord = orgCtx.members.find((m) => m.user.id === userCtx.userData?.id)?.record;
-    if (!myMembershipRecord) {
+    const myMembership = orgCtx.members.find((m) => m.user.id === userCtx.userData?.id);
+    if (!myMembership) {
         return (
             <NotFound
                 itemType="organization"
@@ -49,21 +49,21 @@ const OrganizationPage = (): React.JSX.Element => {
         Organization: <OrgTabCards orgData={orgCtx.active} />,
         Members: (
             <OrgTabMembers
-                myMembershipRecord={myMembershipRecord}
+                myMembershipRecord={myMembership}
                 orgData={orgCtx.active}
                 members={orgCtx.members}
             />
         ),
         Roles: (
             <OrgTabRoles
-                myMembershipRecord={myMembershipRecord}
+                myMembershipRecord={myMembership}
                 orgData={orgCtx.active}
                 roles={orgCtx.roles}
             />
         ),
         Settings: (
             <OrgTabSettings
-                myMembershipRecord={myMembershipRecord}
+                myMembershipRecord={myMembership}
                 orgData={orgCtx.active}
             />
         ),

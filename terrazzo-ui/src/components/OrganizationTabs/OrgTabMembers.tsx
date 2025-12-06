@@ -1,9 +1,9 @@
 import { ActionIcon, Box, Button, Divider, Group, Menu, Stack, Tabs, Text, Title } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { Invite, isInviteExpired, Member, MembershipRecord, OrganizationHeader, OrgMembershipLevel } from '@mosaiq/terrazzo-common';
+import { Invite, isInviteExpired, Member, MembershipRecord, OrganizationHeader } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUser } from '@trz/contexts/user-context';
-import { createInvite, deleteInvite, removeUserFromOrg, updateUsersOrgMembership } from '@trz/emitters';
+import { createInvite, deleteInvite, removeUserFromOrg } from '@trz/emitters';
 import { useOrgInvites } from '@trz/hooks/useOrgInvites';
 import { getInviteLink } from '@trz/util/linkUtils';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -36,8 +36,6 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
         return { nonExpiredInvites, expiredInvites };
     }, [invites]);
 
-    const isAdmin = props.myMembershipRecord.permissionLevel === OrgMembershipLevel.ADMIN;
-
     const handleCreateInvite = async (uses: number | null) => {
         try {
             const invite = await createInvite(sockCtx, props.orgData.id, uses);
@@ -63,14 +61,6 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
     const handleRemoveMember = async (member: MembershipRecord) => {
         try {
             await removeUserFromOrg(sockCtx, member.userId, props.orgData.id);
-        } catch (err) {
-            notify(NoteType.GENERIC_ERROR, err);
-        }
-    };
-
-    const handleChangeRole = async (member: MembershipRecord, newRole: OrgMembershipLevel) => {
-        try {
-            await updateUsersOrgMembership(sockCtx, member.userId, props.orgData.id, newRole);
         } catch (err) {
             notify(NoteType.GENERIC_ERROR, err);
         }
@@ -165,9 +155,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                                     key={member.user.id}
                                     member={member}
                                     isCurrentUser={member.user.id === userCtx.userData?.id}
-                                    canManageMembers={isAdmin}
                                     onRemoveMember={handleRemoveMember}
-                                    onChangeRole={handleChangeRole}
                                 />
                             ))}
                         </Stack>
@@ -191,7 +179,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                             >
                                 Invites
                             </Title>
-                            {isAdmin && (
+                            {
                                 <Group>
                                     <Menu
                                         trigger="hover"
@@ -239,7 +227,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                                         </Menu.Dropdown>
                                     </Menu>
                                 </Group>
-                            )}
+                            }
                         </Group>
                         {invites.length === 0 ? (
                             <Text
@@ -263,7 +251,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                                     <InviteRow
                                         key={invite.id}
                                         invite={invite}
-                                        canManageInvites={isAdmin}
+                                        canManageInvites={true}
                                         onDeleteInvite={() => handleDeleteInvite(invite)}
                                     />
                                 ))}
@@ -280,7 +268,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                                     <InviteRow
                                         key={invite.id}
                                         invite={invite}
-                                        canManageInvites={isAdmin}
+                                        canManageInvites={false}
                                         onDeleteInvite={() => handleDeleteInvite(invite)}
                                     />
                                 ))}

@@ -1,12 +1,12 @@
 import { BoardId, CardId, DirectoryId, DocumentId, InviteId, LabelId, ListId, OrganizationId, Position, RoleId, TextBlockId, UID, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
-import { Board, Label, BoardRes } from '../../modules/board/boardTypes';
+import { Board, BoardRes, Label } from '../../modules/board/boardTypes';
 import { Card } from '../../modules/board/cardTypes';
 import { List, ListHeader } from '../../modules/board/listTypes';
 import { DirectoryHeader } from '../../modules/directoryTypes';
 import { DocumentHeader, TextBlock } from '../../modules/documentTypes';
 import { MinimalModuleHeader } from '../../modules/moduleTypes';
-import { Member, OrganizationHeader, OrgMembershipLevel } from '../../organizationTypes';
+import { Member, OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissionTypes';
 import { QueryResult } from '../../queryTypes';
 import { UserHeader } from '../../userTypes';
@@ -62,7 +62,6 @@ export enum ClientSE {
     UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
     UPDATE_DIRECTORY_FIELD = 'UPDATE_DIRECTORY_FIELD',
     UPDATE_DIRECTORY_CONTENTS = 'UPDATE_DIRECTORY_CONTENTS',
-    UPDATE_MEMBERSHIP = 'UPDATE_MEMBERSHIP',
     UPDATE_ROLE = 'UPDATE_ROLE',
     UPDATE_ROLES_FOR_USER_IN_ORG = 'UPDATE_ROLES_FOR_USER_IN_ORG',
 
@@ -121,7 +120,6 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ClientSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
     [ClientSE.UPDATE_DIRECTORY_CONTENTS]: { directoryId: DirectoryId; contents: UID[] };
-    [ClientSE.UPDATE_MEMBERSHIP]: { userId: UserId; orgId: OrganizationId; newPermissionLevel: OrgMembershipLevel };
     [ClientSE.UPDATE_ROLE]: Role;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
 
@@ -180,7 +178,6 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_DOCUMENT_FIELD]: undefined;
     [ClientSE.UPDATE_DIRECTORY_FIELD]: undefined;
     [ClientSE.UPDATE_DIRECTORY_CONTENTS]: undefined;
-    [ClientSE.UPDATE_MEMBERSHIP]: undefined;
     [ClientSE.UPDATE_ROLE]: undefined;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: undefined;
 

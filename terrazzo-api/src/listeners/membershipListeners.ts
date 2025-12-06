@@ -1,5 +1,5 @@
 import { ClientSE, ClientSEPayload, ClientSEReply } from '@mosaiq/terrazzo-common';
-import { getMembersInOrg, removeMembership, updateMembership } from '@trz-api/controllers/membershipController';
+import { getMembersInOrg, removeMembership } from '@trz-api/controllers/membershipController';
 import { syncMembersInOrg, syncUsersOrgs } from '@trz-api/utils/broadcasters';
 import { Server, Socket } from 'socket.io';
 
@@ -13,21 +13,6 @@ export const registerMembershipListeners = (socket: Socket, io: Server) => {
             reply(memberships);
         } catch (error: any) {
             console.error('Error getting organization memberships', error);
-            reply(undefined, error.message);
-        }
-    });
-
-    socket.on(ClientSE.UPDATE_MEMBERSHIP, async (data: ClientSEPayload[ClientSE.UPDATE_MEMBERSHIP], reply: ClientSEReply<ClientSE.UPDATE_MEMBERSHIP>) => {
-        try {
-            if (!data) {
-                throw new Error('No data provided');
-            }
-            await updateMembership(data.userId, data.orgId, data.newPermissionLevel);
-            await syncMembersInOrg(socket, data.orgId);
-            await syncUsersOrgs(socket, data.userId);
-            reply(undefined);
-        } catch (error: any) {
-            console.error('Error updating membership', error);
             reply(undefined, error.message);
         }
     });

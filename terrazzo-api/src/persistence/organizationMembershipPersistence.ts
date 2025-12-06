@@ -13,8 +13,8 @@ OrganizationMembershipModel.init(
             type: DataTypes.STRING,
             primaryKey: true,
         },
-        permissionLevel: {
-            type: DataTypes.TINYINT,
+        joinedAt: {
+            type: DataTypes.NUMBER,
             allowNull: false,
         },
     },
@@ -38,16 +38,6 @@ export const getOrganizationMembershipsForOrg = async (orgId: OrganizationId) =>
 
 export const upsertOrganizationMembership = async (membershipRecord: MembershipRecord) => {
     await OrganizationMembershipModel.upsert({ ...membershipRecord });
-};
-
-export const updateOrganizationMembership = async (membershipRecord: MembershipRecord) => {
-    const [updated] = await OrganizationMembershipModel.update(
-        {
-            permissionLevel: membershipRecord.permissionLevel,
-        },
-        { where: { userId: membershipRecord.userId, orgId: membershipRecord.orgId } }
-    );
-    return updated;
 };
 
 export const deleteOrganizationMembership = async (userId: UserId, orgId: OrganizationId) => {
