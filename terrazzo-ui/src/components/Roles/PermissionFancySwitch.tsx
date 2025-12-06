@@ -3,13 +3,13 @@ import { COLOR_ERROR, COLOR_SUCCESS, COLOR_UNSET } from '@trz/util/colorUtils';
 import { useCallback } from 'react';
 import { MdCheck, MdClose, MdOutlineCircle } from 'react-icons/md';
 
-interface PermissionSwitchProps {
+interface PermissionFancySwitchProps {
     permissionName: string;
     permissionDescription: string;
     isEnabled: boolean | undefined;
     onToggle: (newState: boolean | undefined) => void;
 }
-export const PermissionSwitch = (props: PermissionSwitchProps) => {
+export const PermissionFancySwitch = (props: PermissionFancySwitchProps) => {
     const { permissionName, permissionDescription, isEnabled, onToggle } = props;
 
     const handleChange = useCallback(
@@ -50,6 +50,7 @@ export const PermissionSwitch = (props: PermissionSwitchProps) => {
                 value={value}
                 onChange={handleChange}
                 color={color}
+                withItemsBorders={false}
                 styles={{
                     root: {
                         width: 'fit-content',

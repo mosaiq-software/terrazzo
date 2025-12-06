@@ -1,9 +1,11 @@
-import { Button, ColorInput, Group, Stack } from '@mantine/core';
-import { Role, RoleId } from '@mosaiq/terrazzo-common/types';
+import { Button, ColorInput, Divider, Group, Stack, Title } from '@mantine/core';
+import { PermissionFlag, PermissionFlagData, Role, RoleId } from '@mosaiq/terrazzo-common/types';
+import { withPermissionFlag } from '@mosaiq/terrazzo-common/utils/permissionUtils';
 import { useCallback, useEffect, useState } from 'react';
 import { MdOutlineDelete } from 'react-icons/md';
-import { RingHoldingButton } from '../UI/RingHoldingButton';
 import EditableTextbox from '../UI/EditableTextbox';
+import { RingHoldingButton } from '../UI/RingHoldingButton';
+import { PermissionToggle } from './PermissionToggle';
 
 interface RoleEditorProps {
     role: Role;
@@ -13,7 +15,7 @@ interface RoleEditorProps {
 export const RoleEditor = (props: RoleEditorProps) => {
     const [editingRole, setEditingRole] = useState<Role>(props.role);
 
-    const changed = editingRole.name !== props.role.name || editingRole.color !== props.role.color;
+    const changed = editingRole.name !== props.role.name || editingRole.color !== props.role.color || editingRole.defaultPermissions.sort().join() !== props.role.defaultPermissions.sort().join();
 
     useEffect(() => {
         setEditingRole(props.role);
@@ -33,7 +35,7 @@ export const RoleEditor = (props: RoleEditorProps) => {
     return (
         <Stack
             px={'md'}
-            gap="md"
+            gap="lg"
             style={{
                 width: '100%',
             }}
@@ -61,7 +63,38 @@ export const RoleEditor = (props: RoleEditorProps) => {
                         onChange={(e) => change('color', e)}
                     />
                 </Stack>
+                <Button
+                    disabled={!changed}
+                    onClick={handleSave}
+                    w="fit-content"
+                >
+                    Save Changes
+                </Button>
+            </Group>
+            <Divider />
+            <Title order={5}>Default Role Permissions</Title>
+            <Stack gap="md">
+                {Object.values(PermissionFlag).map((permission) => {
+                    const permData = PermissionFlagData[permission];
+                    const enabled = editingRole.defaultPermissions.includes(permission);
+                    return (
+                        <PermissionToggle
+                            key={permission}
+                            permissionName={permData.title}
+                            permissionDescription={permData.description}
+                            isEnabled={enabled}
+                            onToggle={(checked) => {
+                                change('defaultPermissions', withPermissionFlag(editingRole.defaultPermissions, permission, checked));
+                            }}
+                        />
+                    );
+                })}
+            </Stack>
+            <Divider />
+            <Title order={5}>Danger Zone</Title>
+            <Group>
                 <RingHoldingButton
+                    tooltip="Hold to delete role"
                     durationMs={1000}
                     ringSize={50}
                     ringThickness={6}
@@ -73,13 +106,6 @@ export const RoleEditor = (props: RoleEditorProps) => {
                     <MdOutlineDelete />
                 </RingHoldingButton>
             </Group>
-            <Stack gap="sm">{/* TODO Permissions editor */}</Stack>
-            <Button
-                disabled={!changed}
-                onClick={handleSave}
-            >
-                Save Changes
-            </Button>
         </Stack>
     );
 };

@@ -6,7 +6,7 @@ import { generateRandomColor } from '@trz/util/colorUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback, useState } from 'react';
 import { MdAdd, MdCircle } from 'react-icons/md';
-import { RoleEditor } from './RoleEditor';
+import { RoleEditor } from '../Roles/RoleEditor';
 
 interface OrgTabRolesProps {
     myMembershipRecord: MembershipRecord;

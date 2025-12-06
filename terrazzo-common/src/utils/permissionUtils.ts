@@ -1,4 +1,4 @@
-import { ModuleHeader, ModuleHeaderWithChildren, PermissionLevel, PermissionRecord, UID, UserId } from '../types';
+import { ModuleHeader, ModuleHeaderWithChildren, PermissionFlag, PermissionLevel, PermissionRecord, UID, UserId } from '../types';
 
 /**
  * Returns the maximum of two permission levels, treating undefined or null as PermissionLevel.NONE.
@@ -65,4 +65,14 @@ export const calculateEffectivePermissions = (allModules: ModuleHeader[], rootOf
     };
     const effectiveModules = recursivelyCalculateEffectivePermissions(rootOfAllModules);
     return effectiveModules;
+};
+
+export const withPermissionFlag = (existing: PermissionFlag[] | undefined, flag: PermissionFlag, enabled: boolean) => {
+    const updated = new Set(existing ?? []);
+    if (enabled) {
+        updated.add(flag);
+    } else {
+        updated.delete(flag);
+    }
+    return Array.from(updated);
 };
