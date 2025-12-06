@@ -42,7 +42,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                         withArrow
                         arrowPosition="side"
                         closeOnClickOutside={true}
-                        trigger="hover"
+                        trigger="click"
                         openDelay={0}
                         closeDelay={200}
                         shadow="md"
@@ -104,6 +104,11 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                         rolePermissionsOverride={props.desiredPermissions[role.id] || {}}
                         onChangeOverride={(newOverride) => {
                             handleChangeRolePerms(role.id, newOverride);
+                        }}
+                        onRemoveOverride={() => {
+                            const newPermissions = { ...props.desiredPermissions };
+                            delete newPermissions[role.id];
+                            props.onChange(newPermissions);
                         }}
                     />
                 )}
