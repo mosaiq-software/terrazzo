@@ -1,5 +1,4 @@
-import { TrelloExportType, TrelloLabelColorsMap } from '@mosaiq/terrazzo-common/trelloTypes';
-import { BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, ListId, TrzModuleType } from '@mosaiq/terrazzo-common/types';
+import { BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, ListId, TrelloExportType, TrelloLabelColorsMap, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { addList, getListAndCardIdsOnBoard, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
 import { BoardModelType, createBoard, getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
 import { createLabelOnBoard, deleteLabel, deleteLabelingOnCardsByLabelId, getLabelById, getLabelsByBoardId, updateLabel } from '@trz-api/persistence/labelPersistence';

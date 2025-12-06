@@ -1,6 +1,4 @@
-import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { Member, OrganizationId } from '@mosaiq/terrazzo-common/types';
-import { RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { Member, OrganizationId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getOrganizationMemberships } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';

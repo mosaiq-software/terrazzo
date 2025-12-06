@@ -1,9 +1,6 @@
 import { Box, MantineStyleProp } from '@mantine/core';
 import { useIdle, useThrottledCallback } from '@mantine/hooks';
-import { ClientSE, Position, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardId, CardId, ListId } from '@mosaiq/terrazzo-common/types';
-import { RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { BoardId, CardId, ClientSE, fullName, ListId, Position, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import UserCursor from '@trz/components/Boards/UserCursor';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useRoom } from '@trz/hooks/useRoom';

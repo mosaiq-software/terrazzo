@@ -1,5 +1,5 @@
 import { Box, Title } from '@mantine/core';
-import { OrganizationHeader } from '@mosaiq/terrazzo-common/types';
+import { OrganizationHeader } from '@mosaiq/terrazzo-common';
 
 interface OrgTabCardsProps {
     orgData: OrganizationHeader;

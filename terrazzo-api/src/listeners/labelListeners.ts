@@ -1,6 +1,4 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardId } from '@mosaiq/terrazzo-common/types';
-import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { BoardId, ClientSE, ClientSEPayload, ClientSEReply, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { createBoardLabel, removeBoardLabel, updateBoardLabels } from '@trz-api/controllers/boardController';
 import { getBoardIDFromCardID, setCardsLabels } from '@trz-api/controllers/cardController';
 import { broadcast } from '@trz-api/utils/socketUtils';

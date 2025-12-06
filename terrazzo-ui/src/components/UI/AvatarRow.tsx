@@ -1,5 +1,5 @@
 import { Avatar, Text, Tooltip } from '@mantine/core';
-import { UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { UserHeader, UserId } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getUserHeader } from '@trz/emitters';

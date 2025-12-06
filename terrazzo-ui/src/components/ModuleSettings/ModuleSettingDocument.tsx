@@ -1,5 +1,5 @@
 import { Button, Loader, Stack, TextInput } from '@mantine/core';
-import { DocumentHeader, DocumentId } from '@mosaiq/terrazzo-common/types';
+import { DocumentHeader, DocumentId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateDocumentMetadata } from '@trz/emitters';
 import { useDocument } from '@trz/hooks/useDocument';

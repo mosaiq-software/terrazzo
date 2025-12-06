@@ -1,7 +1,7 @@
 import { Alert, Button, Container, Stack, Text } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
-import { ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common/types';
+import { ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateBoardField, updateDocumentMetadata } from '@trz/emitters';
 import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';

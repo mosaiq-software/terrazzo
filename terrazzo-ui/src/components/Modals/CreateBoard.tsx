@@ -1,9 +1,7 @@
 import { Button, Container, Fieldset, FileInput, Flex, Space, Text, TextInput } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
-import { RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
-import { TrelloExportType } from '@mosaiq/terrazzo-common/trelloTypes';
-import { UID } from '@mosaiq/terrazzo-common/types';
+import { RestRoutes, TrelloExportType, UID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createBoard } from '@trz/emitters';
 import { callTrzApi } from '@trz/util/apiUtils';

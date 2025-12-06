@@ -1,5 +1,5 @@
 import { Box, Text } from '@mantine/core';
-import { Role } from '@mosaiq/terrazzo-common/types';
+import { Role } from '@mosaiq/terrazzo-common';
 import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
 import { useState } from 'react';
 import { MdClose } from 'react-icons/md';

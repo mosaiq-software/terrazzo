@@ -1,5 +1,4 @@
-import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { DocumentHeader, DocumentId, UID } from '@mosaiq/terrazzo-common/types';
+import { ClientSE, DocumentHeader, DocumentId, UID } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
 export const getDocument = async (sockCtx: SocketContextType, documentId: DocumentId) => {

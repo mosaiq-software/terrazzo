@@ -1,5 +1,4 @@
-import { RestRequestBody, RestRequestParams, RestResponse, RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
-import { UserId } from '@mosaiq/terrazzo-common/types';
+import { RestRequestBody, RestRequestParams, RestResponse, RestRoutes, UserId } from '@mosaiq/terrazzo-common';
 import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
 import { checkUsernameTaken, getOrCreateUserByGithubAccessToken, setupUser } from '@trz-api/controllers/userController';
 import { githubAuth, revokeGithubAuth } from '@trz-api/utils/githubUtils';

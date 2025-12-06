@@ -1,6 +1,4 @@
-import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { DirectoryHeader, DirectoryId } from '@mosaiq/terrazzo-common/types';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { DirectoryHeader, DirectoryId, RoomType, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getDirectory } from '@trz/emitters/directoryEmitters';
 import { NoteType, notify } from '@trz/util/notifications';

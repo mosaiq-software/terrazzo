@@ -1,7 +1,5 @@
 import { readSessionStorageValue } from '@mantine/hooks';
-import { RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
-import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
-import { UserHeader } from '@mosaiq/terrazzo-common/types';
+import { LocalStorageKey, RestRoutes, UserHeader } from '@mosaiq/terrazzo-common';
 import { callTrzApi } from '@trz/util//apiUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import queryString from 'query-string';

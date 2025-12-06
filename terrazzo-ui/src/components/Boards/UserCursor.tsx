@@ -1,5 +1,5 @@
 import { Badge, Box } from '@mantine/core';
-import { Position } from '@mosaiq/terrazzo-common/socketTypes';
+import { Position } from '@mosaiq/terrazzo-common';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import React from 'react';
 import { GiArrowCursor } from 'react-icons/gi';

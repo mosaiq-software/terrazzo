@@ -1,5 +1,5 @@
 import { Stack } from '@mantine/core';
-import { OrganizationId, TrzModuleType } from '@mosaiq/terrazzo-common/types';
+import { OrganizationId, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
 import { DirectoryTreeItem } from './DirectoryTreeItem';
 

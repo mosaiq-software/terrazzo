@@ -1,4 +1,4 @@
-import { CardId, UserId } from '@mosaiq/terrazzo-common/types';
+import { CardId, UserId } from '@mosaiq/terrazzo-common';
 import { createCardAssignmentRecord, deleteCardAssignmentRecord, getCardAssignmentRecordsForUserOnCard } from '@trz-api/persistence/cardAssignmentPersistence';
 
 export const addAssigneeToCard = async (cardId: CardId, userId: UserId) => {

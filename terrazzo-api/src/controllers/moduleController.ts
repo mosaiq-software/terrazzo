@@ -1,5 +1,4 @@
-import { ModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common/types';
-import { calculateTrueModulePermissionsInOrg } from '@mosaiq/terrazzo-common/utils/permissionUtils';
+import { calculateTrueModulePermissionsInOrg, ModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
 import { createModuleDb, getModuleByIdDb, getNextModuleOrderInParentDb } from '@trz-api/persistence/modulePersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
 import { getAllRolePermissionsInOrg } from './roleController';

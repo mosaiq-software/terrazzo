@@ -1,5 +1,5 @@
 import { Alert } from '@mantine/core';
-import { TextBlockId } from '@mosaiq/terrazzo-common/types';
+import { TextBlockId } from '@mosaiq/terrazzo-common';
 import { TableComponents, TableExtension } from '@remirror/extension-react-tables';
 import { YjsExtension } from '@remirror/extension-yjs';
 import { i18nFormat } from '@remirror/i18n';

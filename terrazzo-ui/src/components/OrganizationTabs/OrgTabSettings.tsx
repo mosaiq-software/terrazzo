@@ -1,5 +1,5 @@
 import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title } from '@mantine/core';
-import { MembershipRecord, OrganizationHeader } from '@mosaiq/terrazzo-common/types';
+import { MembershipRecord, OrganizationHeader } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
 import { removeUserFromOrg, updateOrgField } from '@trz/emitters';

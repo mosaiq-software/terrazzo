@@ -1,4 +1,4 @@
-import { ClientSE, ClientSEPayload, ClientSEReply } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply } from '@mosaiq/terrazzo-common';
 import { getUserPreview } from '@trz-api/controllers/userController';
 import { Server, Socket } from 'socket.io';
 

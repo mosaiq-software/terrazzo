@@ -1,7 +1,7 @@
-import { initApp } from './app';
-import { initSockets } from './utils/socket';
-import { initAdminServer } from './socketAdminServer';
 import dotenv from 'dotenv';
+import { initApp } from './app';
+import { initAdminServer } from './socketAdminServer';
+import { initSockets } from './utils/socket';
 dotenv.config({ path: '../.env' });
 
 const start = async () => {

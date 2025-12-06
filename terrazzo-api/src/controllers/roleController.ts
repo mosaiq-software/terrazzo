@@ -1,4 +1,4 @@
-import { OrganizationId, PermissionFlag, Role, RoleId } from '@mosaiq/terrazzo-common/types';
+import { OrganizationId, PermissionFlag, Role, RoleId } from '@mosaiq/terrazzo-common';
 import { createRoleOnOrgDb, deleteRoleDb, getNextRoleOrderDb, getRoleByIdDb, getRolesByOrgIdDb, updateRoleDb } from '@trz-api/persistence/rolePersistence';
 
 export const getRolesForOrg = async (orgId: OrganizationId) => {

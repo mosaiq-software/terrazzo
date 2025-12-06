@@ -1,5 +1,5 @@
 import { Avatar, Menu, UnstyledButton } from '@mantine/core';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { fullName } from '@mosaiq/terrazzo-common';
 import { useUser } from '@trz/contexts/user-context';
 import { useNavigate } from 'react-router';
 

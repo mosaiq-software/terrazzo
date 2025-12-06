@@ -1,6 +1,6 @@
 import { Button, Divider, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
 import { useDebouncedCallback, useHotkeys } from '@mantine/hooks';
-import { DatapointType, QueryResult } from '@mosaiq/terrazzo-common/types';
+import { DatapointType, QueryResult } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getSearchResults } from '@trz/emitters';
 import React, { useState } from 'react';

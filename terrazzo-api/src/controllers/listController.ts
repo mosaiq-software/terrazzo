@@ -1,8 +1,7 @@
-import { createListOnBoard, getListById, getListsBoardId, getListsByBoardIdOrder, getNextListOrder, updateList, updateListOrder } from '@trz-api/persistence/listPersistence';
-import { getBoardById } from '@trz-api/persistence/boardPersistence';
-import { BoardId, CardId, List, ListHeader, ListId } from '@mosaiq/terrazzo-common/types';
+import { arrayMove, BoardId, CardId, List, ListHeader, ListId, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import { getAllCardsOfList, getCardIdsOnList } from '@trz-api/controllers/cardController';
-import { arrayMove, updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { getBoardById } from '@trz-api/persistence/boardPersistence';
+import { createListOnBoard, getListById, getListsBoardId, getListsByBoardIdOrder, getNextListOrder, updateList, updateListOrder } from '@trz-api/persistence/listPersistence';
 
 //Gets
 

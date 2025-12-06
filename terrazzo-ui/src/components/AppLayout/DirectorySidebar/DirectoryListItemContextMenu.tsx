@@ -1,5 +1,5 @@
 import { modals } from '@mantine/modals';
-import { MinimalModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common/types';
+import { MinimalModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
 import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
 import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
 import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';

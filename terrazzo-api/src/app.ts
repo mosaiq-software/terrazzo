@@ -1,6 +1,6 @@
-import express from 'express';
-import cors from 'cors';
 import routes from '@trz-api/rest/restApiRoutes';
+import cors from 'cors';
+import express from 'express';
 
 export const initApp = async () => {
     const app = express();

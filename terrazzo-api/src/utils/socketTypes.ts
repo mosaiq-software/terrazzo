@@ -1,4 +1,4 @@
-import { UserData } from '@mosaiq/terrazzo-common/socketTypes';
+import { UserData } from '@mosaiq/terrazzo-common';
 
 export interface SocketData {
     connectedAt: Date;

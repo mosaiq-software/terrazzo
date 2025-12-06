@@ -1,6 +1,5 @@
 import { Avatar, Group, Stack, Text } from '@mantine/core';
-import { UserHeader } from '@mosaiq/terrazzo-common/types';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { fullName, UserHeader } from '@mosaiq/terrazzo-common';
 import { RolesList } from '@trz/components/Roles/RolesList';
 import { forAllClickEvents, noEventBubble } from '@trz/util/eventUtils';
 

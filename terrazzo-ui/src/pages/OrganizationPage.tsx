@@ -1,5 +1,5 @@
 import { Avatar, Box, Flex, Group, Loader, ScrollArea, Stack, Tabs, Text, Title } from '@mantine/core';
-import { OrganizationId } from '@mosaiq/terrazzo-common/types';
+import { OrganizationId } from '@mosaiq/terrazzo-common';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
 import { OrgTabRoles } from '@trz/components/OrganizationTabs/OrgTabRoles';

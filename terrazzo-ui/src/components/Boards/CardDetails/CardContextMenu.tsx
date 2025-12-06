@@ -1,8 +1,6 @@
 import { Avatar, Divider } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { Priority } from '@mosaiq/terrazzo-common/constants';
-import { CardId, Label } from '@mosaiq/terrazzo-common/types';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { CardId, fullName, Label, Priority } from '@mosaiq/terrazzo-common';
 import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
 import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
 import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';

@@ -1,7 +1,6 @@
 import { ActionIcon, Box, Button, Divider, Group, Menu, Stack, Tabs, Text, Title } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { Invite, Member, MembershipRecord, OrganizationHeader, OrgMembershipLevel } from '@mosaiq/terrazzo-common/types';
-import { isInviteExpired } from '@mosaiq/terrazzo-common/utils/inviteUtils';
+import { Invite, isInviteExpired, Member, MembershipRecord, OrganizationHeader, OrgMembershipLevel } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUser } from '@trz/contexts/user-context';
 import { createInvite, deleteInvite, removeUserFromOrg, updateUsersOrgMembership } from '@trz/emitters';

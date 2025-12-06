@@ -1,5 +1,5 @@
 import { Box, Center, Group, Tabs, Text, Title } from '@mantine/core';
-import { Role } from '@mosaiq/terrazzo-common/types';
+import { Role } from '@mosaiq/terrazzo-common';
 import { useState } from 'react';
 import { MdCircle } from 'react-icons/md';
 

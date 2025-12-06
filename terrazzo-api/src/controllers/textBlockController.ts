@@ -1,4 +1,4 @@
-import { TextBlockId } from '@mosaiq/terrazzo-common/types';
+import { TextBlockId } from '@mosaiq/terrazzo-common';
 import { createTextBlock, getTextBlockById, writeTextBlock } from '@trz-api/persistence/textBlockPersistence';
 import * as Y from 'yjs';
 

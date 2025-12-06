@@ -1,4 +1,4 @@
-import { DirectoryId } from '@mosaiq/terrazzo-common/types';
+import { DirectoryId } from '@mosaiq/terrazzo-common';
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model } from 'sequelize';
 

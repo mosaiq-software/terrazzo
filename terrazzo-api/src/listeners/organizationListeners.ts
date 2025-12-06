@@ -1,5 +1,4 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { ClientSE, ClientSEPayload, ClientSEReply, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { addOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { broadcast, getSocketData } from '@trz-api/utils/socketUtils';

@@ -1,6 +1,5 @@
 import { Button, ColorInput, Divider, Group, Stack, Title } from '@mantine/core';
-import { PermissionFlag, PermissionFlagData, Role, RoleId } from '@mosaiq/terrazzo-common/types';
-import { withPermissionFlag } from '@mosaiq/terrazzo-common/utils/permissionUtils';
+import { PermissionFlag, PermissionFlagData, Role, RoleId, withPermissionFlag } from '@mosaiq/terrazzo-common';
 import { useCallback, useEffect, useState } from 'react';
 import { MdOutlineDelete } from 'react-icons/md';
 import EditableTextbox from '../UI/EditableTextbox';

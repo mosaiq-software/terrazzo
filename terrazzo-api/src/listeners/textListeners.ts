@@ -1,4 +1,4 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common';
 import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
 import { broadcastToMyRooms, getSocketData, setSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';

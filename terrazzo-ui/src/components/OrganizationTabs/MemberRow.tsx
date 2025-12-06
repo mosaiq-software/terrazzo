@@ -1,6 +1,5 @@
 import { Group, Text, Tooltip } from '@mantine/core';
-import { Member, MembershipRecord, OrgMembershipLevel } from '@mosaiq/terrazzo-common/types';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { fullName, Member, MembershipRecord, OrgMembershipLevel } from '@mosaiq/terrazzo-common';
 import { MdAdminPanelSettings, MdPerson, MdPersonRemove } from 'react-icons/md';
 import { RolesList } from '../Roles/RolesList';
 import { ActionRow } from '../UI/ActionRow';

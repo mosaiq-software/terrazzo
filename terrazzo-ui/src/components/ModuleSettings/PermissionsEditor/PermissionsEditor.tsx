@@ -1,6 +1,5 @@
 import { Box, Button, Fieldset, Menu, Stack, Text } from '@mantine/core';
-import { ModulePermissions, OverridePermissions, Role, RoleId } from '@mosaiq/terrazzo-common/types';
-import { recordKeys } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { ModulePermissions, OverridePermissions, recordKeys, Role, RoleId } from '@mosaiq/terrazzo-common';
 import { RoleTabs } from '@trz/components/Roles/RoleTabs';
 import { RoleTag } from '@trz/components/Roles/RoleTag';
 import { useOrg } from '@trz/contexts/org-context';

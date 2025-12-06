@@ -1,6 +1,4 @@
-import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { Card, CardId } from '@mosaiq/terrazzo-common/types';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { Card, CardId, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getCardData } from '@trz/emitters';
 import { CARD_CACHE_PREFIX } from '@trz/util/boardUtils';

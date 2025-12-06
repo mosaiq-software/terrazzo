@@ -1,5 +1,4 @@
-import { MembershipRecord, OrganizationHeader, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common/types';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { MembershipRecord, OrganizationHeader, OrganizationId, OrgMembershipLevel, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
 import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrg, getOrgById, updateOrg } from '@trz-api/persistence/organizationPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';

@@ -1,6 +1,5 @@
 import { Avatar, Button, Center, Loader, Space, Stack, Text, Title } from '@mantine/core';
-import { InviteId } from '@mosaiq/terrazzo-common/types';
-import { isInviteExpired } from '@mosaiq/terrazzo-common/utils/inviteUtils';
+import { InviteId, isInviteExpired } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUser } from '@trz/contexts/user-context';

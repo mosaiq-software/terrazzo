@@ -1,4 +1,4 @@
-import { RestMethods, RestRequestBody, RestRequestMethod, RestRequestParams, RestResponse, RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
+import { RestMethods, RestRequestBody, RestRequestMethod, RestRequestParams, RestResponse, RestRoutes } from '@mosaiq/terrazzo-common';
 
 export const getApiUrl = () => {
     const apiUrl = import.meta.env.API_URL;

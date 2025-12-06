@@ -1,6 +1,6 @@
 import { Group, Paper, Text } from '@mantine/core';
 import { useInViewport } from '@mantine/hooks';
-import { CardId } from '@mosaiq/terrazzo-common/types';
+import { CardId } from '@mosaiq/terrazzo-common';
 import { AvatarRow } from '@trz/components/UI/AvatarRow';
 import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';

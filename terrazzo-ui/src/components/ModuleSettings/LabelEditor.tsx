@@ -1,6 +1,5 @@
 import { ActionIcon, ColorInput, Group, Stack, Text, TextInput, Tooltip } from '@mantine/core';
-import { TEMPORARY_ID } from '@mosaiq/terrazzo-common/constants';
-import { BoardId, Label } from '@mosaiq/terrazzo-common/types';
+import { BoardId, Label, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createBoardLabel, deleteBoardLabel, updateBoardLabel } from '@trz/emitters';
 import { colorIsDarkAdvanced, generateRandomColor } from '@trz/util/colorUtils';

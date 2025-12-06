@@ -1,6 +1,5 @@
 import { Stack } from '@mantine/core';
-import { OverridePermissions, PermissionFlag, PermissionFlagData } from '@mosaiq/terrazzo-common/types';
-import { recordValues } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { OverridePermissions, PermissionFlag, PermissionFlagData, recordValues } from '@mosaiq/terrazzo-common';
 import { PermissionFancySwitch } from '@trz/components/Roles/PermissionFancySwitch';
 
 interface PermissionsEditorPermissionsListProps {

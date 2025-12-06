@@ -1,5 +1,4 @@
-import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { OrganizationId, Role, RoleId, UserId } from '@mosaiq/terrazzo-common/types';
+import { ClientSE, OrganizationId, Role, RoleId, UserId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
 export const getRolesForOrg = async (sockCtx: SocketContextType, orgId: OrganizationId): Promise<Role[] | undefined> => {

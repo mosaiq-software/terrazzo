@@ -1,5 +1,4 @@
-import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, UserId } from '@mosaiq/terrazzo-common/types';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
 import { getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
 import { getCardAssignmentsForCard } from '@trz-api/persistence/cardAssignmentPersistence';
 import { createCardOnList, getCardById, getCardsByListIdDown, getCardsByListIdShortUp, updateCard, updateCardList, updateCardOrder } from '@trz-api/persistence/cardPersistence';

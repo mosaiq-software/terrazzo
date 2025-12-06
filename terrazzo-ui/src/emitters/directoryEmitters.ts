@@ -1,5 +1,4 @@
-import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { DirectoryHeader, DirectoryId, UID } from '@mosaiq/terrazzo-common/types';
+import { ClientSE, DirectoryHeader, DirectoryId, UID } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
 export const getDirectory = async (sockCtx: SocketContextType, directoryId: DirectoryId): Promise<DirectoryHeader | undefined> => {

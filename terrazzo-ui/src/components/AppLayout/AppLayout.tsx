@@ -1,6 +1,6 @@
 import { Box, Burger, Button, Divider, Group, Kbd, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { useHotkeys, useLocalStorage } from '@mantine/hooks';
-import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
+import { LocalStorageKey } from '@mosaiq/terrazzo-common';
 import TerrazzoLogo from '@trz/assets//terrazzo-logo.svg?react';
 import { DirectoryListItemContextMenu } from '@trz/components/AppLayout/DirectorySidebar/DirectoryListItemContextMenu';
 import { DirectoryTree } from '@trz/components/AppLayout/DirectorySidebar/DirectoryTree';

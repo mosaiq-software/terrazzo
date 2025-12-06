@@ -1,5 +1,4 @@
-import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardId, ListHeader, ListId } from '@mosaiq/terrazzo-common/types';
+import { BoardId, ClientSE, ListHeader, ListId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 import { NoteType, notify } from '@trz/util/notifications';
 
