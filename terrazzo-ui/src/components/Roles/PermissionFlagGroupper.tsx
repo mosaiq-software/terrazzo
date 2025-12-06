@@ -41,7 +41,7 @@ export const PermissionFlagGrouper = (props: PermissionFlagGrouperProps) => {
     return (
         <Accordion
             multiple={true}
-            variant="separated"
+            variant="default"
             defaultValue={props.defaultCollapsed ? [] : allFilteredCategories}
         >
             {allPermissionsByCategory.map((entry) => {
@@ -53,41 +53,7 @@ export const PermissionFlagGrouper = (props: PermissionFlagGrouperProps) => {
                         value={category}
                     >
                         <Accordion.Control>{catData.title}</Accordion.Control>
-                        <Accordion.Panel>
-                            {permissions.map((permission) => {
-                                return <React.Fragment key={permission}>{props.permissionItem(permission)}</React.Fragment>;
-                            })}
-                        </Accordion.Panel>
-                    </Accordion.Item>
-                );
-            })}
-            {allPermissionsByCategory.map((entry) => {
-                const [category, permissions] = entry;
-                const catData = PermissionFlagCategoryData[category];
-                return (
-                    <Accordion.Item
-                        key={category}
-                        value={category}
-                    >
-                        <Accordion.Control>{catData.title}</Accordion.Control>
-                        <Accordion.Panel>
-                            {permissions.map((permission) => {
-                                return <React.Fragment key={permission}>{props.permissionItem(permission)}</React.Fragment>;
-                            })}
-                        </Accordion.Panel>
-                    </Accordion.Item>
-                );
-            })}
-            {allPermissionsByCategory.map((entry) => {
-                const [category, permissions] = entry;
-                const catData = PermissionFlagCategoryData[category];
-                return (
-                    <Accordion.Item
-                        key={category}
-                        value={category}
-                    >
-                        <Accordion.Control>{catData.title}</Accordion.Control>
-                        <Accordion.Panel>
+                        <Accordion.Panel pl={'md'}>
                             {permissions.map((permission) => {
                                 return <React.Fragment key={permission}>{props.permissionItem(permission)}</React.Fragment>;
                             })}
