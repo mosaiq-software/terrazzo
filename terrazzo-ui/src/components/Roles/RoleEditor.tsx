@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { MdOutlineDelete } from 'react-icons/md';
 import EditableTextbox from '../UI/EditableTextbox';
 import { RingHoldingButton } from '../UI/RingHoldingButton';
-import { PermissionFlagGrouper } from './PermissionFlagGroupper';
+import { PermissionFlagGrouper } from './PermissionFlagGrouper';
 import { PermissionToggle } from './PermissionToggle';
 
 interface RoleEditorProps {

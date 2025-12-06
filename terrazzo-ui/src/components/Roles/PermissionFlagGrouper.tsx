@@ -8,7 +8,6 @@ const allCategories = recordValues(PermissionFlagCategory);
 interface PermissionFlagGrouperProps {
     excludeCategories?: PermissionFlagCategory[];
     excludePermissions?: PermissionFlag[];
-    collapsable?: boolean;
     defaultCollapsed?: boolean;
     permissionItem: (flag: PermissionFlag) => React.ReactNode;
 }

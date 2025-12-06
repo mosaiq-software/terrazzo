@@ -1,7 +1,7 @@
 import { Divider, Group, Stack, Title } from '@mantine/core';
 import { OverridePermissions, PermissionFlagData } from '@mosaiq/terrazzo-common';
 import { PermissionFancySwitch } from '@trz/components/Roles/PermissionFancySwitch';
-import { PermissionFlagGrouper } from '@trz/components/Roles/PermissionFlagGroupper';
+import { PermissionFlagGrouper } from '@trz/components/Roles/PermissionFlagGrouper';
 import { RingHoldingButton } from '@trz/components/UI/RingHoldingButton';
 import { MdOutlineDelete } from 'react-icons/md';
 
