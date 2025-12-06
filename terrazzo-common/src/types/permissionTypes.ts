@@ -1,4 +1,4 @@
-import { RoleId, OrganizationId } from './genericTypes';
+import { OrganizationId, RoleId } from './genericTypes';
 
 export interface Role {
     id: RoleId;
@@ -19,12 +19,15 @@ export enum PermissionFlag {
 }
 export enum PermissionFlagCategory {
     DUMMY = 'DUMMY',
+    DUMMY_2 = 'DUMMY_2',
+
+    OTHER = 'OTHER',
 }
 export interface PermissionFlagData {
     flag: PermissionFlag;
     title: string;
     description: string;
-    category: PermissionFlagCategory;
+    category?: PermissionFlagCategory;
 }
 export const PermissionFlagData: Record<PermissionFlag, PermissionFlagData> = {
     [PermissionFlag.DUMMY_1]: {
@@ -37,7 +40,7 @@ export const PermissionFlagData: Record<PermissionFlag, PermissionFlagData> = {
         flag: PermissionFlag.DUMMY_2,
         title: 'Dummy Permission 2',
         description: 'This is another dummy permission for testing purposes.',
-        category: PermissionFlagCategory.DUMMY,
+        category: PermissionFlagCategory.DUMMY_2,
     },
     [PermissionFlag.DUMMY_3]: {
         flag: PermissionFlag.DUMMY_3,
@@ -52,5 +55,12 @@ export interface PermissionFlagCategoryData {
 export const PermissionFlagCategoryData: Record<PermissionFlagCategory, PermissionFlagCategoryData> = {
     [PermissionFlagCategory.DUMMY]: {
         title: 'Dummy Permissions',
+    },
+    [PermissionFlagCategory.DUMMY_2]: {
+        title: 'Dummy Permissions 2',
+    },
+
+    [PermissionFlagCategory.OTHER]: {
+        title: 'Other',
     },
 };
