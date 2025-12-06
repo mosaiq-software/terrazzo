@@ -1,5 +1,6 @@
+import { BoardId, UID } from '../genericTypes';
+import { UserHeader } from '../userTypes';
 import { TrelloExportType } from './trelloTypes';
-import { BoardId, UID, UserHeader } from './types';
 
 /**
  * Data types for the REST API

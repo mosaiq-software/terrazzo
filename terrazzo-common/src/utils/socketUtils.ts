@@ -1,15 +1,5 @@
-import { RoomId, RoomType } from '../socketTypes';
-import { NonEmptyArray, UID } from '../types';
-
-export enum RoomSpecifier {
-    DEFAULT = 'default',
-    MEMBERSHIP = 'membership',
-    INVITES = 'invites',
-    STRUCTURE = 'structure',
-    ROLES = 'roles',
-    ROLE_ASSIGNMENTS = 'role_assignments',
-    CONTENTS = 'contents',
-}
+import { UID, NonEmptyArray } from '../types/genericTypes';
+import { RoomId, RoomSpecifier, RoomType } from '../types/socket/roomTypes';
 
 export const getRoomCode = (roomType: RoomType, uid: UID | string, specifier: string = RoomSpecifier.DEFAULT): RoomId => {
     return `${roomType}@${uid}@${specifier}`;

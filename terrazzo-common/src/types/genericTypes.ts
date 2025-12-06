@@ -1,0 +1,18 @@
+export type NonEmptyArray<T> = [T, ...T[]];
+
+export type URL = string;
+export type UID = `${string}-${string}-${string}-${string}-${string}`;
+export type OrganizationId = UID;
+export type BoardId = UID;
+export type ListId = UID;
+export type CardId = UID;
+export type UserId = UID;
+export type TextBlockId = UID;
+export type LabelId = UID;
+export type InviteId = UID;
+export type AssignmentId = UID;
+export type DocumentId = UID;
+export type DirectoryId = UID;
+export type RoleId = UID;
+
+export type Position = { x: number; y: number };

@@ -1,12 +1,37 @@
-import * as apiTypes from './apiTypes';
-import * as constants from './constants';
-import * as socketTypes from './socketTypes';
-import * as trelloTypes from './trelloTypes';
-import * as types from './types';
-import * as arrayUtils from './utils/arrayUtils';
-import * as inviteUtils from './utils/inviteUtils';
-import * as permissionUtils from './utils/permissionUtils';
-import * as socketUtils from './utils/socketUtils';
-import * as textUtils from './utils/textUtils';
+// Constants
+export * from './constants';
 
-export { apiTypes, arrayUtils, constants, inviteUtils, permissionUtils, socketTypes, socketUtils, textUtils, trelloTypes, types };
+// Types - Generic
+export * from './types/genericTypes';
+export * from './types/inviteTypes';
+export * from './types/organizationTypes';
+export * from './types/permissionTypes';
+export * from './types/queryTypes';
+export * from './types/userTypes';
+
+// Types - Modules
+export * from './types/modules/board/boardTypes';
+export * from './types/modules/board/cardTypes';
+export * from './types/modules/board/listTypes';
+export * from './types/modules/directoryTypes';
+export * from './types/modules/documentTypes';
+export * from './types/modules/moduleTypes';
+export * from './types/modules/trzModuleTypes';
+
+// Types - External
+export * from './types/externalTypes/apiTypes';
+export * from './types/externalTypes/trelloTypes';
+
+// Types - Socket
+export * from './types/socket/events/clientSE';
+export * from './types/socket/events/engineSE';
+export * from './types/socket/events/serverSE';
+export * from './types/socket/roomTypes';
+export * from './types/socket/socketTypes';
+
+// Utils
+export * from './utils/arrayUtils';
+export * from './utils/inviteUtils';
+export * from './utils/permissionUtils';
+export * from './utils/socketUtils';
+export * from './utils/textUtils';
