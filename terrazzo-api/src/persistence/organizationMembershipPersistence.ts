@@ -36,8 +36,8 @@ export const getOrganizationMembershipsForOrg = async (orgId: OrganizationId) =>
     return models.map((membership) => membership.toJSON());
 };
 
-export const upsertOrganizationMembership = async (membershipRecord: MembershipRecord) => {
-    await OrganizationMembershipModel.upsert({ ...membershipRecord });
+export const createOrganizationMembership = async (membershipRecord: MembershipRecord) => {
+    await OrganizationMembershipModel.create({ ...membershipRecord });
 };
 
 export const deleteOrganizationMembership = async (userId: UserId, orgId: OrganizationId) => {

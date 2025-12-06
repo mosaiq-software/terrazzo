@@ -1,7 +1,7 @@
 import { Invite, InviteId, isInviteExpired, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
 import { createInviteRecord, getAllInviteRecordsForOrganization, getInviteRecordById, updateInviteRecord } from '@trz-api/persistence/invitePersistence';
 import { getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
-import { upsertMembership } from './membershipController';
+import { createMembershipIfDoesntExist } from './membershipController';
 
 export const getAllInvitesForOrg = async (orgId: OrganizationId): Promise<Invite[]> => {
     return await getAllInviteRecordsForOrganization(orgId);
@@ -50,7 +50,7 @@ export const useInvite = async (inviteId: InviteId, userId: UserId): Promise<boo
             orgId: invite.forOrganizationId,
             joinedAt: Date.now(),
         };
-        await upsertMembership(membershipRecord);
+        await createMembershipIfDoesntExist(membershipRecord);
         return true;
     } catch (e) {
         console.error(e);

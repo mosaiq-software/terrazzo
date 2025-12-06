@@ -1,5 +1,5 @@
 import { Member, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
-import { deleteOrganizationMembership, getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser, upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
+import { createOrganizationMembership, deleteOrganizationMembership, getOrganizationMembership, getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 
@@ -37,8 +37,12 @@ export const getOrgsForUser = async (userId: UserId) => {
     return orgs.filter((o) => !!o);
 };
 
-export const upsertMembership = async (membershipRecord: MembershipRecord) => {
-    return await upsertOrganizationMembership(membershipRecord);
+export const createMembershipIfDoesntExist = async (membershipRecord: MembershipRecord) => {
+    const existingMemberships = await getOrganizationMembership(membershipRecord.userId, membershipRecord.orgId);
+    if (existingMemberships) {
+        return;
+    }
+    await createOrganizationMembership(membershipRecord);
 };
 
 export const removeMembership = async (userId: UserId, orgId: OrganizationId) => {
