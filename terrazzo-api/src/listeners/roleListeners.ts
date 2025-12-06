@@ -1,6 +1,6 @@
 import { ClientSE, ClientSEPayload, ClientSEReply, getRoomCode, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { createRole, deleteRole, getRolesForOrg, updateRole } from '@trz-api/controllers/roleController';
-import { getRoleIdsForUserInOrg, setRoleIdsForUserInOrg } from '@trz-api/persistence/roleAssignmentPersistence';
+import { getRoleIdsForUserInOrgDb, setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { syncRolesForUserInOrg } from '@trz-api/utils/broadcasters';
 import { broadcast } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
@@ -68,7 +68,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No data provided');
             }
-            const roleIds = await getRoleIdsForUserInOrg(data.userId, data.orgId);
+            const roleIds = await getRoleIdsForUserInOrgDb(data.userId, data.orgId);
             reply(roleIds);
         } catch (error: any) {
             console.error('Error getting roles for user in organization', error);
@@ -81,7 +81,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No data provided');
             }
-            await setRoleIdsForUserInOrg(data.userId, data.orgId, data.roleIds);
+            await setRoleIdsForUserInOrgDb(data.userId, data.orgId, data.roleIds);
             await syncRolesForUserInOrg(socket, data.userId, data.orgId);
             reply(undefined);
         } catch (error: any) {

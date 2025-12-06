@@ -1,7 +1,8 @@
-import { MembershipRecord, OrganizationHeader, OrganizationId, OrgMembershipLevel, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
-import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
+import { MembershipRecord, OrganizationHeader, OrganizationId, PermissionFlag, recordValues, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
+import { createOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrg, getOrgById, updateOrg } from '@trz-api/persistence/organizationPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
+import { addRoleToUserInOrg, createRole } from './roleController';
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
@@ -34,20 +35,28 @@ export async function addOrganization(name: string, creator: UserId) {
         description: '',
     };
 
+    await createOrg(newOrg);
+    await seedFreshOrg(newOrg.id, creator);
+
+    return newOrg.id;
+}
+
+const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
+    // Add creator as member
     const membershipRecord: MembershipRecord = {
         userId: creator,
-        orgId: newOrg.id,
-        permissionLevel: OrgMembershipLevel.ADMIN,
+        orgId: orgId,
+        joinedAt: Date.now(),
     };
+    await createOrganizationMembership(membershipRecord);
 
-    try {
-        await createOrg(newOrg);
-        await upsertOrganizationMembership(membershipRecord);
-        return newOrg.id;
-    } catch (e) {
-        throw new Error('Failed to create org' + e);
-    }
-}
+    // create default roles
+    const adminRole = await createRole('Admin', '#D31757', orgId, recordValues(PermissionFlag));
+    const guest = await createRole('Guest', '#2384CA', orgId, [PermissionFlag.VIEW_MODULE]);
+
+    // assign admin role to creator
+    await addRoleToUserInOrg(creator, orgId, adminRole.id);
+};
 
 export async function updateOrganizationFromPartial(orgId: OrganizationId, partial: Partial<OrganizationHeader>) {
     const updatingOrg = await getOrgById(orgId);

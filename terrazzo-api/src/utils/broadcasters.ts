@@ -4,7 +4,7 @@ import { getAllInvitesForOrg } from '@trz-api/controllers/inviteController';
 import { getMembersInOrg, getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { getInviteRecordById } from '@trz-api/persistence/invitePersistence';
 import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
-import { getRoleIdsForUserInOrg } from '@trz-api/persistence/roleAssignmentPersistence';
+import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
 import { broadcast } from './socketUtils';
 
@@ -58,7 +58,7 @@ export const syncUsersOrgs = async (socket: Socket, userId: UserId) => {
 
 export const syncRolesForUserInOrg = async (socket: Socket, userId: UserId, orgId: OrganizationId) => {
     try {
-        const roleIds = await getRoleIdsForUserInOrg(userId, orgId);
+        const roleIds = await getRoleIdsForUserInOrgDb(userId, orgId);
         const roomKey = `${orgId}_${userId}`;
         broadcast(socket, ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG, { userId, orgId, roleIds }, [getRoomCode(RoomType.DATA, roomKey, RoomSpecifier.ROLE_ASSIGNMENTS)]);
     } catch (error: any) {

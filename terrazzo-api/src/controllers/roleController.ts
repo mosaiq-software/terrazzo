@@ -1,4 +1,5 @@
-import { OrganizationId, PermissionFlag, Role, RoleId } from '@mosaiq/terrazzo-common';
+import { OrganizationId, PermissionFlag, Role, RoleId, UserId } from '@mosaiq/terrazzo-common';
+import { getRoleIdsForUserInOrgDb, setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { createRoleOnOrgDb, deleteRoleDb, getNextRoleOrderDb, getRoleByIdDb, getRolesByOrgIdDb, updateRoleDb } from '@trz-api/persistence/rolePersistence';
 
 export const getRolesForOrg = async (orgId: OrganizationId) => {
@@ -39,4 +40,22 @@ export const getAllRolePermissionsInOrg = async (orgId: OrganizationId): Promise
         rolePermissions[role.id] = role.defaultPermissions;
     }
     return rolePermissions;
+};
+
+export const setRolesForUserInOrg = async (userId: UserId, orgId: OrganizationId, roleIds: RoleId[]) => {
+    await setRoleIdsForUserInOrgDb(userId, orgId, roleIds);
+};
+
+export const addRoleToUserInOrg = async (userId: UserId, orgId: OrganizationId, roleId: RoleId) => {
+    const currentRoleIds = await getRoleIdsForUserInOrgDb(userId, orgId);
+    if (!currentRoleIds.includes(roleId)) {
+        currentRoleIds.push(roleId);
+        await setRoleIdsForUserInOrgDb(userId, orgId, currentRoleIds);
+    }
+};
+
+export const removeRoleFromUserInOrg = async (userId: UserId, orgId: OrganizationId, roleId: RoleId) => {
+    const currentRoleIds = await getRoleIdsForUserInOrgDb(userId, orgId);
+    const updatedRoleIds = currentRoleIds.filter((id) => id !== roleId);
+    await setRoleIdsForUserInOrgDb(userId, orgId, updatedRoleIds);
 };
