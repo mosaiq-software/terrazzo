@@ -1,7 +1,8 @@
 import { Button, Group, Text } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
-import { ModuleHeaderWithChildren, TrzModuleType } from '@mosaiq/terrazzo-common/types';
+import { MinimalModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common/types';
 import { useUI } from '@trz/contexts/ui-context';
+import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
 import { useContextMenu } from 'mantine-contextmenu';
 import { FaChevronDown } from 'react-icons/fa';
 import { IoDocumentOutline } from 'react-icons/io5';
@@ -12,14 +13,16 @@ import { DirectoryListItemContextMenu } from './DirectoryListItemContextMenu';
 
 interface DirectoryTreeItemProps {
     sidebarCollapsed: boolean;
-    directoryListItem: ModuleHeaderWithChildren;
+    directoryListItem: MinimalModuleHeader;
     indent: number;
+    visible: boolean;
 }
 export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { showContextMenu } = useContextMenu();
     const uiCtx = useUI();
+    const contents = useDirectoryContents(props.visible ? props.directoryListItem.id : undefined, props.directoryListItem.type);
 
     const [collapsed, setCollapsed, deleteCollapsed] = useLocalStorage<boolean | undefined>({ key: `directory-tree-item-collapsed-${props.directoryListItem.id}`, defaultValue: undefined });
 
@@ -56,7 +59,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 onContextMenuCapture={showContextMenu((close) => (
                     <DirectoryListItemContextMenu
                         onClose={close}
-                        moduleHeader={props.directoryListItem}
+                        miniModuleHeader={props.directoryListItem}
                         parentId={props.directoryListItem.id}
                         parentName={props.directoryListItem.name}
                         allowAddItem={props.directoryListItem.type === TrzModuleType.Directory}
@@ -73,7 +76,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                     <DirectoryListItemIcon
                         moduleType={props.directoryListItem.type}
                         collapsed={!!collapsed}
-                        subItemsCount={(props.directoryListItem.type === TrzModuleType.Directory ? props.directoryListItem.children?.length : 0) ?? 0}
+                        subItemsCount={contents?.length}
                     />
                     <Text
                         c="#fff"
@@ -90,15 +93,15 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 </Button>
             </Group>
 
-            {props.directoryListItem.type === TrzModuleType.Directory &&
-                props.directoryListItem.children?.map((subItem) => (
-                    <DirectoryTreeItem
-                        key={subItem.id}
-                        sidebarCollapsed={props.sidebarCollapsed || !!collapsed}
-                        directoryListItem={subItem}
-                        indent={props.indent + 1}
-                    />
-                ))}
+            {contents?.map((subItem) => (
+                <DirectoryTreeItem
+                    key={subItem.id}
+                    sidebarCollapsed={props.sidebarCollapsed || !!collapsed}
+                    directoryListItem={subItem}
+                    indent={props.indent + 1}
+                    visible={!collapsed}
+                />
+            ))}
         </>
     );
 };

@@ -14,37 +14,20 @@ OrgModel.init(
         logoUrl: DataTypes.STRING,
         description: DataTypes.TEXT,
     },
-    { sequelize }
+    { sequelize, timestamps: false }
 );
 
 export const getOrgById = async (id: OrganizationId) => {
-    const model = await OrgModel.findByPk(id, {
-        attributes: {
-            exclude: ['updatedAt'],
-        },
-    });
+    const model = await OrgModel.findByPk(id);
     return model?.toJSON();
 };
 
 export const createOrg = async (org: OrganizationHeader) => {
-    const model = await OrgModel.create({
-        id: org.id,
-        name: org.name,
-        createdAt: org.createdAt,
-        logoUrl: org.logoUrl,
-        description: org.description,
-    });
+    const model = await OrgModel.create({ ...org });
     return model.toJSON();
 };
 
 export const updateOrg = async (org: OrganizationHeader) => {
-    const [updated] = await OrgModel.update(
-        {
-            name: org.name,
-            logoUrl: org.logoUrl,
-            description: org.description,
-        },
-        { where: { id: org.id } }
-    );
+    const [updated] = await OrgModel.update({ ...org }, { where: { id: org.id } });
     return updated;
 };

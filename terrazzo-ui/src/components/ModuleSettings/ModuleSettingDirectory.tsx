@@ -46,14 +46,9 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
                 }}
             />
             <PermissionsEditor
-                moduleId={props.directoryId}
-                editedPermissionRecord={{
-                    anyonePermissionLevel: directoryEdits.anyonePermissionLevel,
-                    orgPermissionLevel: directoryEdits.orgPermissionLevel,
-                    userPermissionLevels: directoryEdits.userPermissionLevels,
-                }}
-                onChangeRecord={(newRecord) => {
-                    setDirectoryEdits({ ...directoryEdits, ...newRecord });
+                desiredPermissions={directoryEdits.desiredPermissions ?? directory.desiredPermissions}
+                onChange={(newPermissions) => {
+                    setDirectoryEdits({ ...directoryEdits, desiredPermissions: newPermissions });
                 }}
             />
             <Button

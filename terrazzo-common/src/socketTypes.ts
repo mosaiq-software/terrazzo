@@ -1,4 +1,4 @@
-import { Board, BoardId, BoardRes, Card, CardId, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, Member, ModuleHeaderWithChildren, OrganizationHeader, OrganizationId, OrgMembershipLevel, QueryResult, Role, RoleId, TextBlock, TextBlockId, UID, UserHeader, UserId } from './types';
+import { Board, BoardId, BoardRes, Card, CardId, DirectoryHeader, DirectoryId, DocumentHeader, DocumentId, Invite, InviteId, Label, LabelId, List, ListHeader, ListId, Member, MinimalModuleHeader, OrganizationHeader, OrganizationId, OrgMembershipLevel, QueryResult, Role, RoleId, TextBlock, TextBlockId, UID, UserHeader, UserId } from './types';
 
 // SOCKET IO BUILT-IN EVENTS
 export enum ClientSocketIOEvent {
@@ -35,7 +35,7 @@ export enum ClientSE {
     GET_SEARCH_RESULTS = 'GET_SEARCH_RESULTS',
     GET_DOCUMENT = 'GET_DOCUMENT',
     GET_DIRECTORY = 'GET_DIRECTORY',
-    GET_USERS_DIRECTORY_STRUCTURE = 'GET_USERS_DIRECTORY_STRUCTURE',
+    GET_DIRECTORY_CONTENTS = 'GET_DIRECTORY_CONTENTS',
     GET_INVITES_FOR_ORG = 'GET_INVITES_FOR_ORG',
     GET_INVITE = 'GET_INVITE',
     GET_USER = 'GET_USER',
@@ -63,6 +63,7 @@ export enum ClientSE {
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
     UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
     UPDATE_DIRECTORY_FIELD = 'UPDATE_DIRECTORY_FIELD',
+    UPDATE_DIRECTORY_CONTENTS = 'UPDATE_DIRECTORY_CONTENTS',
     UPDATE_MEMBERSHIP = 'UPDATE_MEMBERSHIP',
     UPDATE_ROLE = 'UPDATE_ROLE',
     UPDATE_ROLES_FOR_USER_IN_ORG = 'UPDATE_ROLES_FOR_USER_IN_ORG',
@@ -93,7 +94,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_SEARCH_RESULTS]: { query: string; searchSessionId: string };
     [ClientSE.GET_DOCUMENT]: DocumentId;
     [ClientSE.GET_DIRECTORY]: DirectoryId;
-    [ClientSE.GET_USERS_DIRECTORY_STRUCTURE]: { userId: UserId; orgId: OrganizationId };
+    [ClientSE.GET_DIRECTORY_CONTENTS]: DirectoryId;
     [ClientSE.GET_INVITES_FOR_ORG]: OrganizationId;
     [ClientSE.GET_INVITE]: InviteId;
     [ClientSE.GET_USER]: UserId;
@@ -121,6 +122,7 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ClientSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ClientSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
+    [ClientSE.UPDATE_DIRECTORY_CONTENTS]: { directoryId: DirectoryId; contents: UID[] };
     [ClientSE.UPDATE_MEMBERSHIP]: { userId: UserId; orgId: OrganizationId; newPermissionLevel: OrgMembershipLevel };
     [ClientSE.UPDATE_ROLE]: Role;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
@@ -151,7 +153,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_SEARCH_RESULTS]: { results: QueryResult[] } | undefined;
     [ClientSE.GET_DOCUMENT]: DocumentHeader | undefined;
     [ClientSE.GET_DIRECTORY]: DirectoryHeader | undefined;
-    [ClientSE.GET_USERS_DIRECTORY_STRUCTURE]: ModuleHeaderWithChildren | undefined;
+    [ClientSE.GET_DIRECTORY_CONTENTS]: MinimalModuleHeader[] | undefined;
     [ClientSE.GET_INVITES_FOR_ORG]: Invite[] | undefined;
     [ClientSE.GET_INVITE]: Invite | undefined;
     [ClientSE.GET_USER]: UserHeader | undefined;
@@ -179,6 +181,7 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_CARDS_LABELS]: undefined;
     [ClientSE.UPDATE_DOCUMENT_FIELD]: undefined;
     [ClientSE.UPDATE_DIRECTORY_FIELD]: undefined;
+    [ClientSE.UPDATE_DIRECTORY_CONTENTS]: undefined;
     [ClientSE.UPDATE_MEMBERSHIP]: undefined;
     [ClientSE.UPDATE_ROLE]: undefined;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: undefined;
@@ -217,7 +220,7 @@ export enum ServerSE {
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
     UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
     UPDATE_DIRECTORY_FIELD = 'UPDATE_DIRECTORY_FIELD',
-    UPDATE_USERS_DIRECTORY_STRUCTURE = 'UPDATE_USERS_DIRECTORY_STRUCTURE',
+    UPDATE_DIRECTORY_CONTENTS = 'UPDATE_DIRECTORY_CONTENTS',
     UPDATE_USERS_ORGANIZATIONS = 'UPDATE_USERS_ORGANIZATIONS',
     UPDATE_ORGANIZATION_MEMBERSHIPS = 'UPDATE_ORGANIZATION_MEMBERSHIPS',
     UPDATE_ORGANIZATION_INVITES = 'UPDATE_ORGANIZATION_INVITES',
@@ -248,7 +251,7 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ServerSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ServerSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
-    [ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE]: { userId: UserId; orgId: OrganizationId; directoryStructure: ModuleHeaderWithChildren };
+    [ServerSE.UPDATE_DIRECTORY_CONTENTS]: { directoryId: DirectoryId; contents: MinimalModuleHeader[] };
     [ServerSE.UPDATE_USERS_ORGANIZATIONS]: { userId: UserId; organizations: OrganizationHeader[] };
     [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: { orgId: OrganizationId; members: Member[] };
     [ServerSE.UPDATE_ORGANIZATION_INVITES]: { orgId: OrganizationId; invites: Invite[] };
@@ -279,7 +282,7 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_CARDS_LABELS]: void;
     [ServerSE.UPDATE_DOCUMENT_FIELD]: void;
     [ServerSE.UPDATE_DIRECTORY_FIELD]: void;
-    [ServerSE.UPDATE_USERS_DIRECTORY_STRUCTURE]: void;
+    [ServerSE.UPDATE_DIRECTORY_CONTENTS]: void;
     [ServerSE.UPDATE_USERS_ORGANIZATIONS]: void;
     [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: void;
     [ServerSE.UPDATE_ORGANIZATION_INVITES]: void;

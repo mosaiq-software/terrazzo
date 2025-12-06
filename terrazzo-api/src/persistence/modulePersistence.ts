@@ -11,22 +11,13 @@ ModuleModel.init(
         },
         parentId: DataTypes.STRING,
         name: DataTypes.STRING,
+        type: DataTypes.STRING,
+        order: DataTypes.INTEGER,
         archived: DataTypes.BOOLEAN,
         createdAt: DataTypes.INTEGER,
         orgId: DataTypes.STRING,
-        type: DataTypes.STRING,
-        anyonePermissionLevel: {
-            type: DataTypes.TINYINT,
-            allowNull: true,
-        },
-        orgPermissionLevel: {
-            type: DataTypes.TINYINT,
-            allowNull: true,
-        },
-        userPermissionLevels: {
-            type: DataTypes.JSON,
-            allowNull: false,
-        },
+        desiredPermissions: DataTypes.JSON,
+        effectivePermissions: DataTypes.JSON,
     },
     { sequelize, timestamps: false }
 );
@@ -39,6 +30,7 @@ export const getModuleByIdDb = async (id: UID) => {
 export const getModulesByParentIdDb = async (parentId: UID) => {
     const models = await ModuleModel.findAll({
         where: { parentId },
+        order: [['order', 'ASC']],
     });
     return models.map((mdl) => mdl.toJSON());
 };
@@ -46,6 +38,7 @@ export const getModulesByParentIdDb = async (parentId: UID) => {
 export const getModulesByOrgIdDb = async (orgId: UID) => {
     const models = await ModuleModel.findAll({
         where: { orgId },
+        order: [['order', 'ASC']],
     });
     return models.map((mdl) => mdl.toJSON());
 };
@@ -56,11 +49,18 @@ export const createModuleDb = async (module: ModuleHeader) => {
 };
 
 export const updateModuleDb = async (id: UID, module: Partial<ModuleHeader>) => {
-    const [updated] = await ModuleModel.update(
-        {
-            ...module,
-        },
-        { where: { id: id } }
-    );
+    const [updated] = await ModuleModel.update({ ...module }, { where: { id: id } });
     return updated;
+};
+
+export const getNextModuleOrderInParentDb = async (parentId: UID) => {
+    const maxOrderModule = await ModuleModel.findOne({
+        where: { parentId },
+        order: [['order', 'DESC']],
+    });
+    const module = maxOrderModule?.toJSON();
+    if (!module) {
+        return 0;
+    }
+    return module.order + 1;
 };

@@ -19,3 +19,7 @@ export function generateRandomColor() {
     // https://stackoverflow.com/questions/5092808/how-do-i-randomly-generate-html-hex-color-codes-using-javascript
     return '#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0');
 }
+
+export const COLOR_SUCCESS = '#41aa53';
+export const COLOR_ERROR = '#cf4545';
+export const COLOR_UNSET = '#2e2e2e';
