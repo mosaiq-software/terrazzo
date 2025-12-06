@@ -1,9 +1,11 @@
 import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { InviteId, OrganizationId, UserId } from '@mosaiq/terrazzo-common/types';
+import { DirectoryId, InviteId, OrganizationId, UID, UserId } from '@mosaiq/terrazzo-common/types';
 import { getRoomCode, RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { getDirectoryContents } from '@trz-api/controllers/directoryController';
 import { getAllInvitesForOrg } from '@trz-api/controllers/inviteController';
 import { getMembersInOrg, getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { getInviteRecordById } from '@trz-api/persistence/invitePersistence';
+import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
 import { getRoleIdsForUserInOrg } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
 import { broadcast } from './socketUtils';
@@ -63,5 +65,29 @@ export const syncRolesForUserInOrg = async (socket: Socket, userId: UserId, orgI
         broadcast(socket, ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG, { userId, orgId, roleIds }, [getRoomCode(RoomType.DATA, roomKey, RoomSpecifier.ROLE_ASSIGNMENTS)]);
     } catch (error: any) {
         console.error('Error syncing roles for user in organization', error);
+    }
+};
+
+export const syncParentsDirectoryContents = async (socket: Socket, childId: UID) => {
+    try {
+        const childModule = await getModuleByIdDb(childId);
+        if (!childModule) {
+            throw new Error('Child module not found for syncing parent directory contents');
+        }
+        const parentId = childModule.parentId;
+        if (!parentId) {
+            throw new Error('No parentId found for child module when syncing parent directory contents');
+        }
+        await syncDirectoryContents(socket, parentId);
+    } catch (error: any) {
+        console.error('Error syncing parents directory contents', error);
+    }
+};
+export const syncDirectoryContents = async (socket: Socket, dirId: DirectoryId) => {
+    try {
+        const directoryContents = await getDirectoryContents(dirId);
+        broadcast(socket, ServerSE.UPDATE_DIRECTORY_CONTENTS, { directoryId: dirId, contents: directoryContents }, [getRoomCode(RoomType.DATA, dirId, RoomSpecifier.CONTENTS)]);
+    } catch (error: any) {
+        console.error('Error syncing directory contents', error);
     }
 };

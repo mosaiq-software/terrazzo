@@ -16,7 +16,6 @@ import { ModuleSettingsModal } from './components/ModuleSettings/ModuleSettingsM
 import { OrgProvider } from './contexts/org-context';
 import { UiProvider } from './contexts/ui-context';
 import Router from './router';
-import { UserDirectoryProvider } from './contexts/user-directory-context';
 
 const theme = createTheme({});
 
@@ -39,13 +38,11 @@ const App = () => {
                     <SocketProvider>
                         <UiProvider>
                             <OrgProvider>
-                                <UserDirectoryProvider>
-                                    <ModalsProvider modals={modals}>
-                                        <ContextMenuProvider>
-                                            <Router />
-                                        </ContextMenuProvider>
-                                    </ModalsProvider>
-                                </UserDirectoryProvider>
+                                <ModalsProvider modals={modals}>
+                                    <ContextMenuProvider>
+                                        <Router />
+                                    </ContextMenuProvider>
+                                </ModalsProvider>
                             </OrgProvider>
                         </UiProvider>
                     </SocketProvider>

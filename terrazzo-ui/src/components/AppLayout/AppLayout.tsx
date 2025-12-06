@@ -9,14 +9,12 @@ import { UserProfileIcon } from '@trz/components/AppLayout/Navbar/UserProfileIco
 import { SearchBar } from '@trz/components/AutoComplete/Searchbar';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
-import { useDirectoryContext } from '@trz/contexts/user-directory-context';
 import { useContextMenu } from 'mantine-contextmenu';
 import { NavLink, Outlet } from 'react-router-dom';
 
 const AppLayout = () => {
     const uiCtx = useUI();
     const org = useOrg();
-    const dirCtx = useDirectoryContext();
     const { showContextMenu } = useContextMenu();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage<boolean>({ key: LocalStorageKey.SIDEBAR_COLLAPSED, defaultValue: false });
@@ -125,12 +123,10 @@ const AppLayout = () => {
                             zIndex: 1,
                         }}
                     >
-                        {dirCtx.userDirectoryStructure && (
-                            <DirectoryTree
-                                sidebarCollapsed={sidebarCollapsed}
-                                directoryTreeRoot={dirCtx.userDirectoryStructure}
-                            />
-                        )}
+                        <DirectoryTree
+                            sidebarCollapsed={sidebarCollapsed}
+                            orgId={org.active?.id}
+                        />
                     </Box>
                     <Box
                         style={{

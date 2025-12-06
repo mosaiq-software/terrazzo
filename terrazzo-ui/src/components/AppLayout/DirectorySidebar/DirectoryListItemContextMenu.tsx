@@ -1,5 +1,5 @@
 import { modals } from '@mantine/modals';
-import { ModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common/types';
+import { MinimalModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common/types';
 import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
 import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
 import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';
@@ -10,7 +10,7 @@ import { NoteType, notify } from '@trz/util/notifications';
 import { MdAdd, MdSettings } from 'react-icons/md';
 
 interface DirectoryListItemContextMenuProps {
-    moduleHeader?: ModuleHeader;
+    miniModuleHeader?: MinimalModuleHeader;
     parentId: UID;
     parentName: string;
     allowAddItem?: boolean;
@@ -65,15 +65,15 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
                     }}
                 />
             )}
-            {!!props.moduleHeader && (
+            {!!props.miniModuleHeader && (
                 <ContextMenuButton
                     icon={<MdSettings size={16} />}
-                    text={getSettingsTitle(props.moduleHeader.type)}
+                    text={getSettingsTitle(props.miniModuleHeader.type)}
                     onClick={() => {
                         modals.openContextModal({
                             modal: 'moduleSettings',
                             title: 'Settings',
-                            innerProps: { moduleHeader: props.moduleHeader },
+                            innerProps: { moduleHeader: props.miniModuleHeader },
                             size: 'xl',
                         });
                         props.onClose();

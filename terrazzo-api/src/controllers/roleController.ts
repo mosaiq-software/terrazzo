@@ -1,4 +1,4 @@
-import { OrganizationId, Role, RoleId } from '@mosaiq/terrazzo-common/types';
+import { OrganizationId, PermissionFlag, Role, RoleId } from '@mosaiq/terrazzo-common/types';
 import { createRoleOnOrgDb, deleteRoleDb, getRoleByIdDb, getRolesByOrgIdDb, updateRoleDb } from '@trz-api/persistence/rolePersistence';
 
 export const getRolesForOrg = async (orgId: OrganizationId) => {
@@ -28,4 +28,13 @@ export const deleteRole = async (roleId: RoleId) => {
     }
     await deleteRoleDb(roleId);
     return role;
+};
+
+export const getAllRolePermissionsInOrg = async (orgId: OrganizationId): Promise<Record<RoleId, PermissionFlag[]>> => {
+    const roles = await getRolesByOrgIdDb(orgId);
+    const rolePermissions: Record<RoleId, PermissionFlag[]> = {};
+    for (const role of roles) {
+        rolePermissions[role.id] = role.defaultPermissions;
+    }
+    return rolePermissions;
 };

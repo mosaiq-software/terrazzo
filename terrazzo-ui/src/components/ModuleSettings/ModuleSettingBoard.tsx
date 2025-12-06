@@ -58,17 +58,7 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
                     setBoardEdits({ ...boardEdits, boardCode: e.target.value });
                 }}
             />
-            <PermissionsEditor
-                moduleId={props.boardId}
-                editedPermissionRecord={{
-                    anyonePermissionLevel: boardEdits.anyonePermissionLevel,
-                    orgPermissionLevel: boardEdits.orgPermissionLevel,
-                    userPermissionLevels: boardEdits.userPermissionLevels,
-                }}
-                onChangeRecord={(newRecord) => {
-                    setBoardEdits({ ...boardEdits, ...newRecord });
-                }}
-            />
+            <PermissionsEditor moduleId={props.boardId} />
             <Button
                 disabled={Object.keys(boardEdits).length === 0}
                 onClick={onSave}

@@ -1,23 +1,32 @@
 import { Stack } from '@mantine/core';
-import { ModuleHeaderWithChildren } from '@mosaiq/terrazzo-common/types';
+import { OrganizationId, TrzModuleType } from '@mosaiq/terrazzo-common/types';
+import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
 import { DirectoryTreeItem } from './DirectoryTreeItem';
 
 interface DirectoryTreeProps {
     sidebarCollapsed: boolean;
-    directoryTreeRoot: ModuleHeaderWithChildren;
+    orgId: OrganizationId | undefined;
 }
 export const DirectoryTree = (props: DirectoryTreeProps) => {
+    const contents = useDirectoryContents(props.orgId, TrzModuleType.Organization);
+
+    if (!props.orgId || !contents) {
+        console.log('No orgId or contents for DirectoryTree', props.orgId, contents);
+        return null;
+    }
+
     return (
         <Stack
             gap={0}
             p={0}
         >
-            {props.directoryTreeRoot.children?.map((item) => (
+            {contents.map((item) => (
                 <DirectoryTreeItem
                     key={item.id}
                     sidebarCollapsed={props.sidebarCollapsed}
                     directoryListItem={item}
                     indent={0}
+                    visible={true}
                 />
             ))}
         </Stack>

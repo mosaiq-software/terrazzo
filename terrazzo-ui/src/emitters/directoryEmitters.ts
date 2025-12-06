@@ -12,3 +12,11 @@ export const createDirectory = async (sockCtx: SocketContextType, name: string, 
 export const updateDirectoryMetadata = async (sockCtx: SocketContextType, directoryId: DirectoryId, partial: Partial<DirectoryHeader>) => {
     await sockCtx.emit(ClientSE.UPDATE_DIRECTORY_FIELD, { ...partial, id: directoryId });
 };
+
+export const getDirectoryContents = async (sockCtx: SocketContextType, directoryId: DirectoryId) => {
+    return await sockCtx.emit(ClientSE.GET_DIRECTORY_CONTENTS, directoryId);
+};
+
+export const updateDirectoryContents = async (sockCtx: SocketContextType, directoryId: DirectoryId, contents: UID[]) => {
+    await sockCtx.emit(ClientSE.UPDATE_DIRECTORY_CONTENTS, { directoryId, contents });
+};

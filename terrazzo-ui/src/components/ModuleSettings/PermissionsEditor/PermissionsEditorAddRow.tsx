@@ -1,5 +1,5 @@
 import { Avatar, Combobox, Group, InputBase, Text, useCombobox } from '@mantine/core';
-import { PermissionLevel, UserHeader } from '@mosaiq/terrazzo-common/types';
+import { UserHeader } from '@mosaiq/terrazzo-common/types';
 import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
 import { useState } from 'react';
 

@@ -1,7 +1,8 @@
 import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
 import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
-import { createDirectory, getDirectory, updateDirectory } from '@trz-api/controllers/directoryController';
-import { broadcast, broadcastUniqueUpdatesForUpdatedModule } from '@trz-api/utils/socketUtils';
+import { createDirectory, getDirectory, getDirectoryContents, updateDirectory, updateDirectoryContents } from '@trz-api/controllers/directoryController';
+import { syncDirectoryContents } from '@trz-api/utils/broadcasters';
+import { broadcast } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerDirectoryListeners = (socket: Socket, io: Server) => {
@@ -17,7 +18,7 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
     socket.on(ClientSE.CREATE_DIRECTORY, async (data: ClientSEPayload[ClientSE.CREATE_DIRECTORY], reply: ClientSEReply<ClientSE.CREATE_DIRECTORY>) => {
         try {
             const directoryHeader = await createDirectory(data.name, data.parentId);
-            await broadcastUniqueUpdatesForUpdatedModule(socket, io, directoryHeader.id);
+            await syncDirectoryContents(socket, directoryHeader.parentId);
             reply(directoryHeader);
         } catch (error: any) {
             reply(undefined, error.message);
@@ -31,8 +32,27 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
             if (!updatedDir) {
                 throw new Error('No directory found');
             }
-            broadcast<ServerSE.UPDATE_DIRECTORY_FIELD>(socket, ServerSE.UPDATE_DIRECTORY_FIELD, updatedDir, [getRoomCode(RoomType.DATA, data.id)]);
-            await broadcastUniqueUpdatesForUpdatedModule(socket, io, data.id);
+            broadcast(socket, ServerSE.UPDATE_DIRECTORY_FIELD, updatedDir, [getRoomCode(RoomType.DATA, data.id)]);
+            await syncDirectoryContents(socket, updatedDir.parentId);
+            reply(undefined);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.GET_DIRECTORY_CONTENTS, async (data: ClientSEPayload[ClientSE.GET_DIRECTORY_CONTENTS], reply: ClientSEReply<ClientSE.GET_DIRECTORY_CONTENTS>) => {
+        try {
+            const contents = await getDirectoryContents(data);
+            reply(contents);
+        } catch (error: any) {
+            reply(undefined, error.message);
+        }
+    });
+
+    socket.on(ClientSE.UPDATE_DIRECTORY_CONTENTS, async (data: ClientSEPayload[ClientSE.UPDATE_DIRECTORY_CONTENTS], reply: ClientSEReply<ClientSE.UPDATE_DIRECTORY_CONTENTS>) => {
+        try {
+            await updateDirectoryContents(data.directoryId, data.contents);
+            await syncDirectoryContents(socket, data.directoryId);
             reply(undefined);
         } catch (error: any) {
             reply(undefined, error.message);

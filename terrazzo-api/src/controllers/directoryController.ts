@@ -1,6 +1,6 @@
-import { DirectoryHeader, DirectoryId, TrzModuleType } from '@mosaiq/terrazzo-common/types';
+import { DirectoryHeader, DirectoryId, MinimalModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common/types';
 import { createDirectoryDb, DirectoryModelType, getDirectoryByIdDb, updateDirectoryDb } from '@trz-api/persistence/directoryPersistence';
-import { getModuleByIdDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
+import { getModuleByIdDb, getModulesByParentIdDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
 import { createNewModule } from './moduleController';
 
 export const getDirectory = async (id: DirectoryId): Promise<DirectoryHeader | undefined> => {
@@ -34,3 +34,18 @@ export const updateDirectory = async (id: DirectoryId, header: Partial<Directory
     await updateDirectoryDb(id, header);
     await updateModuleDb(id, header);
 };
+
+export const getDirectoryContents = async (dirId: DirectoryId): Promise<MinimalModuleHeader[]> => {
+    const modules = await getModulesByParentIdDb(dirId);
+    // discard unneeded fields for listing to reduce payload size
+    const minimalModules: MinimalModuleHeader[] = modules.map((mod) => ({
+        id: mod.id,
+        parentId: mod.parentId,
+        name: mod.name,
+        type: mod.type,
+        order: mod.order,
+    }));
+    return minimalModules;
+};
+
+export const updateDirectoryContents = async (dirId: DirectoryId, moduleIds: UID[]) => {};

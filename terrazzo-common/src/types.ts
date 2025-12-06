@@ -87,13 +87,6 @@ export interface TextBlock {
     text: string;
 }
 
-export enum PermissionLevel {
-    NONE,
-    VIEW,
-    EDIT,
-    ADMIN,
-}
-
 export enum OrgMembershipLevel {
     MEMBER,
     ADMIN,
@@ -177,24 +170,19 @@ export enum TrzModuleType {
 }
 export type TrzModule = DirectoryHeader | DocumentHeader | BoardHeader;
 
-export interface PermissionRecord {
-    anyonePermissionLevel: PermissionLevel | null;
-    orgPermissionLevel: PermissionLevel | null;
-    userPermissionLevels: Record<UserId, PermissionLevel>;
-}
-
-export interface ModuleHeader extends PermissionRecord {
+export interface MinimalModuleHeader {
     id: UID;
     parentId: UID;
     name: string;
+    type: TrzModuleType;
+    order: number;
+}
+export interface ModuleHeader extends MinimalModuleHeader {
     archived: boolean;
     createdAt: number;
-    type: TrzModuleType;
     orgId: OrganizationId;
-}
-
-export interface ModuleHeaderWithChildren extends ModuleHeader {
-    children?: ModuleHeaderWithChildren[];
+    desiredPermissions: ModulePermissions;
+    effectivePermissions: ModulePermissions;
 }
 
 export interface Role {
@@ -204,6 +192,9 @@ export interface Role {
     color: string;
     defaultPermissions: PermissionFlag[];
 }
+
+export type OverridePermissions = Partial<Record<PermissionFlag, boolean>>;
+export type ModulePermissions = Record<RoleId, OverridePermissions>;
 
 export enum PermissionFlag {
     DUMMY_1 = 'DUMMY_1',
