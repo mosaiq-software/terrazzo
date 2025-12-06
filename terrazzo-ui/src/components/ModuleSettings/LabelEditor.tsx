@@ -116,6 +116,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                     </Tooltip>
                     {editingLabel.id !== TEMPORARY_ID && (
                         <RingHoldingButton
+                            tooltip="Hold to delete label"
                             durationMs={1000}
                             ringSize={50}
                             ringThickness={6}

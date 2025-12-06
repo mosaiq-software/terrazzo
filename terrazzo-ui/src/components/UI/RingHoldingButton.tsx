@@ -1,4 +1,4 @@
-import { Center, RingProgress, UnstyledButton } from '@mantine/core';
+import { Center, RingProgress, Tooltip, UnstyledButton } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
 
@@ -11,6 +11,7 @@ interface RingHoldingButtonProps {
     increment?: number;
     ringSize?: number;
     ringThickness?: number;
+    tooltip?: string;
 }
 const DEFAULT_INCREMENT = 1000 / 60; // 60fps
 export const RingHoldingButton = (props: RingHoldingButtonProps) => {
@@ -49,18 +50,24 @@ export const RingHoldingButton = (props: RingHoldingButtonProps) => {
     }, []);
 
     return (
-        <UnstyledButton
-            onMouseUp={release}
-            onMouseLeave={release}
-            onMouseDown={down}
-            onClick={(e) => e.preventDefault()}
+        <Tooltip
+            label={props.tooltip}
+            withArrow
+            disabled={!props.tooltip}
         >
-            <RingProgress
-                size={props.ringSize}
-                thickness={props.ringThickness}
-                sections={[{ value: 100 * (progress / props.durationMs), color: props.color ?? 'white' }]}
-                label={<Center>{props.children}</Center>}
-            />
-        </UnstyledButton>
+            <UnstyledButton
+                onMouseUp={release}
+                onMouseLeave={release}
+                onMouseDown={down}
+                onClick={(e) => e.preventDefault()}
+            >
+                <RingProgress
+                    size={props.ringSize}
+                    thickness={props.ringThickness}
+                    sections={[{ value: 100 * (progress / props.durationMs), color: props.color ?? 'white' }]}
+                    label={<Center>{props.children}</Center>}
+                />
+            </UnstyledButton>
+        </Tooltip>
     );
 };
