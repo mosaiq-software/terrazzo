@@ -190,6 +190,7 @@ export interface Role {
     orgId: OrganizationId;
     name: string;
     color: string;
+    order: number;
     defaultPermissions: PermissionFlag[];
 }
 
