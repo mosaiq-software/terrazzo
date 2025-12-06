@@ -32,7 +32,10 @@ export const PermissionFancySwitch = (props: PermissionFancySwitchProps) => {
             wrap="nowrap"
             justify="space-between"
         >
-            <Stack gap={0}>
+            <Stack
+                gap={0}
+                flex={1}
+            >
                 <Text size="sm">{permissionName}</Text>
                 <Text
                     size="sm"
