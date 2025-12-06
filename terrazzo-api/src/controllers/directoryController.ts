@@ -48,4 +48,6 @@ export const getDirectoryContents = async (dirId: DirectoryId): Promise<MinimalM
     return minimalModules;
 };
 
-export const updateDirectoryContents = async (dirId: DirectoryId, moduleIds: UID[]) => {};
+export const updateDirectoryContents = async (dirId: DirectoryId, moduleIds: UID[]) => {
+    throw new Error('updateDirectoryContents not implemented');
+};

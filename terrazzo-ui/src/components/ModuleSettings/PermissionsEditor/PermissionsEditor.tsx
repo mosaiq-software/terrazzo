@@ -26,6 +26,13 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
         });
     };
 
+    let noSelectionMessage = <Text c="dimmed">Select a role to view or edit its permissions.</Text>;
+    if (orgCtx.roles.length === 0) {
+        noSelectionMessage = <Text c="dimmed">No roles available. Please create roles in the Organization Settings.</Text>;
+    } else if (assignedRoles.length === 0) {
+        noSelectionMessage = <Text c="dimmed">No roles assigned to this module. Use the "Add Role" button to assign roles.</Text>;
+    }
+
     return (
         <Fieldset legend="Permissions">
             <RoleTabs
@@ -79,7 +86,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                                 {unAssignedRoles.length === 0 && (
                                     <Box
                                         style={{
-                                            color: '#888',
+                                            color: 'dimmed',
                                             fontSize: '14px',
                                             textAlign: 'center',
                                             padding: '8px',
@@ -92,10 +99,10 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                         </Menu.Dropdown>
                     </Menu>
                 }
-                noSelectionMessage={orgCtx.roles.length === 0 ? <Text c="dimmed">No roles available. Please create roles in the Organization Settings.</Text> : assignedRoles.length === 0 ? <Text c="dimmed">No roles assigned to this module. Use the "Add Role" button to assign roles.</Text> : <Text c="dimmed">Select a role to view or edit its permissions.</Text>}
+                noSelectionMessage={noSelectionMessage}
                 selectedRolePanel={(role: Role) => (
                     <PermissionsEditorPermissionsList
-                        rolePermissionsOverride={props.desiredPermissions[role.id]}
+                        rolePermissionsOverride={props.desiredPermissions[role.id] || {}}
                         onChangeOverride={(newOverride) => {
                             handleChangeRolePerms(role.id, newOverride);
                         }}

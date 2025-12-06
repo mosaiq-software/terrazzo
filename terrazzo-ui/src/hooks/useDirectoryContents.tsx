@@ -33,7 +33,7 @@ export const useDirectoryContents = (moduleId: UID | undefined, moduleType: TrzM
             }
         };
         fetchDirectoryContents();
-    }, [moduleId, sockCtx.connected]);
+    }, [moduleId, moduleType, sockCtx.connected]);
 
     useSocketListener(
         ServerSE.UPDATE_DIRECTORY_CONTENTS,
