@@ -45,7 +45,12 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
                     setDirectoryEdits({ ...directoryEdits, name: e.target.value });
                 }}
             />
-            <PermissionsEditor moduleId={props.directoryId} />
+            <PermissionsEditor
+                desiredPermissions={directoryEdits.desiredPermissions ?? directory.desiredPermissions}
+                onChange={(newPermissions) => {
+                    setDirectoryEdits({ ...directoryEdits, desiredPermissions: newPermissions });
+                }}
+            />
             <Button
                 disabled={Object.keys(directoryEdits).length === 0}
                 onClick={onSave}

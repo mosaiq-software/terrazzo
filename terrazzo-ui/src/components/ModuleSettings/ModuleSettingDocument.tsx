@@ -45,7 +45,12 @@ export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
                     setDocumentEdits({ ...documentEdits, name: e.target.value });
                 }}
             />
-            <PermissionsEditor moduleId={props.documentId} />
+            <PermissionsEditor
+                desiredPermissions={documentEdits.desiredPermissions ?? document.desiredPermissions}
+                onChange={(newPermissions) => {
+                    setDocumentEdits({ ...documentEdits, desiredPermissions: newPermissions });
+                }}
+            />
             <Button
                 disabled={Object.keys(documentEdits).length === 0}
                 onClick={onSave}

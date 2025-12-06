@@ -79,72 +79,79 @@ const OrganizationPage = (): React.JSX.Element => {
 
     return (
         <ScrollArea h={`calc(100vh - ${uiCtx.navbarHeight}px)`}>
-            <Stack
-                bg="#15161A"
-                mih="100vh"
-                pb="10vh"
-                align="center"
+            <Group
+                gap={0}
+                justify="center"
+                w="100%"
             >
-                <Box
-                    py="25"
+                <Stack
+                    bg="#15161A"
+                    mih="100vh"
+                    pb="10vh"
+                    align="center"
                     w="80%"
                 >
-                    <Group
-                        gap="xl"
-                        pl="50"
+                    <Box
+                        py="25"
+                        w="100%"
                     >
-                        <Avatar
-                            src={orgCtx.active.logoUrl ?? undefined}
-                            name={orgCtx.active.name}
-                            color={'initials'}
-                            size={'75'}
-                            radius={'lg'}
-                        />
-                        <Flex direction="column">
-                            <Title c="white">{orgCtx.active.name}</Title>
-                            <Text c="#6C6C6C">{orgCtx.active.description}</Text>
-                        </Flex>
-                    </Group>
-                    <Tabs
-                        value={getTab()}
-                        pt="30"
-                        onChange={onChangeTab}
-                        color="#F2187E"
-                        variant="default"
-                    >
-                        <Tabs.List>
-                            {Object.keys(tabs).map((t) => {
-                                return (
-                                    <Tabs.Tab
-                                        value={t}
-                                        key={t}
-                                    >
-                                        <Text
-                                            c="white"
-                                            fw="bold"
-                                        >
-                                            {t}
-                                        </Text>
-                                    </Tabs.Tab>
-                                );
-                            })}
-                            <Flex
-                                ml="auto"
-                                align="center"
-                            >
-                                <AvatarRow
-                                    users={orgCtx.members.map((m) => m.user)}
-                                    maxUsers={5}
-                                    showProfilePopover
-                                    showTooltip
-                                    animateOnHover
-                                />
+                        <Group
+                            gap="xl"
+                            pl="50"
+                        >
+                            <Avatar
+                                src={orgCtx.active.logoUrl ?? undefined}
+                                name={orgCtx.active.name}
+                                color={'initials'}
+                                size={'75'}
+                                radius={'lg'}
+                            />
+                            <Flex direction="column">
+                                <Title c="white">{orgCtx.active.name}</Title>
+                                <Text c="#6C6C6C">{orgCtx.active.description}</Text>
                             </Flex>
-                        </Tabs.List>
-                    </Tabs>
-                </Box>
-                {tabs[getTab()]}
-            </Stack>
+                        </Group>
+                        <Tabs
+                            value={getTab()}
+                            pt="30"
+                            onChange={onChangeTab}
+                            color="#F2187E"
+                            variant="default"
+                        >
+                            <Tabs.List>
+                                {Object.keys(tabs).map((t) => {
+                                    return (
+                                        <Tabs.Tab
+                                            value={t}
+                                            key={t}
+                                        >
+                                            <Text
+                                                c="white"
+                                                fw="bold"
+                                            >
+                                                {t}
+                                            </Text>
+                                        </Tabs.Tab>
+                                    );
+                                })}
+                                <Flex
+                                    ml="auto"
+                                    align="center"
+                                >
+                                    <AvatarRow
+                                        users={orgCtx.members.map((m) => m.user)}
+                                        maxUsers={5}
+                                        showProfilePopover
+                                        showTooltip
+                                        animateOnHover
+                                    />
+                                </Flex>
+                            </Tabs.List>
+                        </Tabs>
+                    </Box>
+                    {tabs[getTab()]}
+                </Stack>
+            </Group>
         </ScrollArea>
     );
 };

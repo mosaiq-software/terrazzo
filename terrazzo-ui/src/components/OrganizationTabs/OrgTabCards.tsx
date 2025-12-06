@@ -8,12 +8,12 @@ export const OrgTabCards = (props: OrgTabCardsProps) => {
     return (
         <Box
             style={{
-                width: '80%',
                 display: 'flex',
                 flexDirection: 'column',
                 flexWrap: 'nowrap',
                 alignItems: 'flex-start',
                 justifyContent: 'flex-start',
+                width: '100%',
             }}
         >
             <Title

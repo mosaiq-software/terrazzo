@@ -58,7 +58,12 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
                     setBoardEdits({ ...boardEdits, boardCode: e.target.value });
                 }}
             />
-            <PermissionsEditor moduleId={props.boardId} />
+            <PermissionsEditor
+                desiredPermissions={boardEdits.desiredPermissions ?? boardData.desiredPermissions}
+                onChange={(newPermissions) => {
+                    setBoardEdits({ ...boardEdits, desiredPermissions: newPermissions });
+                }}
+            />
             <Button
                 disabled={Object.keys(boardEdits).length === 0}
                 onClick={onSave}
