@@ -1,0 +1,27 @@
+import { OrganizationId, UID } from '../genericTypes';
+import { ModulePermissions } from '../permissionTypes';
+
+export enum TrzModuleType {
+    Directory = 'directory',
+    Document = 'document',
+    Board = 'board',
+
+    /** Technically an org is just a top-level module, but we should never use it as one */
+    Organization = 'organization',
+}
+
+export interface MinimalModuleHeader {
+    id: UID;
+    parentId: UID;
+    name: string;
+    type: TrzModuleType;
+    order: number;
+}
+
+export interface ModuleHeader extends MinimalModuleHeader {
+    archived: boolean;
+    createdAt: number;
+    orgId: OrganizationId;
+    desiredPermissions: ModulePermissions;
+    effectivePermissions: ModulePermissions;
+}

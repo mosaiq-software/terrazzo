@@ -1,4 +1,4 @@
-import { BoardId, List, MembershipRecord, OrganizationId, OrgMembershipLevel, UserHeader, UserId } from '@mosaiq/terrazzo-common/types';
+import { BoardId, List, MembershipRecord, OrganizationId, OrgMembershipLevel, UserHeader, UserId } from '@mosaiq/terrazzo-common';
 import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createUserHeaderDb, getUserHeaderByGithubIdDb, getUserHeaderByIdDb, getUserHeaderByUsernameDb, updateUserHeaderDb } from '@trz-api/persistence/userPersistence';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';

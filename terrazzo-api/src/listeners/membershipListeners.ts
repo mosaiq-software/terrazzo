@@ -1,4 +1,4 @@
-import { ClientSE, ClientSEPayload, ClientSEReply } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply } from '@mosaiq/terrazzo-common';
 import { getMembersInOrg, removeMembership, updateMembership } from '@trz-api/controllers/membershipController';
 import { syncMembersInOrg, syncUsersOrgs } from '@trz-api/utils/broadcasters';
 import { Server, Socket } from 'socket.io';

@@ -1,7 +1,6 @@
 import { Button, Group, Text, Tooltip } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { Invite } from '@mosaiq/terrazzo-common/types';
-import { isInviteExpired } from '@mosaiq/terrazzo-common/utils/inviteUtils';
+import { Invite, isInviteExpired } from '@mosaiq/terrazzo-common';
 import { formatTimeAgo } from '@trz/util/dateUtils';
 import { uuidToReadableUuid } from '@trz/util/idUtils';
 import { getInviteLink } from '@trz/util/linkUtils';

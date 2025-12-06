@@ -1,5 +1,5 @@
 import { Button, Fieldset, Loader, Stack, TextInput } from '@mantine/core';
-import { BoardHeader, BoardId } from '@mosaiq/terrazzo-common/types';
+import { BoardHeader, BoardId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateBoardField } from '@trz/emitters';
 import { useBoard } from '@trz/hooks/useBoard';

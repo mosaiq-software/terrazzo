@@ -1,10 +1,10 @@
-import * as Y from 'yjs';
+import { TextBlockId } from '@mosaiq/terrazzo-common';
+import { loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
+import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
+import * as Y from 'yjs';
 import { Document } from './document';
-import { Observable } from 'lib0/observable';
-import { loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
-import { TextBlockId } from '@mosaiq/terrazzo-common/types';
 
 /**
  * Simple persistence object using string storage

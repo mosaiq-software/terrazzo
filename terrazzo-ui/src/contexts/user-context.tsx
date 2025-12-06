@@ -1,6 +1,5 @@
 import { readSessionStorageValue, useSessionStorage } from '@mantine/hooks';
-import { LocalStorageKey } from '@mosaiq/terrazzo-common/constants';
-import { UserHeader } from '@mosaiq/terrazzo-common/types';
+import { LocalStorageKey, UserHeader } from '@mosaiq/terrazzo-common';
 import { getUserDataFromGithub, revokeUserAccessToGithubAuth, tryLoginWithGithub } from '@trz/util/githubAuth';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setUpUserData } from '@trz/util/userUtils';

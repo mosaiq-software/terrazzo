@@ -1,7 +1,6 @@
 import { Box, Group, Loader, ScrollArea, Stack, Text } from '@mantine/core';
 import { useIdle } from '@mantine/hooks';
-import { DocumentId } from '@mosaiq/terrazzo-common/types';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { DocumentId, fullName } from '@mosaiq/terrazzo-common';
 import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/CollaborativeTextArea';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';

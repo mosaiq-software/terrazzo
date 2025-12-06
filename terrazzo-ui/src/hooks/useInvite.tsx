@@ -1,4 +1,4 @@
-import { Invite, InviteId, OrganizationHeader } from '@mosaiq/terrazzo-common/types';
+import { Invite, InviteId, OrganizationHeader } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getInvite, getOrganizationData } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';

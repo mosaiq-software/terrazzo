@@ -2,9 +2,7 @@ import { closestCenter, CollisionDetection, DndContext, DragEndEvent, DragOverla
 import { DragAbortEvent, DragCancelEvent, DragOverEvent } from '@dnd-kit/core/dist/types';
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Container } from '@mantine/core';
-import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { BoardId, BoardRes, CardId, Label, ListId, UID } from '@mosaiq/terrazzo-common/types';
-import { arrayMoveInPlace, updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { arrayMoveInPlace, BoardId, BoardRes, CardId, Label, ListId, RoomType, ServerSE, UID, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import CardDetails from '@trz/components/Boards/CardDetails/CardDetails';
 import CreateList from '@trz/components/Boards/CreateList';
 import SortableList from '@trz/components/DragAndDrop/SortableList';

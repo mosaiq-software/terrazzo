@@ -1,5 +1,5 @@
-import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
+import { Sequelize } from 'sequelize';
 dotenv.config({ path: '../.env' });
 
 export const sequelize = new Sequelize({

@@ -1,4 +1,4 @@
-import { UserHeader } from '../types';
+import { UserHeader } from '../types/userTypes';
 
 export const fullName = (user: UserHeader | undefined | null) => {
     if (!user) {

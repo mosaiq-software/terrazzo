@@ -1,4 +1,4 @@
-import { ServerSE, ServerSocketIOEvent, SocketHandshakeAuth } from '@mosaiq/terrazzo-common/socketTypes';
+import { ServerSE, ServerSocketIOEvent, SocketHandshakeAuth } from '@mosaiq/terrazzo-common';
 import { instrument } from '@socket.io/admin-ui';
 import { getUserPreview } from '@trz-api/controllers/userController';
 import * as socketListeners from '@trz-api/listeners';

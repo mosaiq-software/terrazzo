@@ -1,6 +1,6 @@
 import { Button, Group, Text } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
-import { MinimalModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common/types';
+import { MinimalModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useUI } from '@trz/contexts/ui-context';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
 import { useContextMenu } from 'mantine-contextmenu';

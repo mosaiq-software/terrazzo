@@ -1,4 +1,4 @@
-import { Invite } from '../types';
+import { Invite } from '../types/inviteTypes';
 
 export const isInviteExpired = (invite: Invite): boolean => {
     if (invite.revokedAt !== null) {

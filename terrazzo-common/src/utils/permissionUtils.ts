@@ -1,4 +1,5 @@
-import { ModulePermissions, OverridePermissions, PermissionFlag, RoleId } from '../types';
+import { RoleId } from '../types/genericTypes';
+import { PermissionFlag, OverridePermissions, ModulePermissions } from '../types/permissionTypes';
 import { recordKeys, recordValues } from './arrayUtils';
 
 /**

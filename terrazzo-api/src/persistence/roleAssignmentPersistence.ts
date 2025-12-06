@@ -1,4 +1,4 @@
-import { OrganizationId, RoleId, UserId } from '@mosaiq/terrazzo-common/types';
+import { OrganizationId, RoleId, UserId } from '@mosaiq/terrazzo-common';
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model } from 'sequelize';
 

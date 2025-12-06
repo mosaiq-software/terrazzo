@@ -1,5 +1,5 @@
 import { Box, Fieldset, Group, ScrollArea, Space, Stack, Title } from '@mantine/core';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { fullName } from '@mosaiq/terrazzo-common';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';

@@ -1,5 +1,4 @@
-import { RestRoutes } from '@mosaiq/terrazzo-common/apiTypes';
-import { UserId } from '@mosaiq/terrazzo-common/types';
+import { RestRoutes, UserId } from '@mosaiq/terrazzo-common';
 import { callTrzApi } from '@trz/util/apiUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 

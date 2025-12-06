@@ -1,6 +1,6 @@
 import { Avatar, Button } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { fullName } from '@mosaiq/terrazzo-common';
 import { useUser } from '@trz/contexts/user-context';
 import { FaBell } from 'react-icons/fa';
 

@@ -1,4 +1,4 @@
-import { DirectoryHeader, DirectoryId, MinimalModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common/types';
+import { DirectoryHeader, DirectoryId, MinimalModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
 import { createDirectoryDb, DirectoryModelType, getDirectoryByIdDb, updateDirectoryDb } from '@trz-api/persistence/directoryPersistence';
 import { getModuleByIdDb, getModulesByParentIdDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
 import { createNewModule } from './moduleController';

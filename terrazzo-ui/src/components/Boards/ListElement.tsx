@@ -1,9 +1,7 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button, CloseButton, Flex, FocusTrap, Group, Menu, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { getHotkeyHandler, useClickOutside } from '@mantine/hooks';
-import { ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { CardId, ListHeader, ListId } from '@mosaiq/terrazzo-common/types';
-import { updateBaseFromPartial } from '@mosaiq/terrazzo-common/utils/arrayUtils';
+import { CardId, ListHeader, ListId, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createCard, getListData, updateListField } from '@trz/emitters';

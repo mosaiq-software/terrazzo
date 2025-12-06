@@ -1,5 +1,5 @@
 import { ActionIcon, Badge, Box, Group, GroupProps, Menu, Stack } from '@mantine/core';
-import { RoleId, UserId } from '@mosaiq/terrazzo-common/types';
+import { RoleId, UserId } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { setRoleIdsForUserInOrg } from '@trz/emitters/roleEmitters';

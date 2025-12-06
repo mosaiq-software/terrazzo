@@ -1,4 +1,4 @@
-import { GithubUserProfile } from '@mosaiq/terrazzo-common/types';
+import { GithubUserProfile } from '@mosaiq/terrazzo-common';
 import axios from 'axios';
 import queryString from 'query-string';
 

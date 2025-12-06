@@ -1,5 +1,4 @@
-import { Invite, InviteId, MembershipRecord, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common/types';
-import { isInviteExpired } from '@mosaiq/terrazzo-common/utils/inviteUtils';
+import { Invite, InviteId, isInviteExpired, MembershipRecord, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common';
 import { createInviteRecord, getAllInviteRecordsForOrganization, getInviteRecordById, updateInviteRecord } from '@trz-api/persistence/invitePersistence';
 import { getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
 import { upsertMembership } from './membershipController';

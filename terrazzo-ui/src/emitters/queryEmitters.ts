@@ -1,4 +1,4 @@
-import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
 export const getSearchResults = async (sockCtx: SocketContextType, query: string, searchSessionId: string) => {

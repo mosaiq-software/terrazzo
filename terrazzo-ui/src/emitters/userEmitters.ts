@@ -1,5 +1,4 @@
-import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { UserId } from '@mosaiq/terrazzo-common/types';
+import { ClientSE, UserId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
 export const getUserHeader = async (sockCtx: SocketContextType, userId: UserId) => {

@@ -1,6 +1,4 @@
-import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { DirectoryId, InviteId, OrganizationId, UID, UserId } from '@mosaiq/terrazzo-common/types';
-import { getRoomCode, RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { DirectoryId, getRoomCode, InviteId, OrganizationId, RoomSpecifier, RoomType, ServerSE, UID, UserId } from '@mosaiq/terrazzo-common';
 import { getDirectoryContents } from '@trz-api/controllers/directoryController';
 import { getAllInvitesForOrg } from '@trz-api/controllers/inviteController';
 import { getMembersInOrg, getOrgsForUser } from '@trz-api/controllers/membershipController';

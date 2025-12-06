@@ -1,6 +1,4 @@
-import { RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { MinimalModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common/types';
-import { RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { MinimalModuleHeader, RoomSpecifier, RoomType, ServerSE, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getDirectoryContents } from '@trz/emitters/directoryEmitters';
 import { NoteType, notify } from '@trz/util/notifications';

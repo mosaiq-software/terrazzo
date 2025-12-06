@@ -1,4 +1,4 @@
-import { UID } from './types';
+import { UID } from './types/genericTypes';
 
 export enum LocalStorageKey {
     GITHUB_ACCESS_TOKEN = 'GITHUB_ACCESS_TOKEN',

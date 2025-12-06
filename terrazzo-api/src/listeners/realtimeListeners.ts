@@ -1,4 +1,4 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
+import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { broadcastToMyRooms, getSocketData, joinRoom, leaveRoom, setSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 

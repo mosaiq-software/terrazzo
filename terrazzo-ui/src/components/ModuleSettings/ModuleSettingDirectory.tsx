@@ -1,5 +1,5 @@
 import { Button, Loader, Stack, TextInput } from '@mantine/core';
-import { DirectoryHeader, DirectoryId } from '@mosaiq/terrazzo-common/types';
+import { DirectoryHeader, DirectoryId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
 import { useDirectory } from '@trz/hooks/useDirectory';

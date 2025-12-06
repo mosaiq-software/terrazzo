@@ -1,5 +1,4 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { getRoomCode } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { ClientSE, ClientSEPayload, ClientSEReply, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { addBoard, getBoardRes, updateBoardFromPartial } from '@trz-api/controllers/boardController';
 import { syncDirectoryContents, syncParentsDirectoryContents } from '@trz-api/utils/broadcasters';
 import { broadcast } from '@trz-api/utils/socketUtils';

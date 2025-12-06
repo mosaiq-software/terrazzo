@@ -1,5 +1,4 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, RoomType, ServerSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { getRoomCode, RoomSpecifier } from '@mosaiq/terrazzo-common/utils/socketUtils';
+import { ClientSE, ClientSEPayload, ClientSEReply, getRoomCode, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { createRole, deleteRole, getRolesForOrg, updateRole } from '@trz-api/controllers/roleController';
 import { getRoleIdsForUserInOrg, setRoleIdsForUserInOrg } from '@trz-api/persistence/roleAssignmentPersistence';
 import { syncRolesForUserInOrg } from '@trz-api/utils/broadcasters';

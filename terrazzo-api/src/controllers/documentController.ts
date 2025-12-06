@@ -1,4 +1,4 @@
-import { DocumentHeader, DocumentId, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common/types';
+import { DocumentHeader, DocumentId, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common';
 import { createDocumentDb, DocumentModelType, getDocumentByIdDb, updateDocumentDb } from '@trz-api/persistence/documentPersistence';
 import { getModuleByIdDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
 import { createNewModule } from './moduleController';

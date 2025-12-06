@@ -1,6 +1,5 @@
 import { Avatar, MantineSize, Menu, Tooltip } from '@mantine/core';
-import { UserHeader } from '@mosaiq/terrazzo-common/types';
-import { fullName } from '@mosaiq/terrazzo-common/utils/textUtils';
+import { fullName, UserHeader } from '@mosaiq/terrazzo-common';
 import { completelyCaptureEvent } from '@trz/util/eventUtils';
 import { forwardRef, useState } from 'react';
 import { UserProfilePopup } from './UserProfilePopup';

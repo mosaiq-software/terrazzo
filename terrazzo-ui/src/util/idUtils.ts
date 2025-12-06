@@ -1,4 +1,4 @@
-import { UID } from '@mosaiq/terrazzo-common/types';
+import { UID } from '@mosaiq/terrazzo-common';
 
 /**
  * Extracts a UUID from a given string. If the string is a valid UUID, it returns it directly.

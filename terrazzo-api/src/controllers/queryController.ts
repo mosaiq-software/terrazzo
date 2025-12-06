@@ -1,4 +1,4 @@
-import { OrganizationId, QueryableDatapoint, QueryResult, UserId } from '@mosaiq/terrazzo-common/types';
+import { OrganizationId, QueryableDatapoint, QueryResult, UserId } from '@mosaiq/terrazzo-common';
 import { getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgById } from '@trz-api/persistence/organizationPersistence';
 import Fuse from 'fuse.js';

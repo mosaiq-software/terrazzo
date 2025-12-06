@@ -1,4 +1,4 @@
-import { ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common/socketTypes';
+import { ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useEffect } from 'react';
 

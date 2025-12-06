@@ -1,5 +1,5 @@
 import { defaultDropAnimationSideEffects, DropAnimation } from '@dnd-kit/core';
-import { CardId, ListId, UID } from '@mosaiq/terrazzo-common/types';
+import { CardId, ListId, UID } from '@mosaiq/terrazzo-common';
 import CardElement from '@trz/components/Boards/CardElement';
 import ListElement from '@trz/components/Boards/ListElement';
 

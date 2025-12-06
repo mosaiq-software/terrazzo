@@ -1,5 +1,5 @@
 import { Box, Button, Text } from '@mantine/core';
-import { MembershipRecord, OrganizationHeader, Role, RoleId } from '@mosaiq/terrazzo-common/types';
+import { MembershipRecord, OrganizationHeader, Role, RoleId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createRoleOnOrg, deleteRole, updateRole } from '@trz/emitters/roleEmitters';
 import { generateRandomColor } from '@trz/util/colorUtils';

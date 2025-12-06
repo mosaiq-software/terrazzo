@@ -1,5 +1,4 @@
-import { ClientSE } from '@mosaiq/terrazzo-common/socketTypes';
-import { OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common/types';
+import { ClientSE, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
 export const getOrganizationMemberships = async (sockCtx: SocketContextType, orgId: OrganizationId) => {
