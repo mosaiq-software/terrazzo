@@ -1,5 +1,5 @@
-import { Divider, Group, Stack, Title } from '@mantine/core';
-import { OverridePermissions, PermissionFlagData } from '@mosaiq/terrazzo-common';
+import { Group, Stack, Title } from '@mantine/core';
+import { OverridePermissions, PermissionFlagCategory, PermissionFlagData } from '@mosaiq/terrazzo-common';
 import { PermissionFancySwitch } from '@trz/components/Roles/PermissionFancySwitch';
 import { PermissionFlagGrouper } from '@trz/components/Roles/PermissionFlagGrouper';
 import { RingHoldingButton } from '@trz/components/UI/RingHoldingButton';
@@ -17,6 +17,7 @@ export const PermissionsEditorPermissionsList = (props: PermissionsEditorPermiss
             p="md"
         >
             <PermissionFlagGrouper
+                excludeCategories={[PermissionFlagCategory.ORG_LEVEL]}
                 permissionItem={(permission) => {
                     const permData = PermissionFlagData[permission];
                     const state = props.rolePermissionsOverride[permission];
@@ -36,7 +37,6 @@ export const PermissionsEditorPermissionsList = (props: PermissionsEditorPermiss
                     );
                 }}
             />
-            <Divider />
             <Title order={5}>Danger Zone</Title>
             <Group>
                 <RingHoldingButton
