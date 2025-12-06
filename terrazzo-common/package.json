@@ -1,7 +1,8 @@
 {
     "name": "@mosaiq/terrazzo-common",
     "version": "1.6.2",
-    "main": "src/index.ts",
+    "main": "index.js",
+    "types": "index.d.ts",
     "type": "module",
     "scripts": {
         "build": "tsc && tsc-alias && npm run prepublish-cleanup",
