@@ -11,6 +11,7 @@ export const createRole = async (name: string, color: string, orgId: Organizatio
         name,
         color,
         orgId,
+        defaultPermissions: [],
     };
     await createRoleOnOrgDb(role);
     return role;

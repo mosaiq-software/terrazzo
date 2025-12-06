@@ -12,6 +12,7 @@ RoleModel.init(
         orgId: DataTypes.STRING,
         name: DataTypes.STRING,
         color: DataTypes.STRING,
+        defaultPermissions: DataTypes.JSON,
     },
     { sequelize }
 );
@@ -32,13 +33,7 @@ export const createRoleOnOrgDb = async (role: Role) => {
 };
 
 export const updateRoleDb = async (role: Partial<Role> & { id: RoleId }) => {
-    const [updated] = await RoleModel.update(
-        {
-            name: role.name,
-            color: role.color,
-        },
-        { where: { id: role.id } }
-    );
+    const [updated] = await RoleModel.update({ ...role }, { where: { id: role.id } });
     return updated;
 };
 

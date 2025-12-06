@@ -202,4 +202,33 @@ export interface Role {
     orgId: OrganizationId;
     name: string;
     color: string;
+    defaultPermissions: PermissionFlag[];
 }
+
+export enum PermissionFlag {
+    DUMMY_1 = 'DUMMY_1',
+    DUMMY_2 = 'DUMMY_2',
+    DUMMY_3 = 'DUMMY_3',
+}
+export interface PermissionFlagData {
+    flag: PermissionFlag;
+    title: string;
+    description: string;
+}
+export const PermissionFlagData: Record<PermissionFlag, PermissionFlagData> = {
+    [PermissionFlag.DUMMY_1]: {
+        flag: PermissionFlag.DUMMY_1,
+        title: 'Dummy Permission 1',
+        description: 'This is a dummy permission for testing purposes.',
+    },
+    [PermissionFlag.DUMMY_2]: {
+        flag: PermissionFlag.DUMMY_2,
+        title: 'Dummy Permission 2',
+        description: 'This is another dummy permission for testing purposes.',
+    },
+    [PermissionFlag.DUMMY_3]: {
+        flag: PermissionFlag.DUMMY_3,
+        title: 'Dummy Permission 3',
+        description: 'This is yet another dummy permission for testing purposes.',
+    },
+};
