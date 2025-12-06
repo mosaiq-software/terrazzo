@@ -1,9 +1,10 @@
 import { Button, ColorInput, Divider, Group, Stack, Title } from '@mantine/core';
-import { PermissionFlag, PermissionFlagData, Role, RoleId, withPermissionFlag } from '@mosaiq/terrazzo-common';
+import { PermissionFlagData, Role, RoleId, withPermissionFlag } from '@mosaiq/terrazzo-common';
 import { useCallback, useEffect, useState } from 'react';
 import { MdOutlineDelete } from 'react-icons/md';
 import EditableTextbox from '../UI/EditableTextbox';
 import { RingHoldingButton } from '../UI/RingHoldingButton';
+import { PermissionFlagGrouper } from './PermissionFlagGrouper';
 import { PermissionToggle } from './PermissionToggle';
 
 interface RoleEditorProps {
@@ -73,21 +74,23 @@ export const RoleEditor = (props: RoleEditorProps) => {
             <Divider />
             <Title order={5}>Default Role Permissions</Title>
             <Stack gap="md">
-                {Object.values(PermissionFlag).map((permission) => {
-                    const permData = PermissionFlagData[permission];
-                    const enabled = editingRole.defaultPermissions.includes(permission);
-                    return (
-                        <PermissionToggle
-                            key={permission}
-                            permissionName={permData.title}
-                            permissionDescription={permData.description}
-                            isEnabled={enabled}
-                            onToggle={(checked) => {
-                                change('defaultPermissions', withPermissionFlag(editingRole.defaultPermissions, permission, checked));
-                            }}
-                        />
-                    );
-                })}
+                <PermissionFlagGrouper
+                    permissionItem={(permission) => {
+                        const permData = PermissionFlagData[permission];
+                        const enabled = editingRole.defaultPermissions.includes(permission);
+                        return (
+                            <PermissionToggle
+                                key={permission}
+                                permissionName={permData.title}
+                                permissionDescription={permData.description}
+                                isEnabled={enabled}
+                                onToggle={(checked) => {
+                                    change('defaultPermissions', withPermissionFlag(editingRole.defaultPermissions, permission, checked));
+                                }}
+                            />
+                        );
+                    }}
+                />
             </Stack>
             <Divider />
             <Title order={5}>Danger Zone</Title>

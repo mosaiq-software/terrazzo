@@ -2,9 +2,9 @@ import { BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, ListId, Tr
 import { addList, getListAndCardIdsOnBoard, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
 import { BoardModelType, createBoard, getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
 import { createLabelOnBoard, deleteLabel, deleteLabelingOnCardsByLabelId, getLabelById, getLabelsByBoardId, updateLabel } from '@trz-api/persistence/labelPersistence';
-import { getModuleByIdDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
+import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
-import { createNewModule } from './moduleController';
+import { createNewModule, updateModule } from './moduleController';
 
 export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefined> {
     const boardModel = await getBoardById(boardID);
@@ -51,7 +51,7 @@ export async function addBoard(name: string, boardCode: string, parentId: Direct
 export async function updateBoardFromPartial(boardId: BoardId, partial: Partial<BoardHeader>) {
     try {
         await updateBoard(boardId, partial);
-        await updateModuleDb(boardId, partial);
+        await updateModule(boardId, partial);
     } catch (e: any) {
         throw new Error('Failed to update board ' + e);
     }

@@ -1,4 +1,4 @@
-import { Button, Fieldset, Loader, Stack, TextInput } from '@mantine/core';
+import { Fieldset, Loader, TextInput } from '@mantine/core';
 import { BoardHeader, BoardId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateBoardField } from '@trz/emitters';
@@ -6,7 +6,7 @@ import { useBoard } from '@trz/hooks/useBoard';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
 import { LabelEditor } from './LabelEditor';
-import { PermissionsEditor } from './PermissionsEditor/PermissionsEditor';
+import { ModuleSettingsLayout } from './ModuleSettingsLayout';
 
 interface ModuleSettingsBoardProps {
     boardId: BoardId;
@@ -22,7 +22,6 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
         try {
             await updateBoardField(sockCtx, props.boardId, boardEdits);
             setBoardEdits({});
-            props.onClose();
         } catch (e) {
             notify(NoteType.BOARD_DATA_ERROR, e);
         }
@@ -33,19 +32,21 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
     }
 
     return (
-        <Stack>
-            <TextInput
-                labelProps={{
-                    c: 'white',
-                }}
-                label="Board Name"
-                placeholder="My Board"
-                required
-                value={boardEdits.name ?? boardData.name ?? ''}
-                onChange={(e) => {
-                    setBoardEdits({ ...boardEdits, name: e.target.value });
-                }}
-            />
+        <ModuleSettingsLayout
+            moduleHeader={{
+                ...boardData,
+                ...boardEdits,
+            }}
+            onChangeTitle={(newTitle) => {
+                setBoardEdits({ ...boardEdits, name: newTitle });
+            }}
+            onChangePermissions={(newPermissions) => {
+                setBoardEdits({ ...boardEdits, desiredPermissions: newPermissions });
+            }}
+            saved={Object.keys(boardEdits).length === 0}
+            onSave={onSave}
+            onClose={props.onClose}
+        >
             <TextInput
                 w="8rem"
                 labelProps={{
@@ -58,18 +59,6 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
                     setBoardEdits({ ...boardEdits, boardCode: e.target.value });
                 }}
             />
-            <PermissionsEditor
-                desiredPermissions={boardEdits.desiredPermissions ?? boardData.desiredPermissions}
-                onChange={(newPermissions) => {
-                    setBoardEdits({ ...boardEdits, desiredPermissions: newPermissions });
-                }}
-            />
-            <Button
-                disabled={Object.keys(boardEdits).length === 0}
-                onClick={onSave}
-            >
-                Save Changes
-            </Button>
             <Fieldset
                 legend="Labels"
                 bg="transparent"
@@ -79,6 +68,6 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
                     boardId={props.boardId}
                 />
             </Fieldset>
-        </Stack>
+        </ModuleSettingsLayout>
     );
 };
