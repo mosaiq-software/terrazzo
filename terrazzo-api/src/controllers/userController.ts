@@ -114,8 +114,5 @@ export const getUserPreview = async (userId: UserId) => {
 };
 
 export const updateUserData = async (userData: Partial<UserHeader> & { id: UserId }) => {
-    const updated = await updateUserHeaderDb(userData);
-    if (updated === 0) {
-        throw new Error('No user found to update');
-    }
+    await updateUserHeaderDb(userData);
 };
