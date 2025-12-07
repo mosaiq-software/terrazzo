@@ -48,12 +48,17 @@ const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
     useEffect(() => setIdle(idle), [idle]);
 
     const moveMouse = useThrottledCallback((pos: Position) => {
-        sockCtx.volatileEmit<ClientSE.MOUSE_MOVE>(ClientSE.MOUSE_MOVE, { pos, draggingList: props.draggingObject.list, draggingCard: props.draggingObject.card });
+        sockCtx.volatileEmit(ClientSE.MOUSE_MOVE, {
+            pos,
+            draggingList: props.draggingObject.list,
+            draggingCard: props.draggingObject.card,
+            contextId: props.boardId,
+        });
     }, MOUSE_UPDATE_THROTTLE_MS);
 
     const setIdle = useCallback(
         (idle: boolean) => {
-            sockCtx.emit<ClientSE.USER_IDLE>(ClientSE.USER_IDLE, idle);
+            sockCtx.emit(ClientSE.USER_IDLE, idle);
         },
         [sockCtx]
     );
