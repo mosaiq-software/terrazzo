@@ -1,8 +1,8 @@
 import { BoardId, CardId, DirectoryId, DocumentId, LabelId, ListId, OrganizationId, RoleId, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
-import { Board, Label } from '../../modules/board/boardTypes';
-import { Card } from '../../modules/board/cardTypes';
-import { List } from '../../modules/board/listTypes';
+import { BoardHeader, Label } from '../../modules/board/boardTypes';
+import { Card, CardHeader } from '../../modules/board/cardTypes';
+import { List, ListHeader } from '../../modules/board/listTypes';
 import { DirectoryHeader } from '../../modules/directoryTypes';
 import { DocumentHeader } from '../../modules/documentTypes';
 import { MinimalModuleHeader } from '../../modules/moduleTypes';
@@ -57,9 +57,9 @@ export interface ServerSEPayload {
     [ServerSE.ADD_CARD]: Card;
 
     [ServerSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
-    [ServerSE.UPDATE_BOARD_FIELD]: Partial<Board> & { id: BoardId };
-    [ServerSE.UPDATE_LIST_FIELD]: Partial<List> & { id: ListId };
-    [ServerSE.UPDATE_CARD_FIELD]: Partial<Card> & { id: CardId };
+    [ServerSE.UPDATE_BOARD_FIELD]: Partial<BoardHeader> & { id: BoardId };
+    [ServerSE.UPDATE_LIST_FIELD]: Partial<ListHeader> & { id: ListId };
+    [ServerSE.UPDATE_CARD_FIELD]: Partial<CardHeader> & { id: CardId };
     [ServerSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
     [ServerSE.UPDATE_BOARD_LABELS]: { boardId: BoardId; labels: Label[] };
     [ServerSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };

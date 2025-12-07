@@ -1,4 +1,4 @@
-import { CardId, ListId, Position } from '../genericTypes';
+import { CardId, ListId, Position, UID } from '../genericTypes';
 
 export enum RoomType {
     INVALID_DO_NOT_USE = 'INVALID', // Capture case. Do not use!
@@ -19,6 +19,7 @@ export enum RoomSpecifier {
 export type RoomId = `${RoomType}@${string}` | null;
 
 export interface MouseRoomUserData {
+    contextId: UID;
     pos: Position;
     draggingList?: ListId;
     draggingCard?: CardId;

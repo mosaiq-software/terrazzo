@@ -1,8 +1,9 @@
-import { BoardId, ClientSE, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { BoardId, ClientSE } from '@mosaiq/terrazzo-common';
+import { syncBoardLabels, syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { createBoardLabel, removeBoardLabel, updateBoardLabels } from '@trz-api/controllers/boardController';
 import { getBoardIDFromCardID, setCardsLabels } from '@trz-api/controllers/cardController';
 import { userCanEditModule } from '@trz-api/utils/permissions';
-import { broadcast, subscribe } from '@trz-api/utils/socketUtils';
+import { subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerLabelListeners = (socket: Socket, io: Server) => {
@@ -12,7 +13,7 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
         }
         const boardId: BoardId = data.boardId;
         const labels = await createBoardLabel(boardId, data.name, data.color);
-        broadcast(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
+        await syncBoardLabels(io, boardId, labels);
         return undefined;
     });
 
@@ -22,7 +23,7 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
         }
         const boardId: BoardId = data.boardId;
         const labels = await updateBoardLabels(boardId, data.label);
-        broadcast(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
+        await syncBoardLabels(io, boardId, labels);
         return undefined;
     });
 
@@ -32,7 +33,7 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
         }
         const boardId: BoardId = data.boardId;
         const labels = await removeBoardLabel(boardId, data.labelId);
-        broadcast(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
+        await syncBoardLabels(io, boardId, labels);
         return undefined;
     });
 
@@ -42,9 +43,7 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             throw new Error('Insufficient permissions to update labels for cards on this board');
         }
         await setCardsLabels(data.cardId, data.labelIds);
-        if (boardId) {
-            broadcast(socket, ServerSE.UPDATE_CARDS_LABELS, data, [getRoomCode(RoomType.DATA, boardId)]);
-        }
+        await syncCardLabels(io, boardId, data.cardId, data.labelIds);
         return undefined;
     });
 };

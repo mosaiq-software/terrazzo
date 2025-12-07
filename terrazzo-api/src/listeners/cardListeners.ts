@@ -1,9 +1,10 @@
-import { ClientSE, getRoomCode, RoomType, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common';
+import { ClientSE } from '@mosaiq/terrazzo-common';
+import { syncAddCard, syncMovedCard, syncUpdateCardAssignee, syncUpdateCardField } from '@trz-api/broadcasters';
 import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/cardAssignmentController';
 import { addCard, duplicateCard, getBoardIDFromCardID, getSingleFullCard, moveCardToList, updateCardFromPartial } from '@trz-api/controllers/cardController';
 import { getBoardIDFromListID } from '@trz-api/controllers/listController';
 import { userCanEditCardsOnBoard, userCanMoveCardsOnBoard, userCanViewModule } from '@trz-api/utils/permissions';
-import { broadcast, getSocketData, subscribe } from '@trz-api/utils/socketUtils';
+import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerCardListeners = (socket: Socket, io: Server) => {
@@ -26,9 +27,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
         }
         const socketData = getSocketData(socket);
         const card = await addCard(data.listID, data.cardName, undefined, undefined, socketData.user.user.id);
-        if (boardId) {
-            broadcast(socket, ServerSE.ADD_CARD, card, [getRoomCode(RoomType.DATA, boardId)]);
-        }
+        await syncAddCard(io, card, boardId);
         return card.id;
     });
 
@@ -39,9 +38,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
         }
         const socketData = getSocketData(socket);
         const card = await duplicateCard(data.cardId, socketData.user.user.id);
-        if (boardId) {
-            broadcast(socket, ServerSE.ADD_CARD, card, [getRoomCode(RoomType.DATA, boardId)]);
-        }
+        await syncAddCard(io, card, boardId);
         return card.id;
     });
 
@@ -51,9 +48,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
             throw new Error('Insufficient permissions to update this card');
         }
         await updateCardFromPartial(data.id, data);
-        if (boardId) {
-            broadcast(socket, ServerSE.UPDATE_CARD_FIELD, data, [getRoomCode(RoomType.DATA, boardId)]);
-        }
+        await syncUpdateCardField(io, data, boardId);
         return undefined;
     });
 
@@ -63,10 +58,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
             throw new Error('Insufficient permissions to move cards on this board');
         }
         await moveCardToList(data.cardId, data.toList, data.position);
-        const payload: ServerSEPayload[ServerSE.MOVE_CARD] = { ...data };
-        if (boardId) {
-            broadcast(socket, ServerSE.MOVE_CARD, payload, [getRoomCode(RoomType.DATA, boardId)], false);
-        }
+        await syncMovedCard(io, data, boardId);
         return undefined;
     });
 
@@ -81,10 +73,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
         } else {
             await removeAssigneeFromCard(data.cardId, data.userId);
         }
-
-        const payload: ServerSEPayload[ServerSE.UPDATE_CARD_ASSIGNEE] = data;
-        broadcast(socket, ServerSE.UPDATE_CARD_ASSIGNEE, payload, [getRoomCode(RoomType.DATA, boardId)]);
-        broadcast(socket, ServerSE.UPDATE_CARD_ASSIGNEE, payload, [getRoomCode(RoomType.USER, data.userId)]);
+        await syncUpdateCardAssignee(io, data, boardId);
         return undefined;
     });
 };

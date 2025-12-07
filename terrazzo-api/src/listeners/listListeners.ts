@@ -1,7 +1,8 @@
-import { ClientSE, getRoomCode, RoomType, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common';
+import { ClientSE } from '@mosaiq/terrazzo-common';
+import { syncAddList, syncMoveList, syncUpdateListField } from '@trz-api/broadcasters';
 import { addList, getBoardIDFromListID, getListRes, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
 import { userCanEditModule, userCanViewModule } from '@trz-api/utils/permissions';
-import { broadcast, subscribe } from '@trz-api/utils/socketUtils';
+import { subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerListListeners = (socket: Socket, io: Server) => {
@@ -22,7 +23,7 @@ export const registerListListeners = (socket: Socket, io: Server) => {
             throw new Error('Insufficient permissions to create lists for this board');
         }
         const list = await addList(data.boardID, data.listName);
-        broadcast(socket, ServerSE.ADD_LIST, list, [getRoomCode(RoomType.DATA, data.boardID)]);
+        await syncAddList(io, list, data.boardID);
         return list.id;
     });
 
@@ -33,7 +34,7 @@ export const registerListListeners = (socket: Socket, io: Server) => {
         }
         await updateListFromPartial(data.id, data);
         if (boardId) {
-            broadcast(socket, ServerSE.UPDATE_LIST_FIELD, data, [getRoomCode(RoomType.DATA, boardId)]);
+            await syncUpdateListField(io, data.id, data, boardId);
         }
         return undefined;
     });
@@ -44,9 +45,8 @@ export const registerListListeners = (socket: Socket, io: Server) => {
             throw new Error('Insufficient permissions to move this list');
         }
         await moveList(data.listId, data.position);
-        const payload: ServerSEPayload[ServerSE.MOVE_LIST] = { listId: data.listId, position: data.position };
         if (boardId) {
-            broadcast(socket, ServerSE.MOVE_LIST, payload, [getRoomCode(RoomType.DATA, boardId)], false);
+            await syncMoveList(io, data.listId, data.position, boardId);
         }
         return undefined;
     });

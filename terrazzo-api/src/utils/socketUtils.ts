@@ -1,27 +1,35 @@
-import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, getRoomType, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, UserData, UserId } from '@mosaiq/terrazzo-common';
+import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
+import { syncUserJoinedRoom, syncUserLeftRoom } from '@trz-api/broadcasters/realtimeBroadcasters';
 import { Server, Socket } from 'socket.io';
 import { SocketData } from './socketTypes';
 
+/**
+ * Gets all rooms the socket is currently in, excluding its own personal room.
+ */
 export const getSocketRooms = (socket: Socket): RoomId[] | undefined => {
     const rooms = Array.from(socket.rooms) as RoomId[];
     return rooms.filter((room) => room && room !== socket.id);
 };
-export const logoutSocket = (socket: Socket) => {
-    const rooms = Array.from(socket.rooms) as RoomId[];
-    const userRoom = rooms.find((room) => room && room.startsWith(RoomType.USER));
-    if (userRoom) {
-        socket.leave(userRoom);
-    }
-};
+
+/**
+ * Resets the socket to be in the room for the given user ID only.
+ */
 export const loginSocket = (socket: Socket, userId: UserId) => {
-    logoutSocket(socket);
+    const rooms = Array.from(socket.rooms) as RoomId[];
+    const existingUserRoom = rooms.find((room) => room && room.startsWith(RoomType.USER));
+    if (existingUserRoom) {
+        socket.leave(existingUserRoom);
+    }
     const userRoom = getRoomCode(RoomType.USER, userId);
     if (userRoom) {
         socket.join(userRoom);
     }
 };
 
-export const getUsersInRoom = async (io: Server, room: RoomId): Promise<UserData[]> => {
+/**
+ * Gets all sockets in the given room.
+ */
+export const getSocketsInRoom = async (io: Server, room: RoomId): Promise<Socket[]> => {
     if (!room) {
         return [];
     }
@@ -29,51 +37,97 @@ export const getUsersInRoom = async (io: Server, room: RoomId): Promise<UserData
     if (!roomSockets) {
         return [];
     }
-    const sockets = Array.from(roomSockets);
-    const users = sockets.map((socketId) => {
-        const socket = io.sockets.sockets.get(socketId);
+    const socketIds = Array.from(roomSockets);
+    return socketIds.map((socketId) => io.sockets.sockets.get(socketId)).filter((socket) => !!socket);
+};
+
+/**
+ * Gets all users in the given room.
+ */
+export const getUsersInRoom = async (io: Server, room: RoomId): Promise<UserData[]> => {
+    const sockets = await getSocketsInRoom(io, room);
+    const users = sockets.map((socket) => {
         const data = socket ? getSocketData(socket) : undefined;
         return data?.user;
     });
-    return users as UserData[];
+    return users.filter((user) => !!user);
 };
 
-export function broadcast<T extends ServerSE>(socket: Socket, event: T, payload: ServerSEPayload[T], to: NonEmptyArray<RoomId>, returnToSender?: boolean) {
-    if (!to || to.length === 0) {
+export interface BroadcasterOptions<T extends ServerSE> {
+    io: Server;
+    event: T;
+    toRoomIds: NonEmptyArray<RoomId>;
+    /**
+     * Function to build the payload for each user based on their user data
+     * @throws Error if payload cannot be built for a user. This user will be skipped.
+     */
+    buildPayload: (userId: UserId) => Promise<ServerSEPayload[T]> | ServerSEPayload[T];
+}
+/**
+ * Sends an event to each user who is in at least one of the specified rooms.
+ */
+export const broadcast = async <T extends ServerSE>(options: BroadcasterOptions<T>) => {
+    const { io, event, toRoomIds, buildPayload } = options;
+    if (!toRoomIds || toRoomIds.length === 0) {
         return;
     }
-    const socketsRooms = getSocketRooms(socket);
-    let broadcaster = socket.broadcast;
-    let reply = false;
-    for (const rid of to) {
-        if (rid) {
-            broadcaster = broadcaster.to(rid);
-            if (!reply && socketsRooms?.includes) {
-                reply = true;
+
+    // Get all sockets to maybe send to
+    const allSockets = new Set<Socket>();
+    for (const roomId of toRoomIds) {
+        const roomSockets = await getSocketsInRoom(io, roomId);
+        roomSockets.forEach((s) => allSockets.add(s));
+    }
+
+    // Build payloads per user
+    const payloads = new Map<SocketId, ServerSEPayload[T]>();
+    for (const s of allSockets) {
+        const socketData = getSocketData(s);
+        if (socketData?.user) {
+            try {
+                const payload = await buildPayload(socketData.user.user.id);
+                payloads.set(s.id, payload);
+            } catch (e: any) {
+                console.warn(`Skipping socket in broadcast`, {
+                    socketId: s.id,
+                    userId: socketData.user.user.id,
+                    event,
+                    error: e.message,
+                    stack: e.stack,
+                });
             }
         }
     }
-    broadcaster.emit(event, payload);
-    if ((reply || returnToSender === true) && returnToSender !== false) {
-        socket.emit(event, payload);
-    }
-}
 
-export function broadcastToMyRooms<T extends ServerSE>(socket: Socket, event: T, payload: ServerSEPayload[T], include: NonEmptyArray<RoomType>, returnToSender?: boolean) {
-    const rooms = getSocketRooms(socket)?.filter((r) => !!r && include.includes(getRoomType(r)));
-    if (rooms && rooms.length > 0) {
-        broadcast(socket, event, payload, rooms as NonEmptyArray<RoomId>, returnToSender);
+    // Send to each socket
+    for (const sock of allSockets) {
+        const payload = payloads.get(sock.id);
+        if (!payload) {
+            continue;
+        }
+        sock.emit(event, payload);
     }
-}
+};
 
+/**
+ * Gets the Terrazzo-specific data stored on the socket.
+ */
 export const getSocketData = (socket: Socket) => {
     return (socket as any).terrazzoSocketData as SocketData;
 };
+
+/**
+ * Sets the Terrazzo-specific data stored on the socket.
+ */
 export const setSocketData = (socket: Socket, data: SocketData) => {
     // TODO validate each field before setting to ensure no data corruption or injection
     (socket as any).terrazzoSocketData = data;
 };
 
+/**
+ * Joins the socket to the given room and notifies other users in the room.
+ * Returns the list of users currently in the room.
+ */
 export const joinRoom = async (io: Server, socket: Socket, room: RoomId): Promise<UserData[]> => {
     if (room && typeof room === 'string') {
         const rooms = getSocketRooms(socket);
@@ -83,7 +137,7 @@ export const joinRoom = async (io: Server, socket: Socket, room: RoomId): Promis
         }
         const roomUsers = await getUsersInRoom(io, room);
         const socketData = getSocketData(socket);
-        broadcast(socket, ServerSE.CLIENT_JOINED_ROOM, { ...socketData.user, sid: socket.id }, [room]);
+        await syncUserJoinedRoom(io, room, { ...socketData.user, sid: socket.id });
         socket.join(room);
         return roomUsers;
     }
@@ -91,7 +145,10 @@ export const joinRoom = async (io: Server, socket: Socket, room: RoomId): Promis
     return [];
 };
 
-export const leaveRoom = (socket: Socket, room: RoomId) => {
+/**
+ * Leaves the given room and notifies other users in the room.
+ */
+export const leaveRoom = async (io: Server, socket: Socket, room: RoomId) => {
     if (room) {
         const rooms = getSocketRooms(socket);
         if (!rooms || !rooms.find((r) => r === room)) {
@@ -99,7 +156,7 @@ export const leaveRoom = (socket: Socket, room: RoomId) => {
             return;
         }
         socket.leave(room);
-        broadcast(socket, ServerSE.CLIENT_LEFT_ROOM, socket.id, [room]);
+        await syncUserLeftRoom(io, [room], socket.id);
     }
 };
 

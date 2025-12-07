@@ -1,8 +1,8 @@
-import { ClientSE, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { ClientSE } from '@mosaiq/terrazzo-common';
+import { syncDirectoryContents, syncDocumentField } from '@trz-api/broadcasters';
 import { createNewDocument, getDocumentById, modifyDocument } from '@trz-api/controllers/documentController';
-import { syncDirectoryContents } from '@trz-api/utils/broadcasters';
 import { userCanEditModule, userCanViewModule } from '@trz-api/utils/permissions';
-import { broadcast, getSocketData, subscribe } from '@trz-api/utils/socketUtils';
+import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerDocumentListeners = (socket: Socket, io: Server) => {
@@ -12,7 +12,7 @@ export const registerDocumentListeners = (socket: Socket, io: Server) => {
         }
         const socketData = getSocketData(socket);
         const document = await createNewDocument(data.title, data.parentId, socketData.user.user.id);
-        await syncDirectoryContents(socket, document.parentId);
+        await syncDirectoryContents(io, document.parentId);
         return document;
     });
 
@@ -33,8 +33,9 @@ export const registerDocumentListeners = (socket: Socket, io: Server) => {
         if (!updatedDocument) {
             throw new Error('No document found');
         }
-        broadcast(socket, ServerSE.UPDATE_DOCUMENT_FIELD, updatedDocument, [getRoomCode(RoomType.DATA, data.id)]);
-        await syncDirectoryContents(socket, updatedDocument.parentId);
+
+        await syncDocumentField(io, updatedDocument);
+        await syncDirectoryContents(io, updatedDocument.parentId);
         return undefined;
     });
 };

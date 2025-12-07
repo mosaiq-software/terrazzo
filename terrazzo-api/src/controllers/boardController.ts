@@ -5,25 +5,35 @@ import { createLabelOnBoardDb, deleteLabelDb, deleteLabelingOnCardsByLabelIdDb, 
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
 
-export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefined> {
+export const getBoardHeader = async (boardID: BoardId): Promise<BoardHeader | undefined> => {
     const boardModel = await getBoardByIdDb(boardID);
     const moduleModel = await getModuleById(boardID);
     if (!boardModel || !moduleModel) {
-        throw new Error('Board not found');
+        return undefined;
     }
+    const boardHeader: BoardHeader = {
+        ...moduleModel,
+        ...boardModel,
+        type: TrzModuleType.Board,
+    };
+    return boardHeader;
+};
 
+export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefined> {
+    const boardHeader = await getBoardHeader(boardID);
+    if (!boardHeader) {
+        return undefined;
+    }
     const lists = await getListAndCardIdsOnBoard(boardID, false);
     const labels = await getLabelsByBoardIdDb(boardID);
 
     try {
-        const board: BoardRes = {
-            ...moduleModel,
-            ...boardModel,
-            type: TrzModuleType.Board,
+        const boardRes: BoardRes = {
+            ...boardHeader,
             lists: lists,
             labels: labels,
         };
-        return board;
+        return boardRes;
     } catch (e) {
         throw new Error('Failed to retrieve board' + e);
     }

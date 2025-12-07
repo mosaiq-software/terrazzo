@@ -1,8 +1,9 @@
-import { ClientSE, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { ClientSE } from '@mosaiq/terrazzo-common';
+import { syncUpdateOrgField } from '@trz-api/broadcasters';
 import { getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { addOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { userCanAdministerOrganization, userCanGetPersonalDataForUser, userCanViewOrganization } from '@trz-api/utils/permissions';
-import { broadcast, getSocketData, subscribe } from '@trz-api/utils/socketUtils';
+import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerOrganizationListeners = (socket: Socket, io: Server) => {
@@ -25,7 +26,7 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
             throw new Error(`User does not have permission to edit this organization`);
         }
         await updateOrganizationFromPartial(data.id, data);
-        broadcast(socket, ServerSE.UPDATE_ORG_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
+        await syncUpdateOrgField(io, data.id, data);
         return undefined;
     });
 

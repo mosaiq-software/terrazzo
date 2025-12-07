@@ -1,10 +1,15 @@
-import { allRoomTypes, ServerSE, ServerSocketIOEvent } from '@mosaiq/terrazzo-common';
+import { NonEmptyArray, RoomId, ServerSocketIOEvent } from '@mosaiq/terrazzo-common';
+import { syncUserLeftRoom } from '@trz-api/broadcasters';
 import { Server, Socket } from 'socket.io';
-import { broadcastToMyRooms } from './socketUtils';
+import { getSocketRooms } from './socketUtils';
 
 export const registerEngineSocketEvents = (socket: Socket, io: Server) => {
     socket.on(ServerSocketIOEvent.DISCONNECTING, (reason) => {
-        broadcastToMyRooms<ServerSE.CLIENT_LEFT_ROOM>(socket, ServerSE.CLIENT_LEFT_ROOM, socket.id, allRoomTypes());
+        const usersRooms = getSocketRooms(socket);
+        if (!usersRooms?.length) {
+            return;
+        }
+        syncUserLeftRoom(io, usersRooms as NonEmptyArray<RoomId>, socket.id);
     });
 
     socket.on(ServerSocketIOEvent.DISCONNECT, () => {});

@@ -1,10 +1,10 @@
-import { ClientSE, getRoomCode, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { ClientSE } from '@mosaiq/terrazzo-common';
+import { syncRolesForUserInOrg, syncUpdateOrganizationRoles } from '@trz-api/broadcasters';
 import { createRole, deleteRole, getRolesForOrg, updateRole } from '@trz-api/controllers/roleController';
 import { getRoleIdsForUserInOrgDb, setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { getRoleByIdDb } from '@trz-api/persistence/rolePersistence';
-import { syncRolesForUserInOrg } from '@trz-api/utils/broadcasters';
 import { userCanAssignRolesInOrganization, userCanEditRolesInOrganization, userCanViewOrganization } from '@trz-api/utils/permissions';
-import { broadcast, subscribe } from '@trz-api/utils/socketUtils';
+import { subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerRoleListeners = (socket: Socket, io: Server) => {
@@ -22,7 +22,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
         }
         const newRole = await createRole(data.name, data.color, data.orgId);
         const roles = await getRolesForOrg(data.orgId);
-        broadcast(socket, ServerSE.UPDATE_ORGANIZATION_ROLES, { orgId: data.orgId, roles }, [getRoomCode(RoomType.DATA, data.orgId, RoomSpecifier.ROLES)]);
+        await syncUpdateOrganizationRoles(io, data.orgId, roles);
         return newRole;
     });
 
@@ -31,7 +31,8 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
             throw new Error('User does not have permission to edit roles in this organization');
         }
         await updateRole(data);
-        broadcast(socket, ServerSE.UPDATE_ORGANIZATION_ROLES, { orgId: data.orgId, roles: await getRolesForOrg(data.orgId) }, [getRoomCode(RoomType.DATA, data.orgId, RoomSpecifier.ROLES)]);
+        const roles = await getRolesForOrg(data.orgId);
+        await syncUpdateOrganizationRoles(io, data.orgId, roles);
         return undefined;
     });
 
@@ -45,7 +46,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
         }
         await deleteRole(data.roleId);
         const roles = await getRolesForOrg(role.orgId);
-        broadcast(socket, ServerSE.UPDATE_ORGANIZATION_ROLES, { orgId: role.orgId, roles }, [getRoomCode(RoomType.DATA, role.orgId, RoomSpecifier.ROLES)]);
+        await syncUpdateOrganizationRoles(io, role.orgId, roles);
         return undefined;
     });
 
@@ -62,7 +63,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
             throw new Error('User does not have permission to edit roles in this organization');
         }
         await setRoleIdsForUserInOrgDb(data.userId, data.orgId, data.roleIds);
-        await syncRolesForUserInOrg(socket, data.userId, data.orgId);
+        await syncRolesForUserInOrg(io, data.userId, data.orgId);
         return undefined;
     });
 };
