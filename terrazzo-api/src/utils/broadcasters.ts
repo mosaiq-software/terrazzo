@@ -2,8 +2,8 @@ import { DirectoryId, getRoomCode, InviteId, OrganizationId, RoomSpecifier, Room
 import { getDirectoryContents } from '@trz-api/controllers/directoryController';
 import { getAllInvitesForOrg } from '@trz-api/controllers/inviteController';
 import { getMembersInOrg, getOrgsForUser } from '@trz-api/controllers/membershipController';
+import { getModuleById } from '@trz-api/controllers/moduleController';
 import { getInviteRecordById } from '@trz-api/persistence/invitePersistence';
-import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
 import { broadcast } from './socketUtils';
@@ -68,7 +68,7 @@ export const syncRolesForUserInOrg = async (socket: Socket, userId: UserId, orgI
 
 export const syncParentsDirectoryContents = async (socket: Socket, childId: UID) => {
     try {
-        const childModule = await getModuleByIdDb(childId);
+        const childModule = await getModuleById(childId);
         if (!childModule) {
             throw new Error('Child module not found for syncing parent directory contents');
         }

@@ -1,7 +1,6 @@
 import { DocumentHeader, DocumentId, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common';
 import { createDocumentDb, DocumentModelType, getDocumentByIdDb, updateDocumentDb } from '@trz-api/persistence/documentPersistence';
-import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
-import { createNewModule, updateModule } from './moduleController';
+import { createNewModule, getModuleById, updateModule } from './moduleController';
 import { createTextBlockWithPlaintext } from './textBlockController';
 
 export const createNewDocument = async (title: string, parentId: UID, createdByUserId: UserId) => {
@@ -27,7 +26,7 @@ export const createNewDocument = async (title: string, parentId: UID, createdByU
 };
 
 export const getDocumentById = async (id: DocumentId): Promise<DocumentHeader | undefined> => {
-    const docModule = await getModuleByIdDb(id);
+    const docModule = await getModuleById(id);
     const docModel = await getDocumentByIdDb(id);
     if (!docModule || !docModel) {
         return undefined;

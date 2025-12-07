@@ -2,13 +2,12 @@ import { BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, ListId, Tr
 import { addList, getListAndCardIdsOnBoard, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
 import { BoardModelType, createBoard, getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
 import { createLabelOnBoard, deleteLabel, deleteLabelingOnCardsByLabelId, getLabelById, getLabelsByBoardId, updateLabel } from '@trz-api/persistence/labelPersistence';
-import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
-import { createNewModule, updateModule } from './moduleController';
+import { createNewModule, getModuleById, updateModule } from './moduleController';
 
 export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefined> {
     const boardModel = await getBoardById(boardID);
-    const moduleModel = await getModuleByIdDb(boardID);
+    const moduleModel = await getModuleById(boardID);
     if (!boardModel || !moduleModel) {
         throw new Error('Board not found');
     }

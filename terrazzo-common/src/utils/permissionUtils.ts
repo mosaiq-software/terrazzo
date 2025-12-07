@@ -86,3 +86,49 @@ export const calculateTrueModulePermissionsInOrg = (moduleEffectivePermissions: 
     }
     return truePermissions;
 };
+
+export const getPermissionFlagsFromOverrides = (overrides: OverridePermissions): PermissionFlag[] => {
+    const grantedFlags: PermissionFlag[] = [];
+    const allFlags = recordValues(PermissionFlag);
+    for (const flag of allFlags) {
+        if (overrides[flag] === true) {
+            grantedFlags.push(flag);
+        }
+    }
+    return grantedFlags;
+};
+
+/**
+ * Given a set of roles and a module's effective permissions, determines the list of permissions flags that are granted.
+ * @param roles - The list of RoleIds to evaluate.
+ * @param effectivePermissions - The ModulePermissions representing the effective permissions on the module.
+ * @returns The list of PermissionFlags that are granted to the given roles.
+ */
+export const evaluatePermissionForRoles = (roles: RoleId[], effectivePermissions: ModulePermissions): PermissionFlag[] => {
+    const grantedFlags = new Set<PermissionFlag>();
+    for (const roleId of roles) {
+        const roleOverrides = effectivePermissions[roleId];
+        if (roleOverrides) {
+            const flags = getPermissionFlagsFromOverrides(roleOverrides);
+            for (const flag of flags) {
+                grantedFlags.add(flag);
+            }
+        }
+    }
+    return Array.from(grantedFlags);
+};
+
+/**
+ *
+ * @param grantedFlags
+ * @param requiredFlags
+ * @returns
+ */
+export const meetsRequiredFlags = (grantedFlags: PermissionFlag[], requiredFlags: PermissionFlag[]): boolean => {
+    for (const flag of requiredFlags) {
+        if (!grantedFlags.includes(flag)) {
+            return false;
+        }
+    }
+    return true;
+};
