@@ -5,7 +5,7 @@ import UserCursor from '@trz/components/Boards/UserCursor';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { IDLE_TIMEOUT_MS, MOUSE_UPDATE_THROTTLE_MS } from '@trz/util/textUtils';
+import { IDLE_TIMEOUT_MS, MOUSE_UPDATE_THROTTLE_MS } from '@trz/util/realtimeUtils';
 import { MouseEventHandler, useCallback, useEffect, useRef } from 'react';
 
 interface CollaborativeMouseTrackerProps {

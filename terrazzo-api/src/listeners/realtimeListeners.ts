@@ -17,7 +17,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         const socketData = getSocketData(socket);
         socketData.user.mouseRoomData = data;
         setSocketData(socket, socketData);
-        broadcastToMyRooms<ServerSE.MOUSE_MOVE>(socket, ServerSE.MOUSE_MOVE, { sid: socket.id, data: data }, [RoomType.MOUSE], false);
+        broadcastToMyRooms(socket, ServerSE.MOUSE_MOVE, { sid: socket.id, data: data }, [RoomType.MOUSE], false);
         return undefined;
     });
 
@@ -25,7 +25,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         const socketData = getSocketData(socket);
         socketData.user.idle = data;
         setSocketData(socket, socketData);
-        broadcastToMyRooms<ServerSE.USER_IDLE>(socket, ServerSE.USER_IDLE, { sid: socket.id, idle: data }, [RoomType.MOUSE, RoomType.TEXT], false);
+        broadcastToMyRooms(socket, ServerSE.USER_IDLE, { sid: socket.id, idle: data }, [RoomType.MOUSE], false);
         return undefined;
     });
 };

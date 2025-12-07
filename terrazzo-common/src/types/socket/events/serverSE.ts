@@ -1,4 +1,4 @@
-import { BoardId, CardId, DirectoryId, DocumentId, LabelId, ListId, OrganizationId, Position, RoleId, UserId } from '../../genericTypes';
+import { BoardId, CardId, DirectoryId, DocumentId, LabelId, ListId, OrganizationId, RoleId, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { Board, Label } from '../../modules/board/boardTypes';
 import { Card } from '../../modules/board/cardTypes';
@@ -20,7 +20,6 @@ export enum ServerSE {
 
     MOUSE_MOVE = 'MOUSE_MOVE',
     USER_IDLE = 'USER_IDLE',
-    TEXT_CARET = 'TEXT_CARET',
     MOVE_LIST = 'MOVE_LIST',
     MOVE_CARD = 'MOVE_CARD',
 
@@ -51,7 +50,6 @@ export interface ServerSEPayload {
 
     [ServerSE.MOUSE_MOVE]: { sid: SocketId; data: MouseRoomUserData };
     [ServerSE.USER_IDLE]: { sid: SocketId; idle: boolean };
-    [ServerSE.TEXT_CARET]: { sid: SocketId; caret?: Position };
     [ServerSE.MOVE_LIST]: { listId: ListId; position: number };
     [ServerSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number };
 
@@ -80,7 +78,6 @@ export interface ServerSEReplies {
     [ServerSE.CLIENT_JOINED_ROOM]: void;
     [ServerSE.CLIENT_LEFT_ROOM]: void;
 
-    [ServerSE.TEXT_CARET]: void;
     [ServerSE.MOVE_LIST]: void;
     [ServerSE.MOVE_CARD]: void;
     [ServerSE.MOUSE_MOVE]: void;

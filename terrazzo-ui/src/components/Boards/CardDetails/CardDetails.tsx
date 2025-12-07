@@ -11,7 +11,7 @@ import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';
 import { NoteType, notify } from '@trz/util/notifications';
-import { IDLE_TIMEOUT_MS } from '@trz/util/textUtils';
+import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
 import React from 'react';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
 import { MdFileCopy } from 'react-icons/md';

@@ -2,7 +2,7 @@ import { Button, Center, Container, Paper, Space, Stack, Text, TextInput, Title 
 import { useDebouncedValue } from '@mantine/hooks';
 import { useUser } from '@trz/contexts/user-context';
 import { NoteType, notify } from '@trz/util/notifications';
-import { USERNAME_DEBOUNCE } from '@trz/util/textUtils';
+import { USERNAME_DEBOUNCE } from '@trz/util/realtimeUtils';
 import { checkUsernameTaken } from '@trz/util/userUtils';
 import React, { useEffect } from 'react';
 
