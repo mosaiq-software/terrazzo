@@ -2,6 +2,7 @@ import { ClientSE, ClientSEPayload, ClientSEReply } from '@mosaiq/terrazzo-commo
 import { createInvite, deleteInvite, getAllInvitesForOrg, useInvite } from '@trz-api/controllers/inviteController';
 import { getInviteRecordById } from '@trz-api/persistence/invitePersistence';
 import { syncMembersInOrg, syncOrgInvites, syncOrgInvitesFromInviteId } from '@trz-api/utils/broadcasters';
+import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
 import { getSocketData } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
@@ -10,6 +11,9 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
         try {
             if (!data) {
                 throw new Error('No data provided');
+            }
+            if (!(await userCanAdministerOrganization(socket, data))) {
+                throw new Error('Insufficient permissions to view invites for this organization');
             }
             const invites = await getAllInvitesForOrg(data);
             reply(invites);
@@ -23,6 +27,9 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
         try {
             if (!data) {
                 throw new Error('No data provided');
+            }
+            if (!(await userCanAdministerOrganization(socket, data.orgId))) {
+                throw new Error('Insufficient permissions to create invites for this organization');
             }
             const socketData = getSocketData(socket);
             const invite = await createInvite(data.orgId, data.maxUses, socketData.user.user.id);
@@ -38,6 +45,13 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
         try {
             if (!data) {
                 throw new Error('No data provided');
+            }
+            const invite = await getInviteRecordById(data.inviteId);
+            if (!invite) {
+                throw new Error('Invite not found');
+            }
+            if (!(await userCanAdministerOrganization(socket, invite.forOrganizationId))) {
+                throw new Error('Insufficient permissions to delete invites for this organization');
             }
             await deleteInvite(data.inviteId);
             await syncOrgInvitesFromInviteId(socket, data.inviteId);

@@ -1,6 +1,7 @@
 import { BoardId, ClientSE, ClientSEPayload, ClientSEReply, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { createBoardLabel, removeBoardLabel, updateBoardLabels } from '@trz-api/controllers/boardController';
 import { getBoardIDFromCardID, setCardsLabels } from '@trz-api/controllers/cardController';
+import { userCanEditModule } from '@trz-api/utils/permissions';
 import { broadcast } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
@@ -10,9 +11,12 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No data provided');
             }
+            if (!(await userCanEditModule(socket, data.boardId))) {
+                throw new Error('Insufficient permissions to create labels for this board');
+            }
             const boardId: BoardId = data.boardId;
             const labels = await createBoardLabel(boardId, data.name, data.color);
-            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
+            broadcast(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
             reply(undefined);
         } catch (error: any) {
             console.error('Error creating board label', error);
@@ -25,9 +29,12 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No data provided');
             }
+            if (!(await userCanEditModule(socket, data.boardId))) {
+                throw new Error('Insufficient permissions to update labels for this board');
+            }
             const boardId: BoardId = data.boardId;
             const labels = await updateBoardLabels(boardId, data.label);
-            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
+            broadcast(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
             reply(undefined);
         } catch (error: any) {
             console.error('Error updating board labels', error);
@@ -40,9 +47,12 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No data provided');
             }
+            if (!(await userCanEditModule(socket, data.boardId))) {
+                throw new Error('Insufficient permissions to delete labels for this board');
+            }
             const boardId: BoardId = data.boardId;
             const labels = await removeBoardLabel(boardId, data.labelId);
-            broadcast<ServerSE.UPDATE_BOARD_LABELS>(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
+            broadcast(socket, ServerSE.UPDATE_BOARD_LABELS, { boardId, labels }, [getRoomCode(RoomType.DATA, boardId)]);
             reply(undefined);
         } catch (error: any) {
             console.error('Error deleting board labels', error);
@@ -55,10 +65,13 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             if (!data) {
                 throw new Error('No data provided');
             }
-            await setCardsLabels(data.cardId, data.labelIds);
             const boardId = await getBoardIDFromCardID(data.cardId);
+            if (!(await userCanEditModule(socket, boardId))) {
+                throw new Error('Insufficient permissions to update labels for cards on this board');
+            }
+            await setCardsLabels(data.cardId, data.labelIds);
             if (boardId) {
-                broadcast<ServerSE.UPDATE_CARDS_LABELS>(socket, ServerSE.UPDATE_CARDS_LABELS, data, [getRoomCode(RoomType.DATA, boardId)]);
+                broadcast(socket, ServerSE.UPDATE_CARDS_LABELS, data, [getRoomCode(RoomType.DATA, boardId)]);
             }
             reply(undefined);
         } catch (error: any) {

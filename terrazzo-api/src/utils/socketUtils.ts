@@ -1,4 +1,4 @@
-import { getRoomCode, getRoomType, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, UserData, UserId } from '@mosaiq/terrazzo-common';
+import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, getRoomType, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, UserData, UserId } from '@mosaiq/terrazzo-common';
 import { Server, Socket } from 'socket.io';
 import { SocketData } from './socketTypes';
 
@@ -62,7 +62,7 @@ export function broadcast<T extends ServerSE>(socket: Socket, event: T, payload:
 export function broadcastToMyRooms<T extends ServerSE>(socket: Socket, event: T, payload: ServerSEPayload[T], include: NonEmptyArray<RoomType>, returnToSender?: boolean) {
     const rooms = getSocketRooms(socket)?.filter((r) => !!r && include.includes(getRoomType(r)));
     if (rooms && rooms.length > 0) {
-        broadcast<T>(socket, event, payload, rooms as NonEmptyArray<RoomId>, returnToSender);
+        broadcast(socket, event, payload, rooms as NonEmptyArray<RoomId>, returnToSender);
     }
 }
 
@@ -83,7 +83,7 @@ export const joinRoom = async (io: Server, socket: Socket, room: RoomId): Promis
         }
         const roomUsers = await getUsersInRoom(io, room);
         const socketData = getSocketData(socket);
-        broadcast<ServerSE.CLIENT_JOINED_ROOM>(socket, ServerSE.CLIENT_JOINED_ROOM, { ...socketData.user, sid: socket.id }, [room]);
+        broadcast(socket, ServerSE.CLIENT_JOINED_ROOM, { ...socketData.user, sid: socket.id }, [room]);
         socket.join(room);
         return roomUsers;
     }
@@ -99,6 +99,21 @@ export const leaveRoom = (socket: Socket, room: RoomId) => {
             return;
         }
         socket.leave(room);
-        broadcast<ServerSE.CLIENT_LEFT_ROOM>(socket, ServerSE.CLIENT_LEFT_ROOM, socket.id, [room]);
+        broadcast(socket, ServerSE.CLIENT_LEFT_ROOM, socket.id, [room]);
     }
+};
+
+export const sub = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (data: ClientSEPayload[T]) => Promise<ClientSEReplies[T]>) => {
+    socket.on(toEvent as any, async (data: ClientSEPayload[T], reply: ClientSEReply<T>) => {
+        try {
+            if (!data) {
+                throw new Error('No data provided');
+            }
+            const returnedReply = await cb(data);
+            reply(returnedReply);
+        } catch (error: any) {
+            console.error(`Error on event ${toEvent}`, error, data);
+            reply(undefined as ClientSEReplies[T], error.message);
+        }
+    });
 };

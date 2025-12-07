@@ -87,6 +87,11 @@ export const calculateTrueModulePermissionsInOrg = (moduleEffectivePermissions: 
     return truePermissions;
 };
 
+/**
+ * Given an OverridePermissions object, returns the list of PermissionFlags that are granted (set to true).
+ * @param overrides - The OverridePermissions to evaluate.
+ * @returns The list of PermissionFlags that are granted.
+ */
 export const getPermissionFlagsFromOverrides = (overrides: OverridePermissions): PermissionFlag[] => {
     const grantedFlags: PermissionFlag[] = [];
     const allFlags = recordValues(PermissionFlag);
@@ -119,16 +124,37 @@ export const evaluatePermissionForRoles = (roles: RoleId[], effectivePermissions
 };
 
 /**
- *
- * @param grantedFlags
- * @param requiredFlags
- * @returns
+ * Determines if the granted permission flags meet all the required permission flags.
+ * @param grantedFlags - The list of PermissionFlags that are granted.
+ * @param anyOfRequiredFlags - An array of arrays of PermissionFlags, where at least one flag from each inner array must be present in grantedFlags.
+ * Can be thought of as: [[A and B] or [C and D] or ...]
+ * @returns True if any inner array of required flags is fully met by the granted flags, false otherwise.
  */
-export const meetsRequiredFlags = (grantedFlags: PermissionFlag[], requiredFlags: PermissionFlag[]): boolean => {
-    for (const flag of requiredFlags) {
-        if (!grantedFlags.includes(flag)) {
-            return false;
+export const meetsRequiredFlags = (grantedFlags: PermissionFlag[], anyOfRequiredFlags: PermissionFlag[][]): boolean => {
+    for (const requiredFlagGroup of anyOfRequiredFlags) {
+        const groupMet = requiredFlagGroup.every((flag) => grantedFlags.includes(flag));
+        if (groupMet) {
+            return true;
         }
     }
-    return true;
+    return false;
+};
+
+/**
+ * Evaluates the organization-level permissions for a user based on their roles and the organization's default permissions.
+ * @param roles - The list of RoleIds assigned to the user within the organization.
+ * @param orgDefaultPermissions - The default permissions for each role in the organization.
+ * @returns The list of PermissionFlags that are granted to the given roles.
+ */
+export const evaluateOrganizationPermissionForRoles = (roles: RoleId[], orgDefaultPermissions: Record<RoleId, PermissionFlag[]>): PermissionFlag[] => {
+    const grantedFlags = new Set<PermissionFlag>();
+    for (const roleId of roles) {
+        const roleDefaults = orgDefaultPermissions[roleId];
+        if (roleDefaults) {
+            for (const flag of roleDefaults) {
+                grantedFlags.add(flag);
+            }
+        }
+    }
+    return Array.from(grantedFlags);
 };
