@@ -1,6 +1,7 @@
 import { calculateTrueModulePermissionsInOrg, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequiredFlags, OrganizationId, PermissionFlag, UID, UserId } from '@mosaiq/terrazzo-common';
 import { getModuleById } from '@trz-api/controllers/moduleController';
 import { getAllRolePermissionsInOrg } from '@trz-api/controllers/roleController';
+import { getOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
 import { getSocketData } from './socketUtils';
@@ -80,14 +81,49 @@ export const userHasPermissionsOnOrganization = async (user: UserId | Socket, or
 };
 
 /**
+ * Checks if a user can get personal data for a user.
+ * ```
+ * is self
+ * ```
+ */
+export const userCanGetPersonalDataForUser = async (requestingUser: UserId | Socket, targetUserId: UserId): Promise<boolean> => {
+    const requestingUserId = getUserId(requestingUser);
+    if (!requestingUserId) {
+        return false;
+    }
+    return requestingUserId === targetUserId;
+};
+
+/**
+ * Checks if a user can view an organization.
+ * Does not use any specific permission flags, just checks membership.
+ */
+export const userCanViewOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
+    const userId = getUserId(user);
+    if (!userId) {
+        return false;
+    }
+    const membershipRecord = await getOrganizationMembership(userId, orgId);
+    return !!membershipRecord;
+};
+
+/**
  * Checks if a user can administer an organization.
  * ```
  * has any of:
  * - ADMINISTER_ORG.
  * ```
  */
-export const userCanAdministerOrganization = async (user: UserId | Socket, orgId: UID): Promise<boolean> => {
+export const userCanAdministerOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
     return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG]]);
+};
+
+export const userCanEditRolesInOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
+    return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_ROLES]]);
+};
+
+export const userCanAssignRolesInOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
+    return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_ROLES], [PermissionFlag.ASSIGN_ROLES]]);
 };
 
 /**
@@ -111,7 +147,7 @@ export const userCanViewModule = async (user: UserId | Socket, moduleId: UID): P
  * ```
  */
 export const userCanEditModule = async (user: UserId | Socket, moduleId: UID): Promise<boolean> => {
-    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_MODULE, PermissionFlag.EDIT_MODULE]]);
+    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_MODULE]]);
 };
 
 /**
@@ -123,7 +159,7 @@ export const userCanEditModule = async (user: UserId | Socket, moduleId: UID): P
  * ```
  */
 export const userCanMoveCardsOnBoard = async (user: UserId | Socket, moduleId: UID): Promise<boolean> => {
-    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_MODULE, PermissionFlag.MOVE_CARDS]]);
+    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.MOVE_CARDS]]);
 };
 
 /**
@@ -135,5 +171,5 @@ export const userCanMoveCardsOnBoard = async (user: UserId | Socket, moduleId: U
  * ```
  */
 export const userCanEditCardsOnBoard = async (user: UserId | Socket, moduleId: UID): Promise<boolean> => {
-    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_MODULE, PermissionFlag.EDIT_CARDS]]);
+    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_CARDS]]);
 };
