@@ -112,7 +112,12 @@ export const sub = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (data: C
             const returnedReply = await cb(data);
             reply(returnedReply);
         } catch (error: any) {
-            console.error(`Error on event ${toEvent}`, error, data);
+            console.error(`Event Error`, {
+                event: toEvent,
+                data,
+                error: error.message,
+                stack: error.stack,
+            });
             reply(undefined as ClientSEReplies[T], error.message);
         }
     });
