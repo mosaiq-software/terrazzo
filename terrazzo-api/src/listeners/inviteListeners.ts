@@ -3,11 +3,11 @@ import { createInvite, deleteInvite, getAllInvitesForOrg, useInvite } from '@trz
 import { getInviteRecordByIdDb } from '@trz-api/persistence/invitePersistence';
 import { syncMembersInOrg, syncOrgInvites, syncOrgInvitesFromInviteId } from '@trz-api/utils/broadcasters';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
-import { getSocketData, sub } from '@trz-api/utils/socketUtils';
+import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerInviteListeners = (socket: Socket, io: Server) => {
-    sub(socket, ClientSE.GET_INVITES_FOR_ORG, async (data) => {
+    subscribe(socket, ClientSE.GET_INVITES_FOR_ORG, async (data) => {
         if (!(await userCanAdministerOrganization(socket, data))) {
             throw new Error('Insufficient permissions to view invites for this organization');
         }
@@ -15,7 +15,7 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
         return invites;
     });
 
-    sub(socket, ClientSE.CREATE_INVITE, async (data) => {
+    subscribe(socket, ClientSE.CREATE_INVITE, async (data) => {
         if (!(await userCanAdministerOrganization(socket, data.orgId))) {
             throw new Error('Insufficient permissions to create invites for this organization');
         }
@@ -25,7 +25,7 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
         return invite;
     });
 
-    sub(socket, ClientSE.DELETE_INVITE, async (data) => {
+    subscribe(socket, ClientSE.DELETE_INVITE, async (data) => {
         const invite = await getInviteRecordByIdDb(data.inviteId);
         if (!invite) {
             throw new Error('Invite not found');
@@ -38,7 +38,7 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
         return undefined;
     });
 
-    sub(socket, ClientSE.USE_INVITE, async (data) => {
+    subscribe(socket, ClientSE.USE_INVITE, async (data) => {
         const socketData = getSocketData(socket);
         const success = await useInvite(data.inviteId, socketData.user.user.id);
         if (success) {
@@ -52,7 +52,7 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
         return success;
     });
 
-    sub(socket, ClientSE.GET_INVITE, async (data) => {
+    subscribe(socket, ClientSE.GET_INVITE, async (data) => {
         const invite = await getInviteRecordByIdDb(data);
         return invite;
     });

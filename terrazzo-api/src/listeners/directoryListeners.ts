@@ -2,11 +2,11 @@ import { ClientSE, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-comm
 import { createDirectory, getDirectory, getDirectoryContents, updateDirectory, updateDirectoryContents } from '@trz-api/controllers/directoryController';
 import { syncDirectoryContents } from '@trz-api/utils/broadcasters';
 import { userCanEditModule, userCanViewModule } from '@trz-api/utils/permissions';
-import { broadcast, sub } from '@trz-api/utils/socketUtils';
+import { broadcast, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerDirectoryListeners = (socket: Socket, io: Server) => {
-    sub(socket, ClientSE.GET_DIRECTORY, async (data) => {
+    subscribe(socket, ClientSE.GET_DIRECTORY, async (data) => {
         if (!(await userCanViewModule(socket, data))) {
             throw new Error('User does not have permission to view this directory');
         }
@@ -14,7 +14,7 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
         return directoryHeader;
     });
 
-    sub(socket, ClientSE.CREATE_DIRECTORY, async (data) => {
+    subscribe(socket, ClientSE.CREATE_DIRECTORY, async (data) => {
         if (!(await userCanEditModule(socket, data.parentId))) {
             throw new Error('User does not have permission to create a directory in this module');
         }
@@ -23,7 +23,7 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
         return directoryHeader;
     });
 
-    sub(socket, ClientSE.UPDATE_DIRECTORY_FIELD, async (data) => {
+    subscribe(socket, ClientSE.UPDATE_DIRECTORY_FIELD, async (data) => {
         if (!(await userCanEditModule(socket, data.id))) {
             throw new Error('User does not have permission to edit this directory');
         }
@@ -37,12 +37,12 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
         return undefined;
     });
 
-    sub(socket, ClientSE.GET_DIRECTORY_CONTENTS, async (data) => {
+    subscribe(socket, ClientSE.GET_DIRECTORY_CONTENTS, async (data) => {
         const contents = await getDirectoryContents(data);
         return contents;
     });
 
-    sub(socket, ClientSE.UPDATE_DIRECTORY_CONTENTS, async (data) => {
+    subscribe(socket, ClientSE.UPDATE_DIRECTORY_CONTENTS, async (data) => {
         await updateDirectoryContents(data.directoryId, data.contents);
         await syncDirectoryContents(socket, data.directoryId);
         return undefined;

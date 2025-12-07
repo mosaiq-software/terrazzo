@@ -4,11 +4,11 @@ import { getRoleIdsForUserInOrgDb, setRoleIdsForUserInOrgDb } from '@trz-api/per
 import { getRoleByIdDb } from '@trz-api/persistence/rolePersistence';
 import { syncRolesForUserInOrg } from '@trz-api/utils/broadcasters';
 import { userCanAssignRolesInOrganization, userCanEditRolesInOrganization, userCanViewOrganization } from '@trz-api/utils/permissions';
-import { broadcast, sub } from '@trz-api/utils/socketUtils';
+import { broadcast, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerRoleListeners = (socket: Socket, io: Server) => {
-    sub(socket, ClientSE.GET_ROLES_FOR_ORG, async (data) => {
+    subscribe(socket, ClientSE.GET_ROLES_FOR_ORG, async (data) => {
         if (!(await userCanViewOrganization(socket, data))) {
             throw new Error('User does not have permission to view roles for this organization');
         }
@@ -16,7 +16,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
         return roles;
     });
 
-    sub(socket, ClientSE.CREATE_ROLE, async (data) => {
+    subscribe(socket, ClientSE.CREATE_ROLE, async (data) => {
         if (!(await userCanEditRolesInOrganization(socket, data.orgId))) {
             throw new Error('User does not have permission to create roles in this organization');
         }
@@ -26,7 +26,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
         return newRole;
     });
 
-    sub(socket, ClientSE.UPDATE_ROLE, async (data) => {
+    subscribe(socket, ClientSE.UPDATE_ROLE, async (data) => {
         if (!(await userCanEditRolesInOrganization(socket, data.orgId))) {
             throw new Error('User does not have permission to edit roles in this organization');
         }
@@ -35,7 +35,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
         return undefined;
     });
 
-    sub(socket, ClientSE.DELETE_ROLE, async (data) => {
+    subscribe(socket, ClientSE.DELETE_ROLE, async (data) => {
         const role = await getRoleByIdDb(data.roleId);
         if (!role) {
             throw new Error(`Role with ID ${data.roleId} not found`);
@@ -49,7 +49,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
         return undefined;
     });
 
-    sub(socket, ClientSE.GET_ROLES_FOR_USER_IN_ORG, async (data) => {
+    subscribe(socket, ClientSE.GET_ROLES_FOR_USER_IN_ORG, async (data) => {
         if (!(await userCanViewOrganization(socket, data.orgId))) {
             throw new Error('User does not have permission to view roles for this organization');
         }
@@ -57,7 +57,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
         return roleIds;
     });
 
-    sub(socket, ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG, async (data) => {
+    subscribe(socket, ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG, async (data) => {
         if (!(await userCanAssignRolesInOrganization(socket, data.orgId))) {
             throw new Error('User does not have permission to edit roles in this organization');
         }

@@ -1,11 +1,11 @@
 import { ClientSE, getRoomCode, RoomType, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common';
 import { addList, getBoardIDFromListID, getListRes, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
 import { userCanEditModule, userCanViewModule } from '@trz-api/utils/permissions';
-import { broadcast, sub } from '@trz-api/utils/socketUtils';
+import { broadcast, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerListListeners = (socket: Socket, io: Server) => {
-    sub(socket, ClientSE.GET_LIST, async (data) => {
+    subscribe(socket, ClientSE.GET_LIST, async (data) => {
         const boardId = await getBoardIDFromListID(data);
         if (!(await userCanViewModule(socket, boardId))) {
             throw new Error('Insufficient permissions to view this list');
@@ -17,7 +17,7 @@ export const registerListListeners = (socket: Socket, io: Server) => {
         return list;
     });
 
-    sub(socket, ClientSE.CREATE_LIST, async (data) => {
+    subscribe(socket, ClientSE.CREATE_LIST, async (data) => {
         if (!(await userCanEditModule(socket, data.boardID))) {
             throw new Error('Insufficient permissions to create lists for this board');
         }
@@ -26,7 +26,7 @@ export const registerListListeners = (socket: Socket, io: Server) => {
         return list.id;
     });
 
-    sub(socket, ClientSE.UPDATE_LIST_FIELD, async (data) => {
+    subscribe(socket, ClientSE.UPDATE_LIST_FIELD, async (data) => {
         const boardId = await getBoardIDFromListID(data.id);
         if (!(await userCanEditModule(socket, boardId))) {
             throw new Error('Insufficient permissions to update this list');
@@ -38,7 +38,7 @@ export const registerListListeners = (socket: Socket, io: Server) => {
         return undefined;
     });
 
-    sub(socket, ClientSE.MOVE_LIST, async (data) => {
+    subscribe(socket, ClientSE.MOVE_LIST, async (data) => {
         const boardId = await getBoardIDFromListID(data.listId);
         if (!(await userCanEditModule(socket, boardId))) {
             throw new Error('Insufficient permissions to move this list');

@@ -106,7 +106,13 @@ export const leaveRoom = (socket: Socket, room: RoomId) => {
 export type SubOptions = {
     allowEmptyData?: boolean;
 };
-export const sub = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (data: ClientSEPayload[T]) => Promise<ClientSEReplies[T]>, options?: SubOptions) => {
+/**
+ * Subscribes to a client socket event with built-in error handling.
+ * @param toEvent The client event to subscribe to
+ * @param cb The callback to execute when the event is received
+ * @param options Subscription options
+ */
+export const subscribe = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (data: ClientSEPayload[T]) => Promise<ClientSEReplies[T]>, options?: SubOptions) => {
     socket.on(toEvent as any, async (data: ClientSEPayload[T], reply: ClientSEReply<T>) => {
         try {
             if (data === undefined && options?.allowEmptyData !== true) {

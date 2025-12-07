@@ -1,19 +1,19 @@
 import { ClientSE, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
-import { broadcastToMyRooms, getSocketData, joinRoom, leaveRoom, setSocketData, sub } from '@trz-api/utils/socketUtils';
+import { broadcastToMyRooms, getSocketData, joinRoom, leaveRoom, setSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
-    sub(socket, ClientSE.JOIN_ROOM, async (room) => {
+    subscribe(socket, ClientSE.JOIN_ROOM, async (room) => {
         const roomUsers = await joinRoom(io, socket, room);
         return roomUsers;
     });
 
-    sub(socket, ClientSE.LEAVE_ROOM, async (room) => {
+    subscribe(socket, ClientSE.LEAVE_ROOM, async (room) => {
         leaveRoom(socket, room);
         return undefined;
     });
 
-    sub(socket, ClientSE.MOUSE_MOVE, async (data) => {
+    subscribe(socket, ClientSE.MOUSE_MOVE, async (data) => {
         const socketData = getSocketData(socket);
         socketData.user.mouseRoomData = data;
         setSocketData(socket, socketData);
@@ -21,7 +21,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         return undefined;
     });
 
-    sub(socket, ClientSE.USER_IDLE, async (data) => {
+    subscribe(socket, ClientSE.USER_IDLE, async (data) => {
         const socketData = getSocketData(socket);
         socketData.user.idle = data;
         setSocketData(socket, socketData);

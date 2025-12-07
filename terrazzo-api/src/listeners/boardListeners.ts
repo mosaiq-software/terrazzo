@@ -2,11 +2,11 @@ import { ClientSE, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-comm
 import { addBoard, getBoardRes, updateBoardFromPartial } from '@trz-api/controllers/boardController';
 import { syncDirectoryContents, syncParentsDirectoryContents } from '@trz-api/utils/broadcasters';
 import { userCanEditModule, userCanViewModule } from '@trz-api/utils/permissions';
-import { broadcast, sub } from '@trz-api/utils/socketUtils';
+import { broadcast, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerBoardListeners = (socket: Socket, io: Server) => {
-    sub(socket, ClientSE.GET_BOARD, async (data) => {
+    subscribe(socket, ClientSE.GET_BOARD, async (data) => {
         if (!(await userCanViewModule(socket, data))) {
             throw new Error('User does not have permission to view this board');
         }
@@ -14,7 +14,7 @@ export const registerBoardListeners = (socket: Socket, io: Server) => {
         return board;
     });
 
-    sub(socket, ClientSE.CREATE_BOARD, async (data) => {
+    subscribe(socket, ClientSE.CREATE_BOARD, async (data) => {
         if (!(await userCanEditModule(socket, data.parentId))) {
             throw new Error('User does not have permission to create a board in this module');
         }
@@ -23,7 +23,7 @@ export const registerBoardListeners = (socket: Socket, io: Server) => {
         return boardID;
     });
 
-    sub(socket, ClientSE.UPDATE_BOARD_FIELD, async (data) => {
+    subscribe(socket, ClientSE.UPDATE_BOARD_FIELD, async (data) => {
         if (!(await userCanEditModule(socket, data.id))) {
             throw new Error('User does not have permission to edit this board');
         }

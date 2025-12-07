@@ -2,11 +2,11 @@ import { ClientSE, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-comm
 import { createNewDocument, getDocumentById, modifyDocument } from '@trz-api/controllers/documentController';
 import { syncDirectoryContents } from '@trz-api/utils/broadcasters';
 import { userCanEditModule, userCanViewModule } from '@trz-api/utils/permissions';
-import { broadcast, getSocketData, sub } from '@trz-api/utils/socketUtils';
+import { broadcast, getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerDocumentListeners = (socket: Socket, io: Server) => {
-    sub(socket, ClientSE.CREATE_DOCUMENT, async (data) => {
+    subscribe(socket, ClientSE.CREATE_DOCUMENT, async (data) => {
         if (!(await userCanEditModule(socket, data.parentId))) {
             throw new Error('User does not have permission to create a document in this module');
         }
@@ -16,7 +16,7 @@ export const registerDocumentListeners = (socket: Socket, io: Server) => {
         return document;
     });
 
-    sub(socket, ClientSE.GET_DOCUMENT, async (data) => {
+    subscribe(socket, ClientSE.GET_DOCUMENT, async (data) => {
         if (!(await userCanViewModule(socket, data))) {
             throw new Error('User does not have permission to view this document');
         }
@@ -24,7 +24,7 @@ export const registerDocumentListeners = (socket: Socket, io: Server) => {
         return document;
     });
 
-    sub(socket, ClientSE.UPDATE_DOCUMENT_FIELD, async (data) => {
+    subscribe(socket, ClientSE.UPDATE_DOCUMENT_FIELD, async (data) => {
         if (!(await userCanEditModule(socket, data.id))) {
             throw new Error('User does not have permission to edit this document');
         }
