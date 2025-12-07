@@ -99,6 +99,7 @@ export async function setupUser(userId: UserId, username: string, firstName: str
         await addCard(personalListTodo.id, '🧱 Start my own project', undefined, undefined, user.id);
         await addCard(personalListTodo.id, '😀 Invite some friends', undefined, undefined, user.id);
     } catch (e) {
+        console.error(e);
         throw new Error('Failed to create users personal organization ' + e);
     }
 

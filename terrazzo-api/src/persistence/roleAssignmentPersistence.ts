@@ -10,9 +10,18 @@ export interface RoleAssignment {
 class RoleAssignmentModel extends Model<RoleAssignment> {}
 RoleAssignmentModel.init(
     {
-        userId: DataTypes.STRING,
-        roleId: DataTypes.STRING,
-        orgId: DataTypes.STRING,
+        userId: {
+            type: DataTypes.STRING,
+            primaryKey: true,
+        },
+        roleId: {
+            type: DataTypes.STRING,
+            primaryKey: true,
+        },
+        orgId: {
+            type: DataTypes.STRING,
+            primaryKey: true,
+        },
     },
     { sequelize, timestamps: false }
 );

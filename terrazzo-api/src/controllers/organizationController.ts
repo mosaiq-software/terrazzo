@@ -1,5 +1,4 @@
-import { MembershipRecord, OrganizationHeader, OrganizationId, PermissionFlag, recordValues, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
-import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
+import { OrganizationHeader, OrganizationId, PermissionFlag, recordValues, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
 import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { addRoleToUserInOrg, createRole } from './roleController';
@@ -42,14 +41,6 @@ export async function addOrganization(name: string, creator: UserId) {
 }
 
 const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
-    // Add creator as member
-    const membershipRecord: MembershipRecord = {
-        userId: creator,
-        orgId: orgId,
-        joinedAt: Date.now(),
-    };
-    await createOrganizationMembershipDb(membershipRecord);
-
     // create default roles
     const adminRole = await createRole('Admin', '#D31757', orgId, recordValues(PermissionFlag));
     const guest = await createRole('Guest', '#2384CA', orgId, [PermissionFlag.VIEW_BOARD, PermissionFlag.VIEW_DOCUMENT]);

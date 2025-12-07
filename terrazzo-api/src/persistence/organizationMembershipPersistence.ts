@@ -14,7 +14,7 @@ OrganizationMembershipModel.init(
             primaryKey: true,
         },
         joinedAt: {
-            type: DataTypes.NUMBER,
+            type: DataTypes.BIGINT,
             allowNull: false,
         },
     },
