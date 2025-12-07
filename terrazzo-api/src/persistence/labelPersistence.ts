@@ -13,7 +13,7 @@ LabelModel.init(
         name: DataTypes.STRING,
         color: DataTypes.STRING,
     },
-    { sequelize }
+    { sequelize, timestamps: false }
 );
 
 interface LabeledCard {
@@ -32,17 +32,17 @@ LabeledCardModel.init(
     }
 );
 
-export const getLabelById = async (id: LabelId) => {
+export const getLabelByIdDb = async (id: LabelId) => {
     const model = await LabelModel.findByPk(id);
     return model?.toJSON();
 };
 
-export const getLabelsByBoardId = async (boardId: BoardId) => {
+export const getLabelsByBoardIdDb = async (boardId: BoardId) => {
     const models = await LabelModel.findAll({ where: { boardId } });
     return models.map((label) => label.toJSON());
 };
 
-export const createLabelOnBoard = async (label: Label, boardId: BoardId) => {
+export const createLabelOnBoardDb = async (label: Label, boardId: BoardId) => {
     const model = await LabelModel.create({
         id: label.id,
         boardId,
@@ -52,7 +52,7 @@ export const createLabelOnBoard = async (label: Label, boardId: BoardId) => {
     return model.toJSON();
 };
 
-export const updateLabel = async (label: Label) => {
+export const updateLabelDb = async (label: Label) => {
     const [updated] = await LabelModel.update(
         {
             name: label.name,
@@ -63,32 +63,32 @@ export const updateLabel = async (label: Label) => {
     return updated;
 };
 
-export const deleteLabel = async (id: LabelId) => {
+export const deleteLabelDb = async (id: LabelId) => {
     const deleted = await LabelModel.destroy({ where: { id } });
     return deleted;
 };
 
-export const deleteLabelsByBoardId = async (boardId: BoardId) => {
+export const deleteLabelsByBoardIdDb = async (boardId: BoardId) => {
     const deleted = await LabelModel.destroy({ where: { boardId } });
     return deleted;
 };
 
-export const getLabelsOnCard = async (cardId: CardId) => {
+export const getLabelsOnCardDb = async (cardId: CardId) => {
     const models = await LabeledCardModel.findAll({ where: { cardId } });
     return models.map((label) => label.toJSON().labelId);
 };
 
-export const deleteLabelingOnCardsByLabelId = async (labelId: LabelId) => {
+export const deleteLabelingOnCardsByLabelIdDb = async (labelId: LabelId) => {
     const deleted = await LabeledCardModel.destroy({ where: { labelId } });
     return deleted;
 };
 
-export const deleteLabelsOnCard = async (cardId: CardId) => {
+export const deleteLabelsOnCardDb = async (cardId: CardId) => {
     const deleted = await LabeledCardModel.destroy({ where: { cardId } });
     return deleted;
 };
 
-export const addLabelToCard = async (labelId: LabelId, cardId: CardId) => {
+export const addLabelToCardDb = async (labelId: LabelId, cardId: CardId) => {
     const model = await LabeledCardModel.create({
         labelId,
         cardId,

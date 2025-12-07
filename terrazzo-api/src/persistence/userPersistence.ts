@@ -31,9 +31,6 @@ export const getUserHeaderByUsernameDb = async (username: string) => {
 export const getUserHeaderByGithubIdDb = async (githubId: string) => {
     const model = await UserModel.findOne({
         where: { githubUserId: githubId },
-        attributes: {
-            exclude: ['createdAt', 'updatedAt'],
-        },
     });
     return model?.toJSON();
 };

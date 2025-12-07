@@ -21,26 +21,26 @@ OrganizationMembershipModel.init(
     { sequelize, timestamps: false }
 );
 
-export const getOrganizationMembership = async (userId: UserId, orgId: OrganizationId) => {
+export const getOrganizationMembershipDb = async (userId: UserId, orgId: OrganizationId) => {
     const model = await OrganizationMembershipModel.findOne({ where: { userId, orgId } });
     return model?.toJSON();
 };
 
-export const getOrganizationMembershipsForUser = async (userId: UserId) => {
+export const getOrganizationMembershipsForUserDb = async (userId: UserId) => {
     const models = await OrganizationMembershipModel.findAll({ where: { userId } });
     return models.map((membership) => membership.toJSON());
 };
 
-export const getOrganizationMembershipsForOrg = async (orgId: OrganizationId) => {
+export const getOrganizationMembershipsForOrgDb = async (orgId: OrganizationId) => {
     const models = await OrganizationMembershipModel.findAll({ where: { orgId } });
     return models.map((membership) => membership.toJSON());
 };
 
-export const createOrganizationMembership = async (membershipRecord: MembershipRecord) => {
+export const createOrganizationMembershipDb = async (membershipRecord: MembershipRecord) => {
     await OrganizationMembershipModel.create({ ...membershipRecord });
 };
 
-export const deleteOrganizationMembership = async (userId: UserId, orgId: OrganizationId) => {
+export const deleteOrganizationMembershipDb = async (userId: UserId, orgId: OrganizationId) => {
     const deleted = await OrganizationMembershipModel.destroy({ where: { userId, orgId } });
     return deleted;
 };

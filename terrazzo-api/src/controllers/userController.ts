@@ -1,5 +1,5 @@
 import { BoardId, List, MembershipRecord, OrganizationId, UserHeader, UserId } from '@mosaiq/terrazzo-common';
-import { createOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
+import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createUserHeaderDb, getUserHeaderByGithubIdDb, getUserHeaderByIdDb, getUserHeaderByUsernameDb, updateUserHeaderDb } from '@trz-api/persistence/userPersistence';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
 import { addBoard } from './boardController';
@@ -88,7 +88,7 @@ export async function setupUser(userId: UserId, username: string, firstName: str
             userId: user.id,
             joinedAt: Date.now(),
         };
-        await createOrganizationMembership(orgMembershipRecord);
+        await createOrganizationMembershipDb(orgMembershipRecord);
         await updateOrganizationFromPartial(personalOrgId, { logoUrl: user.profilePicture, description: 'A place to keep your personal projects' });
         const personalBoardId: BoardId = await addBoard('Task Tracking', '', personalOrgId);
         const personalListTodo: List = await addList(personalBoardId, 'To do');

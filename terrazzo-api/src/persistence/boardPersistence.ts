@@ -20,22 +20,22 @@ BoardModel.init(
     { sequelize, timestamps: false }
 );
 
-export const getBoards = async () => {
+export const getBoardsDb = async () => {
     const models = await BoardModel.findAll();
     return models.map((board) => board.toJSON());
 };
 
-export const getBoardById = async (id: BoardId) => {
+export const getBoardByIdDb = async (id: BoardId) => {
     const model = await BoardModel.findByPk(id, {});
     return model?.toJSON();
 };
 
-export const createBoard = async (board: BoardModelType) => {
+export const createBoardDb = async (board: BoardModelType) => {
     const model = await BoardModel.create({ ...board });
     return model.toJSON();
 };
 
-export const updateBoard = async (boardID: BoardId, board: Partial<BoardModelType>) => {
+export const updateBoardDb = async (boardID: BoardId, board: Partial<BoardModelType>) => {
     const [updated] = await BoardModel.update({ ...board }, { where: { id: boardID } });
     return updated;
 };

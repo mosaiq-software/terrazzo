@@ -1,6 +1,6 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
 import { createInvite, deleteInvite, getAllInvitesForOrg, useInvite } from '@trz-api/controllers/inviteController';
-import { getInviteRecordById } from '@trz-api/persistence/invitePersistence';
+import { getInviteRecordByIdDb } from '@trz-api/persistence/invitePersistence';
 import { syncMembersInOrg, syncOrgInvites, syncOrgInvitesFromInviteId } from '@trz-api/utils/broadcasters';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
 import { getSocketData, sub } from '@trz-api/utils/socketUtils';
@@ -26,7 +26,7 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
     });
 
     sub(socket, ClientSE.DELETE_INVITE, async (data) => {
-        const invite = await getInviteRecordById(data.inviteId);
+        const invite = await getInviteRecordByIdDb(data.inviteId);
         if (!invite) {
             throw new Error('Invite not found');
         }
@@ -42,7 +42,7 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
         const socketData = getSocketData(socket);
         const success = await useInvite(data.inviteId, socketData.user.user.id);
         if (success) {
-            const inviteRecord = await getInviteRecordById(data.inviteId);
+            const inviteRecord = await getInviteRecordByIdDb(data.inviteId);
             if (!inviteRecord) {
                 throw new Error('Invite not found for syncing org invites');
             }
@@ -53,7 +53,7 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
     });
 
     sub(socket, ClientSE.GET_INVITE, async (data) => {
-        const invite = await getInviteRecordById(data);
+        const invite = await getInviteRecordByIdDb(data);
         return invite;
     });
 };

@@ -1,7 +1,7 @@
 import { calculateTrueModulePermissionsInOrg, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequiredFlags, OrganizationId, PermissionFlag, UID, UserId } from '@mosaiq/terrazzo-common';
 import { getModuleById } from '@trz-api/controllers/moduleController';
 import { getAllRolePermissionsInOrg } from '@trz-api/controllers/roleController';
-import { getOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
+import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
 import { getSocketData } from './socketUtils';
@@ -103,7 +103,7 @@ export const userCanViewOrganization = async (user: UserId | Socket, orgId: Orga
     if (!userId) {
         return false;
     }
-    const membershipRecord = await getOrganizationMembership(userId, orgId);
+    const membershipRecord = await getOrganizationMembershipDb(userId, orgId);
     return !!membershipRecord;
 };
 
@@ -118,10 +118,27 @@ export const userCanAdministerOrganization = async (user: UserId | Socket, orgId
     return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG]]);
 };
 
+/**
+ * Checks if a user can edit roles in an organization.
+ * ```
+ * has any of:
+ * - ADMINISTER_ORG
+ * - EDIT_ROLES
+ * ```
+ */
 export const userCanEditRolesInOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
     return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_ROLES]]);
 };
 
+/**
+ * Checks if a user can assign roles in an organization.
+ * ```
+ * has any of:
+ * - ADMINISTER_ORG
+ * - EDIT_ROLES
+ * - ASSIGN_ROLES
+ * ```
+ */
 export const userCanAssignRolesInOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
     return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_ROLES], [PermissionFlag.ASSIGN_ROLES]]);
 };

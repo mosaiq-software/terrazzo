@@ -25,12 +25,12 @@ InviteModel.init(
     { sequelize, timestamps: false }
 );
 
-export const getInviteRecordById = async (id: InviteId) => {
+export const getInviteRecordByIdDb = async (id: InviteId) => {
     const model = await InviteModel.findByPk(id, {});
     return model?.toJSON();
 };
 
-export const getAllInviteRecordsForOrganization = async (orgId: OrganizationId) => {
+export const getAllInviteRecordsForOrganizationDb = async (orgId: OrganizationId) => {
     const models = await InviteModel.findAll({
         where: { forOrganizationId: orgId },
         order: [['createdAt', 'DESC']],
@@ -38,12 +38,12 @@ export const getAllInviteRecordsForOrganization = async (orgId: OrganizationId) 
     return models.map((inv) => inv.toJSON());
 };
 
-export const createInviteRecord = async (invite: Invite) => {
+export const createInviteRecordDb = async (invite: Invite) => {
     const model = await InviteModel.create({ ...invite });
     return model.toJSON();
 };
 
-export const updateInviteRecord = async (invite: Partial<Invite> & { id: InviteId }) => {
+export const updateInviteRecordDb = async (invite: Partial<Invite> & { id: InviteId }) => {
     const [updated] = await InviteModel.update({ ...invite }, { where: { id: invite.id } });
     return updated;
 };

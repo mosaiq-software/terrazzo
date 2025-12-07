@@ -3,14 +3,14 @@ import { getDirectoryContents } from '@trz-api/controllers/directoryController';
 import { getAllInvitesForOrg } from '@trz-api/controllers/inviteController';
 import { getMembersInOrg, getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { getModuleById } from '@trz-api/controllers/moduleController';
-import { getInviteRecordById } from '@trz-api/persistence/invitePersistence';
+import { getInviteRecordByIdDb } from '@trz-api/persistence/invitePersistence';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
 import { broadcast } from './socketUtils';
 
 export const syncOrgInvitesFromInviteId = async (socket: Socket, inviteId: InviteId) => {
     try {
-        const inviteRecord = await getInviteRecordById(inviteId);
+        const inviteRecord = await getInviteRecordByIdDb(inviteId);
         if (!inviteRecord) {
             throw new Error('Invite not found for syncing org invites');
         }

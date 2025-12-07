@@ -1,19 +1,19 @@
 import { BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, ListId, TrelloExportType, TrelloLabelColorsMap, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { addList, getListAndCardIdsOnBoard, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
-import { BoardModelType, createBoard, getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
-import { createLabelOnBoard, deleteLabel, deleteLabelingOnCardsByLabelId, getLabelById, getLabelsByBoardId, updateLabel } from '@trz-api/persistence/labelPersistence';
+import { BoardModelType, createBoardDb, getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
+import { createLabelOnBoardDb, deleteLabelDb, deleteLabelingOnCardsByLabelIdDb, getLabelByIdDb, getLabelsByBoardIdDb, updateLabelDb } from '@trz-api/persistence/labelPersistence';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
 
 export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefined> {
-    const boardModel = await getBoardById(boardID);
+    const boardModel = await getBoardByIdDb(boardID);
     const moduleModel = await getModuleById(boardID);
     if (!boardModel || !moduleModel) {
         throw new Error('Board not found');
     }
 
     const lists = await getListAndCardIdsOnBoard(boardID, false);
-    const labels = await getLabelsByBoardId(boardID);
+    const labels = await getLabelsByBoardIdDb(boardID);
 
     try {
         const board: BoardRes = {
@@ -43,13 +43,13 @@ export async function addBoard(name: string, boardCode: string, parentId: Direct
         boardCode,
         totalCards: 0,
     };
-    await createBoard(boardModel);
+    await createBoardDb(boardModel);
     return boardModel.id;
 }
 
 export async function updateBoardFromPartial(boardId: BoardId, partial: Partial<BoardHeader>) {
     try {
-        await updateBoard(boardId, partial);
+        await updateBoardDb(boardId, partial);
         await updateModule(boardId, partial);
     } catch (e: any) {
         throw new Error('Failed to update board ' + e);
@@ -63,8 +63,8 @@ export async function createBoardLabel(boardId: BoardId, name: string, color: st
         boardId,
         id: crypto.randomUUID(),
     };
-    await createLabelOnBoard(label, boardId);
-    return await getLabelsByBoardId(boardId);
+    await createLabelOnBoardDb(label, boardId);
+    return await getLabelsByBoardIdDb(boardId);
 }
 
 export async function createBoardLabelSingle(boardId: BoardId, name: string, color: string): Promise<LabelId> {
@@ -74,24 +74,24 @@ export async function createBoardLabelSingle(boardId: BoardId, name: string, col
         boardId,
         id: crypto.randomUUID(),
     };
-    await createLabelOnBoard(label, boardId);
+    await createLabelOnBoardDb(label, boardId);
     return label.id;
 }
 
 export async function removeBoardLabel(boardId: BoardId, labelId: LabelId): Promise<Label[]> {
-    await deleteLabel(labelId);
-    await deleteLabelingOnCardsByLabelId(labelId);
-    return await getLabelsByBoardId(boardId);
+    await deleteLabelDb(labelId);
+    await deleteLabelingOnCardsByLabelIdDb(labelId);
+    return await getLabelsByBoardIdDb(boardId);
 }
 
 export async function updateBoardLabels(boardId: BoardId, updatedLabel: Label): Promise<Label[]> {
-    const label = await getLabelById(updatedLabel.id);
+    const label = await getLabelByIdDb(updatedLabel.id);
     if (!label) {
         throw new Error('Label does not exist');
     }
 
-    await updateLabel(updatedLabel);
-    return await getLabelsByBoardId(boardId);
+    await updateLabelDb(updatedLabel);
+    return await getLabelsByBoardIdDb(boardId);
 }
 
 export const createTerrazzoBoardFromTrelloBoard = async (onParentId: DirectoryId, trelloBoard: TrelloExportType) => {

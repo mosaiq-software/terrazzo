@@ -1,12 +1,12 @@
 import { MembershipRecord, OrganizationHeader, OrganizationId, PermissionFlag, recordValues, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
-import { createOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
-import { createOrg, getOrgById, updateOrg } from '@trz-api/persistence/organizationPersistence';
+import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
+import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { addRoleToUserInOrg, createRole } from './roleController';
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
-        const orgHeader = await getOrgById(orgId);
+        const orgHeader = await getOrgByIdDb(orgId);
         if (!orgHeader) {
             throw new Error('No Org found with id ' + orgId);
         }
@@ -35,7 +35,7 @@ export async function addOrganization(name: string, creator: UserId) {
         description: '',
     };
 
-    await createOrg(newOrg);
+    await createOrgDb(newOrg);
     await seedFreshOrg(newOrg.id, creator);
 
     return newOrg.id;
@@ -48,7 +48,7 @@ const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
         orgId: orgId,
         joinedAt: Date.now(),
     };
-    await createOrganizationMembership(membershipRecord);
+    await createOrganizationMembershipDb(membershipRecord);
 
     // create default roles
     const adminRole = await createRole('Admin', '#D31757', orgId, recordValues(PermissionFlag));
@@ -59,14 +59,14 @@ const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
 };
 
 export async function updateOrganizationFromPartial(orgId: OrganizationId, partial: Partial<OrganizationHeader>) {
-    const updatingOrg = await getOrgById(orgId);
+    const updatingOrg = await getOrgByIdDb(orgId);
     if (updatingOrg == null) {
         throw new Error('Org not found');
     }
 
     const updated = updateBaseFromPartial(updatingOrg, partial);
     try {
-        await updateOrg(updated);
+        await updateOrgDb(updated);
     } catch (e: any) {
         throw new Error('Failed to update org ' + e);
     }

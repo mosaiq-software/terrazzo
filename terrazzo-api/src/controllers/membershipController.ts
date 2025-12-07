@@ -1,14 +1,14 @@
 import { Member, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
-import { createOrganizationMembership, deleteOrganizationMembership, getOrganizationMembership, getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
-import { getOrgById } from '@trz-api/persistence/organizationPersistence';
+import { createOrganizationMembershipDb, deleteOrganizationMembershipDb, getOrganizationMembershipDb, getOrganizationMembershipsForOrgDb, getOrganizationMembershipsForUserDb } from '@trz-api/persistence/organizationMembershipPersistence';
+import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 
 export const getMembersInOrg = async (orgId: OrganizationId) => {
-    const org = await getOrgById(orgId);
+    const org = await getOrgByIdDb(orgId);
     if (org == null) {
         throw new Error('Org not found');
     }
-    const records = await getOrganizationMembershipsForOrg(orgId);
+    const records = await getOrganizationMembershipsForOrgDb(orgId);
     const members = await populateMemberships(records);
     return members;
 };
@@ -31,20 +31,20 @@ const populateMemberships = async (records: MembershipRecord[]) => {
 };
 
 export const getOrgsForUser = async (userId: UserId) => {
-    const records = await getOrganizationMembershipsForUser(userId);
+    const records = await getOrganizationMembershipsForUserDb(userId);
     const orgIds = records.map((r) => r.orgId);
-    const orgs = await Promise.all(orgIds.map(async (id) => await getOrgById(id)));
+    const orgs = await Promise.all(orgIds.map(async (id) => await getOrgByIdDb(id)));
     return orgs.filter((o) => !!o);
 };
 
 export const createMembershipIfDoesntExist = async (membershipRecord: MembershipRecord) => {
-    const existingMemberships = await getOrganizationMembership(membershipRecord.userId, membershipRecord.orgId);
+    const existingMemberships = await getOrganizationMembershipDb(membershipRecord.userId, membershipRecord.orgId);
     if (existingMemberships) {
         return;
     }
-    await createOrganizationMembership(membershipRecord);
+    await createOrganizationMembershipDb(membershipRecord);
 };
 
 export const removeMembership = async (userId: UserId, orgId: OrganizationId) => {
-    await deleteOrganizationMembership(userId, orgId);
+    await deleteOrganizationMembershipDb(userId, orgId);
 };

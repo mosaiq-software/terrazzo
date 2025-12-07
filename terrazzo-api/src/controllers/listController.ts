@@ -1,7 +1,7 @@
 import { arrayMove, BoardId, CardId, List, ListHeader, ListId, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import { getAllCardsOfList, getCardIdsOnList } from '@trz-api/controllers/cardController';
-import { getBoardById } from '@trz-api/persistence/boardPersistence';
-import { createListOnBoard, getListById, getListsBoardId, getListsByBoardIdOrder, getNextListOrder, updateList, updateListOrder } from '@trz-api/persistence/listPersistence';
+import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
+import { createListOnBoardDb, getListByIdDb, getListsBoardIdDb, getListsByBoardIdOrderDb, getNextListOrderDb, updateListDb, updateListOrderDb } from '@trz-api/persistence/listPersistence';
 
 //Gets
 
@@ -12,7 +12,7 @@ import { createListOnBoard, getListById, getListsBoardId, getListsByBoardIdOrder
  * @param archived
  */
 export async function getAllListsOfBoard(boardID: BoardId, archived: boolean) {
-    let listHeaders = await getListsByBoardIdOrder(boardID, archived);
+    let listHeaders = await getListsByBoardIdOrderDb(boardID, archived);
 
     if (listHeaders == null) {
         return [];
@@ -37,7 +37,7 @@ export async function getAllListsOfBoard(boardID: BoardId, archived: boolean) {
 }
 
 export async function getListAndCardIdsOnBoard(boardID: BoardId, archived: boolean): Promise<{ listId: ListId; cardIds: CardId[] }[]> {
-    const listHeaders = await getListsByBoardIdOrder(boardID, archived);
+    const listHeaders = await getListsByBoardIdOrderDb(boardID, archived);
     if (listHeaders == null) {
         return [];
     }
@@ -53,7 +53,7 @@ export async function getListAndCardIdsOnBoard(boardID: BoardId, archived: boole
 }
 
 export async function getListRes(listId: ListId): Promise<ListHeader | undefined> {
-    const listHeader = await getListById(listId);
+    const listHeader = await getListByIdDb(listId);
     if (listHeader == null) {
         throw new Error('List not found');
     }
@@ -71,7 +71,7 @@ export async function getListRes(listId: ListId): Promise<ListHeader | undefined
  */
 export async function addList(boardID: BoardId, listName: string) {
     //pull board from db with ID
-    const updatingBoard = await getBoardById(boardID);
+    const updatingBoard = await getBoardByIdDb(boardID);
 
     if (updatingBoard == null) {
         throw new Error('Board not found');
@@ -84,9 +84,9 @@ export async function addList(boardID: BoardId, listName: string) {
             name: listName,
             archived: false,
             cards: [],
-            order: await getNextListOrder(boardID),
+            order: await getNextListOrderDb(boardID),
         };
-        await createListOnBoard(newList, boardID);
+        await createListOnBoardDb(newList, boardID);
         return newList;
     } catch (e) {
         throw new Error('Failed to save board' + e);
@@ -94,14 +94,14 @@ export async function addList(boardID: BoardId, listName: string) {
 }
 
 export async function updateListFromPartial(listId: ListId, partial: Partial<ListHeader>) {
-    const updatingList = await getListById(listId);
+    const updatingList = await getListByIdDb(listId);
     if (updatingList == null) {
         throw new Error('List not found');
     }
 
     const updated = updateBaseFromPartial(updatingList, partial);
     try {
-        await updateList(updated);
+        await updateListDb(updated);
     } catch (e: any) {
         throw new Error('Failed to update list ' + e);
     }
@@ -110,7 +110,7 @@ export async function updateListFromPartial(listId: ListId, partial: Partial<Lis
 //Utils
 
 export async function getBoardIDFromListID(listID: ListId) {
-    const updatingList = await getListById(listID);
+    const updatingList = await getListByIdDb(listID);
 
     if (updatingList == null) {
         throw new Error('List not found');
@@ -120,11 +120,11 @@ export async function getBoardIDFromListID(listID: ListId) {
 }
 export async function moveList(listID: ListId, toPosition: number) {
     try {
-        const boardId = await getListsBoardId(listID);
+        const boardId = await getListsBoardIdDb(listID);
         if (!boardId) {
             throw new Error('No board found for list');
         }
-        const lists = await getListsByBoardIdOrder(boardId, false); //assumes as of now that archived lists are not included
+        const lists = await getListsByBoardIdOrderDb(boardId, false); //assumes as of now that archived lists are not included
         if (!lists) {
             throw new Error('No lists found on board');
         }
@@ -133,7 +133,7 @@ export async function moveList(listID: ListId, toPosition: number) {
             throw new Error('List not found in list');
         }
         const movedLists = arrayMove<ListHeader>(lists, index, toPosition);
-        await updateListOrder(movedLists);
+        await updateListOrderDb(movedLists);
     } catch (error: any) {
         console.error(error);
         throw error;
