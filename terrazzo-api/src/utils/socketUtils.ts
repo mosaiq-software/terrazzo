@@ -103,10 +103,13 @@ export const leaveRoom = (socket: Socket, room: RoomId) => {
     }
 };
 
-export const sub = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (data: ClientSEPayload[T]) => Promise<ClientSEReplies[T]>) => {
+export type SubOptions = {
+    allowEmptyData?: boolean;
+};
+export const sub = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (data: ClientSEPayload[T]) => Promise<ClientSEReplies[T]>, options?: SubOptions) => {
     socket.on(toEvent as any, async (data: ClientSEPayload[T], reply: ClientSEReply<T>) => {
         try {
-            if (!data) {
+            if (data === undefined && options?.allowEmptyData !== true) {
                 throw new Error('No data provided');
             }
             const returnedReply = await cb(data);
@@ -117,6 +120,7 @@ export const sub = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (data: C
                 data,
                 error: error.message,
                 stack: error.stack,
+                options,
             });
             reply(undefined as ClientSEReplies[T], error.message);
         }
