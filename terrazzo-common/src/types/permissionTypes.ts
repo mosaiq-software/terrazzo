@@ -54,13 +54,13 @@ export const PermissionFlagData: Record<PermissionFlag, PermissionFlagData> = {
     [PermissionFlag.EDIT_ROLES]: {
         flag: PermissionFlag.EDIT_ROLES,
         title: 'Manage Roles',
-        description: 'Ability to create and edit roles and their permissions',
+        description: 'Create and edit roles and their permissions',
         category: PermissionFlagCategory.ORG_LEVEL,
     },
     [PermissionFlag.ASSIGN_ROLES]: {
         flag: PermissionFlag.ASSIGN_ROLES,
         title: 'Assign Roles',
-        description: 'Ability to assign roles to users within the organization',
+        description: 'Assign roles to users within the organization',
         category: PermissionFlagCategory.ORG_LEVEL,
     },
 
@@ -68,37 +68,37 @@ export const PermissionFlagData: Record<PermissionFlag, PermissionFlagData> = {
     [PermissionFlag.VIEW_BOARD]: {
         flag: PermissionFlag.VIEW_BOARD,
         title: 'View Board',
-        description: 'Ability to view a board and its contents',
+        description: 'View a board and its contents',
         category: PermissionFlagCategory.BOARD_LEVEL,
     },
     [PermissionFlag.EDIT_BOARD]: {
         flag: PermissionFlag.EDIT_BOARD,
         title: 'Edit Board',
-        description: 'Ability to edit a board and its lists',
+        description: 'Edit a board and its lists',
         category: PermissionFlagCategory.BOARD_LEVEL,
     },
     [PermissionFlag.CREATE_BOARD]: {
         flag: PermissionFlag.CREATE_BOARD,
         title: 'Create Board',
-        description: 'Ability to create new boards',
+        description: 'Create new boards',
         category: PermissionFlagCategory.BOARD_LEVEL,
     },
     [PermissionFlag.MOVE_CARDS]: {
         flag: PermissionFlag.MOVE_CARDS,
         title: 'Move Cards',
-        description: 'Ability to move cards within a board',
+        description: 'Move cards within a board',
         category: PermissionFlagCategory.BOARD_LEVEL,
     },
     [PermissionFlag.EDIT_CARDS]: {
         flag: PermissionFlag.EDIT_CARDS,
         title: 'Edit Cards',
-        description: 'Ability to edit any field of a card',
+        description: 'Edit any field of a card',
         category: PermissionFlagCategory.BOARD_LEVEL,
     },
     [PermissionFlag.CREATE_CARDS]: {
         flag: PermissionFlag.CREATE_CARDS,
         title: 'Create Cards',
-        description: 'Ability to create new cards on a board',
+        description: 'Create new cards on a board',
         category: PermissionFlagCategory.BOARD_LEVEL,
     },
 
@@ -106,19 +106,19 @@ export const PermissionFlagData: Record<PermissionFlag, PermissionFlagData> = {
     [PermissionFlag.VIEW_DOCUMENT]: {
         flag: PermissionFlag.VIEW_DOCUMENT,
         title: 'View Document',
-        description: 'Ability to view a document',
+        description: 'View a document',
         category: PermissionFlagCategory.DOCUMENT_LEVEL,
     },
     [PermissionFlag.EDIT_DOCUMENT]: {
         flag: PermissionFlag.EDIT_DOCUMENT,
         title: 'Edit Document',
-        description: 'Ability to edit a document',
+        description: 'Edit a document',
         category: PermissionFlagCategory.DOCUMENT_LEVEL,
     },
     [PermissionFlag.CREATE_DOCUMENT]: {
         flag: PermissionFlag.CREATE_DOCUMENT,
         title: 'Create Document',
-        description: 'Ability to create new documents',
+        description: 'Create new documents',
         category: PermissionFlagCategory.DOCUMENT_LEVEL,
     },
 };
