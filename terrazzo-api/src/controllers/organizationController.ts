@@ -52,7 +52,7 @@ const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
 
     // create default roles
     const adminRole = await createRole('Admin', '#D31757', orgId, recordValues(PermissionFlag));
-    const guest = await createRole('Guest', '#2384CA', orgId, [PermissionFlag.VIEW_MODULE]);
+    const guest = await createRole('Guest', '#2384CA', orgId, [PermissionFlag.VIEW_BOARD, PermissionFlag.VIEW_DOCUMENT]);
 
     // assign admin role to creator
     await addRoleToUserInOrg(creator, orgId, adminRole.id);

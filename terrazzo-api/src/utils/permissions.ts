@@ -152,7 +152,7 @@ export const userCanAssignRolesInOrganization = async (user: UserId | Socket, or
  * ```
  */
 export const userCanViewModule = async (user: UserId | Socket, moduleId: UID): Promise<boolean> => {
-    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_MODULE]]);
+    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_BOARD], [PermissionFlag.VIEW_DOCUMENT]]);
 };
 
 /**
@@ -164,7 +164,7 @@ export const userCanViewModule = async (user: UserId | Socket, moduleId: UID): P
  * ```
  */
 export const userCanEditModule = async (user: UserId | Socket, moduleId: UID): Promise<boolean> => {
-    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_MODULE]]);
+    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_BOARD], [PermissionFlag.EDIT_DOCUMENT]]);
 };
 
 /**
