@@ -20,15 +20,20 @@ export const DirectoryTree = (props: DirectoryTreeProps) => {
             gap={0}
             p={0}
         >
-            {contents.map((item) => (
-                <DirectoryTreeItem
-                    key={item.id}
-                    sidebarCollapsed={props.sidebarCollapsed}
-                    directoryListItem={item}
-                    indent={0}
-                    visible={true}
-                />
-            ))}
+            {contents.map((item) => {
+                if (item.type !== TrzModuleType.Directory && !item.canAccess) {
+                    return null;
+                }
+                return (
+                    <DirectoryTreeItem
+                        key={item.id}
+                        sidebarCollapsed={props.sidebarCollapsed}
+                        directoryListItem={item}
+                        indent={0}
+                        visible={true}
+                    />
+                );
+            })}
         </Stack>
     );
 };

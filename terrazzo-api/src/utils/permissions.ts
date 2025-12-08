@@ -28,9 +28,13 @@ const getUserId = (user: UserId | Socket): UserId | undefined => {
  */
 const getModulePermissionsForUser = async (user: UserId | Socket, moduleId: UID): Promise<PermissionFlag[]> => {
     const userId = getUserId(user);
-    const module = await getModuleById(moduleId);
-    if (!module || !userId) {
+    if (!userId) {
         return [];
+    }
+    const module = await getModuleById(moduleId);
+    if (!module) {
+        const orgPerms = await getOrganizationPermissionsForUser(user, moduleId);
+        return orgPerms;
     }
     const userRoles = await getRoleIdsForUserInOrgDb(userId, module.orgId);
     const orgRolePerms = await getAllRolePermissionsInOrg(module.orgId);

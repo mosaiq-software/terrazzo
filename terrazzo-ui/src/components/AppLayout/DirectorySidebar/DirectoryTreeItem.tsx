@@ -93,15 +93,20 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 </Button>
             </Group>
 
-            {contents?.map((subItem) => (
-                <DirectoryTreeItem
-                    key={subItem.id}
-                    sidebarCollapsed={props.sidebarCollapsed || !!collapsed}
-                    directoryListItem={subItem}
-                    indent={props.indent + 1}
-                    visible={!collapsed}
-                />
-            ))}
+            {contents?.map((subItem) => {
+                if (subItem.type !== TrzModuleType.Directory && !subItem.canAccess) {
+                    return null;
+                }
+                return (
+                    <DirectoryTreeItem
+                        key={subItem.id}
+                        sidebarCollapsed={props.sidebarCollapsed || !!collapsed}
+                        directoryListItem={subItem}
+                        indent={props.indent + 1}
+                        visible={!collapsed}
+                    />
+                );
+            })}
         </>
     );
 };

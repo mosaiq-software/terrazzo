@@ -8,7 +8,7 @@ import { useSocketListener } from './useSocketListener';
 
 export const useDirectoryContents = (moduleId: UID | undefined, moduleType: TrzModuleType) => {
     useRoom(RoomType.DATA, moduleId, RoomSpecifier.CONTENTS);
-    const [contents, setContents] = useState<MinimalModuleHeader[] | undefined>(undefined);
+    const [contents, setContents] = useState<(MinimalModuleHeader & { canAccess: boolean })[] | undefined>(undefined);
     const sockCtx = useSocket();
 
     useEffect(() => {

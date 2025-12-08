@@ -143,7 +143,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_SEARCH_RESULTS]: { results: QueryResult[] } | undefined;
     [ClientSE.GET_DOCUMENT]: DocumentHeader | undefined;
     [ClientSE.GET_DIRECTORY]: DirectoryHeader | undefined;
-    [ClientSE.GET_DIRECTORY_CONTENTS]: MinimalModuleHeader[] | undefined;
+    [ClientSE.GET_DIRECTORY_CONTENTS]: (MinimalModuleHeader & { canAccess: boolean })[] | undefined;
     [ClientSE.GET_INVITES_FOR_ORG]: Invite[] | undefined;
     [ClientSE.GET_INVITE]: Invite | undefined;
     [ClientSE.GET_USER]: UserHeader | undefined;

@@ -1,8 +1,8 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
 import { syncDirectoryContents, syncDirectoryField } from '@trz-api/broadcasters';
-import { createDirectory, getDirectory, getDirectoryContents, updateDirectory, updateDirectoryContents } from '@trz-api/controllers/directoryController';
+import { createDirectory, getDirectory, getDirectoryContentsForUser, updateDirectory, updateDirectoryContents } from '@trz-api/controllers/directoryController';
 import { userCanCreateDirectory, userCanEditDirectory, userCanViewDirectory } from '@trz-api/utils/permissions';
-import { subscribe } from '@trz-api/utils/socketUtils';
+import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerDirectoryListeners = (socket: Socket, io: Server) => {
@@ -38,7 +38,8 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
     });
 
     subscribe(socket, ClientSE.GET_DIRECTORY_CONTENTS, async (data) => {
-        const contents = await getDirectoryContents(data);
+        const socketData = getSocketData(socket);
+        const contents = await getDirectoryContentsForUser(data, socketData.user.user.id);
         return contents;
     });
 

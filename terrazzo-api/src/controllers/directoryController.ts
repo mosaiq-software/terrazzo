@@ -1,6 +1,7 @@
-import { DirectoryHeader, DirectoryId, MinimalModuleHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
+import { DirectoryHeader, DirectoryId, MinimalModuleHeader, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common';
 import { createDirectoryDb, DirectoryModelType, getDirectoryByIdDb, updateDirectoryDb } from '@trz-api/persistence/directoryPersistence';
 import { getModulesByParentIdDb } from '@trz-api/persistence/modulePersistence';
+import { userCanViewBoard, userCanViewDirectory, userCanViewDocument } from '@trz-api/utils/permissions';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
 
 export const getDirectory = async (id: DirectoryId): Promise<DirectoryHeader | undefined> => {
@@ -35,16 +36,32 @@ export const updateDirectory = async (id: DirectoryId, header: Partial<Directory
     await updateModule(id, header);
 };
 
-export const getDirectoryContents = async (dirId: DirectoryId): Promise<MinimalModuleHeader[]> => {
+export const getDirectoryContentsForUser = async (dirId: DirectoryId, userId: UserId): Promise<(MinimalModuleHeader & { canAccess: boolean })[]> => {
     const modules = await getModulesByParentIdDb(dirId);
-    // discard unneeded fields for listing to reduce payload size
-    const minimalModules: MinimalModuleHeader[] = modules.map((mod) => ({
-        id: mod.id,
-        parentId: mod.parentId,
-        name: mod.name,
-        type: mod.type,
-        order: mod.order,
-    }));
+    const minimalModules: (MinimalModuleHeader & { canAccess: boolean })[] = await Promise.all(
+        modules.map(async (mod) => {
+            let userCanAccessModule = false;
+            switch (mod.type) {
+                case TrzModuleType.Board:
+                    userCanAccessModule = await userCanViewBoard(userId, mod.id);
+                    break;
+                case TrzModuleType.Document:
+                    userCanAccessModule = await userCanViewDocument(userId, mod.id);
+                    break;
+                case TrzModuleType.Directory:
+                    userCanAccessModule = await userCanViewDirectory(userId, mod.id);
+                    break;
+            }
+            return {
+                id: mod.id,
+                parentId: mod.parentId,
+                name: mod.name,
+                type: mod.type,
+                order: mod.order,
+                canAccess: userCanAccessModule,
+            };
+        })
+    );
     return minimalModules;
 };
 
