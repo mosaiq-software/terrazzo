@@ -1,7 +1,7 @@
 import { DirectoryHeader, DirectoryId, getRoomCode, RoomSpecifier, RoomType, ServerSE, UID } from '@mosaiq/terrazzo-common';
 import { getDirectoryContents } from '@trz-api/controllers/directoryController';
 import { getModuleById } from '@trz-api/controllers/moduleController';
-import { userCanViewModule } from '@trz-api/utils/permissions';
+import { userCanViewDirectory } from '@trz-api/utils/permissions';
 import { broadcast } from '@trz-api/utils/socketUtils';
 import { Server } from 'socket.io';
 
@@ -29,7 +29,7 @@ export const syncDirectoryContents = async (io: Server, dirId: DirectoryId) => {
             event: ServerSE.UPDATE_DIRECTORY_CONTENTS,
             toRoomIds: [getRoomCode(RoomType.DATA, dirId, RoomSpecifier.CONTENTS)],
             buildPayload: async (userId) => {
-                if (!(await userCanViewModule(userId, dirId))) {
+                if (!(await userCanViewDirectory(userId, dirId))) {
                     throw new Error('Insufficient permissions to view this directory');
                 }
                 return { directoryId: dirId, contents: directoryContents };
@@ -46,7 +46,7 @@ export const syncDirectoryField = async (io: Server, directory: DirectoryHeader)
         event: ServerSE.UPDATE_DIRECTORY_FIELD,
         toRoomIds: [getRoomCode(RoomType.DATA, directory.id)],
         buildPayload: async (userId) => {
-            if (!(await userCanViewModule(userId, directory.id))) {
+            if (!(await userCanViewDirectory(userId, directory.id))) {
                 throw new Error('Insufficient permissions to view this directory');
             }
             return directory;

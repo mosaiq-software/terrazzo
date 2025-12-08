@@ -1,13 +1,13 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
 import { syncDirectoryContents, syncDirectoryField } from '@trz-api/broadcasters';
 import { createDirectory, getDirectory, getDirectoryContents, updateDirectory, updateDirectoryContents } from '@trz-api/controllers/directoryController';
-import { userCanEditModule, userCanViewModule } from '@trz-api/utils/permissions';
+import { userCanCreateDirectory, userCanEditDirectory, userCanViewDirectory } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerDirectoryListeners = (socket: Socket, io: Server) => {
     subscribe(socket, ClientSE.GET_DIRECTORY, async (data) => {
-        if (!(await userCanViewModule(socket, data))) {
+        if (!(await userCanViewDirectory(socket, data))) {
             throw new Error('User does not have permission to view this directory');
         }
         const directoryHeader = await getDirectory(data);
@@ -15,7 +15,7 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
     });
 
     subscribe(socket, ClientSE.CREATE_DIRECTORY, async (data) => {
-        if (!(await userCanEditModule(socket, data.parentId))) {
+        if (!(await userCanCreateDirectory(socket, data.parentId))) {
             throw new Error('User does not have permission to create a directory in this module');
         }
         const directoryHeader = await createDirectory(data.name, data.parentId);
@@ -24,7 +24,7 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
     });
 
     subscribe(socket, ClientSE.UPDATE_DIRECTORY_FIELD, async (data) => {
-        if (!(await userCanEditModule(socket, data.id))) {
+        if (!(await userCanEditDirectory(socket, data.id))) {
             throw new Error('User does not have permission to edit this directory');
         }
         await updateDirectory(data.id, data);

@@ -1,4 +1,4 @@
-import { calculateTrueModulePermissionsInOrg, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequiredFlags, OrganizationId, PermissionFlag, UID, UserId } from '@mosaiq/terrazzo-common';
+import { BoardId, calculateTrueModulePermissionsInOrg, CardId, DirectoryId, DocumentId, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequiredFlags, OrganizationId, PermissionFlag, UID, UserId } from '@mosaiq/terrazzo-common';
 import { getModuleById } from '@trz-api/controllers/moduleController';
 import { getAllRolePermissionsInOrg } from '@trz-api/controllers/roleController';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
@@ -80,12 +80,8 @@ export const userHasPermissionsOnOrganization = async (user: UserId | Socket, or
     return meetsRequiredFlags(grantedFlags, requiredFlags);
 };
 
-/**
- * Checks if a user can get personal data for a user.
- * ```
- * is self
- * ```
- */
+// ====================== Specific Permission Checkers ======================
+
 export const userCanGetPersonalDataForUser = async (requestingUser: UserId | Socket, targetUserId: UserId): Promise<boolean> => {
     const requestingUserId = getUserId(requestingUser);
     if (!requestingUserId) {
@@ -94,10 +90,6 @@ export const userCanGetPersonalDataForUser = async (requestingUser: UserId | Soc
     return requestingUserId === targetUserId;
 };
 
-/**
- * Checks if a user can view an organization.
- * Does not use any specific permission flags, just checks membership.
- */
 export const userCanViewOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
     const userId = getUserId(user);
     if (!userId) {
@@ -107,86 +99,58 @@ export const userCanViewOrganization = async (user: UserId | Socket, orgId: Orga
     return !!membershipRecord;
 };
 
-/**
- * Checks if a user can administer an organization.
- * ```
- * has any of:
- * - ADMINISTER_ORG.
- * ```
- */
 export const userCanAdministerOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
     return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG]]);
 };
 
-/**
- * Checks if a user can edit roles in an organization.
- * ```
- * has any of:
- * - ADMINISTER_ORG
- * - EDIT_ROLES
- * ```
- */
 export const userCanEditRolesInOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
     return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_ROLES]]);
 };
 
-/**
- * Checks if a user can assign roles in an organization.
- * ```
- * has any of:
- * - ADMINISTER_ORG
- * - EDIT_ROLES
- * - ASSIGN_ROLES
- * ```
- */
 export const userCanAssignRolesInOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
     return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_ROLES], [PermissionFlag.ASSIGN_ROLES]]);
 };
 
-/**
- * Checks if a user can view or edit a module.
- * ```
- * has any of:
- * - ADMINISTER_ORG
- * - VIEW_MODULE
- * ```
- */
-export const userCanViewModule = async (user: UserId | Socket, moduleId: UID): Promise<boolean> => {
-    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_BOARD], [PermissionFlag.VIEW_DOCUMENT]]);
+export const userCanViewBoard = async (user: UserId | Socket, boardId: BoardId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, boardId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_BOARD]]);
 };
 
-/**
- * Checks if a user can edit a module.
- * ```
- * has any of:
- * - ADMINISTER_ORG
- * - VIEW_MODULE and EDIT_MODULE
- * ```
- */
-export const userCanEditModule = async (user: UserId | Socket, moduleId: UID): Promise<boolean> => {
-    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_BOARD], [PermissionFlag.EDIT_DOCUMENT]]);
+export const userCanEditBoard = async (user: UserId | Socket, boardId: BoardId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, boardId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_BOARD]]);
 };
 
-/**
- * Checks if a user can move cards on a board.
- * ```
- * has any of:
- * - ADMINISTER_ORG
- * - VIEW_MODULE and MOVE_CARDS and EDIT_CARDS
- * ```
- */
-export const userCanMoveCardsOnBoard = async (user: UserId | Socket, moduleId: UID): Promise<boolean> => {
-    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.MOVE_CARDS]]);
+export const userCanCreateBoard = async (user: UserId | Socket, boardId: BoardId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, boardId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.CREATE_BOARD]]);
 };
 
-/**
- * Checks if a user can edit cards on a board.
- * ```
- * has any of:
- * - ADMINISTER_ORG
- * - VIEW_MODULE and EDIT_CARDS
- * ```
- */
-export const userCanEditCardsOnBoard = async (user: UserId | Socket, moduleId: UID): Promise<boolean> => {
-    return userHasPermissionOnModule(user, moduleId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_CARDS]]);
+export const userCanMoveCardsOnBoard = async (user: UserId | Socket, boardId: BoardId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, boardId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.MOVE_CARDS]]);
+};
+
+export const userCanEditCard = async (user: UserId | Socket, cardId: CardId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, cardId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_CARDS]]);
+};
+
+export const userCanViewDocument = async (user: UserId | Socket, documentId: DocumentId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, documentId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_DOCUMENT]]);
+};
+
+export const userCanEditDocument = async (user: UserId | Socket, documentId: DocumentId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, documentId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_DOCUMENT]]);
+};
+
+export const userCanCreateDocument = async (user: UserId | Socket, documentId: DocumentId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, documentId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.CREATE_DOCUMENT]]);
+};
+
+export const userCanViewDirectory = async (user: UserId | Socket, directoryId: DirectoryId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, directoryId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_BOARD], [PermissionFlag.VIEW_DOCUMENT]]);
+};
+
+export const userCanEditDirectory = async (user: UserId | Socket, directoryId: DirectoryId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, directoryId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_BOARD], [PermissionFlag.EDIT_DOCUMENT]]);
+};
+
+export const userCanCreateDirectory = async (user: UserId | Socket, directoryId: DirectoryId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, directoryId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.CREATE_BOARD], [PermissionFlag.CREATE_DOCUMENT]]);
 };

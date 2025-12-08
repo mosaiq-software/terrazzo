@@ -3,14 +3,14 @@ import { syncAddCard, syncMovedCard, syncUpdateCardAssignee, syncUpdateCardField
 import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/cardAssignmentController';
 import { addCard, duplicateCard, getBoardIDFromCardID, getSingleFullCard, moveCardToList, updateCardFromPartial } from '@trz-api/controllers/cardController';
 import { getBoardIDFromListID } from '@trz-api/controllers/listController';
-import { userCanEditCardsOnBoard, userCanMoveCardsOnBoard, userCanViewModule } from '@trz-api/utils/permissions';
+import { userCanEditCard, userCanMoveCardsOnBoard, userCanViewBoard } from '@trz-api/utils/permissions';
 import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerCardListeners = (socket: Socket, io: Server) => {
     subscribe(socket, ClientSE.GET_CARD, async (data) => {
         const boardId = await getBoardIDFromCardID(data);
-        if (!(await userCanViewModule(socket, boardId))) {
+        if (!(await userCanViewBoard(socket, boardId))) {
             throw new Error('Insufficient permissions to view this card');
         }
         const card = await getSingleFullCard(data);
@@ -22,7 +22,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
 
     subscribe(socket, ClientSE.CREATE_CARD, async (data) => {
         const boardId = await getBoardIDFromListID(data.listID);
-        if (!(await userCanEditCardsOnBoard(socket, boardId))) {
+        if (!(await userCanEditCard(socket, boardId))) {
             throw new Error('Insufficient permissions to create cards on this board');
         }
         const socketData = getSocketData(socket);
@@ -33,7 +33,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
 
     subscribe(socket, ClientSE.CREATE_DUPLICATE_CARD, async (data) => {
         const boardId = await getBoardIDFromCardID(data.cardId);
-        if (!(await userCanEditCardsOnBoard(socket, boardId))) {
+        if (!(await userCanEditCard(socket, boardId))) {
             throw new Error('Insufficient permissions to duplicate cards on this board');
         }
         const socketData = getSocketData(socket);
@@ -44,7 +44,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
 
     subscribe(socket, ClientSE.UPDATE_CARD_FIELD, async (data) => {
         const boardId = await getBoardIDFromCardID(data.id);
-        if (!(await userCanEditCardsOnBoard(socket, boardId))) {
+        if (!(await userCanEditCard(socket, boardId))) {
             throw new Error('Insufficient permissions to update this card');
         }
         await updateCardFromPartial(data.id, data);
@@ -64,7 +64,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
 
     subscribe(socket, ClientSE.UPDATE_CARD_ASSIGNEE, async (data) => {
         const boardId = await getBoardIDFromCardID(data.cardId);
-        if (!(await userCanEditCardsOnBoard(socket, boardId))) {
+        if (!(await userCanEditCard(socket, boardId))) {
             throw new Error('Insufficient permissions to update assignees for this card');
         }
 
