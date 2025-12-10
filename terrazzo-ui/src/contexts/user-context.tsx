@@ -86,9 +86,9 @@ const UserProvider: React.FC<any> = ({ children }) => {
         if (githubAuthToken) {
             if (isDev() && githubAuthToken === 'DEV') {
                 console.warn("Skipping auth token removal because it is 'DEV'");
-                return;
+            } else {
+                await revokeUserAccessToGithubAuth(githubAuthToken);
             }
-            await revokeUserAccessToGithubAuth(githubAuthToken);
         }
         localStorage.removeItem(LocalStorageKey.GITHUB_ACCESS_TOKEN);
         setGithubAuthToken(null);
