@@ -38,10 +38,10 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
     });
 
     subscribe(socket, ClientSE.UPDATE_CARDS_LABELS, async (data) => {
-        if (!(await userCanEditCard(socket, data.cardId))) {
+        const boardId = await getBoardIDFromCardID(data.cardId);
+        if (!(await userCanEditCard(socket, boardId))) {
             throw new Error('Insufficient permissions to update labels for cards on this board');
         }
-        const boardId = await getBoardIDFromCardID(data.cardId);
         await setCardsLabels(data.cardId, data.labelIds);
         await syncCardLabels(io, boardId, data.cardId, data.labelIds);
         return undefined;

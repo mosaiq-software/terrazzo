@@ -1,3 +1,4 @@
+import { OrganizationId, UID } from '../genericTypes';
 import { PermissionFlag } from './permissionFlags';
 
 export enum PermissibleAction {
@@ -35,3 +36,14 @@ export const PermissibleActionRequirements: Record<PermissibleAction, Permission
     [PermissibleAction.EditDirectory]: [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_BOARD], [PermissionFlag.EDIT_DOCUMENT]],
     [PermissibleAction.CreateDirectory]: [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.CREATE_BOARD], [PermissionFlag.CREATE_DOCUMENT]],
 };
+
+export type FetchablePermissibleActionType = { action: PermissibleAction } & (
+    | {
+          type: 'org';
+          orgId: OrganizationId;
+      }
+    | {
+          type: 'module';
+          moduleId: UID;
+      }
+);

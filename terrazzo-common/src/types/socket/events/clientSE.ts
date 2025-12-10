@@ -7,6 +7,7 @@ import { DirectoryHeader } from '../../modules/directoryTypes';
 import { DocumentHeader } from '../../modules/documentTypes';
 import { MinimalModuleHeader } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';
+import { FetchablePermissibleActionType } from '../../permissions/permissibleActions';
 import { Role } from '../../permissions/roleTypes';
 import { QueryResult } from '../../queryTypes';
 import { UserHeader } from '../../userTypes';
@@ -38,6 +39,7 @@ export enum ClientSE {
     GET_ORGANIZATION_MEMBERSHIPS = 'GET_ORGANIZATION_MEMBERSHIPS',
     GET_ROLES_FOR_ORG = 'GET_ROLES_FOR_ORG',
     GET_ROLES_FOR_USER_IN_ORG = 'GET_ROLES_FOR_USER_IN_ORG',
+    GET_CAN_PERFORM_PERMISSIBLE_ACTION = 'GET_CAN_PERFORM_PERMISSIBLE_ACTION',
 
     CREATE_ORG = 'CREATE_ORG',
     CREATE_BOARD = 'CREATE_BOARD',
@@ -94,6 +96,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_ORGANIZATION_MEMBERSHIPS]: OrganizationId;
     [ClientSE.GET_ROLES_FOR_ORG]: OrganizationId;
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId };
+    [ClientSE.GET_CAN_PERFORM_PERMISSIBLE_ACTION]: FetchablePermissibleActionType;
 
     [ClientSE.CREATE_ORG]: { name: string };
     [ClientSE.CREATE_BOARD]: { name: string; boardCode: string; parentId: DirectoryId };
@@ -150,6 +153,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_ORGANIZATION_MEMBERSHIPS]: Member[] | undefined;
     [ClientSE.GET_ROLES_FOR_ORG]: Role[] | undefined;
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: RoleId[] | undefined;
+    [ClientSE.GET_CAN_PERFORM_PERMISSIBLE_ACTION]: boolean;
 
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
     [ClientSE.CREATE_BOARD]: BoardId | undefined;

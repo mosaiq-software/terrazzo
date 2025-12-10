@@ -1,4 +1,4 @@
-import { BoardId, calculateTrueModulePermissionsInOrg, CardId, DirectoryId, DocumentId, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequirementsForPermissibleAction, OrganizationId, PermissibleAction, PermissionFlag, UID, UserId } from '@mosaiq/terrazzo-common';
+import { BoardId, calculateTrueModulePermissionsInOrg, DirectoryId, DocumentId, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, FetchablePermissibleActionType, meetsRequirementsForPermissibleAction, OrganizationId, PermissibleAction, PermissionFlag, UID, UserId } from '@mosaiq/terrazzo-common';
 import { getModuleById } from '@trz-api/controllers/moduleController';
 import { getAllRolePermissionsInOrg } from '@trz-api/controllers/roleController';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
@@ -86,6 +86,16 @@ export const userHasPermissionsOnOrganization = async (user: UserId | Socket, or
     return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
 };
 
+export const fetchablePermissionCheck = async (user: UserId | Socket, data: FetchablePermissibleActionType) => {
+    switch (data.type) {
+        case 'org':
+            return userHasPermissionsOnOrganization(user, data.orgId, data.action);
+        case 'module':
+            return userHasPermissionOnModule(user, data.moduleId, data.action);
+    }
+    throw new Error('Unknown fetchable permission check type');
+};
+
 // ====================== Specific Permission Checkers ======================
 
 export const userCanGetPersonalDataForUser = async (requestingUser: UserId | Socket, targetUserId: UserId): Promise<boolean> => {
@@ -134,8 +144,8 @@ export const userCanMoveCardsOnBoard = async (user: UserId | Socket, boardId: Bo
     return userHasPermissionOnModule(user, boardId, PermissibleAction.MoveCards);
 };
 
-export const userCanEditCard = async (user: UserId | Socket, cardId: CardId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, cardId, PermissibleAction.EditCard);
+export const userCanEditCard = async (user: UserId | Socket, boardId: BoardId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, boardId, PermissibleAction.EditCard);
 };
 
 export const userCanViewDocument = async (user: UserId | Socket, documentId: DocumentId): Promise<boolean> => {
