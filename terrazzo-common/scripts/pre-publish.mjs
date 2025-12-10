@@ -12,7 +12,7 @@ const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 
 let version = 0;
 try {
-    const v = execSync('npm view . version', { encoding: 'utf8' }).trim();
+    const v = execSync('npm view . version', { encoding: 'utf8', timeout: 2000 }).trim();
     version = parseInt(v.split('.')[0], 10);
 } catch (error) {
     console.warn('Error fetching version from npm view:', error.message);
