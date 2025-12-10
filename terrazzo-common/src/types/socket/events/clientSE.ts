@@ -7,7 +7,7 @@ import { DirectoryHeader } from '../../modules/directoryTypes';
 import { DocumentHeader } from '../../modules/documentTypes';
 import { MinimalModuleHeader } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';
-import { Role } from '../../permissionTypes';
+import { Role } from '../../permissions/roleTypes';
 import { QueryResult } from '../../queryTypes';
 import { UserHeader } from '../../userTypes';
 import { MouseRoomUserData, RoomId } from '../roomTypes';

@@ -1,16 +1,4 @@
-import { OrganizationId, RoleId } from './genericTypes';
-
-export interface Role {
-    id: RoleId;
-    orgId: OrganizationId;
-    name: string;
-    color: string;
-    order: number;
-    defaultPermissions: PermissionFlag[];
-}
-
-export type OverridePermissions = Partial<Record<PermissionFlag, boolean>>;
-export type ModulePermissions = Record<RoleId, OverridePermissions>;
+import { PermissionFlagCategory } from './permissionCategories';
 
 export enum PermissionFlag {
     // Org level permissions
@@ -31,12 +19,7 @@ export enum PermissionFlag {
     EDIT_DOCUMENT = 'EDIT_DOCUMENT',
     CREATE_DOCUMENT = 'CREATE_DOCUMENT',
 }
-export enum PermissionFlagCategory {
-    ORG_LEVEL = 'ORG_LEVEL',
-    BOARD_LEVEL = 'BOARD_LEVEL',
-    DOCUMENT_LEVEL = 'DOCUMENT_LEVEL',
-    OTHER = 'OTHER',
-}
+
 export interface PermissionFlagData {
     flag: PermissionFlag;
     title: string;
@@ -120,22 +103,5 @@ export const PermissionFlagData: Record<PermissionFlag, PermissionFlagData> = {
         title: 'Create Document',
         description: 'Create new documents',
         category: PermissionFlagCategory.DOCUMENT_LEVEL,
-    },
-};
-export interface PermissionFlagCategoryData {
-    title: string;
-}
-export const PermissionFlagCategoryData: Record<PermissionFlagCategory, PermissionFlagCategoryData> = {
-    [PermissionFlagCategory.ORG_LEVEL]: {
-        title: 'Organization Permissions',
-    },
-    [PermissionFlagCategory.BOARD_LEVEL]: {
-        title: 'Board Permissions',
-    },
-    [PermissionFlagCategory.DOCUMENT_LEVEL]: {
-        title: 'Document Permissions',
-    },
-    [PermissionFlagCategory.OTHER]: {
-        title: 'Miscellaneous Permissions',
     },
 };

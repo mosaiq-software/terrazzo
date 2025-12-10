@@ -1,5 +1,7 @@
 import { RoleId } from '../types/genericTypes';
-import { ModulePermissions, OverridePermissions, PermissionFlag } from '../types/permissionTypes';
+import { PermissibleAction, PermissibleActionRequirements } from '../types/permissions/permissibleActions';
+import { PermissionFlag } from '../types/permissions/permissionFlags';
+import { ModulePermissions, OverridePermissions } from '../types/permissions/permissionTypes';
 import { recordKeys, recordValues } from './arrayUtils';
 
 /**
@@ -126,12 +128,13 @@ export const evaluatePermissionForRoles = (roles: RoleId[], effectivePermissions
 /**
  * Determines if the granted permission flags meet all the required permission flags.
  * @param grantedFlags - The list of PermissionFlags that are granted.
- * @param anyOfRequiredFlags - An array of arrays of PermissionFlags, where at least one flag from each inner array must be present in grantedFlags.
+ * @param permissibleAction - An array of arrays of PermissionFlags, where at least one flag from each inner array must be present in grantedFlags.
  * Can be thought of as: [[A and B] or [C and D] or ...]
  * @returns True if any inner array of required flags is fully met by the granted flags, false otherwise.
  */
-export const meetsRequiredFlags = (grantedFlags: PermissionFlag[], anyOfRequiredFlags: PermissionFlag[][]): boolean => {
-    for (const requiredFlagGroup of anyOfRequiredFlags) {
+export const meetsRequirementsForPermissibleAction = (grantedFlags: PermissionFlag[], permissibleAction: PermissibleAction): boolean => {
+    const requirementsGroup = PermissibleActionRequirements[permissibleAction];
+    for (const requiredFlagGroup of requirementsGroup) {
         const groupMet = requiredFlagGroup.every((flag) => grantedFlags.includes(flag));
         if (groupMet) {
             return true;

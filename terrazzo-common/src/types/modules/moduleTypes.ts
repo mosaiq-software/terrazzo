@@ -1,5 +1,5 @@
 import { OrganizationId, UID } from '../genericTypes';
-import { ModulePermissions } from '../permissionTypes';
+import { ModulePermissions } from '../permissions/permissionTypes';
 
 export enum TrzModuleType {
     Directory = 'directory',

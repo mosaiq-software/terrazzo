@@ -1,4 +1,4 @@
-import { BoardId, calculateTrueModulePermissionsInOrg, CardId, DirectoryId, DocumentId, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequiredFlags, OrganizationId, PermissionFlag, UID, UserId } from '@mosaiq/terrazzo-common';
+import { BoardId, calculateTrueModulePermissionsInOrg, CardId, DirectoryId, DocumentId, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequirementsForPermissibleAction, OrganizationId, PermissibleAction, PermissionFlag, UID, UserId } from '@mosaiq/terrazzo-common';
 import { getModuleById } from '@trz-api/controllers/moduleController';
 import { getAllRolePermissionsInOrg } from '@trz-api/controllers/roleController';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
@@ -56,34 +56,34 @@ const getOrganizationPermissionsForUser = async (userId: UserId, orgId: Organiza
  * Checks if a user has the required permissions on a module.
  * @param user - The UserId or Socket of the user.
  * @param moduleId - The ID of the module.
- * @param requiredFlags - The list of required PermissionFlags (as arrays of alternatives). @see meetsRequiredFlags
+ * @param requiredFlags - The list of required PermissionFlags (as arrays of alternatives). @see meetsRequirementsForPermissibleAction
  * @returns Whether the user has the required permissions on the module.
  */
-export const userHasPermissionOnModule = async (user: UserId | Socket, moduleId: UID, requiredFlags: PermissionFlag[][]): Promise<boolean> => {
+export const userHasPermissionOnModule = async (user: UserId | Socket, moduleId: UID, permissibleAction: PermissibleAction): Promise<boolean> => {
     const userId = getUserId(user);
     if (!userId) {
         return false;
     }
     const grantedFlags = await getModulePermissionsForUser(userId, moduleId);
-    console.debug('userHasPermissionOnModule', { userId, moduleId, grantedFlags, requiredFlags });
-    return meetsRequiredFlags(grantedFlags, requiredFlags);
+    console.debug('userHasPermissionOnModule', { userId, moduleId, grantedFlags, permissibleAction });
+    return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
 };
 
 /**
  * Checks if a user has the required permissions on an organization.
  * @param user - The UserId or Socket of the user.
  * @param orgId - The ID of the organization.
- * @param requiredFlags - The list of required PermissionFlags (as arrays of alternatives). @see meetsRequiredFlags
+ * @param requiredFlags - The list of required PermissionFlags (as arrays of alternatives). @see meetsRequirementsForPermissibleAction
  * @returns Whether the user has the required permissions on the organization.
  */
-export const userHasPermissionsOnOrganization = async (user: UserId | Socket, orgId: OrganizationId, requiredFlags: PermissionFlag[][]): Promise<boolean> => {
+export const userHasPermissionsOnOrganization = async (user: UserId | Socket, orgId: OrganizationId, permissibleAction: PermissibleAction): Promise<boolean> => {
     const userId = getUserId(user);
     if (!userId) {
         return false;
     }
     const grantedFlags = await getOrganizationPermissionsForUser(userId, orgId);
-    console.debug('userHasPermissionsOnOrganization', { userId, orgId, grantedFlags, requiredFlags });
-    return meetsRequiredFlags(grantedFlags, requiredFlags);
+    console.debug('userHasPermissionsOnOrganization', { userId, orgId, grantedFlags, permissibleAction });
+    return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
 };
 
 // ====================== Specific Permission Checkers ======================
@@ -107,57 +107,57 @@ export const userCanViewOrganization = async (user: UserId | Socket, orgId: Orga
 };
 
 export const userCanAdministerOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
-    return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG]]);
+    return userHasPermissionsOnOrganization(user, orgId, PermissibleAction.AdministerOrg);
 };
 
 export const userCanEditRolesInOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
-    return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_ROLES]]);
+    return userHasPermissionsOnOrganization(user, orgId, PermissibleAction.EditRoles);
 };
 
 export const userCanAssignRolesInOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
-    return userHasPermissionsOnOrganization(user, orgId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_ROLES], [PermissionFlag.ASSIGN_ROLES]]);
+    return userHasPermissionsOnOrganization(user, orgId, PermissibleAction.AssignRoles);
 };
 
 export const userCanViewBoard = async (user: UserId | Socket, boardId: BoardId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, boardId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_BOARD]]);
+    return userHasPermissionOnModule(user, boardId, PermissibleAction.ViewBoard);
 };
 
 export const userCanEditBoard = async (user: UserId | Socket, boardId: BoardId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, boardId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_BOARD]]);
+    return userHasPermissionOnModule(user, boardId, PermissibleAction.EditBoard);
 };
 
 export const userCanCreateBoard = async (user: UserId | Socket, boardId: BoardId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, boardId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.CREATE_BOARD]]);
+    return userHasPermissionOnModule(user, boardId, PermissibleAction.CreateBoard);
 };
 
 export const userCanMoveCardsOnBoard = async (user: UserId | Socket, boardId: BoardId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, boardId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.MOVE_CARDS]]);
+    return userHasPermissionOnModule(user, boardId, PermissibleAction.MoveCards);
 };
 
 export const userCanEditCard = async (user: UserId | Socket, cardId: CardId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, cardId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_CARDS]]);
+    return userHasPermissionOnModule(user, cardId, PermissibleAction.EditCard);
 };
 
 export const userCanViewDocument = async (user: UserId | Socket, documentId: DocumentId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, documentId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_DOCUMENT]]);
+    return userHasPermissionOnModule(user, documentId, PermissibleAction.ViewDocument);
 };
 
 export const userCanEditDocument = async (user: UserId | Socket, documentId: DocumentId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, documentId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_DOCUMENT]]);
+    return userHasPermissionOnModule(user, documentId, PermissibleAction.EditDocument);
 };
 
 export const userCanCreateDocument = async (user: UserId | Socket, documentId: DocumentId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, documentId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.CREATE_DOCUMENT]]);
+    return userHasPermissionOnModule(user, documentId, PermissibleAction.CreateDocument);
 };
 
 export const userCanViewDirectory = async (user: UserId | Socket, directoryId: DirectoryId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, directoryId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_BOARD], [PermissionFlag.VIEW_DOCUMENT]]);
+    return userHasPermissionOnModule(user, directoryId, PermissibleAction.ViewDirectory);
 };
 
 export const userCanEditDirectory = async (user: UserId | Socket, directoryId: DirectoryId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, directoryId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_BOARD], [PermissionFlag.EDIT_DOCUMENT]]);
+    return userHasPermissionOnModule(user, directoryId, PermissibleAction.EditDirectory);
 };
 
 export const userCanCreateDirectory = async (user: UserId | Socket, directoryId: DirectoryId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, directoryId, [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.CREATE_BOARD], [PermissionFlag.CREATE_DOCUMENT]]);
+    return userHasPermissionOnModule(user, directoryId, PermissibleAction.CreateDirectory);
 };
