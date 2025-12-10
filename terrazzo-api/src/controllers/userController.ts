@@ -81,9 +81,19 @@ export async function setupUser(userId: UserId, username: string, firstName: str
         throw new Error('Failed to update user' + e);
     }
 
+    await seedNewUserProfile(userId);
+
+    return user;
+}
+
+const seedNewUserProfile = async (userId: UserId) => {
     // create a default personal org for the user to have projects in
     try {
-        const personalOrgId: OrganizationId = await addOrganization(firstName + "'s Space", user.id);
+        const user = await getUserHeaderByIdDb(userId);
+        if (!user) {
+            throw new Error(`Could not find seedable user: ${userId}`);
+        }
+        const personalOrgId: OrganizationId = await addOrganization(user.firstName + "'s Space", user.id);
         const orgMembershipRecord: MembershipRecord = {
             orgId: personalOrgId,
             userId: user.id,
@@ -103,9 +113,7 @@ export async function setupUser(userId: UserId, username: string, firstName: str
         console.error(e);
         throw new Error('Failed to create users personal organization ' + e);
     }
-
-    return user;
-}
+};
 
 export const getUserPreview = async (userId: UserId) => {
     const user = await getUserHeaderByIdDb(userId);
@@ -126,7 +134,20 @@ export const DEV_upsertFakeUser = async (username: string): Promise<UserHeader> 
 
     let user = await getUserHeaderByUsernameDb(username);
     if (!user) {
-        const randoms = crypto.randomUUID().split('-');
-        user = await createNewUser(username, randoms[0], randoms[1]);
+        const randomId = crypto.randomUUID();
+        const firstNames = ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Heidi', 'Ivan', 'Judy'];
+        const lastNames = ['Anderson', 'Brown', 'Clark', 'Davis', 'Evans', 'Franklin', 'Garcia', 'Harris', 'Ivanov', 'Johnson'];
+        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+        const profilePicture = `https://i.pravatar.cc/150?u=${randomId}`;
+        const githubUserId = `FAKE_${randomId}`;
+        const fakeUser = await createNewUser(username, firstName, lastName, profilePicture, githubUserId);
+        user = fakeUser;
+
+        await seedNewUserProfile(fakeUser.id);
     }
+    if (!user) {
+        throw new Error('Failed to upsert dev user');
+    }
+    return user;
 };

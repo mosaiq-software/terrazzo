@@ -96,10 +96,12 @@ export const userCanGetPersonalDataForUser = async (requestingUser: UserId | Soc
 
 export const userCanViewOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
     const userId = getUserId(user);
+    console.log('id', userId, user.toString());
     if (!userId) {
         return false;
     }
     const membershipRecord = await getOrganizationMembershipDb(userId, orgId);
+    console.log(membershipRecord);
     return !!membershipRecord;
 };
 
