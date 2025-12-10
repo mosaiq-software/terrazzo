@@ -26,14 +26,10 @@ const getUserId = (user: UserId | Socket): UserId | undefined => {
  * @param moduleId - The ID of the module.
  * @returns The list of PermissionFlags that are granted to the user on the module.
  */
-const getModulePermissionsForUser = async (user: UserId | Socket, moduleId: UID): Promise<PermissionFlag[]> => {
-    const userId = getUserId(user);
-    if (!userId) {
-        return [];
-    }
+const getModulePermissionsForUser = async (userId: UserId, moduleId: UID): Promise<PermissionFlag[]> => {
     const module = await getModuleById(moduleId);
     if (!module) {
-        const orgPerms = await getOrganizationPermissionsForUser(user, moduleId);
+        const orgPerms = await getOrganizationPermissionsForUser(userId, moduleId);
         return orgPerms;
     }
     const userRoles = await getRoleIdsForUserInOrgDb(userId, module.orgId);
@@ -49,11 +45,7 @@ const getModulePermissionsForUser = async (user: UserId | Socket, moduleId: UID)
  * @param orgId - The ID of the organization.
  * @returns The list of PermissionFlags that are granted to the user in the organization.
  */
-const getOrganizationPermissionsForUser = async (user: UserId | Socket, orgId: OrganizationId): Promise<PermissionFlag[]> => {
-    const userId = getUserId(user);
-    if (!userId) {
-        return [];
-    }
+const getOrganizationPermissionsForUser = async (userId: UserId, orgId: OrganizationId): Promise<PermissionFlag[]> => {
     const userRoles = await getRoleIdsForUserInOrgDb(userId, orgId);
     const orgRolePerms = await getAllRolePermissionsInOrg(orgId);
     const grantedFlags = evaluateOrganizationPermissionForRoles(userRoles, orgRolePerms);
@@ -68,7 +60,12 @@ const getOrganizationPermissionsForUser = async (user: UserId | Socket, orgId: O
  * @returns Whether the user has the required permissions on the module.
  */
 export const userHasPermissionOnModule = async (user: UserId | Socket, moduleId: UID, requiredFlags: PermissionFlag[][]): Promise<boolean> => {
-    const grantedFlags = await getModulePermissionsForUser(user, moduleId);
+    const userId = getUserId(user);
+    if (!userId) {
+        return false;
+    }
+    const grantedFlags = await getModulePermissionsForUser(userId, moduleId);
+    console.debug('userHasPermissionOnModule', { userId, moduleId, grantedFlags, requiredFlags });
     return meetsRequiredFlags(grantedFlags, requiredFlags);
 };
 
@@ -80,7 +77,12 @@ export const userHasPermissionOnModule = async (user: UserId | Socket, moduleId:
  * @returns Whether the user has the required permissions on the organization.
  */
 export const userHasPermissionsOnOrganization = async (user: UserId | Socket, orgId: OrganizationId, requiredFlags: PermissionFlag[][]): Promise<boolean> => {
-    const grantedFlags = await getOrganizationPermissionsForUser(user, orgId);
+    const userId = getUserId(user);
+    if (!userId) {
+        return false;
+    }
+    const grantedFlags = await getOrganizationPermissionsForUser(userId, orgId);
+    console.debug('userHasPermissionsOnOrganization', { userId, orgId, grantedFlags, requiredFlags });
     return meetsRequiredFlags(grantedFlags, requiredFlags);
 };
 
@@ -96,7 +98,6 @@ export const userCanGetPersonalDataForUser = async (requestingUser: UserId | Soc
 
 export const userCanViewOrganization = async (user: UserId | Socket, orgId: OrganizationId): Promise<boolean> => {
     const userId = getUserId(user);
-    console.log('id', userId, user.toString());
     if (!userId) {
         return false;
     }
