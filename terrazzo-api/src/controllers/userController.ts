@@ -1,6 +1,7 @@
 import { BoardId, List, MembershipRecord, OrganizationId, UserHeader, UserId } from '@mosaiq/terrazzo-common';
 import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createUserHeaderDb, getUserHeaderByGithubIdDb, getUserHeaderByIdDb, getUserHeaderByUsernameDb, updateUserHeaderDb } from '@trz-api/persistence/userPersistence';
+import { isDev } from '@trz-api/utils/envUtils';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
 import { addBoard } from './boardController';
 import { addCard } from './cardController';
@@ -116,4 +117,16 @@ export const getUserPreview = async (userId: UserId) => {
 
 export const updateUserData = async (userData: Partial<UserHeader> & { id: UserId }) => {
     await updateUserHeaderDb(userData);
+};
+
+export const DEV_upsertFakeUser = async (username: string): Promise<UserHeader> => {
+    if (!isDev()) {
+        throw new Error('upsertFakeUser cannot be used outside of the dev environment');
+    }
+
+    let user = await getUserHeaderByUsernameDb(username);
+    if (!user) {
+        const randoms = crypto.randomUUID().split('-');
+        user = await createNewUser(username, randoms[0], randoms[1]);
+    }
 };
