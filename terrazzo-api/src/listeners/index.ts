@@ -7,6 +7,7 @@ export * from './labelListeners';
 export * from './listListeners';
 export * from './membershipListeners';
 export * from './organizationListeners';
+export * from './permissionListeners';
 export * from './queryListeners';
 export * from './realtimeListeners';
 export * from './roleListeners';
