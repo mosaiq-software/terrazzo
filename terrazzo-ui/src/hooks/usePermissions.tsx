@@ -1,33 +1,34 @@
 import { OrganizationId, PermissibleAction, UID } from '@mosaiq/terrazzo-common';
-import { useSocket } from '@trz/contexts/socket-context';
-import { getModuleActionPermission, getOrgActionPermission } from '@trz/emitters/permissionEmitters';
+import { usePermission } from '@trz/contexts/permission-context';
 import { useEffect, useState } from 'react';
 
-export const useOrgPermission = (orgId: OrganizationId, permissibleAction: PermissibleAction) => {
-    const sockCtx = useSocket();
+export const useOrgPermission = (orgId: OrganizationId | undefined, permissibleAction: PermissibleAction) => {
+    const permCtx = usePermission();
+
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-
     useEffect(() => {
-        const fetchPermission = async () => {
-            const result = await getOrgActionPermission(sockCtx, permissibleAction, orgId);
-            setHasPermission(!!result);
-        };
-        fetchPermission();
-    }, [sockCtx, orgId, permissibleAction]);
-
+        if (!orgId) {
+            setHasPermission(false);
+            return;
+        }
+        permCtx.checkOrgPermission(permissibleAction, orgId).then((result) => {
+            setHasPermission(result);
+        });
+    }, [permCtx, orgId, permissibleAction]);
     return !!hasPermission;
 };
 
-export const useModulePermission = (moduleId: UID, permissibleAction: PermissibleAction) => {
-    const sockCtx = useSocket();
+export const useModulePermission = (moduleId: UID | undefined, permissibleAction: PermissibleAction) => {
+    const permCtx = usePermission();
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
     useEffect(() => {
-        const fetchPermission = async () => {
-            const result = await getModuleActionPermission(sockCtx, permissibleAction, moduleId);
-            setHasPermission(!!result);
-        };
-        fetchPermission();
-    }, [sockCtx, moduleId, permissibleAction]);
-
+        if (!moduleId) {
+            setHasPermission(false);
+            return;
+        }
+        permCtx.checkModulePermission(permissibleAction, moduleId).then((result) => {
+            setHasPermission(result);
+        });
+    }, [permCtx, moduleId, permissibleAction]);
     return !!hasPermission;
 };
