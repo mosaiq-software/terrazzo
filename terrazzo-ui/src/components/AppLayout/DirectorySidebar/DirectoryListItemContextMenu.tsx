@@ -43,6 +43,10 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
         }
         return items;
     }, [userCanCreateBoards, userCanCreateDocuments, userCanCreateDirectories, userCanCreateBoardsOrg, userCanCreateDocumentsOrg, userCanCreateDirectoriesOrg]);
+
+    const showCreateOptions = creationMenuItems.length > 0;
+    const showEditOptions = !!props.moduleHeader;
+
     async function addItem(type: TrzModuleType) {
         if (!props.parentId || !props.allowAddItem || !type) {
             return;
@@ -74,7 +78,7 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
 
     return (
         <ContextMenuLayout title={props.parentName}>
-            {props.allowAddItem && creationMenuItems.length > 0 && (
+            {props.allowAddItem && showCreateOptions && (
                 <ContextMenuSelectorMenu
                     title={`Create New`}
                     icon={<MdAdd size={16} />}
@@ -100,6 +104,7 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
                     }}
                 />
             )}
+            {!showCreateOptions && !showEditOptions && <div style={{ padding: '8px', color: '#888' }}>No actions available</div>}
         </ContextMenuLayout>
     );
 };
