@@ -1,4 +1,4 @@
-import { BoardId, calculateTrueModulePermissionsInOrg, DirectoryId, DocumentId, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, FetchablePermissibleActionType, meetsRequirementsForPermissibleAction, OrganizationId, PermissibleAction, PermissionFlag, UID, UserId } from '@mosaiq/terrazzo-common';
+import { BoardId, calculateTrueModulePermissionsInOrg, DirectoryId, DocumentId, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequirementsForPermissibleAction, OrganizationId, PermissibleAction, PermissionFlag, UID, UserId } from '@mosaiq/terrazzo-common';
 import { getModuleById } from '@trz-api/controllers/moduleController';
 import { getRolesForOrg } from '@trz-api/controllers/roleController';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
@@ -84,16 +84,6 @@ export const userHasPermissionsOnOrganization = async (user: UserId | Socket, or
     const grantedFlags = await getOrganizationPermissionsForUser(userId, orgId);
     console.debug('userHasPermissionsOnOrganization', { userId, orgId, grantedFlags, permissibleAction });
     return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
-};
-
-export const fetchablePermissionCheck = async (user: UserId | Socket, data: FetchablePermissibleActionType) => {
-    switch (data.type) {
-        case 'org':
-            return userHasPermissionsOnOrganization(user, data.orgId, data.action);
-        case 'module':
-            return userHasPermissionOnModule(user, data.moduleId, data.action);
-    }
-    throw new Error('Unknown fetchable permission check type');
 };
 
 // ====================== Specific Permission Checkers ======================
