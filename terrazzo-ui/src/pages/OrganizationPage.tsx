@@ -23,6 +23,7 @@ const OrganizationPage = (): React.JSX.Element => {
     const tabId = params.tabId;
     const orgCtx = useOrg();
     const userCanAdmin = useOrgPermission(orgId, PermissibleAction.AdministerOrg);
+    const userCanEditRoles = useOrgPermission(orgId, PermissibleAction.EditRoles) || userCanAdmin;
     setTitle(`${orgCtx.active?.name ?? 'Organization'} | Terrazzo`);
 
     if (orgCtx.active === undefined) {
@@ -97,7 +98,7 @@ const OrganizationPage = (): React.JSX.Element => {
                             variant="default"
                         >
                             <Tabs.List>
-                                {['Organization', 'Members', ...(userCanAdmin ? ['Roles', 'Settings'] : [])].map((t) => {
+                                {['Organization', 'Members', ...(userCanEditRoles ? ['Roles'] : []), ...(userCanAdmin ? ['Settings'] : [])].map((t) => {
                                     return (
                                         <Tabs.Tab
                                             value={t}
@@ -136,7 +137,7 @@ const OrganizationPage = (): React.JSX.Element => {
                                 />
                             </Tabs.Panel>
                             <Tabs.Panel value="Roles">
-                                {userCanAdmin ? (
+                                {userCanEditRoles ? (
                                     <OrgTabRoles
                                         myMembershipRecord={myMembership}
                                         orgData={orgCtx.active}
