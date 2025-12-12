@@ -45,7 +45,7 @@ const PermissionProvider: React.FC<any> = ({ children }) => {
     );
 };
 
-const usePermission = () => {
+const usePermissionContext = () => {
     const context = useContext(PermissionContext);
     if (context === undefined) {
         throw new Error('usePermission must be used within a PermissionProvider');
@@ -53,4 +53,4 @@ const usePermission = () => {
     return context;
 };
 
-export { PermissionProvider, usePermission };
+export { PermissionProvider, usePermissionContext as usePermission };
