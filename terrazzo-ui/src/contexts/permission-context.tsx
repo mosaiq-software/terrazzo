@@ -1,4 +1,4 @@
-import { calculateTrueModulePermissionsInOrg, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequirementsForPermissibleAction, ModuleHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { calculateTrueModulePermissionsInOrg, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequirementsForPermissibleAction, ModuleHeader, PermissibleAction, Role, RoleId } from '@mosaiq/terrazzo-common';
 import { useRoleForUserInOrg } from '@trz/hooks/useRolesForUserInOrg';
 import React, { createContext, useContext } from 'react';
 import { useOrg } from './org-context';
@@ -7,6 +7,9 @@ import { useUser } from './user-context';
 export type PermissionContextType = {
     checkOrgPermission: (action: PermissibleAction) => Promise<boolean>;
     checkModulePermission: (action: PermissibleAction, moduleHeader: ModuleHeader) => Promise<boolean>;
+    userRoleIds: RoleId[];
+    userRoles: Role[];
+    maxRole: Role | undefined;
 };
 
 const PermissionContext = createContext<PermissionContextType | undefined>(undefined);
@@ -14,7 +17,9 @@ const PermissionContext = createContext<PermissionContextType | undefined>(undef
 const PermissionProvider: React.FC<any> = ({ children }) => {
     const orgCtx = useOrg();
     const userCtx = useUser();
-    const { roleIds: userRoleIds } = useRoleForUserInOrg(userCtx.userData?.id, orgCtx.active?.id);
+    const { roleIds: userRoleIds, roles: userRoles } = useRoleForUserInOrg(userCtx.userData?.id, orgCtx.active?.id);
+
+    const maxRole = userRoles.sort((ra, rb) => ra.order - rb.order)?.[0];
 
     const checkOrgPermission = async (permissibleAction: PermissibleAction): Promise<boolean> => {
         if (!userCtx.userData?.id || !orgCtx.active) {
@@ -38,6 +43,9 @@ const PermissionProvider: React.FC<any> = ({ children }) => {
             value={{
                 checkOrgPermission,
                 checkModulePermission,
+                userRoleIds,
+                userRoles,
+                maxRole,
             }}
         >
             {children}

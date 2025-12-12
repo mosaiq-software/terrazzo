@@ -3,6 +3,7 @@ import { ModulePermissions, OverridePermissions, recordKeys, Role, RoleId } from
 import { RoleTabs } from '@trz/components/Roles/RoleTabs';
 import { RoleTag } from '@trz/components/Roles/RoleTag';
 import { useOrg } from '@trz/contexts/org-context';
+import { usePermission } from '@trz/contexts/permission-context';
 import { completelyCaptureEvent } from '@trz/util/eventUtils';
 import { MdAdd } from 'react-icons/md';
 import { PermissionsEditorPermissionsList } from './PermissionsEditorPermissionsList';
@@ -15,6 +16,7 @@ interface PermissionsEditorProps {
 
 export const PermissionsEditor = (props: PermissionsEditorProps) => {
     const orgCtx = useOrg();
+    const permCtx = usePermission();
     const assignedRoleIds = recordKeys(props.desiredPermissions);
     const assignedRoles = orgCtx.roles.filter((role) => assignedRoleIds.includes(role.id));
     const unAssignedRoles = orgCtx.roles.filter((role) => !assignedRoleIds.includes(role.id));
@@ -37,6 +39,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
         <Fieldset legend="Permissions">
             <RoleTabs
                 roles={assignedRoles}
+                disabledRoleCount={permCtx.maxRole?.order}
                 actionButton={
                     props.disabled ? null : (
                         <Menu
