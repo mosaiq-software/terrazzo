@@ -11,8 +11,8 @@ export const useRoleForUserInOrg = (userId: UserId | undefined, orgId: Organizat
     const roomKey = orgId && userId ? `${orgId}_${userId}` : undefined;
     useRoom(RoomType.DATA, roomKey, RoomSpecifier.ROLE_ASSIGNMENTS);
     const orgCtx = useOrg();
-    const [roleIds, setRoleIds] = useState<RoleId[]>([]);
     const sockCtx = useSocket();
+    const [roleIds, setRoleIds] = useState<RoleId[]>([]);
 
     useEffect(() => {
         const fetchRoleIds = async () => {

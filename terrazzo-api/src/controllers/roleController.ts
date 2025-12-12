@@ -28,15 +28,6 @@ export const deleteRole = async (roleId: RoleId) => {
     await deleteRoleDb(roleId);
 };
 
-export const getAllRolePermissionsInOrg = async (orgId: OrganizationId): Promise<Record<RoleId, PermissionFlag[]>> => {
-    const roles = await getRolesByOrgIdDb(orgId);
-    const rolePermissions: Record<RoleId, PermissionFlag[]> = {};
-    for (const role of roles) {
-        rolePermissions[role.id] = role.defaultPermissions;
-    }
-    return rolePermissions;
-};
-
 export const setRolesForUserInOrg = async (userId: UserId, orgId: OrganizationId, roleIds: RoleId[]) => {
     await setRoleIdsForUserInOrgDb(userId, orgId, roleIds);
 };

@@ -1,57 +1,36 @@
-import { OrganizationId, PermissibleAction, UID } from '@mosaiq/terrazzo-common';
-import { getModuleActionPermission, getOrgActionPermission } from '@trz/emitters/permissionEmitters';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { calculateTrueModulePermissionsInOrg, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequirementsForPermissibleAction, ModuleHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { useRoleForUserInOrg } from '@trz/hooks/useRolesForUserInOrg';
+import React, { createContext, useContext } from 'react';
 import { useOrg } from './org-context';
-import { useSocket } from './socket-context';
+import { useUser } from './user-context';
 
 export type PermissionContextType = {
-    checkOrgPermission: (action: PermissibleAction, orgId: OrganizationId) => Promise<boolean>;
-    checkModulePermission: (action: PermissibleAction, moduleId: UID) => Promise<boolean>;
+    checkOrgPermission: (action: PermissibleAction) => Promise<boolean>;
+    checkModulePermission: (action: PermissibleAction, moduleHeader: ModuleHeader) => Promise<boolean>;
 };
 
 const PermissionContext = createContext<PermissionContextType | undefined>(undefined);
 
-const PERMISSION_CHECK_THROTTLE = 1000 * 10;
-
 const PermissionProvider: React.FC<any> = ({ children }) => {
-    const sockCtx = useSocket();
     const orgCtx = useOrg();
+    const userCtx = useUser();
+    const { roleIds: userRoleIds } = useRoleForUserInOrg(userCtx.userData?.id, orgCtx.active?.id);
 
-    const [permissionMap, setPermissionMap] = useState<Map<PermissibleAction, { granted: boolean; lastChecked: number }>>(new Map());
-
-    // Clear permission cache when org changes
-    useEffect(() => {
-        setPermissionMap(new Map());
-    }, [orgCtx.active?.id]);
-
-    const checkOrgPermission = async (action: PermissibleAction, orgId: OrganizationId): Promise<boolean> => {
-        const now = Date.now();
-        const existing = permissionMap.get(action);
-        if (existing && now - existing.lastChecked < PERMISSION_CHECK_THROTTLE) {
-            return existing.granted;
-        }
-        const fetched = await getOrgActionPermission(sockCtx, action, orgId);
-        if (fetched === undefined) {
-            console.warn('Failed to fetch permission for action', action, 'in org', orgId);
+    const checkOrgPermission = async (permissibleAction: PermissibleAction): Promise<boolean> => {
+        if (!userCtx.userData?.id || !orgCtx.active) {
             return false;
         }
-        permissionMap.set(action, { granted: fetched, lastChecked: now });
-        return fetched;
+        const grantedFlags = evaluateOrganizationPermissionForRoles(userRoleIds, orgCtx.roles);
+        return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
     };
 
-    const checkModulePermission = async (action: PermissibleAction, moduleId: UID): Promise<boolean> => {
-        const now = Date.now();
-        const existing = permissionMap.get(action);
-        if (existing && now - existing.lastChecked < PERMISSION_CHECK_THROTTLE) {
-            return existing.granted;
-        }
-        const fetched = await getModuleActionPermission(sockCtx, action, moduleId);
-        if (fetched === undefined) {
-            console.warn('Failed to fetch permission for action', action, 'on module', moduleId);
+    const checkModulePermission = async (permissibleAction: PermissibleAction, moduleHeader: ModuleHeader): Promise<boolean> => {
+        if (!userCtx.userData?.id || !orgCtx.active?.id) {
             return false;
         }
-        permissionMap.set(action, { granted: fetched, lastChecked: now });
-        return fetched;
+        const truePermissions = calculateTrueModulePermissionsInOrg(moduleHeader.effectivePermissions, orgCtx.roles);
+        const grantedFlags = evaluatePermissionForRoles(userRoleIds, truePermissions);
+        return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
     };
 
     return (

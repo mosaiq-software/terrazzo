@@ -1,4 +1,4 @@
-import { DirectoryHeader, DirectoryId, MinimalModuleHeader, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common';
+import { DirectoryHeader, DirectoryId, ModuleHeader, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common';
 import { createDirectoryDb, DirectoryModelType, getDirectoryByIdDb, updateDirectoryDb } from '@trz-api/persistence/directoryPersistence';
 import { getModulesByParentIdDb } from '@trz-api/persistence/modulePersistence';
 import { userCanViewBoard, userCanViewDirectory, userCanViewDocument } from '@trz-api/utils/permissions';
@@ -36,9 +36,9 @@ export const updateDirectory = async (id: DirectoryId, header: Partial<Directory
     await updateModule(id, header);
 };
 
-export const getDirectoryContentsForUser = async (dirId: DirectoryId, userId: UserId): Promise<(MinimalModuleHeader & { canAccess: boolean })[]> => {
+export const getDirectoryContentsForUser = async (dirId: DirectoryId, userId: UserId): Promise<(ModuleHeader & { canAccess: boolean })[]> => {
     const modules = await getModulesByParentIdDb(dirId);
-    const minimalModules: (MinimalModuleHeader & { canAccess: boolean })[] = await Promise.all(
+    const canAccessModules: (ModuleHeader & { canAccess: boolean })[] = await Promise.all(
         modules.map(async (mod) => {
             let userCanAccessModule = false;
             switch (mod.type) {
@@ -53,16 +53,12 @@ export const getDirectoryContentsForUser = async (dirId: DirectoryId, userId: Us
                     break;
             }
             return {
-                id: mod.id,
-                parentId: mod.parentId,
-                name: mod.name,
-                type: mod.type,
-                order: mod.order,
+                ...mod,
                 canAccess: userCanAccessModule,
             };
         })
     );
-    return minimalModules;
+    return canAccessModules;
 };
 
 export const updateDirectoryContents = async (dirId: DirectoryId, moduleIds: UID[]) => {

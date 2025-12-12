@@ -1,4 +1,4 @@
-import { MinimalModuleHeader, RoomSpecifier, RoomType, ServerSE, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
+import { ModuleHeader, RoomSpecifier, RoomType, ServerSE, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getDirectoryContents } from '@trz/emitters/directoryEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -8,7 +8,7 @@ import { useSocketListener } from './useSocketListener';
 
 export const useDirectoryContents = (moduleId: UID | undefined, moduleType: TrzModuleType) => {
     useRoom(RoomType.DATA, moduleId, RoomSpecifier.CONTENTS);
-    const [contents, setContents] = useState<(MinimalModuleHeader & { canAccess: boolean })[] | undefined>(undefined);
+    const [contents, setContents] = useState<(ModuleHeader & { canAccess: boolean })[] | undefined>(undefined);
     const sockCtx = useSocket();
 
     useEffect(() => {

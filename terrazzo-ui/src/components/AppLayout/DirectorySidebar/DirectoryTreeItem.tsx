@@ -1,8 +1,9 @@
 import { Button, Group, Text } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
-import { MinimalModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
+import { ModuleHeader, modulePermissibleAction, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useUI } from '@trz/contexts/ui-context';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
+import { useModulePermission } from '@trz/hooks/usePermissions';
 import { useContextMenu } from 'mantine-contextmenu';
 import { FaChevronDown } from 'react-icons/fa';
 import { IoDocumentOutline } from 'react-icons/io5';
@@ -13,7 +14,7 @@ import { DirectoryListItemContextMenu } from './DirectoryListItemContextMenu';
 
 interface DirectoryTreeItemProps {
     sidebarCollapsed: boolean;
-    directoryListItem: MinimalModuleHeader;
+    directoryListItem: ModuleHeader;
     indent: number;
     visible: boolean;
 }
@@ -23,7 +24,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     const { showContextMenu } = useContextMenu();
     const uiCtx = useUI();
     const contents = useDirectoryContents(props.visible ? props.directoryListItem.id : undefined, props.directoryListItem.type);
-
+    const userCanViewModule = useModulePermission(props.directoryListItem, modulePermissibleAction(props.directoryListItem.type).view);
     const [collapsed, setCollapsed, deleteCollapsed] = useLocalStorage<boolean | undefined>({ key: `directory-tree-item-collapsed-${props.directoryListItem.id}`, defaultValue: undefined });
 
     const selected = location.pathname.includes(props.directoryListItem.id);
@@ -59,7 +60,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 onContextMenuCapture={showContextMenu((close) => (
                     <DirectoryListItemContextMenu
                         onClose={close}
-                        miniModuleHeader={props.directoryListItem}
+                        moduleHeader={props.directoryListItem}
                         parentId={props.directoryListItem.id}
                         parentName={props.directoryListItem.name}
                         allowAddItem={props.directoryListItem.type === TrzModuleType.Directory}

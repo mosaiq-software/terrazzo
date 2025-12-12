@@ -1,7 +1,9 @@
 import { RoleId } from '../types/genericTypes';
+import { TrzModuleType } from '../types/modules/moduleTypes';
 import { PermissibleAction, PermissibleActionRequirements } from '../types/permissions/permissibleActions';
 import { PermissionFlag } from '../types/permissions/permissionFlags';
 import { ModulePermissions, OverridePermissions } from '../types/permissions/permissionTypes';
+import { Role } from '../types/permissions/roleTypes';
 import { recordKeys, recordValues } from './arrayUtils';
 
 /**
@@ -74,7 +76,8 @@ export const calculateModuleEffectivePermissions = (parentPermissions: ModulePer
  * @param orgDefaultPermissions - The default permissions for each role in the organization.
  * @returns The true permissions for each role on the module within the organization.
  */
-export const calculateTrueModulePermissionsInOrg = (moduleEffectivePermissions: ModulePermissions, orgDefaultPermissions: Record<RoleId, PermissionFlag[]>): ModulePermissions => {
+export const calculateTrueModulePermissionsInOrg = (moduleEffectivePermissions: ModulePermissions, orgRoles: Role[]): ModulePermissions => {
+    const orgDefaultPermissions = mapRolesToPermissions(orgRoles);
     const truePermissions: ModulePermissions = {};
     const allRoleIds = recordKeys(orgDefaultPermissions);
     const allPermissionFlags = recordValues(PermissionFlag);
@@ -145,13 +148,14 @@ export const meetsRequirementsForPermissibleAction = (grantedFlags: PermissionFl
 
 /**
  * Evaluates the organization-level permissions for a user based on their roles and the organization's default permissions.
- * @param roles - The list of RoleIds assigned to the user within the organization.
+ * @param roleIds - The list of RoleIds assigned to the user within the organization.
  * @param orgDefaultPermissions - The default permissions for each role in the organization.
  * @returns The list of PermissionFlags that are granted to the given roles.
  */
-export const evaluateOrganizationPermissionForRoles = (roles: RoleId[], orgDefaultPermissions: Record<RoleId, PermissionFlag[]>): PermissionFlag[] => {
+export const evaluateOrganizationPermissionForRoles = (roleIds: RoleId[], orgRoles: Role[]): PermissionFlag[] => {
+    const orgDefaultPermissions = mapRolesToPermissions(orgRoles);
     const grantedFlags = new Set<PermissionFlag>();
-    for (const roleId of roles) {
+    for (const roleId of roleIds) {
         const roleDefaults = orgDefaultPermissions[roleId];
         if (roleDefaults) {
             for (const flag of roleDefaults) {
@@ -160,4 +164,40 @@ export const evaluateOrganizationPermissionForRoles = (roles: RoleId[], orgDefau
         }
     }
     return Array.from(grantedFlags);
+};
+
+/**
+ * Maps a list of roles to their default permission flags.
+ */
+const mapRolesToPermissions = (roles: Role[]): Record<RoleId, PermissionFlag[]> => {
+    const rolePermissions: Record<RoleId, PermissionFlag[]> = {};
+    for (const role of roles) {
+        rolePermissions[role.id] = role.defaultPermissions;
+    }
+    return rolePermissions;
+};
+
+export const modulePermissibleAction = (moduleType: TrzModuleType) => {
+    switch (moduleType) {
+        case TrzModuleType.Directory:
+            return {
+                view: PermissibleAction.ViewDirectory,
+                edit: PermissibleAction.EditDirectory,
+                create: PermissibleAction.CreateDirectory,
+            };
+        case TrzModuleType.Board:
+            return {
+                view: PermissibleAction.ViewBoard,
+                edit: PermissibleAction.EditBoard,
+                create: PermissibleAction.CreateBoard,
+            };
+        case TrzModuleType.Document:
+            return {
+                view: PermissibleAction.ViewDocument,
+                edit: PermissibleAction.EditDocument,
+                create: PermissibleAction.CreateDocument,
+            };
+        default:
+            throw new Error(`[modulePermissibleAction] Unsupported module type: ${moduleType}`);
+    }
 };

@@ -1,6 +1,6 @@
 import { BoardId, calculateTrueModulePermissionsInOrg, DirectoryId, DocumentId, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, FetchablePermissibleActionType, meetsRequirementsForPermissibleAction, OrganizationId, PermissibleAction, PermissionFlag, UID, UserId } from '@mosaiq/terrazzo-common';
 import { getModuleById } from '@trz-api/controllers/moduleController';
-import { getAllRolePermissionsInOrg } from '@trz-api/controllers/roleController';
+import { getRolesForOrg } from '@trz-api/controllers/roleController';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
@@ -33,8 +33,8 @@ const getModulePermissionsForUser = async (userId: UserId, moduleId: UID): Promi
         return orgPerms;
     }
     const userRoles = await getRoleIdsForUserInOrgDb(userId, module.orgId);
-    const orgRolePerms = await getAllRolePermissionsInOrg(module.orgId);
-    const truePermissions = calculateTrueModulePermissionsInOrg(module.effectivePermissions, orgRolePerms);
+    const orgRoles = await getRolesForOrg(module.orgId);
+    const truePermissions = calculateTrueModulePermissionsInOrg(module.effectivePermissions, orgRoles);
     const grantedFlags = evaluatePermissionForRoles(userRoles, truePermissions);
     return grantedFlags;
 };
@@ -47,8 +47,8 @@ const getModulePermissionsForUser = async (userId: UserId, moduleId: UID): Promi
  */
 const getOrganizationPermissionsForUser = async (userId: UserId, orgId: OrganizationId): Promise<PermissionFlag[]> => {
     const userRoles = await getRoleIdsForUserInOrgDb(userId, orgId);
-    const orgRolePerms = await getAllRolePermissionsInOrg(orgId);
-    const grantedFlags = evaluateOrganizationPermissionForRoles(userRoles, orgRolePerms);
+    const orgRoles = await getRolesForOrg(orgId);
+    const grantedFlags = evaluateOrganizationPermissionForRoles(userRoles, orgRoles);
     return grantedFlags;
 };
 
