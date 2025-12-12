@@ -12,6 +12,7 @@ interface RingHoldingButtonProps {
     ringSize?: number;
     ringThickness?: number;
     tooltip?: string;
+    disabled?: boolean;
 }
 const DEFAULT_INCREMENT = 1000 / 60; // 60fps
 export const RingHoldingButton = (props: RingHoldingButtonProps) => {
@@ -20,7 +21,7 @@ export const RingHoldingButton = (props: RingHoldingButtonProps) => {
     const [clicked, setClicked] = useState<boolean>(false);
 
     const onComplete = () => {
-        if (clicked) return;
+        if (clicked || props.disabled) return;
         setClicked(true);
         if (props.onClick) props.onClick();
     };
@@ -34,6 +35,7 @@ export const RingHoldingButton = (props: RingHoldingButtonProps) => {
     };
 
     const down = () => {
+        if (props.disabled) return;
         setHolding(true);
     };
 
@@ -64,6 +66,7 @@ export const RingHoldingButton = (props: RingHoldingButtonProps) => {
                 onMouseLeave={release}
                 onMouseDown={down}
                 onClick={(e) => e.preventDefault()}
+                disabled={props.disabled}
             >
                 <RingProgress
                     size={props.ringSize}

@@ -11,6 +11,7 @@ interface ModuleSettingsLayoutProps {
     onSave: () => void;
     onClose: () => void;
     children?: React.ReactNode;
+    disabled?: boolean;
 }
 
 export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
@@ -31,11 +32,13 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                 onChange={(e) => {
                     props.onChangeTitle(e.target.value);
                 }}
+                disabled={props.disabled}
             />
             {props.children}
             <PermissionsEditor
                 desiredPermissions={props.moduleHeader.desiredPermissions}
                 onChange={props.onChangePermissions}
+                disabled={props.disabled}
             />
             <Group
                 bg={COLOR_UNSET}
@@ -56,7 +59,7 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                     Close
                 </Button>
                 <Button
-                    disabled={props.saved}
+                    disabled={props.saved || props.disabled}
                     onClick={props.onSave}
                 >
                     Save Changes

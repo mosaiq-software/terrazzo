@@ -10,6 +10,7 @@ import { RingHoldingButton } from '../UI/RingHoldingButton';
 interface LabelEditorProps {
     labels: Label[];
     boardId: BoardId;
+    disableEditing?: boolean;
 }
 
 export const LabelEditor = (props: LabelEditorProps) => {
@@ -76,6 +77,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                                 onClick={() => {
                                     setEditingLabel(label);
                                 }}
+                                disabled={props.disableEditing}
                             >
                                 <MdOutlineEdit color={textColor} />
                             </ActionIcon>
@@ -95,10 +97,12 @@ export const LabelEditor = (props: LabelEditorProps) => {
                                 onSaveLabel();
                             }
                         }}
+                        disabled={props.disableEditing}
                     />
                     <ColorInput
                         value={editingLabel.color}
                         onChange={(e) => setEditingLabel({ ...editingLabel, color: e })}
+                        disabled={props.disableEditing}
                     />
                     <Tooltip
                         label="Save"
@@ -107,7 +111,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                         <ActionIcon
                             size="input-sm"
                             onClick={onSaveLabel}
-                            disabled={!isValidLabel(editingLabel)}
+                            disabled={!isValidLabel(editingLabel) || props.disableEditing}
                         >
                             {editingLabel.id === TEMPORARY_ID && <MdOutlineAdd />}
                             {editingLabel.id !== TEMPORARY_ID && <MdOutlineCheck />}
@@ -124,6 +128,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                                 setEditingLabel(undefined);
                                 deleteBoardLabel(sockCtx, props.boardId, editingLabel.id);
                             }}
+                            disabled={props.disableEditing}
                         >
                             <MdOutlineDelete />
                         </RingHoldingButton>
@@ -139,6 +144,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                                 onClick={async () => {
                                     setEditingLabel(undefined);
                                 }}
+                                disabled={props.disableEditing}
                             >
                                 {editingLabel.id === TEMPORARY_ID && <MdOutlineClose />}
                             </ActionIcon>
@@ -154,6 +160,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                     <ActionIcon
                         size="input-sm"
                         onClick={onCreateNewLabel}
+                        disabled={props.disableEditing}
                     >
                         <MdOutlineAdd />
                     </ActionIcon>

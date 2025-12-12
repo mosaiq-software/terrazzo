@@ -8,6 +8,7 @@ interface PermissionFancySwitchProps {
     permissionDescription: string;
     isEnabled: boolean | undefined;
     onToggle: (newState: boolean | undefined) => void;
+    disabled?: boolean;
 }
 export const PermissionFancySwitch = (props: PermissionFancySwitchProps) => {
     const { permissionName, permissionDescription, isEnabled, onToggle } = props;
@@ -68,6 +69,7 @@ export const PermissionFancySwitch = (props: PermissionFancySwitchProps) => {
                         transitionProperty: 'transform, width, height, background-color',
                     },
                 }}
+                disabled={props.disabled}
             />
         </Group>
     );

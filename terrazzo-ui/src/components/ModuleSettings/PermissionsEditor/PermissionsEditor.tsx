@@ -10,6 +10,7 @@ import { PermissionsEditorPermissionsList } from './PermissionsEditorPermissions
 interface PermissionsEditorProps {
     desiredPermissions: ModulePermissions;
     onChange: (newPermissions: ModulePermissions) => void;
+    disabled?: boolean;
 }
 
 export const PermissionsEditor = (props: PermissionsEditorProps) => {
@@ -37,66 +38,68 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
             <RoleTabs
                 roles={assignedRoles}
                 actionButton={
-                    <Menu
-                        position="bottom-start"
-                        withArrow
-                        arrowPosition="side"
-                        closeOnClickOutside={true}
-                        trigger="click"
-                        openDelay={0}
-                        closeDelay={200}
-                        shadow="md"
-                        offset={4}
-                    >
-                        <Menu.Target>
-                            <Button
-                                variant="subtle"
-                                leftSection={<MdAdd />}
-                                justify="flex-start"
-                                px={'1rem'}
-                                c="white"
-                            >
-                                Add Role
-                            </Button>
-                        </Menu.Target>
-                        <Menu.Dropdown miw="12rem">
-                            <Menu.Label>Add Roles</Menu.Label>
-                            <Stack
-                                gap={6}
-                                p="xs"
-                            >
-                                {unAssignedRoles.map((role) => (
-                                    <Box
-                                        key={role.id}
-                                        onClick={(e) => {
-                                            completelyCaptureEvent(e);
-                                            handleChangeRolePerms(role.id, {});
-                                        }}
-                                        style={{
-                                            cursor: 'pointer',
-                                        }}
-                                    >
-                                        <RoleTag
-                                            role={role}
-                                            variant="item"
-                                        />
-                                    </Box>
-                                ))}
-                                {unAssignedRoles.length === 0 && (
-                                    <Box
-                                        style={{
-                                            color: 'dimmed',
-                                            fontSize: '14px',
-                                            textAlign: 'center',
-                                            padding: '8px',
-                                        }}
-                                    >
-                                        All roles configured
-                                    </Box>
-                                )}
-                            </Stack>
-                        </Menu.Dropdown>
-                    </Menu>
+                    props.disabled ? null : (
+                        <Menu
+                            position="bottom-start"
+                            withArrow
+                            arrowPosition="side"
+                            closeOnClickOutside={true}
+                            trigger="click"
+                            openDelay={0}
+                            closeDelay={200}
+                            shadow="md"
+                            offset={4}
+                        >
+                            <Menu.Target>
+                                <Button
+                                    variant="subtle"
+                                    leftSection={<MdAdd />}
+                                    justify="flex-start"
+                                    px={'1rem'}
+                                    c="white"
+                                >
+                                    Add Role
+                                </Button>
+                            </Menu.Target>
+                            <Menu.Dropdown miw="12rem">
+                                <Menu.Label>Add Roles</Menu.Label>
+                                <Stack
+                                    gap={6}
+                                    p="xs"
+                                >
+                                    {unAssignedRoles.map((role) => (
+                                        <Box
+                                            key={role.id}
+                                            onClick={(e) => {
+                                                completelyCaptureEvent(e);
+                                                handleChangeRolePerms(role.id, {});
+                                            }}
+                                            style={{
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            <RoleTag
+                                                role={role}
+                                                variant="item"
+                                            />
+                                        </Box>
+                                    ))}
+                                    {unAssignedRoles.length === 0 && (
+                                        <Box
+                                            style={{
+                                                color: 'dimmed',
+                                                fontSize: '14px',
+                                                textAlign: 'center',
+                                                padding: '8px',
+                                            }}
+                                        >
+                                            All roles configured
+                                        </Box>
+                                    )}
+                                </Stack>
+                            </Menu.Dropdown>
+                        </Menu>
+                    )
                 }
                 noSelectionMessage={noSelectionMessage}
                 selectedRolePanel={(role: Role) => (
@@ -110,6 +113,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                             delete newPermissions[role.id];
                             props.onChange(newPermissions);
                         }}
+                        disabled={props.disabled}
                     />
                 )}
             />

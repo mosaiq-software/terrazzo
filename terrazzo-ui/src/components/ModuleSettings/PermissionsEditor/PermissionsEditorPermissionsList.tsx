@@ -9,6 +9,7 @@ interface PermissionsEditorPermissionsListProps {
     rolePermissionsOverride: OverridePermissions;
     onChangeOverride: (newOverride: OverridePermissions) => void;
     onRemoveOverride: () => void;
+    disabled?: boolean;
 }
 export const PermissionsEditorPermissionsList = (props: PermissionsEditorPermissionsListProps) => {
     return (
@@ -33,6 +34,7 @@ export const PermissionsEditorPermissionsList = (props: PermissionsEditorPermiss
                                     [permission]: newState,
                                 });
                             }}
+                            disabled={props.disabled}
                         />
                     );
                 }}
@@ -48,6 +50,7 @@ export const PermissionsEditorPermissionsList = (props: PermissionsEditorPermiss
                     onClick={() => {
                         props.onRemoveOverride();
                     }}
+                    disabled={props.disabled}
                 >
                     <MdOutlineDelete />
                 </RingHoldingButton>

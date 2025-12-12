@@ -1,9 +1,8 @@
 import { Button, Group, Text } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
-import { ModuleHeader, modulePermissibleAction, TrzModuleType } from '@mosaiq/terrazzo-common';
+import { ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useUI } from '@trz/contexts/ui-context';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
-import { useModulePermission } from '@trz/hooks/usePermissions';
 import { useContextMenu } from 'mantine-contextmenu';
 import { FaChevronDown } from 'react-icons/fa';
 import { IoDocumentOutline } from 'react-icons/io5';
@@ -24,7 +23,6 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     const { showContextMenu } = useContextMenu();
     const uiCtx = useUI();
     const contents = useDirectoryContents(props.visible ? props.directoryListItem.id : undefined, props.directoryListItem.type);
-    const userCanViewModule = useModulePermission(props.directoryListItem, modulePermissibleAction(props.directoryListItem.type).view);
     const [collapsed, setCollapsed, deleteCollapsed] = useLocalStorage<boolean | undefined>({ key: `directory-tree-item-collapsed-${props.directoryListItem.id}`, defaultValue: undefined });
 
     const selected = location.pathname.includes(props.directoryListItem.id);
