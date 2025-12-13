@@ -1,8 +1,9 @@
 import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title, Tooltip } from '@mantine/core';
-import { MembershipRecord, OrganizationHeader } from '@mosaiq/terrazzo-common';
+import { MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
 import { removeUserFromOrg, updateOrgField } from '@trz/emitters';
+import { useOrgPermission } from '@trz/hooks/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +14,7 @@ interface OrgTabSettingsProps {
 }
 export const OrgTabSettings = (props: OrgTabSettingsProps) => {
     const [editedSettings, setEditedSettings] = useState<Partial<OrganizationHeader>>({});
+    const userCanAdmin = useOrgPermission(props.orgData.id, PermissibleAction.AdministerOrg);
     const sockCtx = useSocket();
     const navigate = useNavigate();
 
@@ -36,6 +38,18 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
             notify(NoteType.ORG_DATA_ERROR, e);
         }
     }, [sockCtx, props.myMembershipRecord, props.orgData, navigate, iAmOwner]);
+
+    const handleSaveChanges = useCallback(async () => {
+        try {
+            if (!userCanAdmin) {
+                throw new Error('You do not have permission to administer this organization.');
+            }
+            await updateOrgField(sockCtx, props.orgData.id, editedSettings);
+            notify(NoteType.CHANGES_SAVED);
+        } catch (e) {
+            notify(NoteType.ORG_DATA_ERROR, e);
+        }
+    }, [sockCtx, props.orgData, editedSettings, userCanAdmin]);
 
     return (
         <Box
@@ -78,6 +92,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         onChange={(e) => {
                             setEditedSettings({ ...editedSettings, name: e.target.value });
                         }}
+                        disabled={!userCanAdmin}
                     />
                     <Textarea
                         labelProps={{
@@ -89,6 +104,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         onChange={(e) => {
                             setEditedSettings({ ...editedSettings, description: e.target.value });
                         }}
+                        disabled={!userCanAdmin}
                     />
                     <TextInput
                         labelProps={{
@@ -100,6 +116,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         onChange={(e) => {
                             setEditedSettings({ ...editedSettings, logoUrl: e.target.value });
                         }}
+                        disabled={!userCanAdmin}
                     />
                     <Group>
                         <Button
@@ -107,19 +124,14 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                             onClick={() => {
                                 setEditedSettings(props.orgData ?? {});
                             }}
+                            disabled={!userCanAdmin}
                         >
                             Cancel
                         </Button>
                         <Button
                             variant="filled"
-                            onClick={async () => {
-                                try {
-                                    updateOrgField(sockCtx, props.orgData.id, editedSettings);
-                                    notify(NoteType.CHANGES_SAVED);
-                                } catch (e) {
-                                    notify(NoteType.ORG_DATA_ERROR, e);
-                                }
-                            }}
+                            onClick={handleSaveChanges}
+                            disabled={!userCanAdmin}
                         >
                             Save
                         </Button>
