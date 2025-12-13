@@ -1,12 +1,14 @@
-import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title, Tooltip } from '@mantine/core';
+import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title } from '@mantine/core';
 import { MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
 import { removeUserFromOrg, updateOrgField } from '@trz/emitters';
 import { useOrgPermission } from '@trz/hooks/usePermissions';
+import { COLOR_UNSET } from '@trz/util/colorUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { RectHoldingButton } from '../UI/RectHoldingButton';
 
 interface OrgTabSettingsProps {
     myMembershipRecord: MembershipRecord;
@@ -139,20 +141,16 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                     <Divider />
                     <Space />
                     <Group gap="sm">
-                        <Tooltip
-                            label={iAmOwner ? 'Organization owners cannot leave their own organization. Please transfer ownership first.' : 'Leave this organization'}
-                            withArrow
+                        <RectHoldingButton
+                            onClick={handleLeaveOrg}
+                            durationMs={5000}
+                            tooltip={iAmOwner ? 'Organization owners cannot leave their own organization. Please transfer ownership first.' : 'Hold to leave this organization'}
+                            disabled={iAmOwner}
+                            borderColor={'red'}
+                            defaultBorderColor={COLOR_UNSET}
                         >
-                            <Button
-                                variant="light"
-                                color="red"
-                                w="min-content"
-                                onClick={handleLeaveOrg}
-                                disabled={iAmOwner}
-                            >
-                                Leave Organization
-                            </Button>
-                        </Tooltip>
+                            Hold to Leave Organization
+                        </RectHoldingButton>
                     </Group>
                 </Stack>
             </Box>

@@ -5,7 +5,7 @@
     "scripts": {
         "test": "test",
         "preview": "vite preview",
-        "start": "vite --port 8080 --strictPort",
+        "start": "vite --port 8080 --strictPort --host",
         "start:open": "vite --port 8080 --open --strictPort",
         "build": "tsc -b && vite build",
         "build:prod": "npm ci && npm i @mosaiq/terrazzo-common@latest && npm run build && rm -rf /www/* && cp -r ./dist/* /www",
