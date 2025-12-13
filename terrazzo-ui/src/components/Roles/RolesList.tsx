@@ -1,13 +1,13 @@
-import { ActionIcon, Badge, Box, Group, GroupProps, Menu, Stack } from '@mantine/core';
-import { RoleId, UserId } from '@mosaiq/terrazzo-common';
+import { Group, GroupProps } from '@mantine/core';
+import { PermissibleAction, RoleId, UserId } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { setRoleIdsForUserInOrg } from '@trz/emitters/roleEmitters';
+import { useOrgPermission } from '@trz/hooks/usePermissions';
 import { useRoleForUserInOrg } from '@trz/hooks/useRolesForUserInOrg';
-import { completelyCaptureEvent } from '@trz/util/eventUtils';
 import { NoteType, notify } from '@trz/util/notifications';
-import { useCallback, useMemo } from 'react';
-import { MdAdd } from 'react-icons/md';
+import { useCallback } from 'react';
+import { RolesListAddMenu } from './RolesListAddMenu';
 import { RoleTag } from './RoleTag';
 
 interface RolesListProps {
@@ -17,6 +17,7 @@ interface RolesListProps {
 export const RolesList = (props: RolesListProps) => {
     const orgCtx = useOrg();
     const { roles } = useRoleForUserInOrg(props.userId, orgCtx.active?.id);
+    const userCanManageRoles = useOrgPermission(orgCtx.active?.id, PermissibleAction.AssignRoles);
     const sockCtx = useSocket();
 
     const handleToggleRole = useCallback(
@@ -40,7 +41,6 @@ export const RolesList = (props: RolesListProps) => {
         [roles, sockCtx, props.userId, orgCtx.active?.id]
     );
 
-    const unAssignedRoles = useMemo(() => orgCtx.roles.filter((role) => !roles.find((r) => r.id === role.id)), [orgCtx.roles, roles]);
     return (
         <Group
             gap="xs"
@@ -55,92 +55,13 @@ export const RolesList = (props: RolesListProps) => {
                     }}
                 />
             ))}
-            <Menu
-                position="bottom-start"
-                withArrow
-                arrowPosition="side"
-                closeOnClickOutside={true}
-                trigger="click"
-                openDelay={0}
-                closeDelay={200}
-                shadow="md"
-                offset={4}
-            >
-                <Menu.Target>
-                    {roles.length === 0 ? (
-                        <Badge
-                            variant="outline"
-                            color="gray"
-                            style={{
-                                backgroundColor: 'transparent',
-                                cursor: 'pointer',
-                            }}
-                            leftSection={
-                                <ActionIcon
-                                    size={12}
-                                    variant="transparent"
-                                >
-                                    <MdAdd
-                                        size={12}
-                                        color="white"
-                                    />
-                                </ActionIcon>
-                            }
-                        >
-                            Add a role
-                        </Badge>
-                    ) : (
-                        <ActionIcon
-                            variant="light"
-                            color="gray"
-                            size="sm"
-                            radius="xl"
-                            style={{
-                                cursor: 'pointer',
-                            }}
-                        >
-                            <MdAdd size={16} />
-                        </ActionIcon>
-                    )}
-                </Menu.Target>
-                <Menu.Dropdown miw="12rem">
-                    <Menu.Label>Add Roles</Menu.Label>
-                    <Stack
-                        gap={6}
-                        p="xs"
-                    >
-                        {unAssignedRoles.map((role) => (
-                            <Box
-                                key={role.id}
-                                onClick={(e) => {
-                                    completelyCaptureEvent(e);
-                                    handleToggleRole(role.id, true);
-                                }}
-                                style={{
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                <RoleTag
-                                    role={role}
-                                    variant="item"
-                                />
-                            </Box>
-                        ))}
-                        {unAssignedRoles.length === 0 && (
-                            <Box
-                                style={{
-                                    color: '#888',
-                                    fontSize: '14px',
-                                    textAlign: 'center',
-                                    padding: '8px',
-                                }}
-                            >
-                                All roles assigned
-                            </Box>
-                        )}
-                    </Stack>
-                </Menu.Dropdown>
-            </Menu>
+            {userCanManageRoles && (
+                <RolesListAddMenu
+                    userId={props.userId}
+                    roles={roles}
+                    onToggleRole={handleToggleRole}
+                />
+            )}
         </Group>
     );
 };
