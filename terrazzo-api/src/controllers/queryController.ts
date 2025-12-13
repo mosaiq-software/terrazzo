@@ -1,17 +1,17 @@
 import { OrganizationId, QueryableDatapoint, QueryResult, UserId } from '@mosaiq/terrazzo-common';
-import { getOrganizationMembershipsForUser } from '@trz-api/persistence/organizationMembershipPersistence';
-import { getOrgById } from '@trz-api/persistence/organizationPersistence';
+import { getOrganizationMembershipsForUserDb } from '@trz-api/persistence/organizationMembershipPersistence';
+import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import Fuse from 'fuse.js';
 
 /** Cache each search session so that we only index once per use of the searchbar */
 const CachedSearchSessions = new Map<UserId, { searchSessionId: string; datapoints: QueryableDatapoint[] }>();
 
 const getAllQueryableDataForUser = async (userId: UserId) => {
-    const orgMemberships = await getOrganizationMembershipsForUser(userId);
+    const orgMemberships = await getOrganizationMembershipsForUserDb(userId);
     const allOrgIds = new Set<OrganizationId>();
     for (const om of orgMemberships) {
         allOrgIds.add(om.orgId);
-        const org = await getOrgById(om.orgId);
+        const org = await getOrgByIdDb(om.orgId);
         if (!org) continue;
     }
 

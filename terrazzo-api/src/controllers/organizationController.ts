@@ -1,11 +1,12 @@
-import { MembershipRecord, OrganizationHeader, OrganizationId, OrgMembershipLevel, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
-import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
-import { createOrg, getOrgById, updateOrg } from '@trz-api/persistence/organizationPersistence';
+import { OrganizationHeader, OrganizationId, PermissionFlag, recordValues, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
+import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
+import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
+import { createRole } from './roleController';
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
-        const orgHeader = await getOrgById(orgId);
+        const orgHeader = await getOrgByIdDb(orgId);
         if (!orgHeader) {
             throw new Error('No Org found with id ' + orgId);
         }
@@ -34,30 +35,30 @@ export async function addOrganization(name: string, creator: UserId) {
         description: '',
     };
 
-    const membershipRecord: MembershipRecord = {
-        userId: creator,
-        orgId: newOrg.id,
-        permissionLevel: OrgMembershipLevel.ADMIN,
-    };
+    await createOrgDb(newOrg);
+    await seedFreshOrg(newOrg.id, creator);
 
-    try {
-        await createOrg(newOrg);
-        await upsertOrganizationMembership(membershipRecord);
-        return newOrg.id;
-    } catch (e) {
-        throw new Error('Failed to create org' + e);
-    }
+    return newOrg.id;
 }
 
+const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
+    // create default roles
+    const adminRole = await createRole('Admin', '#D31757', orgId, recordValues(PermissionFlag));
+    const guest = await createRole('Guest', '#2384CA', orgId, [PermissionFlag.VIEW_BOARD, PermissionFlag.VIEW_DOCUMENT]);
+
+    // assign admin role to creator
+    await setRoleIdsForUserInOrgDb(creator, orgId, [adminRole.id]);
+};
+
 export async function updateOrganizationFromPartial(orgId: OrganizationId, partial: Partial<OrganizationHeader>) {
-    const updatingOrg = await getOrgById(orgId);
+    const updatingOrg = await getOrgByIdDb(orgId);
     if (updatingOrg == null) {
         throw new Error('Org not found');
     }
 
     const updated = updateBaseFromPartial(updatingOrg, partial);
     try {
-        await updateOrg(updated);
+        await updateOrgDb(updated);
     } catch (e: any) {
         throw new Error('Failed to update org ' + e);
     }

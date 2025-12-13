@@ -11,15 +11,15 @@ TextBlockModel.init(
         },
         text: DataTypes.TEXT,
     },
-    { sequelize }
+    { sequelize, timestamps: false }
 );
 
-export const getTextBlockById = async (id: TextBlockId) => {
+export const getTextBlockByIdDb = async (id: TextBlockId) => {
     const model = await TextBlockModel.findByPk(id);
     return model?.toJSON();
 };
 
-export const createTextBlock = async (text?: string) => {
+export const createTextBlockDb = async (text?: string) => {
     const uid = crypto.randomUUID();
     const model = await TextBlockModel.create({
         id: uid,
@@ -28,7 +28,7 @@ export const createTextBlock = async (text?: string) => {
     return model.toJSON();
 };
 
-export const writeTextBlock = async (id: TextBlockId, text: string) => {
+export const writeTextBlockDb = async (id: TextBlockId, text: string) => {
     const [updated] = await TextBlockModel.update(
         {
             text,

@@ -1,10 +1,12 @@
 import { Fieldset, Loader, TextInput } from '@mantine/core';
-import { BoardHeader, BoardId } from '@mosaiq/terrazzo-common';
+import { BoardHeader, BoardId, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateBoardField } from '@trz/emitters';
 import { useBoard } from '@trz/hooks/useBoard';
+import { useModulePermission } from '@trz/hooks/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
+import { NotFound } from '../UI/NotFound';
 import { LabelEditor } from './LabelEditor';
 import { ModuleSettingsLayout } from './ModuleSettingsLayout';
 
@@ -16,10 +18,15 @@ interface ModuleSettingsBoardProps {
 export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
     const sockCtx = useSocket();
     const { boardData, boardLabels } = useBoard(props.boardId);
+    const userCanViewBoard = useModulePermission(boardData, PermissibleAction.ViewBoard);
+    const userCanEditBoard = useModulePermission(boardData, PermissibleAction.EditBoard);
     const [boardEdits, setBoardEdits] = useState<Partial<BoardHeader>>({});
 
     const onSave = async () => {
         try {
+            if (!userCanEditBoard) {
+                throw new Error('You do not have permission to edit this board.');
+            }
             await updateBoardField(sockCtx, props.boardId, boardEdits);
             setBoardEdits({});
         } catch (e) {
@@ -29,6 +36,15 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
 
     if (!boardData) {
         return <Loader />;
+    }
+
+    if (!userCanViewBoard) {
+        return (
+            <NotFound
+                itemType="board"
+                error={403}
+            />
+        );
     }
 
     return (
@@ -46,6 +62,7 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
             saved={Object.keys(boardEdits).length === 0}
             onSave={onSave}
             onClose={props.onClose}
+            disabled={!userCanEditBoard}
         >
             <TextInput
                 w="8rem"
@@ -58,6 +75,7 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
                 onChange={(e) => {
                     setBoardEdits({ ...boardEdits, boardCode: e.target.value });
                 }}
+                disabled={!userCanEditBoard}
             />
             <Fieldset
                 legend="Labels"
@@ -66,6 +84,7 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
                 <LabelEditor
                     labels={boardLabels}
                     boardId={props.boardId}
+                    disableEditing={!userCanEditBoard}
                 />
             </Fieldset>
         </ModuleSettingsLayout>

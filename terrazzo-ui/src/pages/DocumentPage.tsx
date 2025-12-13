@@ -11,8 +11,8 @@ import { updateDocumentMetadata } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useDocument } from '@trz/hooks/useDocument';
 import { NoteType, notify } from '@trz/util/notifications';
+import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
 import { setTitle } from '@trz/util/tabUtils';
-import { IDLE_TIMEOUT_MS } from '@trz/util/textUtils';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 

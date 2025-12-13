@@ -1,5 +1,6 @@
 import { Box, Button, Text } from '@mantine/core';
 import { MembershipRecord, OrganizationHeader, Role, RoleId } from '@mosaiq/terrazzo-common';
+import { usePermission } from '@trz/contexts/permission-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createRoleOnOrg, deleteRole, updateRole } from '@trz/emitters/roleEmitters';
 import { generateRandomColor } from '@trz/util/colorUtils';
@@ -16,6 +17,7 @@ interface OrgTabRolesProps {
 }
 export const OrgTabRoles = (props: OrgTabRolesProps) => {
     const sockCtx = useSocket();
+    const { maxRole } = usePermission();
     const [activeTab, setActiveTab] = useState<string | null>('no-role-selected');
 
     const createNewRole = useCallback(async () => {
@@ -70,6 +72,7 @@ export const OrgTabRoles = (props: OrgTabRolesProps) => {
         >
             <RoleTabs
                 roles={props.roles}
+                disabledRoleCount={maxRole?.order}
                 actionButton={
                     <Button
                         variant="subtle"
@@ -79,7 +82,7 @@ export const OrgTabRoles = (props: OrgTabRolesProps) => {
                         px={'1rem'}
                         c="white"
                     >
-                        Add Role
+                        Create Role
                     </Button>
                 }
                 noSelectionMessage={

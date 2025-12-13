@@ -1,13 +1,13 @@
-import { BoardId, CardId, DirectoryId, DocumentId, LabelId, ListId, OrganizationId, Position, RoleId, UserId } from '../../genericTypes';
+import { BoardId, CardId, DirectoryId, DocumentId, LabelId, ListId, OrganizationId, RoleId, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
-import { Board, Label } from '../../modules/board/boardTypes';
-import { Card } from '../../modules/board/cardTypes';
-import { List } from '../../modules/board/listTypes';
+import { BoardHeader, Label } from '../../modules/board/boardTypes';
+import { Card, CardHeader } from '../../modules/board/cardTypes';
+import { List, ListHeader } from '../../modules/board/listTypes';
 import { DirectoryHeader } from '../../modules/directoryTypes';
 import { DocumentHeader } from '../../modules/documentTypes';
-import { MinimalModuleHeader } from '../../modules/moduleTypes';
+import { ModuleHeader } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';
-import { Role } from '../../permissionTypes';
+import { Role } from '../../permissions/roleTypes';
 import { MouseRoomUserData } from '../roomTypes';
 import { SocketId, UserData } from '../socketTypes';
 
@@ -20,7 +20,6 @@ export enum ServerSE {
 
     MOUSE_MOVE = 'MOUSE_MOVE',
     USER_IDLE = 'USER_IDLE',
-    TEXT_CARET = 'TEXT_CARET',
     MOVE_LIST = 'MOVE_LIST',
     MOVE_CARD = 'MOVE_CARD',
 
@@ -51,7 +50,6 @@ export interface ServerSEPayload {
 
     [ServerSE.MOUSE_MOVE]: { sid: SocketId; data: MouseRoomUserData };
     [ServerSE.USER_IDLE]: { sid: SocketId; idle: boolean };
-    [ServerSE.TEXT_CARET]: { sid: SocketId; caret?: Position };
     [ServerSE.MOVE_LIST]: { listId: ListId; position: number };
     [ServerSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number };
 
@@ -59,15 +57,15 @@ export interface ServerSEPayload {
     [ServerSE.ADD_CARD]: Card;
 
     [ServerSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
-    [ServerSE.UPDATE_BOARD_FIELD]: Partial<Board> & { id: BoardId };
-    [ServerSE.UPDATE_LIST_FIELD]: Partial<List> & { id: ListId };
-    [ServerSE.UPDATE_CARD_FIELD]: Partial<Card> & { id: CardId };
+    [ServerSE.UPDATE_BOARD_FIELD]: Partial<BoardHeader> & { id: BoardId };
+    [ServerSE.UPDATE_LIST_FIELD]: Partial<ListHeader> & { id: ListId };
+    [ServerSE.UPDATE_CARD_FIELD]: Partial<CardHeader> & { id: CardId };
     [ServerSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
     [ServerSE.UPDATE_BOARD_LABELS]: { boardId: BoardId; labels: Label[] };
     [ServerSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ServerSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ServerSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
-    [ServerSE.UPDATE_DIRECTORY_CONTENTS]: { directoryId: DirectoryId; contents: MinimalModuleHeader[] };
+    [ServerSE.UPDATE_DIRECTORY_CONTENTS]: { directoryId: DirectoryId; contents: (ModuleHeader & { canAccess: boolean })[] };
     [ServerSE.UPDATE_USERS_ORGANIZATIONS]: { userId: UserId; organizations: OrganizationHeader[] };
     [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: { orgId: OrganizationId; members: Member[] };
     [ServerSE.UPDATE_ORGANIZATION_INVITES]: { orgId: OrganizationId; invites: Invite[] };
@@ -80,7 +78,6 @@ export interface ServerSEReplies {
     [ServerSE.CLIENT_JOINED_ROOM]: void;
     [ServerSE.CLIENT_LEFT_ROOM]: void;
 
-    [ServerSE.TEXT_CARET]: void;
     [ServerSE.MOVE_LIST]: void;
     [ServerSE.MOVE_CARD]: void;
     [ServerSE.MOUSE_MOVE]: void;

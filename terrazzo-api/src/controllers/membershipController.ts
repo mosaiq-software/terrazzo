@@ -1,52 +1,50 @@
-import { Member, MembershipRecord, OrganizationId, OrgMembershipLevel, UserId } from '@mosaiq/terrazzo-common';
-import { deleteOrganizationMembership, getOrganizationMembershipsForOrg, getOrganizationMembershipsForUser, updateOrganizationMembership, upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
-import { getOrgById } from '@trz-api/persistence/organizationPersistence';
+import { Member, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
+import { createOrganizationMembershipDb, deleteOrganizationMembershipDb, getOrganizationMembershipDb, getOrganizationMembershipsForOrgDb, getOrganizationMembershipsForUserDb } from '@trz-api/persistence/organizationMembershipPersistence';
+import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 
 export const getMembersInOrg = async (orgId: OrganizationId) => {
-    const org = await getOrgById(orgId);
+    const org = await getOrgByIdDb(orgId);
     if (org == null) {
         throw new Error('Org not found');
     }
-    const records = await getOrganizationMembershipsForOrg(orgId);
-    const members = populateMemberships(records);
+    const records = await getOrganizationMembershipsForOrgDb(orgId);
+    const members = await populateMemberships(records);
     return members;
 };
 
 const populateMemberships = async (records: MembershipRecord[]) => {
-    const members = (
-        await Promise.all(
-            records.map(async (r) => {
-                return {
-                    record: r,
-                    user: await getUserHeaderByIdDb(r.userId),
-                };
-            })
-        )
-    ).filter((m) => !!m.user) as Member[];
+    const memberPromises = records.map(async (r) => {
+        const user = await getUserHeaderByIdDb(r.userId);
+        if (!user) {
+            return undefined;
+        }
+        const member: Member = {
+            user: user,
+            ...r,
+        };
+        return member;
+    });
+    const membersWithUndefined = await Promise.all(memberPromises);
+    const members = membersWithUndefined.filter((m) => !!m);
     return members;
 };
 
 export const getOrgsForUser = async (userId: UserId) => {
-    const records = await getOrganizationMembershipsForUser(userId);
+    const records = await getOrganizationMembershipsForUserDb(userId);
     const orgIds = records.map((r) => r.orgId);
-    const orgs = await Promise.all(orgIds.map(async (id) => await getOrgById(id)));
+    const orgs = await Promise.all(orgIds.map(async (id) => await getOrgByIdDb(id)));
     return orgs.filter((o) => !!o);
 };
 
-export const upsertMembership = async (membershipRecord: MembershipRecord) => {
-    return await upsertOrganizationMembership(membershipRecord);
-};
-
-export const updateMembership = async (userId: UserId, orgId: OrganizationId, newLevel: OrgMembershipLevel) => {
-    const record: MembershipRecord = {
-        userId,
-        orgId,
-        permissionLevel: newLevel,
-    };
-    await updateOrganizationMembership(record);
+export const createMembershipIfDoesntExist = async (membershipRecord: MembershipRecord) => {
+    const existingMemberships = await getOrganizationMembershipDb(membershipRecord.userId, membershipRecord.orgId);
+    if (existingMemberships) {
+        return;
+    }
+    await createOrganizationMembershipDb(membershipRecord);
 };
 
 export const removeMembership = async (userId: UserId, orgId: OrganizationId) => {
-    await deleteOrganizationMembership(userId, orgId);
+    await deleteOrganizationMembershipDb(userId, orgId);
 };

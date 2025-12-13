@@ -1,5 +1,5 @@
 import { OrganizationId, UID } from '../genericTypes';
-import { ModulePermissions } from '../permissionTypes';
+import { ModulePermissions } from '../permissions/permissionTypes';
 
 export enum TrzModuleType {
     Directory = 'directory',
@@ -10,15 +10,12 @@ export enum TrzModuleType {
     Organization = 'organization',
 }
 
-export interface MinimalModuleHeader {
+export interface ModuleHeader {
     id: UID;
     parentId: UID;
     name: string;
     type: TrzModuleType;
     order: number;
-}
-
-export interface ModuleHeader extends MinimalModuleHeader {
     archived: boolean;
     createdAt: number;
     orgId: OrganizationId;

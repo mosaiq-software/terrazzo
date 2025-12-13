@@ -2,6 +2,7 @@ import { Button, Center, Checkbox, Container, Paper, Space, Stack, Text, Title }
 import { useSessionStorage } from '@mantine/hooks';
 import { getGithubLoginUrl } from '@trz/util/githubAuth';
 import { FaGithub } from 'react-icons/fa';
+import { DEV_FakeAccountLogin } from './DEV_FakeAccountLogin';
 
 interface LoginPageProps {}
 const LoginPage = (props: LoginPageProps) => {
@@ -39,6 +40,7 @@ const LoginPage = (props: LoginPageProps) => {
                         >
                             Login With Github
                         </Button>
+                        <DEV_FakeAccountLogin />
                         <Space />
                         <Checkbox
                             label="Remember me"

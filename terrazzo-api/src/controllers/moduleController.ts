@@ -1,13 +1,12 @@
-import { calculateModuleEffectivePermissions, calculateTrueModulePermissionsInOrg, ModuleHeader, ModulePermissions, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
+import { calculateModuleEffectivePermissions, ModuleHeader, ModulePermissions, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
 import { createModuleDb, getModuleByIdDb, getModulesByParentIdDb, getNextModuleOrderInParentDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
-import { getOrgById } from '@trz-api/persistence/organizationPersistence';
-import { getAllRolePermissionsInOrg } from './roleController';
+import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 
 export const createNewModule = async (name: string, parentId: UID, type: TrzModuleType): Promise<ModuleHeader> => {
-    const parentModule = await getModuleByIdDb(parentId);
+    const parentModule = await getModuleById(parentId);
     let orgId = parentModule?.orgId;
     if (!orgId) {
-        const org = await getOrgById(parentId);
+        const org = await getOrgByIdDb(parentId);
         if (!org) {
             throw new Error('Parent module or organization not found');
         }
@@ -35,8 +34,6 @@ export const getModuleById = async (id: UID): Promise<ModuleHeader | undefined> 
     if (!module) {
         return undefined;
     }
-    const orgRolePerms = await getAllRolePermissionsInOrg(module.orgId);
-    module.effectivePermissions = calculateTrueModulePermissionsInOrg(module.effectivePermissions, orgRolePerms);
     return module;
 };
 

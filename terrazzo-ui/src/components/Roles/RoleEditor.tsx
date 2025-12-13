@@ -92,7 +92,6 @@ export const RoleEditor = (props: RoleEditorProps) => {
                     }}
                 />
             </Stack>
-            <Divider />
             <Title order={5}>Danger Zone</Title>
             <Group>
                 <RingHoldingButton

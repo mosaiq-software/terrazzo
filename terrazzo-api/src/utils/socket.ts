@@ -1,10 +1,11 @@
-import { ServerSE, ServerSocketIOEvent, SocketHandshakeAuth } from '@mosaiq/terrazzo-common';
+import { GithubUserProfile, ServerSE, ServerSocketIOEvent, SocketHandshakeAuth } from '@mosaiq/terrazzo-common';
 import { instrument } from '@socket.io/admin-ui';
 import { getUserPreview } from '@trz-api/controllers/userController';
 import * as socketListeners from '@trz-api/listeners';
 import { YSocketIO } from '@trz-api/utils/y-socket-io';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import { isDev } from './envUtils';
 import { getPrivateGitHubUserData } from './githubUtils';
 import { registerEngineSocketEvents } from './socketEngineHandlers';
 import { SocketData } from './socketTypes';
@@ -38,11 +39,16 @@ const initSockets = () => {
     io.on(ServerSocketIOEvent.CONNECTION, async (socket) => {
         try {
             const auth: SocketHandshakeAuth = socket.handshake.auth as any;
-            const githubData = await getPrivateGitHubUserData(auth.githubToken);
             const userData = await getUserPreview(auth.userId);
-
-            if (!githubData || !userData) {
-                throw new Error('No user found');
+            if (!userData) {
+                throw new Error('No Terrazzo user found');
+            }
+            let githubData: GithubUserProfile | null = null;
+            if (!(isDev() && userData.githubUserId.startsWith('FAKE_'))) {
+                githubData = await getPrivateGitHubUserData(auth.githubToken);
+                if (!githubData) {
+                    throw new Error('No Github user found');
+                }
             }
 
             const socketData: SocketData = {

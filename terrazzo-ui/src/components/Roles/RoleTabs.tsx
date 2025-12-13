@@ -8,6 +8,7 @@ interface RoleTabProps {
     actionButton?: React.ReactNode;
     noSelectionMessage?: React.ReactNode;
     selectedRolePanel: (role: Role) => React.ReactNode;
+    disabledRoleCount?: number;
 }
 export const RoleTabs = (props: RoleTabProps) => {
     const [activeTab, setActiveTab] = useState<string | null>('no-role-selected');
@@ -51,32 +52,37 @@ export const RoleTabs = (props: RoleTabProps) => {
                         gap: 'lg',
                     }}
                 >
-                    {props.roles.map((role) => (
-                        <Tabs.Tab
-                            key={role.id}
-                            value={role.id}
-                            leftSection={
-                                <MdCircle
-                                    size={18}
-                                    color={role.color}
-                                />
-                            }
-                            maw="10rem"
-                            style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
-                        >
-                            {role.name}
-                        </Tabs.Tab>
-                    ))}
+                    {props.roles.map((role, index) => {
+                        return (
+                            <Tabs.Tab
+                                key={role.id}
+                                value={role.id}
+                                leftSection={
+                                    <MdCircle
+                                        size={18}
+                                        color={role.color}
+                                    />
+                                }
+                                maw="10rem"
+                                style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+                                disabled={index <= (props.disabledRoleCount || 0)}
+                            >
+                                {role.name}
+                            </Tabs.Tab>
+                        );
+                    })}
                     {props.actionButton}
                 </Tabs.List>
-                {props.roles.map((role) => (
-                    <Tabs.Panel
-                        key={role.id}
-                        value={role.id}
-                    >
-                        {props.selectedRolePanel(role)}
-                    </Tabs.Panel>
-                ))}
+                {props.roles.map((role, index) => {
+                    return (
+                        <Tabs.Panel
+                            key={role.id}
+                            value={role.id}
+                        >
+                            {props.selectedRolePanel(role)}
+                        </Tabs.Panel>
+                    );
+                })}
                 <Tabs.Panel value="no-role-selected">
                     <Center
                         w="100%"

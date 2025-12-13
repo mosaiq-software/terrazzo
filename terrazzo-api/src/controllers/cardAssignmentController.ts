@@ -1,17 +1,17 @@
 import { CardId, UserId } from '@mosaiq/terrazzo-common';
-import { createCardAssignmentRecord, deleteCardAssignmentRecord, getCardAssignmentRecordsForUserOnCard } from '@trz-api/persistence/cardAssignmentPersistence';
+import { createCardAssignmentRecordDb, deleteCardAssignmentRecordDb, getCardAssignmentRecordsForUserOnCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
 
 export const addAssigneeToCard = async (cardId: CardId, userId: UserId) => {
-    const existingAssignment = await getCardAssignmentRecordsForUserOnCard(userId, cardId);
+    const existingAssignment = await getCardAssignmentRecordsForUserOnCardDb(userId, cardId);
     if (existingAssignment?.length) {
         return;
     }
-    await createCardAssignmentRecord(userId, cardId);
+    await createCardAssignmentRecordDb(userId, cardId);
 };
 
 export const removeAssigneeFromCard = async (cardId: CardId, userId: UserId) => {
-    const existingAssignment = await getCardAssignmentRecordsForUserOnCard(userId, cardId);
+    const existingAssignment = await getCardAssignmentRecordsForUserOnCardDb(userId, cardId);
     if (existingAssignment?.length) {
-        await deleteCardAssignmentRecord(existingAssignment[0].id);
+        await deleteCardAssignmentRecordDb(existingAssignment[0].id);
     }
 };

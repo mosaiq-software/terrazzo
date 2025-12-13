@@ -17,17 +17,17 @@ OrgModel.init(
     { sequelize, timestamps: false }
 );
 
-export const getOrgById = async (id: OrganizationId) => {
+export const getOrgByIdDb = async (id: OrganizationId) => {
     const model = await OrgModel.findByPk(id);
     return model?.toJSON();
 };
 
-export const createOrg = async (org: OrganizationHeader) => {
+export const createOrgDb = async (org: OrganizationHeader) => {
     const model = await OrgModel.create({ ...org });
     return model.toJSON();
 };
 
-export const updateOrg = async (org: OrganizationHeader) => {
+export const updateOrgDb = async (org: OrganizationHeader) => {
     const [updated] = await OrgModel.update({ ...org }, { where: { id: org.id } });
     return updated;
 };

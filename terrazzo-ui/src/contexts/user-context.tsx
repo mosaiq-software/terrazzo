@@ -1,5 +1,6 @@
 import { readSessionStorageValue, useSessionStorage } from '@mantine/hooks';
 import { LocalStorageKey, UserHeader } from '@mosaiq/terrazzo-common';
+import { isDev } from '@trz/util/envUtils';
 import { getUserDataFromGithub, revokeUserAccessToGithubAuth, tryLoginWithGithub } from '@trz/util/githubAuth';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setUpUserData } from '@trz/util/userUtils';
@@ -13,6 +14,7 @@ type UserContextType = {
     userData: UserHeader | null;
     setUser: (newUser: UserHeader) => void;
     setUpAccount: (username: string, firstName: string, lastName: string) => Promise<void>;
+    devLogin: (userHeader: UserHeader) => Promise<void>;
 };
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -82,7 +84,11 @@ const UserProvider: React.FC<any> = ({ children }) => {
 
     const logoutAll = async () => {
         if (githubAuthToken) {
-            await revokeUserAccessToGithubAuth(githubAuthToken);
+            if (isDev() && githubAuthToken === 'DEV') {
+                console.warn("Skipping auth token removal because it is 'DEV'");
+            } else {
+                await revokeUserAccessToGithubAuth(githubAuthToken);
+            }
         }
         localStorage.removeItem(LocalStorageKey.GITHUB_ACCESS_TOKEN);
         setGithubAuthToken(null);
@@ -100,6 +106,15 @@ const UserProvider: React.FC<any> = ({ children }) => {
         navigate(route || DEFAULT_AUTHED_ROUTE);
     };
 
+    const devOnlyLogin = async (userHeader: UserHeader) => {
+        if (!isDev()) {
+            return;
+        }
+        setGithubAuthToken('DEV');
+        setUser(userHeader);
+        localStorage.removeItem(LocalStorageKey.GITHUB_ACCESS_TOKEN);
+    };
+
     return (
         <UserContext.Provider
             value={{
@@ -109,6 +124,7 @@ const UserProvider: React.FC<any> = ({ children }) => {
                 userData,
                 setUser,
                 setUpAccount,
+                devLogin: devOnlyLogin,
             }}
         >
             {children}

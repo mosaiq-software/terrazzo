@@ -14,37 +14,34 @@ ListModel.init(
         archived: DataTypes.BOOLEAN,
         order: DataTypes.INTEGER,
     },
-    { sequelize }
+    { sequelize, timestamps: false }
 );
 
-export const getListById = async (id: ListId) => {
+export const getListByIdDb = async (id: ListId) => {
     const model = await ListModel.findByPk(id);
     return model?.toJSON();
 };
 
-export const getListsByBoardId = async (boardId: BoardId) => {
+export const getListsByBoardIdDb = async (boardId: BoardId) => {
     const models = await ListModel.findAll({ where: { boardId } });
     return models.map((list) => list.toJSON());
 };
 
-export const getListsByBoardIdOrder = async (boardId: BoardId, archived: boolean) => {
+export const getListsByBoardIdOrderDb = async (boardId: BoardId, archived: boolean) => {
     const models = await ListModel.findAll({
         where: { boardId, archived },
         order: [['order', 'ASC']],
-        attributes: {
-            exclude: ['createdAt', 'updatedAt'],
-        },
     });
     return models.map((list) => list.toJSON());
 };
 
-export const getNextListOrder = async (boardId: BoardId) => {
+export const getNextListOrderDb = async (boardId: BoardId) => {
     const models = await ListModel.findAll({ where: { boardId }, order: [['order', 'DESC']] });
     const list = models.map((list) => list.toJSON());
     return list ? list.length : 0;
 };
 
-export const createListOnBoard = async (list: ListHeader, boardId: BoardId) => {
+export const createListOnBoardDb = async (list: ListHeader, boardId: BoardId) => {
     const model = await ListModel.create({
         id: list.id,
         boardId,
@@ -55,7 +52,7 @@ export const createListOnBoard = async (list: ListHeader, boardId: BoardId) => {
     return model.toJSON();
 };
 
-export const updateList = async (list: ListHeader) => {
+export const updateListDb = async (list: ListHeader) => {
     const [updated] = await ListModel.update(
         {
             name: list.name,
@@ -67,13 +64,13 @@ export const updateList = async (list: ListHeader) => {
     return updated;
 };
 
-export const getListsBoardId = async (listId: ListId) => {
+export const getListsBoardIdDb = async (listId: ListId) => {
     const model = await ListModel.findByPk(listId);
     const list = model?.toJSON();
     return list?.boardId ?? null;
 };
 
-export const updateListOrder = async (lists: ListHeader[]) => {
+export const updateListOrderDb = async (lists: ListHeader[]) => {
     for (let i = 0; i < lists.length; i++) {
         await ListModel.update(
             {

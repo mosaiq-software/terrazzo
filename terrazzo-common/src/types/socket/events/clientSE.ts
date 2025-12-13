@@ -1,13 +1,13 @@
-import { BoardId, CardId, DirectoryId, DocumentId, InviteId, LabelId, ListId, OrganizationId, Position, RoleId, TextBlockId, UID, UserId } from '../../genericTypes';
+import { BoardId, CardId, DirectoryId, DocumentId, InviteId, LabelId, ListId, OrganizationId, RoleId, UID, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
-import { Board, Label, BoardRes } from '../../modules/board/boardTypes';
+import { Board, BoardRes, Label } from '../../modules/board/boardTypes';
 import { Card } from '../../modules/board/cardTypes';
 import { List, ListHeader } from '../../modules/board/listTypes';
 import { DirectoryHeader } from '../../modules/directoryTypes';
-import { DocumentHeader, TextBlock } from '../../modules/documentTypes';
-import { MinimalModuleHeader } from '../../modules/moduleTypes';
-import { Member, OrganizationHeader, OrgMembershipLevel } from '../../organizationTypes';
-import { Role } from '../../permissionTypes';
+import { DocumentHeader } from '../../modules/documentTypes';
+import { ModuleHeader } from '../../modules/moduleTypes';
+import { Member, OrganizationHeader } from '../../organizationTypes';
+import { Role } from '../../permissions/roleTypes';
 import { QueryResult } from '../../queryTypes';
 import { UserHeader } from '../../userTypes';
 import { MouseRoomUserData, RoomId } from '../roomTypes';
@@ -20,7 +20,6 @@ export enum ClientSE {
     LEAVE_ROOM = 'LEAVE_ROOM',
     MOUSE_MOVE = 'MOUSE_MOVE',
     USER_IDLE = 'USER_IDLE',
-    TEXT_CARET = 'TEXT_CARET',
     MOVE_LIST = 'MOVE_LIST',
     MOVE_CARD = 'MOVE_CARD',
 
@@ -29,7 +28,6 @@ export enum ClientSE {
     GET_BOARD = 'GET_BOARD',
     GET_LIST = 'GET_LIST',
     GET_CARD = 'GET_CARD',
-    GET_TEXT_BLOCK = 'GET_TEXT_BLOCK',
     GET_SEARCH_RESULTS = 'GET_SEARCH_RESULTS',
     GET_DOCUMENT = 'GET_DOCUMENT',
     GET_DIRECTORY = 'GET_DIRECTORY',
@@ -62,7 +60,6 @@ export enum ClientSE {
     UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
     UPDATE_DIRECTORY_FIELD = 'UPDATE_DIRECTORY_FIELD',
     UPDATE_DIRECTORY_CONTENTS = 'UPDATE_DIRECTORY_CONTENTS',
-    UPDATE_MEMBERSHIP = 'UPDATE_MEMBERSHIP',
     UPDATE_ROLE = 'UPDATE_ROLE',
     UPDATE_ROLES_FOR_USER_IN_ORG = 'UPDATE_ROLES_FOR_USER_IN_ORG',
 
@@ -79,7 +76,6 @@ export interface ClientSEPayload {
     [ClientSE.LEAVE_ROOM]: RoomId;
     [ClientSE.MOUSE_MOVE]: MouseRoomUserData;
     [ClientSE.USER_IDLE]: boolean;
-    [ClientSE.TEXT_CARET]: Position | undefined;
     [ClientSE.MOVE_LIST]: { listId: ListId; position: number };
     [ClientSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number };
 
@@ -88,7 +84,6 @@ export interface ClientSEPayload {
     [ClientSE.GET_BOARD]: BoardId;
     [ClientSE.GET_LIST]: ListId;
     [ClientSE.GET_CARD]: CardId;
-    [ClientSE.GET_TEXT_BLOCK]: TextBlockId;
     [ClientSE.GET_SEARCH_RESULTS]: { query: string; searchSessionId: string };
     [ClientSE.GET_DOCUMENT]: DocumentId;
     [ClientSE.GET_DIRECTORY]: DirectoryId;
@@ -121,7 +116,6 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ClientSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
     [ClientSE.UPDATE_DIRECTORY_CONTENTS]: { directoryId: DirectoryId; contents: UID[] };
-    [ClientSE.UPDATE_MEMBERSHIP]: { userId: UserId; orgId: OrganizationId; newPermissionLevel: OrgMembershipLevel };
     [ClientSE.UPDATE_ROLE]: Role;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
 
@@ -138,7 +132,6 @@ export interface ClientSEReplies {
     [ClientSE.LEAVE_ROOM]: undefined;
     [ClientSE.MOUSE_MOVE]: undefined;
     [ClientSE.USER_IDLE]: undefined;
-    [ClientSE.TEXT_CARET]: undefined;
     [ClientSE.MOVE_LIST]: undefined;
     [ClientSE.MOVE_CARD]: undefined;
 
@@ -147,11 +140,10 @@ export interface ClientSEReplies {
     [ClientSE.GET_BOARD]: BoardRes | undefined;
     [ClientSE.GET_LIST]: ListHeader | undefined;
     [ClientSE.GET_CARD]: Card | undefined;
-    [ClientSE.GET_TEXT_BLOCK]: TextBlock | undefined;
     [ClientSE.GET_SEARCH_RESULTS]: { results: QueryResult[] } | undefined;
     [ClientSE.GET_DOCUMENT]: DocumentHeader | undefined;
     [ClientSE.GET_DIRECTORY]: DirectoryHeader | undefined;
-    [ClientSE.GET_DIRECTORY_CONTENTS]: MinimalModuleHeader[] | undefined;
+    [ClientSE.GET_DIRECTORY_CONTENTS]: (ModuleHeader & { canAccess: boolean })[] | undefined;
     [ClientSE.GET_INVITES_FOR_ORG]: Invite[] | undefined;
     [ClientSE.GET_INVITE]: Invite | undefined;
     [ClientSE.GET_USER]: UserHeader | undefined;
@@ -180,7 +172,6 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_DOCUMENT_FIELD]: undefined;
     [ClientSE.UPDATE_DIRECTORY_FIELD]: undefined;
     [ClientSE.UPDATE_DIRECTORY_CONTENTS]: undefined;
-    [ClientSE.UPDATE_MEMBERSHIP]: undefined;
     [ClientSE.UPDATE_ROLE]: undefined;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: undefined;
 

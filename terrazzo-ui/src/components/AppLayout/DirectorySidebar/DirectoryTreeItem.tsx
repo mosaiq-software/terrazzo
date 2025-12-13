@@ -1,6 +1,6 @@
 import { Button, Group, Text } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
-import { MinimalModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
+import { ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useUI } from '@trz/contexts/ui-context';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
 import { useContextMenu } from 'mantine-contextmenu';
@@ -13,7 +13,7 @@ import { DirectoryListItemContextMenu } from './DirectoryListItemContextMenu';
 
 interface DirectoryTreeItemProps {
     sidebarCollapsed: boolean;
-    directoryListItem: MinimalModuleHeader;
+    directoryListItem: ModuleHeader;
     indent: number;
     visible: boolean;
 }
@@ -23,7 +23,6 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     const { showContextMenu } = useContextMenu();
     const uiCtx = useUI();
     const contents = useDirectoryContents(props.visible ? props.directoryListItem.id : undefined, props.directoryListItem.type);
-
     const [collapsed, setCollapsed, deleteCollapsed] = useLocalStorage<boolean | undefined>({ key: `directory-tree-item-collapsed-${props.directoryListItem.id}`, defaultValue: undefined });
 
     const selected = location.pathname.includes(props.directoryListItem.id);
@@ -59,7 +58,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 onContextMenuCapture={showContextMenu((close) => (
                     <DirectoryListItemContextMenu
                         onClose={close}
-                        miniModuleHeader={props.directoryListItem}
+                        moduleHeader={props.directoryListItem}
                         parentId={props.directoryListItem.id}
                         parentName={props.directoryListItem.name}
                         allowAddItem={props.directoryListItem.type === TrzModuleType.Directory}
@@ -93,15 +92,20 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 </Button>
             </Group>
 
-            {contents?.map((subItem) => (
-                <DirectoryTreeItem
-                    key={subItem.id}
-                    sidebarCollapsed={props.sidebarCollapsed || !!collapsed}
-                    directoryListItem={subItem}
-                    indent={props.indent + 1}
-                    visible={!collapsed}
-                />
-            ))}
+            {contents?.map((subItem) => {
+                if (subItem.type !== TrzModuleType.Directory && !subItem.canAccess) {
+                    return null;
+                }
+                return (
+                    <DirectoryTreeItem
+                        key={subItem.id}
+                        sidebarCollapsed={props.sidebarCollapsed || !!collapsed}
+                        directoryListItem={subItem}
+                        indent={props.indent + 1}
+                        visible={!collapsed}
+                    />
+                );
+            })}
         </>
     );
 };

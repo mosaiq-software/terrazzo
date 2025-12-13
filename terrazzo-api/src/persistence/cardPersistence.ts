@@ -26,17 +26,12 @@ CardModel.init(
     { sequelize, timestamps: false }
 );
 
-export const getCardById = async (id: CardId) => {
+export const getCardByIdDb = async (id: CardId) => {
     const model = await CardModel.findByPk(id);
     return model?.toJSON();
 };
 
-export const getCardsByListId = async (listId: ListId) => {
-    const models = await CardModel.findAll({ where: { listId } });
-    return models.map((card) => card.toJSON());
-};
-
-export const getCardsByListIdShortUp = async (listId: ListId, archived: boolean) => {
+export const getCardsByListIdShortUpDb = async (listId: ListId, archived: boolean) => {
     const models = await CardModel.findAll({
         where: { listId, archived },
         order: [['order', 'ASC']],
@@ -47,7 +42,7 @@ export const getCardsByListIdShortUp = async (listId: ListId, archived: boolean)
     return models.map((card) => card.toJSON());
 };
 
-export const createCardOnList = async (card: CardHeader, listId: ListId) => {
+export const createCardOnListDb = async (card: CardHeader, listId: ListId) => {
     const model = await CardModel.create({
         id: card.id,
         listId,
@@ -64,7 +59,7 @@ export const createCardOnList = async (card: CardHeader, listId: ListId) => {
     return model.toJSON();
 };
 
-export const updateCard = async (card: CardHeader) => {
+export const updateCardDb = async (card: CardHeader) => {
     const [updated] = await CardModel.update(
         {
             cardNumber: card.cardNumber,
@@ -80,33 +75,17 @@ export const updateCard = async (card: CardHeader) => {
     return updated;
 };
 
-export const updateName = async (cardId: CardId, name: string) => {
-    const [updated] = await CardModel.update({ name: name }, { where: { id: cardId } });
-    return updated;
-};
-
-export const getCardsByListIdDown = async (listId: ListId) => {
+export const getCardsByListIdDownDb = async (listId: ListId) => {
     const models = await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] });
     return models.map((card) => card.toJSON());
 };
 
-export const getCardsByListIdUp = async (listId: ListId) => {
-    const models = await CardModel.findAll({ where: { listId }, order: [['order', 'ASC']] });
-    return models.map((list) => list.toJSON());
-};
-
-export const getNextCardOrder = async (listId: ListId) => {
-    const models = await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] });
-    const cards = models.map((card) => card.toJSON());
-    return cards?.length ?? 0;
-};
-
-export const updateCardList = async (cardId: CardId, listId: ListId) => {
+export const updateCardListDb = async (cardId: CardId, listId: ListId) => {
     const [updated] = await CardModel.update({ listId }, { where: { id: cardId } });
     return updated;
 };
 
-export const updateCardOrder = async (cardId: CardId, order: number) => {
+export const updateCardOrderDb = async (cardId: CardId, order: number) => {
     const [updated] = await CardModel.update({ order }, { where: { id: cardId } });
     return updated;
 };

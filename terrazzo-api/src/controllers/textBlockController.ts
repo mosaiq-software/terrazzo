@@ -1,18 +1,18 @@
 import { TextBlockId } from '@mosaiq/terrazzo-common';
-import { createTextBlock, getTextBlockById, writeTextBlock } from '@trz-api/persistence/textBlockPersistence';
+import { createTextBlockDb, getTextBlockByIdDb, writeTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import * as Y from 'yjs';
 
 export const storeTextBlockEncodedData = async (_textBlockId: TextBlockId, data: string) => {
-    let textBlockId = (await getTextBlockById(_textBlockId))?.id;
+    let textBlockId = (await getTextBlockByIdDb(_textBlockId))?.id;
     if (!textBlockId) {
-        textBlockId = (await createTextBlock(data)).id;
+        textBlockId = (await createTextBlockDb(data)).id;
     }
     if (!textBlockId) {
         throw new Error(`Unable to find or create text block ${_textBlockId}`);
     }
 
     try {
-        await writeTextBlock(textBlockId, data);
+        await writeTextBlockDb(textBlockId, data);
     } catch (error: any) {
         console.error('Unable to save text block ' + textBlockId + ' : ' + error.message);
         throw new Error('Unable to save text block ' + textBlockId + ' : ' + error.message);
@@ -21,7 +21,7 @@ export const storeTextBlockEncodedData = async (_textBlockId: TextBlockId, data:
 
 export const loadTextBlockEncodedData = async (textBlockId: TextBlockId) => {
     try {
-        const textBlock = await getTextBlockById(textBlockId);
+        const textBlock = await getTextBlockByIdDb(textBlockId);
         if (!textBlock) {
             throw new Error(`Text block ${textBlockId} not found`);
         }
@@ -43,7 +43,7 @@ export const createTextBlockWithPlaintext = async (plaintext?: string) => {
 
 export const createTextBlockWithEncodedData = async (data: string) => {
     try {
-        const uid = await createTextBlock(data);
+        const uid = await createTextBlockDb(data);
         return uid;
     } catch (e: any) {
         console.error(`Unable to create text block`, e);

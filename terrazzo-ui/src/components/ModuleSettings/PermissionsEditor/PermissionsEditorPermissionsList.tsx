@@ -1,5 +1,5 @@
-import { Divider, Group, Stack, Title } from '@mantine/core';
-import { OverridePermissions, PermissionFlagData } from '@mosaiq/terrazzo-common';
+import { Group, Stack, Title } from '@mantine/core';
+import { OverridePermissions, PermissionFlagCategory, PermissionFlagData } from '@mosaiq/terrazzo-common';
 import { PermissionFancySwitch } from '@trz/components/Roles/PermissionFancySwitch';
 import { PermissionFlagGrouper } from '@trz/components/Roles/PermissionFlagGrouper';
 import { RingHoldingButton } from '@trz/components/UI/RingHoldingButton';
@@ -9,6 +9,7 @@ interface PermissionsEditorPermissionsListProps {
     rolePermissionsOverride: OverridePermissions;
     onChangeOverride: (newOverride: OverridePermissions) => void;
     onRemoveOverride: () => void;
+    disabled?: boolean;
 }
 export const PermissionsEditorPermissionsList = (props: PermissionsEditorPermissionsListProps) => {
     return (
@@ -17,6 +18,7 @@ export const PermissionsEditorPermissionsList = (props: PermissionsEditorPermiss
             p="md"
         >
             <PermissionFlagGrouper
+                excludeCategories={[PermissionFlagCategory.ORG_LEVEL]}
                 permissionItem={(permission) => {
                     const permData = PermissionFlagData[permission];
                     const state = props.rolePermissionsOverride[permission];
@@ -32,11 +34,11 @@ export const PermissionsEditorPermissionsList = (props: PermissionsEditorPermiss
                                     [permission]: newState,
                                 });
                             }}
+                            disabled={props.disabled}
                         />
                     );
                 }}
             />
-            <Divider />
             <Title order={5}>Danger Zone</Title>
             <Group>
                 <RingHoldingButton
@@ -48,6 +50,7 @@ export const PermissionsEditorPermissionsList = (props: PermissionsEditorPermiss
                     onClick={() => {
                         props.onRemoveOverride();
                     }}
+                    disabled={props.disabled}
                 >
                     <MdOutlineDelete />
                 </RingHoldingButton>

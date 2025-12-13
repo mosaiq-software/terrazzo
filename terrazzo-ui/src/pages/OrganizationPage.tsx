@@ -1,5 +1,5 @@
 import { Avatar, Box, Flex, Group, Loader, ScrollArea, Stack, Tabs, Text, Title } from '@mantine/core';
-import { OrganizationId } from '@mosaiq/terrazzo-common';
+import { OrganizationId, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
 import { OrgTabRoles } from '@trz/components/OrganizationTabs/OrgTabRoles';
@@ -9,6 +9,7 @@ import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { useUser } from '@trz/contexts/user-context';
+import { useOrgPermission } from '@trz/hooks/usePermissions';
 import { setTitle } from '@trz/util/tabUtils';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,6 +22,8 @@ const OrganizationPage = (): React.JSX.Element => {
     const orgId = params.orgId as OrganizationId | undefined;
     const tabId = params.tabId;
     const orgCtx = useOrg();
+    const userCanAdmin = useOrgPermission(orgId, PermissibleAction.AdministerOrg);
+    const userCanEditRoles = useOrgPermission(orgId, PermissibleAction.EditRoles) || userCanAdmin;
     setTitle(`${orgCtx.active?.name ?? 'Organization'} | Terrazzo`);
 
     if (orgCtx.active === undefined) {
@@ -35,8 +38,8 @@ const OrganizationPage = (): React.JSX.Element => {
         );
     }
 
-    const myMembershipRecord = orgCtx.members.find((m) => m.user.id === userCtx.userData?.id)?.record;
-    if (!myMembershipRecord) {
+    const myMembership = orgCtx.members.find((m) => m.user.id === userCtx.userData?.id);
+    if (!myMembership) {
         return (
             <NotFound
                 itemType="organization"
@@ -45,36 +48,12 @@ const OrganizationPage = (): React.JSX.Element => {
         );
     }
 
-    const tabs: any = {
-        Organization: <OrgTabCards orgData={orgCtx.active} />,
-        Members: (
-            <OrgTabMembers
-                myMembershipRecord={myMembershipRecord}
-                orgData={orgCtx.active}
-                members={orgCtx.members}
-            />
-        ),
-        Roles: (
-            <OrgTabRoles
-                myMembershipRecord={myMembershipRecord}
-                orgData={orgCtx.active}
-                roles={orgCtx.roles}
-            />
-        ),
-        Settings: (
-            <OrgTabSettings
-                myMembershipRecord={myMembershipRecord}
-                orgData={orgCtx.active}
-            />
-        ),
-    };
-
     const onChangeTab = (tab: string | null) => {
-        if (tab === Object.keys(tabs)[0]) tab = '';
+        if (tab === 'Organization') tab = '';
         navigate(`/org/${orgId}/${tab}`);
     };
     const getTab = () => {
-        return tabId && tabId in tabs ? tabId : Object.keys(tabs)[0];
+        return tabId || 'Organization';
     };
 
     return (
@@ -119,7 +98,7 @@ const OrganizationPage = (): React.JSX.Element => {
                             variant="default"
                         >
                             <Tabs.List>
-                                {Object.keys(tabs).map((t) => {
+                                {['Organization', 'Members', ...(userCanEditRoles ? ['Roles'] : []), ...(userCanAdmin ? ['Settings'] : [])].map((t) => {
                                     return (
                                         <Tabs.Tab
                                             value={t}
@@ -147,9 +126,49 @@ const OrganizationPage = (): React.JSX.Element => {
                                     />
                                 </Flex>
                             </Tabs.List>
+                            <Tabs.Panel value="Organization">
+                                <OrgTabCards orgData={orgCtx.active} />
+                            </Tabs.Panel>
+                            <Tabs.Panel value="Members">
+                                <OrgTabMembers
+                                    myMembershipRecord={myMembership}
+                                    orgData={orgCtx.active}
+                                    members={orgCtx.members}
+                                />
+                            </Tabs.Panel>
+                            <Tabs.Panel value="Roles">
+                                {userCanEditRoles ? (
+                                    <OrgTabRoles
+                                        myMembershipRecord={myMembership}
+                                        orgData={orgCtx.active}
+                                        roles={orgCtx.roles}
+                                    />
+                                ) : (
+                                    <Text
+                                        c="white"
+                                        mt="md"
+                                    >
+                                        You do not have permission to view this tab.
+                                    </Text>
+                                )}
+                            </Tabs.Panel>
+                            <Tabs.Panel value="Settings">
+                                {userCanAdmin ? (
+                                    <OrgTabSettings
+                                        myMembershipRecord={myMembership}
+                                        orgData={orgCtx.active}
+                                    />
+                                ) : (
+                                    <Text
+                                        c="white"
+                                        mt="md"
+                                    >
+                                        You do not have permission to view this tab.
+                                    </Text>
+                                )}
+                            </Tabs.Panel>
                         </Tabs>
                     </Box>
-                    {tabs[getTab()]}
                 </Stack>
             </Group>
         </ScrollArea>

@@ -144,6 +144,7 @@ const AppLayout = () => {
                                     parentId={org.active.id}
                                     parentName={org.active.name}
                                     allowAddItem={true}
+                                    isRoot
                                 />
                             ) : (
                                 <></>

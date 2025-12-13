@@ -1,4 +1,4 @@
-import { Accordion } from '@mantine/core';
+import { Accordion, Stack, Text } from '@mantine/core';
 import { PermissionFlag, PermissionFlagCategory, PermissionFlagCategoryData, PermissionFlagData, recordEntries, recordValues } from '@mosaiq/terrazzo-common';
 import React, { useMemo } from 'react';
 
@@ -51,11 +51,20 @@ export const PermissionFlagGrouper = (props: PermissionFlagGrouperProps) => {
                         key={category}
                         value={category}
                     >
-                        <Accordion.Control>{catData.title}</Accordion.Control>
+                        <Accordion.Control>
+                            <Text
+                                c="dimmed"
+                                fz="sm"
+                            >
+                                {catData.title}
+                            </Text>
+                        </Accordion.Control>
                         <Accordion.Panel pl={'md'}>
-                            {permissions.map((permission) => {
-                                return <React.Fragment key={permission}>{props.permissionItem(permission)}</React.Fragment>;
-                            })}
+                            <Stack>
+                                {permissions.map((permission) => {
+                                    return <React.Fragment key={permission}>{props.permissionItem(permission)}</React.Fragment>;
+                                })}
+                            </Stack>
                         </Accordion.Panel>
                     </Accordion.Item>
                 );

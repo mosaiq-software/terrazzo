@@ -1,6 +1,7 @@
-import { BoardId, List, MembershipRecord, OrganizationId, OrgMembershipLevel, UserHeader, UserId } from '@mosaiq/terrazzo-common';
-import { upsertOrganizationMembership } from '@trz-api/persistence/organizationMembershipPersistence';
+import { BoardId, List, MembershipRecord, OrganizationId, UserHeader, UserId } from '@mosaiq/terrazzo-common';
+import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createUserHeaderDb, getUserHeaderByGithubIdDb, getUserHeaderByIdDb, getUserHeaderByUsernameDb, updateUserHeaderDb } from '@trz-api/persistence/userPersistence';
+import { isDev } from '@trz-api/utils/envUtils';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
 import { addBoard } from './boardController';
 import { addCard } from './cardController';
@@ -80,15 +81,25 @@ export async function setupUser(userId: UserId, username: string, firstName: str
         throw new Error('Failed to update user' + e);
     }
 
+    await seedNewUserProfile(userId);
+
+    return user;
+}
+
+const seedNewUserProfile = async (userId: UserId) => {
     // create a default personal org for the user to have projects in
     try {
-        const personalOrgId: OrganizationId = await addOrganization(firstName + "'s Space", user.id);
+        const user = await getUserHeaderByIdDb(userId);
+        if (!user) {
+            throw new Error(`Could not find seedable user: ${userId}`);
+        }
+        const personalOrgId: OrganizationId = await addOrganization(user.firstName + "'s Space", user.id);
         const orgMembershipRecord: MembershipRecord = {
             orgId: personalOrgId,
             userId: user.id,
-            permissionLevel: OrgMembershipLevel.ADMIN,
+            joinedAt: Date.now(),
         };
-        await upsertOrganizationMembership(orgMembershipRecord);
+        await createOrganizationMembershipDb(orgMembershipRecord);
         await updateOrganizationFromPartial(personalOrgId, { logoUrl: user.profilePicture, description: 'A place to keep your personal projects' });
         const personalBoardId: BoardId = await addBoard('Task Tracking', '', personalOrgId);
         const personalListTodo: List = await addList(personalBoardId, 'To do');
@@ -99,11 +110,10 @@ export async function setupUser(userId: UserId, username: string, firstName: str
         await addCard(personalListTodo.id, '🧱 Start my own project', undefined, undefined, user.id);
         await addCard(personalListTodo.id, '😀 Invite some friends', undefined, undefined, user.id);
     } catch (e) {
+        console.error(e);
         throw new Error('Failed to create users personal organization ' + e);
     }
-
-    return user;
-}
+};
 
 export const getUserPreview = async (userId: UserId) => {
     const user = await getUserHeaderByIdDb(userId);
@@ -115,4 +125,29 @@ export const getUserPreview = async (userId: UserId) => {
 
 export const updateUserData = async (userData: Partial<UserHeader> & { id: UserId }) => {
     await updateUserHeaderDb(userData);
+};
+
+export const DEV_upsertFakeUser = async (username: string): Promise<UserHeader> => {
+    if (!isDev()) {
+        throw new Error('upsertFakeUser cannot be used outside of the dev environment');
+    }
+
+    let user = await getUserHeaderByUsernameDb(username);
+    if (!user) {
+        const randomId = crypto.randomUUID();
+        const firstNames = ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Heidi', 'Ivan', 'Judy'];
+        const lastNames = ['Anderson', 'Brown', 'Clark', 'Davis', 'Evans', 'Franklin', 'Garcia', 'Harris', 'Ivanov', 'Johnson'];
+        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+        const profilePicture = `https://i.pravatar.cc/150?u=${randomId}`;
+        const githubUserId = `FAKE_${randomId}`;
+        const fakeUser = await createNewUser(username, firstName, lastName, profilePicture, githubUserId);
+        user = fakeUser;
+
+        await seedNewUserProfile(fakeUser.id);
+    }
+    if (!user) {
+        throw new Error('Failed to upsert dev user');
+    }
+    return user;
 };

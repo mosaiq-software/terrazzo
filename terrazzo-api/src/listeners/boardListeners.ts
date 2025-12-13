@@ -1,48 +1,35 @@
-import { ClientSE, ClientSEPayload, ClientSEReply, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { ClientSE } from '@mosaiq/terrazzo-common';
+import { syncBoardFields, syncDirectoryContents, syncParentsDirectoryContents } from '@trz-api/broadcasters';
 import { addBoard, getBoardRes, updateBoardFromPartial } from '@trz-api/controllers/boardController';
-import { syncDirectoryContents, syncParentsDirectoryContents } from '@trz-api/utils/broadcasters';
-import { broadcast } from '@trz-api/utils/socketUtils';
+import { userCanCreateBoard, userCanEditBoard, userCanViewBoard } from '@trz-api/utils/permissions';
+import { subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerBoardListeners = (socket: Socket, io: Server) => {
-    socket.on(ClientSE.GET_BOARD, async (data: ClientSEPayload[ClientSE.GET_BOARD], reply: ClientSEReply<ClientSE.GET_BOARD>) => {
-        try {
-            if (!data) {
-                throw new Error('No board id provided');
-            }
-            const board = await getBoardRes(data);
-            reply(board);
-        } catch (error: any) {
-            reply(undefined, error.message);
+    subscribe(socket, ClientSE.GET_BOARD, async (data) => {
+        if (!(await userCanViewBoard(socket, data))) {
+            throw new Error('User does not have permission to view this board');
         }
+        const board = await getBoardRes(data);
+        return board;
     });
 
-    socket.on(ClientSE.CREATE_BOARD, async (data: ClientSEPayload[ClientSE.CREATE_BOARD], reply: ClientSEReply<ClientSE.CREATE_BOARD>) => {
-        try {
-            if (!data) {
-                throw new Error('No board data provided');
-            }
-            const boardID = await addBoard(data.name, data.boardCode, data.parentId);
-            await syncDirectoryContents(socket, data.parentId);
-            reply(boardID);
-        } catch (error: any) {
-            console.error('Error creating board', error);
-            reply(undefined, error.message);
+    subscribe(socket, ClientSE.CREATE_BOARD, async (data) => {
+        if (!(await userCanCreateBoard(socket, data.parentId))) {
+            throw new Error('User does not have permission to create a board in this module');
         }
+        const boardID = await addBoard(data.name, data.boardCode, data.parentId);
+        await syncDirectoryContents(io, data.parentId);
+        return boardID;
     });
 
-    socket.on(ClientSE.UPDATE_BOARD_FIELD, async (data: ClientSEPayload[ClientSE.UPDATE_BOARD_FIELD], reply: ClientSEReply<ClientSE.UPDATE_BOARD_FIELD>) => {
-        try {
-            if (!data) {
-                throw new Error('No board data provided');
-            }
-            await updateBoardFromPartial(data.id, data);
-            broadcast(socket, ServerSE.UPDATE_BOARD_FIELD, data, [getRoomCode(RoomType.DATA, data.id)]);
-            await syncParentsDirectoryContents(socket, data.id);
-            reply(undefined);
-        } catch (error: any) {
-            console.error('Error updating board fields', error);
-            reply(undefined, error.message);
+    subscribe(socket, ClientSE.UPDATE_BOARD_FIELD, async (data) => {
+        if (!(await userCanEditBoard(socket, data.id))) {
+            throw new Error('User does not have permission to edit this board');
         }
+        await updateBoardFromPartial(data.id, data);
+        await syncBoardFields(io, data.id);
+        await syncParentsDirectoryContents(io, data.id);
+        return undefined;
     });
 };

@@ -9,18 +9,12 @@ export interface OrganizationHeader {
     description: string;
 }
 
-export enum OrgMembershipLevel {
-    MEMBER,
-    ADMIN,
-}
-
 export interface MembershipRecord {
     userId: UserId;
     orgId: OrganizationId;
-    permissionLevel: OrgMembershipLevel;
+    joinedAt: number;
 }
 
-export interface Member {
+export interface Member extends MembershipRecord {
     user: UserHeader;
-    record: MembershipRecord;
 }

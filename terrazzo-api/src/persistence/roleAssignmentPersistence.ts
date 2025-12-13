@@ -10,19 +10,28 @@ export interface RoleAssignment {
 class RoleAssignmentModel extends Model<RoleAssignment> {}
 RoleAssignmentModel.init(
     {
-        userId: DataTypes.STRING,
-        roleId: DataTypes.STRING,
-        orgId: DataTypes.STRING,
+        userId: {
+            type: DataTypes.STRING,
+            primaryKey: true,
+        },
+        roleId: {
+            type: DataTypes.STRING,
+            primaryKey: true,
+        },
+        orgId: {
+            type: DataTypes.STRING,
+            primaryKey: true,
+        },
     },
     { sequelize, timestamps: false }
 );
 
-export const getRoleIdsForUserInOrg = async (userId: UserId, orgId: OrganizationId): Promise<RoleId[]> => {
+export const getRoleIdsForUserInOrgDb = async (userId: UserId, orgId: OrganizationId): Promise<RoleId[]> => {
     const model = await RoleAssignmentModel.findAll({ where: { userId, orgId } });
     return model.map((m) => m.toJSON().roleId);
 };
 
-export const setRoleIdsForUserInOrg = async (userId: UserId, orgId: OrganizationId, roleIds: RoleId[]) => {
+export const setRoleIdsForUserInOrgDb = async (userId: UserId, orgId: OrganizationId, roleIds: RoleId[]) => {
     await RoleAssignmentModel.destroy({ where: { userId, orgId } });
     const assignments = roleIds.map((roleId) => ({
         userId,

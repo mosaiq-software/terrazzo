@@ -1,10 +1,10 @@
 import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
-import { getBoardById, updateBoard } from '@trz-api/persistence/boardPersistence';
-import { getCardAssignmentsForCard } from '@trz-api/persistence/cardAssignmentPersistence';
-import { createCardOnList, getCardById, getCardsByListIdDown, getCardsByListIdShortUp, updateCard, updateCardList, updateCardOrder } from '@trz-api/persistence/cardPersistence';
-import { addLabelToCard, deleteLabelsOnCard, getLabelsOnCard } from '@trz-api/persistence/labelPersistence';
-import { getListById } from '@trz-api/persistence/listPersistence';
-import { getTextBlockById } from '@trz-api/persistence/textBlockPersistence';
+import { getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
+import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
+import { createCardOnListDb, getCardByIdDb, getCardsByListIdDownDb, getCardsByListIdShortUpDb, updateCardDb, updateCardListDb, updateCardOrderDb } from '@trz-api/persistence/cardPersistence';
+import { addLabelToCardDb, deleteLabelsOnCardDb, getLabelsOnCardDb } from '@trz-api/persistence/labelPersistence';
+import { getListByIdDb } from '@trz-api/persistence/listPersistence';
+import { getTextBlockByIdDb } from '@trz-api/persistence/textBlockPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
 import { createTextBlockWithEncodedData, createTextBlockWithPlaintext } from './textBlockController';
@@ -20,7 +20,7 @@ export const MOVING_LIST_ORDER = -10000;
  * @param archived
  */
 export async function getAllCardsOfList(listID: ListId, archived: boolean) {
-    let cardHeaders = await getCardsByListIdShortUp(listID, archived);
+    let cardHeaders = await getCardsByListIdShortUpDb(listID, archived);
 
     if (cardHeaders == null) {
         return [];
@@ -38,7 +38,7 @@ export async function getAllCardsOfList(listID: ListId, archived: boolean) {
 }
 
 export async function getCardIdsOnList(listID: ListId, archived: boolean): Promise<CardId[]> {
-    const cardHeaders = await getCardsByListIdShortUp(listID, archived);
+    const cardHeaders = await getCardsByListIdShortUpDb(listID, archived);
     if (cardHeaders == null) {
         return [];
     }
@@ -46,7 +46,7 @@ export async function getCardIdsOnList(listID: ListId, archived: boolean): Promi
 }
 
 export async function getSingleFullCard(cardId: CardId): Promise<Card | undefined> {
-    const cardHeader = await getCardById(cardId);
+    const cardHeader = await getCardByIdDb(cardId);
     if (!cardHeader) {
         throw new Error('Card not found');
     }
@@ -65,13 +65,13 @@ export async function getSingleFullCard(cardId: CardId): Promise<Card | undefine
  */
 export async function addCard(listID: ListId, cardName: string, description?: string, explicitCardNumber?: number, createdById?: UserId) {
     //pull board from db with ID
-    const updatingList = await getListById(listID);
+    const updatingList = await getListByIdDb(listID);
 
     if (updatingList == null) {
         throw new Error('Board not found');
     }
 
-    const board = await getBoardById(updatingList.boardId);
+    const board = await getBoardByIdDb(updatingList.boardId);
 
     if (board == null) {
         throw new Error('Board not found');
@@ -105,8 +105,8 @@ export async function addCard(listID: ListId, cardName: string, description?: st
     }
 
     try {
-        await createCardOnList(newCard, listID);
-        await updateBoard(board.id, { totalCards: board.totalCards + 1 });
+        await createCardOnListDb(newCard, listID);
+        await updateBoardDb(board.id, { totalCards: board.totalCards + 1 });
         return newCard;
     } catch (e) {
         throw new Error('Failed to save Card' + e);
@@ -120,16 +120,16 @@ export async function addCard(listID: ListId, cardName: string, description?: st
  * @param createdById Optional user ID of the user creating the duplicate
  */
 export async function duplicateCard(cardId: CardId, createdById?: UserId) {
-    const existingCardHeader = await getCardById(cardId);
+    const existingCardHeader = await getCardByIdDb(cardId);
     if (!existingCardHeader) {
         throw new Error('Card not found');
     }
 
-    const list = await getListById(existingCardHeader.listId);
+    const list = await getListByIdDb(existingCardHeader.listId);
     if (!list) {
         throw new Error('List not found');
     }
-    const board = await getBoardById(list.boardId);
+    const board = await getBoardByIdDb(list.boardId);
     if (!board) {
         throw new Error('Board not found');
     }
@@ -158,7 +158,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     };
 
     try {
-        const currentEncodedDesc = await getTextBlockById(existingCard.descriptionTextBlockId);
+        const currentEncodedDesc = await getTextBlockByIdDb(existingCard.descriptionTextBlockId);
         let newTextBlockId: TextBlockId | undefined = undefined;
         if (currentEncodedDesc) {
             const descBlock = await createTextBlockWithEncodedData(currentEncodedDesc.text);
@@ -180,8 +180,8 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     }
 
     try {
-        await createCardOnList(newCard, list.id);
-        await updateBoard(board.id, { totalCards: board.totalCards + 1 });
+        await createCardOnListDb(newCard, list.id);
+        await updateBoardDb(board.id, { totalCards: board.totalCards + 1 });
     } catch (e) {
         throw new Error('Failed to save Card' + e);
     }
@@ -204,28 +204,28 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
 }
 
 export async function updateCardFromPartial(cardId: CardId, partial: Partial<CardHeader>) {
-    const updatingCard = await getCardById(cardId);
+    const updatingCard = await getCardByIdDb(cardId);
     if (updatingCard == null) {
         throw new Error('Card not found');
     }
 
     const updated = updateBaseFromPartial(updatingCard, partial);
     try {
-        await updateCard(updated);
+        await updateCardDb(updated);
     } catch (e: any) {
         throw new Error('Failed to update card ' + e);
     }
 }
 
 export const getNextCardOrder = async (listId: ListId) => {
-    const card = await getCardsByListIdDown(listId);
+    const card = await getCardsByListIdDownDb(listId);
     return card ? card.length + 1 : 1;
 };
 
 //Utils
 
 export async function getListIDFromCardID(cardID: CardId) {
-    const card = await getCardById(cardID);
+    const card = await getCardByIdDb(cardID);
     if (card == null) {
         throw new Error('Card not found');
     }
@@ -233,11 +233,11 @@ export async function getListIDFromCardID(cardID: CardId) {
 }
 
 export async function getBoardIDFromCardID(cardID: CardId) {
-    const card = await getCardById(cardID);
+    const card = await getCardByIdDb(cardID);
     if (card == null || !card.listId) {
         throw new Error('Card not found');
     }
-    const list = await getListById(card.listId);
+    const list = await getListByIdDb(card.listId);
     if (list == null) {
         throw new Error('List not found');
     }
@@ -249,15 +249,15 @@ export async function getBoardIDFromCardID(cardID: CardId) {
 */
 export async function moveCardToList(cardId: CardId, toListId: ListId, position?: number) {
     try {
-        const card = await getCardById(cardId);
+        const card = await getCardByIdDb(cardId);
         if (!card) {
             throw new Error(`Card ${cardId} not found`);
         }
-        let currentListCards = await getCardsByListIdShortUp(card.listId, false);
+        let currentListCards = await getCardsByListIdShortUpDb(card.listId, false);
         if (!currentListCards) {
             throw new Error(`Current list ${card.listId} not found`);
         }
-        let newListCards = await getCardsByListIdShortUp(toListId, false);
+        let newListCards = await getCardsByListIdShortUpDb(toListId, false);
 
         currentListCards = currentListCards.filter((c) => c.id !== cardId);
 
@@ -277,14 +277,14 @@ export async function moveCardToList(cardId: CardId, toListId: ListId, position?
         const promises = [];
         for (let i = 0; i < currentListCards.length; i++) {
             currentListCards[i].order = i;
-            promises.push(updateCardOrder(currentListCards[i].id, i));
+            promises.push(updateCardOrderDb(currentListCards[i].id, i));
         }
         if (toListId !== card.listId) {
             for (let i = 0; i < newListCards.length; i++) {
                 newListCards[i].order = i;
-                promises.push(updateCardOrder(newListCards[i].id, i));
+                promises.push(updateCardOrderDb(newListCards[i].id, i));
             }
-            promises.push(updateCardList(cardId, toListId));
+            promises.push(updateCardListDb(cardId, toListId));
         }
         await Promise.all(promises);
     } catch (error: any) {
@@ -298,8 +298,8 @@ export const populateCards = async (cardHeaders: CardHeader[]): Promise<Card[]> 
         cardHeaders.map(async (c: CardHeader) => {
             const cc: Card = {
                 ...c,
-                assignees: await getCardAssignmentsForCard(c.id),
-                labels: await getLabelsOnCard(c.id),
+                assignees: await getCardAssignmentsForCardDb(c.id),
+                labels: await getLabelsOnCardDb(c.id),
                 createdBy: c.createdById ? await getUserHeaderByIdDb(c.createdById) : undefined,
             };
             return cc;
@@ -308,8 +308,8 @@ export const populateCards = async (cardHeaders: CardHeader[]): Promise<Card[]> 
 };
 
 export const setCardsLabels = async (cardId: CardId, labelIds: LabelId[]) => {
-    await deleteLabelsOnCard(cardId);
+    await deleteLabelsOnCardDb(cardId);
     for (const labelId of labelIds) {
-        addLabelToCard(labelId, cardId);
+        addLabelToCardDb(labelId, cardId);
     }
 };

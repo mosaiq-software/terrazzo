@@ -1,11 +1,13 @@
 import { Loader } from '@mantine/core';
-import { DocumentHeader, DocumentId } from '@mosaiq/terrazzo-common';
+import { DocumentHeader, DocumentId, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateDocumentMetadata } from '@trz/emitters';
 import { useDocument } from '@trz/hooks/useDocument';
+import { useModulePermission } from '@trz/hooks/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
 import { ModuleSettingsLayout } from './ModuleSettingsLayout';
+import { NotFound } from '../UI/NotFound';
 
 interface ModuleSettingsDocumentProps {
     documentId: DocumentId;
@@ -15,10 +17,15 @@ interface ModuleSettingsDocumentProps {
 export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
     const sockCtx = useSocket();
     const { document } = useDocument(props.documentId);
+    const userCanViewDocument = useModulePermission(document, PermissibleAction.ViewDocument);
+    const userCanEditDocument = useModulePermission(document, PermissibleAction.EditDocument);
     const [documentEdits, setDocumentEdits] = useState<Partial<DocumentHeader>>({});
 
     const onSave = async () => {
         try {
+            if (!userCanEditDocument) {
+                throw new Error('You do not have permission to edit this document.');
+            }
             await updateDocumentMetadata(sockCtx, props.documentId, documentEdits);
             setDocumentEdits({});
         } catch (e) {
@@ -28,6 +35,15 @@ export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
 
     if (!document) {
         return <Loader />;
+    }
+
+    if (!userCanViewDocument) {
+        return (
+            <NotFound
+                itemType="document"
+                error={403}
+            />
+        );
     }
 
     return (
@@ -45,6 +61,7 @@ export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
             saved={Object.keys(documentEdits).length === 0}
             onSave={onSave}
             onClose={props.onClose}
+            disabled={!userCanEditDocument}
         />
     );
 };
