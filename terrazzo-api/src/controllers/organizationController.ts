@@ -33,6 +33,7 @@ export async function addOrganization(name: string, creator: UserId) {
         createdAt: Date.now(),
         logoUrl: '',
         description: '',
+        ownerId: creator,
     };
 
     await createOrgDb(newOrg);

@@ -13,6 +13,7 @@ OrgModel.init(
         createdAt: DataTypes.INTEGER,
         logoUrl: DataTypes.STRING,
         description: DataTypes.TEXT,
+        ownerId: DataTypes.STRING,
     },
     { sequelize, timestamps: false }
 );

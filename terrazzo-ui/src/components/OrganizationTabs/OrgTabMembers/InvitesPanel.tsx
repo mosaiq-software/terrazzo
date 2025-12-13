@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { HiDotsVertical } from 'react-icons/hi';
 import { IoChevronDown } from 'react-icons/io5';
 import { InfinityChar } from '../../UI/InfinityChar';
-import { InviteRow } from '../InviteRow';
+import { InviteRow } from './InviteRow';
 
 interface InvitesPanelProps {
     orgData: OrganizationHeader;

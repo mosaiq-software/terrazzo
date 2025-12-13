@@ -1,11 +1,13 @@
+import { Text } from '@mantine/core';
 import { fullName, Member, MembershipRecord } from '@mosaiq/terrazzo-common';
 import { MdPersonRemove } from 'react-icons/md';
-import { RolesList } from '../Roles/RolesList';
-import { ActionRow } from '../UI/ActionRow';
+import { RolesList } from '../../Roles/RolesList';
+import { ActionRow } from '../../UI/ActionRow';
 
 interface MemberRowProps {
     member: Member;
     isCurrentUser: boolean;
+    isOrgOwner?: boolean;
     onRemoveMember?: (member: MembershipRecord) => void;
 }
 
@@ -21,6 +23,18 @@ export const MemberRow = (props: MemberRowProps) => {
                     key="roles-list"
                     containerProps={{ maw: 300 }}
                 />,
+                ...(props.isOrgOwner
+                    ? [
+                          <Text
+                              c="yellow"
+                              size="xs"
+                              fw={500}
+                              key="owner-badge"
+                          >
+                              Organization Owner
+                          </Text>,
+                      ]
+                    : []),
             ]}
             menuLabel="Manage Member"
             menuItems={

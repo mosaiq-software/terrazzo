@@ -133,12 +133,16 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                 if (!orgId) {
                     throw new Error('Organization creation failed');
                 }
+                if (!userCtx.userData) {
+                    throw new Error('User data not available');
+                }
                 const newOrg: OrganizationHeader = {
                     id: orgId,
                     name: orgName,
                     createdAt: Date.now(),
                     logoUrl: '',
                     description: '',
+                    ownerId: userCtx.userData.id,
                 };
                 setAllOrganizations((prev) => [...prev, newOrg]);
                 return newOrg;
@@ -146,7 +150,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                 notify(NoteType.ORG_CREATION_ERROR, e);
             }
         },
-        [sockCtx, notify]
+        [sockCtx, notify, userCtx.userData]
     );
 
     return (
