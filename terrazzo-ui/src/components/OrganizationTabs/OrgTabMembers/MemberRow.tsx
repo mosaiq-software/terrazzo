@@ -1,6 +1,6 @@
-import { Text } from '@mantine/core';
+import { Center, Tooltip } from '@mantine/core';
 import { fullName, Member, MembershipRecord, withIf } from '@mosaiq/terrazzo-common';
-import { MdPersonRemove } from 'react-icons/md';
+import { MdPersonRemove, MdStar } from 'react-icons/md';
 import { RolesList } from '../../Roles/RolesList';
 import { ActionRow } from '../../UI/ActionRow';
 
@@ -24,14 +24,18 @@ export const MemberRow = (props: MemberRowProps) => {
                     containerProps={{ maw: 300 }}
                 />,
                 ...withIf(
-                    <Text
-                        c="yellow"
-                        size="xs"
-                        fw={500}
-                        key="current-user-badge"
+                    <Tooltip
+                        key="org-owner-tooltip"
+                        label="Organization owner"
+                        withArrow
                     >
-                        Organization Owner
-                    </Text>,
+                        <Center>
+                            <MdStar
+                                size={20}
+                                color="gold"
+                            />
+                        </Center>
+                    </Tooltip>,
                     props.isOrgOwner
                 ),
             ]}
