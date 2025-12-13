@@ -1,7 +1,8 @@
 import { OrganizationHeader, OrganizationId, PermissionFlag, recordValues, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
 import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
+import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
-import { addRoleToUserInOrg, createRole } from './roleController';
+import { createRole } from './roleController';
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
@@ -46,7 +47,7 @@ const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
     const guest = await createRole('Guest', '#2384CA', orgId, [PermissionFlag.VIEW_BOARD, PermissionFlag.VIEW_DOCUMENT]);
 
     // assign admin role to creator
-    await addRoleToUserInOrg(creator, orgId, adminRole.id);
+    await setRoleIdsForUserInOrgDb(creator, orgId, [adminRole.id]);
 };
 
 export async function updateOrganizationFromPartial(orgId: OrganizationId, partial: Partial<OrganizationHeader>) {

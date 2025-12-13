@@ -177,6 +177,10 @@ const mapRolesToPermissions = (roles: Role[]): Record<RoleId, PermissionFlag[]> 
     return rolePermissions;
 };
 
+/**
+ * Returns the permissible actions for a given module type.
+ * (Used for handling module-level permissions in a generic way.)
+ */
 export const modulePermissibleAction = (moduleType: TrzModuleType) => {
     switch (moduleType) {
         case TrzModuleType.Directory:
@@ -200,4 +204,12 @@ export const modulePermissibleAction = (moduleType: TrzModuleType) => {
         default:
             throw new Error(`[modulePermissibleAction] Unsupported module type: ${moduleType}`);
     }
+};
+
+/**
+ * Returns the highest-priority role from a list of roles (the one with the lowest order value).
+ */
+export const getMaxUserRole = (userRoles: Role[]): Role | undefined => {
+    const sorted = userRoles.sort((ra, rb) => ra.order - rb.order);
+    return sorted?.[0];
 };

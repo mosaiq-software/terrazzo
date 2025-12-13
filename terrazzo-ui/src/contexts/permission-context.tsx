@@ -1,4 +1,4 @@
-import { calculateTrueModulePermissionsInOrg, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, meetsRequirementsForPermissibleAction, ModuleHeader, PermissibleAction, Role, RoleId } from '@mosaiq/terrazzo-common';
+import { calculateTrueModulePermissionsInOrg, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, getMaxUserRole, meetsRequirementsForPermissibleAction, ModuleHeader, PermissibleAction, Role, RoleId } from '@mosaiq/terrazzo-common';
 import { useRoleForUserInOrg } from '@trz/hooks/useRolesForUserInOrg';
 import React, { createContext, useContext } from 'react';
 import { useOrg } from './org-context';
@@ -18,8 +18,6 @@ const PermissionProvider: React.FC<any> = ({ children }) => {
     const orgCtx = useOrg();
     const userCtx = useUser();
     const { roleIds: userRoleIds, roles: userRoles } = useRoleForUserInOrg(userCtx.userData?.id, orgCtx.active?.id);
-
-    const maxRole = userRoles.sort((ra, rb) => ra.order - rb.order)?.[0];
 
     const checkOrgPermission = async (permissibleAction: PermissibleAction): Promise<boolean> => {
         if (!userCtx.userData?.id || !orgCtx.active) {
@@ -45,7 +43,7 @@ const PermissionProvider: React.FC<any> = ({ children }) => {
                 checkModulePermission,
                 userRoleIds,
                 userRoles,
-                maxRole,
+                maxRole: getMaxUserRole(userRoles),
             }}
         >
             {children}
