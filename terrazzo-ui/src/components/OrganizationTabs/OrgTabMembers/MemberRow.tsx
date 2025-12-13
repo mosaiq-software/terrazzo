@@ -1,5 +1,5 @@
 import { Text } from '@mantine/core';
-import { fullName, Member, MembershipRecord } from '@mosaiq/terrazzo-common';
+import { fullName, Member, MembershipRecord, withIf } from '@mosaiq/terrazzo-common';
 import { MdPersonRemove } from 'react-icons/md';
 import { RolesList } from '../../Roles/RolesList';
 import { ActionRow } from '../../UI/ActionRow';
@@ -23,36 +23,30 @@ export const MemberRow = (props: MemberRowProps) => {
                     key="roles-list"
                     containerProps={{ maw: 300 }}
                 />,
-                ...(props.isOrgOwner
-                    ? [
-                          <Text
-                              c="yellow"
-                              size="xs"
-                              fw={500}
-                              key="owner-badge"
-                          >
-                              Organization Owner
-                          </Text>,
-                      ]
-                    : []),
+                ...withIf(
+                    <Text
+                        c="yellow"
+                        size="xs"
+                        fw={500}
+                        key="current-user-badge"
+                    >
+                        Organization Owner
+                    </Text>,
+                    props.isOrgOwner
+                ),
             ]}
             menuLabel="Manage Member"
-            menuItems={
-                !props.isCurrentUser
-                    ? [
-                          ...(props.onRemoveMember
-                              ? [
-                                    {
-                                        label: 'Remove Member',
-                                        onClick: () => props.onRemoveMember?.(props.member),
-                                        icon: <MdPersonRemove size={16} />,
-                                        color: 'red',
-                                    },
-                                ]
-                              : []),
-                      ]
-                    : undefined
-            }
+            menuItems={[
+                ...withIf(
+                    {
+                        label: 'Remove Member',
+                        onClick: () => props.onRemoveMember?.(props.member),
+                        icon: <MdPersonRemove size={16} />,
+                        color: 'red',
+                    },
+                    !props.isCurrentUser && !!props.onRemoveMember
+                ),
+            ]}
         />
     );
 };
