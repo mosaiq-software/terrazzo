@@ -1,10 +1,10 @@
-import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title } from '@mantine/core';
+import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title, Tooltip } from '@mantine/core';
 import { MembershipRecord, OrganizationHeader } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
 import { removeUserFromOrg, updateOrgField } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface OrgTabSettingsProps {
@@ -19,6 +19,23 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
     useEffect(() => {
         if (props.orgData) setEditedSettings(props.orgData);
     }, [props.orgData]);
+
+    const iAmOwner = useMemo(() => {
+        return props.myMembershipRecord.userId === props.orgData.ownerId;
+    }, [props.myMembershipRecord, props.orgData]);
+
+    const handleLeaveOrg = useCallback(async () => {
+        try {
+            if (iAmOwner) {
+                throw new Error('Organization owners cannot leave their own organization. Please transfer ownership first.');
+            }
+            await removeUserFromOrg(sockCtx, props.myMembershipRecord.userId, props.orgData.id);
+            notify(NoteType.LEFT_ENTITY, [props.orgData.name]);
+            navigate(DEFAULT_AUTHED_ROUTE);
+        } catch (e) {
+            notify(NoteType.ORG_DATA_ERROR, e);
+        }
+    }, [sockCtx, props.myMembershipRecord, props.orgData, navigate, iAmOwner]);
 
     return (
         <Box
@@ -110,22 +127,20 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                     <Divider />
                     <Space />
                     <Group gap="sm">
-                        <Button
-                            variant="light"
-                            color="red"
-                            w="min-content"
-                            onClick={async () => {
-                                try {
-                                    await removeUserFromOrg(sockCtx, props.myMembershipRecord.userId, props.orgData.id);
-                                    notify(NoteType.LEFT_ENTITY, [props.orgData.name]);
-                                    navigate(DEFAULT_AUTHED_ROUTE);
-                                } catch (e) {
-                                    notify(NoteType.ORG_DATA_ERROR, e);
-                                }
-                            }}
+                        <Tooltip
+                            label={iAmOwner ? 'Organization owners cannot leave their own organization. Please transfer ownership first.' : 'Leave this organization'}
+                            withArrow
                         >
-                            Leave Organization
-                        </Button>
+                            <Button
+                                variant="light"
+                                color="red"
+                                w="min-content"
+                                onClick={handleLeaveOrg}
+                                disabled={iAmOwner}
+                            >
+                                Leave Organization
+                            </Button>
+                        </Tooltip>
                     </Group>
                 </Stack>
             </Box>
