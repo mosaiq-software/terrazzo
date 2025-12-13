@@ -46,7 +46,6 @@ export const PermissionFlagGrouper = (props: PermissionFlagGrouperProps) => {
             {allPermissionsByCategory.map((entry) => {
                 const [category, permissions] = entry;
                 const catData = PermissionFlagCategoryData[category];
-                console.log({ category, permissions });
                 return (
                     <Accordion.Item
                         key={category}

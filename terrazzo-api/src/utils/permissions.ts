@@ -102,7 +102,6 @@ export const userCanViewOrganization = async (user: UserId | Socket, orgId: Orga
         return false;
     }
     const membershipRecord = await getOrganizationMembershipDb(userId, orgId);
-    console.log(membershipRecord);
     return !!membershipRecord;
 };
 
