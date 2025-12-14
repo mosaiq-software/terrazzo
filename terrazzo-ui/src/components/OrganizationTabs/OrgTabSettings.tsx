@@ -1,4 +1,5 @@
 import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
@@ -151,6 +152,38 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         >
                             Hold to Leave Organization
                         </RectHoldingButton>
+                        {/* <RectHoldingButton
+                            onClick={() => {
+                                modals.openContextModal({
+                                    modal: 'transferOrganization',
+                                    title: 'Transfer Organization',
+                                    innerProps: {},
+                                });
+                            }}
+                            durationMs={5000}
+                            tooltip={iAmOwner ? 'Organization owners cannot leave their own organization. Please transfer ownership first.' : 'Hold to leave this organization'}
+                            disabled={iAmOwner}
+                            borderColor={'red'}
+                            defaultBorderColor={COLOR_UNSET}
+                        >
+                            Hold to Transfer Organization
+                        </RectHoldingButton> */}
+                        {iAmOwner && (
+                            <Button
+                                variant="outline"
+                                color="red"
+                                onClick={() => {
+                                    modals.openContextModal({
+                                        modal: 'transferOrganization',
+                                        title: 'Transfer Organization',
+                                        innerProps: {},
+                                    });
+                                }}
+                                disabled={!iAmOwner}
+                            >
+                                Transfer Organization
+                            </Button>
+                        )}
                     </Group>
                 </Stack>
             </Box>
