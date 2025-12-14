@@ -22,7 +22,8 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
         if (!(await userCanAdministerOrganization(socket, data.id))) {
             throw new Error(`User does not have permission to edit this organization`);
         }
-        await updateOrganizationFromPartial(data.id, data);
+        const socketData = getSocketData(socket);
+        await updateOrganizationFromPartial(data.id, data, socketData.user.user.id);
         await syncUpdateOrgField(io, data.id, data);
         return undefined;
     });

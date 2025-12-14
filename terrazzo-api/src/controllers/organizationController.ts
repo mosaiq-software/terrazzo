@@ -51,10 +51,14 @@ const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
     await setRoleIdsForUserInOrgDb(creator, orgId, [adminRole.id]);
 };
 
-export async function updateOrganizationFromPartial(orgId: OrganizationId, partial: Partial<OrganizationHeader>) {
+export async function updateOrganizationFromPartial(orgId: OrganizationId, partial: Partial<OrganizationHeader>, updatedBy?: UserId) {
     const updatingOrg = await getOrgByIdDb(orgId);
     if (updatingOrg == null) {
         throw new Error('Org not found');
+    }
+
+    if (!updatedBy || updatingOrg.ownerId !== updatedBy) {
+        delete partial.ownerId; // only owner can change ownership
     }
 
     const updated = updateBaseFromPartial(updatingOrg, partial);
