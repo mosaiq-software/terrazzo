@@ -97,6 +97,7 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                         }}
                         borderColor="red"
                         variant="outline"
+                        disabled={props.disabled}
                     >
                         Hold to Archive
                     </RectHoldingButton>

@@ -1,5 +1,6 @@
 import { Box, Group, Tooltip, UnstyledButton } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
+import { completelyCaptureEvent } from '@trz/util/eventUtils';
 import { useEffect, useRef, useState } from 'react';
 
 interface RectHoldingButtonProps {
@@ -120,6 +121,9 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                 onMouseLeave={() => {
                     setHovered(false);
                     release();
+                }}
+                onFocus={(e) => {
+                    completelyCaptureEvent(e);
                 }}
             >
                 <Box
