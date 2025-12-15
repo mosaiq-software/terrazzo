@@ -1,5 +1,6 @@
 import { Box, Group, Tooltip, UnstyledButton } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
+import { completelyCaptureEvent } from '@trz/util/eventUtils';
 import { useEffect, useRef, useState } from 'react';
 
 interface RectHoldingButtonProps {
@@ -20,6 +21,7 @@ interface RectHoldingButtonProps {
     disabled?: boolean;
     leftSection?: React.ReactNode;
     rightSection?: React.ReactNode;
+    variant?: 'filled' | 'outline';
 }
 const DEFAULT_INCREMENT = 1000 / 60; // 60fps
 export const RectHoldingButton = (props: RectHoldingButtonProps) => {
@@ -88,8 +90,9 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
         };
     }, [props.children, props.width, props.height, props.borderRadius, props.borderThickness, props.style]);
 
-    const borderRadius = props.borderRadius ?? 8;
-    const strokeWidth = props.borderThickness ?? 3;
+    const borderRadius = props.borderRadius ?? 4;
+    const strokeWidth = props.borderThickness ?? 1;
+    const defaultBorderColor = props.defaultBorderColor || (props.variant === 'outline' ? 'white' : undefined);
 
     // Calculate the perimeter of the rounded rectangle
     const rectWidth = dimensions.width - strokeWidth;
@@ -119,6 +122,9 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                     setHovered(false);
                     release();
                 }}
+                onFocus={(e) => {
+                    completelyCaptureEvent(e);
+                }}
             >
                 <Box
                     ref={boxRef}
@@ -126,7 +132,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                         position: 'relative',
                         width: props.width,
                         height: props.height,
-                        backgroundColor: props.backgroundColor || '#15161A',
+                        backgroundColor: props.backgroundColor || 'transparent',
                         padding: '8px 18px',
                         borderRadius,
                         display: 'inline-flex',
@@ -136,6 +142,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                         userSelect: 'none',
                         opacity: props.disabled ? 0.5 : 1,
                         cursor: props.disabled ? 'not-allowed' : 'pointer',
+                        fontSize: '14px',
                         ...props.style,
                     }}
                 >
@@ -154,7 +161,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                             zIndex: 0,
                         }}
                     >
-                        {props.defaultBorderColor && (
+                        {defaultBorderColor && (
                             <rect
                                 x={strokeWidth / 2}
                                 y={strokeWidth / 2}
@@ -163,7 +170,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                                 rx={radius}
                                 ry={radius}
                                 fill="none"
-                                stroke={props.defaultBorderColor}
+                                stroke={defaultBorderColor}
                                 strokeWidth={strokeWidth}
                                 strokeLinecap="round"
                             />

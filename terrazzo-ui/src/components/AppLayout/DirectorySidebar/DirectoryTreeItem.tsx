@@ -41,6 +41,10 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
         navigate(url);
     };
 
+    if (props.directoryListItem.archived) {
+        return null;
+    }
+
     return (
         <>
             <Group

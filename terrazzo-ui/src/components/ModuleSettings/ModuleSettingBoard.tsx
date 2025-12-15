@@ -1,5 +1,5 @@
 import { Fieldset, Loader, TextInput } from '@mantine/core';
-import { BoardHeader, BoardId, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { BoardHeader, BoardId, ModuleHeader, PermissibleAction, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateBoardField } from '@trz/emitters';
 import { useBoard } from '@trz/hooks/useBoard';
@@ -22,12 +22,12 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
     const userCanEditBoard = useModulePermission(boardData, PermissibleAction.EditBoard);
     const [boardEdits, setBoardEdits] = useState<Partial<BoardHeader>>({});
 
-    const onSave = async () => {
+    const onSave = async (explicit?: Partial<ModuleHeader>) => {
         try {
             if (!userCanEditBoard) {
                 throw new Error('You do not have permission to edit this board.');
             }
-            await updateBoardField(sockCtx, props.boardId, boardEdits);
+            await updateBoardField(sockCtx, props.boardId, { ...boardEdits, ...explicit, type: TrzModuleType.Board });
             setBoardEdits({});
         } catch (e) {
             notify(NoteType.BOARD_DATA_ERROR, e);
