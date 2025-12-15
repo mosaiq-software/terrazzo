@@ -1,13 +1,13 @@
 import { Loader } from '@mantine/core';
-import { DirectoryHeader, DirectoryId, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { DirectoryHeader, DirectoryId, ModuleHeader, PermissibleAction, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
 import { useDirectory } from '@trz/hooks/useDirectory';
 import { useModulePermission } from '@trz/hooks/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
-import { ModuleSettingsLayout } from './ModuleSettingsLayout';
 import { NotFound } from '../UI/NotFound';
+import { ModuleSettingsLayout } from './ModuleSettingsLayout';
 
 interface ModuleSettingsDirectoryProps {
     directoryId: DirectoryId;
@@ -21,12 +21,12 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
     const userCanEditDirectory = useModulePermission(directory, PermissibleAction.EditDirectory);
     const [directoryEdits, setDirectoryEdits] = useState<Partial<DirectoryHeader>>({});
 
-    const onSave = async () => {
+    const onSave = async (explicit?: Partial<ModuleHeader>) => {
         try {
             if (!userCanEditDirectory) {
                 throw new Error('You do not have permission to edit this directory.');
             }
-            await updateDirectoryMetadata(sockCtx, props.directoryId, directoryEdits);
+            await updateDirectoryMetadata(sockCtx, props.directoryId, { ...directoryEdits, ...explicit, type: TrzModuleType.Directory });
             setDirectoryEdits({});
         } catch (e) {
             notify(NoteType.DOC_UPDATE_ERROR, e);

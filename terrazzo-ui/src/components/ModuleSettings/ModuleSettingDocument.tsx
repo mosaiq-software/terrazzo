@@ -1,13 +1,13 @@
 import { Loader } from '@mantine/core';
-import { DocumentHeader, DocumentId, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { DocumentHeader, DocumentId, ModuleHeader, PermissibleAction, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateDocumentMetadata } from '@trz/emitters';
 import { useDocument } from '@trz/hooks/useDocument';
 import { useModulePermission } from '@trz/hooks/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
-import { ModuleSettingsLayout } from './ModuleSettingsLayout';
 import { NotFound } from '../UI/NotFound';
+import { ModuleSettingsLayout } from './ModuleSettingsLayout';
 
 interface ModuleSettingsDocumentProps {
     documentId: DocumentId;
@@ -21,12 +21,12 @@ export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
     const userCanEditDocument = useModulePermission(document, PermissibleAction.EditDocument);
     const [documentEdits, setDocumentEdits] = useState<Partial<DocumentHeader>>({});
 
-    const onSave = async () => {
+    const onSave = async (explicit?: Partial<ModuleHeader>) => {
         try {
             if (!userCanEditDocument) {
                 throw new Error('You do not have permission to edit this document.');
             }
-            await updateDocumentMetadata(sockCtx, props.documentId, documentEdits);
+            await updateDocumentMetadata(sockCtx, props.documentId, { ...documentEdits, ...explicit, type: TrzModuleType.Document });
             setDocumentEdits({});
         } catch (e) {
             notify(NoteType.DOC_UPDATE_ERROR, e);

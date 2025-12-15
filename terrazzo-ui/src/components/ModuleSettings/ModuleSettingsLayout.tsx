@@ -1,6 +1,8 @@
-import { Button, Group, Stack, TextInput } from '@mantine/core';
+import { Alert, Button, Group, Stack, Text, TextInput } from '@mantine/core';
 import { ModuleHeader, ModulePermissions } from '@mosaiq/terrazzo-common';
 import { COLOR_UNSET } from '@trz/util/colorUtils';
+import { toTitleCase } from '@trz/util/textUtils';
+import { RectHoldingButton } from '../UI/RectHoldingButton';
 import { PermissionsEditor } from './PermissionsEditor/PermissionsEditor';
 
 interface ModuleSettingsLayoutProps {
@@ -8,13 +10,33 @@ interface ModuleSettingsLayoutProps {
     onChangeTitle: (newTitle: string) => void;
     onChangePermissions: (newPermissions: ModulePermissions) => void;
     saved: boolean;
-    onSave: () => void;
+    onSave: (explicit?: Partial<ModuleHeader>) => void;
     onClose: () => void;
     children?: React.ReactNode;
     disabled?: boolean;
 }
 
 export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
+    if (props.moduleHeader.archived) {
+        return (
+            <Alert
+                title={`Archived ${toTitleCase(props.moduleHeader.type)}`}
+                color="yellow"
+            >
+                <Stack>
+                    <Text>This {props.moduleHeader.type} is archived and can only be viewed.</Text>
+                    <Button
+                        variant="subtle"
+                        onClick={() => {
+                            props.onSave({ archived: false });
+                        }}
+                    >
+                        {`Unarchive ${toTitleCase(props.moduleHeader.type)}`}
+                    </Button>
+                </Stack>
+            </Alert>
+        );
+    }
     return (
         <Stack
             style={{
@@ -25,8 +47,8 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                 labelProps={{
                     c: 'white',
                 }}
-                label="Document Name"
-                placeholder="My Document"
+                label={toTitleCase(`${props.moduleHeader.type} Name`)}
+                placeholder={toTitleCase(`My ${props.moduleHeader.type}`)}
                 required
                 value={props.moduleHeader.name}
                 onChange={(e) => {
@@ -51,19 +73,34 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                     boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.3)',
                     borderRadius: '4px',
                 }}
+                justify="space-between"
             >
-                <Button
-                    variant="subtle"
-                    onClick={props.onClose}
-                >
-                    Close
-                </Button>
-                <Button
-                    disabled={props.saved || props.disabled}
-                    onClick={props.onSave}
-                >
-                    Save Changes
-                </Button>
+                <Group>
+                    <Button
+                        variant="outline"
+                        onClick={props.onClose}
+                    >
+                        Close
+                    </Button>
+                    <Button
+                        disabled={props.saved || props.disabled}
+                        onClick={() => props.onSave()}
+                    >
+                        Save Changes
+                    </Button>
+                </Group>
+                <Group>
+                    <RectHoldingButton
+                        durationMs={3000}
+                        onClick={() => {
+                            props.onSave({ archived: true });
+                        }}
+                        borderColor="red"
+                        variant="outline"
+                    >
+                        Hold to Archive
+                    </RectHoldingButton>
+                </Group>
             </Group>
         </Stack>
     );
