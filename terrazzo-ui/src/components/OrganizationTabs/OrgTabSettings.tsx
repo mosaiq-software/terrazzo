@@ -152,22 +152,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         >
                             Hold to Leave Organization
                         </RectHoldingButton>
-                        {/* <RectHoldingButton
-                            onClick={() => {
-                                modals.openContextModal({
-                                    modal: 'transferOrganization',
-                                    title: 'Transfer Organization',
-                                    innerProps: {},
-                                });
-                            }}
-                            durationMs={5000}
-                            tooltip={iAmOwner ? 'Organization owners cannot leave their own organization. Please transfer ownership first.' : 'Hold to leave this organization'}
-                            disabled={iAmOwner}
-                            borderColor={'red'}
-                            defaultBorderColor={COLOR_UNSET}
-                        >
-                            Hold to Transfer Organization
-                        </RectHoldingButton> */}
                         {iAmOwner && (
                             <Button
                                 variant="outline"

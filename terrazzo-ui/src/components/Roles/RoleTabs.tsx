@@ -8,7 +8,7 @@ interface RoleTabProps {
     actionButton?: React.ReactNode;
     noSelectionMessage?: React.ReactNode;
     selectedRolePanel: (role: Role) => React.ReactNode;
-    disabledRoleCount?: number;
+    disableRolesOnAndBelowIndex?: number;
 }
 export const RoleTabs = (props: RoleTabProps) => {
     const [activeTab, setActiveTab] = useState<string | null>('no-role-selected');
@@ -65,7 +65,7 @@ export const RoleTabs = (props: RoleTabProps) => {
                                 }
                                 maw="10rem"
                                 style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
-                                disabled={index <= (props.disabledRoleCount || 0)}
+                                disabled={index <= (props.disableRolesOnAndBelowIndex || 0)}
                             >
                                 {role.name}
                             </Tabs.Tab>

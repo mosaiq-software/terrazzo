@@ -1,4 +1,5 @@
 import { OrganizationHeader, OrganizationId, PermissionFlag, recordValues, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
+import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
@@ -59,6 +60,12 @@ export async function updateOrganizationFromPartial(orgId: OrganizationId, parti
 
     if (!updatedBy || updatingOrg.ownerId !== updatedBy) {
         delete partial.ownerId; // only owner can change ownership
+    } else {
+        if (partial.ownerId) {
+            if (!(await userIsValidMemberOfOrg(partial.ownerId, orgId))) {
+                throw new Error('New owner must be a member of the organization');
+            }
+        }
     }
 
     const updated = updateBaseFromPartial(updatingOrg, partial);
@@ -75,4 +82,13 @@ export const userIsOrgOwner = async (userId: UserId, orgId: OrganizationId): Pro
         return false;
     }
     return orgHeader.ownerId === userId;
+};
+
+export const userIsValidMemberOfOrg = async (userId: UserId, orgId: OrganizationId): Promise<boolean> => {
+    const userHeader = await getUserHeaderByIdDb(userId);
+    if (!userHeader) {
+        return false;
+    }
+    const orgMembership = await getOrganizationMembershipDb(userId, orgId);
+    return !!orgMembership;
 };

@@ -1,4 +1,3 @@
-import { TEMPORARY_ID } from '../constants';
 import { RoleId } from '../types/genericTypes';
 import { TrzModuleType } from '../types/modules/moduleTypes';
 import { PermissibleAction, PermissibleActionRequirements } from '../types/permissions/permissibleActions';
@@ -216,18 +215,7 @@ export const modulePermissibleAction = (moduleType: TrzModuleType) => {
 /**
  * Returns the highest-priority role from a list of roles (the one with the lowest order value).
  */
-export const getMaxUserRole = (userRoles: Role[], userIsOwner?: boolean): Role | undefined => {
-    if (userIsOwner) {
-        const superAdminRole: Role = {
-            id: TEMPORARY_ID,
-            orgId: TEMPORARY_ID,
-            name: 'SUPER ADMIN',
-            color: '#000000',
-            order: -1,
-            defaultPermissions: recordValues(PermissionFlag),
-        };
-        return superAdminRole;
-    }
+export const getMaxUserRole = (userRoles: Role[]): Role | undefined => {
     const sorted = userRoles.sort((ra, rb) => ra.order - rb.order);
     return sorted?.[0];
 };

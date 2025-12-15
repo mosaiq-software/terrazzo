@@ -66,7 +66,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
     useEffect(() => {
         interval.start();
         return interval.stop;
-    }, []);
+    }, [interval]);
 
     useEffect(() => {
         const updateDimensions = () => {
@@ -134,8 +134,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                         justifyContent: 'center',
                         whiteSpace: 'nowrap',
                         userSelect: 'none',
-                        // opacity: props.disabled ? 0.5 : 1,
-                        opacity: props.disabled ? 0.6 : hovered ? 0.9 : 1,
+                        opacity: props.disabled ? 0.5 : 1,
                         cursor: props.disabled ? 'not-allowed' : 'pointer',
                         ...props.style,
                     }}

@@ -39,7 +39,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
         <Fieldset legend="Permissions">
             <RoleTabs
                 roles={assignedRoles}
-                disabledRoleCount={permCtx.maxRole?.order}
+                disableRolesOnAndBelowIndex={permCtx.userIsActiveOrgOwner ? -1 : permCtx.maxRole?.order}
                 actionButton={
                     props.disabled ? null : (
                         <Menu

@@ -17,7 +17,7 @@ interface OrgTabRolesProps {
 }
 export const OrgTabRoles = (props: OrgTabRolesProps) => {
     const sockCtx = useSocket();
-    const { maxRole } = usePermission();
+    const { maxRole, userIsActiveOrgOwner } = usePermission();
     const [activeTab, setActiveTab] = useState<string | null>('no-role-selected');
 
     const createNewRole = useCallback(async () => {
@@ -72,7 +72,7 @@ export const OrgTabRoles = (props: OrgTabRolesProps) => {
         >
             <RoleTabs
                 roles={props.roles}
-                disabledRoleCount={maxRole?.order}
+                disableRolesOnAndBelowIndex={userIsActiveOrgOwner ? -1 : maxRole?.order}
                 actionButton={
                     <Button
                         variant="subtle"

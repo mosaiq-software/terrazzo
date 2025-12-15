@@ -45,7 +45,7 @@ const PermissionProvider: React.FC<any> = ({ children }) => {
                 checkModulePermission,
                 userRoleIds,
                 userRoles,
-                maxRole: getMaxUserRole(userRoles, userIsActiveOrgOwner),
+                maxRole: getMaxUserRole(userRoles),
                 userIsActiveOrgOwner,
             }}
         >
