@@ -68,3 +68,11 @@ export async function updateOrganizationFromPartial(orgId: OrganizationId, parti
         throw new Error('Failed to update org ' + e);
     }
 }
+
+export const userIsOrgOwner = async (userId: UserId, orgId: OrganizationId): Promise<boolean> => {
+    const orgHeader = await getOrgByIdDb(orgId);
+    if (!orgHeader) {
+        return false;
+    }
+    return orgHeader.ownerId === userId;
+};

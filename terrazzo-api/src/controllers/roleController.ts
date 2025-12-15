@@ -1,6 +1,7 @@
 import { getMaxUserRole, OrganizationId, PermissionFlag, Role, RoleId, UserId } from '@mosaiq/terrazzo-common';
 import { getRoleIdsForUserInOrgDb, setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { createRoleOnOrgDb, deleteRoleDb, getNextRoleOrderDb, getRolesByOrgIdDb, updateRoleDb } from '@trz-api/persistence/rolePersistence';
+import { userIsOrgOwner } from './organizationController';
 
 export const getRolesForOrg = async (orgId: OrganizationId) => {
     return await getRolesByOrgIdDb(orgId);
@@ -23,10 +24,8 @@ export const createRole = async (name: string, color: string, orgId: Organizatio
 export const updateRole = async (role: Role, updatedBy: UserId) => {
     const userRoles = await getUserRolesInOrg(updatedBy, role.orgId);
     const maxUserRole = getMaxUserRole(userRoles);
-    if (!maxUserRole) {
-        throw new Error('User has no roles in the organization');
-    }
-    if (!roleACanManageRoleB(maxUserRole, role)) {
+    const userIsOwner = await userIsOrgOwner(updatedBy, role.orgId);
+    if (!roleACanManageRoleB(maxUserRole, role, userIsOwner)) {
         throw new Error('User cannot update a role with equal or higher order than their maximum role');
     }
 
@@ -46,10 +45,8 @@ export const getSpecificRolesInOrg = async (roleIds: RoleId[], orgId: Organizati
 export const deleteRole = async (role: Role, deletedBy: UserId) => {
     const userRoles = await getUserRolesInOrg(deletedBy, role.orgId);
     const maxUserRole = getMaxUserRole(userRoles);
-    if (!maxUserRole) {
-        throw new Error('User has no roles in the organization');
-    }
-    if (!roleACanManageRoleB(maxUserRole, role)) {
+    const userIsOwner = await userIsOrgOwner(deletedBy, role.orgId);
+    if (!roleACanManageRoleB(maxUserRole, role, userIsOwner)) {
         throw new Error('User cannot delete a role with equal or higher order than their maximum role');
     }
 
@@ -59,12 +56,10 @@ export const deleteRole = async (role: Role, deletedBy: UserId) => {
 export const validateUserCanAssignRoles = async (assigningToUserId: UserId, inOrgId: OrganizationId, roleIdsToAssign: RoleId[], assignedByUserId: UserId) => {
     const assignedByUserRoles = await getUserRolesInOrg(assignedByUserId, inOrgId);
     const maxAssignedByUserRole = getMaxUserRole(assignedByUserRoles);
-    if (!maxAssignedByUserRole) {
-        throw new Error('Assigning user has no roles in the organization');
-    }
     const rolesToAssign = await getSpecificRolesInOrg(roleIdsToAssign, inOrgId);
+    const assignerIsOrgOwner = await userIsOrgOwner(assignedByUserId, inOrgId);
     for (const role of rolesToAssign) {
-        if (!roleACanManageRoleB(maxAssignedByUserRole, role)) {
+        if (!roleACanManageRoleB(maxAssignedByUserRole, role, assignerIsOrgOwner)) {
             throw new Error('Assigning user cannot assign a role with equal or higher order than their maximum role');
         }
     }
@@ -76,7 +71,19 @@ export const validateUserCanAssignRoles = async (assigningToUserId: UserId, inOr
  * @param roleB - The role being managed.
  * @returns Whether roleA can manage roleB.
  */
-export const roleACanManageRoleB = (roleA: Role, roleB: Role): boolean => {
+export const roleACanManageRoleB = (roleA: Role | undefined, roleB: Role | undefined, roleAIsOrgOwner: boolean): boolean => {
+    if (roleAIsOrgOwner) {
+        // If the user is the org owner, they can manage any role
+        return true;
+    }
+    if (!roleB) {
+        // If roleB doesn't exist, treat it as if it has the lowest order
+        return true;
+    }
+    if (!roleA) {
+        // If roleA doesn't exist, it can't manage anything
+        return false;
+    }
     return roleB.order >= roleA.order;
 };
 
