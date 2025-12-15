@@ -3,7 +3,7 @@ import { useInterval } from '@mantine/hooks';
 import { useEffect, useRef, useState } from 'react';
 
 interface RectHoldingButtonProps {
-    children?: any;
+    children?: React.ReactNode;
     durationMs: number;
     onClick?: () => void;
     onEarlyRelease?: () => void;

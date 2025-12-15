@@ -163,7 +163,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                                         innerProps: {},
                                     });
                                 }}
-                                disabled={!iAmOwner}
                             >
                                 Transfer Organization
                             </Button>

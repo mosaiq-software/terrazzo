@@ -52,19 +52,31 @@ const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
     await setRoleIdsForUserInOrgDb(creator, orgId, [adminRole.id]);
 };
 
+export const userIsValidMemberOfOrg = async (userId: UserId, orgId: OrganizationId): Promise<boolean> => {
+    const userHeader = await getUserHeaderByIdDb(userId);
+    if (!userHeader) {
+        return false;
+    }
+    const orgMembership = await getOrganizationMembershipDb(userId, orgId);
+    return !!orgMembership;
+};
+
 export async function updateOrganizationFromPartial(orgId: OrganizationId, partial: Partial<OrganizationHeader>, updatedBy?: UserId) {
     const updatingOrg = await getOrgByIdDb(orgId);
     if (updatingOrg == null) {
         throw new Error('Org not found');
     }
 
-    if (!updatedBy || updatingOrg.ownerId !== updatedBy) {
-        delete partial.ownerId; // only owner can change ownership
-    } else {
-        if (partial.ownerId) {
-            if (!(await userIsValidMemberOfOrg(partial.ownerId, orgId))) {
-                throw new Error('New owner must be a member of the organization');
-            }
+    // Check if ownership is being transferred
+    if (partial.ownerId && partial.ownerId !== updatingOrg.ownerId) {
+        if (!updatedBy) {
+            throw new Error('Must specify user performing update to transfer ownership');
+        }
+        if (updatingOrg.ownerId !== updatedBy) {
+            throw new Error('Only the current owner can transfer ownership');
+        }
+        if (!(await userIsValidMemberOfOrg(partial.ownerId, orgId))) {
+            throw new Error('New owner must be a member of the organization');
         }
     }
 
@@ -82,13 +94,4 @@ export const userIsOrgOwner = async (userId: UserId, orgId: OrganizationId): Pro
         return false;
     }
     return orgHeader.ownerId === userId;
-};
-
-export const userIsValidMemberOfOrg = async (userId: UserId, orgId: OrganizationId): Promise<boolean> => {
-    const userHeader = await getUserHeaderByIdDb(userId);
-    if (!userHeader) {
-        return false;
-    }
-    const orgMembership = await getOrganizationMembershipDb(userId, orgId);
-    return !!orgMembership;
 };
