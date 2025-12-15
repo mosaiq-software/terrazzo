@@ -43,10 +43,11 @@ export const MemberRow = (props: MemberRowProps) => {
             menuItems={[
                 ...withIf(
                     {
-                        label: 'Remove Member',
+                        label: 'Hold to Remove Member',
                         onClick: () => props.onRemoveMember?.(props.member),
                         icon: <MdPersonRemove size={16} />,
                         color: 'red',
+                        longHold: true,
                     },
                     !props.isCurrentUser && !!props.onRemoveMember
                 ),

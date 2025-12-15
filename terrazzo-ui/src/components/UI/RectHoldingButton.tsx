@@ -1,4 +1,4 @@
-import { Box, Tooltip, UnstyledButton } from '@mantine/core';
+import { Box, Group, Tooltip, UnstyledButton } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
 import { useEffect, useRef, useState } from 'react';
 
@@ -18,6 +18,8 @@ interface RectHoldingButtonProps {
     style?: Omit<React.CSSProperties, 'width' | 'height' | 'borderRadius' | 'borderWidth'>;
     tooltip?: string;
     disabled?: boolean;
+    leftSection?: React.ReactNode;
+    rightSection?: React.ReactNode;
 }
 const DEFAULT_INCREMENT = 1000 / 60; // 60fps
 export const RectHoldingButton = (props: RectHoldingButtonProps) => {
@@ -29,6 +31,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
         height: typeof props.height === 'number' ? props.height : 50,
     });
     const boxRef = useRef<HTMLDivElement>(null);
+    const [hovered, setHovered] = useState<boolean>(false);
 
     const onComplete = () => {
         if (clicked || props.disabled) return;
@@ -108,10 +111,14 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
         >
             <UnstyledButton
                 onMouseUp={release}
-                onMouseLeave={release}
                 onMouseDown={down}
                 onClick={(e) => e.preventDefault()}
                 disabled={props.disabled}
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => {
+                    setHovered(false);
+                    release();
+                }}
             >
                 <Box
                     ref={boxRef}
@@ -120,17 +127,15 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                         width: props.width,
                         height: props.height,
                         backgroundColor: props.backgroundColor || '#15161A',
-                        paddingTop: '8px',
-                        paddingBottom: '8px',
-                        paddingLeft: '18px',
-                        paddingRight: '18px',
+                        padding: '8px 18px',
                         borderRadius,
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         whiteSpace: 'nowrap',
                         userSelect: 'none',
-                        opacity: props.disabled ? 0.5 : 1,
+                        // opacity: props.disabled ? 0.5 : 1,
+                        opacity: props.disabled ? 0.6 : hovered ? 0.9 : 1,
                         cursor: props.disabled ? 'not-allowed' : 'pointer',
                         ...props.style,
                     }}
@@ -144,6 +149,10 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                             left: 0,
                             pointerEvents: 'none',
                             overflow: 'visible',
+                            backgroundColor: hovered ? '#ffffff20' : 'transparent',
+                            borderRadius: borderRadius,
+                            transition: 'background-color 0.1s ease',
+                            zIndex: 0,
                         }}
                     >
                         {props.defaultBorderColor && (
@@ -175,7 +184,17 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                             strokeLinecap="round"
                         />
                     </svg>
-                    {props.children}
+                    <Group
+                        gap={8}
+                        align="center"
+                        wrap="nowrap"
+                        fz="inherit"
+                        style={{ position: 'relative', zIndex: 1 }}
+                    >
+                        {props.leftSection}
+                        {props.children}
+                        {props.rightSection}
+                    </Group>
                 </Box>
             </UnstyledButton>
         </Tooltip>

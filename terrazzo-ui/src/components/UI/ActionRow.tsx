@@ -1,6 +1,7 @@
 import { ActionIcon, Avatar, Box, Group, Menu, Text } from '@mantine/core';
 import { IconType } from 'react-icons';
 import { HiDotsVertical } from 'react-icons/hi';
+import { RectHoldingButton } from './RectHoldingButton';
 
 export interface ActionRowMenuItem {
     label: string;
@@ -8,6 +9,7 @@ export interface ActionRowMenuItem {
     icon?: React.ReactNode;
     color?: string;
     disabled?: boolean;
+    longHold?: boolean;
 }
 
 interface ActionRowProps {
@@ -126,6 +128,28 @@ export const ActionRow = (props: ActionRowProps) => {
                             {props.menuItems?.map((item, index) => {
                                 if (item === '-') {
                                     return <Menu.Divider key={index} />;
+                                }
+                                if (item.longHold) {
+                                    return (
+                                        <RectHoldingButton
+                                            key={index}
+                                            leftSection={item.icon}
+                                            onClick={item.onClick}
+                                            disabled={item.disabled}
+                                            durationMs={2000}
+                                            width="100%"
+                                            backgroundColor="transparent"
+                                            borderColor={item.color || 'white'}
+                                            style={{
+                                                fontSize: '14px',
+                                                padding: '8px 12px',
+                                                justifyContent: 'center',
+                                            }}
+                                            borderRadius={4}
+                                        >
+                                            {item.label}
+                                        </RectHoldingButton>
+                                    );
                                 }
                                 return (
                                     <Menu.Item
