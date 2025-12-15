@@ -35,3 +35,7 @@ export const recordValues = <K extends string | number | symbol, V>(record: Reco
 export const recordEntries = <K extends string | number | symbol, V>(record: Record<K, V>): [K, V][] => {
     return Object.entries(record) as [K, V][];
 };
+
+export const withIf = <T>(item: T | T[], condition: any): T[] => {
+    return condition ? (Array.isArray(item) ? item : [item]) : [];
+};

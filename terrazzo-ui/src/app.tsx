@@ -17,6 +17,7 @@ import { OrgProvider } from './contexts/org-context';
 import { PermissionProvider } from './contexts/permission-context';
 import { UiProvider } from './contexts/ui-context';
 import Router from './router';
+import { TransferOrganizationModal } from './components/Modals/TransferOrganization';
 
 const theme = createTheme({});
 
@@ -25,6 +26,7 @@ const modals = {
     board: CreateBoardModal,
     moduleSettings: ModuleSettingsModal,
     joinOrganization: JoinOrganizationModal,
+    transferOrganization: TransferOrganizationModal,
 };
 
 const App = () => {

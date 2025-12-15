@@ -10,6 +10,7 @@ export type PermissionContextType = {
     userRoleIds: RoleId[];
     userRoles: Role[];
     maxRole: Role | undefined;
+    userIsActiveOrgOwner: boolean;
 };
 
 const PermissionContext = createContext<PermissionContextType | undefined>(undefined);
@@ -18,12 +19,13 @@ const PermissionProvider: React.FC<any> = ({ children }) => {
     const orgCtx = useOrg();
     const userCtx = useUser();
     const { roleIds: userRoleIds, roles: userRoles } = useRoleForUserInOrg(userCtx.userData?.id, orgCtx.active?.id);
+    const userIsActiveOrgOwner = !!(userCtx.userData?.id && orgCtx.active && userCtx.userData.id === orgCtx.active.ownerId);
 
     const checkOrgPermission = async (permissibleAction: PermissibleAction): Promise<boolean> => {
         if (!userCtx.userData?.id || !orgCtx.active) {
             return false;
         }
-        const grantedFlags = evaluateOrganizationPermissionForRoles(userRoleIds, orgCtx.roles);
+        const grantedFlags = evaluateOrganizationPermissionForRoles(userRoleIds, orgCtx.roles, userIsActiveOrgOwner);
         return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
     };
 
@@ -32,7 +34,7 @@ const PermissionProvider: React.FC<any> = ({ children }) => {
             return false;
         }
         const truePermissions = calculateTrueModulePermissionsInOrg(moduleHeader.effectivePermissions, orgCtx.roles);
-        const grantedFlags = evaluatePermissionForRoles(userRoleIds, truePermissions);
+        const grantedFlags = evaluatePermissionForRoles(userRoleIds, truePermissions, userIsActiveOrgOwner);
         return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
     };
 
@@ -44,6 +46,7 @@ const PermissionProvider: React.FC<any> = ({ children }) => {
                 userRoleIds,
                 userRoles,
                 maxRole: getMaxUserRole(userRoles),
+                userIsActiveOrgOwner,
             }}
         >
             {children}

@@ -114,7 +114,7 @@ export const getPermissionFlagsFromOverrides = (overrides: OverridePermissions):
  * @param effectivePermissions - The ModulePermissions representing the effective permissions on the module.
  * @returns The list of PermissionFlags that are granted to the given roles.
  */
-export const evaluatePermissionForRoles = (roles: RoleId[], effectivePermissions: ModulePermissions): PermissionFlag[] => {
+export const evaluatePermissionForRoles = (roles: RoleId[], effectivePermissions: ModulePermissions, isOwner?: boolean): PermissionFlag[] => {
     const grantedFlags = new Set<PermissionFlag>();
     for (const roleId of roles) {
         const roleOverrides = effectivePermissions[roleId];
@@ -124,6 +124,9 @@ export const evaluatePermissionForRoles = (roles: RoleId[], effectivePermissions
                 grantedFlags.add(flag);
             }
         }
+    }
+    if (isOwner) {
+        grantedFlags.add(PermissionFlag.ADMINISTER_ORG);
     }
     return Array.from(grantedFlags);
 };
@@ -152,7 +155,7 @@ export const meetsRequirementsForPermissibleAction = (grantedFlags: PermissionFl
  * @param orgDefaultPermissions - The default permissions for each role in the organization.
  * @returns The list of PermissionFlags that are granted to the given roles.
  */
-export const evaluateOrganizationPermissionForRoles = (roleIds: RoleId[], orgRoles: Role[]): PermissionFlag[] => {
+export const evaluateOrganizationPermissionForRoles = (roleIds: RoleId[], orgRoles: Role[], isOwner?: boolean): PermissionFlag[] => {
     const orgDefaultPermissions = mapRolesToPermissions(orgRoles);
     const grantedFlags = new Set<PermissionFlag>();
     for (const roleId of roleIds) {
@@ -162,6 +165,9 @@ export const evaluateOrganizationPermissionForRoles = (roleIds: RoleId[], orgRol
                 grantedFlags.add(flag);
             }
         }
+    }
+    if (isOwner) {
+        grantedFlags.add(PermissionFlag.ADMINISTER_ORG);
     }
     return Array.from(grantedFlags);
 };

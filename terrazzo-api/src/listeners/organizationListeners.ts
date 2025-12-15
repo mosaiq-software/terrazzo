@@ -2,15 +2,12 @@ import { ClientSE } from '@mosaiq/terrazzo-common';
 import { syncUpdateOrgField } from '@trz-api/broadcasters';
 import { getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { addOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
-import { userCanAdministerOrganization, userCanGetPersonalDataForUser, userCanViewOrganization } from '@trz-api/utils/permissions';
+import { userCanAdministerOrganization, userCanGetPersonalDataForUser } from '@trz-api/utils/permissions';
 import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerOrganizationListeners = (socket: Socket, io: Server) => {
     subscribe(socket, ClientSE.GET_ORGANIZATION, async (data) => {
-        if (!(await userCanViewOrganization(socket, data))) {
-            throw new Error(`User does not have permission to view the organization`);
-        }
         const orgHeader = await getOrganizationPreview(data);
         return orgHeader;
     });
@@ -25,7 +22,8 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
         if (!(await userCanAdministerOrganization(socket, data.id))) {
             throw new Error(`User does not have permission to edit this organization`);
         }
-        await updateOrganizationFromPartial(data.id, data);
+        const socketData = getSocketData(socket);
+        await updateOrganizationFromPartial(data.id, data, socketData.user.user.id);
         await syncUpdateOrgField(io, data.id, data);
         return undefined;
     });

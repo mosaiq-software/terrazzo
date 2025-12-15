@@ -2,7 +2,7 @@ import { ClientSE } from '@mosaiq/terrazzo-common';
 import { syncMembersInOrg, syncUsersOrgs } from '@trz-api/broadcasters';
 import { getMembersInOrg, removeMembership } from '@trz-api/controllers/membershipController';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
-import { subscribe } from '@trz-api/utils/socketUtils';
+import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerMembershipListeners = (socket: Socket, io: Server) => {
@@ -12,7 +12,9 @@ export const registerMembershipListeners = (socket: Socket, io: Server) => {
     });
 
     subscribe(socket, ClientSE.DELETE_MEMBERSHIP, async (data) => {
-        if (!(await userCanAdministerOrganization(socket, data.orgId))) {
+        const socketData = getSocketData(socket);
+        const isLeavingSelf = socketData.user.user.id === data.userId;
+        if (!(await userCanAdministerOrganization(socket, data.orgId)) && !isLeavingSelf) {
             throw new Error(`User does not have permission to delete membership in organization`);
         }
         await removeMembership(data.userId, data.orgId);

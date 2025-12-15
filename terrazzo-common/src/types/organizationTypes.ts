@@ -7,6 +7,7 @@ export interface OrganizationHeader {
     createdAt: number;
     logoUrl: URL;
     description: string;
+    ownerId: UserId;
 }
 
 export interface MembershipRecord {

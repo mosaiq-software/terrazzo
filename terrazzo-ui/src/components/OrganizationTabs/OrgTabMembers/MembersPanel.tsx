@@ -4,7 +4,8 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { useUser } from '@trz/contexts/user-context';
 import { removeUserFromOrg } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
-import { MemberRow } from '../MemberRow';
+import { useCallback, useMemo } from 'react';
+import { MemberRow } from './MemberRow';
 
 interface MembersPanelProps {
     orgData: OrganizationHeader;
@@ -16,17 +17,26 @@ export const MembersPanel = (props: MembersPanelProps) => {
     const userCtx = useUser();
     const sockCtx = useSocket();
 
-    const handleRemoveMember = async (member: MembershipRecord) => {
-        if (!props.userCanAdmin) {
-            notify(NoteType.GENERIC_ERROR, 'You do not have permission to remove members');
-            return;
-        }
-        try {
-            await removeUserFromOrg(sockCtx, member.userId, props.orgData.id);
-        } catch (err) {
-            notify(NoteType.GENERIC_ERROR, err);
-        }
-    };
+    const handleRemoveMember = useCallback(
+        async (member: MembershipRecord) => {
+            if (!props.userCanAdmin) {
+                notify(NoteType.GENERIC_ERROR, 'You do not have permission to remove members');
+                return;
+            }
+            try {
+                await removeUserFromOrg(sockCtx, member.userId, props.orgData.id);
+            } catch (err) {
+                notify(NoteType.GENERIC_ERROR, err);
+            }
+        },
+        [props.orgData.id, props.userCanAdmin, sockCtx]
+    );
+
+    const orgOwner = useMemo(() => props.members.find((m) => m.userId === props.orgData.ownerId), [props.members, props.orgData.ownerId]);
+
+    const otherMembersSorted = useMemo(() => {
+        return props.members.filter((m) => m.userId !== props.orgData.ownerId).sort((a, b) => a.joinedAt - b.joinedAt);
+    }, [props.members, props.orgData.ownerId]);
 
     return (
         <Stack
@@ -48,7 +58,15 @@ export const MembersPanel = (props: MembersPanelProps) => {
                 </Title>
             </Group>
             <Stack gap="sm">
-                {props.members.map((member) => (
+                {orgOwner && (
+                    <MemberRow
+                        key={orgOwner.user.id}
+                        member={orgOwner}
+                        isCurrentUser={orgOwner.user.id === userCtx.userData?.id}
+                        isOrgOwner
+                    />
+                )}
+                {otherMembersSorted.map((member) => (
                     <MemberRow
                         key={member.user.id}
                         member={member}

@@ -1,4 +1,5 @@
 import { OrganizationHeader, OrganizationId, PermissionFlag, recordValues, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
+import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
@@ -33,6 +34,7 @@ export async function addOrganization(name: string, creator: UserId) {
         createdAt: Date.now(),
         logoUrl: '',
         description: '',
+        ownerId: creator,
     };
 
     await createOrgDb(newOrg);
@@ -50,10 +52,32 @@ const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
     await setRoleIdsForUserInOrgDb(creator, orgId, [adminRole.id]);
 };
 
-export async function updateOrganizationFromPartial(orgId: OrganizationId, partial: Partial<OrganizationHeader>) {
+export const userIsValidMemberOfOrg = async (userId: UserId, orgId: OrganizationId): Promise<boolean> => {
+    const userHeader = await getUserHeaderByIdDb(userId);
+    if (!userHeader) {
+        return false;
+    }
+    const orgMembership = await getOrganizationMembershipDb(userId, orgId);
+    return !!orgMembership;
+};
+
+export async function updateOrganizationFromPartial(orgId: OrganizationId, partial: Partial<OrganizationHeader>, updatedBy?: UserId) {
     const updatingOrg = await getOrgByIdDb(orgId);
     if (updatingOrg == null) {
         throw new Error('Org not found');
+    }
+
+    // Check if ownership is being transferred
+    if (partial.ownerId && partial.ownerId !== updatingOrg.ownerId) {
+        if (!updatedBy) {
+            throw new Error('Must specify user performing update to transfer ownership');
+        }
+        if (updatingOrg.ownerId !== updatedBy) {
+            throw new Error('Only the current owner can transfer ownership');
+        }
+        if (!(await userIsValidMemberOfOrg(partial.ownerId, orgId))) {
+            throw new Error('New owner must be a member of the organization');
+        }
     }
 
     const updated = updateBaseFromPartial(updatingOrg, partial);
@@ -63,3 +87,11 @@ export async function updateOrganizationFromPartial(orgId: OrganizationId, parti
         throw new Error('Failed to update org ' + e);
     }
 }
+
+export const userIsOrgOwner = async (userId: UserId, orgId: OrganizationId): Promise<boolean> => {
+    const orgHeader = await getOrgByIdDb(orgId);
+    if (!orgHeader) {
+        return false;
+    }
+    return orgHeader.ownerId === userId;
+};

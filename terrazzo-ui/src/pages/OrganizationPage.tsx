@@ -1,5 +1,5 @@
 import { Avatar, Box, Flex, Group, Loader, ScrollArea, Stack, Tabs, Text, Title } from '@mantine/core';
-import { OrganizationId, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { OrganizationId, PermissibleAction, withIf } from '@mosaiq/terrazzo-common';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
 import { OrgTabRoles } from '@trz/components/OrganizationTabs/OrgTabRoles';
@@ -22,8 +22,7 @@ const OrganizationPage = (): React.JSX.Element => {
     const orgId = params.orgId as OrganizationId | undefined;
     const tabId = params.tabId;
     const orgCtx = useOrg();
-    const userCanAdmin = useOrgPermission(orgId, PermissibleAction.AdministerOrg);
-    const userCanEditRoles = useOrgPermission(orgId, PermissibleAction.EditRoles) || userCanAdmin;
+    const userCanEditRoles = useOrgPermission(orgId, PermissibleAction.EditRoles);
     setTitle(`${orgCtx.active?.name ?? 'Organization'} | Terrazzo`);
 
     if (orgCtx.active === undefined) {
@@ -98,7 +97,7 @@ const OrganizationPage = (): React.JSX.Element => {
                             variant="default"
                         >
                             <Tabs.List>
-                                {['Organization', 'Members', ...(userCanEditRoles ? ['Roles'] : []), ...(userCanAdmin ? ['Settings'] : [])].map((t) => {
+                                {['Organization', 'Members', ...withIf('Roles', userCanEditRoles), 'Settings'].map((t) => {
                                     return (
                                         <Tabs.Tab
                                             value={t}
@@ -153,19 +152,10 @@ const OrganizationPage = (): React.JSX.Element => {
                                 )}
                             </Tabs.Panel>
                             <Tabs.Panel value="Settings">
-                                {userCanAdmin ? (
-                                    <OrgTabSettings
-                                        myMembershipRecord={myMembership}
-                                        orgData={orgCtx.active}
-                                    />
-                                ) : (
-                                    <Text
-                                        c="white"
-                                        mt="md"
-                                    >
-                                        You do not have permission to view this tab.
-                                    </Text>
-                                )}
+                                <OrgTabSettings
+                                    myMembershipRecord={myMembership}
+                                    orgData={orgCtx.active}
+                                />
                             </Tabs.Panel>
                         </Tabs>
                     </Box>

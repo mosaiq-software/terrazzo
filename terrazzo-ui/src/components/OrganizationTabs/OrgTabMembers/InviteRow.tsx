@@ -1,12 +1,12 @@
 import { Button, Group, Text, Tooltip } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { Invite, isInviteExpired } from '@mosaiq/terrazzo-common';
+import { Invite, isInviteExpired, withIf } from '@mosaiq/terrazzo-common';
 import { formatTimeAgo } from '@trz/util/dateUtils';
 import { uuidToReadableUuid } from '@trz/util/idUtils';
 import { getInviteLink } from '@trz/util/linkUtils';
 import { MdContentCopy, MdDelete, MdLink } from 'react-icons/md';
-import { ActionRow } from '../UI/ActionRow';
-import { InfinityChar } from '../UI/InfinityChar';
+import { ActionRow } from '../../UI/ActionRow';
+import { InfinityChar } from '../../UI/InfinityChar';
 
 interface InviteRowProps {
     invite: Invite;
@@ -73,18 +73,17 @@ export const InviteRow = (props: InviteRowProps) => {
                 </Button>,
             ]}
             menuLabel="Manage Invite"
-            menuItems={
-                props.canManageInvites && props.onDeleteInvite
-                    ? [
-                          {
-                              label: 'Delete Invite',
-                              onClick: () => props.onDeleteInvite?.(props.invite),
-                              icon: <MdDelete size={16} />,
-                              color: 'red',
-                          },
-                      ]
-                    : []
-            }
+            menuItems={[
+                ...withIf(
+                    {
+                        label: 'Delete Invite',
+                        onClick: () => props.onDeleteInvite?.(props.invite),
+                        icon: <MdDelete size={16} />,
+                        color: 'red',
+                    },
+                    props.canManageInvites && !!props.onDeleteInvite
+                ),
+            ]}
         />
     );
 };

@@ -1,7 +1,9 @@
 import { Member, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
 import { createOrganizationMembershipDb, deleteOrganizationMembershipDb, getOrganizationMembershipDb, getOrganizationMembershipsForOrgDb, getOrganizationMembershipsForUserDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
+import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
+import { userIsOrgOwner } from './organizationController';
 
 export const getMembersInOrg = async (orgId: OrganizationId) => {
     const org = await getOrgByIdDb(orgId);
@@ -46,5 +48,10 @@ export const createMembershipIfDoesntExist = async (membershipRecord: Membership
 };
 
 export const removeMembership = async (userId: UserId, orgId: OrganizationId) => {
+    const isOwner = await userIsOrgOwner(userId, orgId);
+    if (isOwner) {
+        throw new Error('Cannot remove membership for the owner of the organization');
+    }
     await deleteOrganizationMembershipDb(userId, orgId);
+    await setRoleIdsForUserInOrgDb(userId, orgId, []);
 };

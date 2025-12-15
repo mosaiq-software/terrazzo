@@ -2,6 +2,7 @@ import { BoardId, calculateTrueModulePermissionsInOrg, DirectoryId, DocumentId, 
 import { getModuleById } from '@trz-api/controllers/moduleController';
 import { getRolesForOrg } from '@trz-api/controllers/roleController';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
+import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
 import { getSocketData } from './socketUtils';
@@ -34,8 +35,9 @@ const getModulePermissionsForUser = async (userId: UserId, moduleId: UID): Promi
     }
     const userRoles = await getRoleIdsForUserInOrgDb(userId, module.orgId);
     const orgRoles = await getRolesForOrg(module.orgId);
+    const org = await getOrgByIdDb(module.orgId);
     const truePermissions = calculateTrueModulePermissionsInOrg(module.effectivePermissions, orgRoles);
-    const grantedFlags = evaluatePermissionForRoles(userRoles, truePermissions);
+    const grantedFlags = evaluatePermissionForRoles(userRoles, truePermissions, org && org.ownerId === userId);
     return grantedFlags;
 };
 
@@ -48,7 +50,8 @@ const getModulePermissionsForUser = async (userId: UserId, moduleId: UID): Promi
 const getOrganizationPermissionsForUser = async (userId: UserId, orgId: OrganizationId): Promise<PermissionFlag[]> => {
     const userRoles = await getRoleIdsForUserInOrgDb(userId, orgId);
     const orgRoles = await getRolesForOrg(orgId);
-    const grantedFlags = evaluateOrganizationPermissionForRoles(userRoles, orgRoles);
+    const org = await getOrgByIdDb(orgId);
+    const grantedFlags = evaluateOrganizationPermissionForRoles(userRoles, orgRoles, org && org.ownerId === userId);
     return grantedFlags;
 };
 
