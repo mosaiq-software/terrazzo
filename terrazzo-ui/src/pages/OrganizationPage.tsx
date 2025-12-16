@@ -50,7 +50,7 @@ const OrganizationPage = (): React.JSX.Element => {
     }
 
     const onChangeTab = async (tab: string | null) => {
-        if (!(await unsavedCtx.confirmDiscardUnsavedChanges())) {
+        if (await unsavedCtx.confirmKeepUnsavedChanges()) {
             return;
         }
         if (tab === 'Organization') tab = '';

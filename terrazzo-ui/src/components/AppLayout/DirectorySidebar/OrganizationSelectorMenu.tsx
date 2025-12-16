@@ -35,6 +35,22 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
         navigate(`/org/${orgCtx.active.id}`);
     }, [unsavedCtx, orgCtx, navigate]);
 
+    const handleCreateOrganization = useCallback(() => {
+        modals.openContextModal({
+            modal: 'organization',
+            title: 'Create New Organization',
+            innerProps: {},
+        });
+    }, []);
+
+    const handleJoinOrganization = useCallback(() => {
+        modals.openContextModal({
+            modal: 'joinOrganization',
+            title: 'Join Organization',
+            innerProps: {},
+        });
+    }, []);
+
     return (
         <Menu
             position={props.sidebarCollapsed ? 'right-start' : 'bottom-start'}
@@ -116,15 +132,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                     </Menu.Item>
                 ))}
                 <Divider my="xs" />
-                <Menu.Item
-                    onClick={() => {
-                        modals.openContextModal({
-                            modal: 'joinOrganization',
-                            title: 'Join Organization',
-                            innerProps: {},
-                        });
-                    }}
-                >
+                <Menu.Item onClick={handleJoinOrganization}>
                     <Group
                         wrap="nowrap"
                         gap={8}
@@ -145,15 +153,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                         </Text>
                     </Group>
                 </Menu.Item>
-                <Menu.Item
-                    onClick={() => {
-                        modals.openContextModal({
-                            modal: 'organization',
-                            title: 'Create New Organization',
-                            innerProps: {},
-                        });
-                    }}
-                >
+                <Menu.Item onClick={handleCreateOrganization}>
                     <Group
                         wrap="nowrap"
                         gap={8}
