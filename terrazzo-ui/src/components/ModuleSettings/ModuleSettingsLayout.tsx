@@ -1,22 +1,25 @@
 import { Alert, Button, Group, Stack, Text, TextInput } from '@mantine/core';
-import { ModuleHeader, ModulePermissions } from '@mosaiq/terrazzo-common';
+import { ModuleHeader } from '@mosaiq/terrazzo-common';
 import { COLOR_UNSET } from '@trz/util/colorUtils';
 import { toTitleCase } from '@trz/util/textUtils';
+import { useEffect, useState } from 'react';
 import { RectHoldingButton } from '../UI/RectHoldingButton';
 import { PermissionsEditor } from './PermissionsEditor/PermissionsEditor';
 
 interface ModuleSettingsLayoutProps {
     moduleHeader: ModuleHeader;
-    onChangeTitle: (newTitle: string) => void;
-    onChangePermissions: (newPermissions: ModulePermissions) => void;
-    saved: boolean;
-    onSave: (explicit?: Partial<ModuleHeader>) => void;
+    onSave: (edits: Partial<Omit<ModuleHeader, 'type'>>) => void;
     onClose: () => void;
     children?: React.ReactNode;
     disabled?: boolean;
 }
 
 export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
+    const [editedTitle, setEditedTitle] = useState<string>(props.moduleHeader.name);
+    useEffect(() => {
+        setEditedTitle(props.moduleHeader.name);
+    }, [props.moduleHeader.name]);
+
     if (props.moduleHeader.archived) {
         return (
             <Alert
@@ -37,6 +40,7 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
             </Alert>
         );
     }
+
     return (
         <Stack
             style={{
@@ -50,16 +54,19 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                 label={toTitleCase(`${props.moduleHeader.type} Name`)}
                 placeholder={toTitleCase(`My ${props.moduleHeader.type}`)}
                 required
-                value={props.moduleHeader.name}
+                value={editedTitle}
                 onChange={(e) => {
-                    props.onChangeTitle(e.target.value);
+                    setEditedTitle(e.currentTarget.value);
                 }}
+                onBlur={() => props.onSave({ name: editedTitle })}
                 disabled={props.disabled}
             />
             {props.children}
             <PermissionsEditor
                 desiredPermissions={props.moduleHeader.desiredPermissions}
-                onChange={props.onChangePermissions}
+                onChange={(newPerms) => {
+                    props.onSave({ desiredPermissions: newPerms });
+                }}
                 disabled={props.disabled}
             />
             <Group
@@ -81,12 +88,6 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                         onClick={props.onClose}
                     >
                         Close
-                    </Button>
-                    <Button
-                        disabled={props.saved || props.disabled}
-                        onClick={() => props.onSave()}
-                    >
-                        Save Changes
                     </Button>
                 </Group>
                 <Group>
