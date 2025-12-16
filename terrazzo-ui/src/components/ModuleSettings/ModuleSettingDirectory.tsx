@@ -1,5 +1,5 @@
 import { Fieldset, Loader, Stack } from '@mantine/core';
-import { DirectoryHeader, DirectoryId, ModuleHeader, PermissibleAction, TrzModuleType, UID, withIf } from '@mosaiq/terrazzo-common';
+import { DirectoryHeader, DirectoryId, PermissibleAction, TrzModuleType, UID, withIf } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateBoardField, updateDocumentMetadata } from '@trz/emitters';
 import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
@@ -8,7 +8,7 @@ import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
 import { useModulePermission } from '@trz/hooks/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
 import { toTitleCase } from '@trz/util/textUtils';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { IconType } from 'react-icons';
 import { IoDocumentOutline } from 'react-icons/io5';
 import { MdFolder, MdOutlineViewKanban } from 'react-icons/md';
@@ -26,7 +26,6 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
     const directory = useDirectory(props.directoryId);
     const userCanViewDirectory = useModulePermission(directory, PermissibleAction.ViewDirectory);
     const userCanEditDirectory = useModulePermission(directory, PermissibleAction.EditDirectory);
-    const [directoryEdits, setDirectoryEdits] = useState<Partial<DirectoryHeader>>({});
     const contents = useDirectoryContents(props.directoryId, TrzModuleType.Directory);
 
     const archivedSubitems = useMemo(() => {
@@ -36,13 +35,12 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
         return contents.filter((item) => item.archived);
     }, [contents]);
 
-    const onSave = async (explicit?: Partial<ModuleHeader>) => {
+    const onSave = async (edits: Partial<DirectoryHeader>) => {
         try {
             if (!userCanEditDirectory) {
                 throw new Error('You do not have permission to edit this directory.');
             }
-            await updateDirectoryMetadata(sockCtx, props.directoryId, { ...directoryEdits, ...explicit, type: TrzModuleType.Directory });
-            setDirectoryEdits({});
+            await updateDirectoryMetadata(sockCtx, props.directoryId, { ...edits });
         } catch (e) {
             notify(NoteType.DOC_UPDATE_ERROR, e);
         }
@@ -89,15 +87,7 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
         <ModuleSettingsLayout
             moduleHeader={{
                 ...directory,
-                ...directoryEdits,
             }}
-            onChangeTitle={(newTitle) => {
-                setDirectoryEdits({ ...directoryEdits, name: newTitle });
-            }}
-            onChangePermissions={(newPermissions) => {
-                setDirectoryEdits({ ...directoryEdits, desiredPermissions: newPermissions });
-            }}
-            saved={Object.keys(directoryEdits).length === 0}
             onSave={onSave}
             onClose={props.onClose}
             disabled={!userCanEditDirectory}

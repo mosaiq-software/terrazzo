@@ -2,6 +2,7 @@ import { Button, Group, Text } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useUI } from '@trz/contexts/ui-context';
+import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
 import { useContextMenu } from 'mantine-contextmenu';
 import { FaChevronDown } from 'react-icons/fa';
@@ -22,12 +23,13 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     const location = useLocation();
     const { showContextMenu } = useContextMenu();
     const uiCtx = useUI();
+    const unsavedCtx = useUnsavedChanges();
     const contents = useDirectoryContents(props.visible ? props.directoryListItem.id : undefined, props.directoryListItem.type);
     const [collapsed, setCollapsed, deleteCollapsed] = useLocalStorage<boolean | undefined>({ key: `directory-tree-item-collapsed-${props.directoryListItem.id}`, defaultValue: undefined });
 
     const selected = location.pathname.includes(props.directoryListItem.id);
 
-    const handleClick = () => {
+    const handleClick = async () => {
         if (props.directoryListItem.type === TrzModuleType.Directory) {
             if (collapsed) {
                 deleteCollapsed();
@@ -36,7 +38,9 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
             }
             return;
         }
-
+        if (await unsavedCtx.confirmKeepUnsavedChanges()) {
+            return;
+        }
         const url = getModuleUrl(props.directoryListItem.type, props.directoryListItem.id);
         navigate(url);
     };

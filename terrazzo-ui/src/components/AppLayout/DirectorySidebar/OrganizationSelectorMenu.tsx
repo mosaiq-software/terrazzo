@@ -1,7 +1,10 @@
 import { Avatar, Button, Divider, Group, Menu, Text, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
+import { OrganizationId } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
+import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
+import { useCallback } from 'react';
 import { MdAdd, MdMailOutline } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 
@@ -12,6 +15,41 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
     const navigate = useNavigate();
     const orgCtx = useOrg();
     const uiCtx = useUI();
+    const unsavedCtx = useUnsavedChanges();
+
+    const handleSelectOrganization = useCallback(
+        async (orgId: OrganizationId) => {
+            if (await unsavedCtx.confirmKeepUnsavedChanges()) {
+                return;
+            }
+            orgCtx.selectAndGoToOrganization(orgId);
+        },
+        [unsavedCtx, orgCtx]
+    );
+
+    const handleSelectActiveOrganization = useCallback(async () => {
+        if (!orgCtx.active) return;
+        if (await unsavedCtx.confirmKeepUnsavedChanges()) {
+            return;
+        }
+        navigate(`/org/${orgCtx.active.id}`);
+    }, [unsavedCtx, orgCtx, navigate]);
+
+    const handleCreateOrganization = useCallback(() => {
+        modals.openContextModal({
+            modal: 'organization',
+            title: 'Create New Organization',
+            innerProps: {},
+        });
+    }, []);
+
+    const handleJoinOrganization = useCallback(() => {
+        modals.openContextModal({
+            modal: 'joinOrganization',
+            title: 'Join Organization',
+            innerProps: {},
+        });
+    }, []);
 
     return (
         <Menu
@@ -34,10 +72,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                         display={'flex'}
                         variant={'subtle'}
                         px={0}
-                        onClick={() => {
-                            if (!orgCtx.active) return;
-                            navigate(`/org/${orgCtx.active.id}`);
-                        }}
+                        onClick={handleSelectActiveOrganization}
                     >
                         {orgCtx.active && (
                             <Avatar
@@ -71,9 +106,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                             wrap="nowrap"
                             gap={8}
                             px={0}
-                            onClick={() => {
-                                orgCtx.selectAndGoToOrganization(org.id);
-                            }}
+                            onClick={() => handleSelectOrganization(org.id)}
                         >
                             <Avatar
                                 src={org.logoUrl ?? undefined}
@@ -99,15 +132,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                     </Menu.Item>
                 ))}
                 <Divider my="xs" />
-                <Menu.Item
-                    onClick={() => {
-                        modals.openContextModal({
-                            modal: 'joinOrganization',
-                            title: 'Join Organization',
-                            innerProps: {},
-                        });
-                    }}
-                >
+                <Menu.Item onClick={handleJoinOrganization}>
                     <Group
                         wrap="nowrap"
                         gap={8}
@@ -128,15 +153,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                         </Text>
                     </Group>
                 </Menu.Item>
-                <Menu.Item
-                    onClick={() => {
-                        modals.openContextModal({
-                            modal: 'organization',
-                            title: 'Create New Organization',
-                            innerProps: {},
-                        });
-                    }}
-                >
+                <Menu.Item onClick={handleCreateOrganization}>
                     <Group
                         wrap="nowrap"
                         gap={8}

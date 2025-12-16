@@ -1,5 +1,6 @@
 import { Box, Center, Group, Tabs, Text, Title } from '@mantine/core';
 import { Role } from '@mosaiq/terrazzo-common';
+import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useState } from 'react';
 import { MdCircle } from 'react-icons/md';
 
@@ -11,7 +12,15 @@ interface RoleTabProps {
     disableRolesOnAndBelowIndex?: number;
 }
 export const RoleTabs = (props: RoleTabProps) => {
-    const [activeTab, setActiveTab] = useState<string | null>('no-role-selected');
+    const [activeTab, _setActiveTab] = useState<string | null>('no-role-selected');
+    const unsavedCtx = useUnsavedChanges();
+
+    const setActiveTab = async (newTab: string | null) => {
+        if (newTab === activeTab || (await unsavedCtx.confirmKeepUnsavedChanges())) {
+            return;
+        }
+        _setActiveTab(newTab);
+    };
 
     return (
         <Box

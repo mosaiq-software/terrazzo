@@ -1,11 +1,11 @@
 import { Fieldset, Loader, TextInput } from '@mantine/core';
-import { BoardHeader, BoardId, ModuleHeader, PermissibleAction, TrzModuleType } from '@mosaiq/terrazzo-common';
+import { BoardHeader, BoardId, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateBoardField } from '@trz/emitters';
 import { useBoard } from '@trz/hooks/useBoard';
 import { useModulePermission } from '@trz/hooks/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NotFound } from '../UI/NotFound';
 import { LabelEditor } from './LabelEditor';
 import { ModuleSettingsLayout } from './ModuleSettingsLayout';
@@ -20,15 +20,19 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
     const { boardData, boardLabels } = useBoard(props.boardId);
     const userCanViewBoard = useModulePermission(boardData, PermissibleAction.ViewBoard);
     const userCanEditBoard = useModulePermission(boardData, PermissibleAction.EditBoard);
-    const [boardEdits, setBoardEdits] = useState<Partial<BoardHeader>>({});
+    const [editedBoardCode, setEditedBoardCode] = useState<string>('');
+    useEffect(() => {
+        if (boardData?.boardCode) {
+            setEditedBoardCode(boardData.boardCode);
+        }
+    }, [boardData?.boardCode]);
 
-    const onSave = async (explicit?: Partial<ModuleHeader>) => {
+    const onSave = async (edits: Partial<BoardHeader>) => {
         try {
             if (!userCanEditBoard) {
                 throw new Error('You do not have permission to edit this board.');
             }
-            await updateBoardField(sockCtx, props.boardId, { ...boardEdits, ...explicit, type: TrzModuleType.Board });
-            setBoardEdits({});
+            await updateBoardField(sockCtx, props.boardId, { ...edits });
         } catch (e) {
             notify(NoteType.BOARD_DATA_ERROR, e);
         }
@@ -51,15 +55,7 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
         <ModuleSettingsLayout
             moduleHeader={{
                 ...boardData,
-                ...boardEdits,
             }}
-            onChangeTitle={(newTitle) => {
-                setBoardEdits({ ...boardEdits, name: newTitle });
-            }}
-            onChangePermissions={(newPermissions) => {
-                setBoardEdits({ ...boardEdits, desiredPermissions: newPermissions });
-            }}
-            saved={Object.keys(boardEdits).length === 0}
             onSave={onSave}
             onClose={props.onClose}
             disabled={!userCanEditBoard}
@@ -71,9 +67,14 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
                 }}
                 label="Board Code"
                 placeholder="#"
-                value={boardEdits.boardCode ?? boardData.boardCode ?? ''}
+                value={editedBoardCode}
                 onChange={(e) => {
-                    setBoardEdits({ ...boardEdits, boardCode: e.target.value });
+                    setEditedBoardCode(e.currentTarget.value);
+                }}
+                onBlur={() => {
+                    if (editedBoardCode !== boardData.boardCode) {
+                        onSave({ boardCode: editedBoardCode });
+                    }
                 }}
                 disabled={!userCanEditBoard}
             />

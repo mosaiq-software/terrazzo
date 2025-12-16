@@ -12,12 +12,13 @@ import { ContextMenuProvider } from 'mantine-contextmenu';
 import 'mantine-contextmenu/styles.layer.css';
 import { BrowserRouter } from 'react-router-dom';
 import { JoinOrganizationModal } from './components/Modals/JoinOrganization';
+import { TransferOrganizationModal } from './components/Modals/TransferOrganization';
 import { ModuleSettingsModal } from './components/ModuleSettings/ModuleSettingsModal';
 import { OrgProvider } from './contexts/org-context';
 import { PermissionProvider } from './contexts/permission-context';
 import { UiProvider } from './contexts/ui-context';
+import { UnsavedChangesProvider } from './contexts/unsaved-changes-context';
 import Router from './router';
-import { TransferOrganizationModal } from './components/Modals/TransferOrganization';
 
 const theme = createTheme({});
 
@@ -42,11 +43,13 @@ const App = () => {
                         <UiProvider>
                             <OrgProvider>
                                 <PermissionProvider>
-                                    <ModalsProvider modals={modals}>
-                                        <ContextMenuProvider>
-                                            <Router />
-                                        </ContextMenuProvider>
-                                    </ModalsProvider>
+                                    <UnsavedChangesProvider>
+                                        <ModalsProvider modals={modals}>
+                                            <ContextMenuProvider>
+                                                <Router />
+                                            </ContextMenuProvider>
+                                        </ModalsProvider>
+                                    </UnsavedChangesProvider>
                                 </PermissionProvider>
                             </OrgProvider>
                         </UiProvider>
