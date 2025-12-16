@@ -16,7 +16,7 @@ export const RoleTabs = (props: RoleTabProps) => {
     const unsavedCtx = useUnsavedChanges();
 
     const setActiveTab = async (newTab: string | null) => {
-        if (await unsavedCtx.confirmKeepUnsavedChanges()) {
+        if (newTab === activeTab || (await unsavedCtx.confirmKeepUnsavedChanges())) {
             return;
         }
         _setActiveTab(newTab);

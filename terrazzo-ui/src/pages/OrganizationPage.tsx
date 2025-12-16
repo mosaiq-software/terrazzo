@@ -50,10 +50,10 @@ const OrganizationPage = (): React.JSX.Element => {
     }
 
     const onChangeTab = async (tab: string | null) => {
-        if (await unsavedCtx.confirmKeepUnsavedChanges()) {
+        if (tab === 'Organization') tab = '';
+        if (tab === tabId || (await unsavedCtx.confirmKeepUnsavedChanges())) {
             return;
         }
-        if (tab === 'Organization') tab = '';
         navigate(`/org/${orgId}/${tab}`);
     };
     const getTab = () => {
