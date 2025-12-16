@@ -1,6 +1,6 @@
 import { Button, ColorInput, Divider, Group, Stack, Title } from '@mantine/core';
 import { PermissionFlagData, Role, RoleId, withPermissionFlag } from '@mosaiq/terrazzo-common';
-import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
+import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useCallback, useEffect, useState } from 'react';
 import { MdOutlineDelete } from 'react-icons/md';
 import EditableTextbox from '../UI/EditableTextbox';
@@ -32,7 +32,7 @@ export const RoleEditor = (props: RoleEditorProps) => {
             ...prev,
             [field]: value,
         }));
-        unsavedCtx.markChangesUnsaved();
+        unsavedCtx.markChangesUnsaved(Savable.RoleSettings);
     }, []);
 
     return (
