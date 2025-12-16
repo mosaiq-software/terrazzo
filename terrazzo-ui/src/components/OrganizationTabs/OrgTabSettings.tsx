@@ -2,12 +2,13 @@ import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title }
 import { modals } from '@mantine/modals';
 import { MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
+import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
 import { removeUserFromOrg, updateOrgField } from '@trz/emitters';
 import { useOrgPermission } from '@trz/hooks/usePermissions';
 import { COLOR_UNSET } from '@trz/util/colorUtils';
 import { NoteType, notify } from '@trz/util/notifications';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RectHoldingButton } from '../UI/RectHoldingButton';
 
@@ -20,10 +21,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
     const userCanAdmin = useOrgPermission(props.orgData.id, PermissibleAction.AdministerOrg);
     const sockCtx = useSocket();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        if (props.orgData) setEditedSettings(props.orgData);
-    }, [props.orgData]);
+    const unsavedCtx = useUnsavedChanges();
 
     const iAmOwner = useMemo(() => {
         return props.myMembershipRecord.userId === props.orgData.ownerId;
@@ -36,6 +34,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
             }
             await removeUserFromOrg(sockCtx, props.myMembershipRecord.userId, props.orgData.id);
             notify(NoteType.LEFT_ENTITY, [props.orgData.name]);
+            unsavedCtx.markChangesSaved(Savable.OrgSettings);
             navigate(DEFAULT_AUTHED_ROUTE);
         } catch (e) {
             notify(NoteType.ORG_DATA_ERROR, e);
@@ -49,10 +48,26 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
             }
             await updateOrgField(sockCtx, props.orgData.id, editedSettings);
             notify(NoteType.CHANGES_SAVED);
+            unsavedCtx.markChangesSaved(Savable.OrgSettings);
+            setEditedSettings({});
         } catch (e) {
             notify(NoteType.ORG_DATA_ERROR, e);
         }
     }, [sockCtx, props.orgData, editedSettings, userCanAdmin]);
+
+    const change = useCallback(
+        <K extends keyof OrganizationHeader>(field: K, value: OrganizationHeader[K]) => {
+            const updatedSettings = { ...editedSettings, [field]: value };
+            setEditedSettings(updatedSettings);
+            unsavedCtx.setSavedState(Savable.OrgSettings, JSON.stringify(updatedSettings) === JSON.stringify(props.orgData));
+        },
+        [editedSettings, props.orgData, unsavedCtx]
+    );
+
+    const resetChanges = useCallback(() => {
+        setEditedSettings({});
+        unsavedCtx.markChangesSaved(Savable.OrgSettings);
+    }, [props.orgData, unsavedCtx]);
 
     return (
         <Box
@@ -91,9 +106,9 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         }}
                         label="Organization Name"
                         placeholder="My Organization"
-                        value={editedSettings.name ?? ''}
+                        value={editedSettings.name ?? props.orgData.name}
                         onChange={(e) => {
-                            setEditedSettings({ ...editedSettings, name: e.target.value });
+                            change('name', e.target.value);
                         }}
                         disabled={!userCanAdmin}
                     />
@@ -103,9 +118,9 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         }}
                         label="Organization Description"
                         placeholder="Write some info about your organization"
-                        value={editedSettings.description ?? ''}
+                        value={editedSettings.description ?? props.orgData.description}
                         onChange={(e) => {
-                            setEditedSettings({ ...editedSettings, description: e.target.value });
+                            change('description', e.target.value);
                         }}
                         disabled={!userCanAdmin}
                     />
@@ -115,18 +130,16 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         }}
                         label="Organization Logo URL"
                         placeholder="https://mosaiq.dev/logo.png"
-                        value={editedSettings.logoUrl ?? ''}
+                        value={editedSettings.logoUrl ?? props.orgData.logoUrl}
                         onChange={(e) => {
-                            setEditedSettings({ ...editedSettings, logoUrl: e.target.value });
+                            change('logoUrl', e.target.value);
                         }}
                         disabled={!userCanAdmin}
                     />
                     <Group>
                         <Button
                             variant="outline"
-                            onClick={() => {
-                                setEditedSettings(props.orgData ?? {});
-                            }}
+                            onClick={resetChanges}
                             disabled={!userCanAdmin}
                         >
                             Cancel
@@ -134,7 +147,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         <Button
                             variant="filled"
                             onClick={handleSaveChanges}
-                            disabled={!userCanAdmin}
+                            disabled={!userCanAdmin || Object.keys(editedSettings).length === 0}
                         >
                             Save
                         </Button>
