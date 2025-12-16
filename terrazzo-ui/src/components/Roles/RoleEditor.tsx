@@ -17,7 +17,12 @@ export const RoleEditor = (props: RoleEditorProps) => {
     const [editingRole, setEditingRole] = useState<Role>(props.role);
     const unsavedCtx = useUnsavedChanges();
 
-    const changed = editingRole.name !== props.role.name || editingRole.color !== props.role.color || editingRole.defaultPermissions.sort().join() !== props.role.defaultPermissions.sort().join();
+    const isChanged = useCallback(
+        (edited: Role) => {
+            return edited.name !== props.role.name || edited.color !== props.role.color || edited.defaultPermissions.sort().join() !== props.role.defaultPermissions.sort().join();
+        },
+        [props.role]
+    );
 
     useEffect(() => {
         setEditingRole(props.role);
@@ -27,13 +32,14 @@ export const RoleEditor = (props: RoleEditorProps) => {
         props.onSave(editingRole);
     }, [editingRole, props]);
 
-    const change = useCallback(<K extends keyof Role>(field: K, value: Role[K]) => {
-        setEditingRole((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
-        unsavedCtx.markChangesUnsaved(Savable.RoleSettings);
-    }, []);
+    const change = useCallback(
+        <K extends keyof Role>(field: K, value: Role[K]) => {
+            const updatedRole = { ...editingRole, [field]: value };
+            setEditingRole(updatedRole);
+            unsavedCtx.setSavedState(Savable.RoleSettings, !isChanged(updatedRole));
+        },
+        [editingRole, isChanged, unsavedCtx]
+    );
 
     return (
         <Stack
@@ -67,7 +73,7 @@ export const RoleEditor = (props: RoleEditorProps) => {
                     />
                 </Stack>
                 <Button
-                    disabled={!changed}
+                    disabled={!isChanged(editingRole)}
                     onClick={handleSave}
                     w="fit-content"
                 >

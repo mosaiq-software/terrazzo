@@ -100,6 +100,7 @@ const OrganizationPage = (): React.JSX.Element => {
                             onChange={onChangeTab}
                             color="#F2187E"
                             variant="default"
+                            keepMounted={false}
                         >
                             <Tabs.List>
                                 {['Organization', 'Members', ...withIf('Roles', userCanEditRoles), 'Settings'].map((t) => {

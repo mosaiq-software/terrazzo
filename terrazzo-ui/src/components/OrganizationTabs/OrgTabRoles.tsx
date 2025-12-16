@@ -2,7 +2,7 @@ import { Box, Button, Text } from '@mantine/core';
 import { MembershipRecord, OrganizationHeader, Role, RoleId } from '@mosaiq/terrazzo-common';
 import { usePermission } from '@trz/contexts/permission-context';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
+import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { createRoleOnOrg, deleteRole, updateRole } from '@trz/emitters/roleEmitters';
 import { generateRandomColor } from '@trz/util/colorUtils';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -39,7 +39,7 @@ export const OrgTabRoles = (props: OrgTabRolesProps) => {
             try {
                 await updateRole(sockCtx, updatedRole);
                 notify(NoteType.CHANGES_SAVED, 'Role updated successfully');
-                unsavedCtx.markChangesSaved();
+                unsavedCtx.markChangesSaved(Savable.RoleSettings);
             } catch (error) {
                 notify(NoteType.GENERIC_ERROR, 'Failed to save role changes');
             }
@@ -52,7 +52,7 @@ export const OrgTabRoles = (props: OrgTabRolesProps) => {
             try {
                 await deleteRole(sockCtx, roleId);
                 notify(NoteType.CHANGES_SAVED, 'Role deleted successfully');
-                unsavedCtx.markChangesSaved();
+                unsavedCtx.markChangesSaved(Savable.RoleSettings);
             } catch (error) {
                 notify(NoteType.GENERIC_ERROR, 'Failed to delete role');
             }
