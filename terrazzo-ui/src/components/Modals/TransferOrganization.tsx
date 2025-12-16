@@ -103,7 +103,7 @@ const TransferOrganization = (props: ContextModalProps<{}>): React.JSX.Element =
                 <RectHoldingButton
                     onClick={onSubmit}
                     durationMs={2000}
-                    tooltip="This action cannot be undone. Hold to confirm."
+                    tooltip={toUserId ? 'This action cannot be undone. Hold to confirm.' : 'Select a user to transfer the organization to.'}
                     width={250}
                     borderColor="red"
                     disabled={!toUserId}
