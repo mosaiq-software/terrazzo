@@ -59,7 +59,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
         <K extends keyof OrganizationHeader>(field: K, value: OrganizationHeader[K]) => {
             const updatedSettings = { ...editedSettings, [field]: value };
             setEditedSettings(updatedSettings);
-            unsavedCtx.setSavedState(Savable.OrgSettings, JSON.stringify(updatedSettings) === JSON.stringify(props.orgData));
+            unsavedCtx.setSavedState(Savable.OrgSettings, Object.keys(updatedSettings).length === 0);
         },
         [editedSettings, props.orgData, unsavedCtx]
     );
@@ -67,7 +67,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
     const resetChanges = useCallback(() => {
         setEditedSettings({});
         unsavedCtx.markChangesSaved(Savable.OrgSettings);
-    }, [props.orgData, unsavedCtx]);
+    }, [unsavedCtx]);
 
     return (
         <Box

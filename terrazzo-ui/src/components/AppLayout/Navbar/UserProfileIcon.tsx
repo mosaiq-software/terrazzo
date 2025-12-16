@@ -15,14 +15,14 @@ export const UserProfileIcon = () => {
             return;
         }
         usr.logoutAll();
-    }, [usr]);
+    }, [usr, unsavedCtx]);
 
     const handleNavigateToSettings = useCallback(async () => {
         if (await unsavedCtx.confirmKeepUnsavedChanges()) {
             return;
         }
         navigate('/settings');
-    }, [navigate]);
+    }, [navigate, unsavedCtx]);
 
     return (
         <Menu
