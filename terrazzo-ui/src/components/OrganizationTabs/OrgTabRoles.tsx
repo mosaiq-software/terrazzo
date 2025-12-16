@@ -2,10 +2,11 @@ import { Box, Button, Text } from '@mantine/core';
 import { MembershipRecord, OrganizationHeader, Role, RoleId } from '@mosaiq/terrazzo-common';
 import { usePermission } from '@trz/contexts/permission-context';
 import { useSocket } from '@trz/contexts/socket-context';
+import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { createRoleOnOrg, deleteRole, updateRole } from '@trz/emitters/roleEmitters';
 import { generateRandomColor } from '@trz/util/colorUtils';
 import { NoteType, notify } from '@trz/util/notifications';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { MdAdd } from 'react-icons/md';
 import { RoleEditor } from '../Roles/RoleEditor';
 import { RoleTabs } from '../Roles/RoleTabs';
@@ -18,7 +19,7 @@ interface OrgTabRolesProps {
 export const OrgTabRoles = (props: OrgTabRolesProps) => {
     const sockCtx = useSocket();
     const { maxRole, userIsActiveOrgOwner } = usePermission();
-    const [activeTab, setActiveTab] = useState<string | null>('no-role-selected');
+    const unsavedCtx = useUnsavedChanges();
 
     const createNewRole = useCallback(async () => {
         try {
@@ -28,7 +29,6 @@ export const OrgTabRoles = (props: OrgTabRolesProps) => {
                 throw new Error('Role creation failed');
             }
             notify(NoteType.CHANGES_SAVED, 'Role created successfully');
-            setActiveTab(newRole.id);
         } catch (error) {
             notify(NoteType.GENERIC_ERROR, 'Failed to create role');
         }
@@ -39,6 +39,7 @@ export const OrgTabRoles = (props: OrgTabRolesProps) => {
             try {
                 await updateRole(sockCtx, updatedRole);
                 notify(NoteType.CHANGES_SAVED, 'Role updated successfully');
+                unsavedCtx.markChangesSaved();
             } catch (error) {
                 notify(NoteType.GENERIC_ERROR, 'Failed to save role changes');
             }
@@ -51,7 +52,7 @@ export const OrgTabRoles = (props: OrgTabRolesProps) => {
             try {
                 await deleteRole(sockCtx, roleId);
                 notify(NoteType.CHANGES_SAVED, 'Role deleted successfully');
-                setActiveTab('no-role-selected');
+                unsavedCtx.markChangesSaved();
             } catch (error) {
                 notify(NoteType.GENERIC_ERROR, 'Failed to delete role');
             }

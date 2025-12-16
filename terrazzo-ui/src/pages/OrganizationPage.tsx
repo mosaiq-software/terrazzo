@@ -8,6 +8,7 @@ import { AvatarRow } from '@trz/components/UI/AvatarRow';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
+import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useUser } from '@trz/contexts/user-context';
 import { useOrgPermission } from '@trz/hooks/usePermissions';
 import { setTitle } from '@trz/util/tabUtils';
@@ -22,6 +23,7 @@ const OrganizationPage = (): React.JSX.Element => {
     const orgId = params.orgId as OrganizationId | undefined;
     const tabId = params.tabId;
     const orgCtx = useOrg();
+    const unsavedCtx = useUnsavedChanges();
     const userCanEditRoles = useOrgPermission(orgId, PermissibleAction.EditRoles);
     setTitle(`${orgCtx.active?.name ?? 'Organization'} | Terrazzo`);
 
@@ -47,7 +49,10 @@ const OrganizationPage = (): React.JSX.Element => {
         );
     }
 
-    const onChangeTab = (tab: string | null) => {
+    const onChangeTab = async (tab: string | null) => {
+        if (!(await unsavedCtx.confirmDiscardUnsavedChanges())) {
+            return;
+        }
         if (tab === 'Organization') tab = '';
         navigate(`/org/${orgId}/${tab}`);
     };

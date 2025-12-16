@@ -1,5 +1,6 @@
 import { Button, ColorInput, Divider, Group, Stack, Title } from '@mantine/core';
 import { PermissionFlagData, Role, RoleId, withPermissionFlag } from '@mosaiq/terrazzo-common';
+import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useCallback, useEffect, useState } from 'react';
 import { MdOutlineDelete } from 'react-icons/md';
 import EditableTextbox from '../UI/EditableTextbox';
@@ -14,6 +15,7 @@ interface RoleEditorProps {
 }
 export const RoleEditor = (props: RoleEditorProps) => {
     const [editingRole, setEditingRole] = useState<Role>(props.role);
+    const unsavedCtx = useUnsavedChanges();
 
     const changed = editingRole.name !== props.role.name || editingRole.color !== props.role.color || editingRole.defaultPermissions.sort().join() !== props.role.defaultPermissions.sort().join();
 
@@ -30,6 +32,7 @@ export const RoleEditor = (props: RoleEditorProps) => {
             ...prev,
             [field]: value,
         }));
+        unsavedCtx.markChangesUnsaved();
     }, []);
 
     return (
