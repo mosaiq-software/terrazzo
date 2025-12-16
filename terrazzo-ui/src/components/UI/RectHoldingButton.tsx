@@ -18,6 +18,7 @@ interface RectHoldingButtonProps {
     backgroundColor?: string;
     style?: Omit<React.CSSProperties, 'width' | 'height' | 'borderRadius' | 'borderWidth'>;
     tooltip?: string;
+    tooltipDelay?: number;
     disabled?: boolean;
     leftSection?: React.ReactNode;
     rightSection?: React.ReactNode;
@@ -111,6 +112,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
             label={props.tooltip}
             withArrow
             disabled={!props.tooltip}
+            openDelay={props.tooltipDelay || 200}
         >
             <UnstyledButton
                 onMouseUp={release}

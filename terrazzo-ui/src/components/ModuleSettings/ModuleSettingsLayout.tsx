@@ -1,6 +1,5 @@
 import { Alert, Button, Group, Stack, Text, TextInput } from '@mantine/core';
 import { ModuleHeader } from '@mosaiq/terrazzo-common';
-import { COLOR_UNSET } from '@trz/util/colorUtils';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useEffect, useState } from 'react';
 import { RectHoldingButton } from '../UI/RectHoldingButton';
@@ -69,40 +68,23 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                 }}
                 disabled={props.disabled}
             />
+
             <Group
-                bg={COLOR_UNSET}
-                style={{
-                    position: 'sticky',
-                    bottom: '0',
-                    marginInline: '1rem',
-                    padding: '1rem',
-                    zIndex: 10,
-                    boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.3)',
-                    borderRadius: '4px',
-                }}
-                justify="space-between"
+                w="100%"
+                pt="xl"
             >
-                <Group>
-                    <Button
-                        variant="outline"
-                        onClick={props.onClose}
-                    >
-                        Close
-                    </Button>
-                </Group>
-                <Group>
-                    <RectHoldingButton
-                        durationMs={3000}
-                        onClick={() => {
-                            props.onSave({ archived: true });
-                        }}
-                        borderColor="red"
-                        variant="outline"
-                        disabled={props.disabled}
-                    >
-                        Hold to Archive
-                    </RectHoldingButton>
-                </Group>
+                <RectHoldingButton
+                    durationMs={3000}
+                    onClick={() => {
+                        props.onSave({ archived: true });
+                    }}
+                    borderColor="red"
+                    variant="outline"
+                    disabled={props.disabled}
+                    tooltip={`Archived ${props.moduleHeader.type}s can be restored at any time`}
+                >
+                    Hold to Archive
+                </RectHoldingButton>
             </Group>
         </Stack>
     );
