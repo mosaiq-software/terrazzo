@@ -1,11 +1,17 @@
-import { Button, Group, Modal, Stack, Title } from '@mantine/core';
+import { Button, Group, Modal, Stack, Text, Title } from '@mantine/core';
 import React, { createContext, useContext, useState } from 'react';
 
 export type UnsavedChangesContextType = {
+    /** Does the user have any piece of unsaved data */
     unsavedChanges: boolean;
+    /** Marks all changes as saved */
     markChangesSaved: () => void;
+    /** Marks all changes as unsaved */
     markChangesUnsaved: () => void;
+    /** Prompts the user to confirm discarding unsaved changes. Returns true if the user confirms discarding changes, false otherwise. */
     confirmDiscardUnsavedChanges: () => Promise<boolean>;
+    /** Prompts the user to confirm discarding unsaved changes. Returns false if the user confirms discarding changes, true otherwise. */
+    confirmKeepUnsavedChanges: () => Promise<boolean>;
 };
 
 const UnsavedChangesContext = createContext<UnsavedChangesContextType | undefined>(undefined);
@@ -23,6 +29,11 @@ const UnsavedChangesProvider: React.FC<any> = ({ children }) => {
             });
         }
         return true;
+    };
+
+    const confirmKeepUnsavedChanges = async () => {
+        const discard = await confirmDiscardUnsavedChanges();
+        return !discard;
     };
 
     const handleCloseModal = (discardChanges: boolean) => {
@@ -43,16 +54,17 @@ const UnsavedChangesProvider: React.FC<any> = ({ children }) => {
                 markChangesSaved: () => setUnsavedChanges(false),
                 markChangesUnsaved: () => setUnsavedChanges(true),
                 confirmDiscardUnsavedChanges,
+                confirmKeepUnsavedChanges,
             }}
         >
             <Modal
                 opened={modalOpened}
                 onClose={() => setUnsavedChanges(false)}
-                title="You have unsaved changes"
+                title={<Title order={4}>Unsaved Changes</Title>}
                 centered
             >
                 <Stack>
-                    <Title order={4}> You have unsaved changes. </Title>
+                    <Text>Are you sure you want to discard your unsaved changes?</Text>
                     <Group>
                         <Button
                             variant="outline"
