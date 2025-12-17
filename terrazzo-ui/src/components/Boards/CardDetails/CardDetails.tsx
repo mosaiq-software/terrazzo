@@ -3,6 +3,7 @@ import { useClipboard, useIdle } from '@mantine/hooks';
 import { CardId, fullName } from '@mosaiq/terrazzo-common';
 import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/CollaborativeTextArea';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
+import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUser } from '@trz/contexts/user-context';
 import { updateCardAssignee, updateCardField } from '@trz/emitters';
@@ -35,6 +36,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
     const card = useCard(props.cardId, false, true);
     useCatchSaveKey();
     const boardMeta = useBoardMetadata();
+    const perms = boardMeta?.permissions;
 
     const onCloseModal = () => {
         props.onClose();
@@ -80,6 +82,15 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                     <Text ta="center">Loading...</Text>
                 </Stack>
             </Center>
+        );
+    }
+
+    if (!perms.viewBoard) {
+        return (
+            <NotFound
+                itemType="card"
+                error={PageErrors.UNAUTHORIZED}
+            />
         );
     }
 
@@ -149,7 +160,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                         style={{
                                             width: '95%',
                                         }}
-                                        viewOnly={boardMeta?.viewOnly}
+                                        readonly={!perms.editCard}
                                     />
                                     <Tooltip label="Copy card ID">
                                         <Button
@@ -194,18 +205,18 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                         <Group>
                             <PriorityButtons
                                 card={card}
-                                viewOnly={boardMeta?.viewOnly}
+                                viewOnly={!perms.editCard}
                             />
                             <LabelsMenu
                                 card={card}
                                 boardLabels={boardMeta.labels}
-                                viewOnly={boardMeta?.viewOnly}
+                                viewOnly={!perms.editCard}
                             />
                             <AssigneeMenu
                                 card={card}
-                                viewOnly={boardMeta?.viewOnly}
+                                viewOnly={!perms.editCard}
                             />
-                            {!boardMeta?.viewOnly && (
+                            {perms.editCard && (
                                 <Tooltip label={`${joinedCard ? 'Leave' : 'Join'} Card`}>
                                     <ActionIcon
                                         variant="subtle"
@@ -228,7 +239,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             idle={idle}
                             name={fullName(usr.userData)}
                             avatarUrl={usr.userData?.profilePicture}
-                            viewOnly={boardMeta?.viewOnly}
+                            viewOnly={!perms.editCard}
                         />
                         <Stack
                             style={{
@@ -239,7 +250,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             <Text>
                                 Created at {new Date(card.createdAt).toLocaleString()} by {fullName(card.createdBy)}
                             </Text>
-                            {!boardMeta?.viewOnly && (
+                            {perms.editCard && (
                                 <Tooltip label="Archived cards can be restored later">
                                     <Button
                                         variant="subtle"

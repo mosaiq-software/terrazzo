@@ -98,7 +98,7 @@ const DocumentPage = (props: DocumentPageProps): React.JSX.Element => {
                                 style={{
                                     width: '95%',
                                 }}
-                                viewOnly={props.viewOnly}
+                                readonly={props.viewOnly}
                             />
                         </Group>
 

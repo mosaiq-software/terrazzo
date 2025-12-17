@@ -2,7 +2,7 @@ import { closestCenter, CollisionDetection, DndContext, DragEndEvent, DragOverla
 import { DragAbortEvent, DragCancelEvent, DragOverEvent } from '@dnd-kit/core/dist/types';
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Container, Group, Text } from '@mantine/core';
-import { arrayMoveInPlace, BoardId, BoardRes, CardId, Label, ListId, RoomType, ServerSE, UID, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
+import { arrayMoveInPlace, BoardId, BoardRes, CardId, Label, ListId, PermissibleAction, RoomType, ServerSE, UID, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import CardDetails from '@trz/components/Boards/CardDetails/CardDetails';
 import CreateList from '@trz/components/Boards/CreateList';
 import SortableList from '@trz/components/DragAndDrop/SortableList';
@@ -11,6 +11,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { createList, emitMoveCard, emitMoveList, getBoardData, getCardData, getListData } from '@trz/emitters';
 import { useMap } from '@trz/hooks/useMap';
+import { useModulePermission } from '@trz/hooks/usePermissions';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { CARD_CACHE_PREFIX, getBoardNameWithCode, LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
@@ -30,7 +31,13 @@ export const BoardContext = createContext<BoardContextType | undefined>(undefine
 interface BoardMetadataContextType {
     labels: Label[];
     id: BoardId;
-    viewOnly: boolean;
+    permissions: {
+        viewBoard: boolean;
+        editBoard: boolean;
+        moveCards: boolean;
+        editCard: boolean;
+        createCard: boolean;
+    };
 }
 const BoardMetadataContext = createContext<BoardMetadataContextType | undefined>(undefined);
 export const useBoardMetadata = () => {
@@ -59,6 +66,11 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
     const [cardToListMap, setCardMap] = useMap<CardId, ListId>();
     const listKeys = Array.from(listToCardsMap.keys());
     useRoom(RoomType.DATA, boardId);
+    const userCanViewBoard = useModulePermission(boardData, PermissibleAction.ViewBoard) || props.viewOnly;
+    const userCanEditBoard = useModulePermission(boardData, PermissibleAction.EditBoard);
+    const userCanMoveCards = useModulePermission(boardData, PermissibleAction.MoveCards);
+    const userCanEditCard = useModulePermission(boardData, PermissibleAction.EditCard);
+    const userCanCreateCard = useModulePermission(boardData, PermissibleAction.CreateCard);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -478,6 +490,15 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
         );
     }
 
+    if (!userCanViewBoard) {
+        return (
+            <NotFound
+                itemType="board"
+                error={PageErrors.FORBIDDEN}
+            />
+        );
+    }
+
     const onRender: React.ProfilerOnRenderCallback = (id, phase, actualDuration, baseDuration, startTime, commitTime) => {
         // console.log("Rendered", id, "in", phase, "for", actualDuration+"ms", "from", startTime+"ms", "to", commitTime+"ms");
     };
@@ -527,7 +548,13 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
                     value={{
                         labels: boardData.labels,
                         id: boardData.id,
-                        viewOnly: !!props.viewOnly,
+                        permissions: {
+                            viewBoard: userCanViewBoard,
+                            editBoard: userCanEditBoard && !props.viewOnly,
+                            moveCards: userCanMoveCards && !props.viewOnly,
+                            editCard: userCanEditCard && !props.viewOnly,
+                            createCard: userCanCreateCard && !props.viewOnly,
+                        },
                     }}
                 >
                     <DndContext
@@ -552,14 +579,14 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
                             <SortableContext
                                 items={listKeys}
                                 strategy={horizontalListSortingStrategy}
-                                disabled={props.viewOnly}
+                                disabled={props.viewOnly || !userCanEditBoard}
                             >
                                 {memoizedSortableLists}
                             </SortableContext>
                             {createPortal(<DragOverlay dropAnimation={boardDropAnimation}>{activeObject ? (listToCardsMap.has(activeObject) ? renderListDragOverlay(activeObject, boardData.boardCode ?? '#') : renderCardDragOverlay(activeObject, boardData.boardCode ?? '#')) : null}</DragOverlay>, document.body)}
                         </BoardContext.Provider>
                     </DndContext>
-                    {!props.viewOnly && (
+                    {!props.viewOnly && userCanEditBoard && (
                         <CreateList
                             onCreateList={async (title) => {
                                 try {

@@ -33,6 +33,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
     const clickOutsideRef = useClickOutside(() => onBlur());
     const sockCtx = useSocket();
     const boardMeta = useBoardMetadata();
+    const { editBoard, moveCards, createCard: canCreateCard } = boardMeta.permissions;
 
     useEffect(() => {
         const fetchListData = async () => {
@@ -167,7 +168,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                 px="sm"
                 w="100%"
                 style={{
-                    cursor: boardMeta?.viewOnly ? 'default' : 'pointer',
+                    cursor: editBoard ? 'pointer' : 'default',
                     height: '3rem',
                 }}
             >
@@ -180,10 +181,10 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                     style={{
                         width: '90%',
                     }}
-                    viewOnly={!!boardMeta?.viewOnly}
+                    readonly={!editBoard}
                 />
 
-                {!boardMeta?.viewOnly && (
+                {editBoard && (
                     <Menu
                         shadow="md"
                         width={200}
@@ -228,7 +229,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
             >
                 <ListCardStack
                     {...props}
-                    viewOnly={!!boardMeta?.viewOnly}
+                    canMoveCards={moveCards}
                 />
             </Stack>
 
@@ -272,7 +273,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                 )}
             </Group>
 
-            {!cardNameInputVisible && !boardMeta.viewOnly && (
+            {!cardNameInputVisible && canCreateCard && (
                 <Button
                     w="100%"
                     variant="light"
@@ -298,7 +299,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
 export default ListElement;
 
 interface ListCardStackProps extends ListElementProps {
-    viewOnly: boolean;
+    canMoveCards: boolean;
 }
 const ListCardStack = (props: ListCardStackProps) => {
     const boardContext = useContext(BoardContext);
@@ -307,7 +308,7 @@ const ListCardStack = (props: ListCardStackProps) => {
         <SortableContext
             items={cardIds}
             strategy={verticalListSortingStrategy}
-            disabled={props.viewOnly}
+            disabled={!props.canMoveCards}
         >
             {cardIds.map((cardId) => {
                 return (

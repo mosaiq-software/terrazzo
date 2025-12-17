@@ -13,10 +13,10 @@ interface EditableTextboxProps {
     inputProps?: InputProps;
     style?: CSSProperties;
     showEditIcon?: boolean;
-    viewOnly?: boolean;
+    readonly?: boolean;
 }
 const EditableTextbox = (props: EditableTextboxProps) => {
-    const { value, onChange, placeholder, type, titleProps, textProps, inputProps, style, viewOnly } = props;
+    const { value, onChange, placeholder, type, titleProps, textProps, inputProps, style, readonly: viewOnly } = props;
     const [editingValue, setEditingValue] = React.useState<string | null>(null);
 
     const onSaveChanges = () => {

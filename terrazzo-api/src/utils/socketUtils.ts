@@ -64,7 +64,7 @@ export interface BroadcasterOptions<T extends ServerSE> {
      * Function to build the payload for each user based on their user data
      * @throws Error if payload cannot be built for a user. This user will be skipped.
      */
-    buildPayload: (userId: UserId) => Promise<ServerSEPayload[T]> | ServerSEPayload[T];
+    buildPayload: (userId: UserId | undefined) => Promise<ServerSEPayload[T]> | ServerSEPayload[T];
 }
 /**
  * Sends an event to each user who is in at least one of the specified rooms.
@@ -86,19 +86,17 @@ export const broadcast = async <T extends ServerSE>(options: BroadcasterOptions<
     const payloads = new Map<SocketId, ServerSEPayload[T]>();
     for (const s of allSockets) {
         const socketData = getSocketData(s);
-        if (socketData?.user) {
-            try {
-                const payload = await buildPayload(socketData.user.user.id);
-                payloads.set(s.id, payload);
-            } catch (e: any) {
-                console.warn(`Skipping socket in broadcast`, {
-                    socketId: s.id,
-                    userId: socketData.user.user.id,
-                    event,
-                    error: e.message,
-                    stack: e.stack,
-                });
-            }
+        try {
+            const payload = await buildPayload(socketData.user?.user.id);
+            payloads.set(s.id, payload);
+        } catch (e: any) {
+            console.warn(`Skipping socket in broadcast`, {
+                socketId: s.id,
+                userId: socketData.user?.user.id,
+                event,
+                error: e.message,
+                stack: e.stack,
+            });
         }
     }
 

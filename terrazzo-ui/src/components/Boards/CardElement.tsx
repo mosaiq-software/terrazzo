@@ -23,6 +23,7 @@ const CardElement = (props: CardElementProps) => {
     const card = useCard(props.cardId, props.dragging || props.isOverlay, inViewport);
     const { showContextMenu } = useContextMenu();
     const boardMeta = useBoardMetadata();
+    const { editCard } = boardMeta.permissions;
 
     const onOpenCardModal = () => {
         if (!card || props.dragging || props.isOverlay) {
@@ -61,15 +62,15 @@ const CardElement = (props: CardElementProps) => {
             }}
             onClick={onOpenCardModal}
             onContextMenu={
-                boardMeta?.viewOnly
-                    ? undefined
-                    : showContextMenu((close) => (
+                editCard
+                    ? showContextMenu((close) => (
                           <CardContextMenu
                               cardId={props.cardId}
                               onClose={close}
                               boardLabels={boardMeta.labels}
                           />
                       ))
+                    : undefined
             }
         >
             {import.meta.env.DEBUG === 'true' && <Text fz="6pt">{props.cardId}</Text>}

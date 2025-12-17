@@ -28,6 +28,7 @@ export const syncUpdateListField = async (io: Server, listId: ListId, updates: a
             event: ServerSE.UPDATE_LIST_FIELD,
             toRoomIds: [getRoomCode(RoomType.DATA, boardId)],
             buildPayload: async (userId) => {
+                console.log('syncUpdateListField buildPayload', { userId, listId, updates, boardId });
                 if (!(await userCanViewBoard(userId, boardId))) {
                     throw new Error('Insufficient permissions to view this list');
                 }
