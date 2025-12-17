@@ -48,10 +48,7 @@ export const useBoardMetadata = () => {
     return context;
 };
 
-interface BoardPageProps {
-    viewOnly?: boolean;
-}
-const BoardPage = (props: BoardPageProps): React.JSX.Element => {
+const BoardPage = (): React.JSX.Element => {
     const [boardData, setBoardData] = useState<BoardRes | undefined>();
     const [draggingObject, setDraggingObject] = useState<{ list?: ListId; card?: CardId }>({});
     const [activeObject, setActiveObject] = useState<ListId | CardId | null>(null);
@@ -233,20 +230,12 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
     );
 
     const openModal = useCallback((card: CardId) => {
-        if (props.viewOnly) {
-            window.history.replaceState(null, '', `/view/card/${card}`);
-        } else {
-            window.history.replaceState(null, '', `/card/${card}`);
-        }
+        window.history.replaceState(null, '', `/card/${card}`);
         setOpenedCard(card);
     }, []);
 
     const closeModal = useCallback(() => {
-        if (props.viewOnly) {
-            window.history.replaceState(null, '', `/view/board/${boardId}`);
-        } else {
-            window.history.replaceState(null, '', `/board/${boardId}`);
-        }
+        window.history.replaceState(null, '', `/board/${boardId}`);
         setOpenedCard(undefined);
     }, [boardId]);
 
@@ -506,7 +495,7 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
     return (
         // <Profiler onRender={onRender} id={"board"}>
         <Container
-            h={props.viewOnly ? '100vh' : `calc(100vh - ${uiCtx.navbarHeight}px)`}
+            h={`calc(100vh - ${uiCtx.navbarHeight}px)`}
             fluid
             maw="100%"
             p="0"
@@ -515,24 +504,10 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
                 overflowX: 'scroll',
             }}
         >
-            {props.viewOnly && (
-                <Group
-                    w="100%"
-                    justify="flex-start"
-                    bg="#0c0c10"
-                >
-                    <Text
-                        c="white"
-                        p="md"
-                    >
-                        {getBoardNameWithCode(boardData.name, boardData.boardCode)}
-                    </Text>
-                </Group>
-            )}
             <CollaborativeMouseTracker
                 boardId={boardId}
                 draggingObject={draggingObject}
-                disableTracking={props.viewOnly}
+                disableTracking={viewOnly}
                 style={{
                     height: '95%',
                     width: 'auto',
@@ -550,10 +525,10 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
                         id: boardData.id,
                         permissions: {
                             viewBoard: userCanViewBoard,
-                            editBoard: userCanEditBoard && !props.viewOnly,
-                            moveCards: userCanMoveCards && !props.viewOnly,
-                            editCard: userCanEditCard && !props.viewOnly,
-                            createCard: userCanCreateCard && !props.viewOnly,
+                            editBoard: userCanEditBoard && !viewOnly,
+                            moveCards: userCanMoveCards && !viewOnly,
+                            editCard: userCanEditCard && !viewOnly,
+                            createCard: userCanCreateCard && !viewOnly,
                         },
                     }}
                 >
@@ -579,14 +554,14 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
                             <SortableContext
                                 items={listKeys}
                                 strategy={horizontalListSortingStrategy}
-                                disabled={props.viewOnly || !userCanEditBoard}
+                                disabled={!userCanEditBoard}
                             >
                                 {memoizedSortableLists}
                             </SortableContext>
                             {createPortal(<DragOverlay dropAnimation={boardDropAnimation}>{activeObject ? (listToCardsMap.has(activeObject) ? renderListDragOverlay(activeObject, boardData.boardCode ?? '#') : renderCardDragOverlay(activeObject, boardData.boardCode ?? '#')) : null}</DragOverlay>, document.body)}
                         </BoardContext.Provider>
                     </DndContext>
-                    {!props.viewOnly && userCanEditBoard && (
+                    {!viewOnly && userCanEditBoard && (
                         <CreateList
                             onCreateList={async (title) => {
                                 try {
