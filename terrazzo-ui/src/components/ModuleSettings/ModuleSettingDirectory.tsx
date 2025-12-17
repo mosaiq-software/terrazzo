@@ -9,12 +9,10 @@ import { useModulePermission } from '@trz/hooks/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useMemo } from 'react';
-import { IconType } from 'react-icons';
-import { IoDocumentOutline } from 'react-icons/io5';
-import { MdFolder, MdOutlineViewKanban } from 'react-icons/md';
 import { ActionRow } from '../UI/ActionRow';
 import { NotFound } from '../UI/NotFound';
 import { ModuleSettingsLayout } from './ModuleSettingsLayout';
+import { ModuleIcon } from '@trz/util/moduleUtils';
 
 interface ModuleSettingsDirectoryProps {
     directoryId: DirectoryId;
@@ -116,18 +114,4 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
             </Fieldset>
         </ModuleSettingsLayout>
     );
-};
-
-interface ModuleIconProps {
-    moduleType: TrzModuleType;
-}
-export const ModuleIcon = (props: ModuleIconProps): IconType | undefined => {
-    switch (props.moduleType) {
-        case TrzModuleType.Directory:
-            return MdFolder;
-        case TrzModuleType.Document:
-            return IoDocumentOutline;
-        case TrzModuleType.Board:
-            return MdOutlineViewKanban;
-    }
 };

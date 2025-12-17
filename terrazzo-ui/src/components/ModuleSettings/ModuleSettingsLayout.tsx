@@ -1,5 +1,6 @@
 import { Alert, Button, CopyButton, Group, Stack, Switch, Text, TextInput } from '@mantine/core';
 import { ModuleHeader } from '@mosaiq/terrazzo-common';
+import { getModulePublicUrl } from '@trz/util/moduleUtils';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useEffect, useState } from 'react';
 import { MdLink } from 'react-icons/md';
@@ -90,7 +91,7 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                     }}
                 />
                 {props.moduleHeader.public && (
-                    <CopyButton value={'hi'}>
+                    <CopyButton value={getModulePublicUrl(props.moduleHeader.type, props.moduleHeader.id)}>
                         {({ copied, copy }) => (
                             <Button
                                 variant="outline"

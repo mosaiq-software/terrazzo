@@ -7,8 +7,8 @@ import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
 import { NoteType, notify } from '@trz/util/notifications';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useMemo } from 'react';
-import { ModuleIcon } from '../ModuleSettings/ModuleSettingDirectory';
 import { ActionRow } from '../UI/ActionRow';
+import { ModuleIcon } from '@trz/util/moduleUtils';
 
 interface OrgTabArchiveProps {
     orgId: OrganizationId;
