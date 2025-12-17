@@ -71,6 +71,10 @@ const Router = () => {
             </Route>
             <Route path="/view">
                 <Route
+                    path="card/:cardId"
+                    element={<BoardPage viewOnly />}
+                />
+                <Route
                     path="board/:boardId"
                     element={<BoardPage viewOnly />}
                 />

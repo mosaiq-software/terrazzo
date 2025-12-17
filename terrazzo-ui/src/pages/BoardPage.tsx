@@ -1,7 +1,7 @@
 import { closestCenter, CollisionDetection, DndContext, DragEndEvent, DragOverlay, DragStartEvent, KeyboardSensor, MeasuringStrategy, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { DragAbortEvent, DragCancelEvent, DragOverEvent } from '@dnd-kit/core/dist/types';
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { Container } from '@mantine/core';
+import { Container, Group, Text } from '@mantine/core';
 import { arrayMoveInPlace, BoardId, BoardRes, CardId, Label, ListId, RoomType, ServerSE, UID, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import CardDetails from '@trz/components/Boards/CardDetails/CardDetails';
 import CreateList from '@trz/components/Boards/CreateList';
@@ -13,7 +13,7 @@ import { createList, emitMoveCard, emitMoveList, getBoardData, getCardData, getL
 import { useMap } from '@trz/hooks/useMap';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { CARD_CACHE_PREFIX, LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
+import { CARD_CACHE_PREFIX, getBoardNameWithCode, LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
 import { boardDropAnimation, horizontalCollisionDetection, renderCardDragOverlay, renderListDragOverlay } from '@trz/util/dragAndDropUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
@@ -107,9 +107,9 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
                     return;
                 }
                 if (!cardId) {
-                    setTitle(`${boardRes.name} | Terrazzo`);
+                    setTitle(`${getBoardNameWithCode(boardRes.name, boardRes.boardCode)} | Terrazzo`);
                 }
-                uiCtx.setPageTitle(boardRes.name ?? '');
+                uiCtx.setPageTitle(getBoardNameWithCode(boardRes.name, boardRes.boardCode));
 
                 const tempListMap = new Map<ListId, CardId[]>();
                 const tempCardMap = new Map<CardId, ListId>();
@@ -157,9 +157,9 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
             if (payload.id !== boardId) {
                 return;
             }
-            if (payload.name) {
-                setTitle(`${payload.name} | Terrazzo`);
-                uiCtx.setPageTitle(payload.name);
+            if (payload.name || payload.boardCode) {
+                setTitle(`${getBoardNameWithCode((payload.name || boardData?.name) ?? '', payload.boardCode || boardData?.boardCode)} | Terrazzo`);
+                uiCtx.setPageTitle(getBoardNameWithCode((payload.name || boardData?.name) ?? '', payload.boardCode || boardData?.boardCode));
             }
             setBoardData((prev) => {
                 if (!prev) {
@@ -168,7 +168,7 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
                 return { ...updateBaseFromPartial(prev, payload as Partial<BoardRes>) };
             });
         },
-        [boardId]
+        [boardId, boardData]
     );
 
     useSocketListener(
@@ -221,12 +221,20 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
     );
 
     const openModal = useCallback((card: CardId) => {
-        window.history.replaceState(null, '', `/card/${card}`);
+        if (props.viewOnly) {
+            window.history.replaceState(null, '', `/view/card/${card}`);
+        } else {
+            window.history.replaceState(null, '', `/card/${card}`);
+        }
         setOpenedCard(card);
     }, []);
 
     const closeModal = useCallback(() => {
-        window.history.replaceState(null, '', `/board/${boardId}`);
+        if (props.viewOnly) {
+            window.history.replaceState(null, '', `/view/board/${boardId}`);
+        } else {
+            window.history.replaceState(null, '', `/board/${boardId}`);
+        }
         setOpenedCard(undefined);
     }, [boardId]);
 
@@ -477,15 +485,29 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
     return (
         // <Profiler onRender={onRender} id={"board"}>
         <Container
-            h={`calc(100vh - ${uiCtx.navbarHeight}px)`}
+            h={props.viewOnly ? '100vh' : `calc(100vh - ${uiCtx.navbarHeight}px)`}
             fluid
             maw="100%"
-            p="lg"
+            p="0"
             bg="#1d2022"
             style={{
                 overflowX: 'scroll',
             }}
         >
+            {props.viewOnly && (
+                <Group
+                    w="100%"
+                    justify="flex-start"
+                    bg="#0c0c10"
+                >
+                    <Text
+                        c="white"
+                        p="md"
+                    >
+                        {getBoardNameWithCode(boardData.name, boardData.boardCode)}
+                    </Text>
+                </Group>
+            )}
             <CollaborativeMouseTracker
                 boardId={boardId}
                 draggingObject={draggingObject}
@@ -498,6 +520,7 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
                     alignItems: 'flex-start',
                     justifyContent: 'flex-start',
                     flexWrap: 'nowrap',
+                    padding: '20px',
                 }}
             >
                 <BoardMetadataContext.Provider
@@ -536,16 +559,18 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
                             {createPortal(<DragOverlay dropAnimation={boardDropAnimation}>{activeObject ? (listToCardsMap.has(activeObject) ? renderListDragOverlay(activeObject, boardData.boardCode ?? '#') : renderCardDragOverlay(activeObject, boardData.boardCode ?? '#')) : null}</DragOverlay>, document.body)}
                         </BoardContext.Provider>
                     </DndContext>
-                    <CreateList
-                        onCreateList={async (title) => {
-                            try {
-                                await createList(sockCtx, boardData.id, title);
-                            } catch (e) {
-                                notify(NoteType.LIST_CREATION_ERROR, e);
-                                return;
-                            }
-                        }}
-                    />
+                    {!props.viewOnly && (
+                        <CreateList
+                            onCreateList={async (title) => {
+                                try {
+                                    await createList(sockCtx, boardData.id, title);
+                                } catch (e) {
+                                    notify(NoteType.LIST_CREATION_ERROR, e);
+                                    return;
+                                }
+                            }}
+                        />
+                    )}
                     {openedCard && (
                         <CardDetails
                             cardId={openedCard}
