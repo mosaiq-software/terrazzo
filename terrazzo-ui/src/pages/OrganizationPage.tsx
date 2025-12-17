@@ -1,5 +1,6 @@
 import { Avatar, Box, Flex, Group, Loader, ScrollArea, Stack, Tabs, Text, Title } from '@mantine/core';
 import { OrganizationId, PermissibleAction, withIf } from '@mosaiq/terrazzo-common';
+import { OrgTabArchive } from '@trz/components/OrganizationTabs/OrgTabArchive';
 import { OrgTabCards } from '@trz/components/OrganizationTabs/OrgTabCards';
 import { OrgTabMembers } from '@trz/components/OrganizationTabs/OrgTabMembers';
 import { OrgTabRoles } from '@trz/components/OrganizationTabs/OrgTabRoles';
@@ -25,6 +26,8 @@ const OrganizationPage = (): React.JSX.Element => {
     const orgCtx = useOrg();
     const unsavedCtx = useUnsavedChanges();
     const userCanEditRoles = useOrgPermission(orgId, PermissibleAction.EditRoles);
+    const userCanEditRootDirectory = useOrgPermission(orgId, PermissibleAction.EditDirectory);
+
     setTitle(`${orgCtx.active?.name ?? 'Organization'} | Terrazzo`);
 
     if (orgCtx.active === undefined) {
@@ -103,7 +106,7 @@ const OrganizationPage = (): React.JSX.Element => {
                             keepMounted={false}
                         >
                             <Tabs.List>
-                                {['Organization', 'Members', ...withIf('Roles', userCanEditRoles), 'Settings'].map((t) => {
+                                {['Organization', 'Members', ...withIf('Roles', userCanEditRoles), 'Settings', ...withIf('Archive', userCanEditRootDirectory)].map((t) => {
                                     return (
                                         <Tabs.Tab
                                             value={t}
@@ -149,12 +152,10 @@ const OrganizationPage = (): React.JSX.Element => {
                                         roles={orgCtx.roles}
                                     />
                                 ) : (
-                                    <Text
-                                        c="white"
-                                        mt="md"
-                                    >
-                                        You do not have permission to view this tab.
-                                    </Text>
+                                    <NotFound
+                                        itemType="organization roles"
+                                        error={403}
+                                    />
                                 )}
                             </Tabs.Panel>
                             <Tabs.Panel value="Settings">
@@ -162,6 +163,16 @@ const OrganizationPage = (): React.JSX.Element => {
                                     myMembershipRecord={myMembership}
                                     orgData={orgCtx.active}
                                 />
+                            </Tabs.Panel>
+                            <Tabs.Panel value="Archive">
+                                {userCanEditRootDirectory ? (
+                                    <OrgTabArchive orgId={orgCtx.active.id} />
+                                ) : (
+                                    <NotFound
+                                        itemType="organization archive"
+                                        error={403}
+                                    />
+                                )}
                             </Tabs.Panel>
                         </Tabs>
                     </Box>

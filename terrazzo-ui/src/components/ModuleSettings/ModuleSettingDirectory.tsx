@@ -121,7 +121,7 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
 interface ModuleIconProps {
     moduleType: TrzModuleType;
 }
-const ModuleIcon = (props: ModuleIconProps): IconType | undefined => {
+export const ModuleIcon = (props: ModuleIconProps): IconType | undefined => {
     switch (props.moduleType) {
         case TrzModuleType.Directory:
             return MdFolder;
