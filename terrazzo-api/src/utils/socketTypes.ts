@@ -1,7 +1,8 @@
-import { UserData } from '@mosaiq/terrazzo-common';
+import { SocketId, UserData } from '@mosaiq/terrazzo-common';
 
 export interface SocketData {
     connectedAt: Date;
-    githubAccessToken: string;
-    user: UserData;
+    githubAccessToken: string | undefined;
+    sid: SocketId;
+    user: UserData | undefined;
 }

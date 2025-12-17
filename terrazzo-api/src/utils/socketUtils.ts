@@ -1,6 +1,9 @@
-import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
+import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, GithubUserProfile, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
 import { syncUserJoinedRoom, syncUserLeftRoom } from '@trz-api/broadcasters/realtimeBroadcasters';
+import { getUserPreview } from '@trz-api/controllers/userController';
 import { Server, Socket } from 'socket.io';
+import { isDev } from './envUtils';
+import { getPrivateGitHubUserData } from './githubUtils';
 import { SocketData } from './socketTypes';
 
 /**
@@ -137,7 +140,9 @@ export const joinRoom = async (io: Server, socket: Socket, room: RoomId): Promis
         }
         const roomUsers = await getUsersInRoom(io, room);
         const socketData = getSocketData(socket);
-        await syncUserJoinedRoom(io, room, { ...socketData.user, sid: socket.id });
+        if (socketData?.user) {
+            await syncUserJoinedRoom(io, room, socketData.user);
+        }
         socket.join(room);
         return roomUsers;
     }
@@ -188,4 +193,36 @@ export const subscribe = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (d
             reply(undefined as ClientSEReplies[T], error.message);
         }
     });
+};
+
+export const initializeSocketData = async (socket: Socket): Promise<SocketData> => {
+    try {
+        const auth: SocketHandshakeAuth = socket.handshake.auth as any;
+        let userData;
+        if (auth.userId) {
+            userData = await getUserPreview(auth.userId);
+        }
+        let githubData: GithubUserProfile | null = null;
+        if (userData && auth.githubToken && !(isDev() && userData.githubUserId.startsWith('FAKE_'))) {
+            githubData = await getPrivateGitHubUserData(auth.githubToken);
+        }
+
+        const socketData: SocketData = {
+            connectedAt: new Date(),
+            githubAccessToken: auth.githubToken,
+            sid: socket.id,
+            user: userData
+                ? {
+                      sid: socket.id,
+                      idle: false,
+                      user: userData,
+                  }
+                : undefined,
+        };
+        return socketData;
+    } catch (error) {
+        console.error('Error initializing socket data for ' + socket.id, error);
+        socket.disconnect(true);
+        throw error;
+    }
 };

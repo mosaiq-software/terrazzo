@@ -121,6 +121,10 @@ export const userCanAssignRolesInOrganization = async (user: UserId | Socket, or
 };
 
 export const userCanViewBoard = async (user: UserId | Socket, boardId: BoardId): Promise<boolean> => {
+    const board = await getModuleById(boardId);
+    if (board?.public) {
+        return true;
+    }
     return userHasPermissionOnModule(user, boardId, PermissibleAction.ViewBoard);
 };
 
@@ -141,6 +145,10 @@ export const userCanEditCard = async (user: UserId | Socket, boardId: BoardId): 
 };
 
 export const userCanViewDocument = async (user: UserId | Socket, documentId: DocumentId): Promise<boolean> => {
+    const document = await getModuleById(documentId);
+    if (document?.public) {
+        return true;
+    }
     return userHasPermissionOnModule(user, documentId, PermissibleAction.ViewDocument);
 };
 

@@ -39,6 +39,9 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
 
     subscribe(socket, ClientSE.GET_DIRECTORY_CONTENTS, async (data) => {
         const socketData = getSocketData(socket);
+        if (!socketData.user?.user.id) {
+            return [];
+        }
         const contents = await getDirectoryContentsForUser(data, socketData.user.user.id);
         return contents;
     });

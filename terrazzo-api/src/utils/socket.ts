@@ -1,15 +1,11 @@
-import { GithubUserProfile, ServerSE, ServerSocketIOEvent, SocketHandshakeAuth } from '@mosaiq/terrazzo-common';
+import { ServerSE, ServerSocketIOEvent } from '@mosaiq/terrazzo-common';
 import { instrument } from '@socket.io/admin-ui';
-import { getUserPreview } from '@trz-api/controllers/userController';
 import * as socketListeners from '@trz-api/listeners';
 import { YSocketIO } from '@trz-api/utils/y-socket-io';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { isDev } from './envUtils';
-import { getPrivateGitHubUserData } from './githubUtils';
 import { registerEngineSocketEvents } from './socketEngineHandlers';
-import { SocketData } from './socketTypes';
-import { loginSocket, setSocketData } from './socketUtils';
+import { initializeSocketData, loginSocket, setSocketData } from './socketUtils';
 
 const listenerRegistrars = [registerEngineSocketEvents, ...Object.values(socketListeners)];
 
@@ -38,30 +34,11 @@ const initSockets = () => {
 
     io.on(ServerSocketIOEvent.CONNECTION, async (socket) => {
         try {
-            const auth: SocketHandshakeAuth = socket.handshake.auth as any;
-            const userData = await getUserPreview(auth.userId);
-            if (!userData) {
-                throw new Error('No Terrazzo user found');
-            }
-            let githubData: GithubUserProfile | null = null;
-            if (!(isDev() && userData.githubUserId.startsWith('FAKE_'))) {
-                githubData = await getPrivateGitHubUserData(auth.githubToken);
-                if (!githubData) {
-                    throw new Error('No Github user found');
-                }
-            }
-
-            const socketData: SocketData = {
-                connectedAt: new Date(),
-                githubAccessToken: auth.githubToken,
-                user: {
-                    sid: socket.id,
-                    idle: false,
-                    user: userData,
-                },
-            };
+            const socketData = await initializeSocketData(socket);
             setSocketData(socket, socketData);
-            loginSocket(socket, userData.id);
+            if (socketData.user) {
+                loginSocket(socket, socketData.user.user.id);
+            }
         } catch (error) {
             console.warn('Error connecting ' + socket.id, error);
             socket.disconnect(true);
