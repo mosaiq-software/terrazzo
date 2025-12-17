@@ -18,9 +18,9 @@ export const getModulePublicUrl = (moduleType: TrzModuleType, moduleId: UID): st
     const baseUrl = window.location.origin;
     switch (moduleType) {
         case TrzModuleType.Document:
-            return `${baseUrl}/view/doc/${moduleId}`;
+            return `${baseUrl}/doc/${moduleId}`;
         case TrzModuleType.Board:
-            return `${baseUrl}/view/board/${moduleId}`;
+            return `${baseUrl}/board/${moduleId}`;
         default:
             return baseUrl;
     }

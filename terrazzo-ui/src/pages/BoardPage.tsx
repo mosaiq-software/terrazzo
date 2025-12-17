@@ -6,6 +6,7 @@ import { arrayMoveInPlace, BoardId, BoardRes, CardId, Label, ListId, Permissible
 import CardDetails from '@trz/components/Boards/CardDetails/CardDetails';
 import CreateList from '@trz/components/Boards/CreateList';
 import SortableList from '@trz/components/DragAndDrop/SortableList';
+import CollaborativeMouseTracker from '@trz/components/UI/collaborativeMouseTracker';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
@@ -18,7 +19,6 @@ import { CARD_CACHE_PREFIX, getBoardNameWithCode, LIST_CACHE_PREFIX } from '@trz
 import { boardDropAnimation, horizontalCollisionDetection, renderCardDragOverlay, renderListDragOverlay } from '@trz/util/dragAndDropUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
-import CollaborativeMouseTracker from '@trz/wrappers/collaborativeMouseTracker';
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
