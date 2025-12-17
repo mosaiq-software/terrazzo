@@ -16,7 +16,10 @@ import { setTitle } from '@trz/util/tabUtils';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-const DocumentPage = (): React.JSX.Element => {
+interface DocumentPageProps {
+    viewOnly?: boolean;
+}
+const DocumentPage = (props: DocumentPageProps): React.JSX.Element => {
     const params = useParams();
     const sockCtx = useSocket();
     const uiCtx = useUI();

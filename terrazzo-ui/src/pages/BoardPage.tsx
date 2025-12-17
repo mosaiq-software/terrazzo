@@ -40,7 +40,10 @@ export const useBoardMetadata = () => {
     return context;
 };
 
-const BoardPage = (): React.JSX.Element => {
+interface BoardPageProps {
+    viewOnly?: boolean;
+}
+const BoardPage = (props: BoardPageProps): React.JSX.Element => {
     const [boardData, setBoardData] = useState<BoardRes | undefined>();
     const [draggingObject, setDraggingObject] = useState<{ list?: ListId; card?: CardId }>({});
     const [activeObject, setActiveObject] = useState<ListId | CardId | null>(null);

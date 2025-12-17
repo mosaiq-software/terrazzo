@@ -69,6 +69,16 @@ const Router = () => {
                     />
                 </Route>
             </Route>
+            <Route path="/view">
+                <Route
+                    path="board/:boardId"
+                    element={<BoardPage viewOnly />}
+                />
+                <Route
+                    path="doc/:documentId"
+                    element={<DocumentPage viewOnly />}
+                />
+            </Route>
 
             {/* A catch-all route to redirect to the error page */}
             <Route
