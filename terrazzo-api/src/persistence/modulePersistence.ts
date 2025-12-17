@@ -18,6 +18,7 @@ ModuleModel.init(
         orgId: DataTypes.STRING,
         desiredPermissions: DataTypes.JSON,
         effectivePermissions: DataTypes.JSON,
+        public: DataTypes.BOOLEAN,
     },
     { sequelize, timestamps: false }
 );

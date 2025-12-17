@@ -1,7 +1,8 @@
-import { Alert, Button, Group, Stack, Text, TextInput } from '@mantine/core';
+import { Alert, Button, CopyButton, Group, Stack, Switch, Text, TextInput } from '@mantine/core';
 import { ModuleHeader } from '@mosaiq/terrazzo-common';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useEffect, useState } from 'react';
+import { MdLink } from 'react-icons/md';
 import { RectHoldingButton } from '../UI/RectHoldingButton';
 import { PermissionsEditor } from './PermissionsEditor/PermissionsEditor';
 
@@ -72,7 +73,36 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
             <Group
                 w="100%"
                 pt="xl"
+                justify="space-between"
             >
+                <Switch
+                    checked={props.moduleHeader.public}
+                    onChange={(event) => {
+                        props.onSave({ public: event.currentTarget.checked });
+                    }}
+                    disabled={props.disabled}
+                    label="Public"
+                    description="Public modules are viewable by anyone with the link"
+                    styles={{
+                        description: {
+                            maxWidth: '10rem',
+                        },
+                    }}
+                />
+                {props.moduleHeader.public && (
+                    <CopyButton value={'hi'}>
+                        {({ copied, copy }) => (
+                            <Button
+                                variant="outline"
+                                onClick={copy}
+                                disabled={props.disabled}
+                                leftSection={<MdLink size={16} />}
+                            >
+                                {copied ? 'Link Copied' : 'Copy Public Link'}
+                            </Button>
+                        )}
+                    </CopyButton>
+                )}
                 <RectHoldingButton
                     durationMs={3000}
                     onClick={() => {
