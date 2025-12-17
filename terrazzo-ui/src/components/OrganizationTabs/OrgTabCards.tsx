@@ -1,4 +1,4 @@
-import { Box, Title } from '@mantine/core';
+import { Box } from '@mantine/core';
 import { OrganizationHeader } from '@mosaiq/terrazzo-common';
 
 interface OrgTabCardsProps {
@@ -16,14 +16,6 @@ export const OrgTabCards = (props: OrgTabCardsProps) => {
                 width: '100%',
             }}
         >
-            <Title
-                c="white"
-                pb="20"
-                order={4}
-                maw="200"
-            >
-                Projects
-            </Title>
             {/* // Saved for when we do starred modules */}
             {/* <Box
                 style={{

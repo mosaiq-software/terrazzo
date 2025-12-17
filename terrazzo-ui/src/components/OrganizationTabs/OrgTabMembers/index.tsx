@@ -1,4 +1,4 @@
-import { Box, Group, Tabs, Title } from '@mantine/core';
+import { Box, Tabs } from '@mantine/core';
 import { Member, MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useOrgPermission } from '@trz/hooks/usePermissions';
 import { MdOutlineMailOutline, MdOutlinePerson } from 'react-icons/md';
@@ -25,19 +25,6 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                 width: '100%',
             }}
         >
-            <Group
-                w="100%"
-                justify="space-between"
-            >
-                <Title
-                    c="white"
-                    pb="20"
-                    order={4}
-                    maw="200"
-                >
-                    Members
-                </Title>
-            </Group>
             <Tabs
                 orientation="vertical"
                 defaultValue="members"
