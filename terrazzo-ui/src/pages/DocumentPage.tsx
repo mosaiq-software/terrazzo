@@ -98,7 +98,8 @@ const DocumentPage = (props: DocumentPageProps): React.JSX.Element => {
                                 style={{
                                     width: '95%',
                                 }}
-                            />{' '}
+                                viewOnly={props.viewOnly}
+                            />
                         </Group>
 
                         <CollaborativeTextArea
@@ -108,6 +109,7 @@ const DocumentPage = (props: DocumentPageProps): React.JSX.Element => {
                             idle={idle}
                             name={fullName(usr.userData)}
                             avatarUrl={usr.userData?.profilePicture}
+                            viewOnly={props.viewOnly}
                         />
                         <Group
                             w="100%"
