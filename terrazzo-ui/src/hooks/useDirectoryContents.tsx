@@ -1,4 +1,5 @@
 import { ModuleHeader, RoomSpecifier, RoomType, ServerSE, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
+import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getDirectoryContents } from '@trz/emitters/directoryEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -8,6 +9,8 @@ import { useSocketListener } from './useSocketListener';
 
 export const useDirectoryContents = (moduleId: UID | undefined, moduleType: TrzModuleType) => {
     useRoom(RoomType.DATA, moduleId, RoomSpecifier.CONTENTS);
+    const orgCtx = useOrg();
+
     const [contents, setContents] = useState<(ModuleHeader & { canAccess: boolean })[] | undefined>(undefined);
     const sockCtx = useSocket();
 
@@ -31,7 +34,7 @@ export const useDirectoryContents = (moduleId: UID | undefined, moduleType: TrzM
             }
         };
         fetchDirectoryContents();
-    }, [moduleId, moduleType, sockCtx.connected]);
+    }, [moduleId, moduleType, sockCtx.connected, orgCtx.roles]);
 
     useSocketListener(
         ServerSE.UPDATE_DIRECTORY_CONTENTS,
