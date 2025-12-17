@@ -1,5 +1,5 @@
 import { Box, Fieldset, Stack, Title } from '@mantine/core';
-import { MembershipRecord, OrganizationHeader, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
+import { OrganizationId, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateBoardField, updateDocumentMetadata } from '@trz/emitters';
 import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
@@ -11,13 +11,11 @@ import { ModuleIcon } from '../ModuleSettings/ModuleSettingDirectory';
 import { ActionRow } from '../UI/ActionRow';
 
 interface OrgTabArchiveProps {
-    myMembershipRecord: MembershipRecord;
-    orgData: OrganizationHeader;
+    orgId: OrganizationId;
 }
 export const OrgTabArchive = (props: OrgTabArchiveProps) => {
     const sockCtx = useSocket();
-    const contents = useDirectoryContents(props.orgData.id, TrzModuleType.Organization);
-
+    const contents = useDirectoryContents(props.orgId, TrzModuleType.Organization);
     const archivedSubitems = useMemo(() => {
         if (!contents) {
             return [];
@@ -62,7 +60,7 @@ export const OrgTabArchive = (props: OrgTabArchiveProps) => {
                 order={4}
                 maw="200"
             >
-                Settings
+                Archive
             </Title>
             <Box
                 style={{

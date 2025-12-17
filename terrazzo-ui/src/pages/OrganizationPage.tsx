@@ -166,10 +166,7 @@ const OrganizationPage = (): React.JSX.Element => {
                             </Tabs.Panel>
                             <Tabs.Panel value="Archive">
                                 {userCanEditRootDirectory ? (
-                                    <OrgTabArchive
-                                        myMembershipRecord={myMembership}
-                                        orgData={orgCtx.active}
-                                    />
+                                    <OrgTabArchive orgId={orgCtx.active.id} />
                                 ) : (
                                     <NotFound
                                         itemType="organization archive"
