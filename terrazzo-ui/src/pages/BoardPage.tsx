@@ -1,7 +1,7 @@
 import { closestCenter, CollisionDetection, DndContext, DragEndEvent, DragOverlay, DragStartEvent, KeyboardSensor, MeasuringStrategy, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { DragAbortEvent, DragCancelEvent, DragOverEvent } from '@dnd-kit/core/dist/types';
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { Container, Group, Text } from '@mantine/core';
+import { Container } from '@mantine/core';
 import { arrayMoveInPlace, BoardId, BoardRes, CardId, Label, ListId, PermissibleAction, RoomType, ServerSE, UID, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import CardDetails from '@trz/components/Boards/CardDetails/CardDetails';
 import CreateList from '@trz/components/Boards/CreateList';
@@ -19,6 +19,7 @@ import { CARD_CACHE_PREFIX, getBoardNameWithCode, LIST_CACHE_PREFIX } from '@trz
 import { boardDropAnimation, horizontalCollisionDetection, renderCardDragOverlay, renderListDragOverlay } from '@trz/util/dragAndDropUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
+import console from 'console';
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
@@ -63,22 +64,13 @@ const BoardPage = (): React.JSX.Element => {
     const [cardToListMap, setCardMap] = useMap<CardId, ListId>();
     const listKeys = Array.from(listToCardsMap.keys());
     useRoom(RoomType.DATA, boardId);
-    const userCanViewBoard = useModulePermission(boardData, PermissibleAction.ViewBoard) || props.viewOnly;
+    const userCanExplicitlyViewBoard = useModulePermission(boardData, PermissibleAction.ViewBoard);
+    const viewOnly = !userCanExplicitlyViewBoard && boardData?.public;
+    const userCanViewBoard = userCanExplicitlyViewBoard || boardData?.public;
     const userCanEditBoard = useModulePermission(boardData, PermissibleAction.EditBoard);
     const userCanMoveCards = useModulePermission(boardData, PermissibleAction.MoveCards);
     const userCanEditCard = useModulePermission(boardData, PermissibleAction.EditCard);
     const userCanCreateCard = useModulePermission(boardData, PermissibleAction.CreateCard);
-
-    const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 6,
-            },
-        }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
 
     useEffect(() => {
         setBoardId(params.boardId as BoardId);
@@ -469,6 +461,16 @@ const BoardPage = (): React.JSX.Element => {
         },
         [listToCardsMap]
     );
+
+    const pointerSensor = useSensor(PointerSensor, {
+        activationConstraint: {
+            distance: 6,
+        },
+    });
+    const keyboardSensor = useSensor(KeyboardSensor, {
+        coordinateGetter: sortableKeyboardCoordinates,
+    });
+    const sensors = useSensors(pointerSensor, keyboardSensor);
 
     if ((!boardId && !cardId) || !boardData) {
         return (
