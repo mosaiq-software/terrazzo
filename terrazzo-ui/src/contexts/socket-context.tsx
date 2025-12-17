@@ -4,6 +4,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useUser } from './user-context';
 
+const IO_CLIENT_DISCONNECT = 'io client disconnect';
+
 export type SocketContextType = {
     socket: Socket | null;
     sid: SocketId | undefined;
@@ -53,7 +55,11 @@ const SocketProvider: React.FC<any> = ({ children }) => {
             notify(NoteType.CONNECTION_ERROR);
         });
 
-        sock.on(ClientSocketIOEvent.DISCONNECT, () => {
+        sock.on(ClientSocketIOEvent.DISCONNECT, (reason) => {
+            if (reason === IO_CLIENT_DISCONNECT) {
+                // Disconnection was initiated by the client, do not attempt to reconnect
+                return;
+            }
             setConnected(false);
             notify(NoteType.DISCONNECTED);
         });
@@ -81,7 +87,6 @@ const SocketProvider: React.FC<any> = ({ children }) => {
 
         return () => {
             setConnected(false);
-            console.warn('Effect closed');
             sock.disconnect();
         };
     }, [usr.userData?.id, usr.githubAuthToken]);

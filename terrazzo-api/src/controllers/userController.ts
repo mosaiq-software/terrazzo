@@ -34,21 +34,21 @@ export async function checkUsernameTaken(username: string) {
 }
 
 //Creates
-export async function createNewUser(username: string, firstName: string, lastName: string, profilePicture: string, githubUserId: string) {
-    if (username.length > 13) {
+export async function createNewUser(username: string | undefined, firstName: string | undefined, lastName: string | undefined, profilePicture: string | undefined, githubUserId: string) {
+    if (username && username.length > 13) {
         throw new Error('Username must be 13 characters or less');
     }
-    if ((await getUserHeaderByUsernameDb(username)) != null) {
+    if (username && (await getUserHeaderByUsernameDb(username)) != null) {
         throw new Error('Username already exists');
     }
 
     const ghProfile = await getPublicGithubUserDataFromGithubUserId(githubUserId);
-
+    const [ghFirstName, ghLastName] = ghProfile?.name ? ghProfile.name.split(' ') : [undefined, undefined];
     const newUser: UserHeader = {
         id: crypto.randomUUID(),
-        username: username || '',
-        firstName: firstName,
-        lastName: lastName,
+        username: username || ghProfile?.login || '',
+        firstName: firstName || ghFirstName || '',
+        lastName: lastName || ghLastName || '',
         profilePicture: profilePicture || ghProfile?.avatar_url || '',
         githubUserId: githubUserId,
     };

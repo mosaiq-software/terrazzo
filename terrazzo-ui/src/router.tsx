@@ -1,6 +1,5 @@
 import { GithubAuth } from '@trz/pages/auth/github';
 import LoginPage from '@trz/pages/auth/LoginPage';
-import { SetUpAccount } from '@trz/pages/auth/SetUpAccount';
 import BoardPage from '@trz/pages/BoardPage';
 import HomePage from '@trz/pages/HomePage';
 import LandingPage from '@trz/pages/LandingPage';
@@ -26,10 +25,6 @@ const Router = () => {
             <Route
                 path="/auth/github"
                 element={<GithubAuth />}
-            />
-            <Route
-                path="/create-account"
-                element={<SetUpAccount />}
             />
             <Route
                 path="/invite/:inviteId"

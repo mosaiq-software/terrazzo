@@ -1,4 +1,4 @@
-import { RestRoutes, UserId } from '@mosaiq/terrazzo-common';
+import { RestRoutes } from '@mosaiq/terrazzo-common';
 import { callTrzApi } from '@trz/util/apiUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 
@@ -8,19 +8,6 @@ export const checkUsernameTaken = async (username: string) => {
             return undefined;
         }
         const taken = await callTrzApi<RestRoutes.USER_CHECK_USERNAME>(RestRoutes.USER_CHECK_USERNAME, { username }, undefined);
-        return taken;
-    } catch (error) {
-        notify(NoteType.GENERIC_ERROR, 'Error checking username ' + error);
-        return undefined;
-    }
-};
-
-export const setUpUserData = async (userId: UserId, username: string, firstName: string, lastName: string) => {
-    try {
-        if (!username) {
-            return undefined;
-        }
-        const taken = await callTrzApi<RestRoutes.USER_SETUP>(RestRoutes.USER_SETUP, { id: userId }, { username, firstName, lastName });
         return taken;
     } catch (error) {
         notify(NoteType.GENERIC_ERROR, 'Error checking username ' + error);
