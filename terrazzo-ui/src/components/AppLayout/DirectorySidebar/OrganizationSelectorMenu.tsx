@@ -33,7 +33,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
             return;
         }
         navigate(`/org/${orgCtx.active.id}`);
-    }, [unsavedCtx, orgCtx, navigate]);
+    }, [unsavedCtx, orgCtx.active?.id, navigate]);
 
     const handleCreateOrganization = useCallback(() => {
         modals.openContextModal({
