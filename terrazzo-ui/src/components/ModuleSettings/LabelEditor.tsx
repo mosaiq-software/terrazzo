@@ -158,6 +158,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                     openDelay={200}
                 >
                     <ActionIcon
+                        variant="outline"
                         size="input-sm"
                         onClick={onCreateNewLabel}
                         disabled={props.disableEditing}
