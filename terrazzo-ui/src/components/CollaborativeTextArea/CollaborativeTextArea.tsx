@@ -171,7 +171,7 @@ const Editor = (props: EditorProps) => {
             i18nFormat={i18nFormat}
             initialContent={state}
         >
-            <CollabTextAreaToolbar />
+            {!props.viewOnly && <CollabTextAreaToolbar />}
             <EditorComponent />
             <EmojiPopupComponent />
             {/* <MentionComponent
@@ -195,6 +195,7 @@ interface SharedCollaborativeTextAreaProps {
     idle: boolean;
     users?: MentionAtomNodeAttributes[];
     tags?: string[];
+    viewOnly?: boolean;
 }
 
 export const CollaborativeTextArea = (props: SharedCollaborativeTextAreaProps) => {

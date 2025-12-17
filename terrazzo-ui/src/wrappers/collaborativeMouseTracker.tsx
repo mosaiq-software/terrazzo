@@ -16,13 +16,14 @@ interface CollaborativeMouseTrackerProps {
         list?: ListId;
         card?: CardId;
     };
+    disableTracking?: boolean;
 }
 const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
     const ref = useRef<HTMLDivElement | null>(null);
     const sockCtx = useSocket();
-    const [roomUsers, setRoomUsersState] = useRoom(RoomType.MOUSE, props.boardId, RoomSpecifier.DEFAULT, true);
+    const [roomUsers, setRoomUsersState] = useRoom(RoomType.MOUSE, props.disableTracking ? undefined : props.boardId, RoomSpecifier.DEFAULT, true);
 
-    useSocketListener<ServerSE.MOUSE_MOVE>(ServerSE.MOUSE_MOVE, (payload) => {
+    useSocketListener(ServerSE.MOUSE_MOVE, (payload) => {
         const user = roomUsers.get(payload.sid);
         if (!user) {
             return;
@@ -33,7 +34,7 @@ const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
         });
     });
 
-    useSocketListener<ServerSE.USER_IDLE>(ServerSE.USER_IDLE, (payload) => {
+    useSocketListener(ServerSE.USER_IDLE, (payload) => {
         const user = roomUsers.get(payload.sid);
         if (!user) {
             return;
@@ -48,6 +49,9 @@ const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
     useEffect(() => setIdle(idle), [idle]);
 
     const moveMouse = useThrottledCallback((pos: Position) => {
+        if (props.disableTracking) {
+            return;
+        }
         sockCtx.volatileEmit(ClientSE.MOUSE_MOVE, {
             pos,
             draggingList: props.draggingObject.list,
@@ -58,6 +62,9 @@ const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
 
     const setIdle = useCallback(
         (idle: boolean) => {
+            if (props.disableTracking) {
+                return;
+            }
             sockCtx.emit(ClientSE.USER_IDLE, idle);
         },
         [sockCtx]
@@ -65,7 +72,7 @@ const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
 
     const handleMoveMouse: MouseEventHandler<HTMLDivElement> = useCallback(
         (event) => {
-            if (!ref.current || Array.from(roomUsers.keys()).length === 0) {
+            if (!ref.current || Array.from(roomUsers.keys()).length === 0 || props.disableTracking) {
                 return;
             }
             const rect = event.currentTarget.getBoundingClientRect();

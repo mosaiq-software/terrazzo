@@ -30,6 +30,7 @@ export const BoardContext = createContext<BoardContextType | undefined>(undefine
 interface BoardMetadataContextType {
     labels: Label[];
     id: BoardId;
+    viewOnly: boolean;
 }
 const BoardMetadataContext = createContext<BoardMetadataContextType | undefined>(undefined);
 export const useBoardMetadata = () => {
@@ -488,6 +489,7 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
             <CollaborativeMouseTracker
                 boardId={boardId}
                 draggingObject={draggingObject}
+                disableTracking={props.viewOnly}
                 style={{
                     height: '95%',
                     width: 'auto',
@@ -502,6 +504,7 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
                     value={{
                         labels: boardData.labels,
                         id: boardData.id,
+                        viewOnly: !!props.viewOnly,
                     }}
                 >
                     <DndContext
@@ -526,6 +529,7 @@ const BoardPage = (props: BoardPageProps): React.JSX.Element => {
                             <SortableContext
                                 items={listKeys}
                                 strategy={horizontalListSortingStrategy}
+                                disabled={props.viewOnly}
                             >
                                 {memoizedSortableLists}
                             </SortableContext>

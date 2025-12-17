@@ -60,13 +60,17 @@ const CardElement = (props: CardElementProps) => {
                     : undefined),
             }}
             onClick={onOpenCardModal}
-            onContextMenu={showContextMenu((close) => (
-                <CardContextMenu
-                    cardId={props.cardId}
-                    onClose={close}
-                    boardLabels={boardMeta.labels}
-                />
-            ))}
+            onContextMenu={
+                boardMeta?.viewOnly
+                    ? undefined
+                    : showContextMenu((close) => (
+                          <CardContextMenu
+                              cardId={props.cardId}
+                              onClose={close}
+                              boardLabels={boardMeta.labels}
+                          />
+                      ))
+            }
         >
             {import.meta.env.DEBUG === 'true' && <Text fz="6pt">{props.cardId}</Text>}
             {card && inViewport && (

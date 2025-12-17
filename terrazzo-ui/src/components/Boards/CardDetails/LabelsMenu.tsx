@@ -2,13 +2,14 @@ import { ActionIcon, Button, MantineSize, Menu, Pill, Stack, Tooltip } from '@ma
 import { Card, Label, LabelId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardsLabels } from '@trz/emitters';
-import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
+import { COLOR_UNSET, colorIsDarkAdvanced } from '@trz/util/colorUtils';
 import { IoMdInformationCircleOutline } from 'react-icons/io';
-import { MdCheck, MdLabel } from 'react-icons/md';
+import { MdCheck, MdLabel, MdLabelOutline } from 'react-icons/md';
 
 interface LabelsMenuProps {
     card: Card;
     boardLabels: Label[];
+    viewOnly?: boolean;
 }
 
 export const LabelsMenu = (props: LabelsMenuProps) => {
@@ -26,17 +27,30 @@ export const LabelsMenu = (props: LabelsMenuProps) => {
         >
             <Menu.Target>
                 {props.boardLabels.length ? (
-                    <Button
-                        variant="subtle"
-                        justify={'flex-start'}
-                    >
+                    props.viewOnly ? (
                         <LabelDisplay
                             labels={props.card.labels}
-                            showAdd
                             size="sm"
                             boardLabels={props.boardLabels}
                         />
-                    </Button>
+                    ) : (
+                        <Button
+                            variant="subtle"
+                            justify={'flex-start'}
+                        >
+                            <LabelDisplay
+                                labels={props.card.labels}
+                                showAdd
+                                size="sm"
+                                boardLabels={props.boardLabels}
+                            />
+                        </Button>
+                    )
+                ) : props.viewOnly ? (
+                    <MdLabelOutline
+                        size="1.5rem"
+                        color={COLOR_UNSET}
+                    />
                 ) : (
                     <Tooltip label="No labels available. Create labels in board settings to assign them to cards.">
                         <ActionIcon
