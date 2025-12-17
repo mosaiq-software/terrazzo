@@ -31,6 +31,9 @@ export const syncDirectoryContents = async (io: Server, dirId: DirectoryId) => {
                 if (!(await userCanViewDirectory(userId, dirId))) {
                     throw new Error('Insufficient permissions to view this directory');
                 }
+                if (!userId) {
+                    throw new Error('No userId provided for syncing directory contents');
+                }
                 const directoryContents = await getDirectoryContentsForUser(dirId, userId);
                 return { directoryId: dirId, contents: directoryContents };
             },

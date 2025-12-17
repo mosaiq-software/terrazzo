@@ -8,7 +8,6 @@ import { addCard } from './cardController';
 import { addList } from './listController';
 import { addOrganization, updateOrganizationFromPartial } from './organizationController';
 
-//Gets
 export async function getOrCreateUserByGithubAccessToken(accessToken: string) {
     const githubData = await getPrivateGitHubUserData(accessToken);
     if (!githubData) {
@@ -33,7 +32,6 @@ export async function checkUsernameTaken(username: string) {
     return user != null;
 }
 
-//Creates
 export async function createNewUser(username: string | undefined, firstName: string | undefined, lastName: string | undefined, profilePicture: string | undefined, githubUserId: string) {
     if (username && username.length > 13) {
         throw new Error('Username must be 13 characters or less');
@@ -59,31 +57,9 @@ export async function createNewUser(username: string | undefined, firstName: str
         throw new Error('Failed to create user' + e);
     }
 
+    seedNewUserProfile(newUser.id);
+
     return newUser;
-}
-
-//Updates
-
-export async function setupUser(userId: UserId, username: string, firstName: string, lastName: string) {
-    const user = await getUserHeaderByIdDb(userId);
-
-    if (user == null) {
-        throw new Error('User not found');
-    }
-
-    user.username = username;
-    user.firstName = firstName;
-    user.lastName = lastName;
-
-    try {
-        await updateUserHeaderDb(user);
-    } catch (e) {
-        throw new Error('Failed to update user' + e);
-    }
-
-    await seedNewUserProfile(userId);
-
-    return user;
 }
 
 const seedNewUserProfile = async (userId: UserId) => {

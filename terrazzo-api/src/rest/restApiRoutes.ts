@@ -1,6 +1,6 @@
-import { RestRequestBody, RestRequestParams, RestResponse, RestRoutes, UserId } from '@mosaiq/terrazzo-common';
+import { RestRequestBody, RestRequestParams, RestResponse, RestRoutes } from '@mosaiq/terrazzo-common';
 import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
-import { checkUsernameTaken, DEV_upsertFakeUser, getOrCreateUserByGithubAccessToken, setupUser } from '@trz-api/controllers/userController';
+import { checkUsernameTaken, DEV_upsertFakeUser, getOrCreateUserByGithubAccessToken } from '@trz-api/controllers/userController';
 import { isDev } from '@trz-api/utils/envUtils';
 import { githubAuth, revokeGithubAuth } from '@trz-api/utils/githubUtils';
 import express from 'express';
@@ -78,23 +78,6 @@ router.get(RestRoutes.USER_CHECK_USERNAME, async (req, res) => {
         }
         const taken = await checkUsernameTaken(req.params.username);
         const response: RestResponse<RestRoutes.USER_CHECK_USERNAME> = taken;
-        res.status(200).send(response);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal server error');
-    }
-});
-
-router.post(RestRoutes.USER_SETUP, async (req, res) => {
-    const params: RestRequestParams[RestRoutes.USER_SETUP] = req.params;
-    const body: RestRequestBody[RestRoutes.USER_SETUP] = req.body;
-    try {
-        if (!body.username || !body.firstName || !body.lastName || !params.id) {
-            res.status(400).send('Missing info');
-            return;
-        }
-        const user = await setupUser(params.id as UserId, body.username, body.firstName, body.lastName);
-        const response: RestResponse<RestRoutes.USER_SETUP> = user;
         res.status(200).send(response);
     } catch (error) {
         console.error(error);
