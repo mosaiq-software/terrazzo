@@ -1,7 +1,7 @@
 import { closestCenter, CollisionDetection, DndContext, DragEndEvent, DragOverlay, DragStartEvent, KeyboardSensor, MeasuringStrategy, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { DragAbortEvent, DragCancelEvent, DragOverEvent } from '@dnd-kit/core/dist/types';
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { Container } from '@mantine/core';
+import { Container, Loader } from '@mantine/core';
 import { arrayMoveInPlace, BoardId, BoardRes, CardId, Label, ListId, PermissibleAction, RoomType, ServerSE, UID, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import CardDetails from '@trz/components/Boards/CardDetails/CardDetails';
 import CreateList from '@trz/components/Boards/CreateList';
@@ -472,6 +472,23 @@ const BoardPage = (): React.JSX.Element => {
     });
     const sensors = useSensors(pointerSensor, keyboardSensor);
 
+    const boardMetadata = useMemo((): BoardMetadataContextType | undefined => {
+        if (!boardData) {
+            return undefined;
+        }
+        return {
+            labels: boardData.labels,
+            id: boardData.id,
+            permissions: {
+                viewBoard: !!userCanViewBoard,
+                editBoard: userCanEditBoard && !viewOnly,
+                moveCards: userCanMoveCards && !viewOnly,
+                editCard: userCanEditCard && !viewOnly,
+                createCard: userCanCreateCard && !viewOnly,
+            },
+        };
+    }, [boardData, userCanViewBoard, userCanEditBoard, userCanMoveCards, userCanEditCard, userCanCreateCard, viewOnly]);
+
     if ((!boardId && !cardId) || !boardData) {
         return (
             <NotFound
@@ -488,6 +505,10 @@ const BoardPage = (): React.JSX.Element => {
                 error={PageErrors.FORBIDDEN}
             />
         );
+    }
+
+    if (!boardMetadata) {
+        return <Loader />;
     }
 
     const onRender: React.ProfilerOnRenderCallback = (id, phase, actualDuration, baseDuration, startTime, commitTime) => {
@@ -521,19 +542,7 @@ const BoardPage = (): React.JSX.Element => {
                     padding: '20px',
                 }}
             >
-                <BoardMetadataContext.Provider
-                    value={{
-                        labels: boardData.labels,
-                        id: boardData.id,
-                        permissions: {
-                            viewBoard: userCanViewBoard,
-                            editBoard: userCanEditBoard && !viewOnly,
-                            moveCards: userCanMoveCards && !viewOnly,
-                            editCard: userCanEditCard && !viewOnly,
-                            createCard: userCanCreateCard && !viewOnly,
-                        },
-                    }}
-                >
+                <BoardMetadataContext.Provider value={boardMetadata}>
                     <DndContext
                         sensors={sensors}
                         collisionDetection={collisionDetectionStrategy}
@@ -597,6 +606,7 @@ interface RenderSortableListProps {
     onClickCard: (cardId: CardId) => void;
 }
 const RenderSortableList = (props: RenderSortableListProps) => {
+    console.log('Rendering SortableList for listId:', props.listId);
     return (
         <SortableList
             key={props.listId}
