@@ -2,14 +2,14 @@ import { ClientSE, getRoomCode, RoomSpecifier, RoomType, ServerSE, SocketId, UID
 import { useSocket } from '@trz/contexts/socket-context';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useMap } from './useMap';
-
-const DUMMY = [new Map<string, UserData>(), (map: [string, UserData][] | Map<string, UserData>) => {}] as const;
 
 export function useRoom(roomType: RoomType, roomId: UID | string | null | undefined, specifier?: RoomSpecifier, trackUsers: boolean = false): readonly [Map<string, UserData>, (map: [string, UserData][] | Map<string, UserData>) => void] {
     const [roomUsers, setRoomUsers] = useMap<SocketId, UserData>([]);
     const sockCtx = useSocket();
+
+    const DUMMY = useMemo(() => [new Map<string, UserData>(), (map: [string, UserData][] | Map<string, UserData>) => {}] as const, []);
 
     useEffect(() => {
         if (!sockCtx.connected) {

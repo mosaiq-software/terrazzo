@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useUser } from './user-context';
 
+/** Special status string from socket.io client when disconnecting */
 const IO_CLIENT_DISCONNECT = 'io client disconnect';
 
 export type SocketContextType = {

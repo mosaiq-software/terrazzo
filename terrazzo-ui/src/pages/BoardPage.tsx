@@ -19,7 +19,6 @@ import { CARD_CACHE_PREFIX, getBoardNameWithCode, LIST_CACHE_PREFIX } from '@trz
 import { boardDropAnimation, horizontalCollisionDetection, renderCardDragOverlay, renderListDragOverlay } from '@trz/util/dragAndDropUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
-import console from 'console';
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
@@ -630,7 +629,6 @@ interface RenderSortableListProps {
     onClickCard: (cardId: CardId) => void;
 }
 const RenderSortableList = (props: RenderSortableListProps) => {
-    console.log('Rendering SortableList for listId:', props.listId);
     return (
         <SortableList
             key={props.listId}

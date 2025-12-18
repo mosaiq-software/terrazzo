@@ -31,7 +31,7 @@ const AppLayout = () => {
         ['/', () => {}],
     ]);
 
-    const publicMode = !userCtx.userData?.id;
+    const isPublicAccessMode = !userCtx.userData?.id;
 
     return (
         <Group
@@ -44,7 +44,7 @@ const AppLayout = () => {
                 gap: 0,
             }}
         >
-            {!publicMode && (
+            {!isPublicAccessMode && (
                 <Stack
                     px={sidebarCollapsed ? '10px' : '15px'}
                     style={{
@@ -280,7 +280,7 @@ const AppLayout = () => {
                                 </ScrollAreaAutosize>
                             </Popover.Dropdown>
                         </Popover>
-                        {!publicMode && <SearchBar />}
+                        {!isPublicAccessMode && <SearchBar />}
                         <UserProfileIcon />
                     </Group>
                 </Group>

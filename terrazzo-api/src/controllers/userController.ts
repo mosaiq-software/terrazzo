@@ -57,7 +57,7 @@ export async function createNewUser(username: string | undefined, firstName: str
         throw new Error('Failed to create user' + e);
     }
 
-    seedNewUserProfile(newUser.id);
+    await seedNewUserProfile(newUser.id);
 
     return newUser;
 }

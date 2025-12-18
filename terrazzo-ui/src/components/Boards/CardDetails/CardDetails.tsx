@@ -85,7 +85,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
         );
     }
 
-    if (!perms.viewBoard) {
+    if (!perms?.viewBoard) {
         return (
             <NotFound
                 itemType="card"
@@ -160,7 +160,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                         style={{
                                             width: '95%',
                                         }}
-                                        readonly={!perms.editCard}
+                                        readonly={!perms?.editCard}
                                     />
                                     <Tooltip label="Copy card ID">
                                         <Button
@@ -250,7 +250,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             <Text>
                                 Created at {new Date(card.createdAt).toLocaleString()} by {fullName(card.createdBy)}
                             </Text>
-                            {perms.editCard && (
+                            {perms?.editCard && (
                                 <Tooltip label="Archived cards can be restored later">
                                     <Button
                                         variant="subtle"

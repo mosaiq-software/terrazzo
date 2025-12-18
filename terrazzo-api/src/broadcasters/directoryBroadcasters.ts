@@ -28,11 +28,11 @@ export const syncDirectoryContents = async (io: Server, dirId: DirectoryId) => {
             event: ServerSE.UPDATE_DIRECTORY_CONTENTS,
             toRoomIds: [getRoomCode(RoomType.DATA, dirId, RoomSpecifier.CONTENTS)],
             buildPayload: async (userId) => {
-                if (!(await userCanViewDirectory(userId, dirId))) {
-                    throw new Error('Insufficient permissions to view this directory');
-                }
                 if (!userId) {
                     throw new Error('No userId provided for syncing directory contents');
+                }
+                if (!(await userCanViewDirectory(userId, dirId))) {
+                    throw new Error('Insufficient permissions to view this directory');
                 }
                 const directoryContents = await getDirectoryContentsForUser(dirId, userId);
                 return { directoryId: dirId, contents: directoryContents };

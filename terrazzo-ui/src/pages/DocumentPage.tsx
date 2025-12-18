@@ -25,9 +25,9 @@ const DocumentPage = (): React.JSX.Element => {
     const idle = useIdle(IDLE_TIMEOUT_MS);
     const usr = useUser();
     const { document, lastEditor } = useDocument(docId);
-    const userCanExplicitlyViewBoard = useModulePermission(document, PermissibleAction.ViewDocument);
-    const viewOnly = !userCanExplicitlyViewBoard && document?.public;
-    const userCanViewBoard = userCanExplicitlyViewBoard || document?.public;
+    const userCanExplicitlyViewDocument = useModulePermission(document, PermissibleAction.ViewDocument);
+    const viewOnly = !userCanExplicitlyViewDocument && document?.public;
+    const userCanViewDocument = userCanExplicitlyViewDocument || document?.public;
 
     useCatchSaveKey();
 
@@ -48,7 +48,7 @@ const DocumentPage = (): React.JSX.Element => {
         );
     }
 
-    if (!userCanViewBoard) {
+    if (!userCanViewDocument) {
         return (
             <NotFound
                 itemType="document"
