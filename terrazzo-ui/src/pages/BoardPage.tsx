@@ -221,6 +221,30 @@ const BoardPage = (): React.JSX.Element => {
         [listToCardsMap]
     );
 
+    useSocketListener(
+        ServerSE.UPDATE_CARD_FIELD,
+        (payload) => {
+            if (!cardToListMap.has(payload.id)) {
+                return;
+            }
+            if (!payload.archived) {
+                return;
+            }
+            const listId = cardToListMap.get(payload.id);
+            if (!listId) {
+                return;
+            }
+            const list = listToCardsMap.get(listId);
+            if (!list) {
+                return;
+            }
+            const newList = list.filter((c) => c !== payload.id);
+            listToCardsMap.set(listId, newList);
+            cardToListMap.delete(payload.id);
+        },
+        [listToCardsMap, cardToListMap]
+    );
+
     const openModal = useCallback((card: CardId) => {
         window.history.replaceState(null, '', `/card/${card}`);
         setOpenedCard(card);
