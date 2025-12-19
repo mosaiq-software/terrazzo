@@ -8,6 +8,7 @@ import { DocumentHeader } from '../../modules/documentTypes';
 import { ModuleHeader } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
+import { UserHeader } from '../../userTypes';
 import { MouseRoomUserData } from '../roomTypes';
 import { SocketId, UserData } from '../socketTypes';
 
@@ -26,6 +27,7 @@ export enum ServerSE {
     ADD_LIST = 'ADD_LIST',
     ADD_CARD = 'ADD_CARD',
 
+    UPDATE_USER_FIELD = 'UPDATE_USER_FIELD',
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
     UPDATE_BOARD_FIELD = 'UPDATE_BOARD_FIELD',
     UPDATE_LIST_FIELD = 'UPDATE_LIST_FIELD',
@@ -56,6 +58,7 @@ export interface ServerSEPayload {
     [ServerSE.ADD_LIST]: List;
     [ServerSE.ADD_CARD]: Card;
 
+    [ServerSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
     [ServerSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
     [ServerSE.UPDATE_BOARD_FIELD]: Partial<BoardHeader> & { id: BoardId };
     [ServerSE.UPDATE_LIST_FIELD]: Partial<ListHeader> & { id: ListId };
@@ -86,6 +89,7 @@ export interface ServerSEReplies {
     [ServerSE.ADD_LIST]: void;
     [ServerSE.ADD_CARD]: void;
 
+    [ServerSE.UPDATE_USER_FIELD]: void;
     [ServerSE.UPDATE_ORG_FIELD]: void;
     [ServerSE.UPDATE_BOARD_FIELD]: void;
     [ServerSE.UPDATE_LIST_FIELD]: void;

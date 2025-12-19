@@ -25,18 +25,17 @@ export async function callTrzApi<T extends RestRoutes>(endpoint: T, params: Rest
                   },
         });
         if (!fetchResponse) {
-            console.error(`Error calling ${endpoint} with method ${method}`);
             throw new Error(`Error calling ${endpoint} with method ${method}`);
         }
         if (!fetchResponse.ok) {
             throw new Error('Server responded ' + fetchResponse.status);
         }
         const textRes: string = await fetchResponse.text();
-        let response: RestResponse<T> = '';
+        let response: RestResponse<T>;
         try {
             response = JSON.parse(textRes);
         } catch (error: any) {
-            response = textRes;
+            response = textRes as unknown as RestResponse<T>;
         }
         return response;
     } catch (error) {

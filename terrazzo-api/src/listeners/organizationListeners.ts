@@ -2,7 +2,7 @@ import { ClientSE } from '@mosaiq/terrazzo-common';
 import { syncUpdateOrgField } from '@trz-api/broadcasters';
 import { getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { addOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
-import { userCanAdministerOrganization, userCanGetPersonalDataForUser } from '@trz-api/utils/permissions';
+import { userCanAdministerOrganization, userCanGetAndEditPersonalDataForUser } from '@trz-api/utils/permissions';
 import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
@@ -14,10 +14,10 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
 
     subscribe(socket, ClientSE.CREATE_ORG, async (data) => {
         const socketData = getSocketData(socket);
-        if (!socketData.user?.user.id) {
+        if (!socketData.user?.userId) {
             throw new Error(`User does not have permission to create an organization`);
         }
-        const orgId = await addOrganization(data.name, socketData.user.user.id);
+        const orgId = await addOrganization(data.name, socketData.user.userId);
         return orgId;
     });
 
@@ -26,16 +26,16 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
             throw new Error(`User does not have permission to edit this organization`);
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.user.id) {
+        if (!socketData.user?.userId) {
             throw new Error('User not authenticated');
         }
-        await updateOrganizationFromPartial(data.id, data, socketData.user.user.id);
+        await updateOrganizationFromPartial(data.id, data, socketData.user.userId);
         await syncUpdateOrgField(io, data.id, data);
         return undefined;
     });
 
     subscribe(socket, ClientSE.GET_USERS_ORGANIZATIONS, async (data) => {
-        if (!(await userCanGetPersonalDataForUser(socket, data))) {
+        if (!(await userCanGetAndEditPersonalDataForUser(socket, data))) {
             throw new Error(`User does not have permission to get personal data for this user`);
         }
         const orgs = await getOrgsForUser(data);

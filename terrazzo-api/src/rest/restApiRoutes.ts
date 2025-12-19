@@ -1,9 +1,11 @@
-import { RestRequestBody, RestRequestParams, RestResponse, RestRoutes } from '@mosaiq/terrazzo-common';
+import { AuthProvider, RestRequestBody, RestRequestParams, RestResponse, RestRoutes, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
+import { signInWithExistingProvider, signInWithGithub, startAuthenticatedSession } from '@trz-api/controllers/authController';
 import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
-import { checkUsernameTaken, DEV_upsertFakeUser, getOrCreateUserByGithubAccessToken } from '@trz-api/controllers/userController';
+import { checkUsernameTaken, DEV_upsertFakeUser } from '@trz-api/controllers/userController';
 import { createFileDb, getFileByIdDb } from '@trz-api/persistence/filePersistence';
+import { getFrontendAuthSessionCallbackUrl } from '@trz-api/utils/authUtils';
 import { isDev } from '@trz-api/utils/envUtils';
-import { githubAuth, revokeGithubAuth } from '@trz-api/utils/githubUtils';
+import { getGithubAccessTokenFromCode } from '@trz-api/utils/githubUtils';
 import express from 'express';
 
 const router = express.Router();
@@ -14,55 +16,6 @@ router.get(RestRoutes.INDEX, async (req, res) => {
     try {
         const response: RestResponse<RestRoutes.INDEX> = 'Welcome to the TRZ API';
         res.send(response);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal server error');
-    }
-});
-
-router.get(RestRoutes.USER_GITHUB_AUTH, async (req, res) => {
-    const params: RestRequestParams[RestRoutes.USER_GITHUB_AUTH] = req.params;
-    const body: RestRequestBody[RestRoutes.USER_GITHUB_AUTH] = req.body;
-    try {
-        if (!params.code) {
-            throw new Error('No code!');
-        }
-        const token = await githubAuth(params.code);
-        const response: RestResponse<RestRoutes.USER_GITHUB_AUTH> = token;
-        res.status(200).send(response);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal server error');
-    }
-});
-
-router.get(RestRoutes.USER_GITHUB_DATA, async (req, res) => {
-    const params: RestRequestParams[RestRoutes.USER_GITHUB_DATA] = req.params;
-    const body: RestRequestBody[RestRoutes.USER_GITHUB_DATA] = req.body;
-    try {
-        if (!params.access_token) {
-            throw new Error('No token!');
-        }
-        const userHeader = await getOrCreateUserByGithubAccessToken(params.access_token);
-        const response: RestResponse<RestRoutes.USER_GITHUB_DATA> = userHeader;
-        res.status(200).send(response);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal server error');
-    }
-});
-
-router.delete(RestRoutes.USER_GITHUB_REVOKE_TOKEN, async (req, res) => {
-    const params: RestRequestParams[RestRoutes.USER_GITHUB_REVOKE_TOKEN] = req.params;
-    const body: RestRequestBody[RestRoutes.USER_GITHUB_REVOKE_TOKEN] = req.body;
-    try {
-        if (!req.params.accessToken) {
-            res.status(400).send('No access token provided');
-            return;
-        }
-        await revokeGithubAuth(req.params.accessToken);
-        const response: RestResponse<RestRoutes.USER_GITHUB_REVOKE_TOKEN> = undefined;
-        res.status(200).send(response);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');
@@ -93,7 +46,12 @@ router.post(RestRoutes.USER_FAKE_DEV, async (req, res) => {
             res.sendStatus(401);
         }
         const fakeUser = await DEV_upsertFakeUser(params.username);
-        const response: RestResponse<RestRoutes.USER_FAKE_DEV> = fakeUser;
+        const authSession = await startAuthenticatedSession(fakeUser.id);
+        if (!authSession) {
+            res.status(500).send('Failed to start auth session for fake user');
+            return;
+        }
+        const response: RestResponse<RestRoutes.USER_FAKE_DEV> = authSession;
         res.status(200).send(response);
     } catch (e: any) {
         console.error(e);
@@ -106,7 +64,8 @@ router.post(RestRoutes.IMPORT_FROM_TRELLO, async (req, res) => {
     const body: RestRequestBody[RestRoutes.IMPORT_FROM_TRELLO] = req.body;
     try {
         const boardId = await createTerrazzoBoardFromTrelloBoard(params.parentId, body);
-        res.status(200).send(boardId);
+        const response: RestResponse<RestRoutes.IMPORT_FROM_TRELLO> = boardId;
+        res.status(200).send(response);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');
@@ -125,7 +84,8 @@ router.get(RestRoutes.GET_FILE, async (req, res) => {
         const file = Buffer.from(base64 || '', 'base64');
         res.setHeader('Content-Type', retrievedFile?.mimeType || 'application/octet-stream');
         res.setHeader('Content-Disposition', `attachment; filename="${retrievedFile?.fileName || 'file'}"`);
-        res.status(200).send(file);
+        const response: RestResponse<RestRoutes.GET_FILE> = file;
+        res.status(200).send(response);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');
@@ -135,8 +95,50 @@ router.get(RestRoutes.GET_FILE, async (req, res) => {
 router.post(RestRoutes.UPLOAD_FILE, async (req, res) => {
     const body: RestRequestBody[RestRoutes.UPLOAD_FILE] = req.body;
     try {
-        const fileId = await createFileDb(body.base64, body.fileName, body.mimeType);
-        res.status(200).send(fileId);
+        const uploadedFile = await createFileDb(body.base64, body.fileName, body.mimeType, TEMPORARY_ID); //TODO: replace TEMPORARY_ID with actual user ID when auth is implemented
+        const response: RestResponse<RestRoutes.UPLOAD_FILE> = uploadedFile.id;
+        res.status(200).send(response);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.post(RestRoutes.LOGIN_WITH_PROVIDER, async (req, res) => {
+    const body: RestRequestBody[RestRoutes.LOGIN_WITH_PROVIDER] = req.body;
+    try {
+        const authSession = await signInWithExistingProvider(body);
+        if (!authSession) {
+            res.status(401).send('Failed to sign in with provided auth provider');
+            return;
+        }
+        const response: RestResponse<RestRoutes.LOGIN_WITH_PROVIDER> = authSession;
+        res.status(200).send(response);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.get(RestRoutes.GITHUB_OAUTH_CALLBACK, async (req, res) => {
+    try {
+        const code = req.query.code as string | undefined;
+        if (!code || typeof code !== 'string' || code.trim().length === 0) {
+            res.status(400).send('No code provided');
+            return;
+        }
+        const githubAuthToken = await getGithubAccessTokenFromCode(code);
+        if (!githubAuthToken) {
+            res.status(500).send('Failed to obtain GitHub access token');
+            return;
+        }
+        const authSession = await signInWithGithub(githubAuthToken);
+        if (!authSession) {
+            res.status(500).send('Failed to sign in with GitHub');
+            return;
+        }
+        const redirectUrl = getFrontendAuthSessionCallbackUrl(authSession, { provider: AuthProvider.Github, providerAuthToken: githubAuthToken });
+        res.redirect(redirectUrl);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');

@@ -20,7 +20,7 @@ const getUserId = (user: UserId | Socket | undefined): UserId | undefined => {
         return user;
     }
     const socketData = getSocketData(user);
-    return socketData?.user?.user?.id;
+    return socketData?.user?.userId;
 };
 
 /**
@@ -93,7 +93,7 @@ export const userHasPermissionsOnOrganization = async (user: UserId | Socket | u
 
 // ====================== Specific Permission Checkers ======================
 
-export const userCanGetPersonalDataForUser = async (requestingUser: UserId | Socket | undefined, targetUserId: UserId): Promise<boolean> => {
+export const userCanGetAndEditPersonalDataForUser = async (requestingUser: UserId | Socket | undefined, targetUserId: UserId): Promise<boolean> => {
     const requestingUserId = getUserId(requestingUser);
     if (!requestingUserId) {
         return false;

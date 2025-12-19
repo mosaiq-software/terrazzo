@@ -39,3 +39,7 @@ export const recordEntries = <K extends string | number | symbol, V>(record: Rec
 export const withIf = <T>(item: T | T[], condition: any): T[] => {
     return condition ? (Array.isArray(item) ? item : [item]) : [];
 };
+
+export const exhaustiveCheck = (param: never, message?: string): never => {
+    throw new Error(message || `Exhaustive check failed for value: ${param}`);
+};

@@ -2,9 +2,9 @@ import { Avatar, Button, Center, Loader, Space, Stack, Text, Title } from '@mant
 import { InviteId, isInviteExpired } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useUser } from '@trz/contexts/user-context';
 import { acceptInvite } from '@trz/emitters';
 import { useInvite } from '@trz/hooks/useInvite';
+import { useMe } from '@trz/hooks/useMe';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { useCallback, useEffect, useMemo } from 'react';
@@ -14,7 +14,7 @@ const InvitePage = (): React.JSX.Element => {
     const params = useParams();
     const inviteId = params.inviteId as InviteId | undefined;
     const { invite, invitingOrg } = useInvite(inviteId);
-    const usr = useUser();
+    const me = useMe();
     const orgCtx = useOrg();
     const sockCtx = useSocket();
     const navigate = useNavigate();
@@ -46,7 +46,7 @@ const InvitePage = (): React.JSX.Element => {
         setAccepting(false);
     }, [invite, sockCtx, orgCtx]);
 
-    if (!usr.userData) {
+    if (!me) {
         return <Loader />;
     }
 
@@ -71,7 +71,7 @@ const InvitePage = (): React.JSX.Element => {
                             name={invitingOrg?.name}
                             color={'initials'}
                         />
-                        <Text>{userIsInOrg ? `Hi ${usr.userData.firstName}, welcome back to` : `Hi ${usr.userData.firstName}, you have been invited to join`}</Text>
+                        <Text>{userIsInOrg ? `Hi ${me.firstName}, welcome back to` : `Hi ${me.firstName}, you have been invited to join`}</Text>
                         <Title>{invitingOrg?.name || 'Unknown Organization'}</Title>
                         <Text>{invitingOrg?.description || null}</Text>
                         <Space h="1rem" />
@@ -93,7 +93,7 @@ const InvitePage = (): React.JSX.Element => {
                                     onClick={handleAcceptInvite}
                                     loading={accepting}
                                 >
-                                    {`${userIsInOrg ? 'Continue as' : 'Accept Invite as'} @${usr.userData.username}`}
+                                    {`${userIsInOrg ? 'Continue as' : 'Accept Invite as'} @${me.username}`}
                                 </Button>
                                 {!userIsInOrg && (
                                     <Button

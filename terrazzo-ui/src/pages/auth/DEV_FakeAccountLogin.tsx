@@ -1,5 +1,5 @@
 import { Button, Divider, Stack, TextInput } from '@mantine/core';
-import { useUser } from '@trz/contexts/user-context';
+import { useUserContext } from '@trz/contexts/user-context';
 import { isDev } from '@trz/util/envUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useState } from 'react';
@@ -7,7 +7,7 @@ import { FaCodeBranch } from 'react-icons/fa';
 import { useNavigate } from 'react-router';
 
 export const DEV_FakeAccountLogin = () => {
-    const usr = useUser();
+    const usr = useUserContext();
     const navigate = useNavigate();
 
     const [username, setUsername] = useState<string>('');

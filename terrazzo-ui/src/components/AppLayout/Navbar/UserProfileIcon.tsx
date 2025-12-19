@@ -1,20 +1,23 @@
 import { Avatar, Button, Menu } from '@mantine/core';
 import { fullName } from '@mosaiq/terrazzo-common';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
-import { useUser } from '@trz/contexts/user-context';
+import { useUserContext } from '@trz/contexts/user-context';
+import { useUser } from '@trz/hooks/useUser';
 import { useCallback } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 
 export const UserProfileIcon = () => {
-    const userCtx = useUser();
+    const userCtx = useUserContext();
     const navigate = useNavigate();
     const unsavedCtx = useUnsavedChanges();
+    const user = useUser(userCtx.userId);
 
     const handleLogout = useCallback(async () => {
         if (await unsavedCtx.confirmKeepUnsavedChanges()) {
             return;
         }
-        userCtx.logoutAll();
+        userCtx.clearLocalLoginData();
+        //TODO: emit logout event to server?
     }, [userCtx, unsavedCtx]);
 
     const handleNavigateToSettings = useCallback(async () => {
@@ -34,20 +37,19 @@ export const UserProfileIcon = () => {
             trigger="hover"
         >
             <Menu.Target>
-                {userCtx.userData ? (
+                {userCtx.userId ? (
                     <Avatar
                         size={'1.75rem'}
-                        src={userCtx.userData?.profilePicture}
+                        src={user?.profilePicture}
                         color="initials"
-                        name={fullName(userCtx.userData)}
+                        name={fullName(user)}
                     />
                 ) : (
                     <Button
-                        component={Link}
-                        to="/login"
                         color="#fafafa"
                         c="#19191b"
                         variant="filled"
+                        onClick={userCtx.goToLogin}
                     >
                         Login
                     </Button>

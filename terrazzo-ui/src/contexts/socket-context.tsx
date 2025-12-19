@@ -2,7 +2,7 @@ import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSocketIOEvent, Server
 import { NoteType, notify } from '@trz/util/notifications';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useUser } from './user-context';
+import { useUserContext } from './user-context';
 
 /** Special status string from socket.io client when disconnecting */
 const IO_CLIENT_DISCONNECT = 'io client disconnect';
@@ -18,21 +18,22 @@ export type SocketContextType = {
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
 const SocketProvider: React.FC<any> = ({ children }) => {
-    const usr = useUser();
+    const usr = useUserContext();
     const [socket, setSocketState] = useState<Socket | null>(null);
     const [connected, setConnected] = useState<boolean>(false);
 
     useEffect(() => {
-        if (!import.meta.env.SOCKET_URL) {
+        const socketUrl = import.meta.env.SOCKET_URL;
+        if (!socketUrl) {
             throw new Error('SOCKET_URL environment variable is not set');
         }
 
         // CREATE SOCKET CONNECTION
         const auth: SocketHandshakeAuth = {
-            userId: usr.userData?.id || undefined,
-            githubToken: usr.githubAuthToken || undefined,
+            userId: usr.userId,
+            authToken: usr.authToken,
         };
-        const sock = io(import.meta.env.SOCKET_URL, {
+        const sock = io(socketUrl, {
             auth,
             path: '/socket',
         });
@@ -90,7 +91,7 @@ const SocketProvider: React.FC<any> = ({ children }) => {
             setConnected(false);
             sock.disconnect();
         };
-    }, [usr.userData?.id, usr.githubAuthToken]);
+    }, [usr.userId, usr.authToken]);
 
     /**
         Emit events to the backend

@@ -10,7 +10,7 @@ import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
-import { useUser } from '@trz/contexts/user-context';
+import { useUserContext } from '@trz/contexts/user-context';
 import { useOrgPermission } from '@trz/hooks/usePermissions';
 import { setTitle } from '@trz/util/tabUtils';
 import React from 'react';
@@ -19,7 +19,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 const OrganizationPage = (): React.JSX.Element => {
     const params = useParams();
     const uiCtx = useUI();
-    const userCtx = useUser();
+    const userCtx = useUserContext();
     const navigate = useNavigate();
     const orgId = params.orgId as OrganizationId | undefined;
     const tabId = params.tabId;
@@ -42,7 +42,7 @@ const OrganizationPage = (): React.JSX.Element => {
         );
     }
 
-    const myMembership = orgCtx.members.find((m) => m.user.id === userCtx.userData?.id);
+    const myMembership = orgCtx.members.find((m) => m.user.id === userCtx.userId);
     if (!myMembership) {
         return (
             <NotFound

@@ -1,25 +1,20 @@
 import { Box, Fieldset, Group, ScrollArea, Space, Stack, Title } from '@mantine/core';
 import { fullName } from '@mosaiq/terrazzo-common';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
-import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
-import { useUser } from '@trz/contexts/user-context';
+import { useMe } from '@trz/hooks/useMe';
 import { setTitle } from '@trz/util/tabUtils';
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
 
 const UserSettingsPage = (): React.JSX.Element => {
-    const [isDirty, setIsDirty] = useState<boolean>(false);
-    const sockCtx = useSocket();
     const uiCtx = useUI();
-    const userCtx = useUser();
-    const navigate = useNavigate();
+    const me = useMe();
 
     useEffect(() => {
         setTitle(`My Settings | Terrazzo`);
     }, []);
 
-    if (!userCtx.userData) {
+    if (!me) {
         return (
             <NotFound
                 itemType="user"
@@ -50,7 +45,7 @@ const UserSettingsPage = (): React.JSX.Element => {
                         }}
                     >
                         <Group>
-                            <Title order={2}>Settings for {fullName(userCtx.userData)}</Title>
+                            <Title order={2}>Settings for {fullName(me)}</Title>
                         </Group>
                         <Fieldset
                             legend="General"

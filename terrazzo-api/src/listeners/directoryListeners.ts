@@ -39,10 +39,10 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
 
     subscribe(socket, ClientSE.GET_DIRECTORY_CONTENTS, async (data) => {
         const socketData = getSocketData(socket);
-        if (!socketData.user?.user.id) {
+        if (!socketData.user?.userId) {
             return [];
         }
-        const contents = await getDirectoryContentsForUser(data, socketData.user.user.id);
+        const contents = await getDirectoryContentsForUser(data, socketData.user.userId);
         return contents;
     });
 

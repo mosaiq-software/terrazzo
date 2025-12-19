@@ -1,5 +1,7 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { getUserPreview } from '@trz-api/controllers/userController';
+import { syncUpdateUserField } from '@trz-api/broadcasters';
+import { getUserPreview, updateUserData } from '@trz-api/controllers/userController';
+import { userCanGetAndEditPersonalDataForUser } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
@@ -7,5 +9,14 @@ export const registerUserListeners = (socket: Socket, io: Server) => {
     subscribe(socket, ClientSE.GET_USER, async (data) => {
         const userHeader = await getUserPreview(data);
         return userHeader;
+    });
+
+    subscribe(socket, ClientSE.UPDATE_USER_FIELD, async (data) => {
+        if (!(await userCanGetAndEditPersonalDataForUser(socket, data.id))) {
+            throw new Error(`User does not have permission to edit personal data for this user`);
+        }
+        await updateUserData(data);
+        await syncUpdateUserField(io, data.id, data);
+        return undefined;
     });
 };

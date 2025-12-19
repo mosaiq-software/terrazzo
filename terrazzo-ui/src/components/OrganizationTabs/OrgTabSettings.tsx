@@ -3,7 +3,6 @@ import { modals } from '@mantine/modals';
 import { MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
-import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
 import { removeUserFromOrg, updateOrgField } from '@trz/emitters';
 import { useOrgPermission } from '@trz/hooks/usePermissions';
 import { COLOR_UNSET } from '@trz/util/colorUtils';
@@ -35,7 +34,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
             await removeUserFromOrg(sockCtx, props.myMembershipRecord.userId, props.orgData.id);
             notify(NoteType.LEFT_ENTITY, [props.orgData.name]);
             unsavedCtx.markChangesSaved(Savable.OrgSettings);
-            navigate(DEFAULT_AUTHED_ROUTE);
+            navigate('/dashboard');
         } catch (e) {
             notify(NoteType.ORG_DATA_ERROR, e);
         }

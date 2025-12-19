@@ -1,7 +1,6 @@
 import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
 import { syncUserJoinedRoom, syncUserLeftRoom } from '@trz-api/broadcasters/realtimeBroadcasters';
-import { getUserPreview } from '@trz-api/controllers/userController';
-import { getAuthSessionByAuthTokenDb } from '@trz-api/persistence/authSessionPersistence';
+import { getExistingAuthenticatedSession, startAuthenticatedSession } from '@trz-api/controllers/authController';
 import { Server, Socket } from 'socket.io';
 import { SocketData } from './socketTypes';
 
@@ -86,12 +85,12 @@ export const broadcast = async <T extends ServerSE>(options: BroadcasterOptions<
     for (const s of allSockets) {
         const socketData = getSocketData(s);
         try {
-            const payload = await buildPayload(socketData.user?.user.id);
+            const payload = await buildPayload(socketData.user?.userId);
             payloads.set(s.id, payload);
         } catch (e: any) {
             console.warn(`Skipping socket in broadcast`, {
                 socketId: s.id,
-                userId: socketData.user?.user.id,
+                userId: socketData.user?.userId,
                 event,
                 error: e.message,
                 stack: e.stack,
@@ -195,19 +194,18 @@ export const subscribe = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (d
 export const initializeSocketData = async (socket: Socket): Promise<SocketData> => {
     try {
         const auth: SocketHandshakeAuth = socket.handshake.auth as any;
-        let userData: UserData | undefined = undefined;
+        const userData: UserData | undefined = undefined;
         if (auth.userId && auth.authToken) {
-            const authSession = await getAuthSessionByAuthTokenDb(auth.authToken);
-            if (authSession && authSession.userId === auth.userId) {
-                // Valid session, fetch user data
-                const userHeader = await getUserPreview(auth.userId);
-                if (userHeader) {
-                    userData = {
-                        sid: socket.id,
-                        idle: false,
-                        user: userHeader,
-                    };
-                }
+            let authSession = await getExistingAuthenticatedSession(auth.userId);
+            if (!authSession) {
+                authSession = await startAuthenticatedSession(auth.userId);
+            }
+            if (authSession) {
+                const userData: UserData = {
+                    sid: socket.id,
+                    idle: false,
+                    userId: authSession.userId,
+                };
             }
         }
 

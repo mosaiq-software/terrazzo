@@ -4,7 +4,7 @@ import { ContextModalProps } from '@mantine/modals';
 import { fullName, UserId } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useUser } from '@trz/contexts/user-context';
+import { useUserContext } from '@trz/contexts/user-context';
 import { updateOrgField } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import React, { useState } from 'react';
@@ -14,18 +14,18 @@ import { UserAvatar } from '../UI/UserAvatar/UserAvatar';
 const TransferOrganization = (props: ContextModalProps<{}>): React.JSX.Element => {
     const [toUserId, setToUserId] = useState<UserId | undefined>(undefined);
     const orgCtx = useOrg();
-    const userCtx = useUser();
+    const userCtx = useUserContext();
     const sockCtx = useSocket();
 
     const newOwner = orgCtx.members.find((m) => m.userId === toUserId);
-    const possibleUsers = orgCtx.members.filter((m) => m.userId !== userCtx.userData?.id);
+    const possibleUsers = orgCtx.members.filter((m) => m.userId !== userCtx.userId);
 
     async function onSubmit() {
         try {
             if (!toUserId) {
                 throw new Error('Please select a user to transfer the organization to.');
             }
-            if (userCtx.userData?.id !== orgCtx.active?.ownerId) {
+            if (userCtx.userId !== orgCtx.active?.ownerId) {
                 throw new Error('Only the organization owner can transfer the organization.');
             }
             if (!orgCtx.active) {

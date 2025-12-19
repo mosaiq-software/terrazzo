@@ -27,6 +27,11 @@ export const getLinkedAccountsForUserDb = async (userId: UserId) => {
     return models.map((model) => model.toJSON());
 };
 
+export const getLinkedAccountForProviderDb = async (provider: LinkedAccountProvider, accountId: string) => {
+    const model = await LinkedAccountModel.findOne({ where: { provider, accountId } });
+    return model?.toJSON();
+};
+
 export const createLinkedAccountDb = async (linkedAccount: LinkedAccount) => {
     const model = await LinkedAccountModel.create({ ...linkedAccount });
     return model.toJSON();

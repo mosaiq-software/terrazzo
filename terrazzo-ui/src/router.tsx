@@ -1,4 +1,4 @@
-import { GithubAuth } from '@trz/pages/auth/github';
+import { AuthHandlerPage } from '@trz/pages/auth/AuthHandlerPage';
 import LoginPage from '@trz/pages/auth/LoginPage';
 import BoardPage from '@trz/pages/BoardPage';
 import HomePage from '@trz/pages/HomePage';
@@ -23,8 +23,8 @@ const Router = () => {
                 element={<LoginPage />}
             />
             <Route
-                path="/auth/github"
-                element={<GithubAuth />}
+                path="/auth/:userId/:provider/:providerAuthToken/:trzAuthToken"
+                element={<AuthHandlerPage />}
             />
             <Route
                 path="/invite/:inviteId"

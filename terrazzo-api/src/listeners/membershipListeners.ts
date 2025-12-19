@@ -16,7 +16,7 @@ export const registerMembershipListeners = (socket: Socket, io: Server) => {
         if (!socketData.user) {
             throw new Error('User not authenticated');
         }
-        const isLeavingSelf = socketData.user.user.id === data.userId;
+        const isLeavingSelf = socketData.user.userId === data.userId;
         if (!(await userCanAdministerOrganization(socket, data.orgId)) && !isLeavingSelf) {
             throw new Error(`User does not have permission to delete membership in organization`);
         }

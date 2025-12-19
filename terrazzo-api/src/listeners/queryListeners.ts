@@ -6,10 +6,10 @@ import { Server, Socket } from 'socket.io';
 export const registerQueryListeners = (socket: Socket, io: Server) => {
     subscribe(socket, ClientSE.GET_SEARCH_RESULTS, async (data) => {
         const socketData = getSocketData(socket);
-        if (!socketData.user?.user.id) {
+        if (!socketData.user?.userId) {
             throw new Error('User not authenticated');
         }
-        const results = await executeQueryForUser(socketData.user.user.id, data.query, data.searchSessionId);
+        const results = await executeQueryForUser(socketData.user.userId, data.query, data.searchSessionId);
         return { results };
     });
 };

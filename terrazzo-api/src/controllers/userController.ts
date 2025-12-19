@@ -2,52 +2,27 @@ import { BoardId, List, MembershipRecord, OrganizationId, UserHeader, UserId } f
 import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createUserHeaderDb, getUserHeaderByIdDb, getUserHeaderByUsernameDb, updateUserHeaderDb } from '@trz-api/persistence/userPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
-import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
 import { addBoard } from './boardController';
 import { addCard } from './cardController';
 import { addList } from './listController';
 import { addOrganization, updateOrganizationFromPartial } from './organizationController';
-
-export async function getOrCreateUserByGithubAccessToken(accessToken: string) {
-    const githubData = await getPrivateGitHubUserData(accessToken);
-    if (!githubData) {
-        throw new Error('Cant find an account with that access token');
-    }
-    let user = await getUserHeaderByGithubIdDb(githubData.id);
-
-    try {
-        if (user == null) {
-            user = await createNewUser('', '', '', '', githubData.id);
-            return user;
-        }
-
-        return user;
-    } catch (e) {
-        throw new Error('Failed to retrieve user' + e);
-    }
-}
 
 export async function checkUsernameTaken(username: string) {
     const user = await getUserHeaderByUsernameDb(username);
     return user != null;
 }
 
-export async function createNewUser(username: string | undefined, firstName: string | undefined, lastName: string | undefined, profilePicture: string | undefined, githubUserId: string) {
-    if (username && username.length > 13) {
-        throw new Error('Username must be 13 characters or less');
-    }
+export async function createNewUser(username: string, firstName: string, lastName: string, profilePicture: string) {
     if (username && (await getUserHeaderByUsernameDb(username)) != null) {
         throw new Error('Username already exists');
     }
 
-    const ghProfile = await getPublicGithubUserDataFromGithubUserId(githubUserId);
-    const [ghFirstName, ghLastName] = ghProfile?.name ? ghProfile.name.split(' ') : [undefined, undefined];
     const newUser: UserHeader = {
         id: crypto.randomUUID(),
-        username: username || ghProfile?.login || '',
-        firstName: firstName || ghFirstName || '',
-        lastName: lastName || ghLastName || '',
-        profilePicture: profilePicture || ghProfile?.avatar_url || '',
+        username: username,
+        firstName: firstName,
+        lastName: lastName,
+        profilePicture: profilePicture,
     };
 
     try {
@@ -115,7 +90,7 @@ export const DEV_upsertFakeUser = async (username: string): Promise<UserHeader> 
         const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
         const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
         const profilePicture = `https://i.pravatar.cc/150?u=${randomId}`;
-        const fakeUser = await createNewUser(username, firstName, lastName, profilePicture, githubUserId);
+        const fakeUser = await createNewUser(username, firstName, lastName, profilePicture);
         user = fakeUser;
 
         await seedNewUserProfile(fakeUser.id);

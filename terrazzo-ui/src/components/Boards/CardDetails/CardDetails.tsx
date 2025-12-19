@@ -4,7 +4,7 @@ import { CardId, fullName } from '@mosaiq/terrazzo-common';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useUser } from '@trz/contexts/user-context';
+import { useUserContext } from '@trz/contexts/user-context';
 import { updateCardAssignee, updateCardField } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
@@ -26,7 +26,7 @@ interface CardDetailsProps {
 }
 const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
     const sockCtx = useSocket();
-    const usr = useUser();
+    const usr = useUserContext();
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
     });
@@ -71,7 +71,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
         return null;
     }
 
-    const joinedCard = !!usr.userData && card?.assignees.includes(usr.userData.id);
+    const joinedCard = !!usr.userId && card?.assignees.includes(usr.userId);
 
     if (!card) {
         return (
@@ -221,8 +221,8 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                         variant="subtle"
                                         c="white"
                                         onClick={() => {
-                                            if (usr.userData) {
-                                                updateCardAssignee(sockCtx, card.id, usr.userData.id, !joinedCard);
+                                            if (usr.userId) {
+                                                updateCardAssignee(sockCtx, card.id, usr.userId, !joinedCard);
                                             }
                                         }}
                                     >

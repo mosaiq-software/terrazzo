@@ -2,7 +2,7 @@ import { calculateTrueModulePermissionsInOrg, evaluateOrganizationPermissionForR
 import { useRoleForUserInOrg } from '@trz/hooks/useRolesForUserInOrg';
 import React, { createContext, useContext } from 'react';
 import { useOrg } from './org-context';
-import { useUser } from './user-context';
+import { useUserContext } from './user-context';
 
 export type PermissionContextType = {
     checkOrgPermission: (action: PermissibleAction) => Promise<boolean>;
@@ -17,12 +17,12 @@ const PermissionContext = createContext<PermissionContextType | undefined>(undef
 
 const PermissionProvider: React.FC<any> = ({ children }) => {
     const orgCtx = useOrg();
-    const userCtx = useUser();
-    const { roleIds: userRoleIds, roles: userRoles } = useRoleForUserInOrg(userCtx.userData?.id, orgCtx.active?.id);
-    const userIsActiveOrgOwner = !!(userCtx.userData?.id && orgCtx.active && userCtx.userData.id === orgCtx.active.ownerId);
+    const userCtx = useUserContext();
+    const { roleIds: userRoleIds, roles: userRoles } = useRoleForUserInOrg(userCtx.userId, orgCtx.active?.id);
+    const userIsActiveOrgOwner = !!(userCtx.userId && orgCtx.active && userCtx.userId === orgCtx.active.ownerId);
 
     const checkOrgPermission = async (permissibleAction: PermissibleAction): Promise<boolean> => {
-        if (!userCtx.userData?.id || !orgCtx.active) {
+        if (!userCtx.userId || !orgCtx.active) {
             return false;
         }
         const grantedFlags = evaluateOrganizationPermissionForRoles(userRoleIds, orgCtx.roles, userIsActiveOrgOwner);
@@ -30,7 +30,7 @@ const PermissionProvider: React.FC<any> = ({ children }) => {
     };
 
     const checkModulePermission = async (permissibleAction: PermissibleAction, moduleHeader: ModuleHeader): Promise<boolean> => {
-        if (!userCtx.userData?.id || !orgCtx.active?.id) {
+        if (!userCtx.userId || !orgCtx.active?.id) {
             return false;
         }
         const truePermissions = calculateTrueModulePermissionsInOrg(moduleHeader.effectivePermissions, orgCtx.roles);

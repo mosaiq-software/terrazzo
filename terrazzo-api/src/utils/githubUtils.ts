@@ -2,18 +2,7 @@ import { GithubUserProfile } from '@mosaiq/terrazzo-common';
 import axios from 'axios';
 import queryString from 'query-string';
 
-export const githubAuth = async (code: string) => {
-    if (!code) {
-        throw new Error('No code provided');
-    }
-    const access_token = await getAccessTokenFromCode(code);
-    if (!access_token) {
-        throw new Error('Invalid code');
-    }
-    return access_token;
-};
-
-async function getAccessTokenFromCode(code: string) {
+export async function getGithubAccessTokenFromCode(code: string) {
     try {
         const { data } = await axios({
             url: 'https://github.com/login/oauth/access_token',

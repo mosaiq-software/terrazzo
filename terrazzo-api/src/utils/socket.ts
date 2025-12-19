@@ -37,7 +37,7 @@ const initSockets = () => {
             const socketData = await initializeSocketData(socket);
             setSocketData(socket, socketData);
             if (socketData.user) {
-                loginSocket(socket, socketData.user.user.id);
+                loginSocket(socket, socketData.user.userId);
             }
         } catch (error) {
             console.warn('Error connecting ' + socket.id, error);

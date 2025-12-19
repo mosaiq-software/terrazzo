@@ -1,38 +1,34 @@
 import { Center, Container, Loader, Paper, Stack, Text, Title } from '@mantine/core';
-import { useUser } from '@trz/contexts/user-context';
-import { NoteType, notify } from '@trz/util/notifications';
-import queryString from 'query-string';
+import { AuthProvider, UserId } from '@mosaiq/terrazzo-common';
+import { useUserContext } from '@trz/contexts/user-context';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 /*
-This page will only show as the callback fro github login. It should take the code from the string, save it, and then go to another page with the new data.
-*/
-export const GithubAuth = () => {
-    const usr = useUser();
-    const navigate = useNavigate();
-    const urlParams = queryString.parse(window.location.search);
-    const code = urlParams.code;
+ * This page will only show as the callback from an external auth provider
+ */
+export const AuthHandlerPage = () => {
+    const usr = useUserContext();
+    const params = useParams();
+    const userId = params.userId as UserId;
+    const provider = params.provider as AuthProvider;
+    const providerAuthToken = params.providerAuthToken as string;
+    const trzAuthToken = params.trzAuthToken as string;
 
     useEffect(() => {
         let strictIgnore = false;
-        const fetchData = async (code: any) => {
-            await new Promise((res) => setTimeout(res, 50));
+        const handleLogin = async () => {
+            await new Promise((res) => setTimeout(res, 200));
             if (strictIgnore) {
                 return;
             }
-            if (!code || typeof code !== 'string') {
-                notify(NoteType.GITHUB_AUTH_ERROR, 'Invalid github code!');
-                navigate('/');
-                return;
-            }
-            await usr.githubLogin(code);
+            usr.handleLogin(userId, trzAuthToken, provider, providerAuthToken);
         };
-        fetchData(code);
+        handleLogin();
         return () => {
             strictIgnore = true;
         };
-    }, [code]);
+    }, []);
 
     return (
         <Container
@@ -53,7 +49,7 @@ export const GithubAuth = () => {
                         align="center"
                     >
                         <Title>Working on it...</Title>
-                        <Text>Hold tight, we&apos;re logging you in with Github.</Text>
+                        <Text>Hold tight! We&apos;re logging you in with {provider}.</Text>
                         <Loader
                             type="bars"
                             size="xl"

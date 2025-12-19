@@ -7,9 +7,3 @@ export interface UserHeader {
     lastName: string;
     profilePicture: URL;
 }
-
-export interface AuthSession {
-    userId: UserId;
-    authToken: string;
-    createdAt: number;
-}
