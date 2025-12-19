@@ -123,7 +123,14 @@ const DocumentPage = (): React.JSX.Element => {
                             avatarUrl={usr.userData?.profilePicture}
                             viewOnly={viewOnly}
                         /> */}
-                        <BlockNoteEditor />
+                        <BlockNoteEditor
+                            textBlockId={document.textBlockId}
+                            placeholder="Start writing here..."
+                            idle={idle}
+                            name={fullName(usr.userData)}
+                            avatarUrl={usr.userData?.profilePicture}
+                            viewOnly={viewOnly}
+                        />
                         <Group
                             w="100%"
                             justify="flex-end"
