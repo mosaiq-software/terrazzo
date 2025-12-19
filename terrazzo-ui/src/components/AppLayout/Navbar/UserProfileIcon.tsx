@@ -28,7 +28,7 @@ export const UserProfileIcon = () => {
         } catch (err) {
             notify(NoteType.GENERIC_ERROR, 'Error logging out user!');
         }
-    }, [userCtx, unsavedCtx]);
+    }, [sockCtx, userCtx, navigate, unsavedCtx]);
 
     const handleNavigateToSettings = useCallback(async () => {
         if (await unsavedCtx.confirmKeepUnsavedChanges()) {

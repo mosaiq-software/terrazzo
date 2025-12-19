@@ -162,6 +162,13 @@ const OrgProvider: React.FC<any> = ({ children }) => {
         [sockCtx, notify, userCtx.userId]
     );
 
+    useEffect(() => {
+        if (!userCtx.userId) {
+            setSelectedOrganization(undefined);
+            setAllOrganizations([]);
+        }
+    }, [userCtx.userId]);
+
     return (
         <OrgContext.Provider
             value={{
