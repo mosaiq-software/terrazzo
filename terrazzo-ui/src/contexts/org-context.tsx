@@ -81,15 +81,24 @@ const OrgProvider: React.FC<any> = ({ children }) => {
     useSocketListener(
         ServerSE.UPDATE_ORG_FIELD,
         (payload) => {
-            if (!selectedOrganization || payload.id !== selectedOrganization.id) {
-                return;
+            if (allOrganizations.findIndex((org) => org.id === payload.id) !== -1) {
+                setAllOrganizations((prev) =>
+                    prev.map((org) => {
+                        if (org.id === payload.id) {
+                            return updateBaseFromPartial(org, payload);
+                        }
+                        return org;
+                    })
+                );
             }
-            setSelectedOrganization((prev) => {
-                if (!prev) {
-                    return prev;
-                }
-                return updateBaseFromPartial(prev, payload);
-            });
+            if (selectedOrganization && payload.id === selectedOrganization.id) {
+                setSelectedOrganization((prev) => {
+                    if (!prev) {
+                        return prev;
+                    }
+                    return updateBaseFromPartial(prev, payload);
+                });
+            }
         },
         [selectedOrganization]
     );

@@ -9,6 +9,7 @@ import { COLOR_UNSET } from '@trz/util/colorUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ImageUpload } from '../UI/ImageUpload';
 import { RectHoldingButton } from '../UI/RectHoldingButton';
 
 interface OrgTabSettingsProps {
@@ -90,11 +91,9 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                     style={{
                         width: '40rem',
                     }}
+                    gap={'lg'}
                 >
                     <TextInput
-                        labelProps={{
-                            c: 'white',
-                        }}
                         label="Organization Name"
                         placeholder="My Organization"
                         value={editedSettings.name ?? props.orgData.name}
@@ -104,9 +103,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         disabled={!userCanAdmin}
                     />
                     <Textarea
-                        labelProps={{
-                            c: 'white',
-                        }}
                         label="Organization Description"
                         placeholder="Write some info about your organization"
                         value={editedSettings.description ?? props.orgData.description}
@@ -115,18 +111,29 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         }}
                         disabled={!userCanAdmin}
                     />
-                    <TextInput
-                        labelProps={{
-                            c: 'white',
-                        }}
-                        label="Organization Logo URL"
-                        placeholder="https://mosaiq.dev/logo.png"
-                        value={editedSettings.logoUrl ?? props.orgData.logoUrl}
-                        onChange={(e) => {
-                            change('logoUrl', e.target.value);
-                        }}
-                        disabled={!userCanAdmin}
-                    />
+                    <Group
+                        align="start"
+                        wrap="nowrap"
+                    >
+                        <ImageUpload
+                            currentImageUrl={editedSettings.logoUrl ?? props.orgData.logoUrl}
+                            onUploadComplete={(url) => change('logoUrl', url)}
+                            width={100}
+                            height={100}
+                            alt="Organization Logo"
+                            style={{ width: 100, height: 100 }}
+                        />
+                        <TextInput
+                            label="Organization Logo URL"
+                            placeholder="https://mosaiq.dev/logo.png"
+                            value={editedSettings.logoUrl ?? props.orgData.logoUrl}
+                            onChange={(e) => {
+                                change('logoUrl', e.target.value);
+                            }}
+                            disabled={!userCanAdmin}
+                            style={{ flex: 1 }}
+                        />
+                    </Group>
                     <Group>
                         <Button
                             variant="outline"

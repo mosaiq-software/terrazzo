@@ -1,6 +1,5 @@
-import { Box, Button, Fieldset, Group, ScrollArea, Stack, Title } from '@mantine/core';
+import { Box, Button, Fieldset, Group, ScrollArea, Stack, TextInput, Title } from '@mantine/core';
 import { fullName, UserHeader } from '@mosaiq/terrazzo-common';
-import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { ImageUpload } from '@trz/components/UI/ImageUpload';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
@@ -42,20 +41,18 @@ const UserSettingsPage = (): React.JSX.Element => {
         unsavedCtx.setSavedState(Savable.UserSettings, isSaved);
     }, [isSaved]);
 
-    const handleSave = useCallback(
-        async (changes: Partial<UserHeader>) => {
-            try {
-                if (!me) {
-                    throw new Error('No user data available');
-                }
-                await updateUserField(sockCtx, { ...changes, id: me.id });
-                notify(NoteType.CHANGES_SAVED);
-            } catch (e) {
-                notify(NoteType.GENERIC_ERROR, e);
+    const handleSave = useCallback(async () => {
+        try {
+            if (!me) {
+                throw new Error('No user data available');
             }
-        },
-        [me, sockCtx]
-    );
+            await updateUserField(sockCtx, { ...editedUserData, id: me.id });
+            notify(NoteType.CHANGES_SAVED);
+            setEditedUserData({});
+        } catch (e) {
+            notify(NoteType.GENERIC_ERROR, e);
+        }
+    }, [editedUserData, me, sockCtx]);
 
     useEffect(() => {
         setTitle(`My Settings | Terrazzo`);
@@ -98,52 +95,52 @@ const UserSettingsPage = (): React.JSX.Element => {
                             legend="General"
                             bg="transparent"
                         >
-                            <Stack>
-                                <EditableTextbox
+                            <Stack gap={'lg'}>
+                                <TextInput
+                                    label="Username"
                                     value={editedUserData.username ?? me.username}
-                                    onChange={(val) => change('username', val)}
+                                    onChange={(e) => change('username', e.target.value)}
                                     placeholder="Username"
-                                    type="title"
-                                    titleProps={{
-                                        order: 3,
-                                    }}
-                                    style={{ flex: 1 }}
                                 />
                                 <Group>
-                                    <EditableTextbox
+                                    <TextInput
+                                        label="First Name"
                                         value={editedUserData.firstName ?? me.firstName}
-                                        onChange={(val) => change('firstName', val)}
+                                        onChange={(e) => change('firstName', e.target.value)}
                                         placeholder="First Name"
                                         style={{ flex: 1 }}
                                     />
-                                    <EditableTextbox
+                                    <TextInput
+                                        label="Last Name"
                                         value={editedUserData.lastName ?? me.lastName}
-                                        onChange={(val) => change('lastName', val)}
+                                        onChange={(e) => change('lastName', e.target.value)}
                                         placeholder="Last Name"
                                         style={{ flex: 1 }}
                                     />
                                 </Group>
-                                <Group>
+                                <Group
+                                    align="start"
+                                    wrap="nowrap"
+                                >
                                     <ImageUpload
                                         currentImageUrl={editedUserData.profilePicture ?? me.profilePicture}
-                                        onUploadComplete={(url) => handleSave({ profilePicture: url })}
+                                        onUploadComplete={(url) => change('profilePicture', url)}
                                         width={100}
                                         height={100}
                                         alt="Profile Picture"
+                                        style={{ width: 100, height: 100 }}
                                     />
-                                    <EditableTextbox
+                                    <TextInput
+                                        label="Profile Picture URL"
                                         value={editedUserData.profilePicture ?? me.profilePicture}
-                                        onChange={(val) => change('profilePicture', val)}
+                                        onChange={(e) => change('profilePicture', e.target.value)}
                                         placeholder="Profile Picture URL"
                                         style={{ flex: 1 }}
                                     />
                                 </Group>
                                 <Button
                                     disabled={isSaved}
-                                    onClick={() => {
-                                        handleSave(editedUserData);
-                                        setEditedUserData({});
-                                    }}
+                                    onClick={handleSave}
                                 >
                                     Save
                                 </Button>
