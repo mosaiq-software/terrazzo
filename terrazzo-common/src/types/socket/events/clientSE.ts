@@ -1,4 +1,4 @@
-import { BoardId, CardId, DirectoryId, DocumentId, InviteId, LabelId, ListId, OrganizationId, RoleId, UID, UserId } from '../../genericTypes';
+import { BoardId, CardId, DirectoryId, DocumentId, InviteId, LabelId, ListId, OrganizationId, RoleId, UID, UploadedFileId, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { Board, BoardRes, Label } from '../../modules/board/boardTypes';
 import { Card } from '../../modules/board/cardTypes';
@@ -49,6 +49,7 @@ export enum ClientSE {
     CREATE_DIRECTORY = 'CREATE_DIRECTORY',
     CREATE_INVITE = 'CREATE_INVITE',
     CREATE_ROLE = 'CREATE_ROLE',
+    CREATE_FILE_UPLOAD = 'CREATE_FILE_UPLOAD',
 
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
     UPDATE_BOARD_FIELD = 'UPDATE_BOARD_FIELD',
@@ -105,6 +106,7 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_DIRECTORY]: { name: string; parentId: DirectoryId };
     [ClientSE.CREATE_INVITE]: { orgId: OrganizationId; maxUses: number | null };
     [ClientSE.CREATE_ROLE]: { orgId: OrganizationId; name: string; color: string };
+    [ClientSE.CREATE_FILE_UPLOAD]: { fileName: string; base64: string; mimeType: string };
 
     [ClientSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
     [ClientSE.UPDATE_BOARD_FIELD]: Partial<Board> & { id: BoardId };
@@ -161,6 +163,7 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_DIRECTORY]: DirectoryHeader | undefined;
     [ClientSE.CREATE_INVITE]: Invite | undefined;
     [ClientSE.CREATE_ROLE]: Role | undefined;
+    [ClientSE.CREATE_FILE_UPLOAD]: UploadedFileId | undefined;
 
     [ClientSE.UPDATE_ORG_FIELD]: undefined;
     [ClientSE.UPDATE_BOARD_FIELD]: undefined;

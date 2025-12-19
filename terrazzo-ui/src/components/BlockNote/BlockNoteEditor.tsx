@@ -3,6 +3,7 @@ import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
 import { TextBlockId } from '@mosaiq/terrazzo-common';
+import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { useEffect, useState } from 'react';
 import { ManagerOptions, SocketOptions } from 'socket.io-client';
@@ -45,6 +46,8 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
         return new SocketIOProvider(SOCKET_URL, props.textBlockId, doc, pConf, sockConf);
     });
 
+    const fileUploader = useFileUploader();
+
     useEffect(() => {
         socketIOProvider.awareness.on('change', () => setClients(Array.from(socketIOProvider.awareness.getStates().keys()).map((key) => `${key}`)));
         socketIOProvider.on('status', ({ status: _status }: { status: string }) => {
@@ -72,6 +75,7 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
             },
             showCursorLabels: 'activity',
         },
+        uploadFile: fileUploader.uploadFile,
     });
 
     return (

@@ -1,6 +1,7 @@
 import { RestRequestBody, RestRequestParams, RestResponse, RestRoutes } from '@mosaiq/terrazzo-common';
 import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
 import { checkUsernameTaken, DEV_upsertFakeUser, getOrCreateUserByGithubAccessToken } from '@trz-api/controllers/userController';
+import { createFileDb, getFileByIdDb } from '@trz-api/persistence/filePersistence';
 import { isDev } from '@trz-api/utils/envUtils';
 import { githubAuth, revokeGithubAuth } from '@trz-api/utils/githubUtils';
 import express from 'express';
@@ -106,6 +107,36 @@ router.post(RestRoutes.IMPORT_FROM_TRELLO, async (req, res) => {
     try {
         const boardId = await createTerrazzoBoardFromTrelloBoard(params.parentId, body);
         res.status(200).send(boardId);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.get(RestRoutes.GET_FILE, async (req, res) => {
+    const params: RestRequestParams[RestRoutes.GET_FILE] = req.params as RestRequestParams[RestRoutes.GET_FILE];
+    try {
+        if (!params.fileId) {
+            res.status(400).send('No file ID provided');
+            return;
+        }
+        const retrievedFile = await getFileByIdDb(params.fileId);
+        const base64 = retrievedFile?.base64;
+        const file = Buffer.from(base64 || '', 'base64');
+        res.setHeader('Content-Type', retrievedFile?.mimeType || 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename="${retrievedFile?.fileName || 'file'}"`);
+        res.status(200).send(file);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.post(RestRoutes.UPLOAD_FILE, async (req, res) => {
+    const body: RestRequestBody[RestRoutes.UPLOAD_FILE] = req.body;
+    try {
+        const fileId = await createFileDb(body.base64, body.fileName, body.mimeType);
+        res.status(200).send(fileId);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');
