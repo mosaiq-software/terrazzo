@@ -1,6 +1,6 @@
 import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSocketIOEvent, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId } from '@mosaiq/terrazzo-common';
 import { NoteType, notify } from '@trz/util/notifications';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useUserContext } from './user-context';
 
@@ -18,7 +18,7 @@ export type SocketContextType = {
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
 const SocketProvider: React.FC<any> = ({ children }) => {
-    const usr = useUserContext();
+    const userCtx = useUserContext();
     const [socket, setSocketState] = useState<Socket | null>(null);
     const [connected, setConnected] = useState<boolean>(false);
 
@@ -30,8 +30,8 @@ const SocketProvider: React.FC<any> = ({ children }) => {
 
         // CREATE SOCKET CONNECTION
         const auth: SocketHandshakeAuth = {
-            userId: usr.userId,
-            authToken: usr.authToken,
+            userId: userCtx.userId,
+            authToken: userCtx.authToken,
         };
         const sock = io(socketUrl, {
             auth,
@@ -91,47 +91,53 @@ const SocketProvider: React.FC<any> = ({ children }) => {
             setConnected(false);
             sock.disconnect();
         };
-    }, [usr.userId, usr.authToken]);
+    }, [userCtx.userId, userCtx.authToken]);
 
     /**
         Emit events to the backend
         @returns The servers response
         @throws Server error
     */
-    function emit<T extends ClientSE>(event: T, payload: ClientSEPayload[T]): Promise<ClientSEReplies[T] | undefined> {
-        return new Promise((resolve: (response: ClientSEReplies[T]) => void, reject: (error?: string) => void) => {
-            if (!socket || !connected) {
-                return null;
-            }
-            socket.emit(event, payload, (response: ClientSEReplies[T], error?: string) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve(response);
+    const emit = useCallback(
+        <T extends ClientSE>(event: T, payload: ClientSEPayload[T]): Promise<ClientSEReplies[T] | undefined> => {
+            return new Promise((resolve: (response: ClientSEReplies[T]) => void, reject: (error?: string) => void) => {
+                if (!socket || !connected) {
+                    return null;
                 }
+                socket.emit(event, payload, (response: ClientSEReplies[T], error?: string) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(response);
+                    }
+                });
             });
-        });
-    }
+        },
+        [socket, connected]
+    );
 
     /**
      * Emit a volatile event. These will not queue and are not guaranteed delivery at all.
      * @returns The servers reply
      * @throws Any server error
      */
-    function volatileEmit<T extends ClientSE>(event: ClientSE, payload: ClientSEPayload[T]): Promise<ClientSEReplies[T] | undefined> {
-        return new Promise((resolve: (response: ClientSEReplies[T]) => void, reject: (error?: string) => void) => {
-            if (!socket || !connected) {
-                return null;
-            }
-            socket.volatile.emit(event, payload, (response: ClientSEReplies[T], error?: string) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve(response);
+    const volatileEmit = useCallback(
+        <T extends ClientSE>(event: ClientSE, payload: ClientSEPayload[T]): Promise<ClientSEReplies[T] | undefined> => {
+            return new Promise((resolve: (response: ClientSEReplies[T]) => void, reject: (error?: string) => void) => {
+                if (!socket || !connected) {
+                    return null;
                 }
+                socket.volatile.emit(event, payload, (response: ClientSEReplies[T], error?: string) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(response);
+                    }
+                });
             });
-        });
-    }
+        },
+        [socket, connected]
+    );
 
     return (
         <SocketContext.Provider

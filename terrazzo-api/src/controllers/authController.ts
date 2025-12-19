@@ -5,7 +5,7 @@ import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { generateAuthToken } from '@trz-api/utils/authUtils';
 import { isDev } from '@trz-api/utils/envUtils';
 import { getPrivateGitHubUserData } from '@trz-api/utils/githubUtils';
-import { createNewUser, DEV_upsertFakeUser } from './userController';
+import { createNewUser } from './userController';
 
 const EXPIRE_AUTH_SESSIONS_AFTER_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 
@@ -59,15 +59,9 @@ export const DEV_signInWithDev = async (devUsername: string): Promise<AuthSessio
         console.warn('Attempted to sign in with DEV provider in non-dev environment');
         return undefined;
     }
-    let linkedAccount = await getLinkedAccountForProviderDb(LinkedAccountProvider.DEV, devUsername);
+    const linkedAccount = await getLinkedAccountForProviderDb(LinkedAccountProvider.DEV, devUsername);
     if (!linkedAccount) {
-        const user = await DEV_upsertFakeUser(devUsername);
-        linkedAccount = await createLinkedAccountDb({
-            provider: LinkedAccountProvider.DEV,
-            accountId: user.id,
-            userId: user.id,
-            accountData: {},
-        });
+        throw new Error(`DEV users must have a linked account to sign in. No linked account found for username: ${devUsername}`);
     }
     const authSession = await startAuthenticatedSession(linkedAccount.userId);
     return authSession;

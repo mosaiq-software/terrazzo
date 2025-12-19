@@ -1,23 +1,35 @@
 import { Avatar, Button, Menu } from '@mantine/core';
 import { fullName } from '@mosaiq/terrazzo-common';
+import { useSocket } from '@trz/contexts/socket-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useUserContext } from '@trz/contexts/user-context';
+import { logoutUser } from '@trz/emitters';
 import { useUser } from '@trz/hooks/useUser';
+import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router';
 
 export const UserProfileIcon = () => {
+    const sockCtx = useSocket();
     const userCtx = useUserContext();
     const navigate = useNavigate();
     const unsavedCtx = useUnsavedChanges();
     const user = useUser(userCtx.userId);
 
     const handleLogout = useCallback(async () => {
+        console.log('Logging out user...');
         if (await unsavedCtx.confirmKeepUnsavedChanges()) {
             return;
         }
-        userCtx.clearLocalLoginData();
-        //TODO: emit logout event to server?
+        try {
+            console.log('Emitting logout event to server...');
+            await logoutUser(sockCtx);
+            userCtx.clearLocalLoginData();
+            notify(NoteType.CHANGES_SAVED, 'Successfully logged out!');
+            navigate('/');
+        } catch (err) {
+            notify(NoteType.GENERIC_ERROR, 'Error logging out user!');
+        }
     }, [userCtx, unsavedCtx]);
 
     const handleNavigateToSettings = useCallback(async () => {

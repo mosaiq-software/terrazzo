@@ -1,9 +1,10 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
 import { syncUpdateUserField } from '@trz-api/broadcasters';
+import { endAuthenticatedSession } from '@trz-api/controllers/authController';
 import { getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { getUserPreview, updateUserData } from '@trz-api/controllers/userController';
 import { userCanGetAndEditPersonalDataForUser } from '@trz-api/utils/permissions';
-import { subscribe } from '@trz-api/utils/socketUtils';
+import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
 export const registerUserListeners = (socket: Socket, io: Server) => {
@@ -27,5 +28,14 @@ export const registerUserListeners = (socket: Socket, io: Server) => {
         }
         const orgs = await getOrgsForUser(data);
         return orgs;
+    });
+
+    subscribe(socket, ClientSE.LOGOUT, async () => {
+        const socketData = getSocketData(socket);
+        if (!socketData.user?.userId) {
+            return undefined;
+        }
+        await endAuthenticatedSession(socketData.user.userId);
+        return undefined;
     });
 };

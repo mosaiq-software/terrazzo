@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
  * This page will only show as the callback from an external auth provider
  */
 export const AuthHandlerPage = () => {
-    const usr = useUserContext();
+    const userContext = useUserContext();
     const params = useParams();
     const userId = params.userId as UserId;
     const provider = params.provider as AuthProvider;
@@ -22,7 +22,7 @@ export const AuthHandlerPage = () => {
             if (strictIgnore) {
                 return;
             }
-            usr.handleLogin(userId, trzAuthToken, provider, providerAuthToken);
+            userContext.handleLogin(userId, trzAuthToken, provider, providerAuthToken);
         };
         handleLogin();
         return () => {

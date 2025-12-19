@@ -32,7 +32,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
     const [lastSelectedOrgId, setLastSelectedOrgId] = useLocalStorage<OrganizationId | undefined>({ key: LocalStorageKey.LAST_SELECTED_ORG, defaultValue: undefined });
     useRoom(RoomType.DATA, selectedOrganization?.id);
     const members = useOrgMembers(selectedOrganization?.id);
-    const roles = useOrgRoles(selectedOrganization?.id);
+    const roles = useOrgRoles(userCtx.userId ? selectedOrganization?.id : undefined);
 
     useEffect(() => {
         const fetchInitialData = async () => {

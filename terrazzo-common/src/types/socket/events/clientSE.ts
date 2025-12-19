@@ -22,6 +22,7 @@ export enum ClientSE {
     USER_IDLE = 'USER_IDLE',
     MOVE_LIST = 'MOVE_LIST',
     MOVE_CARD = 'MOVE_CARD',
+    LOGOUT = 'LOGOUT',
 
     GET_USERS_ORGANIZATIONS = 'GET_USERS_ORGANIZATIONS',
     GET_ORGANIZATION = 'GET_ORGANIZATION',
@@ -80,6 +81,7 @@ export interface ClientSEPayload {
     [ClientSE.USER_IDLE]: boolean;
     [ClientSE.MOVE_LIST]: { listId: ListId; position: number };
     [ClientSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number };
+    [ClientSE.LOGOUT]: undefined;
 
     [ClientSE.GET_USERS_ORGANIZATIONS]: UserId;
     [ClientSE.GET_ORGANIZATION]: OrganizationId;
@@ -138,6 +140,7 @@ export interface ClientSEReplies {
     [ClientSE.USER_IDLE]: undefined;
     [ClientSE.MOVE_LIST]: undefined;
     [ClientSE.MOVE_CARD]: undefined;
+    [ClientSE.LOGOUT]: undefined;
 
     [ClientSE.GET_USERS_ORGANIZATIONS]: OrganizationHeader[];
     [ClientSE.GET_ORGANIZATION]: OrganizationHeader | undefined;

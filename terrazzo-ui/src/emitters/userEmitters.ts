@@ -8,3 +8,7 @@ export const getUserHeader = async (sockCtx: SocketContextType, userId: UserId) 
 export const updateUserField = async (sockCtx: SocketContextType, userData: Partial<UserHeader> & { id: UserId }) => {
     return await sockCtx.emit(ClientSE.UPDATE_USER_FIELD, userData);
 };
+
+export const logoutUser = async (sockCtx: SocketContextType) => {
+    return await sockCtx.emit(ClientSE.LOGOUT, undefined);
+};
