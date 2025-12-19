@@ -92,8 +92,6 @@ export const DEV_upsertFakeUser = async (username: string): Promise<UserHeader> 
         const profilePicture = `https://i.pravatar.cc/150?u=${randomId}`;
         const fakeUser = await createNewUser(username, firstName, lastName, profilePicture);
         user = fakeUser;
-
-        await seedNewUserProfile(fakeUser.id);
     }
     if (!user) {
         throw new Error('Failed to upsert dev user');
