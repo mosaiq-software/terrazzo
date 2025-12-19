@@ -103,7 +103,6 @@ const BoardPage = (): React.JSX.Element => {
                 setBoardData(boardRes);
 
                 if (!boardRes) {
-                    console.error('No board data found for boardId:', boardIdToUse);
                     return;
                 }
                 if (!cardId) {

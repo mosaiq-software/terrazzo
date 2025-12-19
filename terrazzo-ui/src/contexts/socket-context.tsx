@@ -100,13 +100,13 @@ const SocketProvider: React.FC<any> = ({ children }) => {
     */
     const emit = useCallback(
         <T extends ClientSE>(event: T, payload: ClientSEPayload[T]): Promise<ClientSEReplies[T] | undefined> => {
-            return new Promise((resolve: (response: ClientSEReplies[T]) => void, reject: (error?: string) => void) => {
+            return new Promise((resolve: (response: ClientSEReplies[T] | undefined) => void) => {
                 if (!socket || !connected) {
-                    return null;
+                    return undefined;
                 }
                 socket.emit(event, payload, (response: ClientSEReplies[T], error?: string) => {
                     if (error) {
-                        reject(error);
+                        resolve(undefined);
                     } else {
                         resolve(response);
                     }
@@ -123,13 +123,13 @@ const SocketProvider: React.FC<any> = ({ children }) => {
      */
     const volatileEmit = useCallback(
         <T extends ClientSE>(event: ClientSE, payload: ClientSEPayload[T]): Promise<ClientSEReplies[T] | undefined> => {
-            return new Promise((resolve: (response: ClientSEReplies[T]) => void, reject: (error?: string) => void) => {
+            return new Promise((resolve: (response: ClientSEReplies[T] | undefined) => void) => {
                 if (!socket || !connected) {
-                    return null;
+                    return undefined;
                 }
                 socket.volatile.emit(event, payload, (response: ClientSEReplies[T], error?: string) => {
                     if (error) {
-                        reject(error);
+                        resolve(undefined);
                     } else {
                         resolve(response);
                     }

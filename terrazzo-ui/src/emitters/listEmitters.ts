@@ -1,14 +1,9 @@
 import { BoardId, ClientSE, ListHeader, ListId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
-import { NoteType, notify } from '@trz/util/notifications';
 
 export const getListData = async (sockCtx: SocketContextType, listId: BoardId): Promise<ListHeader | undefined> => {
-    try {
-        const list = await sockCtx.emit(ClientSE.GET_LIST, listId);
-        return list;
-    } catch (e: any) {
-        notify(NoteType.LIST_DATA_ERROR, e);
-    }
+    const list = await sockCtx.emit(ClientSE.GET_LIST, listId);
+    return list;
 };
 
 export const createList = async (sockCtx: SocketContextType, boardID: BoardId, listName: string): Promise<ListId | undefined> => {
