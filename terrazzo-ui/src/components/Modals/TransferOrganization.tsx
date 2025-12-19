@@ -48,51 +48,76 @@ const TransferOrganization = (props: ContextModalProps<{}>): React.JSX.Element =
         props.context.closeModal(props.id);
     };
 
+    const existsSomeoneToTransferTo = possibleUsers.length > 0;
+
     return (
         <Container onKeyDown={getHotkeyHandler([['Escape', handleClose]])}>
-            <Select
-                label="Transfer To"
-                placeholder="Select User"
-                w={350}
-                value={toUserId}
-                onChange={(value) => setToUserId(value as UserId)}
-                data={possibleUsers.map((member) => ({
-                    value: member.userId,
-                    label: `${fullName(member.user)} @${member.user.username}`,
-                }))}
-                renderOption={(item) => {
-                    const [name, username] = item.option.label.split(' @');
-                    const user = possibleUsers.find((m) => m.userId === item.option.value);
-                    if (!user) return null;
-                    return (
-                        <Group>
-                            <UserAvatar
-                                user={user.user}
-                                size={40}
-                                showProfilePopover={false}
-                                showTooltip={false}
-                            />
-                            <Stack gap={0}>
-                                <Title order={5}>{name}</Title>
-                                <Text
-                                    size="sm"
-                                    c="dimmed"
-                                >
-                                    @{username}
-                                </Text>
-                            </Stack>
-                        </Group>
-                    );
-                }}
-            />
-            <Text
-                c="dimmed"
-                size="sm"
-                mt="sm"
-                mb="md"
-            >
-                This will transfer full ownership of the organization to the selected user. You will lose access to administrative functions unless the new owner grants them back to you.
-            </Text>
+            {existsSomeoneToTransferTo ? (
+                <>
+                    <Select
+                        label="Transfer To"
+                        placeholder="Select User"
+                        w={350}
+                        value={toUserId}
+                        defaultValue={possibleUsers.length === 1 ? possibleUsers[0].userId : undefined}
+                        onChange={(value) => setToUserId(value as UserId)}
+                        data={possibleUsers.map((member) => ({
+                            value: member.userId,
+                            label: `${fullName(member.user)} @${member.user.username}`,
+                        }))}
+                        renderOption={(item) => {
+                            const [name, username] = item.option.label.split(' @');
+                            const user = possibleUsers.find((m) => m.userId === item.option.value);
+                            if (!user) return null;
+                            return (
+                                <Group>
+                                    <UserAvatar
+                                        user={user.user}
+                                        size={40}
+                                        showProfilePopover={false}
+                                        showTooltip={false}
+                                    />
+                                    <Stack gap={0}>
+                                        <Title order={5}>{name}</Title>
+                                        <Text
+                                            size="sm"
+                                            c="dimmed"
+                                        >
+                                            @{username}
+                                        </Text>
+                                    </Stack>
+                                </Group>
+                            );
+                        }}
+                    />
+                    <Text
+                        c="dimmed"
+                        size="sm"
+                        mt="sm"
+                        mb="md"
+                    >
+                        This will transfer full ownership of the organization to the selected user. You will lose access to administrative functions unless the new owner grants them back to you.
+                    </Text>
+                </>
+            ) : (
+                <>
+                    <Title
+                        order={4}
+                        size="md"
+                        mb="md"
+                        w="100%"
+                    >
+                        Looks like its just you!
+                    </Title>
+                    <Text
+                        c="dimmed"
+                        size="sm"
+                        mb="md"
+                    >
+                        There are no other members in this organization to transfer ownership to.
+                    </Text>
+                </>
+            )}
             <Group>
                 <Button
                     variant="default"
