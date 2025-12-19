@@ -17,12 +17,10 @@ export const UserProfileIcon = () => {
     const user = useUser(userCtx.userId);
 
     const handleLogout = useCallback(async () => {
-        console.log('Logging out user...');
         if (await unsavedCtx.confirmKeepUnsavedChanges()) {
             return;
         }
         try {
-            console.log('Emitting logout event to server...');
             await logoutUser(sockCtx);
             userCtx.clearLocalLoginData();
             notify(NoteType.CHANGES_SAVED, 'Successfully logged out!');
