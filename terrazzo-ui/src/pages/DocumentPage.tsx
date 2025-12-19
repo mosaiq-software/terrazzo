@@ -1,7 +1,7 @@
 import { Box, Group, Loader, ScrollArea, Stack, Text } from '@mantine/core';
 import { useIdle } from '@mantine/hooks';
 import { DocumentId, fullName, PermissibleAction } from '@mosaiq/terrazzo-common';
-import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/CollaborativeTextArea';
+import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
@@ -114,7 +114,7 @@ const DocumentPage = (): React.JSX.Element => {
                             />
                         </Group>
 
-                        <CollaborativeTextArea
+                        {/* <CollaborativeTextArea
                             textBlockId={document.textBlockId}
                             maxLineLength={200}
                             placeholder="Start writing here..."
@@ -122,7 +122,8 @@ const DocumentPage = (): React.JSX.Element => {
                             name={fullName(usr.userData)}
                             avatarUrl={usr.userData?.profilePicture}
                             viewOnly={viewOnly}
-                        />
+                        /> */}
+                        <BlockNoteEditor />
                         <Group
                             w="100%"
                             justify="flex-end"

@@ -1,7 +1,6 @@
 import { ActionIcon, Box, Button, Center, Group, Loader, Modal, Stack, Text, Tooltip, useCombobox } from '@mantine/core';
 import { useClipboard, useIdle } from '@mantine/hooks';
 import { CardId, fullName } from '@mosaiq/terrazzo-common';
-import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/CollaborativeTextArea';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
@@ -232,7 +231,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                 </Tooltip>
                             )}
                         </Group>
-                        <CollaborativeTextArea
+                        {/* <CollaborativeTextArea
                             textBlockId={card.descriptionTextBlockId}
                             maxLineLength={60}
                             placeholder="Add a more detailed description..."
@@ -240,7 +239,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             name={fullName(usr.userData)}
                             avatarUrl={usr.userData?.profilePicture}
                             viewOnly={!perms.editCard}
-                        />
+                        /> */}
                         <Stack
                             style={{
                                 position: 'absolute',
