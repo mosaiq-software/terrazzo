@@ -2,6 +2,7 @@ import { URL, UserId } from './genericTypes';
 
 export enum LinkedAccountProvider {
     Github = 'Github',
+    DEV = 'DEV',
 }
 
 export interface GithubUserProfile {
@@ -11,11 +12,16 @@ export interface GithubUserProfile {
     name: string;
 }
 
+export interface DEVUserProfile {}
+
+export interface LinkedAccountData {
+    [LinkedAccountProvider.Github]: GithubUserProfile;
+    [LinkedAccountProvider.DEV]: DEVUserProfile;
+}
+
 export interface LinkedAccount<T extends LinkedAccountProvider = LinkedAccountProvider> {
     provider: T;
     accountId: string;
     userId: UserId;
-    accountData: {
-        [LinkedAccountProvider.Github]: GithubUserProfile;
-    }[T];
+    accountData: LinkedAccountData[T];
 }

@@ -34,28 +34,25 @@ const UserProvider: React.FC<any> = ({ children }) => {
     /**
      * Handles user login by setting user context and navigating to the appropriate page
      */
-    const handleLogin = useCallback(
-        (userId: UserId, trzAuthToken: string, provider: AuthProvider, providerAuthToken: string) => {
-            if (!userId || !provider || !trzAuthToken) {
-                notify(NoteType.GENERIC_ERROR, 'Invalid authentication parameters!');
-                navigate('/');
-                return;
-            }
+    const handleLogin = useCallback((userId: UserId, trzAuthToken: string, provider: AuthProvider, providerAuthToken: string) => {
+        if (!userId || !provider || !trzAuthToken) {
+            notify(NoteType.GENERIC_ERROR, 'Invalid authentication parameters!');
+            navigate('/');
+            return;
+        }
 
-            // Save the provider auth token to local storage for future auto logins
-            localStorage.setItem(LOCAL_SAVED_AUTH_PROVIDER_KEY, JSON.stringify({ provider, providerAuthToken }));
+        // Save the provider auth token to local storage for future auto logins
+        localStorage.setItem(LOCAL_SAVED_AUTH_PROVIDER_KEY, JSON.stringify({ provider, providerAuthToken }));
 
-            // Set user data
-            setAuthToken(trzAuthToken);
-            setUserId(userId);
+        // Set user data
+        setAuthToken(trzAuthToken);
+        setUserId(userId);
 
-            // Once logged in, redirect to saved route or dashboard
-            const route = window.sessionStorage.getItem(SESSION_POST_LOGIN_REDIRECT_KEY);
-            window.sessionStorage.removeItem(SESSION_POST_LOGIN_REDIRECT_KEY);
-            navigate(route || DEFAULT_AUTHED_ROUTE);
-        },
-        [navigate]
-    );
+        // Once logged in, redirect to saved route or dashboard
+        const route = window.sessionStorage.getItem(SESSION_POST_LOGIN_REDIRECT_KEY);
+        window.sessionStorage.removeItem(SESSION_POST_LOGIN_REDIRECT_KEY);
+        navigate(route || DEFAULT_AUTHED_ROUTE);
+    }, []);
 
     /**
      * Clears all user login data and navigates to the landing page.
@@ -67,7 +64,7 @@ const UserProvider: React.FC<any> = ({ children }) => {
         setAuthToken(undefined);
         setUserId(undefined);
         navigate('/');
-    }, [navigate]);
+    }, []);
 
     /**
      * Development only login function to simulate user login
@@ -77,7 +74,7 @@ const UserProvider: React.FC<any> = ({ children }) => {
             if (!isDev()) {
                 return;
             }
-            const authSession = await callTrzApi<RestRoutes.USER_FAKE_DEV>(RestRoutes.USER_FAKE_DEV, { username }, undefined);
+            const authSession = await callTrzApi(RestRoutes.USER_FAKE_DEV, { username }, undefined);
             if (!authSession) {
                 throw new Error('Failed to login as user');
             }
@@ -95,6 +92,9 @@ const UserProvider: React.FC<any> = ({ children }) => {
             if (strictIgnore) {
                 return;
             }
+            if (userId && authToken) {
+                return;
+            }
             const savedAuthProviderStr = localStorage.getItem(LOCAL_SAVED_AUTH_PROVIDER_KEY);
             if (!savedAuthProviderStr) {
                 return;
@@ -107,7 +107,7 @@ const UserProvider: React.FC<any> = ({ children }) => {
                 return;
             }
             try {
-                const loginData = await callTrzApi<RestRoutes.LOGIN_WITH_PROVIDER>(RestRoutes.LOGIN_WITH_PROVIDER, {}, savedAuthProvider);
+                const loginData = await callTrzApi(RestRoutes.LOGIN_WITH_PROVIDER, {}, savedAuthProvider);
                 if (!loginData) {
                     console.warn('Auto login with saved auth provider returned no data');
                     return;
@@ -121,7 +121,7 @@ const UserProvider: React.FC<any> = ({ children }) => {
         return () => {
             strictIgnore = true;
         };
-    }, [handleLogin]);
+    }, [handleLogin, userId, authToken]);
 
     return (
         <UserContext.Provider

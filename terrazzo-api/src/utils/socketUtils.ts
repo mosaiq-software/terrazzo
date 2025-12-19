@@ -185,6 +185,7 @@ export const subscribe = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (d
                 error: error.message,
                 stack: error.stack,
                 options,
+                socketData: getSocketData(socket),
             });
             reply(undefined as ClientSEReplies[T], error.message);
         }
@@ -194,14 +195,14 @@ export const subscribe = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (d
 export const initializeSocketData = async (socket: Socket): Promise<SocketData> => {
     try {
         const auth: SocketHandshakeAuth = socket.handshake.auth as any;
-        const userData: UserData | undefined = undefined;
+        let userData: UserData | undefined = undefined;
         if (auth.userId && auth.authToken) {
-            let authSession = await getExistingAuthenticatedSession(auth.userId);
+            let authSession = await getExistingAuthenticatedSession(auth.authToken);
             if (!authSession) {
                 authSession = await startAuthenticatedSession(auth.userId);
             }
             if (authSession) {
-                const userData: UserData = {
+                userData = {
                     sid: socket.id,
                     idle: false,
                     userId: authSession.userId,

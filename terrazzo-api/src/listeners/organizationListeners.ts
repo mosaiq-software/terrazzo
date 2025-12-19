@@ -1,8 +1,7 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
 import { syncUpdateOrgField } from '@trz-api/broadcasters';
-import { getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { addOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
-import { userCanAdministerOrganization, userCanGetAndEditPersonalDataForUser } from '@trz-api/utils/permissions';
+import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
 import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
 import { Server, Socket } from 'socket.io';
 
@@ -32,13 +31,5 @@ export const registerOrganizationListeners = (socket: Socket, io: Server) => {
         await updateOrganizationFromPartial(data.id, data, socketData.user.userId);
         await syncUpdateOrgField(io, data.id, data);
         return undefined;
-    });
-
-    subscribe(socket, ClientSE.GET_USERS_ORGANIZATIONS, async (data) => {
-        if (!(await userCanGetAndEditPersonalDataForUser(socket, data))) {
-            throw new Error(`User does not have permission to get personal data for this user`);
-        }
-        const orgs = await getOrgsForUser(data);
-        return orgs;
     });
 };
