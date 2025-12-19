@@ -5,6 +5,7 @@ import React, { createContext, useCallback, useContext, useState } from 'react';
 export enum Savable {
     RoleSettings = 'role settings',
     OrgSettings = 'organization settings',
+    UserSettings = 'user settings',
 }
 
 export type UnsavedChangesContextType = {
