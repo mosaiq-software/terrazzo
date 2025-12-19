@@ -19,9 +19,19 @@ export interface LinkedAccountData {
     [LinkedAccountProvider.DEV]: DEVUserProfile;
 }
 
-export interface LinkedAccount<T extends LinkedAccountProvider = LinkedAccountProvider> {
-    provider: T;
+interface BaseLinkedAccount {
     accountId: string;
     userId: UserId;
-    accountData: LinkedAccountData[T];
 }
+
+interface GithubLinkedAccount extends BaseLinkedAccount {
+    provider: LinkedAccountProvider.Github;
+    accountData: GithubUserProfile;
+}
+
+interface DEVLinkedAccount extends BaseLinkedAccount {
+    provider: LinkedAccountProvider.DEV;
+    accountData: DEVUserProfile;
+}
+
+export type LinkedAccount = GithubLinkedAccount | DEVLinkedAccount;

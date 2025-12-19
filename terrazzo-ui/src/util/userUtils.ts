@@ -7,7 +7,7 @@ export const checkUsernameTaken = async (username: string) => {
         if (!username) {
             return undefined;
         }
-        const taken = await callTrzApi<RestRoutes.USER_CHECK_USERNAME>(RestRoutes.USER_CHECK_USERNAME, { username }, undefined);
+        const taken = await callTrzApi(RestRoutes.USER_CHECK_USERNAME, { username }, undefined);
         return taken;
     } catch (error) {
         notify(NoteType.GENERIC_ERROR, 'Error checking username ' + error);

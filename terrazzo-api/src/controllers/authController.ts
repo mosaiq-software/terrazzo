@@ -1,10 +1,11 @@
 import { AuthProvider, AuthProviderToken, AuthSession, exhaustiveCheck, LinkedAccountProvider, UserId } from '@mosaiq/terrazzo-common';
 import { createAuthSessionDb, deleteAuthSessionByUserIdDb, getAuthSessionByAuthTokenDb, getAuthSessionByUserIdDb } from '@trz-api/persistence/authSessionPersistence';
-import { createLinkedAccountDb, getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccountPersistence';
+import { getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccountPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { generateAuthToken } from '@trz-api/utils/authUtils';
 import { isDev } from '@trz-api/utils/envUtils';
 import { getPrivateGitHubUserData } from '@trz-api/utils/githubUtils';
+import { addLinkedAccountToUser } from './linkedAccountController';
 import { createNewUser } from './userController';
 
 const EXPIRE_AUTH_SESSIONS_AFTER_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
@@ -79,7 +80,7 @@ export const signInWithGithub = async (githubAccessToken: string): Promise<AuthS
             const [firstName, ...lastNameParts] = (githubData.name || githubData.login).split(' ');
             const lastName = lastNameParts.join(' ');
             const newUser = await createNewUser(githubData.login, firstName, lastName, githubData.avatar_url);
-            linkedAccount = await createLinkedAccountDb({
+            linkedAccount = await addLinkedAccountToUser({
                 provider: LinkedAccountProvider.Github,
                 accountId: githubData.id.toString(),
                 userId: newUser.id,

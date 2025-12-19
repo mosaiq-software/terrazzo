@@ -1,9 +1,10 @@
 import { AuthProvider, LinkedAccountProvider, RestRequestBody, RestRequestParams, RestResponse, RestRoutes, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
 import { signInWithExistingProvider, signInWithGithub, startAuthenticatedSession } from '@trz-api/controllers/authController';
 import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
+import { addLinkedAccountToUser } from '@trz-api/controllers/linkedAccountController';
 import { checkUsernameTaken, DEV_upsertFakeUser } from '@trz-api/controllers/userController';
 import { createFileDb, getFileByIdDb } from '@trz-api/persistence/filePersistence';
-import { createLinkedAccountDb, getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccountPersistence';
+import { getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccountPersistence';
 import { getFrontendAuthSessionCallbackUrl } from '@trz-api/utils/authUtils';
 import { isDev } from '@trz-api/utils/envUtils';
 import { getGithubAccessTokenFromCode } from '@trz-api/utils/githubUtils';
@@ -49,7 +50,7 @@ router.post(RestRoutes.USER_FAKE_DEV, async (req, res) => {
         const fakeUser = await DEV_upsertFakeUser(params.username);
         let linkedAccount = await getLinkedAccountForProviderDb(LinkedAccountProvider.DEV, fakeUser.username);
         if (!linkedAccount) {
-            linkedAccount = await createLinkedAccountDb({
+            linkedAccount = await addLinkedAccountToUser({
                 provider: LinkedAccountProvider.DEV,
                 accountId: fakeUser.username,
                 userId: fakeUser.id,

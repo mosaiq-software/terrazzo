@@ -1,12 +1,14 @@
 import { Box, Button, Fieldset, Group, ScrollArea, Stack, TextInput, Title } from '@mantine/core';
 import { fullName, UserHeader } from '@mosaiq/terrazzo-common';
 import { ImageUpload } from '@trz/components/UI/ImageUpload';
+import { LinkedAccountRenderer } from '@trz/components/UI/LinkedAccountRenderer';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { updateUserField } from '@trz/emitters';
 import { useMe } from '@trz/hooks/useMe';
+import { useUserLinkedAccounts } from '@trz/hooks/useUserLinkedAccounts';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -16,6 +18,7 @@ const UserSettingsPage = (): React.JSX.Element => {
     const me = useMe();
     const sockCtx = useSocket();
     const unsavedCtx = useUnsavedChanges();
+    const linkedAccounts = useUserLinkedAccounts(me?.id);
 
     const [editedUserData, setEditedUserData] = useState<Partial<UserHeader>>({});
 
@@ -92,7 +95,7 @@ const UserSettingsPage = (): React.JSX.Element => {
                             <Title order={2}>Settings for {fullName(me)}</Title>
                         </Group>
                         <Fieldset
-                            legend="General"
+                            legend="Account"
                             bg="transparent"
                         >
                             <Stack gap={'lg'}>
@@ -144,6 +147,20 @@ const UserSettingsPage = (): React.JSX.Element => {
                                 >
                                     Save
                                 </Button>
+                            </Stack>
+                        </Fieldset>
+                        <Fieldset
+                            legend="Linked Accounts"
+                            bg="transparent"
+                        >
+                            <Stack gap={'lg'}>
+                                {linkedAccounts.map((account) => (
+                                    <LinkedAccountRenderer
+                                        key={account.accountId}
+                                        account={account}
+                                        isOnlyAccount={linkedAccounts.length === 1}
+                                    />
+                                ))}
                             </Stack>
                         </Fieldset>
                     </Stack>
