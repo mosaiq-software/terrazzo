@@ -11,6 +11,9 @@ export const registerDocumentListeners = (socket: Socket, io: Server) => {
             throw new Error('User does not have permission to create a document in this module');
         }
         const socketData = getSocketData(socket);
+        if (!socketData.user?.user.id) {
+            throw new Error('User not authenticated');
+        }
         const document = await createNewDocument(data.title, data.parentId, socketData.user.user.id);
         await syncDirectoryContents(io, document.parentId);
         return document;
@@ -29,6 +32,9 @@ export const registerDocumentListeners = (socket: Socket, io: Server) => {
             throw new Error('User does not have permission to edit this document');
         }
         const socketData = getSocketData(socket);
+        if (!socketData.user?.user.id) {
+            throw new Error('User not authenticated');
+        }
         const updatedDocument = await modifyDocument(data.id, data, socketData.user.user.id);
         if (!updatedDocument) {
             throw new Error('No document found');

@@ -13,9 +13,10 @@ interface EditableTextboxProps {
     inputProps?: InputProps;
     style?: CSSProperties;
     showEditIcon?: boolean;
+    readonly?: boolean;
 }
 const EditableTextbox = (props: EditableTextboxProps) => {
-    const { value, onChange, placeholder, type, titleProps, textProps, inputProps, style } = props;
+    const { value, onChange, placeholder, type, titleProps, textProps, inputProps, style, readonly: viewOnly } = props;
     const [editingValue, setEditingValue] = React.useState<string | null>(null);
 
     const onSaveChanges = () => {
@@ -30,7 +31,9 @@ const EditableTextbox = (props: EditableTextboxProps) => {
     };
 
     const onEdit = (e) => {
-        // captureEvent(e);
+        if (viewOnly) {
+            return;
+        }
         setEditingValue(value);
     };
 
@@ -70,7 +73,7 @@ const EditableTextbox = (props: EditableTextboxProps) => {
                         gap={4}
                         align="center"
                         style={{
-                            cursor: 'pointer',
+                            cursor: viewOnly ? 'default' : 'pointer',
                         }}
                     >
                         {props.showEditIcon && (

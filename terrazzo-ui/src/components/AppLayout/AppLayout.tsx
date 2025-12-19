@@ -9,12 +9,14 @@ import { UserProfileIcon } from '@trz/components/AppLayout/Navbar/UserProfileIco
 import { SearchBar } from '@trz/components/AutoComplete/Searchbar';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
+import { useUser } from '@trz/contexts/user-context';
 import { useContextMenu } from 'mantine-contextmenu';
 import { NavLink, Outlet } from 'react-router-dom';
 
 const AppLayout = () => {
     const uiCtx = useUI();
     const org = useOrg();
+    const userCtx = useUser();
     const { showContextMenu } = useContextMenu();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage<boolean>({ key: LocalStorageKey.SIDEBAR_COLLAPSED, defaultValue: false });
@@ -29,6 +31,8 @@ const AppLayout = () => {
         ['/', () => {}],
     ]);
 
+    const isPublicAccessMode = !userCtx.userData?.id;
+
     return (
         <Group
             style={{
@@ -40,119 +44,121 @@ const AppLayout = () => {
                 gap: 0,
             }}
         >
-            <Stack
-                px={sidebarCollapsed ? '10px' : '15px'}
-                style={{
-                    transition: `padding ${uiCtx.animationDuration}ms`,
-                }}
-                bg="#0c0c10"
-                h="100vh"
-                pt={10}
-            >
-                <Group
-                    align="center"
-                    justify={'space-between'}
-                    wrap="nowrap"
-                    gap={0}
+            {!isPublicAccessMode && (
+                <Stack
+                    px={sidebarCollapsed ? '10px' : '15px'}
+                    style={{
+                        transition: `padding ${uiCtx.animationDuration}ms`,
+                    }}
+                    bg="#0c0c10"
+                    h="100vh"
+                    pt={10}
                 >
-                    <Tooltip
-                        offset={{ mainAxis: 5 }}
-                        label={
-                            <Group align={'center'}>
-                                <Text size={'sm'}>Collapse Sidebar</Text>
-                                <Kbd>{'['}</Kbd>
-                            </Group>
-                        }
+                    <Group
+                        align="center"
+                        justify={'space-between'}
+                        wrap="nowrap"
+                        gap={0}
                     >
-                        <Burger
-                            transitionDuration={uiCtx.animationDuration}
-                            opened={!sidebarCollapsed}
-                            size="20px"
-                            p="5px"
-                            color="white"
-                            onClick={() => {
-                                setSidebarCollapsed(!sidebarCollapsed);
-                            }}
-                        />
-                    </Tooltip>
-                    <NavLink
-                        to={'/'}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'baseline',
-                            justifyContent: 'flex-end',
-                            textDecoration: 'none',
-                            width: sidebarCollapsed ? '0px' : '200px',
-                            transition: `width ${uiCtx.animationDuration}ms`,
-                            overflow: 'hidden',
-                        }}
-                    >
-                        <TerrazzoLogo
+                        <Tooltip
+                            offset={{ mainAxis: 5 }}
+                            label={
+                                <Group align={'center'}>
+                                    <Text size={'sm'}>Collapse Sidebar</Text>
+                                    <Kbd>{'['}</Kbd>
+                                </Group>
+                            }
+                        >
+                            <Burger
+                                transitionDuration={uiCtx.animationDuration}
+                                opened={!sidebarCollapsed}
+                                size="20px"
+                                p="5px"
+                                color="white"
+                                onClick={() => {
+                                    setSidebarCollapsed(!sidebarCollapsed);
+                                }}
+                            />
+                        </Tooltip>
+                        <NavLink
+                            to={'/'}
                             style={{
-                                fill: '#282836',
-                                width: 16,
-                                height: 20,
-                            }}
-                        />
-                        <Title
-                            order={2}
-                            c="#282836"
-                            fw={700}
-                            style={{
-                                letterSpacing: 1,
+                                display: 'flex',
+                                alignItems: 'baseline',
+                                justifyContent: 'flex-end',
                                 textDecoration: 'none',
+                                width: sidebarCollapsed ? '0px' : '200px',
+                                transition: `width ${uiCtx.animationDuration}ms`,
+                                overflow: 'hidden',
                             }}
                         >
-                            errazzo
-                        </Title>
-                    </NavLink>
-                </Group>
-                <Divider />
-                <OrganizationSelectorMenu sidebarCollapsed={sidebarCollapsed} />
-                <Divider />
-                <Box
-                    style={{
-                        flexGrow: 1,
-                        overflowY: 'auto',
-                        position: 'relative',
-                    }}
-                >
+                            <TerrazzoLogo
+                                style={{
+                                    fill: '#282836',
+                                    width: 16,
+                                    height: 20,
+                                }}
+                            />
+                            <Title
+                                order={2}
+                                c="#282836"
+                                fw={700}
+                                style={{
+                                    letterSpacing: 1,
+                                    textDecoration: 'none',
+                                }}
+                            >
+                                errazzo
+                            </Title>
+                        </NavLink>
+                    </Group>
+                    <Divider />
+                    <OrganizationSelectorMenu sidebarCollapsed={sidebarCollapsed} />
+                    <Divider />
                     <Box
                         style={{
+                            flexGrow: 1,
+                            overflowY: 'auto',
                             position: 'relative',
-                            zIndex: 1,
                         }}
                     >
-                        <DirectoryTree
-                            sidebarCollapsed={sidebarCollapsed}
-                            orgId={org.active?.id}
+                        <Box
+                            style={{
+                                position: 'relative',
+                                zIndex: 1,
+                            }}
+                        >
+                            <DirectoryTree
+                                sidebarCollapsed={sidebarCollapsed}
+                                orgId={org.active?.id}
+                            />
+                        </Box>
+                        <Box
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                zIndex: 0,
+                            }}
+                            onContextMenuCapture={showContextMenu((close) =>
+                                org.active ? (
+                                    <DirectoryListItemContextMenu
+                                        onClose={close}
+                                        parentId={org.active.id}
+                                        parentName={org.active.name}
+                                        allowAddItem={true}
+                                        isRoot
+                                    />
+                                ) : (
+                                    <></>
+                                )
+                            )}
                         />
                     </Box>
-                    <Box
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            zIndex: 0,
-                        }}
-                        onContextMenuCapture={showContextMenu((close) =>
-                            org.active ? (
-                                <DirectoryListItemContextMenu
-                                    onClose={close}
-                                    parentId={org.active.id}
-                                    parentName={org.active.name}
-                                    allowAddItem={true}
-                                    isRoot
-                                />
-                            ) : (
-                                <></>
-                            )
-                        )}
-                    />
-                </Box>
-            </Stack>
+                </Stack>
+            )}
             <Stack
                 flex={1}
                 gap={0}
@@ -161,13 +167,12 @@ const AppLayout = () => {
                 }}
             >
                 <Group
-                    style={{
-                        justifyContent: 'space-between',
-                        height: `${uiCtx.navbarHeight}px`,
-                        padding: '10px',
-                        background: '#0c0c10',
-                        gap: 0,
-                    }}
+                    gap={0}
+                    justify="space-between"
+                    align="center"
+                    bg="#0c0c10"
+                    h={uiCtx.navbarHeight}
+                    px="md"
                 >
                     <Group>
                         <Text
@@ -275,7 +280,7 @@ const AppLayout = () => {
                                 </ScrollAreaAutosize>
                             </Popover.Dropdown>
                         </Popover>
-                        <SearchBar />
+                        {!isPublicAccessMode && <SearchBar />}
                         <UserProfileIcon />
                     </Group>
                 </Group>

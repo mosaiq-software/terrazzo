@@ -8,7 +8,6 @@ import { addCard } from './cardController';
 import { addList } from './listController';
 import { addOrganization, updateOrganizationFromPartial } from './organizationController';
 
-//Gets
 export async function getOrCreateUserByGithubAccessToken(accessToken: string) {
     const githubData = await getPrivateGitHubUserData(accessToken);
     if (!githubData) {
@@ -33,22 +32,21 @@ export async function checkUsernameTaken(username: string) {
     return user != null;
 }
 
-//Creates
-export async function createNewUser(username: string, firstName: string, lastName: string, profilePicture: string, githubUserId: string) {
-    if (username.length > 13) {
+export async function createNewUser(username: string | undefined, firstName: string | undefined, lastName: string | undefined, profilePicture: string | undefined, githubUserId: string) {
+    if (username && username.length > 13) {
         throw new Error('Username must be 13 characters or less');
     }
-    if ((await getUserHeaderByUsernameDb(username)) != null) {
+    if (username && (await getUserHeaderByUsernameDb(username)) != null) {
         throw new Error('Username already exists');
     }
 
     const ghProfile = await getPublicGithubUserDataFromGithubUserId(githubUserId);
-
+    const [ghFirstName, ghLastName] = ghProfile?.name ? ghProfile.name.split(' ') : [undefined, undefined];
     const newUser: UserHeader = {
         id: crypto.randomUUID(),
-        username: username || '',
-        firstName: firstName,
-        lastName: lastName,
+        username: username || ghProfile?.login || '',
+        firstName: firstName || ghFirstName || '',
+        lastName: lastName || ghLastName || '',
         profilePicture: profilePicture || ghProfile?.avatar_url || '',
         githubUserId: githubUserId,
     };
@@ -59,31 +57,9 @@ export async function createNewUser(username: string, firstName: string, lastNam
         throw new Error('Failed to create user' + e);
     }
 
+    await seedNewUserProfile(newUser.id);
+
     return newUser;
-}
-
-//Updates
-
-export async function setupUser(userId: UserId, username: string, firstName: string, lastName: string) {
-    const user = await getUserHeaderByIdDb(userId);
-
-    if (user == null) {
-        throw new Error('User not found');
-    }
-
-    user.username = username;
-    user.firstName = firstName;
-    user.lastName = lastName;
-
-    try {
-        await updateUserHeaderDb(user);
-    } catch (e) {
-        throw new Error('Failed to update user' + e);
-    }
-
-    await seedNewUserProfile(userId);
-
-    return user;
 }
 
 const seedNewUserProfile = async (userId: UserId) => {

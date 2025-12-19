@@ -12,6 +12,6 @@ export interface UserData {
 }
 
 export interface SocketHandshakeAuth {
-    userId: UserId;
-    githubToken: string;
+    userId?: UserId | undefined;
+    githubToken: string | undefined;
 }

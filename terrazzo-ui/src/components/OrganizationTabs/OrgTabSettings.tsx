@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea, Title } from '@mantine/core';
+import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
@@ -80,14 +80,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                 width: '100%',
             }}
         >
-            <Title
-                c="white"
-                pb="20"
-                order={4}
-                maw="200"
-            >
-                Settings
-            </Title>
             <Box
                 style={{
                     width: '100%',

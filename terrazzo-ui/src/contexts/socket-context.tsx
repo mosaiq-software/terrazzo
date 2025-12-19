@@ -4,6 +4,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useUser } from './user-context';
 
+/** Special status string from socket.io client when disconnecting */
+const IO_CLIENT_DISCONNECT = 'io client disconnect';
+
 export type SocketContextType = {
     socket: Socket | null;
     sid: SocketId | undefined;
@@ -18,20 +21,16 @@ const SocketProvider: React.FC<any> = ({ children }) => {
     const usr = useUser();
     const [socket, setSocketState] = useState<Socket | null>(null);
     const [connected, setConnected] = useState<boolean>(false);
-    // const [userLookup, setUserLookup] = useState<{[userId:UserId]:UserHeader}>({});
 
     useEffect(() => {
         if (!import.meta.env.SOCKET_URL) {
             throw new Error('SOCKET_URL environment variable is not set');
         }
-        if (!usr.userData?.id || !usr.githubAuthToken) {
-            return;
-        }
 
         // CREATE SOCKET CONNECTION
         const auth: SocketHandshakeAuth = {
-            userId: usr.userData.id,
-            githubToken: usr.githubAuthToken,
+            userId: usr.userData?.id || undefined,
+            githubToken: usr.githubAuthToken || undefined,
         };
         const sock = io(import.meta.env.SOCKET_URL, {
             auth,
@@ -57,7 +56,11 @@ const SocketProvider: React.FC<any> = ({ children }) => {
             notify(NoteType.CONNECTION_ERROR);
         });
 
-        sock.on(ClientSocketIOEvent.DISCONNECT, () => {
+        sock.on(ClientSocketIOEvent.DISCONNECT, (reason) => {
+            if (reason === IO_CLIENT_DISCONNECT) {
+                // Disconnection was initiated by the client, do not attempt to reconnect
+                return;
+            }
             setConnected(false);
             notify(NoteType.DISCONNECTED);
         });
@@ -85,7 +88,6 @@ const SocketProvider: React.FC<any> = ({ children }) => {
 
         return () => {
             setConnected(false);
-            console.warn('Effect closed');
             sock.disconnect();
         };
     }, [usr.userData?.id, usr.githubAuthToken]);
@@ -129,17 +131,6 @@ const SocketProvider: React.FC<any> = ({ children }) => {
             });
         });
     }
-
-    // EVENT EMITTERS
-
-    // const lookupUser = async (userId:UserId):Promise<UserHeader | undefined> => {
-    //     const cached = userLookup[userId];
-    //     if(cached){
-    //         return cached;
-    //     }
-    //     const fetched = await getUserHeader(userId);
-    //     return fetched;
-    // }
 
     return (
         <SocketContext.Provider

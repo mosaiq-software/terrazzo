@@ -1,13 +1,13 @@
-import { Box, Fieldset, Stack, Title } from '@mantine/core';
+import { Box, Fieldset, Stack } from '@mantine/core';
 import { OrganizationId, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateBoardField, updateDocumentMetadata } from '@trz/emitters';
 import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
+import { ModuleIcon } from '@trz/util/moduleUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useMemo } from 'react';
-import { ModuleIcon } from '../ModuleSettings/ModuleSettingDirectory';
 import { ActionRow } from '../UI/ActionRow';
 
 interface OrgTabArchiveProps {
@@ -54,14 +54,6 @@ export const OrgTabArchive = (props: OrgTabArchiveProps) => {
                 width: '100%',
             }}
         >
-            <Title
-                c="white"
-                pb="20"
-                order={4}
-                maw="200"
-            >
-                Archive
-            </Title>
             <Box
                 style={{
                     width: '100%',

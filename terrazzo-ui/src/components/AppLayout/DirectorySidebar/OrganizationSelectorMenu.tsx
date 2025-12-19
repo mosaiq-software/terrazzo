@@ -57,6 +57,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
             width={200}
             withinPortal
             trigger="hover"
+            openDelay={300}
         >
             <Menu.Target>
                 <Tooltip

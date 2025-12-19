@@ -1,7 +1,9 @@
-import { Alert, Button, Group, Stack, Text, TextInput } from '@mantine/core';
+import { Alert, Box, Button, CopyButton, Group, Stack, Switch, Text, TextInput, Tooltip } from '@mantine/core';
 import { ModuleHeader } from '@mosaiq/terrazzo-common';
+import { getModulePublicUrl } from '@trz/util/moduleUtils';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useEffect, useState } from 'react';
+import { MdLink } from 'react-icons/md';
 import { RectHoldingButton } from '../UI/RectHoldingButton';
 import { PermissionsEditor } from './PermissionsEditor/PermissionsEditor';
 
@@ -72,7 +74,45 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
             <Group
                 w="100%"
                 pt="xl"
+                justify="space-between"
             >
+                <Stack gap={'xs'}>
+                    <Tooltip
+                        label={`Public ${props.moduleHeader.type}s are viewable by anyone with the link`}
+                        withArrow
+                    >
+                        <Box>
+                            <Switch
+                                labelPosition="left"
+                                checked={props.moduleHeader.public}
+                                onChange={(event) => {
+                                    props.onSave({ public: event.currentTarget.checked });
+                                }}
+                                disabled={props.disabled}
+                                label="Public"
+                                styles={{
+                                    description: {
+                                        maxWidth: '10rem',
+                                    },
+                                }}
+                            />
+                        </Box>
+                    </Tooltip>
+                    {props.moduleHeader.public && (
+                        <CopyButton value={getModulePublicUrl(props.moduleHeader.type, props.moduleHeader.id)}>
+                            {({ copied, copy }) => (
+                                <Button
+                                    variant="subtle"
+                                    onClick={copy}
+                                    disabled={props.disabled}
+                                    leftSection={<MdLink size={16} />}
+                                >
+                                    {copied ? 'Link Copied' : 'Copy Link'}
+                                </Button>
+                            )}
+                        </CopyButton>
+                    )}
+                </Stack>
                 <RectHoldingButton
                     durationMs={3000}
                     onClick={() => {

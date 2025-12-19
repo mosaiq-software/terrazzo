@@ -3,6 +3,7 @@ import { useClipboard, useIdle } from '@mantine/hooks';
 import { CardId, fullName } from '@mosaiq/terrazzo-common';
 import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/CollaborativeTextArea';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
+import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUser } from '@trz/contexts/user-context';
 import { updateCardAssignee, updateCardField } from '@trz/emitters';
@@ -35,6 +36,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
     const card = useCard(props.cardId, false, true);
     useCatchSaveKey();
     const boardMeta = useBoardMetadata();
+    const perms = boardMeta?.permissions;
 
     const onCloseModal = () => {
         props.onClose();
@@ -80,6 +82,15 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                     <Text ta="center">Loading...</Text>
                 </Stack>
             </Center>
+        );
+    }
+
+    if (!perms?.viewBoard) {
+        return (
+            <NotFound
+                itemType="card"
+                error={PageErrors.UNAUTHORIZED}
+            />
         );
     }
 
@@ -149,6 +160,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                         style={{
                                             width: '95%',
                                         }}
+                                        readonly={!perms?.editCard}
                                     />
                                     <Tooltip label="Copy card ID">
                                         <Button
@@ -191,25 +203,34 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                         pb="8rem"
                     >
                         <Group>
-                            <PriorityButtons card={card} />
+                            <PriorityButtons
+                                card={card}
+                                viewOnly={!perms.editCard}
+                            />
                             <LabelsMenu
                                 card={card}
                                 boardLabels={boardMeta.labels}
+                                viewOnly={!perms.editCard}
                             />
-                            <AssigneeMenu card={card} />
-                            <Tooltip label={`${joinedCard ? 'Leave' : 'Join'} Card`}>
-                                <ActionIcon
-                                    variant="subtle"
-                                    c="white"
-                                    onClick={() => {
-                                        if (usr.userData) {
-                                            updateCardAssignee(sockCtx, card.id, usr.userData.id, !joinedCard);
-                                        }
-                                    }}
-                                >
-                                    {joinedCard ? <FaUserMinus /> : <FaUserPlus />}
-                                </ActionIcon>
-                            </Tooltip>
+                            <AssigneeMenu
+                                card={card}
+                                viewOnly={!perms.editCard}
+                            />
+                            {perms.editCard && (
+                                <Tooltip label={`${joinedCard ? 'Leave' : 'Join'} Card`}>
+                                    <ActionIcon
+                                        variant="subtle"
+                                        c="white"
+                                        onClick={() => {
+                                            if (usr.userData) {
+                                                updateCardAssignee(sockCtx, card.id, usr.userData.id, !joinedCard);
+                                            }
+                                        }}
+                                    >
+                                        {joinedCard ? <FaUserMinus /> : <FaUserPlus />}
+                                    </ActionIcon>
+                                </Tooltip>
+                            )}
                         </Group>
                         <CollaborativeTextArea
                             textBlockId={card.descriptionTextBlockId}
@@ -218,6 +239,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             idle={idle}
                             name={fullName(usr.userData)}
                             avatarUrl={usr.userData?.profilePicture}
+                            viewOnly={!perms.editCard}
                         />
                         <Stack
                             style={{
@@ -228,18 +250,20 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             <Text>
                                 Created at {new Date(card.createdAt).toLocaleString()} by {fullName(card.createdBy)}
                             </Text>
-                            <Tooltip label="Archived cards can be restored later">
-                                <Button
-                                    variant="subtle"
-                                    c="white"
-                                    key={card.archived ? 'Unarchive' : 'Archive'}
-                                    leftSection={<FaArchive />}
-                                    justify={'flex-start'}
-                                    onClick={() => onArchiveCard(!card.archived)}
-                                >
-                                    {card.archived ? 'Unarchive' : 'Archive'}
-                                </Button>
-                            </Tooltip>
+                            {perms?.editCard && (
+                                <Tooltip label="Archived cards can be restored later">
+                                    <Button
+                                        variant="subtle"
+                                        c="white"
+                                        key={card.archived ? 'Unarchive' : 'Archive'}
+                                        leftSection={<FaArchive />}
+                                        justify={'flex-start'}
+                                        onClick={() => onArchiveCard(!card.archived)}
+                                    >
+                                        {card.archived ? 'Unarchive' : 'Archive'}
+                                    </Button>
+                                </Tooltip>
+                            )}
                         </Stack>
                     </Stack>
                 </Modal.Body>

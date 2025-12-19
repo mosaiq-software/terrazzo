@@ -1,4 +1,4 @@
-import { Button, Flex, Menu } from '@mantine/core';
+import { Button, Center, Flex, Menu } from '@mantine/core';
 import { Card, Priority } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardField } from '@trz/emitters';
@@ -25,6 +25,7 @@ export const prioNames = {
 
 interface PriorityButtonsProps {
     card: Card;
+    viewOnly?: boolean;
 }
 export const PriorityButtons = (props: PriorityButtonsProps): React.JSX.Element => {
     const priority = props.card.priority ?? 0;
@@ -50,14 +51,21 @@ export const PriorityButtons = (props: PriorityButtonsProps): React.JSX.Element 
             closeOnClickOutside={true}
             trigger="hover"
             closeDelay={200}
+            disabled={props.viewOnly}
         >
             <Menu.Target>
-                <Button
-                    variant="subtle"
-                    justify={'flex-start'}
-                >
-                    <PriorityChip priority={priority} />
-                </Button>
+                {props.viewOnly ? (
+                    <Center p="sm">
+                        <PriorityChip priority={priority} />
+                    </Center>
+                ) : (
+                    <Button
+                        variant="subtle"
+                        justify={'flex-start'}
+                    >
+                        <PriorityChip priority={priority} />
+                    </Button>
+                )}
             </Menu.Target>
             <Menu.Dropdown>
                 <Flex

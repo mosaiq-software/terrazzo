@@ -13,7 +13,6 @@ export enum RestRoutes {
     USER_GITHUB_DATA = '/user/github/userdata/:access_token',
     USER_GITHUB_REVOKE_TOKEN = '/user/github/revoke/:accessToken',
     USER_CHECK_USERNAME = '/user/check-username/:username',
-    USER_SETUP = '/user/setup/:id',
     USER_FAKE_DEV = '/user/dev-only-signin/:username',
     IMPORT_FROM_TRELLO = '/uploadtrello/:parentId',
 }
@@ -31,7 +30,6 @@ export const RestRequestMethod = {
     [RestRoutes.USER_GITHUB_DATA]: RestMethods.GET,
     [RestRoutes.USER_GITHUB_REVOKE_TOKEN]: RestMethods.DELETE,
     [RestRoutes.USER_CHECK_USERNAME]: RestMethods.GET,
-    [RestRoutes.USER_SETUP]: RestMethods.POST,
     [RestRoutes.USER_FAKE_DEV]: RestMethods.POST,
     [RestRoutes.IMPORT_FROM_TRELLO]: RestMethods.POST,
 };
@@ -41,7 +39,6 @@ export interface RestRequestParams {
     [RestRoutes.USER_GITHUB_DATA]: { access_token: string };
     [RestRoutes.USER_GITHUB_REVOKE_TOKEN]: { accessToken: string };
     [RestRoutes.USER_CHECK_USERNAME]: { username: string };
-    [RestRoutes.USER_SETUP]: { id: string };
     [RestRoutes.USER_FAKE_DEV]: { username: string };
     [RestRoutes.IMPORT_FROM_TRELLO]: { parentId: UID };
 }
@@ -52,7 +49,6 @@ export interface RestRequestBody {
     [RestRoutes.USER_GITHUB_DATA]: undefined;
     [RestRoutes.USER_GITHUB_REVOKE_TOKEN]: undefined;
     [RestRoutes.USER_CHECK_USERNAME]: undefined;
-    [RestRoutes.USER_SETUP]: { username: string; firstName: string; lastName: string };
     [RestRoutes.USER_FAKE_DEV]: undefined;
     [RestRoutes.IMPORT_FROM_TRELLO]: TrelloExportType;
 }
@@ -63,7 +59,6 @@ export interface RestResponseTypes {
     [RestRoutes.USER_GITHUB_DATA]: UserHeader | null;
     [RestRoutes.USER_GITHUB_REVOKE_TOKEN]: undefined;
     [RestRoutes.USER_CHECK_USERNAME]: boolean;
-    [RestRoutes.USER_SETUP]: UserHeader;
     [RestRoutes.USER_FAKE_DEV]: UserHeader;
     [RestRoutes.IMPORT_FROM_TRELLO]: BoardId | undefined;
 }

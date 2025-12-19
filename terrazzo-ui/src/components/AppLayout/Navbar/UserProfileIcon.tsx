@@ -1,12 +1,12 @@
-import { Avatar, Menu, UnstyledButton } from '@mantine/core';
+import { Avatar, Button, Menu } from '@mantine/core';
 import { fullName } from '@mosaiq/terrazzo-common';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useUser } from '@trz/contexts/user-context';
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 export const UserProfileIcon = () => {
-    const usr = useUser();
+    const userCtx = useUser();
     const navigate = useNavigate();
     const unsavedCtx = useUnsavedChanges();
 
@@ -14,8 +14,8 @@ export const UserProfileIcon = () => {
         if (await unsavedCtx.confirmKeepUnsavedChanges()) {
             return;
         }
-        usr.logoutAll();
-    }, [usr, unsavedCtx]);
+        userCtx.logoutAll();
+    }, [userCtx, unsavedCtx]);
 
     const handleNavigateToSettings = useCallback(async () => {
         if (await unsavedCtx.confirmKeepUnsavedChanges()) {
@@ -34,14 +34,24 @@ export const UserProfileIcon = () => {
             trigger="hover"
         >
             <Menu.Target>
-                <UnstyledButton onClick={() => {}}>
+                {userCtx.userData ? (
                     <Avatar
                         size={'1.75rem'}
-                        src={usr.userData?.profilePicture}
+                        src={userCtx.userData?.profilePicture}
                         color="initials"
-                        name={fullName(usr.userData)}
+                        name={fullName(userCtx.userData)}
                     />
-                </UnstyledButton>
+                ) : (
+                    <Button
+                        component={Link}
+                        to="/login"
+                        color="#fafafa"
+                        c="#19191b"
+                        variant="filled"
+                    >
+                        Login
+                    </Button>
+                )}
             </Menu.Target>
             <Menu.Dropdown>
                 <Menu.Item onClick={handleNavigateToSettings}>Settings</Menu.Item>

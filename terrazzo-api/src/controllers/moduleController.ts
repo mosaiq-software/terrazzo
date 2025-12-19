@@ -24,6 +24,7 @@ export const createNewModule = async (name: string, parentId: UID, type: TrzModu
         createdAt: Date.now(),
         desiredPermissions: {},
         effectivePermissions: {},
+        public: false,
     };
     await createModuleDb(newModule);
     return newModule;

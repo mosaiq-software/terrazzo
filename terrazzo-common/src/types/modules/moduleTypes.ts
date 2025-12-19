@@ -21,4 +21,5 @@ export interface ModuleHeader {
     orgId: OrganizationId;
     desiredPermissions: ModulePermissions;
     effectivePermissions: ModulePermissions;
+    public: boolean;
 }

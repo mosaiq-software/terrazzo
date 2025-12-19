@@ -6,7 +6,7 @@ import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createCard, getListData, updateListField } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { BoardContext } from '@trz/pages/BoardPage';
+import { BoardContext, useBoardMetadata } from '@trz/pages/BoardPage';
 import { LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
 import { captureDraggableEvents, completelyCaptureEvent } from '@trz/util/eventUtils';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -27,11 +27,13 @@ interface ListElementProps {
 function ListElement(props: ListElementProps): React.JSX.Element {
     const [list, setList] = useState<ListHeader | undefined>(undefined);
     const [listTitle, setListTitle] = useState('');
-    const [visible, setVisible] = useState(false);
+    const [cardNameInputVisible, setCardNameInputVisible] = useState(false);
     const [error, setError] = useState('');
     const [cardTitle, setCardTitle] = useState('');
     const clickOutsideRef = useClickOutside(() => onBlur());
     const sockCtx = useSocket();
+    const boardMeta = useBoardMetadata();
+    const { editBoard, moveCards, createCard: canCreateCard } = boardMeta.permissions;
 
     useEffect(() => {
         const fetchListData = async () => {
@@ -62,7 +64,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
         fetchListData();
     }, [props.listId, sockCtx.connected]);
 
-    useSocketListener<ServerSE.UPDATE_LIST_FIELD>(ServerSE.UPDATE_LIST_FIELD, (payload) => {
+    useSocketListener(ServerSE.UPDATE_LIST_FIELD, (payload) => {
         if (props.listId !== payload.id) {
             return;
         }
@@ -99,7 +101,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
             return;
         }
 
-        setVisible(usingHotkey);
+        setCardNameInputVisible(usingHotkey);
     }
 
     async function onTitleChange(value: string) {
@@ -119,7 +121,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
     function onBlur() {
         setCardTitle('');
         setError('');
-        setVisible((v) => !v);
+        setCardNameInputVisible((v) => !v);
     }
 
     return (
@@ -166,7 +168,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                 px="sm"
                 w="100%"
                 style={{
-                    cursor: 'pointer',
+                    cursor: editBoard ? 'pointer' : 'default',
                     height: '3rem',
                 }}
             >
@@ -179,38 +181,41 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                     style={{
                         width: '90%',
                     }}
+                    readonly={!editBoard}
                 />
 
-                <Menu
-                    shadow="md"
-                    width={200}
-                    position="right-start"
-                    withArrow
-                    arrowPosition="center"
-                    withOverlay={true}
-                    closeOnClickOutside={true}
-                >
-                    <Menu.Target>
-                        <Button
-                            {...captureDraggableEvents(completelyCaptureEvent)}
-                            variant="subtle"
-                            c="#ffffff"
-                            h="100%"
-                            px={5}
-                        >
-                            <HiDotsVertical />
-                        </Button>
-                    </Menu.Target>
-                    <Menu.Dropdown {...captureDraggableEvents(completelyCaptureEvent)}>
-                        <Menu.Label>Settings</Menu.Label>
-                        <Menu.Item
-                            onClick={onArchive}
-                            leftSection={<FaArchive />}
-                        >
-                            Archive List
-                        </Menu.Item>
-                    </Menu.Dropdown>
-                </Menu>
+                {editBoard && (
+                    <Menu
+                        shadow="md"
+                        width={200}
+                        position="right-start"
+                        withArrow
+                        arrowPosition="center"
+                        withOverlay={true}
+                        closeOnClickOutside={true}
+                    >
+                        <Menu.Target>
+                            <Button
+                                {...captureDraggableEvents(completelyCaptureEvent)}
+                                variant="subtle"
+                                c="#ffffff"
+                                h="100%"
+                                px={5}
+                            >
+                                <HiDotsVertical />
+                            </Button>
+                        </Menu.Target>
+                        <Menu.Dropdown {...captureDraggableEvents(completelyCaptureEvent)}>
+                            <Menu.Label>Settings</Menu.Label>
+                            <Menu.Item
+                                onClick={onArchive}
+                                leftSection={<FaArchive />}
+                            >
+                                Archive List
+                            </Menu.Item>
+                        </Menu.Dropdown>
+                    </Menu>
+                )}
             </Group>
             <Stack
                 ref={props.droppableSetNodeRef}
@@ -222,11 +227,14 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                     overflowX: 'hidden',
                 }}
             >
-                <ListCardStack {...props} />
+                <ListCardStack
+                    {...props}
+                    canMoveCards={moveCards}
+                />
             </Stack>
 
             <Group>
-                {visible && (
+                {cardNameInputVisible && (
                     <Paper
                         bg={'#121314'}
                         w="250"
@@ -265,13 +273,13 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                 )}
             </Group>
 
-            {!visible && (
+            {!cardNameInputVisible && canCreateCard && (
                 <Button
                     w="100%"
                     variant="light"
                     color="gray"
                     onClickCapture={(e) => {
-                        setVisible((v) => !v);
+                        setCardNameInputVisible((v) => !v);
                     }}
                     style={{
                         maxHeight: '2.5rem',
@@ -290,13 +298,17 @@ function ListElement(props: ListElementProps): React.JSX.Element {
 
 export default ListElement;
 
-const ListCardStack = (props: ListElementProps) => {
+interface ListCardStackProps extends ListElementProps {
+    canMoveCards: boolean;
+}
+const ListCardStack = (props: ListCardStackProps) => {
     const boardContext = useContext(BoardContext);
     const cardIds = boardContext?.listToCardsMap.get(props.listId) ?? [];
     return (
         <SortableContext
             items={cardIds}
             strategy={verticalListSortingStrategy}
+            disabled={!props.canMoveCards}
         >
             {cardIds.map((cardId) => {
                 return (

@@ -1,6 +1,9 @@
-import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
+import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, GithubUserProfile, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
 import { syncUserJoinedRoom, syncUserLeftRoom } from '@trz-api/broadcasters/realtimeBroadcasters';
+import { getUserPreview } from '@trz-api/controllers/userController';
 import { Server, Socket } from 'socket.io';
+import { isDev } from './envUtils';
+import { getPrivateGitHubUserData } from './githubUtils';
 import { SocketData } from './socketTypes';
 
 /**
@@ -61,7 +64,7 @@ export interface BroadcasterOptions<T extends ServerSE> {
      * Function to build the payload for each user based on their user data
      * @throws Error if payload cannot be built for a user. This user will be skipped.
      */
-    buildPayload: (userId: UserId) => Promise<ServerSEPayload[T]> | ServerSEPayload[T];
+    buildPayload: (userId: UserId | undefined) => Promise<ServerSEPayload[T]> | ServerSEPayload[T];
 }
 /**
  * Sends an event to each user who is in at least one of the specified rooms.
@@ -83,19 +86,17 @@ export const broadcast = async <T extends ServerSE>(options: BroadcasterOptions<
     const payloads = new Map<SocketId, ServerSEPayload[T]>();
     for (const s of allSockets) {
         const socketData = getSocketData(s);
-        if (socketData?.user) {
-            try {
-                const payload = await buildPayload(socketData.user.user.id);
-                payloads.set(s.id, payload);
-            } catch (e: any) {
-                console.warn(`Skipping socket in broadcast`, {
-                    socketId: s.id,
-                    userId: socketData.user.user.id,
-                    event,
-                    error: e.message,
-                    stack: e.stack,
-                });
-            }
+        try {
+            const payload = await buildPayload(socketData.user?.user.id);
+            payloads.set(s.id, payload);
+        } catch (e: any) {
+            console.warn(`Skipping socket in broadcast`, {
+                socketId: s.id,
+                userId: socketData.user?.user.id,
+                event,
+                error: e.message,
+                stack: e.stack,
+            });
         }
     }
 
@@ -137,7 +138,9 @@ export const joinRoom = async (io: Server, socket: Socket, room: RoomId): Promis
         }
         const roomUsers = await getUsersInRoom(io, room);
         const socketData = getSocketData(socket);
-        await syncUserJoinedRoom(io, room, { ...socketData.user, sid: socket.id });
+        if (socketData?.user) {
+            await syncUserJoinedRoom(io, room, socketData.user);
+        }
         socket.join(room);
         return roomUsers;
     }
@@ -188,4 +191,36 @@ export const subscribe = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (d
             reply(undefined as ClientSEReplies[T], error.message);
         }
     });
+};
+
+export const initializeSocketData = async (socket: Socket): Promise<SocketData> => {
+    try {
+        const auth: SocketHandshakeAuth = socket.handshake.auth as any;
+        let userData;
+        if (auth.userId) {
+            userData = await getUserPreview(auth.userId);
+        }
+        let githubData: GithubUserProfile | null = null;
+        if (userData && auth.githubToken && !(isDev() && userData.githubUserId.startsWith('FAKE_'))) {
+            githubData = await getPrivateGitHubUserData(auth.githubToken);
+        }
+
+        const socketData: SocketData = {
+            connectedAt: new Date(),
+            githubAccessToken: auth.githubToken,
+            sid: socket.id,
+            user: userData
+                ? {
+                      sid: socket.id,
+                      idle: false,
+                      user: userData,
+                  }
+                : undefined,
+        };
+        return socketData;
+    } catch (error) {
+        console.error('Error initializing socket data for ' + socket.id, error);
+        socket.disconnect(true);
+        throw error;
+    }
 };

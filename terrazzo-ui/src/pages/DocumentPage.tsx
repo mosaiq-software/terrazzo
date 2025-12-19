@@ -1,6 +1,6 @@
 import { Box, Group, Loader, ScrollArea, Stack, Text } from '@mantine/core';
 import { useIdle } from '@mantine/hooks';
-import { DocumentId, fullName } from '@mosaiq/terrazzo-common';
+import { DocumentId, fullName, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/CollaborativeTextArea';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
@@ -10,6 +10,7 @@ import { useUser } from '@trz/contexts/user-context';
 import { updateDocumentMetadata } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useDocument } from '@trz/hooks/useDocument';
+import { useModulePermission } from '@trz/hooks/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
 import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
 import { setTitle } from '@trz/util/tabUtils';
@@ -24,7 +25,12 @@ const DocumentPage = (): React.JSX.Element => {
     const idle = useIdle(IDLE_TIMEOUT_MS);
     const usr = useUser();
     const { document, lastEditor } = useDocument(docId);
+    const userCanExplicitlyViewDocument = useModulePermission(document, PermissibleAction.ViewDocument);
+    const viewOnly = !userCanExplicitlyViewDocument && document?.public;
+    const userCanViewDocument = userCanExplicitlyViewDocument || document?.public;
+
     useCatchSaveKey();
+
     useEffect(() => {
         setTitle(`${document?.name ?? 'Document'} | Terrazzo`);
     }, [document?.name]);
@@ -38,6 +44,15 @@ const DocumentPage = (): React.JSX.Element => {
             <NotFound
                 itemType="document"
                 error={PageErrors.NOT_FOUND}
+            />
+        );
+    }
+
+    if (!userCanViewDocument) {
+        return (
+            <NotFound
+                itemType="document"
+                error={PageErrors.FORBIDDEN}
             />
         );
     }
@@ -95,7 +110,8 @@ const DocumentPage = (): React.JSX.Element => {
                                 style={{
                                     width: '95%',
                                 }}
-                            />{' '}
+                                readonly={viewOnly}
+                            />
                         </Group>
 
                         <CollaborativeTextArea
@@ -105,6 +121,7 @@ const DocumentPage = (): React.JSX.Element => {
                             idle={idle}
                             name={fullName(usr.userData)}
                             avatarUrl={usr.userData?.profilePicture}
+                            viewOnly={viewOnly}
                         />
                         <Group
                             w="100%"

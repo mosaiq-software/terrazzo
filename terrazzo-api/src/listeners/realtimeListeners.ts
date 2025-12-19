@@ -16,6 +16,9 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
 
     subscribe(socket, ClientSE.MOUSE_MOVE, async (data) => {
         const socketData = getSocketData(socket);
+        if (!socketData.user?.user.id) {
+            return undefined;
+        }
         socketData.user.mouseRoomData = data;
         setSocketData(socket, socketData);
         await syncMouseMove(io, data.contextId, socket.id, data);
@@ -24,6 +27,9 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
 
     subscribe(socket, ClientSE.USER_IDLE, async (data) => {
         const socketData = getSocketData(socket);
+        if (!socketData.user?.user.id) {
+            return undefined;
+        }
         socketData.user.idle = data;
         setSocketData(socket, socketData);
         if (socketData.user.mouseRoomData) {

@@ -1,9 +1,9 @@
 import { readSessionStorageValue, useSessionStorage } from '@mantine/hooks';
-import { LocalStorageKey, UserHeader } from '@mosaiq/terrazzo-common';
+import { LocalStorageKey, RestRoutes, UserHeader } from '@mosaiq/terrazzo-common';
+import { callTrzApi } from '@trz/util/apiUtils';
 import { isDev } from '@trz/util/envUtils';
 import { getUserDataFromGithub, revokeUserAccessToGithubAuth, tryLoginWithGithub } from '@trz/util/githubAuth';
 import { NoteType, notify } from '@trz/util/notifications';
-import { setUpUserData } from '@trz/util/userUtils';
 import React, { createContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,12 +13,10 @@ type UserContextType = {
     logoutAll: () => void;
     userData: UserHeader | null;
     setUser: (newUser: UserHeader) => void;
-    setUpAccount: (username: string, firstName: string, lastName: string) => Promise<void>;
-    devLogin: (userHeader: UserHeader) => Promise<void>;
+    devLogin: (username: string) => Promise<void>;
 };
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const FINISH_ACCOUNT_CREATION_ROUTE = '/create-account';
 export const DEFAULT_AUTHED_ROUTE = '/dashboard';
 export const DEFAULT_NO_AUTH_ROUTE = '/login';
 
@@ -31,6 +29,11 @@ const UserProvider: React.FC<any> = ({ children }) => {
     useEffect(() => {
         const tryLogin = async () => {
             const savedToken = localStorage.getItem(LocalStorageKey.GITHUB_ACCESS_TOKEN);
+            if (isDev() && savedToken?.startsWith('DEV')) {
+                const devUsername = savedToken.split('.')[1];
+                devOnlyLogin(devUsername);
+                return;
+            }
             if (!savedToken) {
                 return;
             }
@@ -67,13 +70,6 @@ const UserProvider: React.FC<any> = ({ children }) => {
         setGithubAuthToken(authToken);
         setUser(user);
 
-        //Account not set up yet
-        if (!user.firstName?.length || !user.lastName?.length) {
-            setLoginRouteDestination(DEFAULT_AUTHED_ROUTE);
-            navigate(FINISH_ACCOUNT_CREATION_ROUTE);
-            return;
-        }
-
         // Account is set up and logged in
         const route = readSessionStorageValue<string | null>({ key: 'loginRouteDestination' });
         setLoginRouteDestination(null);
@@ -95,24 +91,17 @@ const UserProvider: React.FC<any> = ({ children }) => {
         window.location.href = '/';
     };
 
-    const setUpAccount = async (username: string, firstName: string, lastName: string) => {
-        if (!userData) {
-            throw new Error('No user found');
-        }
-        await setUpUserData(userData.id, username, firstName, lastName);
-        setUser({ ...userData, username, firstName, lastName });
-        const route = readSessionStorageValue<string | null>({ key: 'loginRouteDestination' });
-        setLoginRouteDestination(null);
-        navigate(route || DEFAULT_AUTHED_ROUTE);
-    };
-
-    const devOnlyLogin = async (userHeader: UserHeader) => {
+    const devOnlyLogin = async (username: string) => {
         if (!isDev()) {
             return;
         }
-        setGithubAuthToken('DEV');
+        const userHeader = (await callTrzApi<RestRoutes.USER_FAKE_DEV>(RestRoutes.USER_FAKE_DEV, { username }, undefined)) as UserHeader | undefined;
+        if (!userHeader) {
+            throw new Error('Failed to login as user');
+        }
+        setGithubAuthToken(`DEV.${userHeader.username}`);
         setUser(userHeader);
-        localStorage.removeItem(LocalStorageKey.GITHUB_ACCESS_TOKEN);
+        localStorage.setItem(LocalStorageKey.GITHUB_ACCESS_TOKEN, `DEV.${userHeader.username}`);
     };
 
     return (
@@ -123,7 +112,6 @@ const UserProvider: React.FC<any> = ({ children }) => {
                 logoutAll,
                 userData,
                 setUser,
-                setUpAccount,
                 devLogin: devOnlyLogin,
             }}
         >

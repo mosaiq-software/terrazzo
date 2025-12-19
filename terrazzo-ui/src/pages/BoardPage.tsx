@@ -1,23 +1,24 @@
 import { closestCenter, CollisionDetection, DndContext, DragEndEvent, DragOverlay, DragStartEvent, KeyboardSensor, MeasuringStrategy, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { DragAbortEvent, DragCancelEvent, DragOverEvent } from '@dnd-kit/core/dist/types';
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { Container } from '@mantine/core';
-import { arrayMoveInPlace, BoardId, BoardRes, CardId, Label, ListId, RoomType, ServerSE, UID, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
+import { Container, Loader } from '@mantine/core';
+import { arrayMoveInPlace, BoardId, BoardRes, CardId, Label, ListId, PermissibleAction, RoomType, ServerSE, UID, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import CardDetails from '@trz/components/Boards/CardDetails/CardDetails';
 import CreateList from '@trz/components/Boards/CreateList';
 import SortableList from '@trz/components/DragAndDrop/SortableList';
+import CollaborativeMouseTracker from '@trz/components/UI/collaborativeMouseTracker';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { createList, emitMoveCard, emitMoveList, getBoardData, getCardData, getListData } from '@trz/emitters';
 import { useMap } from '@trz/hooks/useMap';
+import { useModulePermission } from '@trz/hooks/usePermissions';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { CARD_CACHE_PREFIX, LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
+import { CARD_CACHE_PREFIX, getBoardNameWithCode, LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
 import { boardDropAnimation, horizontalCollisionDetection, renderCardDragOverlay, renderListDragOverlay } from '@trz/util/dragAndDropUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
-import CollaborativeMouseTracker from '@trz/wrappers/collaborativeMouseTracker';
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
@@ -30,6 +31,13 @@ export const BoardContext = createContext<BoardContextType | undefined>(undefine
 interface BoardMetadataContextType {
     labels: Label[];
     id: BoardId;
+    permissions: {
+        viewBoard: boolean;
+        editBoard: boolean;
+        moveCards: boolean;
+        editCard: boolean;
+        createCard: boolean;
+    };
 }
 const BoardMetadataContext = createContext<BoardMetadataContextType | undefined>(undefined);
 export const useBoardMetadata = () => {
@@ -55,17 +63,13 @@ const BoardPage = (): React.JSX.Element => {
     const [cardToListMap, setCardMap] = useMap<CardId, ListId>();
     const listKeys = Array.from(listToCardsMap.keys());
     useRoom(RoomType.DATA, boardId);
-
-    const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 6,
-            },
-        }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
+    const userCanExplicitlyViewBoard = useModulePermission(boardData, PermissibleAction.ViewBoard);
+    const viewOnly = !userCanExplicitlyViewBoard && boardData?.public;
+    const userCanViewBoard = userCanExplicitlyViewBoard || boardData?.public;
+    const userCanEditBoard = useModulePermission(boardData, PermissibleAction.EditBoard);
+    const userCanMoveCards = useModulePermission(boardData, PermissibleAction.MoveCards);
+    const userCanEditCard = useModulePermission(boardData, PermissibleAction.EditCard);
+    const userCanCreateCard = useModulePermission(boardData, PermissibleAction.CreateCard);
 
     useEffect(() => {
         setBoardId(params.boardId as BoardId);
@@ -103,9 +107,9 @@ const BoardPage = (): React.JSX.Element => {
                     return;
                 }
                 if (!cardId) {
-                    setTitle(`${boardRes.name} | Terrazzo`);
+                    setTitle(`${getBoardNameWithCode(boardRes.name, boardRes.boardCode)} | Terrazzo`);
                 }
-                uiCtx.setPageTitle(boardRes.name ?? '');
+                uiCtx.setPageTitle(getBoardNameWithCode(boardRes.name, boardRes.boardCode));
 
                 const tempListMap = new Map<ListId, CardId[]>();
                 const tempCardMap = new Map<CardId, ListId>();
@@ -153,9 +157,9 @@ const BoardPage = (): React.JSX.Element => {
             if (payload.id !== boardId) {
                 return;
             }
-            if (payload.name) {
-                setTitle(`${payload.name} | Terrazzo`);
-                uiCtx.setPageTitle(payload.name);
+            if (payload.name || payload.boardCode) {
+                setTitle(`${getBoardNameWithCode((payload.name || boardData?.name) ?? '', payload.boardCode || boardData?.boardCode)} | Terrazzo`);
+                uiCtx.setPageTitle(getBoardNameWithCode((payload.name || boardData?.name) ?? '', payload.boardCode || boardData?.boardCode));
             }
             setBoardData((prev) => {
                 if (!prev) {
@@ -164,7 +168,7 @@ const BoardPage = (): React.JSX.Element => {
                 return { ...updateBaseFromPartial(prev, payload as Partial<BoardRes>) };
             });
         },
-        [boardId]
+        [boardId, boardData]
     );
 
     useSocketListener(
@@ -214,6 +218,30 @@ const BoardPage = (): React.JSX.Element => {
             }
         },
         [listToCardsMap]
+    );
+
+    useSocketListener(
+        ServerSE.UPDATE_CARD_FIELD,
+        (payload) => {
+            if (!cardToListMap.has(payload.id)) {
+                return;
+            }
+            if (!payload.archived) {
+                return;
+            }
+            const listId = cardToListMap.get(payload.id);
+            if (!listId) {
+                return;
+            }
+            const list = listToCardsMap.get(listId);
+            if (!list) {
+                return;
+            }
+            const newList = list.filter((c) => c !== payload.id);
+            listToCardsMap.set(listId, newList);
+            cardToListMap.delete(payload.id);
+        },
+        [listToCardsMap, cardToListMap]
     );
 
     const openModal = useCallback((card: CardId) => {
@@ -457,6 +485,33 @@ const BoardPage = (): React.JSX.Element => {
         [listToCardsMap]
     );
 
+    const pointerSensor = useSensor(PointerSensor, {
+        activationConstraint: {
+            distance: 6,
+        },
+    });
+    const keyboardSensor = useSensor(KeyboardSensor, {
+        coordinateGetter: sortableKeyboardCoordinates,
+    });
+    const sensors = useSensors(pointerSensor, keyboardSensor);
+
+    const boardMetadata = useMemo((): BoardMetadataContextType | undefined => {
+        if (!boardData) {
+            return undefined;
+        }
+        return {
+            labels: boardData.labels,
+            id: boardData.id,
+            permissions: {
+                viewBoard: !!userCanViewBoard,
+                editBoard: userCanEditBoard && !viewOnly,
+                moveCards: userCanMoveCards && !viewOnly,
+                editCard: userCanEditCard && !viewOnly,
+                createCard: userCanCreateCard && !viewOnly,
+            },
+        };
+    }, [boardData, userCanViewBoard, userCanEditBoard, userCanMoveCards, userCanEditCard, userCanCreateCard, viewOnly]);
+
     if ((!boardId && !cardId) || !boardData) {
         return (
             <NotFound
@@ -464,6 +519,19 @@ const BoardPage = (): React.JSX.Element => {
                 error={PageErrors.NOT_FOUND}
             />
         );
+    }
+
+    if (!userCanViewBoard) {
+        return (
+            <NotFound
+                itemType="board"
+                error={PageErrors.FORBIDDEN}
+            />
+        );
+    }
+
+    if (!boardMetadata) {
+        return <Loader />;
     }
 
     const onRender: React.ProfilerOnRenderCallback = (id, phase, actualDuration, baseDuration, startTime, commitTime) => {
@@ -476,7 +544,7 @@ const BoardPage = (): React.JSX.Element => {
             h={`calc(100vh - ${uiCtx.navbarHeight}px)`}
             fluid
             maw="100%"
-            p="lg"
+            p="0"
             bg="#1d2022"
             style={{
                 overflowX: 'scroll',
@@ -485,6 +553,7 @@ const BoardPage = (): React.JSX.Element => {
             <CollaborativeMouseTracker
                 boardId={boardId}
                 draggingObject={draggingObject}
+                disableTracking={viewOnly}
                 style={{
                     height: '95%',
                     width: 'auto',
@@ -493,14 +562,10 @@ const BoardPage = (): React.JSX.Element => {
                     alignItems: 'flex-start',
                     justifyContent: 'flex-start',
                     flexWrap: 'nowrap',
+                    padding: '20px',
                 }}
             >
-                <BoardMetadataContext.Provider
-                    value={{
-                        labels: boardData.labels,
-                        id: boardData.id,
-                    }}
-                >
+                <BoardMetadataContext.Provider value={boardMetadata}>
                     <DndContext
                         sensors={sensors}
                         collisionDetection={collisionDetectionStrategy}
@@ -523,22 +588,25 @@ const BoardPage = (): React.JSX.Element => {
                             <SortableContext
                                 items={listKeys}
                                 strategy={horizontalListSortingStrategy}
+                                disabled={!userCanEditBoard}
                             >
                                 {memoizedSortableLists}
                             </SortableContext>
                             {createPortal(<DragOverlay dropAnimation={boardDropAnimation}>{activeObject ? (listToCardsMap.has(activeObject) ? renderListDragOverlay(activeObject, boardData.boardCode ?? '#') : renderCardDragOverlay(activeObject, boardData.boardCode ?? '#')) : null}</DragOverlay>, document.body)}
                         </BoardContext.Provider>
                     </DndContext>
-                    <CreateList
-                        onCreateList={async (title) => {
-                            try {
-                                await createList(sockCtx, boardData.id, title);
-                            } catch (e) {
-                                notify(NoteType.LIST_CREATION_ERROR, e);
-                                return;
-                            }
-                        }}
-                    />
+                    {!viewOnly && userCanEditBoard && (
+                        <CreateList
+                            onCreateList={async (title) => {
+                                try {
+                                    await createList(sockCtx, boardData.id, title);
+                                } catch (e) {
+                                    notify(NoteType.LIST_CREATION_ERROR, e);
+                                    return;
+                                }
+                            }}
+                        />
+                    )}
                     {openedCard && (
                         <CardDetails
                             cardId={openedCard}

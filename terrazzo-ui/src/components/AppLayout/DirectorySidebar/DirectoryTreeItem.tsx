@@ -4,13 +4,12 @@ import { ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useUI } from '@trz/contexts/ui-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
+import { getModuleRelativeUrl } from '@trz/util/moduleUtils';
 import { useContextMenu } from 'mantine-contextmenu';
-import { FaChevronDown } from 'react-icons/fa';
-import { IoDocumentOutline } from 'react-icons/io5';
-import { MdOutlineViewKanban } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 import { useLocation } from 'react-router-dom';
 import { DirectoryListItemContextMenu } from './DirectoryListItemContextMenu';
+import { DirectoryListItemIcon } from './DirectoryListItemIcon';
 
 interface DirectoryTreeItemProps {
     sidebarCollapsed: boolean;
@@ -41,7 +40,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
         if (await unsavedCtx.confirmKeepUnsavedChanges()) {
             return;
         }
-        const url = getModuleUrl(props.directoryListItem.type, props.directoryListItem.id);
+        const url = getModuleRelativeUrl(props.directoryListItem.type, props.directoryListItem.id);
         navigate(url);
     };
 
@@ -116,44 +115,4 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
             })}
         </>
     );
-};
-
-interface DirectoryListItemIconProps {
-    moduleType: TrzModuleType;
-    collapsed?: boolean;
-    subItemsCount?: number;
-}
-const DirectoryListItemIcon = (props: DirectoryListItemIconProps) => {
-    switch (props.moduleType) {
-        case TrzModuleType.Directory:
-            if (!props.subItemsCount) {
-                return <></>;
-            }
-            return (
-                <FaChevronDown
-                    color="white"
-                    style={{
-                        transform: props.collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
-                        transition: 'transform 200ms',
-                    }}
-                />
-            );
-        case TrzModuleType.Document:
-            return <IoDocumentOutline color="white" />;
-        case TrzModuleType.Board:
-            return <MdOutlineViewKanban color="white" />;
-        default:
-            return <></>;
-    }
-};
-
-const getModuleUrl = (moduleType: TrzModuleType, moduleId: string): string => {
-    switch (moduleType) {
-        case TrzModuleType.Document:
-            return `/doc/${moduleId}`;
-        case TrzModuleType.Board:
-            return `/board/${moduleId}`;
-        default:
-            return '/';
-    }
 };

@@ -1,4 +1,4 @@
-import { Box, Center, Group, Tabs, Text, Title } from '@mantine/core';
+import { Box, Center, Tabs, Text } from '@mantine/core';
 import { Role } from '@mosaiq/terrazzo-common';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useState } from 'react';
@@ -32,19 +32,6 @@ export const RoleTabs = (props: RoleTabProps) => {
                 justifyContent: 'flex-start',
             }}
         >
-            <Group
-                w="100%"
-                justify="space-between"
-            >
-                <Title
-                    c="white"
-                    pb="20"
-                    order={4}
-                    maw="200"
-                >
-                    Roles
-                </Title>
-            </Group>
             <Tabs
                 orientation="vertical"
                 value={activeTab}
