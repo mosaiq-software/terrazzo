@@ -2,7 +2,7 @@ import { SocketId, UserData } from '@mosaiq/terrazzo-common';
 
 export interface SocketData {
     connectedAt: Date;
-    githubAccessToken: string | undefined;
+    authToken: string | undefined;
     sid: SocketId;
     user: UserData | undefined;
 }

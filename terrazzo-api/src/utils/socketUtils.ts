@@ -1,9 +1,8 @@
-import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, GithubUserProfile, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
+import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
 import { syncUserJoinedRoom, syncUserLeftRoom } from '@trz-api/broadcasters/realtimeBroadcasters';
 import { getUserPreview } from '@trz-api/controllers/userController';
+import { getAuthSessionByAuthTokenDb } from '@trz-api/persistence/authSessionPersistence';
 import { Server, Socket } from 'socket.io';
-import { isDev } from './envUtils';
-import { getPrivateGitHubUserData } from './githubUtils';
 import { SocketData } from './socketTypes';
 
 /**
@@ -196,26 +195,27 @@ export const subscribe = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (d
 export const initializeSocketData = async (socket: Socket): Promise<SocketData> => {
     try {
         const auth: SocketHandshakeAuth = socket.handshake.auth as any;
-        let userData;
-        if (auth.userId) {
-            userData = await getUserPreview(auth.userId);
-        }
-        let githubData: GithubUserProfile | null = null;
-        if (userData && auth.githubToken && !(isDev() && userData.githubUserId.startsWith('FAKE_'))) {
-            githubData = await getPrivateGitHubUserData(auth.githubToken);
+        let userData: UserData | undefined = undefined;
+        if (auth.userId && auth.authToken) {
+            const authSession = await getAuthSessionByAuthTokenDb(auth.authToken);
+            if (authSession && authSession.userId === auth.userId) {
+                // Valid session, fetch user data
+                const userHeader = await getUserPreview(auth.userId);
+                if (userHeader) {
+                    userData = {
+                        sid: socket.id,
+                        idle: false,
+                        user: userHeader,
+                    };
+                }
+            }
         }
 
         const socketData: SocketData = {
             connectedAt: new Date(),
-            githubAccessToken: auth.githubToken,
+            authToken: auth.authToken,
             sid: socket.id,
-            user: userData
-                ? {
-                      sid: socket.id,
-                      idle: false,
-                      user: userData,
-                  }
-                : undefined,
+            user: userData,
         };
         return socketData;
     } catch (error) {

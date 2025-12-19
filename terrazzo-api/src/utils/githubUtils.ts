@@ -60,30 +60,6 @@ export async function getPublicGithubUserDataFromGithubUserId(githubId: string):
     }
 }
 
-export async function getOrgMemberIds(org: string, access_token: string) {
-    const members = await getOrgMembershipData(org, access_token);
-    if (!members) {
-        return [];
-    }
-    return members.map((member: any) => member.id);
-}
-
-export async function getOrgMembershipData(org: string, access_token: string) {
-    try {
-        const { data } = await axios({
-            url: `https://api.github.com/orgs/${org}/members`,
-            method: 'get',
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-                'X-GitHub-Api-Version': '2022-11-28',
-            },
-        });
-        return data;
-    } catch (error) {
-        return null;
-    }
-}
-
 export const revokeGithubAuth = async (access_token: string) => {
     try {
         const credentials = `${process.env.GITHUB_AUTH_CLIENT_ID}:${process.env.GITHUB_AUTH_CLIENT_SECRET}`;

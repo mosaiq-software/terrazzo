@@ -6,12 +6,10 @@ export interface UserHeader {
     firstName: string;
     lastName: string;
     profilePicture: URL;
-    githubUserId: string;
 }
 
-export interface GithubUserProfile {
-    id: string;
-    login: string;
-    avatar_url: URL;
-    name: string;
+export interface AuthSession {
+    userId: UserId;
+    authToken: string;
+    createdAt: number;
 }

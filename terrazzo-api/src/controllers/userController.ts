@@ -1,6 +1,6 @@
 import { BoardId, List, MembershipRecord, OrganizationId, UserHeader, UserId } from '@mosaiq/terrazzo-common';
 import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
-import { createUserHeaderDb, getUserHeaderByGithubIdDb, getUserHeaderByIdDb, getUserHeaderByUsernameDb, updateUserHeaderDb } from '@trz-api/persistence/userPersistence';
+import { createUserHeaderDb, getUserHeaderByIdDb, getUserHeaderByUsernameDb, updateUserHeaderDb } from '@trz-api/persistence/userPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
 import { getPrivateGitHubUserData, getPublicGithubUserDataFromGithubUserId } from '@trz-api/utils/githubUtils';
 import { addBoard } from './boardController';
@@ -48,7 +48,6 @@ export async function createNewUser(username: string | undefined, firstName: str
         firstName: firstName || ghFirstName || '',
         lastName: lastName || ghLastName || '',
         profilePicture: profilePicture || ghProfile?.avatar_url || '',
-        githubUserId: githubUserId,
     };
 
     try {
@@ -116,7 +115,6 @@ export const DEV_upsertFakeUser = async (username: string): Promise<UserHeader> 
         const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
         const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
         const profilePicture = `https://i.pravatar.cc/150?u=${randomId}`;
-        const githubUserId = `FAKE_${randomId}`;
         const fakeUser = await createNewUser(username, firstName, lastName, profilePicture, githubUserId);
         user = fakeUser;
 
