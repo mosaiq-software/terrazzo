@@ -1,5 +1,5 @@
 import { LinkedAccountProvider, RestRequestBody, RestRequestParams, RestResponse, RestRoutes, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
-import { handleAuthProviderCallback, signInWithExistingProvider, startAuthenticatedSession } from '@trz-api/controllers/authController';
+import { handleAuthProviderCallback, signInWithExistingAuth, startAuthenticatedSession } from '@trz-api/controllers/authController';
 import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
 import { addLinkedAccountToUser } from '@trz-api/controllers/linkedAccountController';
 import { checkUsernameTaken, DEV_upsertFakeUser } from '@trz-api/controllers/userController';
@@ -45,9 +45,9 @@ router.post(RestRoutes.USER_FAKE_DEV, async (req, res) => {
         if (!isDev()) {
             res.sendStatus(401);
         }
-        const fakeUser = await DEV_upsertFakeUser(params.username);
-        let linkedAccount = await getLinkedAccountForProviderDb(LinkedAccountProvider.DEV, fakeUser.username);
+        let linkedAccount = await getLinkedAccountForProviderDb(LinkedAccountProvider.DEV, params.username);
         if (!linkedAccount) {
+            const fakeUser = await DEV_upsertFakeUser(params.username);
             linkedAccount = await addLinkedAccountToUser({
                 provider: LinkedAccountProvider.DEV,
                 accountId: fakeUser.username,
@@ -55,7 +55,7 @@ router.post(RestRoutes.USER_FAKE_DEV, async (req, res) => {
                 accountData: {},
             });
         }
-        const authSession = await startAuthenticatedSession(fakeUser.id);
+        const authSession = await startAuthenticatedSession(linkedAccount.userId);
         if (!authSession) {
             res.status(500).send('Failed to start auth session for fake user');
             return;
@@ -113,22 +113,6 @@ router.post(RestRoutes.UPLOAD_FILE, async (req, res) => {
     }
 });
 
-router.post(RestRoutes.LOGIN_WITH_PROVIDER, async (req, res) => {
-    const body: RestRequestBody[RestRoutes.LOGIN_WITH_PROVIDER] = req.body;
-    try {
-        const authSession = await signInWithExistingProvider(body);
-        if (!authSession) {
-            res.status(401).send('Failed to sign in with provided auth provider');
-            return;
-        }
-        const response: RestResponse<RestRoutes.LOGIN_WITH_PROVIDER> = authSession;
-        res.status(200).send(response);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal server error');
-    }
-});
-
 router.post(RestRoutes.AUTH_PROVIDER_CALLBACK, async (req, res) => {
     const body: RestRequestBody[RestRoutes.AUTH_PROVIDER_CALLBACK] = req.body;
     try {
@@ -138,7 +122,19 @@ router.post(RestRoutes.AUTH_PROVIDER_CALLBACK, async (req, res) => {
             return;
         }
         const response: RestResponse<RestRoutes.AUTH_PROVIDER_CALLBACK> = authSession;
-        res.sendStatus(200).send(response);
+        res.status(200).send(response);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.post(RestRoutes.EXISTING_AUTH, async (req, res) => {
+    const body: RestRequestBody[RestRoutes.EXISTING_AUTH] = req.body;
+    try {
+        const authSession = await signInWithExistingAuth(body);
+        const response: RestResponse<RestRoutes.EXISTING_AUTH> = authSession || 'unauthorized';
+        res.status(200).send(response);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');

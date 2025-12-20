@@ -1,5 +1,5 @@
 import { useLocalStorage, useSessionStorage } from '@mantine/hooks';
-import { AuthProvider, AuthProviderCallbackBody, AuthProviderCallbackData, AuthProviderToken, RestRoutes, UserId } from '@mosaiq/terrazzo-common';
+import { AuthProviderCallbackBody, AuthProviderCallbackData, ExistingAuthToken, RestRoutes, UserId, UserIdWithAuth } from '@mosaiq/terrazzo-common';
 import { callTrzApi } from '@trz/util/apiUtils';
 import { isDev } from '@trz/util/envUtils';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -9,10 +9,10 @@ import { useNavigate } from 'react-router-dom';
 type UserContextType = {
     userId: UserId | undefined;
     authToken: string | undefined;
-    handleLogin: (userId: UserId, trzAuthToken: string, provider: AuthProvider, providerAuthToken: string) => void;
     clearLocalLoginData: () => void;
     devLogin: (username: string) => Promise<void>;
     goToLogin: () => void;
+    handleLoginFromProvider: (providerData: AuthProviderCallbackBody) => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -20,13 +20,13 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 const DEFAULT_AUTHED_ROUTE = '/dashboard';
 const DEFAULT_NO_AUTH_ROUTE = '/login';
 const SESSION_POST_LOGIN_REDIRECT_KEY = 'login-route-destination';
-const LOCAL_SAVED_AUTH_PROVIDER_KEY = 'saved-auth-provider';
+const LOCAL_SAVED_AUTH_KEY = 'saved-auth-provider';
 
 const UserProvider: React.FC<any> = ({ children }) => {
     const [userId, setUserId] = useState<UserId | undefined>(undefined);
     const [authToken, setAuthToken] = useState<string | undefined>(undefined);
     const navigate = useNavigate();
-    const [localSavedAuthProvider, setLocalSavedAuthProvider, removeLocalSavedAuthProvider] = useLocalStorage({ key: LOCAL_SAVED_AUTH_PROVIDER_KEY });
+    const [localSavedAuth, setLocalSavedAuth, removeLocalSavedAuth] = useLocalStorage({ key: LOCAL_SAVED_AUTH_KEY });
     const [sessionSavedLoginRoute, setSessionSavedLoginRoute, removeSessionSavedLoginRoute] = useSessionStorage({ key: SESSION_POST_LOGIN_REDIRECT_KEY });
 
     const goToLogin = useCallback(() => {
@@ -38,15 +38,16 @@ const UserProvider: React.FC<any> = ({ children }) => {
      * Handles user login by setting user context and navigating to the appropriate page
      */
     const handleLogin = useCallback(
-        (userId: UserId, trzAuthToken: string, provider: AuthProvider, providerAuthToken: string, preventNavigate?: boolean) => {
-            if (!userId || !provider || !trzAuthToken) {
+        (userId: UserId, trzAuthToken: string, preventNavigate?: boolean) => {
+            if (!userId || !trzAuthToken) {
                 notify(NoteType.GENERIC_ERROR, 'Invalid authentication parameters!');
                 navigate('/');
                 return;
             }
 
-            // Save the provider auth token to local storage for future auto logins
-            setLocalSavedAuthProvider(JSON.stringify({ provider, providerAuthToken }));
+            // Save the auth token to local storage for future auto logins
+            const existingAuth: ExistingAuthToken = { userId, trzAuthToken };
+            setLocalSavedAuth(JSON.stringify(existingAuth));
 
             // Set user data
             setAuthToken(trzAuthToken);
@@ -58,7 +59,7 @@ const UserProvider: React.FC<any> = ({ children }) => {
                 navigate(sessionSavedLoginRoute || DEFAULT_AUTHED_ROUTE, { replace: true });
             }
         },
-        [navigate, sessionSavedLoginRoute, removeSessionSavedLoginRoute, setLocalSavedAuthProvider]
+        [navigate, sessionSavedLoginRoute, removeSessionSavedLoginRoute, setLocalSavedAuth]
     );
 
     /**
@@ -67,11 +68,10 @@ const UserProvider: React.FC<any> = ({ children }) => {
      */
     const clearLocalLoginData = useCallback(() => {
         // Clear saved auth provider
-        removeLocalSavedAuthProvider();
+        removeLocalSavedAuth();
         setAuthToken(undefined);
         setUserId(undefined);
-        navigate('/');
-    }, [navigate, removeLocalSavedAuthProvider]);
+    }, [removeLocalSavedAuth]);
 
     /**
      * Development only login function to simulate user login
@@ -85,19 +85,30 @@ const UserProvider: React.FC<any> = ({ children }) => {
             if (!authSession) {
                 throw new Error('Failed to login as user');
             }
-            handleLogin(authSession.userId, authSession.authToken, AuthProvider.DEV, username);
+            handleLogin(authSession.userId, authSession.authToken);
         },
         [handleLogin]
     );
 
     const handleLoginFromProvider = useCallback(
-        (providerData: AuthProviderCallbackBody) => {
-            if (!userId || !authToken) {
-                return;
+        async (providerData: AuthProviderCallbackBody) => {
+            const authObject: UserIdWithAuth | undefined = userId && authToken ? { userId, authToken } : undefined;
+            const data: AuthProviderCallbackData = { ...providerData, auth: authObject };
+            try {
+                const session = await callTrzApi(RestRoutes.AUTH_PROVIDER_CALLBACK, {}, data);
+                if (!session) {
+                    throw new Error('No auth session returned from provider callback');
+                }
+                if (!authObject) {
+                    handleLogin(session.userId, session.authToken);
+                }
+            } catch (error) {
+                console.error('Error during auth provider callback:', error);
+                notify(NoteType.GENERIC_ERROR, 'Authentication failed. Please try again.');
+                navigate(DEFAULT_NO_AUTH_ROUTE);
             }
-            const data: AuthProviderCallbackData = { ...providerData, auth: { userId, authToken } };
         },
-        [userId, authToken]
+        [userId, authToken, handleLogin, navigate]
     );
 
     /**
@@ -112,23 +123,28 @@ const UserProvider: React.FC<any> = ({ children }) => {
             if (userId && authToken) {
                 return;
             }
-            if (!localSavedAuthProvider) {
+            if (!localSavedAuth) {
                 return;
             }
-            let savedAuthProvider: AuthProviderToken;
+            let savedAuth: ExistingAuthToken;
             try {
-                savedAuthProvider = JSON.parse(localSavedAuthProvider);
+                savedAuth = JSON.parse(localSavedAuth);
             } catch (e) {
                 console.error('Failed to parse saved auth provider from local storage', e);
                 return;
             }
             try {
-                const loginData = await callTrzApi(RestRoutes.LOGIN_WITH_PROVIDER, {}, savedAuthProvider);
-                if (!loginData) {
-                    console.warn('Auto login with saved auth provider returned no data');
+                const existingAuthResponse = await callTrzApi(RestRoutes.EXISTING_AUTH, {}, savedAuth);
+                if (!existingAuthResponse) {
+                    notify(NoteType.GENERIC_ERROR, 'Auto login with saved auth provider failed. Please log in again.');
                     return;
                 }
-                handleLogin(loginData.userId, loginData.authToken, savedAuthProvider.provider, savedAuthProvider.providerAuthToken, true);
+                if (existingAuthResponse === 'unauthorized') {
+                    notify(NoteType.GENERIC_ERROR, 'Saved authentication is no longer valid. Please log in again.');
+                    clearLocalLoginData();
+                    return;
+                }
+                handleLogin(existingAuthResponse.userId, existingAuthResponse.authToken, true);
             } catch (e) {
                 console.error('Auto login with saved auth provider failed', e);
             }
@@ -137,17 +153,17 @@ const UserProvider: React.FC<any> = ({ children }) => {
         return () => {
             strictIgnore = true;
         };
-    }, [handleLogin, userId, authToken, localSavedAuthProvider, setSessionSavedLoginRoute]);
+    }, [handleLogin, userId, authToken, localSavedAuth, setSessionSavedLoginRoute, clearLocalLoginData]);
 
     return (
         <UserContext.Provider
             value={{
                 userId,
                 authToken,
-                handleLogin,
                 clearLocalLoginData,
                 devLogin: devOnlyLogin,
                 goToLogin,
+                handleLoginFromProvider,
             }}
         >
             {children}

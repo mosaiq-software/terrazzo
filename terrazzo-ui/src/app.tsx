@@ -11,6 +11,7 @@ import { UserProvider } from '@trz/contexts/user-context';
 import { ContextMenuProvider } from 'mantine-contextmenu';
 import 'mantine-contextmenu/styles.layer.css';
 import { BrowserRouter } from 'react-router-dom';
+import { LinkDevAccountModal } from './components/Modals/AccountLinking/LinkDevAccountModal';
 import { JoinOrganizationModal } from './components/Modals/JoinOrganization';
 import { TransferOrganizationModal } from './components/Modals/TransferOrganization';
 import { ModuleSettingsModal } from './components/ModuleSettings/ModuleSettingsModal';
@@ -19,6 +20,7 @@ import { PermissionProvider } from './contexts/permission-context';
 import { UiProvider } from './contexts/ui-context';
 import { UnsavedChangesProvider } from './contexts/unsaved-changes-context';
 import Router from './router';
+import { LinkGithubAccountModal } from './components/Modals/AccountLinking/LinkGithubAccountModal';
 
 const theme = createTheme({});
 
@@ -28,6 +30,8 @@ const modals = {
     moduleSettings: ModuleSettingsModal,
     joinOrganization: JoinOrganizationModal,
     transferOrganization: TransferOrganizationModal,
+    linkDevAccount: LinkDevAccountModal,
+    linkGithubAccount: LinkGithubAccountModal,
 };
 
 const App = () => {

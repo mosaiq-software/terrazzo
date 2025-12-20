@@ -28,19 +28,19 @@ export const LinkedAccountRenderer = (props: LinkedAccountProps) => {
         case LinkedAccountProvider.Github:
             return (
                 <ActionRow
-                    title="GitHub Account"
+                    title={props.account.accountData.login}
                     icon={BsGithub}
                     iconColor=""
-                    subtitle={props.account.accountData.login}
+                    subtitle="GitHub"
                     items={[UnlinkButton]}
                 />
             );
         case LinkedAccountProvider.DEV:
             return (
                 <ActionRow
-                    title="Terrazzo Developer Account"
+                    title={props.account.accountId}
                     icon={FaCode}
-                    subtitle="Only used for Terrazzo development purposes"
+                    subtitle="Terrazzo Development"
                     items={[UnlinkButton]}
                 />
             );

@@ -22,10 +22,6 @@ const Router = () => {
                 path="/login"
                 element={<LoginPage />}
             />
-            {/* <Route
-                path="/auth/:userId/:provider/:providerAuthToken/:trzAuthToken"
-                element={<AuthHandlerPage />}
-            /> */}
             <Route
                 path="/auth/github"
                 element={<GithubAuthHandler />}

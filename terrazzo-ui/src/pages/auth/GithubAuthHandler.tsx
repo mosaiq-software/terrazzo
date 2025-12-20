@@ -1,4 +1,5 @@
 import { Center, Container, Loader, Paper, Stack, Text, Title } from '@mantine/core';
+import { AuthProvider } from '@mosaiq/terrazzo-common';
 import { useUserContext } from '@trz/contexts/user-context';
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -8,25 +9,22 @@ import { useSearchParams } from 'react-router-dom';
  */
 export const GithubAuthHandler = () => {
     const userContext = useUserContext();
-    const [queryParams] = useSearchParams();
-    const code = queryParams.get('code');
+    const code = useSearchParams()[0].get('code');
+    console.log('GitHub OAuth callback received with code:', code);
 
     useEffect(() => {
-        let strictIgnore = false;
         const handleLogin = async () => {
             await new Promise((res) => setTimeout(res, 200));
-            if (strictIgnore) {
-                return;
-            }
             if (!code) {
                 console.error('No code provided in query params');
                 return;
             }
+            userContext.handleLoginFromProvider({
+                provider: AuthProvider.Github,
+                code: code,
+            });
         };
         handleLogin();
-        return () => {
-            strictIgnore = true;
-        };
     }, [code, userContext.userId, userContext.authToken]);
 
     return (

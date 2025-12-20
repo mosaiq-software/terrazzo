@@ -1,4 +1,5 @@
-import { Box, Button, Fieldset, Group, ScrollArea, Stack, TextInput, Title } from '@mantine/core';
+import { Box, Button, Fieldset, Group, Menu, ScrollArea, Stack, TextInput, Title } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { fullName, UserHeader } from '@mosaiq/terrazzo-common';
 import { ImageUpload } from '@trz/components/UI/ImageUpload';
 import { LinkedAccountRenderer } from '@trz/components/UI/LinkedAccountRenderer';
@@ -6,12 +7,16 @@ import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
-import { updateUserField } from '@trz/emitters';
+import { unlinkAccountFromUser, updateUserField } from '@trz/emitters';
 import { useMe } from '@trz/hooks/useMe';
 import { useUserLinkedAccounts } from '@trz/hooks/useUserLinkedAccounts';
+import { isDev } from '@trz/util/envUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { BsGithub } from 'react-icons/bs';
+import { FaCode } from 'react-icons/fa';
+import { MdAdd } from 'react-icons/md';
 
 const UserSettingsPage = (): React.JSX.Element => {
     const uiCtx = useUI();
@@ -159,8 +164,51 @@ const UserSettingsPage = (): React.JSX.Element => {
                                         key={account.accountId}
                                         account={account}
                                         isOnlyAccount={linkedAccounts.length === 1}
+                                        onUnlink={async (acc) => {
+                                            try {
+                                                await unlinkAccountFromUser(sockCtx, acc);
+                                            } catch (e) {
+                                                notify(NoteType.GENERIC_ERROR, e);
+                                            }
+                                        }}
                                     />
                                 ))}
+                                <Menu>
+                                    <Menu.Target>
+                                        <Button
+                                            variant="subtle"
+                                            leftSection={<MdAdd />}
+                                        >
+                                            Link New Account
+                                        </Button>
+                                    </Menu.Target>
+                                    <Menu.Dropdown>
+                                        {isDev() && (
+                                            <Menu.Item
+                                                leftSection={<FaCode />}
+                                                onClick={() => {
+                                                    modals.openContextModal({
+                                                        modal: 'linkDevAccount',
+                                                        innerProps: {},
+                                                    });
+                                                }}
+                                            >
+                                                Link Dev Account (Dev Only)
+                                            </Menu.Item>
+                                        )}
+                                        <Menu.Item
+                                            leftSection={<BsGithub />}
+                                            onClick={() => {
+                                                modals.openContextModal({
+                                                    modal: 'linkGithubAccount',
+                                                    innerProps: {},
+                                                });
+                                            }}
+                                        >
+                                            Link Github Account
+                                        </Menu.Item>
+                                    </Menu.Dropdown>
+                                </Menu>
                             </Stack>
                         </Fieldset>
                     </Stack>

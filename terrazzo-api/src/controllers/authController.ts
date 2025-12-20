@@ -1,4 +1,4 @@
-import { AuthProvider, AuthProviderCallbackData, AuthProviderToken, AuthSession, breakNames, exhaustiveCheck, LinkedAccountProvider, UserId, UserIdWithAuth } from '@mosaiq/terrazzo-common';
+import { AuthProvider, AuthProviderCallbackData, AuthSession, breakNames, exhaustiveCheck, ExistingAuthToken, LinkedAccountProvider, UserId, UserIdWithAuth } from '@mosaiq/terrazzo-common';
 import { createAuthSessionDb, deleteAuthSessionByUserIdDb, getAuthSessionByAuthTokenDb, getAuthSessionByUserIdDb } from '@trz-api/persistence/authSessionPersistence';
 import { getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccountPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
@@ -10,6 +10,12 @@ import { createNewUser } from './userController';
 
 const EXPIRE_AUTH_SESSIONS_AFTER_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 
+/**
+ * Starts a new authenticated session for the given user ID
+ * If an existing valid session exists, it is returned instead
+ * If an existing session is expired, it is refreshed
+ * If no existing session, a new one is created
+ */
 export const startAuthenticatedSession = async (userId: UserId): Promise<AuthSession | undefined> => {
     // Can only start a session for an existing user
     const user = await getUserHeaderByIdDb(userId);
@@ -19,6 +25,9 @@ export const startAuthenticatedSession = async (userId: UserId): Promise<AuthSes
 
     const existingSession = await getAuthSessionByUserIdDb(userId);
     if (existingSession) {
+        if (existingSession.userId !== userId) {
+            throw new Error('Auth session user ID does not match requested user ID');
+        }
         if (Date.now() - existingSession.createdAt < EXPIRE_AUTH_SESSIONS_AFTER_MS) {
             return existingSession;
         }
@@ -30,31 +39,53 @@ export const startAuthenticatedSession = async (userId: UserId): Promise<AuthSes
     return newAuthSession;
 };
 
+/**
+ * Retrieves an existing authenticated session by auth token
+ */
 export const getExistingAuthenticatedSession = async (authToken: string): Promise<AuthSession | undefined> => {
     const authSession = await getAuthSessionByAuthTokenDb(authToken);
     return authSession;
 };
 
-export const isAuthenticated = async (userId: UserId, authToken: string): Promise<boolean> => {
-    const authSession = await getAuthSessionByAuthTokenDb(authToken);
-    return authSession?.userId === userId;
-};
-
+/**
+ * Ends the authenticated session for the given user ID
+ */
 export const endAuthenticatedSession = async (userId: UserId): Promise<void> => {
     await deleteAuthSessionByUserIdDb(userId);
 };
 
-export const signInWithExistingProvider = async (auth: AuthProviderToken): Promise<AuthSession | undefined> => {
-    switch (auth.provider) {
-        case AuthProvider.Github:
-            return await handleGithubAuth(undefined, auth.providerAuthToken, undefined);
-        case AuthProvider.DEV:
-            return await handleDevAuth(auth.providerAuthToken, undefined);
-        default:
-            return exhaustiveCheck(auth.provider, `Unsupported auth provider: ${auth.provider}`);
+/**
+ * Checks existing auth token and returns valid auth session if found
+ * If the valid session is expired, it is refreshed
+ * If no valid session is found, a fresh session will NOT be created
+ */
+export const signInWithExistingAuth = async (existingAuth: ExistingAuthToken): Promise<AuthSession | undefined> => {
+    const authSession = await getExistingAuthenticatedSession(existingAuth.trzAuthToken);
+    if (!authSession) {
+        return undefined;
     }
+
+    // Ensure the auth session belongs to the user
+    if (authSession.userId !== existingAuth.userId) {
+        throw new Error('Invalid existing auth token for user');
+    }
+
+    // Check if the session is still valid
+    if (Date.now() - authSession.createdAt < EXPIRE_AUTH_SESSIONS_AFTER_MS) {
+        return authSession;
+    }
+
+    await deleteAuthSessionByUserIdDb(authSession.userId);
+
+    const token = generateAuthToken();
+    const newAuthSession = await createAuthSessionDb(existingAuth.userId, token);
+    return newAuthSession;
 };
 
+/**
+ * Handles the auth provider callback and returns an auth session
+ * Delegates to specific provider handlers based on the provider type
+ */
 export const handleAuthProviderCallback = async (providerData: AuthProviderCallbackData): Promise<AuthSession | undefined> => {
     switch (providerData.provider) {
         case AuthProvider.Github:
@@ -66,6 +97,12 @@ export const handleAuthProviderCallback = async (providerData: AuthProviderCallb
     }
 };
 
+/**
+ * Handles DEV auth provider callback
+ * This is for development only and allows sign-in with just a username
+ * @param username The dev username
+ * @param auth Optional existing user auth to link the DEV account to
+ */
 const handleDevAuth = async (username: string, auth?: UserIdWithAuth): Promise<AuthSession | undefined> => {
     if (!isDev()) {
         console.warn('Attempted to handle DEV auth callback in non-dev environment');
@@ -87,10 +124,21 @@ const handleDevAuth = async (username: string, auth?: UserIdWithAuth): Promise<A
         }
     }
 
+    if (auth && linkedAccount.userId !== auth.userId) {
+        throw new Error('DEV linked account does not belong to the authenticated user');
+    }
+
     const authSession = await startAuthenticatedSession(linkedAccount.userId);
     return authSession;
 };
 
+/**
+ * Handles GitHub auth provider callback
+ * Must provide either a code or access token to proceed
+ * @param code the OAuth code from GitHub
+ * @param accessToken the GitHub access token
+ * @param auth Optional existing user auth to link the GitHub account to
+ */
 const handleGithubAuth = async (code: string | undefined, accessToken: string | undefined, auth?: UserIdWithAuth): Promise<AuthSession | undefined> => {
     let githubAuthToken = accessToken;
     if (!githubAuthToken) {
@@ -126,6 +174,7 @@ const handleGithubAuth = async (code: string | undefined, accessToken: string | 
             accountData: githubData,
         });
     }
+
     const authSession = await startAuthenticatedSession(linkedAccount.userId);
     return authSession;
 };

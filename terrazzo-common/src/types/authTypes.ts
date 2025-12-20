@@ -20,6 +20,11 @@ export interface AuthProviderToken {
     providerAuthToken: string;
 }
 
+export interface ExistingAuthToken {
+    userId: UserId;
+    trzAuthToken: string;
+}
+
 export interface UserHeaderWithAuth extends UserHeader {
     authToken: string;
 }
