@@ -2,16 +2,15 @@ import { getRoomCode, InviteId, OrganizationId, RoomSpecifier, RoomType, ServerS
 import { getAllInvitesForOrg } from '@trz-api/controllers/inviteController';
 import { getInviteRecordByIdDb } from '@trz-api/persistence/invitePersistence';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socketUtils';
-import { Server } from 'socket.io';
+import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
-export const syncOrgInvitesFromInviteId = async (io: Server, inviteId: InviteId) => {
+export const syncOrgInvitesFromInviteId = async (inviteId: InviteId) => {
     try {
         const inviteRecord = await getInviteRecordByIdDb(inviteId);
         if (!inviteRecord) {
             throw new Error('Invite not found for syncing org invites');
         }
-        await syncOrgInvites(io, inviteRecord.forOrganizationId);
+        await syncOrgInvites(inviteRecord.forOrganizationId);
     } catch (error: any) {
         console.error('Error syncing org invites from invite id', error);
     }
@@ -20,11 +19,10 @@ export const syncOrgInvitesFromInviteId = async (io: Server, inviteId: InviteId)
 /**
  * Syncs the invites for an organization by broadcasting the updated list to all members in the org's invite room.
  */
-export const syncOrgInvites = async (io: Server, orgId: OrganizationId) => {
+export const syncOrgInvites = async (orgId: OrganizationId) => {
     try {
         const invites = await getAllInvitesForOrg(orgId);
         broadcast({
-            io,
             event: ServerSE.UPDATE_ORGANIZATION_INVITES,
             toRoomIds: [getRoomCode(RoomType.DATA, orgId, RoomSpecifier.INVITES)],
             buildPayload: async (userId) => {

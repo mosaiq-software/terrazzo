@@ -1,16 +1,16 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
 import { syncMouseMove, syncUserIdle } from '@trz-api/broadcasters';
-import { getSocketData, joinRoom, leaveRoom, setSocketData, subscribe } from '@trz-api/utils/socketUtils';
-import { Server, Socket } from 'socket.io';
+import { getSocketData, joinRoom, leaveRoom, setSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
+import { Socket } from 'socket.io';
 
-export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
+export const registerCustomSocketEvents = (socket: Socket) => {
     subscribe(socket, ClientSE.JOIN_ROOM, async (room) => {
-        const roomUsers = await joinRoom(io, socket, room);
+        const roomUsers = await joinRoom(socket, room);
         return roomUsers;
     });
 
     subscribe(socket, ClientSE.LEAVE_ROOM, async (room) => {
-        await leaveRoom(io, socket, room);
+        await leaveRoom(socket, room);
         return undefined;
     });
 
@@ -21,7 +21,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         }
         socketData.user.mouseRoomData = data;
         setSocketData(socket, socketData);
-        await syncMouseMove(io, data.contextId, socket.id, data);
+        await syncMouseMove(data.contextId, socket.id, data);
         return undefined;
     });
 
@@ -33,7 +33,7 @@ export const registerCustomSocketEvents = (socket: Socket, io: Server) => {
         socketData.user.idle = data;
         setSocketData(socket, socketData);
         if (socketData.user.mouseRoomData) {
-            await syncUserIdle(io, socketData.user.mouseRoomData.contextId, socket.id, data);
+            await syncUserIdle(socketData.user.mouseRoomData.contextId, socket.id, data);
         }
         return undefined;
     });

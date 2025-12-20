@@ -3,10 +3,10 @@ import { syncMembersInOrg, syncOrgInvites, syncOrgInvitesFromInviteId } from '@t
 import { createInvite, deleteInvite, getAllInvitesForOrg, useInvite } from '@trz-api/controllers/inviteController';
 import { getInviteRecordByIdDb } from '@trz-api/persistence/invitePersistence';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
-import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
-import { Server, Socket } from 'socket.io';
+import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
+import { Socket } from 'socket.io';
 
-export const registerInviteListeners = (socket: Socket, io: Server) => {
+export const registerInviteListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.GET_INVITES_FOR_ORG, async (data) => {
         if (!(await userCanAdministerOrganization(socket, data))) {
             throw new Error('Insufficient permissions to view invites for this organization');
@@ -24,7 +24,7 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
             throw new Error('User not authenticated');
         }
         const invite = await createInvite(data.orgId, data.maxUses, socketData.user.userId);
-        await syncOrgInvitesFromInviteId(io, invite.id);
+        await syncOrgInvitesFromInviteId(invite.id);
         return invite;
     });
 
@@ -37,7 +37,7 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
             throw new Error('Insufficient permissions to delete invites for this organization');
         }
         await deleteInvite(data.inviteId);
-        await syncOrgInvitesFromInviteId(io, data.inviteId);
+        await syncOrgInvitesFromInviteId(data.inviteId);
         return undefined;
     });
 
@@ -52,8 +52,8 @@ export const registerInviteListeners = (socket: Socket, io: Server) => {
             if (!inviteRecord) {
                 throw new Error('Invite not found for syncing org invites');
             }
-            await syncOrgInvites(io, inviteRecord.forOrganizationId);
-            await syncMembersInOrg(io, inviteRecord.forOrganizationId);
+            await syncOrgInvites(inviteRecord.forOrganizationId);
+            await syncMembersInOrg(inviteRecord.forOrganizationId);
         }
         return success;
     });

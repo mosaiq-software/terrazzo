@@ -1,7 +1,8 @@
 import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
 import { syncUserJoinedRoom, syncUserLeftRoom } from '@trz-api/broadcasters/realtimeBroadcasters';
 import { getExistingAuthenticatedSession, startAuthenticatedSession } from '@trz-api/controllers/authController';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
+import { SocketManager } from './socketManager';
 import { SocketData } from './socketTypes';
 
 /**
@@ -30,10 +31,11 @@ export const loginSocket = (socket: Socket, userId: UserId) => {
 /**
  * Gets all sockets in the given room.
  */
-export const getSocketsInRoom = async (io: Server, room: RoomId): Promise<Socket[]> => {
+export const getSocketsInRoom = async (room: RoomId): Promise<Socket[]> => {
     if (!room) {
         return [];
     }
+    const io = SocketManager.getInstance().io;
     const roomSockets = io.sockets.adapter.rooms.get(room);
     if (!roomSockets) {
         return [];
@@ -45,8 +47,8 @@ export const getSocketsInRoom = async (io: Server, room: RoomId): Promise<Socket
 /**
  * Gets all users in the given room.
  */
-export const getUsersInRoom = async (io: Server, room: RoomId): Promise<UserData[]> => {
-    const sockets = await getSocketsInRoom(io, room);
+export const getUsersInRoom = async (room: RoomId): Promise<UserData[]> => {
+    const sockets = await getSocketsInRoom(room);
     const users = sockets.map((socket) => {
         const data = socket ? getSocketData(socket) : undefined;
         return data?.user;
@@ -55,7 +57,6 @@ export const getUsersInRoom = async (io: Server, room: RoomId): Promise<UserData
 };
 
 export interface BroadcasterOptions<T extends ServerSE> {
-    io: Server;
     event: T;
     toRoomIds: NonEmptyArray<RoomId>;
     /**
@@ -68,7 +69,7 @@ export interface BroadcasterOptions<T extends ServerSE> {
  * Sends an event to each user who is in at least one of the specified rooms.
  */
 export const broadcast = async <T extends ServerSE>(options: BroadcasterOptions<T>) => {
-    const { io, event, toRoomIds, buildPayload } = options;
+    const { event, toRoomIds, buildPayload } = options;
     if (!toRoomIds || toRoomIds.length === 0) {
         return;
     }
@@ -76,7 +77,7 @@ export const broadcast = async <T extends ServerSE>(options: BroadcasterOptions<
     // Get all sockets to maybe send to
     const allSockets = new Set<Socket>();
     for (const roomId of toRoomIds) {
-        const roomSockets = await getSocketsInRoom(io, roomId);
+        const roomSockets = await getSocketsInRoom(roomId);
         roomSockets.forEach((s) => allSockets.add(s));
     }
 
@@ -127,17 +128,17 @@ export const setSocketData = (socket: Socket, data: SocketData) => {
  * Joins the socket to the given room and notifies other users in the room.
  * Returns the list of users currently in the room.
  */
-export const joinRoom = async (io: Server, socket: Socket, room: RoomId): Promise<UserData[]> => {
+export const joinRoom = async (socket: Socket, room: RoomId): Promise<UserData[]> => {
     if (room && typeof room === 'string') {
         const rooms = getSocketRooms(socket);
         if (!rooms || rooms.find((r) => r === room)) {
             console.warn(`Socket ${socket.id} tried to join its own room ${room}`);
             return [];
         }
-        const roomUsers = await getUsersInRoom(io, room);
+        const roomUsers = await getUsersInRoom(room);
         const socketData = getSocketData(socket);
         if (socketData?.user) {
-            await syncUserJoinedRoom(io, room, socketData.user);
+            await syncUserJoinedRoom(room, socketData.user);
         }
         socket.join(room);
         return roomUsers;
@@ -149,7 +150,7 @@ export const joinRoom = async (io: Server, socket: Socket, room: RoomId): Promis
 /**
  * Leaves the given room and notifies other users in the room.
  */
-export const leaveRoom = async (io: Server, socket: Socket, room: RoomId) => {
+export const leaveRoom = async (socket: Socket, room: RoomId) => {
     if (room) {
         const rooms = getSocketRooms(socket);
         if (!rooms || !rooms.find((r) => r === room)) {
@@ -157,7 +158,7 @@ export const leaveRoom = async (io: Server, socket: Socket, room: RoomId) => {
             return;
         }
         socket.leave(room);
-        await syncUserLeftRoom(io, [room], socket.id);
+        await syncUserLeftRoom([room], socket.id);
     }
 };
 

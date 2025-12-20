@@ -6,9 +6,12 @@ export enum AuthProvider {
     DEV = 'DEV',
 }
 
-export interface AuthSession {
+export interface UserIdWithAuth {
     userId: UserId;
     authToken: string;
+}
+
+export interface AuthSession extends UserIdWithAuth {
     createdAt: number;
 }
 
@@ -20,3 +23,16 @@ export interface AuthProviderToken {
 export interface UserHeaderWithAuth extends UserHeader {
     authToken: string;
 }
+
+export type AuthProviderCallbackBody =
+    | {
+          provider: AuthProvider.Github;
+          code?: string;
+          accessToken?: string;
+      }
+    | {
+          provider: AuthProvider.DEV;
+          username: string;
+      };
+
+export type AuthProviderCallbackData = AuthProviderCallbackBody & { auth?: UserIdWithAuth };

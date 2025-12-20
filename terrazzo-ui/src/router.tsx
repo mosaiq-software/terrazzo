@@ -1,4 +1,3 @@
-import { AuthHandlerPage } from '@trz/pages/auth/AuthHandlerPage';
 import LoginPage from '@trz/pages/auth/LoginPage';
 import BoardPage from '@trz/pages/BoardPage';
 import HomePage from '@trz/pages/HomePage';
@@ -8,6 +7,7 @@ import UserSettingsPage from '@trz/pages/UserSettingsPage';
 import { Route, Routes } from 'react-router-dom';
 import AppLayout from './components/AppLayout/AppLayout';
 import { NotFound, PageErrors } from './components/UI/NotFound';
+import { GithubAuthHandler } from './pages/auth/GithubAuthHandler';
 import DocumentPage from './pages/DocumentPage';
 import InvitePage from './pages/InvitePage';
 
@@ -22,9 +22,13 @@ const Router = () => {
                 path="/login"
                 element={<LoginPage />}
             />
-            <Route
+            {/* <Route
                 path="/auth/:userId/:provider/:providerAuthToken/:trzAuthToken"
                 element={<AuthHandlerPage />}
+            /> */}
+            <Route
+                path="/auth/github"
+                element={<GithubAuthHandler />}
             />
             <Route
                 path="/invite/:inviteId"

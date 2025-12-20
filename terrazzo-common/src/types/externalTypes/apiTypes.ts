@@ -1,4 +1,4 @@
-import { AuthProviderToken, AuthSession } from '../authTypes';
+import { AuthProviderCallbackData, AuthProviderToken, AuthSession } from '../authTypes';
 import { BoardId, UID, UploadedFileId } from '../genericTypes';
 import { TrelloExportType } from './trelloTypes';
 
@@ -15,7 +15,7 @@ export enum RestRoutes {
     GET_FILE = '/file/:fileId',
     UPLOAD_FILE = '/file/upload',
     LOGIN_WITH_PROVIDER = '/user/login-with-provider',
-    GITHUB_OAUTH_CALLBACK = '/auth/github',
+    AUTH_PROVIDER_CALLBACK = '/auth/callback',
 }
 
 export enum RestMethods {
@@ -33,7 +33,7 @@ export const RestRequestMethod = {
     [RestRoutes.GET_FILE]: RestMethods.GET,
     [RestRoutes.UPLOAD_FILE]: RestMethods.POST,
     [RestRoutes.LOGIN_WITH_PROVIDER]: RestMethods.POST,
-    [RestRoutes.GITHUB_OAUTH_CALLBACK]: RestMethods.GET,
+    [RestRoutes.AUTH_PROVIDER_CALLBACK]: RestMethods.POST,
 };
 export interface RestRequestParams {
     [RestRoutes.INDEX]: {};
@@ -43,7 +43,7 @@ export interface RestRequestParams {
     [RestRoutes.GET_FILE]: { fileId: UploadedFileId };
     [RestRoutes.UPLOAD_FILE]: {};
     [RestRoutes.LOGIN_WITH_PROVIDER]: {};
-    [RestRoutes.GITHUB_OAUTH_CALLBACK]: {};
+    [RestRoutes.AUTH_PROVIDER_CALLBACK]: {};
 }
 
 export interface RestRequestBody {
@@ -54,7 +54,7 @@ export interface RestRequestBody {
     [RestRoutes.GET_FILE]: undefined;
     [RestRoutes.UPLOAD_FILE]: { base64: string; fileName: string; mimeType: string };
     [RestRoutes.LOGIN_WITH_PROVIDER]: AuthProviderToken;
-    [RestRoutes.GITHUB_OAUTH_CALLBACK]: undefined;
+    [RestRoutes.AUTH_PROVIDER_CALLBACK]: AuthProviderCallbackData;
 }
 
 export interface RestResponseTypes {
@@ -65,7 +65,7 @@ export interface RestResponseTypes {
     [RestRoutes.GET_FILE]: Buffer<ArrayBuffer>;
     [RestRoutes.UPLOAD_FILE]: UploadedFileId;
     [RestRoutes.LOGIN_WITH_PROVIDER]: AuthSession;
-    [RestRoutes.GITHUB_OAUTH_CALLBACK]: void;
+    [RestRoutes.AUTH_PROVIDER_CALLBACK]: AuthSession;
 }
 export type ErrorString = string;
 export type RestResponse<T extends RestRoutes> = RestResponseTypes[T];

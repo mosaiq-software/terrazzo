@@ -4,10 +4,10 @@ import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/
 import { addCard, duplicateCard, getBoardIDFromCardID, getSingleFullCard, moveCardToList, updateCardFromPartial } from '@trz-api/controllers/cardController';
 import { getBoardIDFromListID } from '@trz-api/controllers/listController';
 import { userCanEditCard, userCanMoveCardsOnBoard, userCanViewBoard } from '@trz-api/utils/permissions';
-import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
-import { Server, Socket } from 'socket.io';
+import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
+import { Socket } from 'socket.io';
 
-export const registerCardListeners = (socket: Socket, io: Server) => {
+export const registerCardListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.GET_CARD, async (data) => {
         const boardId = await getBoardIDFromCardID(data);
         if (!(await userCanViewBoard(socket, boardId))) {
@@ -30,7 +30,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
             throw new Error('User not authenticated');
         }
         const card = await addCard(data.listID, data.cardName, undefined, undefined, socketData.user.userId);
-        await syncAddCard(io, card, boardId);
+        await syncAddCard(card, boardId);
         return card.id;
     });
 
@@ -44,7 +44,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
             throw new Error('User not authenticated');
         }
         const card = await duplicateCard(data.cardId, socketData.user.userId);
-        await syncAddCard(io, card, boardId);
+        await syncAddCard(card, boardId);
         return card.id;
     });
 
@@ -54,7 +54,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
             throw new Error('Insufficient permissions to update this card');
         }
         await updateCardFromPartial(data.id, data);
-        await syncUpdateCardField(io, data, boardId);
+        await syncUpdateCardField(data, boardId);
         return undefined;
     });
 
@@ -64,7 +64,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
             throw new Error('Insufficient permissions to move cards on this board');
         }
         await moveCardToList(data.cardId, data.toList, data.position);
-        await syncMovedCard(io, data, boardId);
+        await syncMovedCard(data, boardId);
         return undefined;
     });
 
@@ -79,7 +79,7 @@ export const registerCardListeners = (socket: Socket, io: Server) => {
         } else {
             await removeAssigneeFromCard(data.cardId, data.userId);
         }
-        await syncUpdateCardAssignee(io, data, boardId);
+        await syncUpdateCardAssignee(data, boardId);
         return undefined;
     });
 };

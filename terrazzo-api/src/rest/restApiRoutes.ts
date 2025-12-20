@@ -1,13 +1,11 @@
-import { AuthProvider, LinkedAccountProvider, RestRequestBody, RestRequestParams, RestResponse, RestRoutes, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
-import { signInWithExistingProvider, signInWithGithub, startAuthenticatedSession } from '@trz-api/controllers/authController';
+import { LinkedAccountProvider, RestRequestBody, RestRequestParams, RestResponse, RestRoutes, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
+import { handleAuthProviderCallback, signInWithExistingProvider, startAuthenticatedSession } from '@trz-api/controllers/authController';
 import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
 import { addLinkedAccountToUser } from '@trz-api/controllers/linkedAccountController';
 import { checkUsernameTaken, DEV_upsertFakeUser } from '@trz-api/controllers/userController';
 import { createFileDb, getFileByIdDb } from '@trz-api/persistence/filePersistence';
 import { getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccountPersistence';
-import { getFrontendAuthSessionCallbackUrl } from '@trz-api/utils/authUtils';
 import { isDev } from '@trz-api/utils/envUtils';
-import { getGithubAccessTokenFromCode } from '@trz-api/utils/githubUtils';
 import express from 'express';
 
 const router = express.Router();
@@ -131,25 +129,16 @@ router.post(RestRoutes.LOGIN_WITH_PROVIDER, async (req, res) => {
     }
 });
 
-router.get(RestRoutes.GITHUB_OAUTH_CALLBACK, async (req, res) => {
+router.post(RestRoutes.AUTH_PROVIDER_CALLBACK, async (req, res) => {
+    const body: RestRequestBody[RestRoutes.AUTH_PROVIDER_CALLBACK] = req.body;
     try {
-        const code = req.query.code as string | undefined;
-        if (!code || typeof code !== 'string' || code.trim().length === 0) {
-            res.status(400).send('No code provided');
-            return;
-        }
-        const githubAuthToken = await getGithubAccessTokenFromCode(code);
-        if (!githubAuthToken) {
-            res.status(500).send('Failed to obtain GitHub access token');
-            return;
-        }
-        const authSession = await signInWithGithub(githubAuthToken);
+        const authSession = await handleAuthProviderCallback(body);
         if (!authSession) {
-            res.status(500).send('Failed to sign in with GitHub');
+            res.status(500).send('Failed to sign in with auth provider');
             return;
         }
-        const redirectUrl = getFrontendAuthSessionCallbackUrl(authSession, { provider: AuthProvider.Github, providerAuthToken: githubAuthToken });
-        res.redirect(redirectUrl);
+        const response: RestResponse<RestRoutes.AUTH_PROVIDER_CALLBACK> = authSession;
+        res.sendStatus(200).send(response);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');

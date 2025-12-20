@@ -1,5 +1,5 @@
 import { useLocalStorage, useSessionStorage } from '@mantine/hooks';
-import { AuthProvider, AuthProviderToken, RestRoutes, UserId } from '@mosaiq/terrazzo-common';
+import { AuthProvider, AuthProviderCallbackBody, AuthProviderCallbackData, AuthProviderToken, RestRoutes, UserId } from '@mosaiq/terrazzo-common';
 import { callTrzApi } from '@trz/util/apiUtils';
 import { isDev } from '@trz/util/envUtils';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -88,6 +88,16 @@ const UserProvider: React.FC<any> = ({ children }) => {
             handleLogin(authSession.userId, authSession.authToken, AuthProvider.DEV, username);
         },
         [handleLogin]
+    );
+
+    const handleLoginFromProvider = useCallback(
+        (providerData: AuthProviderCallbackBody) => {
+            if (!userId || !authToken) {
+                return;
+            }
+            const data: AuthProviderCallbackData = { ...providerData, auth: { userId, authToken } };
+        },
+        [userId, authToken]
     );
 
     /**

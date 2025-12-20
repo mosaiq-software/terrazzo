@@ -18,7 +18,7 @@ export async function getGithubAccessTokenFromCode(code: string) {
         if (parsedData.error) throw new Error(parsedData.error_description as string);
         return parsedData.access_token as string;
     } catch (error) {
-        return null;
+        return undefined;
     }
 }
 

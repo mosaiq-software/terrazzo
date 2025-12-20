@@ -4,10 +4,10 @@ import { createRole, deleteRole, getRolesForOrg, setRolesForUserInOrg, updateRol
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { getRoleByIdDb } from '@trz-api/persistence/rolePersistence';
 import { userCanAssignRolesInOrganization, userCanEditRolesInOrganization, userCanViewOrganization } from '@trz-api/utils/permissions';
-import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
-import { Server, Socket } from 'socket.io';
+import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
+import { Socket } from 'socket.io';
 
-export const registerRoleListeners = (socket: Socket, io: Server) => {
+export const registerRoleListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.GET_ROLES_FOR_ORG, async (data) => {
         if (!(await userCanViewOrganization(socket, data))) {
             throw new Error('User does not have permission to view roles for this organization');
@@ -22,7 +22,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
         }
         const newRole = await createRole(data.name, data.color, data.orgId);
         const roles = await getRolesForOrg(data.orgId);
-        await syncUpdateOrganizationRoles(io, data.orgId, roles);
+        await syncUpdateOrganizationRoles(data.orgId, roles);
         return newRole;
     });
 
@@ -36,7 +36,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
         }
         await updateRole(data, socketData.user.userId);
         const roles = await getRolesForOrg(data.orgId);
-        await syncUpdateOrganizationRoles(io, data.orgId, roles);
+        await syncUpdateOrganizationRoles(data.orgId, roles);
         return undefined;
     });
 
@@ -54,7 +54,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
         }
         await deleteRole(role, socketData.user.userId);
         const roles = await getRolesForOrg(role.orgId);
-        await syncUpdateOrganizationRoles(io, role.orgId, roles);
+        await syncUpdateOrganizationRoles(role.orgId, roles);
         return undefined;
     });
 
@@ -75,7 +75,7 @@ export const registerRoleListeners = (socket: Socket, io: Server) => {
             throw new Error('User not authenticated');
         }
         await setRolesForUserInOrg(data.userId, data.orgId, data.roleIds, socketData.user.userId);
-        await syncRolesForUserInOrg(io, data.userId, data.orgId);
+        await syncRolesForUserInOrg(data.userId, data.orgId);
         return undefined;
     });
 };

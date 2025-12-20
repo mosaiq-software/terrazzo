@@ -2,10 +2,10 @@ import { ClientSE } from '@mosaiq/terrazzo-common';
 import { syncUsersLinkedAccounts } from '@trz-api/broadcasters';
 import { addLinkedAccountToUser, getLinkedAccountsForUser, removeLinkedAccountFromUser } from '@trz-api/controllers/linkedAccountController';
 import { userCanGetAndEditPersonalDataForUser } from '@trz-api/utils/permissions';
-import { subscribe } from '@trz-api/utils/socketUtils';
-import { Server, Socket } from 'socket.io';
+import { subscribe } from '@trz-api/utils/socket/socketUtils';
+import { Socket } from 'socket.io';
 
-export const registerLinkedAccountListeners = (socket: Socket, io: Server) => {
+export const registerLinkedAccountListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.GET_USERS_LINKED_ACCOUNTS, async (data) => {
         // This is public info so no permission check needed
         return getLinkedAccountsForUser(data);
@@ -16,7 +16,7 @@ export const registerLinkedAccountListeners = (socket: Socket, io: Server) => {
             throw new Error(`User does not have permission to edit personal data for this user`);
         }
         await addLinkedAccountToUser(data);
-        await syncUsersLinkedAccounts(io, data.userId);
+        await syncUsersLinkedAccounts(data.userId);
         return undefined;
     });
 
@@ -25,7 +25,7 @@ export const registerLinkedAccountListeners = (socket: Socket, io: Server) => {
             throw new Error(`User does not have permission to edit personal data for this user`);
         }
         await removeLinkedAccountFromUser(data.userId, data.provider, data.accountId);
-        await syncUsersLinkedAccounts(io, data.userId);
+        await syncUsersLinkedAccounts(data.userId);
         return undefined;
     });
 };

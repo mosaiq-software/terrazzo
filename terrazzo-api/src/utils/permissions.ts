@@ -5,7 +5,7 @@ import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMe
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
-import { getSocketData } from './socketUtils';
+import { getSocketData } from './socket/socketUtils';
 
 /**
  * Helper to extract UserId from either a UserId or a Socket

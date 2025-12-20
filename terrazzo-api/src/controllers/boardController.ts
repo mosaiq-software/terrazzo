@@ -1,4 +1,5 @@
 import { BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, ListId, TrelloExportType, TrelloLabelColorsMap, TrzModuleType } from '@mosaiq/terrazzo-common';
+import { syncBoardFields, syncDirectoryContents, syncParentsDirectoryContents } from '@trz-api/broadcasters';
 import { addList, getListAndCardIdsOnBoard, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
 import { BoardModelType, createBoardDb, getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
 import { createLabelOnBoardDb, deleteLabelDb, deleteLabelingOnCardsByLabelIdDb, getLabelByIdDb, getLabelsByBoardIdDb, updateLabelDb } from '@trz-api/persistence/labelPersistence';
@@ -54,6 +55,7 @@ export async function addBoard(name: string, boardCode: string, parentId: Direct
         totalCards: 0,
     };
     await createBoardDb(boardModel);
+    await syncDirectoryContents(parentId);
     return boardModel.id;
 }
 
@@ -61,6 +63,8 @@ export async function updateBoardFromPartial(boardId: BoardId, partial: Partial<
     try {
         await updateBoardDb(boardId, partial);
         await updateModule(boardId, partial);
+        await syncBoardFields(boardId);
+        await syncParentsDirectoryContents(boardId);
     } catch (e: any) {
         throw new Error('Failed to update board ' + e);
     }
