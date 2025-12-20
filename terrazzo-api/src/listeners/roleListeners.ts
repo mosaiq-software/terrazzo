@@ -1,5 +1,4 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncRolesForUserInOrg, syncUpdateOrganizationRoles } from '@trz-api/broadcasters';
 import { createRole, deleteRole, getRolesForOrg, setRolesForUserInOrg, updateRole } from '@trz-api/controllers/roleController';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { getRoleByIdDb } from '@trz-api/persistence/rolePersistence';
@@ -21,8 +20,6 @@ export const registerRoleListeners = (socket: Socket) => {
             throw new Error('User does not have permission to create roles in this organization');
         }
         const newRole = await createRole(data.name, data.color, data.orgId);
-        const roles = await getRolesForOrg(data.orgId);
-        await syncUpdateOrganizationRoles(data.orgId, roles);
         return newRole;
     });
 
@@ -35,8 +32,6 @@ export const registerRoleListeners = (socket: Socket) => {
             throw new Error('User not authenticated');
         }
         await updateRole(data, socketData.user.userId);
-        const roles = await getRolesForOrg(data.orgId);
-        await syncUpdateOrganizationRoles(data.orgId, roles);
         return undefined;
     });
 
@@ -53,8 +48,6 @@ export const registerRoleListeners = (socket: Socket) => {
             throw new Error('User not authenticated');
         }
         await deleteRole(role, socketData.user.userId);
-        const roles = await getRolesForOrg(role.orgId);
-        await syncUpdateOrganizationRoles(role.orgId, roles);
         return undefined;
     });
 
@@ -75,7 +68,6 @@ export const registerRoleListeners = (socket: Socket) => {
             throw new Error('User not authenticated');
         }
         await setRolesForUserInOrg(data.userId, data.orgId, data.roleIds, socketData.user.userId);
-        await syncRolesForUserInOrg(data.userId, data.orgId);
         return undefined;
     });
 };

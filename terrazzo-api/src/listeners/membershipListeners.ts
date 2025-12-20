@@ -1,5 +1,4 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncMembersInOrg, syncUsersOrgs } from '@trz-api/broadcasters';
 import { getMembersInOrg, removeMembership } from '@trz-api/controllers/membershipController';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
 import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
@@ -21,8 +20,6 @@ export const registerMembershipListeners = (socket: Socket) => {
             throw new Error(`User does not have permission to delete membership in organization`);
         }
         await removeMembership(data.userId, data.orgId);
-        await syncMembersInOrg(data.orgId);
-        await syncUsersOrgs(data.userId);
         return undefined;
     });
 };

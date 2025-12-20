@@ -1,5 +1,4 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncDirectoryContents, syncDocumentField } from '@trz-api/broadcasters';
 import { createNewDocument, getDocumentById, modifyDocument } from '@trz-api/controllers/documentController';
 import { userCanCreateDocument, userCanEditDocument, userCanViewDocument } from '@trz-api/utils/permissions';
 import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
@@ -15,7 +14,6 @@ export const registerDocumentListeners = (socket: Socket) => {
             throw new Error('User not authenticated');
         }
         const document = await createNewDocument(data.title, data.parentId, socketData.user.userId);
-        await syncDirectoryContents(document.parentId);
         return document;
     });
 
@@ -40,8 +38,6 @@ export const registerDocumentListeners = (socket: Socket) => {
             throw new Error('No document found');
         }
 
-        await syncDocumentField(updatedDocument);
-        await syncDirectoryContents(updatedDocument.parentId);
         return undefined;
     });
 };

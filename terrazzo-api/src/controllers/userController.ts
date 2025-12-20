@@ -1,4 +1,5 @@
 import { BoardId, List, MembershipRecord, OrganizationId, UserHeader, UserId } from '@mosaiq/terrazzo-common';
+import { syncUpdateUserField } from '@trz-api/broadcasters';
 import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createUserHeaderDb, getUserHeaderByIdDb, getUserHeaderByUsernameDb, updateUserHeaderDb } from '@trz-api/persistence/userPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
@@ -75,6 +76,7 @@ export const getUserPreview = async (userId: UserId) => {
 
 export const updateUserData = async (userData: Partial<UserHeader> & { id: UserId }) => {
     await updateUserHeaderDb(userData);
+    await syncUpdateUserField(userData.id, userData);
 };
 
 export const DEV_upsertFakeUser = async (username: string): Promise<UserHeader> => {

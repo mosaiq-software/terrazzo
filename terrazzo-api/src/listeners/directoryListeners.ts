@@ -1,5 +1,4 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncDirectoryContents, syncDirectoryField } from '@trz-api/broadcasters';
 import { createDirectory, getDirectory, getDirectoryContentsForUser, updateDirectory, updateDirectoryContents } from '@trz-api/controllers/directoryController';
 import { userCanCreateDirectory, userCanEditDirectory, userCanViewDirectory } from '@trz-api/utils/permissions';
 import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
@@ -19,7 +18,6 @@ export const registerDirectoryListeners = (socket: Socket) => {
             throw new Error('User does not have permission to create a directory in this module');
         }
         const directoryHeader = await createDirectory(data.name, data.parentId);
-        await syncDirectoryContents(directoryHeader.parentId);
         return directoryHeader;
     });
 
@@ -28,12 +26,6 @@ export const registerDirectoryListeners = (socket: Socket) => {
             throw new Error('User does not have permission to edit this directory');
         }
         await updateDirectory(data.id, data);
-        const updatedDir = await getDirectory(data.id);
-        if (!updatedDir) {
-            throw new Error('No directory found');
-        }
-        await syncDirectoryField(updatedDir);
-        await syncDirectoryContents(updatedDir.parentId);
         return undefined;
     });
 
@@ -48,7 +40,6 @@ export const registerDirectoryListeners = (socket: Socket) => {
 
     subscribe(socket, ClientSE.UPDATE_DIRECTORY_CONTENTS, async (data) => {
         await updateDirectoryContents(data.directoryId, data.contents);
-        await syncDirectoryContents(data.directoryId);
         return undefined;
     });
 };

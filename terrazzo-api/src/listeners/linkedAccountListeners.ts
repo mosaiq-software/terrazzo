@@ -1,5 +1,4 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncUsersLinkedAccounts } from '@trz-api/broadcasters';
 import { addLinkedAccountToUser, getLinkedAccountsForUser, removeLinkedAccountFromUser } from '@trz-api/controllers/linkedAccountController';
 import { userCanGetAndEditPersonalDataForUser } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socket/socketUtils';
@@ -16,7 +15,6 @@ export const registerLinkedAccountListeners = (socket: Socket) => {
             throw new Error(`User does not have permission to edit personal data for this user`);
         }
         await addLinkedAccountToUser(data);
-        await syncUsersLinkedAccounts(data.userId);
         return undefined;
     });
 
@@ -25,7 +23,6 @@ export const registerLinkedAccountListeners = (socket: Socket) => {
             throw new Error(`User does not have permission to edit personal data for this user`);
         }
         await removeLinkedAccountFromUser(data.userId, data.provider, data.accountId);
-        await syncUsersLinkedAccounts(data.userId);
         return undefined;
     });
 };

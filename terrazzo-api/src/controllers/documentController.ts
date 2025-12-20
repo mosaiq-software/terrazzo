@@ -1,4 +1,5 @@
 import { DocumentHeader, DocumentId, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common';
+import { syncDirectoryContents, syncDocumentField } from '@trz-api/broadcasters';
 import { createDocumentDb, DocumentModelType, getDocumentByIdDb, updateDocumentDb } from '@trz-api/persistence/documentPersistence';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
 import { createTextBlockWithPlaintext } from './textBlockController';
@@ -22,6 +23,9 @@ export const createNewDocument = async (title: string, parentId: UID, createdByU
         ...docModule,
         type: TrzModuleType.Document,
     };
+    // Update parent's directory contents
+    await syncDirectoryContents(docHeader.parentId);
+
     return docHeader;
 };
 
@@ -45,5 +49,10 @@ export const modifyDocument = async (id: DocumentId, updates: Partial<DocumentHe
     await updateDocumentDb(id, updates);
     await updateModule(id, updates);
     const updatedDocument = await getDocumentById(id);
+    if (!updatedDocument) {
+        return undefined;
+    }
+    await syncDocumentField(updatedDocument);
+    await syncDirectoryContents(updatedDocument.parentId);
     return updatedDocument;
 };

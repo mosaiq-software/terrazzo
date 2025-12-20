@@ -1,4 +1,5 @@
 import { LinkedAccount, LinkedAccountProvider, UserId } from '@mosaiq/terrazzo-common';
+import { syncUsersLinkedAccounts } from '@trz-api/broadcasters';
 import { createLinkedAccountDb, deleteLinkedAccountDb, getLinkedAccountForProviderDb, getLinkedAccountsForUserDb } from '@trz-api/persistence/linkedAccountPersistence';
 
 export const getLinkedAccountsForUser = async (userId: UserId) => {
@@ -15,6 +16,7 @@ export const addLinkedAccountToUser = async (linkedAccount: LinkedAccount) => {
         return existingAccount;
     }
     createLinkedAccountDb(linkedAccount);
+    await syncUsersLinkedAccounts(linkedAccount.userId);
     return linkedAccount;
 };
 
@@ -24,4 +26,5 @@ export const removeLinkedAccountFromUser = async (userId: UserId, provider: Link
         throw new Error(`Linked account does not exist for this user`);
     }
     await deleteLinkedAccountDb(provider, accountId, userId);
+    await syncUsersLinkedAccounts(userId);
 };

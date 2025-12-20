@@ -1,4 +1,5 @@
 import { arrayMove, BoardId, CardId, List, ListHeader, ListId, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
+import { syncAddList, syncMoveList, syncUpdateListField } from '@trz-api/broadcasters';
 import { getAllCardsOfList, getCardIdsOnList } from '@trz-api/controllers/cardController';
 import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import { createListOnBoardDb, getListByIdDb, getListsBoardIdDb, getListsByBoardIdOrderDb, getNextListOrderDb, updateListDb, updateListOrderDb } from '@trz-api/persistence/listPersistence';
@@ -87,6 +88,7 @@ export async function addList(boardID: BoardId, listName: string) {
             order: await getNextListOrderDb(boardID),
         };
         await createListOnBoardDb(newList, boardID);
+        await syncAddList(newList, boardID);
         return newList;
     } catch (e) {
         throw new Error('Failed to save board' + e);
@@ -102,6 +104,7 @@ export async function updateListFromPartial(listId: ListId, partial: Partial<Lis
     const updated = updateBaseFromPartial(updatingList, partial);
     try {
         await updateListDb(updated);
+        await syncUpdateListField(updated.id, partial, updated.boardId);
     } catch (e: any) {
         throw new Error('Failed to update list ' + e);
     }
@@ -134,6 +137,7 @@ export async function moveList(listID: ListId, toPosition: number) {
         }
         const movedLists = arrayMove<ListHeader>(lists, index, toPosition);
         await updateListOrderDb(movedLists);
+        await syncMoveList(listID, toPosition, boardId);
     } catch (error: any) {
         console.error(error);
         throw error;

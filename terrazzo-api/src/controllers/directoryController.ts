@@ -1,4 +1,5 @@
 import { DirectoryHeader, DirectoryId, ModuleHeader, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common';
+import { syncDirectoryContents, syncDirectoryField } from '@trz-api/broadcasters';
 import { createDirectoryDb, DirectoryModelType, getDirectoryByIdDb, updateDirectoryDb } from '@trz-api/persistence/directoryPersistence';
 import { getModulesByParentIdDb } from '@trz-api/persistence/modulePersistence';
 import { userCanViewBoard, userCanViewDirectory, userCanViewDocument } from '@trz-api/utils/permissions';
@@ -28,12 +29,22 @@ export const createDirectory = async (name: string, parentId: DirectoryId): Prom
         ...dirModule,
         type: TrzModuleType.Directory,
     };
+
+    // Update parent's directory contents
+    await syncDirectoryContents(dirHeader.parentId);
+
     return dirHeader;
 };
 
 export const updateDirectory = async (id: DirectoryId, header: Partial<DirectoryHeader>) => {
     await updateDirectoryDb(id, header);
     await updateModule(id, header);
+    const updatedDir = await getDirectory(id);
+    if (!updatedDir) {
+        throw new Error('No directory found after update');
+    }
+    await syncDirectoryField(updatedDir);
+    await syncDirectoryContents(updatedDir.parentId);
 };
 
 export const getDirectoryContentsForUser = async (dirId: DirectoryId, userId: UserId): Promise<(ModuleHeader & { canAccess: boolean })[]> => {
@@ -62,5 +73,7 @@ export const getDirectoryContentsForUser = async (dirId: DirectoryId, userId: Us
 };
 
 export const updateDirectoryContents = async (dirId: DirectoryId, moduleIds: UID[]) => {
+    await syncDirectoryContents(dirId);
+
     throw new Error('updateDirectoryContents not implemented');
 };

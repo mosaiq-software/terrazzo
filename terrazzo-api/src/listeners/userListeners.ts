@@ -1,5 +1,4 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncUpdateUserField } from '@trz-api/broadcasters';
 import { endAuthenticatedSession } from '@trz-api/controllers/authController';
 import { getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { getUserPreview, updateUserData } from '@trz-api/controllers/userController';
@@ -18,7 +17,6 @@ export const registerUserListeners = (socket: Socket) => {
             throw new Error(`User does not have permission to edit personal data for this user`);
         }
         await updateUserData(data);
-        await syncUpdateUserField(data.id, data);
         return undefined;
     });
 

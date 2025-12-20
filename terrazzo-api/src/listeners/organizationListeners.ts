@@ -1,5 +1,4 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncUpdateOrgField } from '@trz-api/broadcasters';
 import { addOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
 import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
@@ -29,7 +28,6 @@ export const registerOrganizationListeners = (socket: Socket) => {
             throw new Error('User not authenticated');
         }
         await updateOrganizationFromPartial(data.id, data, socketData.user.userId);
-        await syncUpdateOrgField(data.id, data);
         return undefined;
     });
 };

@@ -1,5 +1,4 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncAddList, syncMoveList, syncUpdateListField } from '@trz-api/broadcasters';
 import { addList, getBoardIDFromListID, getListRes, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
 import { userCanEditBoard, userCanViewBoard } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socket/socketUtils';
@@ -23,7 +22,6 @@ export const registerListListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to create lists for this board');
         }
         const list = await addList(data.boardID, data.listName);
-        await syncAddList(list, data.boardID);
         return list.id;
     });
 
@@ -33,9 +31,6 @@ export const registerListListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to update this list');
         }
         await updateListFromPartial(data.id, data);
-        if (boardId) {
-            await syncUpdateListField(data.id, data, boardId);
-        }
         return undefined;
     });
 
@@ -45,9 +40,6 @@ export const registerListListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to move this list');
         }
         await moveList(data.listId, data.position);
-        if (boardId) {
-            await syncMoveList(data.listId, data.position, boardId);
-        }
         return undefined;
     });
 };

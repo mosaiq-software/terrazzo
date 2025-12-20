@@ -1,5 +1,4 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncMembersInOrg, syncOrgInvites, syncOrgInvitesFromInviteId } from '@trz-api/broadcasters';
 import { createInvite, deleteInvite, getAllInvitesForOrg, useInvite } from '@trz-api/controllers/inviteController';
 import { getInviteRecordByIdDb } from '@trz-api/persistence/invitePersistence';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
@@ -24,7 +23,6 @@ export const registerInviteListeners = (socket: Socket) => {
             throw new Error('User not authenticated');
         }
         const invite = await createInvite(data.orgId, data.maxUses, socketData.user.userId);
-        await syncOrgInvitesFromInviteId(invite.id);
         return invite;
     });
 
@@ -37,7 +35,6 @@ export const registerInviteListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to delete invites for this organization');
         }
         await deleteInvite(data.inviteId);
-        await syncOrgInvitesFromInviteId(data.inviteId);
         return undefined;
     });
 
@@ -47,14 +44,6 @@ export const registerInviteListeners = (socket: Socket) => {
             throw new Error('User not authenticated');
         }
         const success = await useInvite(data.inviteId, socketData.user.userId);
-        if (success) {
-            const inviteRecord = await getInviteRecordByIdDb(data.inviteId);
-            if (!inviteRecord) {
-                throw new Error('Invite not found for syncing org invites');
-            }
-            await syncOrgInvites(inviteRecord.forOrganizationId);
-            await syncMembersInOrg(inviteRecord.forOrganizationId);
-        }
         return success;
     });
 

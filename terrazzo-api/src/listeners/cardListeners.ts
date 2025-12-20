@@ -1,5 +1,4 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncAddCard, syncMovedCard, syncUpdateCardAssignee, syncUpdateCardField } from '@trz-api/broadcasters';
 import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/cardAssignmentController';
 import { addCard, duplicateCard, getBoardIDFromCardID, getSingleFullCard, moveCardToList, updateCardFromPartial } from '@trz-api/controllers/cardController';
 import { getBoardIDFromListID } from '@trz-api/controllers/listController';
@@ -30,7 +29,6 @@ export const registerCardListeners = (socket: Socket) => {
             throw new Error('User not authenticated');
         }
         const card = await addCard(data.listID, data.cardName, undefined, undefined, socketData.user.userId);
-        await syncAddCard(card, boardId);
         return card.id;
     });
 
@@ -44,7 +42,6 @@ export const registerCardListeners = (socket: Socket) => {
             throw new Error('User not authenticated');
         }
         const card = await duplicateCard(data.cardId, socketData.user.userId);
-        await syncAddCard(card, boardId);
         return card.id;
     });
 
@@ -54,7 +51,6 @@ export const registerCardListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to update this card');
         }
         await updateCardFromPartial(data.id, data);
-        await syncUpdateCardField(data, boardId);
         return undefined;
     });
 
@@ -64,7 +60,6 @@ export const registerCardListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to move cards on this board');
         }
         await moveCardToList(data.cardId, data.toList, data.position);
-        await syncMovedCard(data, boardId);
         return undefined;
     });
 
@@ -79,7 +74,6 @@ export const registerCardListeners = (socket: Socket) => {
         } else {
             await removeAssigneeFromCard(data.cardId, data.userId);
         }
-        await syncUpdateCardAssignee(data, boardId);
         return undefined;
     });
 };
