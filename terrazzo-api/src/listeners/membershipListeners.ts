@@ -1,11 +1,10 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncMembersInOrg, syncUsersOrgs } from '@trz-api/broadcasters';
 import { getMembersInOrg, removeMembership } from '@trz-api/controllers/membershipController';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
-import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
-import { Server, Socket } from 'socket.io';
+import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
+import { Socket } from 'socket.io';
 
-export const registerMembershipListeners = (socket: Socket, io: Server) => {
+export const registerMembershipListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.GET_ORGANIZATION_MEMBERSHIPS, async (data) => {
         const memberships = await getMembersInOrg(data);
         return memberships;
@@ -16,13 +15,11 @@ export const registerMembershipListeners = (socket: Socket, io: Server) => {
         if (!socketData.user) {
             throw new Error('User not authenticated');
         }
-        const isLeavingSelf = socketData.user.user.id === data.userId;
+        const isLeavingSelf = socketData.user.userId === data.userId;
         if (!(await userCanAdministerOrganization(socket, data.orgId)) && !isLeavingSelf) {
             throw new Error(`User does not have permission to delete membership in organization`);
         }
         await removeMembership(data.userId, data.orgId);
-        await syncMembersInOrg(io, data.orgId);
-        await syncUsersOrgs(io, data.userId);
         return undefined;
     });
 };

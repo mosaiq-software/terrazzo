@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
 import { UserProfileIcon } from '@trz/components/AppLayout/Navbar/UserProfileIcon';
-import { useUser } from '@trz/contexts/user-context';
+import { useUserContext } from '@trz/contexts/user-context';
 import { setTitle } from '@trz/util/tabUtils';
 import mosaiqLogo from '../assets/mosaiq-logo.png';
 import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
@@ -21,7 +21,7 @@ const COLORS = {
 const MAX_WIDTH = 700;
 
 const LandingPage = () => {
-    const { userData } = useUser();
+    const { userId, goToLogin } = useUserContext();
     useEffect(() => {
         setTitle(`Terrazzo`);
     }, []);
@@ -80,7 +80,7 @@ const LandingPage = () => {
                             </Title>
                         </NavLink>
                         <Group gap="xs">
-                            {userData ? (
+                            {userId ? (
                                 <>
                                     <Anchor
                                         component={Link}
@@ -93,12 +93,11 @@ const LandingPage = () => {
                                 </>
                             ) : (
                                 <Button
-                                    component={Link}
-                                    to="/login"
                                     color={COLORS.primary}
                                     c={COLORS.background}
                                     variant="filled"
                                     radius="md"
+                                    onClick={goToLogin}
                                 >
                                     Login
                                 </Button>
@@ -146,17 +145,30 @@ const LandingPage = () => {
                         gap="sm"
                         mt="md"
                     >
-                        <Button
-                            component={Link}
-                            to={userData ? '/dashboard' : '/login'}
-                            color={COLORS.primary}
-                            c={COLORS.background}
-                            size="md"
-                            radius="md"
-                            fw={600}
-                        >
-                            {userData ? 'Go to Dashboard' : 'Get Started'}
-                        </Button>
+                        {userId ? (
+                            <Button
+                                component={Link}
+                                to="/dashboard"
+                                color={COLORS.primary}
+                                c={COLORS.background}
+                                size="md"
+                                radius="md"
+                                fw={600}
+                            >
+                                Go to Dashboard
+                            </Button>
+                        ) : (
+                            <Button
+                                color={COLORS.primary}
+                                c={COLORS.background}
+                                size="md"
+                                radius="md"
+                                fw={600}
+                                onClick={goToLogin}
+                            >
+                                Get Started
+                            </Button>
+                        )}
                     </Group>
                 </Stack>
                 <div id="features">

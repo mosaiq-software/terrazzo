@@ -1,11 +1,9 @@
 import { BoardId, Card, getRoomCode, RoomType, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common';
 import { userCanViewBoard } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socketUtils';
-import { Server } from 'socket.io';
+import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
-export const syncAddCard = async (io: Server, card: Card, onBoardId: BoardId) => {
+export const syncAddCard = async (card: Card, onBoardId: BoardId) => {
     await broadcast({
-        io,
         event: ServerSE.ADD_CARD,
         toRoomIds: [getRoomCode(RoomType.DATA, onBoardId)],
         buildPayload: async (userId) => {
@@ -17,9 +15,8 @@ export const syncAddCard = async (io: Server, card: Card, onBoardId: BoardId) =>
     });
 };
 
-export const syncUpdateCardField = async (io: Server, card: ServerSEPayload[ServerSE.UPDATE_CARD_FIELD], onBoardId: BoardId) => {
+export const syncUpdateCardField = async (card: ServerSEPayload[ServerSE.UPDATE_CARD_FIELD], onBoardId: BoardId) => {
     await broadcast({
-        io,
         event: ServerSE.UPDATE_CARD_FIELD,
         toRoomIds: [getRoomCode(RoomType.DATA, onBoardId)],
         buildPayload: async (userId) => {
@@ -31,9 +28,8 @@ export const syncUpdateCardField = async (io: Server, card: ServerSEPayload[Serv
     });
 };
 
-export const syncMovedCard = async (io: Server, payload: ServerSEPayload[ServerSE.MOVE_CARD], onBoardId: BoardId) => {
+export const syncMovedCard = async (payload: ServerSEPayload[ServerSE.MOVE_CARD], onBoardId: BoardId) => {
     await broadcast({
-        io,
         event: ServerSE.MOVE_CARD,
         toRoomIds: [getRoomCode(RoomType.DATA, onBoardId)],
         buildPayload: async (userId) => {
@@ -45,9 +41,8 @@ export const syncMovedCard = async (io: Server, payload: ServerSEPayload[ServerS
     });
 };
 
-export const syncUpdateCardAssignee = async (io: Server, payload: ServerSEPayload[ServerSE.UPDATE_CARD_ASSIGNEE], onBoardId: BoardId) => {
+export const syncUpdateCardAssignee = async (payload: ServerSEPayload[ServerSE.UPDATE_CARD_ASSIGNEE], onBoardId: BoardId) => {
     await broadcast({
-        io,
         event: ServerSE.UPDATE_CARD_ASSIGNEE,
         toRoomIds: [getRoomCode(RoomType.DATA, onBoardId), getRoomCode(RoomType.USER, payload.userId)],
         buildPayload: async (userId) => {

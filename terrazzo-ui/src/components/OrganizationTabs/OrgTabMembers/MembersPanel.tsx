@@ -1,7 +1,7 @@
 import { Group, Stack, Title } from '@mantine/core';
 import { Member, MembershipRecord, OrganizationHeader } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useUser } from '@trz/contexts/user-context';
+import { useUserContext } from '@trz/contexts/user-context';
 import { removeUserFromOrg } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback, useMemo } from 'react';
@@ -14,7 +14,7 @@ interface MembersPanelProps {
 }
 
 export const MembersPanel = (props: MembersPanelProps) => {
-    const userCtx = useUser();
+    const userCtx = useUserContext();
     const sockCtx = useSocket();
 
     const handleRemoveMember = useCallback(
@@ -62,7 +62,7 @@ export const MembersPanel = (props: MembersPanelProps) => {
                     <MemberRow
                         key={orgOwner.user.id}
                         member={orgOwner}
-                        isCurrentUser={orgOwner.user.id === userCtx.userData?.id}
+                        isCurrentUser={orgOwner.user.id === userCtx.userId}
                         isOrgOwner
                     />
                 )}
@@ -70,7 +70,7 @@ export const MembersPanel = (props: MembersPanelProps) => {
                     <MemberRow
                         key={member.user.id}
                         member={member}
-                        isCurrentUser={member.user.id === userCtx.userData?.id}
+                        isCurrentUser={member.user.id === userCtx.userId}
                         onRemoveMember={handleRemoveMember}
                     />
                 ))}

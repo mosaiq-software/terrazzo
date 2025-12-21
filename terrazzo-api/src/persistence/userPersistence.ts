@@ -13,7 +13,6 @@ UserModel.init(
         firstName: DataTypes.STRING,
         lastName: DataTypes.STRING,
         profilePicture: DataTypes.STRING,
-        githubUserId: DataTypes.STRING,
     },
     { sequelize, timestamps: false }
 );
@@ -25,13 +24,6 @@ export const getUserHeaderByIdDb = async (id: UserId) => {
 
 export const getUserHeaderByUsernameDb = async (username: string) => {
     const model = await UserModel.findOne({ where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('username')), sequelize.fn('lower', username)) });
-    return model?.toJSON();
-};
-
-export const getUserHeaderByGithubIdDb = async (githubId: string) => {
-    const model = await UserModel.findOne({
-        where: { githubUserId: githubId },
-    });
     return model?.toJSON();
 };
 

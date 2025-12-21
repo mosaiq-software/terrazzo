@@ -3,13 +3,13 @@ import { modals } from '@mantine/modals';
 import { MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
-import { DEFAULT_AUTHED_ROUTE } from '@trz/contexts/user-context';
 import { removeUserFromOrg, updateOrgField } from '@trz/emitters';
 import { useOrgPermission } from '@trz/hooks/usePermissions';
 import { COLOR_UNSET } from '@trz/util/colorUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ImageUpload } from '../UI/ImageUpload';
 import { RectHoldingButton } from '../UI/RectHoldingButton';
 
 interface OrgTabSettingsProps {
@@ -35,7 +35,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
             await removeUserFromOrg(sockCtx, props.myMembershipRecord.userId, props.orgData.id);
             notify(NoteType.LEFT_ENTITY, [props.orgData.name]);
             unsavedCtx.markChangesSaved(Savable.OrgSettings);
-            navigate(DEFAULT_AUTHED_ROUTE);
+            navigate('/dashboard');
         } catch (e) {
             notify(NoteType.ORG_DATA_ERROR, e);
         }
@@ -91,11 +91,9 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                     style={{
                         width: '40rem',
                     }}
+                    gap={'lg'}
                 >
                     <TextInput
-                        labelProps={{
-                            c: 'white',
-                        }}
                         label="Organization Name"
                         placeholder="My Organization"
                         value={editedSettings.name ?? props.orgData.name}
@@ -105,9 +103,6 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         disabled={!userCanAdmin}
                     />
                     <Textarea
-                        labelProps={{
-                            c: 'white',
-                        }}
                         label="Organization Description"
                         placeholder="Write some info about your organization"
                         value={editedSettings.description ?? props.orgData.description}
@@ -116,18 +111,29 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         }}
                         disabled={!userCanAdmin}
                     />
-                    <TextInput
-                        labelProps={{
-                            c: 'white',
-                        }}
-                        label="Organization Logo URL"
-                        placeholder="https://mosaiq.dev/logo.png"
-                        value={editedSettings.logoUrl ?? props.orgData.logoUrl}
-                        onChange={(e) => {
-                            change('logoUrl', e.target.value);
-                        }}
-                        disabled={!userCanAdmin}
-                    />
+                    <Group
+                        align="start"
+                        wrap="nowrap"
+                    >
+                        <ImageUpload
+                            currentImageUrl={editedSettings.logoUrl ?? props.orgData.logoUrl}
+                            onUploadComplete={(url) => change('logoUrl', url)}
+                            width={100}
+                            height={100}
+                            alt="Organization Logo"
+                            style={{ width: 100, height: 100 }}
+                        />
+                        <TextInput
+                            label="Organization Logo URL"
+                            placeholder="https://mosaiq.dev/logo.png"
+                            value={editedSettings.logoUrl ?? props.orgData.logoUrl}
+                            onChange={(e) => {
+                                change('logoUrl', e.target.value);
+                            }}
+                            disabled={!userCanAdmin}
+                            style={{ flex: 1 }}
+                        />
+                    </Group>
                     <Group>
                         <Button
                             variant="outline"

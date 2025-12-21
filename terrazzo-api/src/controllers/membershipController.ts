@@ -1,4 +1,5 @@
 import { Member, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
+import { syncMembersInOrg, syncUsersOrgs } from '@trz-api/broadcasters';
 import { createOrganizationMembershipDb, deleteOrganizationMembershipDb, getOrganizationMembershipDb, getOrganizationMembershipsForOrgDb, getOrganizationMembershipsForUserDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
@@ -54,4 +55,6 @@ export const removeMembership = async (userId: UserId, orgId: OrganizationId) =>
     }
     await deleteOrganizationMembershipDb(userId, orgId);
     await setRoleIdsForUserInOrgDb(userId, orgId, []);
+    await syncMembersInOrg(orgId);
+    await syncUsersOrgs(userId);
 };

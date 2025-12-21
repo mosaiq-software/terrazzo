@@ -1,4 +1,5 @@
 import { OrganizationHeader, OrganizationId, PermissionFlag, recordValues, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
+import { syncUpdateOrgField } from '@trz-api/broadcasters';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
@@ -81,11 +82,8 @@ export async function updateOrganizationFromPartial(orgId: OrganizationId, parti
     }
 
     const updated = updateBaseFromPartial(updatingOrg, partial);
-    try {
-        await updateOrgDb(updated);
-    } catch (e: any) {
-        throw new Error('Failed to update org ' + e);
-    }
+    await updateOrgDb(updated);
+    await syncUpdateOrgField(orgId, { ...partial, id: orgId });
 }
 
 export const userIsOrgOwner = async (userId: UserId, orgId: OrganizationId): Promise<boolean> => {

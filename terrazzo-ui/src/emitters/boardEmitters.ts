@@ -1,14 +1,9 @@
 import { BoardHeader, BoardId, BoardRes, ClientSE, UID } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
-import { NoteType, notify } from '@trz/util/notifications';
 
 export const getBoardData = async (sockCtx: SocketContextType, boardId: BoardId): Promise<BoardRes | undefined> => {
-    try {
-        const board = await sockCtx.emit(ClientSE.GET_BOARD, boardId);
-        return board;
-    } catch (e: any) {
-        notify(NoteType.BOARD_DATA_ERROR, e);
-    }
+    const board = await sockCtx.emit(ClientSE.GET_BOARD, boardId);
+    return board;
 };
 
 export const createBoard = async (sockCtx: SocketContextType, name: string, boardCode: string, parentId: UID): Promise<BoardId | undefined> => {

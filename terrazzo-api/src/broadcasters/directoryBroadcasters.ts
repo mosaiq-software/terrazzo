@@ -2,10 +2,9 @@ import { DirectoryHeader, DirectoryId, getRoomCode, RoomSpecifier, RoomType, Ser
 import { getDirectoryContentsForUser } from '@trz-api/controllers/directoryController';
 import { getModuleById } from '@trz-api/controllers/moduleController';
 import { userCanViewDirectory } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socketUtils';
-import { Server } from 'socket.io';
+import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
-export const syncParentsDirectoryContents = async (io: Server, childId: UID) => {
+export const syncParentsDirectoryContents = async (childId: UID) => {
     try {
         const childModule = await getModuleById(childId);
         if (!childModule) {
@@ -15,16 +14,15 @@ export const syncParentsDirectoryContents = async (io: Server, childId: UID) => 
         if (!parentId) {
             throw new Error('No parentId found for child module when syncing parent directory contents');
         }
-        await syncDirectoryContents(io, parentId);
+        await syncDirectoryContents(parentId);
     } catch (error: any) {
         console.error('Error syncing parents directory contents', error);
     }
 };
 
-export const syncDirectoryContents = async (io: Server, dirId: DirectoryId) => {
+export const syncDirectoryContents = async (dirId: DirectoryId) => {
     try {
         broadcast({
-            io,
             event: ServerSE.UPDATE_DIRECTORY_CONTENTS,
             toRoomIds: [getRoomCode(RoomType.DATA, dirId, RoomSpecifier.CONTENTS)],
             buildPayload: async (userId) => {
@@ -43,9 +41,8 @@ export const syncDirectoryContents = async (io: Server, dirId: DirectoryId) => {
     }
 };
 
-export const syncDirectoryField = async (io: Server, directory: DirectoryHeader) => {
+export const syncDirectoryField = async (directory: DirectoryHeader) => {
     await broadcast({
-        io,
         event: ServerSE.UPDATE_DIRECTORY_FIELD,
         toRoomIds: [getRoomCode(RoomType.DATA, directory.id)],
         buildPayload: async (userId) => {

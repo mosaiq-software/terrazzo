@@ -1,4 +1,6 @@
 import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
+import { syncAddCard, syncMovedCard, syncUpdateCardField } from '@trz-api/broadcasters';
+import { syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
 import { createCardOnListDb, getCardByIdDb, getCardsByListIdDownDb, getCardsByListIdShortUpDb, updateCardDb, updateCardListDb, updateCardOrderDb } from '@trz-api/persistence/cardPersistence';
@@ -7,6 +9,7 @@ import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { getTextBlockByIdDb } from '@trz-api/persistence/textBlockPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
+import { getBoardIDFromListID } from './listController';
 import { createTextBlockWithEncodedData, createTextBlockWithPlaintext } from './textBlockController';
 
 export const MOVING_LIST_ORDER = -10000;
@@ -107,10 +110,11 @@ export async function addCard(listID: ListId, cardName: string, description?: st
     try {
         await createCardOnListDb(newCard, listID);
         await updateBoardDb(board.id, { totalCards: board.totalCards + 1 });
-        return newCard;
+        await syncAddCard(newCard, board.id);
     } catch (e) {
         throw new Error('Failed to save Card' + e);
     }
+    return newCard;
 }
 
 /**
@@ -200,6 +204,12 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         throw new Error('Failed to add labels to card ' + error.message);
     }
 
+    try {
+        await syncAddCard(newCard, board.id);
+    } catch (e) {
+        throw new Error('Failed to sync new card ' + e);
+    }
+
     return newCard;
 }
 
@@ -214,6 +224,13 @@ export async function updateCardFromPartial(cardId: CardId, partial: Partial<Car
         await updateCardDb(updated);
     } catch (e: any) {
         throw new Error('Failed to update card ' + e);
+    }
+
+    try {
+        const boardId = await getBoardIDFromListID(updated.listId);
+        await syncUpdateCardField(updated, boardId);
+    } catch (e) {
+        throw new Error('Failed to sync updated card ' + e);
     }
 }
 
@@ -287,6 +304,8 @@ export async function moveCardToList(cardId: CardId, toListId: ListId, position?
             promises.push(updateCardListDb(cardId, toListId));
         }
         await Promise.all(promises);
+
+        await syncMovedCard({ cardId, toList: toListId, position }, toListId);
     } catch (error: any) {
         console.error(`Error moving card ${cardId} to list ${toListId}: ${error}`);
         throw error;
@@ -312,4 +331,6 @@ export const setCardsLabels = async (cardId: CardId, labelIds: LabelId[]) => {
     for (const labelId of labelIds) {
         addLabelToCardDb(labelId, cardId);
     }
+    const boardId = await getBoardIDFromCardID(cardId);
+    await syncCardLabels(boardId, cardId, labelIds);
 };

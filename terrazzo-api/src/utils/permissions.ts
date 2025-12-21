@@ -5,7 +5,7 @@ import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMe
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
-import { getSocketData } from './socketUtils';
+import { getSocketData } from './socket/socketUtils';
 
 /**
  * Helper to extract UserId from either a UserId or a Socket
@@ -20,7 +20,7 @@ const getUserId = (user: UserId | Socket | undefined): UserId | undefined => {
         return user;
     }
     const socketData = getSocketData(user);
-    return socketData?.user?.user?.id;
+    return socketData?.user?.userId;
 };
 
 /**
@@ -70,7 +70,6 @@ export const userHasPermissionOnModule = async (user: UserId | Socket | undefine
         return false;
     }
     const grantedFlags = await getModulePermissionsForUser(userId, moduleId);
-    console.debug('userHasPermissionOnModule', { userId, moduleId, grantedFlags, permissibleAction });
     return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
 };
 
@@ -87,13 +86,12 @@ export const userHasPermissionsOnOrganization = async (user: UserId | Socket | u
         return false;
     }
     const grantedFlags = await getOrganizationPermissionsForUser(userId, orgId);
-    console.debug('userHasPermissionsOnOrganization', { userId, orgId, grantedFlags, permissibleAction });
     return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
 };
 
 // ====================== Specific Permission Checkers ======================
 
-export const userCanGetPersonalDataForUser = async (requestingUser: UserId | Socket | undefined, targetUserId: UserId): Promise<boolean> => {
+export const userCanGetAndEditPersonalDataForUser = async (requestingUser: UserId | Socket | undefined, targetUserId: UserId): Promise<boolean> => {
     const requestingUserId = getUserId(requestingUser);
     if (!requestingUserId) {
         return false;

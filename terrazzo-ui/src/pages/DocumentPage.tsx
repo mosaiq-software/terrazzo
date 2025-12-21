@@ -1,15 +1,15 @@
 import { Box, Group, Loader, ScrollArea, Stack, Text } from '@mantine/core';
 import { useIdle } from '@mantine/hooks';
 import { DocumentId, fullName, PermissibleAction } from '@mosaiq/terrazzo-common';
-import { CollaborativeTextArea } from '@trz/components/CollaborativeTextArea/CollaborativeTextArea';
+import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
-import { useUser } from '@trz/contexts/user-context';
 import { updateDocumentMetadata } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useDocument } from '@trz/hooks/useDocument';
+import { useMe } from '@trz/hooks/useMe';
 import { useModulePermission } from '@trz/hooks/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
 import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
@@ -23,7 +23,7 @@ const DocumentPage = (): React.JSX.Element => {
     const uiCtx = useUI();
     const docId = params.documentId as DocumentId | undefined;
     const idle = useIdle(IDLE_TIMEOUT_MS);
-    const usr = useUser();
+    const me = useMe();
     const { document, lastEditor } = useDocument(docId);
     const userCanExplicitlyViewDocument = useModulePermission(document, PermissibleAction.ViewDocument);
     const viewOnly = !userCanExplicitlyViewDocument && document?.public;
@@ -114,13 +114,21 @@ const DocumentPage = (): React.JSX.Element => {
                             />
                         </Group>
 
-                        <CollaborativeTextArea
+                        {/* <CollaborativeTextArea
                             textBlockId={document.textBlockId}
                             maxLineLength={200}
                             placeholder="Start writing here..."
                             idle={idle}
                             name={fullName(usr.userData)}
                             avatarUrl={usr.userData?.profilePicture}
+                            viewOnly={viewOnly}
+                        /> */}
+                        <BlockNoteEditor
+                            textBlockId={document.textBlockId}
+                            placeholder="Start writing here..."
+                            idle={idle}
+                            name={fullName(me)}
+                            avatarUrl={me?.profilePicture}
                             viewOnly={viewOnly}
                         />
                         <Group

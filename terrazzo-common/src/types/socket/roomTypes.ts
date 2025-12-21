@@ -1,18 +1,29 @@
 import { CardId, ListId, Position, UID } from '../genericTypes';
 
 export enum RoomType {
-    INVALID_DO_NOT_USE = 'INVALID', // Capture case. Do not use!
-    MOUSE = 'MOUSE', // Show others mouse cursors / dragging
-    USER = 'USER', // For sending updates to a specific UserId's socket
-    DATA = 'DATA', // For updating arbitrary fields realtime
+    /** Capture case. Do not use! */
+    INVALID_DO_NOT_USE = 'INVALID',
+    /** For showing others' mouse cursors / dragging */
+    MOUSE = 'MOUSE',
+    /** For sending updates to a specific UserId's socket */
+    USER = 'USER',
+    /** For updating arbitrary fields realtime */
+    DATA = 'DATA',
 }
 export enum RoomSpecifier {
+    /** Unspecified data type */
     DEFAULT = 'default',
+    /** Organization membership data */
     MEMBERSHIP = 'membership',
+    /** Organization invites */
     INVITES = 'invites',
+    /** Organization directory structure data */
     STRUCTURE = 'structure',
+    /** Organization roles and permissions */
     ROLES = 'roles',
+    /** Role assignment for a user */
     ROLE_ASSIGNMENTS = 'role_assignments',
+    /** Directory contents */
     CONTENTS = 'contents',
 }
 

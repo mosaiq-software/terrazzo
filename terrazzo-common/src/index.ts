@@ -2,8 +2,10 @@
 export * from './constants';
 
 // Types - Generic
+export * from './types/authTypes';
 export * from './types/genericTypes';
 export * from './types/inviteTypes';
+export * from './types/linkedAccountTypes';
 export * from './types/organizationTypes';
 export * from './types/queryTypes';
 export * from './types/userTypes';

@@ -1,20 +1,17 @@
 import { BoardId, ClientSE } from '@mosaiq/terrazzo-common';
-import { syncBoardLabels, syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { createBoardLabel, removeBoardLabel, updateBoardLabels } from '@trz-api/controllers/boardController';
 import { getBoardIDFromCardID, setCardsLabels } from '@trz-api/controllers/cardController';
 import { userCanEditBoard, userCanEditCard } from '@trz-api/utils/permissions';
-import { subscribe } from '@trz-api/utils/socketUtils';
-import { Server, Socket } from 'socket.io';
+import { subscribe } from '@trz-api/utils/socket/socketUtils';
+import { Socket } from 'socket.io';
 
-export const registerLabelListeners = (socket: Socket, io: Server) => {
+export const registerLabelListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.CREATE_BOARD_LABEL, async (data) => {
         if (!(await userCanEditBoard(socket, data.boardId))) {
             throw new Error('Insufficient permissions to create labels for this board');
         }
-        const boardId: BoardId = data.boardId;
-        const labels = await createBoardLabel(boardId, data.name, data.color);
-        await syncBoardLabels(io, boardId, labels);
-        return undefined;
+        const newLabelId = await createBoardLabel(data.boardId, data.name, data.color);
+        return newLabelId;
     });
 
     subscribe(socket, ClientSE.UPDATE_BOARD_LABEL, async (data) => {
@@ -22,8 +19,7 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             throw new Error('Insufficient permissions to update labels for this board');
         }
         const boardId: BoardId = data.boardId;
-        const labels = await updateBoardLabels(boardId, data.label);
-        await syncBoardLabels(io, boardId, labels);
+        await updateBoardLabels(boardId, data.label);
         return undefined;
     });
 
@@ -32,8 +28,7 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             throw new Error('Insufficient permissions to delete labels for this board');
         }
         const boardId: BoardId = data.boardId;
-        const labels = await removeBoardLabel(boardId, data.labelId);
-        await syncBoardLabels(io, boardId, labels);
+        await removeBoardLabel(boardId, data.labelId);
         return undefined;
     });
 
@@ -43,7 +38,6 @@ export const registerLabelListeners = (socket: Socket, io: Server) => {
             throw new Error('Insufficient permissions to update labels for cards on this board');
         }
         await setCardsLabels(data.cardId, data.labelIds);
-        await syncCardLabels(io, boardId, data.cardId, data.labelIds);
         return undefined;
     });
 };

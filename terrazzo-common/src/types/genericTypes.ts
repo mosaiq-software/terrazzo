@@ -14,5 +14,6 @@ export type AssignmentId = UID;
 export type DocumentId = UID;
 export type DirectoryId = UID;
 export type RoleId = UID;
+export type UploadedFileId = UID;
 
 export type Position = { x: number; y: number };

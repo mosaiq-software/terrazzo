@@ -1,11 +1,10 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { syncDirectoryContents, syncDirectoryField } from '@trz-api/broadcasters';
 import { createDirectory, getDirectory, getDirectoryContentsForUser, updateDirectory, updateDirectoryContents } from '@trz-api/controllers/directoryController';
 import { userCanCreateDirectory, userCanEditDirectory, userCanViewDirectory } from '@trz-api/utils/permissions';
-import { getSocketData, subscribe } from '@trz-api/utils/socketUtils';
-import { Server, Socket } from 'socket.io';
+import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
+import { Socket } from 'socket.io';
 
-export const registerDirectoryListeners = (socket: Socket, io: Server) => {
+export const registerDirectoryListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.GET_DIRECTORY, async (data) => {
         if (!(await userCanViewDirectory(socket, data))) {
             throw new Error('User does not have permission to view this directory');
@@ -19,7 +18,6 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
             throw new Error('User does not have permission to create a directory in this module');
         }
         const directoryHeader = await createDirectory(data.name, data.parentId);
-        await syncDirectoryContents(io, directoryHeader.parentId);
         return directoryHeader;
     });
 
@@ -28,27 +26,20 @@ export const registerDirectoryListeners = (socket: Socket, io: Server) => {
             throw new Error('User does not have permission to edit this directory');
         }
         await updateDirectory(data.id, data);
-        const updatedDir = await getDirectory(data.id);
-        if (!updatedDir) {
-            throw new Error('No directory found');
-        }
-        await syncDirectoryField(io, updatedDir);
-        await syncDirectoryContents(io, updatedDir.parentId);
         return undefined;
     });
 
     subscribe(socket, ClientSE.GET_DIRECTORY_CONTENTS, async (data) => {
         const socketData = getSocketData(socket);
-        if (!socketData.user?.user.id) {
+        if (!socketData.user?.userId) {
             return [];
         }
-        const contents = await getDirectoryContentsForUser(data, socketData.user.user.id);
+        const contents = await getDirectoryContentsForUser(data, socketData.user.userId);
         return contents;
     });
 
     subscribe(socket, ClientSE.UPDATE_DIRECTORY_CONTENTS, async (data) => {
         await updateDirectoryContents(data.directoryId, data.contents);
-        await syncDirectoryContents(io, data.directoryId);
         return undefined;
     });
 };

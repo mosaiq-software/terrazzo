@@ -1,4 +1,5 @@
 import { Invite, InviteId, isInviteExpired, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
+import { syncMembersInOrg, syncOrgInvites, syncOrgInvitesFromInviteId } from '@trz-api/broadcasters';
 import { createInviteRecordDb, getAllInviteRecordsForOrganizationDb, getInviteRecordByIdDb, updateInviteRecordDb } from '@trz-api/persistence/invitePersistence';
 import { getOrganizationMembershipsForUserDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createMembershipIfDoesntExist } from './membershipController';
@@ -18,11 +19,14 @@ export const createInvite = async (orgId: OrganizationId, maxUses: number | null
         revokedAt: null,
     };
     await createInviteRecordDb(invite);
+    await syncOrgInvitesFromInviteId(invite.id);
+
     return invite;
 };
 
 export const deleteInvite = async (inviteId: InviteId): Promise<void> => {
     await updateInviteRecordDb({ id: inviteId, revokedAt: Date.now() });
+    await syncOrgInvitesFromInviteId(inviteId);
 };
 
 export const useInvite = async (inviteId: InviteId, userId: UserId): Promise<boolean> => {
@@ -51,6 +55,10 @@ export const useInvite = async (inviteId: InviteId, userId: UserId): Promise<boo
             joinedAt: Date.now(),
         };
         await createMembershipIfDoesntExist(membershipRecord);
+
+        // Sync updates
+        await syncOrgInvites(invite.forOrganizationId);
+        await syncMembersInOrg(invite.forOrganizationId);
         return true;
     } catch (e) {
         console.error(e);

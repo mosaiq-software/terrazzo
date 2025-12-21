@@ -1,14 +1,9 @@
 import { BoardId, Card, CardHeader, CardId, ClientSE, ListId, UserId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
-import { NoteType, notify } from '@trz/util/notifications';
 
 export const getCardData = async (sockCtx: SocketContextType, cardId: BoardId): Promise<Card | undefined> => {
-    try {
-        const card = await sockCtx.emit<ClientSE.GET_CARD>(ClientSE.GET_CARD, cardId);
-        return card;
-    } catch (e: any) {
-        notify(NoteType.CARD_DATA_ERROR, e);
-    }
+    const card = await sockCtx.emit<ClientSE.GET_CARD>(ClientSE.GET_CARD, cardId);
+    return card;
 };
 
 export const createCard = async (sockCtx: SocketContextType, listID: ListId, cardName: string): Promise<CardId | undefined> => {

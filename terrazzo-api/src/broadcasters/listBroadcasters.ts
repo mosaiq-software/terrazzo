@@ -1,12 +1,10 @@
 import { BoardId, getRoomCode, List, ListId, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { userCanViewBoard } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socketUtils';
-import { Server } from 'socket.io';
+import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
-export const syncAddList = async (io: Server, list: List, boardId: BoardId) => {
+export const syncAddList = async (list: List, boardId: BoardId) => {
     try {
         broadcast({
-            io,
             event: ServerSE.ADD_LIST,
             toRoomIds: [getRoomCode(RoomType.DATA, boardId)],
             buildPayload: async (userId) => {
@@ -21,10 +19,9 @@ export const syncAddList = async (io: Server, list: List, boardId: BoardId) => {
     }
 };
 
-export const syncUpdateListField = async (io: Server, listId: ListId, updates: any, boardId: BoardId) => {
+export const syncUpdateListField = async (listId: ListId, updates: any, boardId: BoardId) => {
     try {
         broadcast({
-            io,
             event: ServerSE.UPDATE_LIST_FIELD,
             toRoomIds: [getRoomCode(RoomType.DATA, boardId)],
             buildPayload: async (userId) => {
@@ -39,10 +36,9 @@ export const syncUpdateListField = async (io: Server, listId: ListId, updates: a
     }
 };
 
-export const syncMoveList = async (io: Server, listId: ListId, position: number, boardId: BoardId) => {
+export const syncMoveList = async (listId: ListId, position: number, boardId: BoardId) => {
     try {
         broadcast({
-            io,
             event: ServerSE.MOVE_LIST,
             toRoomIds: [getRoomCode(RoomType.DATA, boardId)],
             buildPayload: async (userId) => {

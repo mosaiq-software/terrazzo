@@ -11,7 +11,6 @@ export const DirectoryTree = (props: DirectoryTreeProps) => {
     const contents = useDirectoryContents(props.orgId, TrzModuleType.Organization);
 
     if (!props.orgId || !contents) {
-        console.error('No orgId or contents for DirectoryTree', props.orgId, contents);
         return null;
     }
 

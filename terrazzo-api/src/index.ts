@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { initApp } from './app';
 import { initAdminServer } from './socketAdminServer';
-import { initSockets } from './utils/socket';
+import { SocketManager } from './utils/socket/socketManager';
 dotenv.config({ path: '../.env' });
 
 const start = async () => {
@@ -24,8 +24,7 @@ const start = async () => {
         console.log(`Socket admin server started at ${API_URL} on port ${SOCKET_ADMIN_PORT}`);
     });
 
-    const { io } = initSockets();
-    io.listen(SOCKET_PORT);
+    SocketManager.initialize(SOCKET_PORT);
     console.log(`Socket server started at ${API_URL} on port ${SOCKET_PORT}`);
 };
 

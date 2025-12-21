@@ -1,5 +1,6 @@
 import { BoardId, CardId, DirectoryId, DocumentId, LabelId, ListId, OrganizationId, RoleId, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
+import { LinkedAccount } from '../../linkedAccountTypes';
 import { BoardHeader, Label } from '../../modules/board/boardTypes';
 import { Card, CardHeader } from '../../modules/board/cardTypes';
 import { List, ListHeader } from '../../modules/board/listTypes';
@@ -8,6 +9,7 @@ import { DocumentHeader } from '../../modules/documentTypes';
 import { ModuleHeader } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
+import { UserHeader } from '../../userTypes';
 import { MouseRoomUserData } from '../roomTypes';
 import { SocketId, UserData } from '../socketTypes';
 
@@ -26,6 +28,7 @@ export enum ServerSE {
     ADD_LIST = 'ADD_LIST',
     ADD_CARD = 'ADD_CARD',
 
+    UPDATE_USER_FIELD = 'UPDATE_USER_FIELD',
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
     UPDATE_BOARD_FIELD = 'UPDATE_BOARD_FIELD',
     UPDATE_LIST_FIELD = 'UPDATE_LIST_FIELD',
@@ -41,6 +44,7 @@ export enum ServerSE {
     UPDATE_ORGANIZATION_INVITES = 'UPDATE_ORGANIZATION_INVITES',
     UPDATE_ORGANIZATION_ROLES = 'UPDATE_ORGANIZATION_ROLES',
     UPDATE_ROLES_FOR_USER_IN_ORG = 'UPDATE_ROLES_FOR_USER_IN_ORG',
+    UPDATE_USERS_LINKED_ACCOUNTS = 'UPDATE_USERS_LINKED_ACCOUNTS',
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -56,6 +60,7 @@ export interface ServerSEPayload {
     [ServerSE.ADD_LIST]: List;
     [ServerSE.ADD_CARD]: Card;
 
+    [ServerSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
     [ServerSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
     [ServerSE.UPDATE_BOARD_FIELD]: Partial<BoardHeader> & { id: BoardId };
     [ServerSE.UPDATE_LIST_FIELD]: Partial<ListHeader> & { id: ListId };
@@ -71,6 +76,7 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_ORGANIZATION_INVITES]: { orgId: OrganizationId; invites: Invite[] };
     [ServerSE.UPDATE_ORGANIZATION_ROLES]: { orgId: OrganizationId; roles: Role[] };
     [ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
+    [ServerSE.UPDATE_USERS_LINKED_ACCOUNTS]: { userId: UserId; linkedAccounts: LinkedAccount[] };
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -86,6 +92,7 @@ export interface ServerSEReplies {
     [ServerSE.ADD_LIST]: void;
     [ServerSE.ADD_CARD]: void;
 
+    [ServerSE.UPDATE_USER_FIELD]: void;
     [ServerSE.UPDATE_ORG_FIELD]: void;
     [ServerSE.UPDATE_BOARD_FIELD]: void;
     [ServerSE.UPDATE_LIST_FIELD]: void;
@@ -101,5 +108,6 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_ORGANIZATION_INVITES]: void;
     [ServerSE.UPDATE_ORGANIZATION_ROLES]: void;
     [ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG]: void;
+    [ServerSE.UPDATE_USERS_LINKED_ACCOUNTS]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;

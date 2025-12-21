@@ -1,6 +1,6 @@
 import { Box, MantineStyleProp } from '@mantine/core';
 import { useIdle, useThrottledCallback } from '@mantine/hooks';
-import { BoardId, CardId, ClientSE, fullName, ListId, Position, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { BoardId, CardId, ClientSE, ListId, Position, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import UserCursor from '@trz/components/Boards/UserCursor';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useRoom } from '@trz/hooks/useRoom';
@@ -101,8 +101,7 @@ const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
                             x: user.mouseRoomData.pos.x + (ref.current?.getBoundingClientRect().left ?? 0),
                             y: user.mouseRoomData.pos.y + (ref.current?.getBoundingClientRect().top ?? 0),
                         }}
-                        name={fullName(user.user)}
-                        avatarUrl={user.user.profilePicture}
+                        userId={user.userId}
                         idle={user.idle}
                     />
                 );

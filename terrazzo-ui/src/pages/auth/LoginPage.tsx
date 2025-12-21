@@ -1,16 +1,9 @@
-import { Button, Center, Checkbox, Container, Paper, Space, Stack, Text, Title } from '@mantine/core';
-import { useSessionStorage } from '@mantine/hooks';
-import { getGithubLoginUrl } from '@trz/util/githubAuth';
+import { Button, Center, Container, Paper, Stack, Text, Title } from '@mantine/core';
+import { getGithubLoginUrl } from '@trz/util/authUtils';
 import { FaGithub } from 'react-icons/fa';
 import { DEV_FakeAccountLogin } from './DEV_FakeAccountLogin';
 
-interface LoginPageProps {}
-const LoginPage = (props: LoginPageProps) => {
-    const [rememberMe, setRememberMe] = useSessionStorage({ key: 'remember-me' });
-    const onRememberMe = (remember: boolean) => {
-        setRememberMe(remember ? 'true' : 'false');
-    };
-
+const LoginPage = () => {
     return (
         <Container
             h="100%"
@@ -41,14 +34,6 @@ const LoginPage = (props: LoginPageProps) => {
                             Login With Github
                         </Button>
                         <DEV_FakeAccountLogin />
-                        <Space />
-                        <Checkbox
-                            label="Remember me"
-                            checked={rememberMe !== 'false'}
-                            onChange={(e) => {
-                                onRememberMe(e.currentTarget.checked);
-                            }}
-                        />
                     </Stack>
                 </Paper>
             </Center>

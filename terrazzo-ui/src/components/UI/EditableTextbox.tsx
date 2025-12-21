@@ -68,7 +68,7 @@ const EditableTextbox = (props: EditableTextboxProps) => {
                 />
             )}
             <div style={style}>
-                {editingValue === null && type === 'title' && (
+                {editingValue === null && (
                     <Group
                         gap={4}
                         align="center"

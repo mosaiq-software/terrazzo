@@ -1,11 +1,9 @@
 import { BoardId, CardId, getRoomCode, Label, LabelId, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { userCanViewBoard } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socketUtils';
-import { Server } from 'socket.io';
+import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
-export const syncBoardLabels = async (io: Server, boardId: BoardId, labels: Label[]) => {
+export const syncBoardLabels = async (boardId: BoardId, labels: Label[]) => {
     await broadcast({
-        io,
         event: ServerSE.UPDATE_BOARD_LABELS,
         toRoomIds: [getRoomCode(RoomType.DATA, boardId)],
         buildPayload: async (userId) => {
@@ -17,9 +15,8 @@ export const syncBoardLabels = async (io: Server, boardId: BoardId, labels: Labe
     });
 };
 
-export const syncCardLabels = async (io: Server, boardId: BoardId, cardId: CardId, labelIds: LabelId[]) => {
+export const syncCardLabels = async (boardId: BoardId, cardId: CardId, labelIds: LabelId[]) => {
     await broadcast({
-        io,
         event: ServerSE.UPDATE_CARDS_LABELS,
         toRoomIds: [getRoomCode(RoomType.DATA, boardId)],
         buildPayload: async (userId) => {

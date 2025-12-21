@@ -4,6 +4,7 @@ export * from './directoryListeners';
 export * from './documentListeners';
 export * from './inviteListeners';
 export * from './labelListeners';
+export * from './linkedAccountListeners';
 export * from './listListeners';
 export * from './membershipListeners';
 export * from './organizationListeners';

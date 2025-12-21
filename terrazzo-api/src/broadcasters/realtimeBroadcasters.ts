@@ -1,11 +1,9 @@
 import { BoardId, getRoomCode, MouseRoomUserData, NonEmptyArray, RoomId, RoomType, ServerSE, SocketId, UserData } from '@mosaiq/terrazzo-common';
-import { broadcast } from '@trz-api/utils/socketUtils';
-import { Server } from 'socket.io';
+import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
-export const syncUserJoinedRoom = async (io: Server, roomId: RoomId, userData: UserData) => {
+export const syncUserJoinedRoom = async (roomId: RoomId, userData: UserData) => {
     // broadcast(socket, ServerSE.CLIENT_JOINED_ROOM, { ...socketData.user, sid: socket.id }, [room]);
     broadcast({
-        io,
         event: ServerSE.CLIENT_JOINED_ROOM,
         toRoomIds: [roomId],
         buildPayload: async () => {
@@ -15,10 +13,9 @@ export const syncUserJoinedRoom = async (io: Server, roomId: RoomId, userData: U
     });
 };
 
-export const syncUserLeftRoom = async (io: Server, roomIds: NonEmptyArray<RoomId>, socketId: SocketId) => {
+export const syncUserLeftRoom = async (roomIds: NonEmptyArray<RoomId>, socketId: SocketId) => {
     // broadcast(socket, ServerSE.CLIENT_LEFT_ROOM, { sid: socket.id }, [room]);
     broadcast({
-        io,
         event: ServerSE.CLIENT_LEFT_ROOM,
         toRoomIds: roomIds,
         buildPayload: async () => {
@@ -28,9 +25,8 @@ export const syncUserLeftRoom = async (io: Server, roomIds: NonEmptyArray<RoomId
     });
 };
 
-export const syncMouseMove = async (io: Server, boardId: BoardId, sid: SocketId, mouseRoomData: MouseRoomUserData) => {
+export const syncMouseMove = async (boardId: BoardId, sid: SocketId, mouseRoomData: MouseRoomUserData) => {
     broadcast({
-        io,
         event: ServerSE.MOUSE_MOVE,
         toRoomIds: [getRoomCode(RoomType.MOUSE, boardId)],
         buildPayload: async () => {
@@ -40,9 +36,8 @@ export const syncMouseMove = async (io: Server, boardId: BoardId, sid: SocketId,
     });
 };
 
-export const syncUserIdle = async (io: Server, boardId: BoardId, sid: SocketId, idle: boolean) => {
+export const syncUserIdle = async (boardId: BoardId, sid: SocketId, idle: boolean) => {
     broadcast({
-        io,
         event: ServerSE.USER_IDLE,
         toRoomIds: [getRoomCode(RoomType.MOUSE, boardId)],
         buildPayload: async () => {

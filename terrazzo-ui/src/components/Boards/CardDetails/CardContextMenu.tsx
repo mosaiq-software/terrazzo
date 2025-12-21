@@ -6,7 +6,7 @@ import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout
 import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useUser } from '@trz/contexts/user-context';
+import { useUserContext } from '@trz/contexts/user-context';
 import { createDuplicateCard, updateCardAssignee, updateCardField, updateCardsLabels } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
 import { getCardLink } from '@trz/util/linkUtils';
@@ -22,7 +22,7 @@ interface CardContextMenuProps {
 }
 export const CardContextMenu = (props: CardContextMenuProps) => {
     const sockCtx = useSocket();
-    const userCtx = useUser();
+    const userCtx = useUserContext();
     const orgCtx = useOrg();
     const card = useCard(props.cardId, false, true);
     const clipboard = useClipboard();
@@ -95,18 +95,18 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
                 }}
             />
             <Divider />
-            {userCtx.userData && (
+            {userCtx.userId && (
                 <>
                     <ContextMenuButton
-                        icon={card.assignees.includes(userCtx.userData.id) ? <FaUserMinus size={16} /> : <FaUserPlus size={16} />}
-                        text={card.assignees.includes(userCtx.userData.id) ? 'Leave' : 'Join'}
+                        icon={card.assignees.includes(userCtx.userId) ? <FaUserMinus size={16} /> : <FaUserPlus size={16} />}
+                        text={card.assignees.includes(userCtx.userId) ? 'Leave' : 'Join'}
                         onClick={async () => {
-                            if (!card) {
+                            if (!card || !userCtx.userId) {
                                 notify(NoteType.CARD_UPDATE_ERROR);
                                 return;
                             }
-                            const isMember = card.assignees.includes(userCtx.userData!.id);
-                            updateCardAssignee(sockCtx, card.id, userCtx.userData!.id, !isMember);
+                            const isMember = card.assignees.includes(userCtx.userId);
+                            updateCardAssignee(sockCtx, card.id, userCtx.userId, !isMember);
                         }}
                     />
                     <Divider />

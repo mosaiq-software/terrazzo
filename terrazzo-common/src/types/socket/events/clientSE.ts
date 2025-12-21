@@ -1,5 +1,6 @@
-import { BoardId, CardId, DirectoryId, DocumentId, InviteId, LabelId, ListId, OrganizationId, RoleId, UID, UserId } from '../../genericTypes';
+import { BoardId, CardId, DirectoryId, DocumentId, InviteId, LabelId, ListId, OrganizationId, RoleId, UID, UploadedFileId, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
+import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
 import { Board, BoardRes, Label } from '../../modules/board/boardTypes';
 import { Card } from '../../modules/board/cardTypes';
 import { List, ListHeader } from '../../modules/board/listTypes';
@@ -22,6 +23,7 @@ export enum ClientSE {
     USER_IDLE = 'USER_IDLE',
     MOVE_LIST = 'MOVE_LIST',
     MOVE_CARD = 'MOVE_CARD',
+    LOGOUT = 'LOGOUT',
 
     GET_USERS_ORGANIZATIONS = 'GET_USERS_ORGANIZATIONS',
     GET_ORGANIZATION = 'GET_ORGANIZATION',
@@ -38,6 +40,8 @@ export enum ClientSE {
     GET_ORGANIZATION_MEMBERSHIPS = 'GET_ORGANIZATION_MEMBERSHIPS',
     GET_ROLES_FOR_ORG = 'GET_ROLES_FOR_ORG',
     GET_ROLES_FOR_USER_IN_ORG = 'GET_ROLES_FOR_USER_IN_ORG',
+    GET_USERS_LINKED_ACCOUNTS = 'GET_USERS_LINKED_ACCOUNTS',
+    GET_USERNAME_AVAILABLE = 'GET_USERNAME_AVAILABLE',
 
     CREATE_ORG = 'CREATE_ORG',
     CREATE_BOARD = 'CREATE_BOARD',
@@ -49,7 +53,9 @@ export enum ClientSE {
     CREATE_DIRECTORY = 'CREATE_DIRECTORY',
     CREATE_INVITE = 'CREATE_INVITE',
     CREATE_ROLE = 'CREATE_ROLE',
+    CREATE_FILE_UPLOAD = 'CREATE_FILE_UPLOAD',
 
+    UPDATE_USER_FIELD = 'UPDATE_USER_FIELD',
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
     UPDATE_BOARD_FIELD = 'UPDATE_BOARD_FIELD',
     UPDATE_LIST_FIELD = 'UPDATE_LIST_FIELD',
@@ -67,6 +73,7 @@ export enum ClientSE {
     DELETE_INVITE = 'DELETE_INVITE',
     DELETE_MEMBERSHIP = 'DELETE_MEMBERSHIP',
     DELETE_ROLE = 'DELETE_ROLE',
+    DELETE_USER_LINKED_ACCOUNT = 'DELETE_USER_LINKED_ACCOUNT',
 
     USE_INVITE = 'USE_INVITE',
 }
@@ -78,6 +85,7 @@ export interface ClientSEPayload {
     [ClientSE.USER_IDLE]: boolean;
     [ClientSE.MOVE_LIST]: { listId: ListId; position: number };
     [ClientSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number };
+    [ClientSE.LOGOUT]: undefined;
 
     [ClientSE.GET_USERS_ORGANIZATIONS]: UserId;
     [ClientSE.GET_ORGANIZATION]: OrganizationId;
@@ -94,6 +102,8 @@ export interface ClientSEPayload {
     [ClientSE.GET_ORGANIZATION_MEMBERSHIPS]: OrganizationId;
     [ClientSE.GET_ROLES_FOR_ORG]: OrganizationId;
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId };
+    [ClientSE.GET_USERS_LINKED_ACCOUNTS]: UserId;
+    [ClientSE.GET_USERNAME_AVAILABLE]: string;
 
     [ClientSE.CREATE_ORG]: { name: string };
     [ClientSE.CREATE_BOARD]: { name: string; boardCode: string; parentId: DirectoryId };
@@ -105,7 +115,9 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_DIRECTORY]: { name: string; parentId: DirectoryId };
     [ClientSE.CREATE_INVITE]: { orgId: OrganizationId; maxUses: number | null };
     [ClientSE.CREATE_ROLE]: { orgId: OrganizationId; name: string; color: string };
+    [ClientSE.CREATE_FILE_UPLOAD]: { fileName: string; base64: string; mimeType: string };
 
+    [ClientSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
     [ClientSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
     [ClientSE.UPDATE_BOARD_FIELD]: Partial<Board> & { id: BoardId };
     [ClientSE.UPDATE_LIST_FIELD]: Partial<List> & { id: ListId };
@@ -123,6 +135,7 @@ export interface ClientSEPayload {
     [ClientSE.DELETE_INVITE]: { inviteId: InviteId };
     [ClientSE.DELETE_MEMBERSHIP]: { userId: UserId; orgId: OrganizationId };
     [ClientSE.DELETE_ROLE]: { roleId: RoleId };
+    [ClientSE.DELETE_USER_LINKED_ACCOUNT]: { userId: UserId; provider: LinkedAccountProvider; accountId: string };
 
     [ClientSE.USE_INVITE]: { inviteId: InviteId };
 }
@@ -134,6 +147,7 @@ export interface ClientSEReplies {
     [ClientSE.USER_IDLE]: undefined;
     [ClientSE.MOVE_LIST]: undefined;
     [ClientSE.MOVE_CARD]: undefined;
+    [ClientSE.LOGOUT]: undefined;
 
     [ClientSE.GET_USERS_ORGANIZATIONS]: OrganizationHeader[];
     [ClientSE.GET_ORGANIZATION]: OrganizationHeader | undefined;
@@ -150,6 +164,8 @@ export interface ClientSEReplies {
     [ClientSE.GET_ORGANIZATION_MEMBERSHIPS]: Member[] | undefined;
     [ClientSE.GET_ROLES_FOR_ORG]: Role[] | undefined;
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: RoleId[] | undefined;
+    [ClientSE.GET_USERS_LINKED_ACCOUNTS]: LinkedAccount[] | undefined;
+    [ClientSE.GET_USERNAME_AVAILABLE]: boolean;
 
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
     [ClientSE.CREATE_BOARD]: BoardId | undefined;
@@ -161,7 +177,9 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_DIRECTORY]: DirectoryHeader | undefined;
     [ClientSE.CREATE_INVITE]: Invite | undefined;
     [ClientSE.CREATE_ROLE]: Role | undefined;
+    [ClientSE.CREATE_FILE_UPLOAD]: UploadedFileId | undefined;
 
+    [ClientSE.UPDATE_USER_FIELD]: undefined;
     [ClientSE.UPDATE_ORG_FIELD]: undefined;
     [ClientSE.UPDATE_BOARD_FIELD]: undefined;
     [ClientSE.UPDATE_LIST_FIELD]: undefined;
@@ -179,6 +197,7 @@ export interface ClientSEReplies {
     [ClientSE.DELETE_INVITE]: undefined;
     [ClientSE.DELETE_MEMBERSHIP]: undefined;
     [ClientSE.DELETE_ROLE]: undefined;
+    [ClientSE.DELETE_USER_LINKED_ACCOUNT]: undefined;
 
     [ClientSE.USE_INVITE]: boolean;
 }

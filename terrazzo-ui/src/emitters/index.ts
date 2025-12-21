@@ -3,6 +3,7 @@ export * from './cardEmitters';
 export * from './documentEmitters';
 export * from './inviteEmitters';
 export * from './labelEmitters';
+export * from './linkedAccountsEmitters';
 export * from './listEmitters';
 export * from './membershipEmitters';
 export * from './organizationEmitters';

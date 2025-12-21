@@ -9,7 +9,7 @@ import { NoteType, notify } from '@trz/util/notifications';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useSocket } from './socket-context';
-import { useUser } from './user-context';
+import { useUserContext } from './user-context';
 
 export type OrgContextType = {
     active: OrganizationHeader | undefined;
@@ -24,7 +24,7 @@ export type OrgContextType = {
 const OrgContext = createContext<OrgContextType | undefined>(undefined);
 
 const OrgProvider: React.FC<any> = ({ children }) => {
-    const userCtx = useUser();
+    const userCtx = useUserContext();
     const sockCtx = useSocket();
     const navigate = useNavigate();
     const [selectedOrganization, setSelectedOrganization] = useState<OrganizationHeader | undefined>(undefined);
@@ -32,13 +32,13 @@ const OrgProvider: React.FC<any> = ({ children }) => {
     const [lastSelectedOrgId, setLastSelectedOrgId] = useLocalStorage<OrganizationId | undefined>({ key: LocalStorageKey.LAST_SELECTED_ORG, defaultValue: undefined });
     useRoom(RoomType.DATA, selectedOrganization?.id);
     const members = useOrgMembers(selectedOrganization?.id);
-    const roles = useOrgRoles(selectedOrganization?.id);
+    const roles = useOrgRoles(userCtx.userId ? selectedOrganization?.id : undefined);
 
     useEffect(() => {
         const fetchInitialData = async () => {
-            if (!userCtx.userData?.id || !sockCtx.connected) return;
+            if (!userCtx.userId || !sockCtx.connected) return;
             try {
-                const orgRes = await getOrganizationsForUser(sockCtx, userCtx.userData.id);
+                const orgRes = await getOrganizationsForUser(sockCtx, userCtx.userId);
                 if (!orgRes) {
                     throw new Error('Failed to fetch organizations for user.');
                 }
@@ -60,12 +60,12 @@ const OrgProvider: React.FC<any> = ({ children }) => {
             }
         };
         fetchInitialData();
-    }, [userCtx.userData?.id, sockCtx.connected]);
+    }, [userCtx.userId, sockCtx.connected]);
 
     useSocketListener(
         ServerSE.UPDATE_USERS_ORGANIZATIONS,
         (payload) => {
-            if (payload.userId !== userCtx.userData?.id) {
+            if (payload.userId !== userCtx.userId) {
                 return;
             }
             setAllOrganizations(payload.organizations);
@@ -75,21 +75,30 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                 selectAndGoToOrganization(null);
             }
         },
-        [userCtx.userData, selectedOrganization]
+        [userCtx.userId, selectedOrganization]
     );
 
     useSocketListener(
         ServerSE.UPDATE_ORG_FIELD,
         (payload) => {
-            if (!selectedOrganization || payload.id !== selectedOrganization.id) {
-                return;
+            if (allOrganizations.findIndex((org) => org.id === payload.id) !== -1) {
+                setAllOrganizations((prev) =>
+                    prev.map((org) => {
+                        if (org.id === payload.id) {
+                            return updateBaseFromPartial(org, payload);
+                        }
+                        return org;
+                    })
+                );
             }
-            setSelectedOrganization((prev) => {
-                if (!prev) {
-                    return prev;
-                }
-                return updateBaseFromPartial(prev, payload);
-            });
+            if (selectedOrganization && payload.id === selectedOrganization.id) {
+                setSelectedOrganization((prev) => {
+                    if (!prev) {
+                        return prev;
+                    }
+                    return updateBaseFromPartial(prev, payload);
+                });
+            }
         },
         [selectedOrganization]
     );
@@ -133,7 +142,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                 if (!orgId) {
                     throw new Error('Organization creation failed');
                 }
-                if (!userCtx.userData) {
+                if (!userCtx.userId) {
                     throw new Error('User data not available');
                 }
                 const newOrg: OrganizationHeader = {
@@ -142,7 +151,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                     createdAt: Date.now(),
                     logoUrl: '',
                     description: '',
-                    ownerId: userCtx.userData.id,
+                    ownerId: userCtx.userId,
                 };
                 setAllOrganizations((prev) => [...prev, newOrg]);
                 return newOrg;
@@ -150,8 +159,15 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                 notify(NoteType.ORG_CREATION_ERROR, e);
             }
         },
-        [sockCtx, notify, userCtx.userData]
+        [sockCtx, notify, userCtx.userId]
     );
+
+    useEffect(() => {
+        if (!userCtx.userId) {
+            setSelectedOrganization(undefined);
+            setAllOrganizations([]);
+        }
+    }, [userCtx.userId]);
 
     return (
         <OrgContext.Provider

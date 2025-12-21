@@ -3,6 +3,7 @@ export * from './cardBroadcasters';
 export * from './directoryBroadcasters';
 export * from './documentBroadcasters';
 export * from './inviteBroadcasters';
+export * from './linkedAccountsBroadcasters';
 export * from './listBroadcasters';
 export * from './membershipBroadcasters';
 export * from './organizationBroadcasters';

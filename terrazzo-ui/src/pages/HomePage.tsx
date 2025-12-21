@@ -1,19 +1,17 @@
 import { Avatar, Box, Button, Center, Divider, Flex, Group, ScrollArea, Stack, Title, UnstyledButton } from '@mantine/core';
-import { useClipboard } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
-import { useUser } from '@trz/contexts/user-context';
+import { useMe } from '@trz/hooks/useMe';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const HomePage = (): React.JSX.Element => {
-    const usr = useUser();
+    const me = useMe();
     const uiCtx = useUI();
     const orgCtx = useOrg();
     const navigate = useNavigate();
-    const clipboard = useClipboard();
 
     useEffect(() => {
         setTitle(`Dashboard | Terrazzo`);
@@ -39,7 +37,7 @@ const HomePage = (): React.JSX.Element => {
                             c="white"
                             order={2}
                         >
-                            Welcome {usr.userData?.firstName ?? ''}
+                            Welcome {me?.firstName ?? ''}
                         </Title>
                     </Flex>
                     <Divider
