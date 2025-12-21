@@ -2,7 +2,7 @@ import { LinkedAccountProvider, RestRequestBody, RestRequestParams, RestResponse
 import { handleAuthProviderCallback, signInWithExistingAuth, startAuthenticatedSession } from '@trz-api/controllers/authController';
 import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
 import { addLinkedAccountToUser } from '@trz-api/controllers/linkedAccountController';
-import { checkUsernameTaken, DEV_upsertFakeUser } from '@trz-api/controllers/userController';
+import { DEV_upsertFakeUser } from '@trz-api/controllers/userController';
 import { createFileDb, getFileByIdDb } from '@trz-api/persistence/filePersistence';
 import { getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccountPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
@@ -16,23 +16,6 @@ router.get(RestRoutes.INDEX, async (req, res) => {
     try {
         const response: RestResponse<RestRoutes.INDEX> = 'Welcome to the TRZ API';
         res.send(response);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal server error');
-    }
-});
-
-router.get(RestRoutes.USER_CHECK_USERNAME, async (req, res) => {
-    const params: RestRequestParams[RestRoutes.USER_CHECK_USERNAME] = req.params;
-    const body: RestRequestBody[RestRoutes.USER_CHECK_USERNAME] = req.body;
-    try {
-        if (!req.params.username) {
-            res.status(400).send('No username provided');
-            return;
-        }
-        const taken = await checkUsernameTaken(req.params.username);
-        const response: RestResponse<RestRoutes.USER_CHECK_USERNAME> = taken;
-        res.status(200).send(response);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');

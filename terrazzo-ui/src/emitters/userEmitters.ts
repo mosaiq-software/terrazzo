@@ -12,3 +12,7 @@ export const updateUserField = async (sockCtx: SocketContextType, userData: Part
 export const logoutUser = async (sockCtx: SocketContextType) => {
     return await sockCtx.emit(ClientSE.LOGOUT, undefined);
 };
+
+export const getUsernameAvailable = async (sockCtx: SocketContextType, username: string) => {
+    return await sockCtx.emit(ClientSE.GET_USERNAME_AVAILABLE, username);
+};

@@ -1,4 +1,5 @@
-import { Box, Button, Fieldset, Group, Menu, ScrollArea, Stack, TextInput, Title } from '@mantine/core';
+import { Box, Button, Fieldset, Group, Loader, Menu, ScrollArea, Stack, TextInput, Title } from '@mantine/core';
+import { useDebouncedCallback } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { fullName, UserHeader } from '@mosaiq/terrazzo-common';
 import { ImageUpload } from '@trz/components/UI/ImageUpload';
@@ -7,7 +8,7 @@ import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
-import { unlinkAccountFromUser, updateUserField } from '@trz/emitters';
+import { getUsernameAvailable, unlinkAccountFromUser, updateUserField } from '@trz/emitters';
 import { useMe } from '@trz/hooks/useMe';
 import { useUserLinkedAccounts } from '@trz/hooks/useUserLinkedAccounts';
 import { isDev } from '@trz/util/envUtils';
@@ -26,13 +27,27 @@ const UserSettingsPage = (): React.JSX.Element => {
     const linkedAccounts = useUserLinkedAccounts(me?.id);
 
     const [editedUserData, setEditedUserData] = useState<Partial<UserHeader>>({});
+    const [usernameAvailable, setUsernameAvailable] = useState<boolean | undefined>(undefined);
 
-    const change = useCallback(<K extends keyof UserHeader>(field: K, value: UserHeader[K]) => {
-        setEditedUserData((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
-    }, []);
+    const checkUsernameAvailability = useDebouncedCallback(async (username: string) => {
+        const user = await getUsernameAvailable(sockCtx, username);
+        setUsernameAvailable(user);
+    }, 500);
+
+    const change = useCallback(
+        <K extends keyof UserHeader>(field: K, value: UserHeader[K]) => {
+            setEditedUserData((prev) => ({
+                ...prev,
+                [field]: value,
+            }));
+
+            if (field === 'username') {
+                setUsernameAvailable(undefined);
+                checkUsernameAvailability(value);
+            }
+        },
+        [checkUsernameAvailability]
+    );
 
     const isSaved = useMemo(() => {
         let saved = true;
@@ -54,13 +69,18 @@ const UserSettingsPage = (): React.JSX.Element => {
             if (!me) {
                 throw new Error('No user data available');
             }
+            if (usernameAvailable === false) {
+                notify(NoteType.USER_CREATION_ERROR, 'Username is already taken');
+                return;
+            }
             await updateUserField(sockCtx, { ...editedUserData, id: me.id });
             notify(NoteType.CHANGES_SAVED);
             setEditedUserData({});
+            setUsernameAvailable(undefined);
         } catch (e) {
             notify(NoteType.GENERIC_ERROR, e);
         }
-    }, [editedUserData, me, sockCtx]);
+    }, [editedUserData, me, sockCtx, usernameAvailable]);
 
     useEffect(() => {
         setTitle(`My Settings | Terrazzo`);
@@ -109,6 +129,8 @@ const UserSettingsPage = (): React.JSX.Element => {
                                     value={editedUserData.username ?? me.username}
                                     onChange={(e) => change('username', e.target.value)}
                                     placeholder="Username"
+                                    error={usernameAvailable === false ? 'Username is already taken' : undefined}
+                                    rightSection={usernameAvailable === undefined && !!editedUserData.username?.length ? <Loader size="xs" /> : null}
                                 />
                                 <Group>
                                     <TextInput
@@ -147,7 +169,7 @@ const UserSettingsPage = (): React.JSX.Element => {
                                     />
                                 </Group>
                                 <Button
-                                    disabled={isSaved}
+                                    disabled={isSaved || usernameAvailable === false}
                                     onClick={handleSave}
                                 >
                                     Save

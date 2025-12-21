@@ -9,7 +9,6 @@ import { TrelloExportType } from './trelloTypes';
  */
 export enum RestRoutes {
     INDEX = '/',
-    USER_CHECK_USERNAME = '/user/check-username/:username',
     USER_FAKE_DEV = '/user/dev-only-signin/:username',
     IMPORT_FROM_TRELLO = '/uploadtrello/:parentId',
     GET_FILE = '/file/:fileId',
@@ -27,7 +26,6 @@ export enum RestMethods {
 }
 export const RestRequestMethod = {
     [RestRoutes.INDEX]: RestMethods.GET,
-    [RestRoutes.USER_CHECK_USERNAME]: RestMethods.GET,
     [RestRoutes.USER_FAKE_DEV]: RestMethods.POST,
     [RestRoutes.IMPORT_FROM_TRELLO]: RestMethods.POST,
     [RestRoutes.GET_FILE]: RestMethods.GET,
@@ -37,7 +35,6 @@ export const RestRequestMethod = {
 };
 export interface RestRequestParams {
     [RestRoutes.INDEX]: {};
-    [RestRoutes.USER_CHECK_USERNAME]: { username: string };
     [RestRoutes.USER_FAKE_DEV]: { username: string };
     [RestRoutes.IMPORT_FROM_TRELLO]: { parentId: UID };
     [RestRoutes.GET_FILE]: { fileId: UploadedFileId };
@@ -48,7 +45,6 @@ export interface RestRequestParams {
 
 export interface RestRequestBody {
     [RestRoutes.INDEX]: undefined;
-    [RestRoutes.USER_CHECK_USERNAME]: undefined;
     [RestRoutes.USER_FAKE_DEV]: undefined;
     [RestRoutes.IMPORT_FROM_TRELLO]: TrelloExportType;
     [RestRoutes.GET_FILE]: undefined;
@@ -59,7 +55,6 @@ export interface RestRequestBody {
 
 export interface RestResponseTypes {
     [RestRoutes.INDEX]: string;
-    [RestRoutes.USER_CHECK_USERNAME]: boolean;
     [RestRoutes.USER_FAKE_DEV]: AuthSession;
     [RestRoutes.IMPORT_FROM_TRELLO]: BoardId | undefined;
     [RestRoutes.GET_FILE]: Buffer<ArrayBuffer>;
