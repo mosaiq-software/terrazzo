@@ -70,7 +70,6 @@ export const userHasPermissionOnModule = async (user: UserId | Socket | undefine
         return false;
     }
     const grantedFlags = await getModulePermissionsForUser(userId, moduleId);
-    console.debug('userHasPermissionOnModule', { userId, moduleId, grantedFlags, permissibleAction });
     return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
 };
 
@@ -87,7 +86,6 @@ export const userHasPermissionsOnOrganization = async (user: UserId | Socket | u
         return false;
     }
     const grantedFlags = await getOrganizationPermissionsForUser(userId, orgId);
-    console.debug('userHasPermissionsOnOrganization', { userId, orgId, grantedFlags, permissibleAction });
     return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
 };
 

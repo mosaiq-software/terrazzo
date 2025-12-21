@@ -10,11 +10,9 @@ import { useSearchParams } from 'react-router-dom';
 export const GithubAuthHandler = () => {
     const userContext = useUserContext();
     const code = useSearchParams()[0].get('code');
-    console.log('GitHub OAuth callback received with code:', code);
 
     useEffect(() => {
-        const handleLogin = async () => {
-            await new Promise((res) => setTimeout(res, 200));
+        const handleLogin = () => {
             if (!code) {
                 console.error('No code provided in query params');
                 return;
@@ -24,7 +22,11 @@ export const GithubAuthHandler = () => {
                 code: code,
             });
         };
-        handleLogin();
+
+        const timeoutId = setTimeout(() => {
+            handleLogin();
+        }, 1000);
+        return () => clearTimeout(timeoutId);
     }, [code, userContext.userId, userContext.authToken]);
 
     return (

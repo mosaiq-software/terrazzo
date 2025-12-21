@@ -86,7 +86,7 @@ export const signInWithExistingAuth = async (existingAuth: ExistingAuthToken): P
  * Handles the auth provider callback and returns an auth session
  * Delegates to specific provider handlers based on the provider type
  */
-export const handleAuthProviderCallback = async (providerData: AuthProviderCallbackData): Promise<AuthSession | undefined> => {
+export const handleAuthProviderCallback = async (providerData: AuthProviderCallbackData): Promise<AuthSession | undefined | 'already-linked'> => {
     switch (providerData.provider) {
         case AuthProvider.Github:
             return handleGithubAuth(providerData.code, providerData.accessToken, providerData.auth);
@@ -103,7 +103,7 @@ export const handleAuthProviderCallback = async (providerData: AuthProviderCallb
  * @param username The dev username
  * @param auth Optional existing user auth to link the DEV account to
  */
-const handleDevAuth = async (username: string, auth?: UserIdWithAuth): Promise<AuthSession | undefined> => {
+const handleDevAuth = async (username: string, auth?: UserIdWithAuth): Promise<AuthSession | undefined | 'already-linked'> => {
     if (!isDev()) {
         console.warn('Attempted to handle DEV auth callback in non-dev environment');
         return undefined;
@@ -125,7 +125,7 @@ const handleDevAuth = async (username: string, auth?: UserIdWithAuth): Promise<A
     }
 
     if (auth && linkedAccount.userId !== auth.userId) {
-        throw new Error('DEV linked account does not belong to the authenticated user');
+        return 'already-linked';
     }
 
     const authSession = await startAuthenticatedSession(linkedAccount.userId);
@@ -139,7 +139,7 @@ const handleDevAuth = async (username: string, auth?: UserIdWithAuth): Promise<A
  * @param accessToken the GitHub access token
  * @param auth Optional existing user auth to link the GitHub account to
  */
-const handleGithubAuth = async (code: string | undefined, accessToken: string | undefined, auth?: UserIdWithAuth): Promise<AuthSession | undefined> => {
+const handleGithubAuth = async (code: string | undefined, accessToken: string | undefined, auth?: UserIdWithAuth): Promise<AuthSession | undefined | 'already-linked'> => {
     let githubAuthToken = accessToken;
     if (!githubAuthToken) {
         if (!code) {
@@ -173,6 +173,10 @@ const handleGithubAuth = async (code: string | undefined, accessToken: string | 
             userId: userId,
             accountData: githubData,
         });
+    }
+
+    if (auth && linkedAccount.userId !== auth.userId) {
+        return 'already-linked';
     }
 
     const authSession = await startAuthenticatedSession(linkedAccount.userId);

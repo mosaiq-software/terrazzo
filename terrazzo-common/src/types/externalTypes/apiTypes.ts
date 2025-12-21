@@ -64,7 +64,7 @@ export interface RestResponseTypes {
     [RestRoutes.IMPORT_FROM_TRELLO]: BoardId | undefined;
     [RestRoutes.GET_FILE]: Buffer<ArrayBuffer>;
     [RestRoutes.UPLOAD_FILE]: UploadedFileId;
-    [RestRoutes.AUTH_PROVIDER_CALLBACK]: AuthSession;
+    [RestRoutes.AUTH_PROVIDER_CALLBACK]: AuthSession | 'already-linked';
     [RestRoutes.EXISTING_AUTH]: AuthSession | 'unauthorized';
 }
 export type ErrorString = string;

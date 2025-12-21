@@ -12,6 +12,7 @@ type UserContextType = {
     clearLocalLoginData: () => void;
     devLogin: (username: string) => Promise<void>;
     goToLogin: () => void;
+    saveCurrentRouteForPostLogin: () => void;
     handleLoginFromProvider: (providerData: AuthProviderCallbackBody) => void;
 };
 
@@ -29,37 +30,43 @@ const UserProvider: React.FC<any> = ({ children }) => {
     const [localSavedAuth, setLocalSavedAuth, removeLocalSavedAuth] = useLocalStorage({ key: LOCAL_SAVED_AUTH_KEY });
     const [sessionSavedLoginRoute, setSessionSavedLoginRoute, removeSessionSavedLoginRoute] = useSessionStorage({ key: SESSION_POST_LOGIN_REDIRECT_KEY });
 
-    const goToLogin = useCallback(() => {
+    /**
+     * Saves the current route to session storage for redirecting post-login
+     */
+    const saveCurrentRouteForPostLogin = useCallback(() => {
         setSessionSavedLoginRoute(window.location.pathname);
+    }, [setSessionSavedLoginRoute]);
+
+    /**
+     * Navigates the user to the login page after saving the current route
+     */
+    const goToLogin = useCallback(() => {
+        saveCurrentRouteForPostLogin();
         navigate(DEFAULT_NO_AUTH_ROUTE);
-    }, [navigate, setSessionSavedLoginRoute]);
+    }, [navigate, saveCurrentRouteForPostLogin]);
 
     /**
      * Handles user login by setting user context and navigating to the appropriate page
      */
-    const handleLogin = useCallback(
-        (userId: UserId, trzAuthToken: string, preventNavigate?: boolean) => {
-            if (!userId || !trzAuthToken) {
-                notify(NoteType.GENERIC_ERROR, 'Invalid authentication parameters!');
-                navigate('/');
-                return;
-            }
-
-            // Save the auth token to local storage for future auto logins
+    const handleLocallySaveAuth = useCallback(
+        (userId: UserId, trzAuthToken: string) => {
             const existingAuth: ExistingAuthToken = { userId, trzAuthToken };
             setLocalSavedAuth(JSON.stringify(existingAuth));
-
-            // Set user data
             setAuthToken(trzAuthToken);
             setUserId(userId);
-
-            // Once logged in, redirect to saved route or dashboard
-            if (!preventNavigate) {
-                removeSessionSavedLoginRoute();
-                navigate(sessionSavedLoginRoute || DEFAULT_AUTHED_ROUTE, { replace: true });
-            }
         },
-        [navigate, sessionSavedLoginRoute, removeSessionSavedLoginRoute, setLocalSavedAuth]
+        [setLocalSavedAuth]
+    );
+
+    /**
+     * Navigates the user to the saved post-login route or default authenticated route
+     */
+    const handleNavigatePostLogin = useCallback(
+        (fallbackRoute?: string) => {
+            removeSessionSavedLoginRoute();
+            navigate(sessionSavedLoginRoute || fallbackRoute || DEFAULT_AUTHED_ROUTE, { replace: true });
+        },
+        [navigate, removeSessionSavedLoginRoute, sessionSavedLoginRoute]
     );
 
     /**
@@ -85,9 +92,10 @@ const UserProvider: React.FC<any> = ({ children }) => {
             if (!authSession) {
                 throw new Error('Failed to login as user');
             }
-            handleLogin(authSession.userId, authSession.authToken);
+            handleLocallySaveAuth(authSession.userId, authSession.authToken);
+            handleNavigatePostLogin();
         },
-        [handleLogin]
+        [handleLocallySaveAuth]
     );
 
     const handleLoginFromProvider = useCallback(
@@ -99,16 +107,20 @@ const UserProvider: React.FC<any> = ({ children }) => {
                 if (!session) {
                     throw new Error('No auth session returned from provider callback');
                 }
-                if (!authObject) {
-                    handleLogin(session.userId, session.authToken);
+                if (session === 'already-linked') {
+                    notify(NoteType.UNAUTHORIZED, 'This authentication method is already linked to another account.');
+                    return;
                 }
+                if (!authObject) {
+                    handleLocallySaveAuth(session.userId, session.authToken);
+                }
+                handleNavigatePostLogin();
             } catch (error) {
                 console.error('Error during auth provider callback:', error);
                 notify(NoteType.GENERIC_ERROR, 'Authentication failed. Please try again.');
-                navigate(DEFAULT_NO_AUTH_ROUTE);
             }
         },
-        [userId, authToken, handleLogin, navigate]
+        [userId, authToken, handleLocallySaveAuth, navigate, handleNavigatePostLogin]
     );
 
     /**
@@ -144,7 +156,7 @@ const UserProvider: React.FC<any> = ({ children }) => {
                     clearLocalLoginData();
                     return;
                 }
-                handleLogin(existingAuthResponse.userId, existingAuthResponse.authToken, true);
+                handleLocallySaveAuth(existingAuthResponse.userId, existingAuthResponse.authToken);
             } catch (e) {
                 console.error('Auto login with saved auth provider failed', e);
             }
@@ -153,7 +165,7 @@ const UserProvider: React.FC<any> = ({ children }) => {
         return () => {
             strictIgnore = true;
         };
-    }, [handleLogin, userId, authToken, localSavedAuth, setSessionSavedLoginRoute, clearLocalLoginData]);
+    }, [handleLocallySaveAuth, userId, authToken, localSavedAuth, setSessionSavedLoginRoute, clearLocalLoginData]);
 
     return (
         <UserContext.Provider
@@ -164,6 +176,7 @@ const UserProvider: React.FC<any> = ({ children }) => {
                 devLogin: devOnlyLogin,
                 goToLogin,
                 handleLoginFromProvider,
+                saveCurrentRouteForPostLogin,
             }}
         >
             {children}

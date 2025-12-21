@@ -3,7 +3,7 @@ import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
 import { useUserContext } from '@trz/contexts/user-context';
 import { getGithubLoginUrl } from '@trz/util/authUtils';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { MdCheck } from 'react-icons/md';
 import { Link } from 'react-router';
 
@@ -13,14 +13,19 @@ const LinkGithubAccount = (props: ContextModalProps<{}>): React.JSX.Element => {
     const userCtx = useUserContext();
     const [hasLoggedOut, setHasLoggedOut] = React.useState(false);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         props.context.closeModal(props.id);
-    };
+    }, [props.context, props.id]);
 
-    const handleLogoutAndContinue = () => {
+    const handleLogoutAndContinue = useCallback(() => {
         setHasLoggedOut(true);
         window.open(GITHUB_LOGOUT_URL, '_blank');
-    };
+    }, []);
+
+    const handleClickLinkGithub = useCallback(() => {
+        userCtx.saveCurrentRouteForPostLogin();
+        window.open(getGithubLoginUrl(), '_self');
+    }, [userCtx]);
 
     return (
         <Container onKeyDown={getHotkeyHandler([['Escape', handleClose]])}>
@@ -31,7 +36,17 @@ const LinkGithubAccount = (props: ContextModalProps<{}>): React.JSX.Element => {
                 Link Github Account
             </Title>
             <Stack>
-                <Text>First, click to log out of your current Github accounts.</Text>
+                <Text>
+                    {' '}
+                    <Text
+                        span
+                        fw={700}
+                        fz="lg"
+                    >
+                        1.{' '}
+                    </Text>
+                    Click "Log out of Github" and log out of all GitHub accounts.
+                </Text>
                 <Button
                     onClick={handleLogoutAndContinue}
                     variant={hasLoggedOut ? 'outline' : 'filled'}
@@ -41,11 +56,19 @@ const LinkGithubAccount = (props: ContextModalProps<{}>): React.JSX.Element => {
                     Log out of Github
                 </Button>
                 <Space h="md" />
-                <Text>Next, click to link a Github account to your Terrazzo account.</Text>
+                <Text>
+                    <Text
+                        span
+                        fw={700}
+                        fz="lg"
+                    >
+                        2.{' '}
+                    </Text>
+                    Return to this page, click "Link Github Account", and sign in with the GitHub account you want to link.
+                </Text>
                 <Button
-                    component={Link}
-                    to={getGithubLoginUrl()}
                     disabled={!hasLoggedOut}
+                    onClick={handleClickLinkGithub}
                 >
                     Link Github Account
                 </Button>

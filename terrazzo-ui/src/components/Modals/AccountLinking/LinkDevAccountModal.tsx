@@ -13,7 +13,7 @@ const LinkDevAccount = (props: ContextModalProps<{}>): React.JSX.Element => {
         props.context.closeModal(props.id);
     };
 
-    const handleLink = () => {
+    const handleLink = async () => {
         try {
             userCtx.handleLoginFromProvider({
                 provider: AuthProvider.DEV,
