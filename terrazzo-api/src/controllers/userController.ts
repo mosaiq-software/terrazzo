@@ -1,4 +1,4 @@
-import { BoardId, List, MembershipRecord, OrganizationId, UserHeader, UserId } from '@mosaiq/terrazzo-common';
+import { BoardId, generateUsernameDiscriminator, List, MembershipRecord, OrganizationId, UserHeader, UserId } from '@mosaiq/terrazzo-common';
 import { syncUpdateUserField } from '@trz-api/broadcasters';
 import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createUserHeaderDb, getUserHeaderByIdDb, getUserHeaderByUsernameDb, updateUserHeaderDb } from '@trz-api/persistence/userPersistence';
@@ -10,17 +10,23 @@ import { addOrganization, updateOrganizationFromPartial } from './organizationCo
 
 export async function checkUsernameTaken(username: string) {
     const user = await getUserHeaderByUsernameDb(username);
-    return user != null;
+    return !!user;
 }
 
 export async function createNewUser(username: string, firstName: string, lastName: string, profilePicture: string) {
-    if (username && (await getUserHeaderByUsernameDb(username)) != null) {
-        throw new Error('Username already exists');
+    let maxAttempts = 100;
+    let discriminator = '';
+    while ((await checkUsernameTaken(`${username}${discriminator}`)) && maxAttempts > 0) {
+        discriminator = generateUsernameDiscriminator();
+        maxAttempts--;
+    }
+    if (maxAttempts === 0) {
+        throw new Error('Failed to generate unique username');
     }
 
     const newUser: UserHeader = {
         id: crypto.randomUUID(),
-        username: username,
+        username: `${username}${discriminator}`,
         firstName: firstName,
         lastName: lastName,
         profilePicture: profilePicture,
@@ -75,6 +81,15 @@ export const getUserPreview = async (userId: UserId) => {
 };
 
 export const updateUserData = async (userData: Partial<UserHeader> & { id: UserId }) => {
+    // Check username uniqueness if it's being updated
+    if (userData.username) {
+        const existingUser = await getUserHeaderByUsernameDb(userData.username);
+        if (existingUser && existingUser.id !== userData.id) {
+            console.error(`Username ${userData.username} is already taken by another user.`);
+            delete userData.username; // Remove username, but allow other fields to be updated
+        }
+    }
+
     await updateUserHeaderDb(userData);
     await syncUpdateUserField(userData.id, userData);
 };
