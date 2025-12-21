@@ -1,6 +1,7 @@
 import { ActionIcon, Box, Button, Center, Group, Loader, Modal, Stack, Text, Tooltip, useCombobox } from '@mantine/core';
-import { useClipboard, useIdle } from '@mantine/hooks';
+import { useClipboard } from '@mantine/hooks';
 import { CardId, fullName } from '@mosaiq/terrazzo-common';
+import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
@@ -11,7 +12,6 @@ import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';
 import { NoteType, notify } from '@trz/util/notifications';
-import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
 import React from 'react';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
 import { MdFileCopy } from 'react-icons/md';
@@ -30,7 +30,6 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
     });
-    const idle = useIdle(IDLE_TIMEOUT_MS);
     const clipboard = useClipboard({ timeout: 500 });
     const card = useCard(props.cardId, false, true);
     useCatchSaveKey();
@@ -231,15 +230,11 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                 </Tooltip>
                             )}
                         </Group>
-                        {/* <CollaborativeTextArea
+                        <BlockNoteEditor
                             textBlockId={card.descriptionTextBlockId}
-                            maxLineLength={60}
-                            placeholder="Add a more detailed description..."
-                            idle={idle}
-                            name={fullName(usr.userData)}
-                            avatarUrl={usr.userData?.profilePicture}
+                            placeholder="Start writing here..."
                             viewOnly={!perms.editCard}
-                        /> */}
+                        />
                         <Stack
                             style={{
                                 position: 'absolute',

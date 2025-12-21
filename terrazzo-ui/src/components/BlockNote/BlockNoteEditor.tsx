@@ -2,9 +2,12 @@ import '@blocknote/core/fonts/inter.css';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
-import { TextBlockId } from '@mosaiq/terrazzo-common';
+import { useIdle } from '@mantine/hooks';
+import { fullName, TextBlockId } from '@mosaiq/terrazzo-common';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useImageColor } from '@trz/hooks/useImageColor';
+import { useMe } from '@trz/hooks/useMe';
+import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
 import { useEffect, useState } from 'react';
 import { ManagerOptions, SocketOptions } from 'socket.io-client';
 import { ProviderConfiguration, SocketIOProvider } from 'y-socket.io';
@@ -24,16 +27,15 @@ interface BlockNoteEditorProps {
     textBlockId: TextBlockId;
     fontSize?: number;
     placeholder?: string;
-    name?: string;
-    color?: string;
-    avatarUrl?: string;
-    idle: boolean;
     viewOnly?: boolean;
 }
 export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
-    const imgColor = useImageColor(props.avatarUrl);
+    const me = useMe();
+    const pfpColor = useImageColor(me?.profilePicture);
     const [status, setStatus] = useState<string>('unknown');
     const [clients, setClients] = useState<string[]>([]);
+    const idle = useIdle(IDLE_TIMEOUT_MS);
+    const name = fullName(me);
 
     const [doc] = useState(() => new Y.Doc());
     const [socketIOProvider] = useState(() => {
@@ -60,18 +62,18 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
 
     useEffect(() => {
         socketIOProvider.awareness.setLocalStateField('user', {
-            name: props.name || 'Unknown User',
-            color: props.idle ? IDLE_COLOR : (imgColor ?? props.color ?? 'black'),
+            name: name || 'Unknown User',
+            color: idle ? IDLE_COLOR : (pfpColor ?? 'black'),
         });
-    }, [socketIOProvider, imgColor, props.color, props.idle, props.name]);
+    }, [socketIOProvider, pfpColor, idle, name]);
 
     const editor = useCreateBlockNote({
         collaboration: {
             provider: socketIOProvider,
             fragment: doc.getXmlFragment('document-store'),
             user: {
-                name: props.name || 'Unknown User',
-                color: props.idle ? IDLE_COLOR : (imgColor ?? props.color ?? 'black'),
+                name: name || 'Unknown User',
+                color: idle ? IDLE_COLOR : (pfpColor ?? 'black'),
             },
             showCursorLabels: 'activity',
         },

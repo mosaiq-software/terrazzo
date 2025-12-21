@@ -113,22 +113,9 @@ const DocumentPage = (): React.JSX.Element => {
                                 readonly={viewOnly}
                             />
                         </Group>
-
-                        {/* <CollaborativeTextArea
-                            textBlockId={document.textBlockId}
-                            maxLineLength={200}
-                            placeholder="Start writing here..."
-                            idle={idle}
-                            name={fullName(usr.userData)}
-                            avatarUrl={usr.userData?.profilePicture}
-                            viewOnly={viewOnly}
-                        /> */}
                         <BlockNoteEditor
                             textBlockId={document.textBlockId}
                             placeholder="Start writing here..."
-                            idle={idle}
-                            name={fullName(me)}
-                            avatarUrl={me?.profilePicture}
                             viewOnly={viewOnly}
                         />
                         <Group
