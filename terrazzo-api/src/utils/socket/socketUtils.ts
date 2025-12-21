@@ -1,6 +1,6 @@
 import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
 import { syncUserJoinedRoom, syncUserLeftRoom } from '@trz-api/broadcasters/realtimeBroadcasters';
-import { getExistingAuthenticatedSession, startAuthenticatedSession } from '@trz-api/controllers/authController';
+import { startAuthenticatedSession } from '@trz-api/controllers/authController';
 import { Socket } from 'socket.io';
 import { SocketManager } from './socketManager';
 import { SocketData } from './socketTypes';
@@ -198,10 +198,7 @@ export const initializeSocketData = async (socket: Socket): Promise<SocketData> 
         const auth: SocketHandshakeAuth = socket.handshake.auth as any;
         let userData: UserData | undefined = undefined;
         if (auth.userId && auth.authToken) {
-            let authSession = await getExistingAuthenticatedSession(auth.authToken);
-            if (!authSession) {
-                authSession = await startAuthenticatedSession(auth.userId);
-            }
+            const authSession = await startAuthenticatedSession(auth.userId);
             if (authSession) {
                 userData = {
                     sid: socket.id,

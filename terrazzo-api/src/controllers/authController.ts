@@ -40,14 +40,6 @@ export const startAuthenticatedSession = async (userId: UserId): Promise<AuthSes
 };
 
 /**
- * Retrieves an existing authenticated session by auth token
- */
-export const getExistingAuthenticatedSession = async (authToken: string): Promise<AuthSession | undefined> => {
-    const authSession = await getAuthSessionByAuthTokenDb(authToken);
-    return authSession;
-};
-
-/**
  * Ends the authenticated session for the given user ID
  */
 export const endAuthenticatedSession = async (userId: UserId): Promise<void> => {
@@ -60,7 +52,7 @@ export const endAuthenticatedSession = async (userId: UserId): Promise<void> => 
  * If no valid session is found, a fresh session will NOT be created
  */
 export const signInWithExistingAuth = async (existingAuth: ExistingAuthToken): Promise<AuthSession | undefined> => {
-    const authSession = await getExistingAuthenticatedSession(existingAuth.trzAuthToken);
+    const authSession = await getAuthSessionByAuthTokenDb(existingAuth.trzAuthToken);
     if (!authSession) {
         return undefined;
     }
