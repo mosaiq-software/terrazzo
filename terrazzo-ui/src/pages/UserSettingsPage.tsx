@@ -1,7 +1,7 @@
-import { Box, Button, Fieldset, Group, Loader, Menu, ScrollArea, Stack, TextInput, Title } from '@mantine/core';
+import { Box, Button, Fieldset, Group, Loader, Menu, ScrollArea, Stack, Text, TextInput, Title } from '@mantine/core';
 import { useDebouncedCallback } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { fullName, UserHeader } from '@mosaiq/terrazzo-common';
+import { fullName, generateUsernameDiscriminator, UserHeader } from '@mosaiq/terrazzo-common';
 import { ImageUpload } from '@trz/components/UI/ImageUpload';
 import { LinkedAccountRenderer } from '@trz/components/UI/LinkedAccountRenderer';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
@@ -95,6 +95,8 @@ const UserSettingsPage = (): React.JSX.Element => {
         );
     }
 
+    const randomDiscriminator = generateUsernameDiscriminator();
+
     return (
         <ScrollArea h={`calc(100vh - ${uiCtx.navbarHeight}px)`}>
             <Stack
@@ -129,7 +131,40 @@ const UserSettingsPage = (): React.JSX.Element => {
                                     value={editedUserData.username ?? me.username}
                                     onChange={(e) => change('username', e.target.value)}
                                     placeholder="Username"
-                                    error={usernameAvailable === false ? 'Username is already taken' : undefined}
+                                    error={
+                                        usernameAvailable === false ? (
+                                            <Stack gap={0}>
+                                                <Text
+                                                    c="unset"
+                                                    fz="xs"
+                                                >
+                                                    Username is already taken.
+                                                </Text>
+                                                <Group gap={4}>
+                                                    <Text
+                                                        span
+                                                        c="dimmed"
+                                                        fz="xs"
+                                                    >
+                                                        How about
+                                                    </Text>
+                                                    <Button
+                                                        variant="subtle"
+                                                        size="compact-xs"
+                                                        p={0}
+                                                        c="dimmed"
+                                                        fw="normal"
+                                                        td="underline"
+                                                        onClick={() => {
+                                                            change('username', `${editedUserData.username ?? me.username}${randomDiscriminator}`);
+                                                        }}
+                                                    >
+                                                        {`${editedUserData.username ?? me.username}${randomDiscriminator}`}
+                                                    </Button>
+                                                </Group>
+                                            </Stack>
+                                        ) : undefined
+                                    }
                                     rightSection={usernameAvailable === undefined && !!editedUserData.username?.length ? <Loader size="xs" /> : null}
                                 />
                                 <Group>
