@@ -53,7 +53,6 @@ export enum ClientSE {
     CREATE_INVITE = 'CREATE_INVITE',
     CREATE_ROLE = 'CREATE_ROLE',
     CREATE_FILE_UPLOAD = 'CREATE_FILE_UPLOAD',
-    CREATE_USER_LINKED_ACCOUNT = 'CREATE_USER_LINKED_ACCOUNT',
 
     UPDATE_USER_FIELD = 'UPDATE_USER_FIELD',
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
@@ -115,7 +114,6 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_INVITE]: { orgId: OrganizationId; maxUses: number | null };
     [ClientSE.CREATE_ROLE]: { orgId: OrganizationId; name: string; color: string };
     [ClientSE.CREATE_FILE_UPLOAD]: { fileName: string; base64: string; mimeType: string };
-    [ClientSE.CREATE_USER_LINKED_ACCOUNT]: LinkedAccount;
 
     [ClientSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
     [ClientSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
@@ -177,7 +175,6 @@ export interface ClientSEReplies {
     [ClientSE.CREATE_INVITE]: Invite | undefined;
     [ClientSE.CREATE_ROLE]: Role | undefined;
     [ClientSE.CREATE_FILE_UPLOAD]: UploadedFileId | undefined;
-    [ClientSE.CREATE_USER_LINKED_ACCOUNT]: undefined;
 
     [ClientSE.UPDATE_USER_FIELD]: undefined;
     [ClientSE.UPDATE_ORG_FIELD]: undefined;

@@ -5,7 +5,7 @@ import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { generateAuthToken } from '@trz-api/utils/authUtils';
 import { isDev } from '@trz-api/utils/envUtils';
 import { getGithubAccessTokenFromCode, getPrivateGitHubUserData } from '@trz-api/utils/githubUtils';
-import { addLinkedAccountToUser } from './linkedAccountController';
+import { addLinkedAccountToUser, updateLinkedAccountForUser } from './linkedAccountController';
 import { createNewUser } from './userController';
 
 const EXPIRE_AUTH_SESSIONS_AFTER_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
@@ -118,6 +118,7 @@ const handleDevAuth = async (username: string, auth?: UserIdWithAuth): Promise<A
                 accountId: username,
                 userId: auth.userId,
                 accountData: {},
+                privateAccountData: {},
             });
         } else {
             throw new Error(`DEV users must have a linked account to sign in. No linked account found for username: ${username}`);
@@ -160,8 +161,10 @@ const handleGithubAuth = async (code: string | undefined, accessToken: string | 
     // If the account is linked, just sign in the user
     // If not, link it to the existing user (if provided) or create a new user
     if (!linkedAccount) {
+        // Create new linked account
         let userId = auth?.userId;
         if (!userId) {
+            // Create new user if no existing auth provided
             const { firstName, lastName } = breakNames(githubData.name);
             const newUser = await createNewUser(githubData.login, firstName, lastName, githubData.avatar_url);
             userId = newUser.id;
@@ -172,11 +175,16 @@ const handleGithubAuth = async (code: string | undefined, accessToken: string | 
             accountId: githubData.id.toString(),
             userId: userId,
             accountData: githubData,
+            privateAccountData: { accessToken: githubAuthToken },
         });
-    }
-
-    if (auth && linkedAccount.userId !== auth.userId) {
+    } else if (auth && linkedAccount.userId !== auth.userId) {
+        // The GitHub account is already linked to a different user
         return 'already-linked';
+    } else {
+        // Update the private account data with the latest access token
+        await updateLinkedAccountForUser(LinkedAccountProvider.Github, linkedAccount.accountId, linkedAccount.userId, {
+            privateAccountData: { accessToken: githubAuthToken },
+        });
     }
 
     const authSession = await startAuthenticatedSession(linkedAccount.userId);

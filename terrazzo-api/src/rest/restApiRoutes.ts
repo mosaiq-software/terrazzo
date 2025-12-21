@@ -53,6 +53,7 @@ router.post(RestRoutes.USER_FAKE_DEV, async (req, res) => {
                 accountId: fakeUser.username,
                 userId: fakeUser.id,
                 accountData: {},
+                privateAccountData: {},
             });
         }
         const authSession = await startAuthenticatedSession(linkedAccount.userId);

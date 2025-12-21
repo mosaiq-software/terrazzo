@@ -12,26 +12,23 @@ export interface GithubUserProfile {
     name: string;
 }
 
-export interface DEVUserProfile {}
-
-export interface LinkedAccountData {
-    [LinkedAccountProvider.Github]: GithubUserProfile;
-    [LinkedAccountProvider.DEV]: DEVUserProfile;
-}
-
 interface BaseLinkedAccount {
     accountId: string;
     userId: UserId;
+    accountData: {};
+    privateAccountData?: {};
 }
 
-interface GithubLinkedAccount extends BaseLinkedAccount {
+export interface GithubLinkedAccount extends BaseLinkedAccount {
     provider: LinkedAccountProvider.Github;
     accountData: GithubUserProfile;
+    privateAccountData?: {
+        accessToken: string;
+    };
 }
 
-interface DEVLinkedAccount extends BaseLinkedAccount {
+export interface DEVLinkedAccount extends BaseLinkedAccount {
     provider: LinkedAccountProvider.DEV;
-    accountData: DEVUserProfile;
 }
 
 export type LinkedAccount = GithubLinkedAccount | DEVLinkedAccount;
