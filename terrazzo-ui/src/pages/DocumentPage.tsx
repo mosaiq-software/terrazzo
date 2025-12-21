@@ -1,5 +1,4 @@
 import { Box, Group, Loader, ScrollArea, Stack, Text } from '@mantine/core';
-import { useIdle } from '@mantine/hooks';
 import { DocumentId, fullName, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
@@ -9,10 +8,8 @@ import { useUI } from '@trz/contexts/ui-context';
 import { updateDocumentMetadata } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useDocument } from '@trz/hooks/useDocument';
-import { useMe } from '@trz/hooks/useMe';
 import { useModulePermission } from '@trz/hooks/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
-import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
@@ -22,8 +19,6 @@ const DocumentPage = (): React.JSX.Element => {
     const sockCtx = useSocket();
     const uiCtx = useUI();
     const docId = params.documentId as DocumentId | undefined;
-    const idle = useIdle(IDLE_TIMEOUT_MS);
-    const me = useMe();
     const { document, lastEditor } = useDocument(docId);
     const userCanExplicitlyViewDocument = useModulePermission(document, PermissibleAction.ViewDocument);
     const viewOnly = !userCanExplicitlyViewDocument && document?.public;
