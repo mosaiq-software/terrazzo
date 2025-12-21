@@ -107,7 +107,7 @@ const TransferOrganization = (props: ContextModalProps<{}>): React.JSX.Element =
                         mb="md"
                         w="100%"
                     >
-                        Looks like its just you!
+                        Looks like it's just you!
                     </Title>
                     <Text
                         c="dimmed"
