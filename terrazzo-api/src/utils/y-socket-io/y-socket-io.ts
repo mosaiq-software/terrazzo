@@ -38,7 +38,7 @@ import * as AwarenessProtocol from 'y-protocols/awareness';
 import * as Y from 'yjs';
 import { YSocketData } from '../socket/socketTypes';
 import { getValidAuthSessionFromSocketHandshake, getYSocketData, setYSocketData } from '../socket/socketUtils';
-import { Document } from './document';
+import { Callbacks, Document } from './document';
 
 /**
  * Simple persistence object using string storage
@@ -47,6 +47,12 @@ export interface Persistence {
     bindState: (textBlockId: TextBlockId, ydoc: Document) => Promise<void>;
     writeState: (textBlockId: TextBlockId, ydoc: Document) => Promise<void>;
 }
+
+/**
+ * Frequency of automatic document saves in milliseconds.
+ * @default 5sec
+ */
+const DOC_AUTOSAVE_INTERVAL_MS = 1000 * 5;
 
 export class YSocketIO extends Observable<string> {
     private readonly _documents: Map<string, Document> = new Map<string, Document>();
@@ -111,20 +117,27 @@ export class YSocketIO extends Observable<string> {
      *      - Emit the `document-loaded` event
      */
     private async initDocument(textBlockId: TextBlockId, namespace: Namespace): Promise<Document> {
-        const doc =
-            this._documents.get(textBlockId) ??
-            new Document(textBlockId, namespace, {
+        let doc = this._documents.get(textBlockId);
+        if (!doc) {
+            const callbacks: Callbacks = {
                 onUpdate: async (doc, update) => {
                     this.emit(YjsEvent.DOCUMENT_UPDATE, [doc, update]);
                     // Save document when updated
-                    // await this.persistence.writeState(doc.name, doc);
+                    const lastSave = doc.lastSavedAt;
+                    const now = Date.now();
+                    if (now - lastSave > DOC_AUTOSAVE_INTERVAL_MS) {
+                        doc.lastSavedAt = now;
+                        await this.persistence.writeState(doc.textBlockId, doc);
+                    }
                 },
                 onChangeAwareness: (doc, update) => this.emit(YjsEvent.AWARENESS_UPDATE, [doc, update]),
                 onDestroy: async (doc) => {
                     this._documents.delete(doc.textBlockId);
                     this.emit(YjsEvent.DOCUMENT_DESTROY, [doc]);
                 },
-            });
+            };
+            doc = new Document(textBlockId, namespace, callbacks);
+        }
         doc.gc = true;
         if (!this._documents.has(textBlockId)) {
             // Load existing document data if available
