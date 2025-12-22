@@ -304,8 +304,8 @@ export async function moveCardToList(cardId: CardId, toListId: ListId, position?
             promises.push(updateCardListDb(cardId, toListId));
         }
         await Promise.all(promises);
-
-        await syncMovedCard({ cardId, toList: toListId, position }, toListId);
+        const boardId = await getBoardIDFromListID(toListId);
+        await syncMovedCard({ cardId, toList: toListId, position }, boardId);
     } catch (error: any) {
         console.error(`Error moving card ${cardId} to list ${toListId}: ${error}`);
         throw error;
