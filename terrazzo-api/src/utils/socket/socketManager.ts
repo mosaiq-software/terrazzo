@@ -1,6 +1,7 @@
-import { ServerSE, ServerSocketIOEvent } from '@mosaiq/terrazzo-common';
+import { ServerSE, ServerSocketIOEvent, YSocketData } from '@mosaiq/terrazzo-common';
 import { instrument } from '@socket.io/admin-ui';
 import * as socketListeners from '@trz-api/listeners';
+import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { YSocketIO } from '../y-socket-io';
@@ -45,7 +46,19 @@ export class SocketManager {
             mode: 'production',
         });
 
-        const yioEngine = new YSocketIO(ioEngine, {});
+        const yioEngine = new YSocketIO(ioEngine, {
+            initializeSocket: async (socket) => {
+                let user = undefined;
+                if (socket.handshake.auth.userId) {
+                    user = await getUserHeaderByIdDb(socket.handshake.auth.userId);
+                }
+                const data: YSocketData = {
+                    sid: socket.id,
+                    userId: user?.id,
+                };
+                return data;
+            },
+        });
         yioEngine.initialize();
 
         ioEngine.on(ServerSocketIOEvent.CONNECTION, async (socket) => {

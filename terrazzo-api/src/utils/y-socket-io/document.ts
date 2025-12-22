@@ -1,3 +1,5 @@
+import { YjsEvent } from '@mosaiq/terrazzo-common';
+import { TextBlockId } from '@mosaiq/terrazzo-common/types/genericTypes';
 import { Namespace, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
 import * as Y from 'yjs';
@@ -35,22 +37,22 @@ export interface Callbacks {
  * YSocketIO document
  */
 export class Document extends Y.Doc {
-    public name: string;
+    public textBlockId: TextBlockId;
     private readonly namespace: Namespace;
     public awareness: AwarenessProtocol.Awareness;
     private readonly callbacks?: Callbacks;
 
-    constructor(name: string, namespace: Namespace, callbacks?: Callbacks) {
+    constructor(textBlockId: TextBlockId, namespace: Namespace, callbacks?: Callbacks) {
         super({ gc: gcEnabled });
-        this.name = name;
+        this.textBlockId = textBlockId;
         this.namespace = namespace;
         this.awareness = new AwarenessProtocol.Awareness(this);
         this.awareness.setLocalState(null);
         this.callbacks = callbacks;
 
-        this.awareness.on('update', this.onUpdateAwareness);
+        this.awareness.on(YjsEvent.UPDATE, this.onUpdateAwareness);
 
-        this.on('update', this.onUpdateDoc);
+        this.on(YjsEvent.UPDATE, this.onUpdateDoc);
     }
 
     /**
@@ -64,7 +66,7 @@ export class Document extends Y.Doc {
                 console.warn(error);
             }
         }
-        this.namespace.emit('sync-update', update);
+        this.namespace.emit(YjsEvent.SYNC_UPDATE, update);
     };
 
     /**
@@ -80,7 +82,7 @@ export class Document extends Y.Doc {
                 console.warn(error);
             }
         }
-        this.namespace.emit('awareness-update', update);
+        this.namespace.emit(YjsEvent.AWARENESS_UPDATE, update);
     };
 
     /**
@@ -94,8 +96,8 @@ export class Document extends Y.Doc {
                 console.warn(error);
             }
         }
-        this.awareness.off('update', this.onUpdateAwareness);
-        this.off('update', this.onUpdateDoc);
+        this.awareness.off(YjsEvent.UPDATE, this.onUpdateAwareness);
+        this.off(YjsEvent.UPDATE, this.onUpdateDoc);
         this.namespace.disconnectSockets();
         super.destroy();
     }

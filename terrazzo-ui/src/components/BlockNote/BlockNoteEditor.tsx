@@ -3,7 +3,8 @@ import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
 import { useIdle } from '@mantine/hooks';
-import { fullName, TextBlockId } from '@mosaiq/terrazzo-common';
+import { fullName, SocketHandshakeAuth, TextBlockId } from '@mosaiq/terrazzo-common';
+import { useUserContext } from '@trz/contexts/user-context';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { useMe } from '@trz/hooks/useMe';
@@ -30,6 +31,7 @@ interface BlockNoteEditorProps {
     viewOnly?: boolean;
 }
 export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
+    const userCtx = useUserContext();
     const me = useMe();
     const pfpColor = useImageColor(me?.profilePicture);
     const [status, setStatus] = useState<string>('unknown');
@@ -42,8 +44,13 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
         const pConf: ProviderConfiguration = {
             autoConnect: true,
         };
+        const auth: SocketHandshakeAuth = {
+            userId: userCtx.userId,
+            authToken: userCtx.authToken,
+        };
         const sockConf: Partial<ManagerOptions & SocketOptions> = {
             path: '/socket',
+            auth: auth,
         };
         return new SocketIOProvider(SOCKET_URL, props.textBlockId, doc, pConf, sockConf);
     });

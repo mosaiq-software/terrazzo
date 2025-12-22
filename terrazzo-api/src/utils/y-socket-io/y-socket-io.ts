@@ -1,4 +1,9 @@
-import { TextBlockId } from '@mosaiq/terrazzo-common';
+/**
+ * YSocketIO module based on the y-socket.io library
+ * https://github.com/ivan-topp/y-socket.io/blob/main/src/server/y-socket-io.ts
+ */
+
+import { ServerSocketIOEvent, TextBlockId, YjsEvent, YSocketData } from '@mosaiq/terrazzo-common';
 import { loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
 import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
@@ -10,9 +15,8 @@ import { Document } from './document';
  * Simple persistence object using string storage
  */
 export interface Persistence {
-    bindState: (docName: string, ydoc: Document) => Promise<void>;
-    writeState: (docName: string, ydoc: Document) => Promise<any>;
-    provider: any;
+    bindState: (textBlockId: TextBlockId, ydoc: Document) => Promise<void>;
+    writeState: (textBlockId: TextBlockId, ydoc: Document) => Promise<void>;
 }
 
 /**
@@ -31,8 +35,9 @@ export interface YSocketIOConfiguration {
      *
      *  It can be a promise and if it returns true, the connection is allowed; otherwise, if it returns false, the connection is rejected.
      * @param handshake Provided from the handshake attribute of the socket io
+     * @throws Will throw an error if the authentication fails
      */
-    authenticate?: (handshake: { [key: string]: any }) => Promise<boolean> | boolean;
+    initializeSocket: (socket: Socket) => Promise<YSocketData> | YSocketData;
 }
 
 /**
@@ -64,13 +69,17 @@ export class YSocketIO extends Observable<string> {
         this.nsp = this.io.of(/^\/yjs\|.*$/);
 
         this.nsp.use(async (socket, next) => {
-            if (this.configuration?.authenticate == null) return next();
-            if (await this.configuration.authenticate(socket.handshake)) return next();
-            else return next(new Error('Unauthorized'));
+            if (this.configuration?.initializeSocket == null) return next();
+            try {
+                await this.configuration.initializeSocket(socket);
+                return next();
+            } catch {
+                return next(new Error('Unauthorized'));
+            }
         });
 
-        this.nsp.on('connection', async (socket) => {
-            const namespace = socket.nsp.name.replace(/\/yjs\|/, '');
+        this.nsp.on(ServerSocketIOEvent.CONNECTION, async (socket) => {
+            const namespace = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
 
             const doc = await this.initDocument(namespace, socket.nsp, this.configuration?.gcEnabled);
             this.initSyncListeners(socket, doc);
@@ -97,76 +106,57 @@ export class YSocketIO extends Observable<string> {
      *      - Adds the new document to the documents map.
      *      - Emit the `document-loaded` event
      */
-    private async initDocument(name: string, namespace: Namespace, gc: boolean = true): Promise<Document> {
+    private async initDocument(textBlockId: TextBlockId, namespace: Namespace, gc: boolean = true): Promise<Document> {
         const doc =
-            this._documents.get(name) ??
-            new Document(name, namespace, {
+            this._documents.get(textBlockId) ??
+            new Document(textBlockId, namespace, {
                 onUpdate: async (doc, update) => {
-                    this.emit('document-update', [doc, update]);
+                    this.emit(YjsEvent.DOCUMENT_UPDATE, [doc, update]);
                     // Save document when updated
-                    await this.persistence.writeState(doc.name, doc);
+                    // await this.persistence.writeState(doc.name, doc);
                 },
-                onChangeAwareness: (doc, update) => this.emit('awareness-update', [doc, update]),
+                onChangeAwareness: (doc, update) => this.emit(YjsEvent.AWARENESS_UPDATE, [doc, update]),
                 onDestroy: async (doc) => {
-                    this._documents.delete(doc.name);
-                    this.emit('document-destroy', [doc]);
+                    this._documents.delete(doc.textBlockId);
+                    this.emit(YjsEvent.DOCUMENT_DESTROY, [doc]);
                 },
             });
         doc.gc = gc;
-        if (!this._documents.has(name)) {
+        if (!this._documents.has(textBlockId)) {
             // Load existing document data if available
-            await this.persistence.bindState(name, doc);
-            this._documents.set(name, doc);
-            this.emit('document-loaded', [doc]);
+            await this.persistence.bindState(textBlockId, doc);
+            this._documents.set(textBlockId, doc);
+            this.emit(YjsEvent.DOCUMENT_LOADED, [doc]);
         }
         return doc;
     }
-
-    /**
-     * This method sets persistence if enabled.
-     */
-    //   private initLevelDB (levelPersistenceDir: string): void {
-    //     const ldb = new LeveldbPersistence(levelPersistenceDir)
-    //     this.persistence = {
-    //       provider: ldb,
-    //       bindState: async (docName: string, ydoc: Document) => {
-    //         const persistedYdoc = await ldb.getYDoc(docName)
-    //         const newUpdates = Y.encodeStateAsUpdate(ydoc)
-    //         await ldb.storeUpdate(docName, newUpdates)
-    //         Y.applyUpdate(ydoc, Y.encodeStateAsUpdate(persistedYdoc))
-    //         ydoc.on('update', async (update: Uint8Array) => await ldb.storeUpdate(docName, update))
-    //       },
-    //       writeState: async (_docName: string, _ydoc: Document) => { }
-    //     }
-    //   }
 
     /**
      * This method sets up string-based persistence using the mock functions.
      */
     private initStringPersistence(): Persistence {
         return {
-            provider: null,
-            bindState: async (docName: string, ydoc: Document) => {
+            bindState: async (textBlockId: TextBlockId, ydoc: Document) => {
                 // Load existing document data if available
-                const persistedData = await loadDocument(docName);
+                const persistedData = await loadTextBlockEncodedData(textBlockId);
                 if (persistedData) {
                     try {
                         // Convert the stored string back to Uint8Array and apply to document
                         const uint8Array = new Uint8Array(Buffer.from(persistedData, 'base64'));
                         Y.applyUpdate(ydoc, uint8Array);
                     } catch (error) {
-                        console.error(`Error loading document ${docName}:`, error);
+                        console.error(`Error loading document ${textBlockId}:`, error);
                     }
                 }
             },
-            writeState: async (docName: string, ydoc: Document) => {
+            writeState: async (textBlockId: TextBlockId, ydoc: Document) => {
                 try {
                     // Encode the document state as an update and convert to base64 string
                     const update = Y.encodeStateAsUpdate(ydoc);
                     const base64String = Buffer.from(update).toString('base64');
-                    await storeDocument(docName, base64String);
+                    await storeTextBlockEncodedData(textBlockId, base64String);
                 } catch (error) {
-                    console.error(`Error storing document ${docName}:`, error);
+                    console.error(`Error storing document ${textBlockId}:`, error);
                 }
             },
         };
@@ -188,11 +178,11 @@ export class YSocketIO extends Observable<string> {
      *    sends the update to clients connected to the document's namespace.
      */
     private readonly initSyncListeners = (socket: Socket, doc: Document): void => {
-        socket.on('sync-step-1', (stateVector: Uint8Array, syncStep2: (update: Uint8Array) => void) => {
+        socket.on(YjsEvent.SYNC_STEP_1, (stateVector: Uint8Array, syncStep2: (update: Uint8Array) => void) => {
             syncStep2(Y.encodeStateAsUpdate(doc, new Uint8Array(stateVector)));
         });
 
-        socket.on('sync-update', (update: Uint8Array) => {
+        socket.on(YjsEvent.SYNC_UPDATE, (update: Uint8Array) => {
             Y.applyUpdate(doc, update, null);
         });
     };
@@ -207,7 +197,7 @@ export class YSocketIO extends Observable<string> {
      *    sends the update to clients connected to the document namespace.
      */
     private readonly initAwarenessListeners = (socket: Socket, doc: Document): void => {
-        socket.on('awareness-update', (update: ArrayBuffer) => {
+        socket.on(YjsEvent.AWARENESS_UPDATE, (update: ArrayBuffer) => {
             AwarenessProtocol.applyAwarenessUpdate(doc.awareness, new Uint8Array(update), socket);
         });
     };
@@ -220,14 +210,13 @@ export class YSocketIO extends Observable<string> {
      *  parameters and persist the document using string persistence.
      */
     private readonly initSocketListeners = (socket: Socket, doc: Document): void => {
-        socket.on('disconnect', async () => {
+        socket.on(ServerSocketIOEvent.DISCONNECT, async () => {
             if ((await socket.nsp.allSockets()).size === 0) {
-                this.emit('all-document-connections-closed', [doc]);
-                if (this.persistence != null) {
-                    await this.persistence.writeState(doc.name, doc);
-                    // Note: Not destroying the document to keep it in memory for faster access
-                    // await doc.destroy()
-                }
+                this.emit(YjsEvent.ALL_DOCUMENT_CONNECTIONS_CLOSED, [doc]);
+
+                // Persist document state when all connections are closed and destroy the document
+                await this.persistence.writeState(doc.textBlockId, doc);
+                await doc.destroy();
             }
         });
     };
@@ -237,18 +226,9 @@ export class YSocketIO extends Observable<string> {
      * events to the client to start the sync.
      */
     private readonly startSynchronization = (socket: Socket, doc: Document): void => {
-        socket.emit('sync-step-1', Y.encodeStateVector(doc), (update: Uint8Array) => {
+        socket.emit(YjsEvent.SYNC_STEP_1, Y.encodeStateVector(doc), (update: Uint8Array) => {
             Y.applyUpdate(doc, new Uint8Array(update), this);
         });
-        socket.emit('awareness-update', AwarenessProtocol.encodeAwarenessUpdate(doc.awareness, Array.from(doc.awareness.getStates().keys())));
+        socket.emit(YjsEvent.AWARENESS_UPDATE, AwarenessProtocol.encodeAwarenessUpdate(doc.awareness, Array.from(doc.awareness.getStates().keys())));
     };
 }
-
-const storeDocument = async (name: string, data: string): Promise<void> => {
-    await storeTextBlockEncodedData(name as TextBlockId, data);
-};
-
-const loadDocument = async (name: string): Promise<string | null> => {
-    const stored = await loadTextBlockEncodedData(name as TextBlockId);
-    return stored;
-};

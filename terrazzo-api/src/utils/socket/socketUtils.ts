@@ -196,16 +196,14 @@ export const subscribe = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (d
 export const initializeSocketData = async (socket: Socket): Promise<SocketData> => {
     try {
         const auth: SocketHandshakeAuth = socket.handshake.auth as any;
+        const authSession = await getValidAuthSessionFromSocketAuth(auth);
         let userData: UserData | undefined = undefined;
-        if (auth.userId && auth.authToken) {
-            const authSession = await startAuthenticatedSession(auth.userId);
-            if (authSession) {
-                userData = {
-                    sid: socket.id,
-                    idle: false,
-                    userId: authSession.userId,
-                };
-            }
+        if (authSession) {
+            userData = {
+                sid: socket.id,
+                idle: false,
+                userId: authSession.userId,
+            };
         }
 
         const socketData: SocketData = {
@@ -217,7 +215,14 @@ export const initializeSocketData = async (socket: Socket): Promise<SocketData> 
         return socketData;
     } catch (error) {
         console.error('Error initializing socket data for ' + socket.id, error);
-        socket.disconnect(true);
         throw error;
     }
+};
+
+export const getValidAuthSessionFromSocketAuth = async (auth: SocketHandshakeAuth) => {
+    if (auth.userId && auth.authToken) {
+        const authSession = await startAuthenticatedSession(auth.userId);
+        return authSession;
+    }
+    return undefined;
 };
