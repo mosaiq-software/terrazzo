@@ -3,14 +3,42 @@
  * https://github.com/ivan-topp/y-socket.io/blob/main/src/server/y-socket-io.ts
  */
 
+/**
+ *  The synchronization protocol is as follows:
+ *
+ *  - A client emits the sync step one event (`sync-step-1`) which sends the document as a state vector
+ *    and the sync step two callback as an acknowledgment according to the socket io acknowledgments.
+ *
+ *  - When the server receives the `sync-step-1` event, it executes the `syncStep2` acknowledgment callback and sends
+ *    the difference between the received state vector and the local document (this difference is called an update).
+ *
+ *  - The second step of the sync is to apply the update sent in the `syncStep2` callback parameters from the server
+ *    to the document on the client side.
+ *
+ *  - There is another event (`sync-update`) that is emitted from the client, which sends an update for the document,
+ *    and when the server receives this event, it applies the received update to the local document.
+ *
+ *  - When an update is applied to a document, it will fire the document's "update" event, which
+ *    sends the update to clients connected to the document's namespace.
+ *
+ *
+ *
+ *  The awareness protocol is as follows:
+ *  - A client emits the `awareness-update` event by sending the awareness update.
+ *  - The server receives that event and applies the received update to the local awareness.
+ *  - When an update is applied to awareness, the awareness "update" event will fire, which
+ *    sends the update to clients connected to the document namespace.
+ */
+
 import { ServerSocketIOEvent, TextBlockId, YjsEvent } from '@mosaiq/terrazzo-common';
 import { loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
 import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
 import * as Y from 'yjs';
+import { userCanEditDocument } from '../permissions';
 import { YSocketData } from '../socket/socketTypes';
-import { setYSocketData } from '../socket/socketUtils';
+import { getYSocketData, setYSocketData } from '../socket/socketUtils';
 import { Document } from './document';
 
 /**
@@ -22,14 +50,12 @@ export interface Persistence {
 }
 
 /**
- * YSocketIO instance cofiguration. Here you can configure:
- * - gcEnabled: Enable/Disable garbage collection (default: gc=true)
- * - levelPersistenceDir: The directory path where the persistent Level database will be stored
- * - authenticate: The callback to authenticate the client connection
+ * YSocketIO instance configuration
  */
 export interface YSocketIOConfiguration {
     /**
-     * Enable/Disable garbage collection (default: gc=true)
+     * Enable/Disable garbage collection
+     * @default true
      */
     gcEnabled?: boolean;
     /**
@@ -42,9 +68,6 @@ export interface YSocketIOConfiguration {
     initializeSocket: (socket: Socket) => Promise<YSocketData> | YSocketData;
 }
 
-/**
- * YSocketIO class. This handles document synchronization.
- */
 export class YSocketIO extends Observable<string> {
     private readonly _documents: Map<string, Document> = new Map<string, Document>();
     private readonly io: Server;
@@ -87,10 +110,9 @@ export class YSocketIO extends Observable<string> {
             const namespace = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
 
             const doc = await this.initDocument(namespace, socket.nsp, this.configuration?.gcEnabled);
-            this.initSyncListeners(socket, doc);
-            this.initAwarenessListeners(socket, doc);
-            this.initSocketListeners(socket, doc);
-            this.startSynchronization(socket, doc);
+            await this.initPublicListeners(socket, doc);
+            await this.initWriteOnlyListeners(socket, doc);
+            await this.startSynchronization(socket, doc);
         });
     }
 
@@ -136,9 +158,6 @@ export class YSocketIO extends Observable<string> {
         return doc;
     }
 
-    /**
-     * This method sets up string persistence for Yjs documents.
-     */
     private initStringPersistence(): Persistence {
         return {
             bindState: async (textBlockId: TextBlockId, ydoc: Document) => {
@@ -167,60 +186,12 @@ export class YSocketIO extends Observable<string> {
         };
     }
 
-    /**
-     * This function initializes the socket event listeners to synchronize document changes.
-     *
-     *  The synchronization protocol is as follows:
-     *
-     *  - A client emits the sync step one event (`sync-step-1`) which sends the document as a state vector
-     *    and the sync step two callback as an acknowledgment according to the socket io acknowledgments.
-     *
-     *  - When the server receives the `sync-step-1` event, it executes the `syncStep2` acknowledgment callback and sends
-     *    the difference between the received state vector and the local document (this difference is called an update).
-     *
-     *  - The second step of the sync is to apply the update sent in the `syncStep2` callback parameters from the server
-     *    to the document on the client side.
-     *
-     *  - There is another event (`sync-update`) that is emitted from the client, which sends an update for the document,
-     *    and when the server receives this event, it applies the received update to the local document.
-     *
-     *  - When an update is applied to a document, it will fire the document's "update" event, which
-     *    sends the update to clients connected to the document's namespace.
-     */
-    private readonly initSyncListeners = (socket: Socket, doc: Document): void => {
+    private readonly initPublicListeners = async (socket: Socket, doc: Document) => {
         socket.on(YjsEvent.SYNC_STEP_1, (stateVector: Uint8Array, syncStep2: (update: Uint8Array) => void) => {
             const diffVec = Y.encodeStateAsUpdate(doc, new Uint8Array(stateVector));
             syncStep2(diffVec);
         });
 
-        socket.on(YjsEvent.SYNC_UPDATE, (update: Uint8Array) => {
-            Y.applyUpdate(doc, update, null);
-        });
-    };
-
-    /**
-     * This function initializes socket event listeners to synchronize awareness changes.
-     *
-     *  The awareness protocol is as follows:
-     *  - A client emits the `awareness-update` event by sending the awareness update.
-     *  - The server receives that event and applies the received update to the local awareness.
-     *  - When an update is applied to awareness, the awareness "update" event will fire, which
-     *    sends the update to clients connected to the document namespace.
-     */
-    private readonly initAwarenessListeners = (socket: Socket, doc: Document): void => {
-        socket.on(YjsEvent.AWARENESS_UPDATE, (update: ArrayBuffer) => {
-            AwarenessProtocol.applyAwarenessUpdate(doc.awareness, new Uint8Array(update), socket);
-        });
-    };
-
-    /**
-     *  This function initializes socket event listeners for general purposes.
-     *
-     *  When a client has been disconnected, check the clients connected to the document namespace,
-     *  if no connection remains, emit the `all-document-connections-closed` event
-     *  parameters and persist the document using string persistence.
-     */
-    private readonly initSocketListeners = (socket: Socket, doc: Document): void => {
         socket.on(ServerSocketIOEvent.DISCONNECT, async () => {
             if ((await socket.nsp.allSockets()).size === 0) {
                 this.emit(YjsEvent.ALL_DOCUMENT_CONNECTIONS_CLOSED, [doc]);
@@ -230,13 +201,22 @@ export class YSocketIO extends Observable<string> {
                 await doc.destroy();
             }
         });
+
+        socket.on(YjsEvent.AWARENESS_UPDATE, (update: ArrayBuffer) => {
+            AwarenessProtocol.applyAwarenessUpdate(doc.awareness, new Uint8Array(update), socket);
+        });
     };
 
-    /**
-     * This function is called when a client connects and it emit the `sync-step-1` and `awareness-update`
-     * events to the client to start the sync.
-     */
-    private readonly startSynchronization = (socket: Socket, doc: Document): void => {
+    private readonly initWriteOnlyListeners = async (socket: Socket, doc: Document) => {
+        const socketData = getYSocketData(socket);
+        const userCanWrite = await userCanEditDocument(socketData?.userId, doc.textBlockId);
+
+        socket.on(YjsEvent.SYNC_UPDATE, (update: Uint8Array) => {
+            Y.applyUpdate(doc, update, null);
+        });
+    };
+
+    private readonly startSynchronization = async (socket: Socket, doc: Document) => {
         socket.emit(YjsEvent.SYNC_STEP_1, Y.encodeStateVector(doc), (update: Uint8Array) => {
             Y.applyUpdate(doc, new Uint8Array(update), this);
         });
