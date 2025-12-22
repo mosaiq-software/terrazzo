@@ -23,6 +23,7 @@ const DocumentPage = (): React.JSX.Element => {
     const userCanExplicitlyViewDocument = useModulePermission(document, PermissibleAction.ViewDocument);
     const viewOnly = !userCanExplicitlyViewDocument && document?.public;
     const userCanViewDocument = userCanExplicitlyViewDocument || document?.public;
+    const userCanEditDocument = useModulePermission(document, PermissibleAction.EditDocument);
 
     useCatchSaveKey();
 
@@ -105,13 +106,13 @@ const DocumentPage = (): React.JSX.Element => {
                                 style={{
                                     width: '95%',
                                 }}
-                                readonly={viewOnly}
+                                readonly={!userCanEditDocument}
                             />
                         </Group>
                         <BlockNoteEditor
                             textBlockId={document.textBlockId}
                             placeholder="Start writing or hit / for commands..."
-                            viewOnly={viewOnly}
+                            viewOnly={!userCanEditDocument}
                         />
                         <Group
                             w="100%"

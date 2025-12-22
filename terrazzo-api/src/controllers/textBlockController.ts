@@ -3,7 +3,6 @@ import { getCardsByDescriptionTextBlockIdDb } from '@trz-api/persistence/cardPer
 import { getDocumentsByTextBlockIdDb } from '@trz-api/persistence/documentPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, writeTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
-import * as Y from 'yjs';
 import { getBoardIDFromCardID } from './cardController';
 
 export const checkCanUserEditTextBlock = async (userId: UserId | undefined, textBlockId: TextBlockId): Promise<boolean> => {
@@ -58,16 +57,11 @@ export const loadTextBlockEncodedData = async (textBlockId: TextBlockId) => {
         if (isValidBase64(text)) {
             return text;
         }
-        return plaintextToRemirrorYjs(text);
+        return text;
     } catch (error: any) {
         console.error(`Unable to load text block ${textBlockId} : ${error.message}`);
         return null;
     }
-};
-
-export const createTextBlockWithPlaintext = async (plaintext?: string) => {
-    const encoded = plaintextToRemirrorYjs(plaintext ?? '');
-    return await createTextBlockWithEncodedData(encoded);
 };
 
 export const createTextBlockWithEncodedData = async (data: string) => {
@@ -78,58 +72,6 @@ export const createTextBlockWithEncodedData = async (data: string) => {
         console.error(`Unable to create text block`, e);
         return null;
     }
-};
-
-/**
- * Converts plain text to a Y.js document that can be saved as base64 string
- * Creates a Remirror-compatible ProseMirror document structure in Y.js format
- * @param text The plain text to convert
- * @returns Base64 encoded Y.js document state
- */
-export const plaintextToRemirrorYjs = (text: string): string => {
-    const ydoc = new Y.Doc();
-
-    // Based on inspection, we need to create the shared types that Remirror expects
-    // The rawSharedTypes shows both 'prosemirror' and 'default' exist as AbstractType
-    // Let's try different approaches to see what works
-
-    // Approach 1: Create as XmlFragment (most common for ProseMirror)
-    const prosemirrorDoc = ydoc.getXmlFragment('prosemirror');
-
-    if (text) {
-        // Create a simple paragraph structure that ProseMirror expects
-        const paragraph = new Y.XmlElement('paragraph');
-        const textNode = new Y.XmlText();
-        textNode.insert(0, text);
-        paragraph.insert(0, [textNode]);
-        prosemirrorDoc.insert(0, [paragraph]);
-    } else {
-        // Empty document should still have a paragraph
-        const paragraph = new Y.XmlElement('paragraph');
-        prosemirrorDoc.insert(0, [paragraph]);
-    }
-
-    const update = Y.encodeStateAsUpdate(ydoc);
-    const base64String = Buffer.from(update).toString('base64');
-    return base64String;
-};
-
-export const remirrorYjsToPlaintext = (base64Data: string): string => {
-    const binaryData = Buffer.from(base64Data, 'base64');
-    const ydoc = new Y.Doc();
-    Y.applyUpdate(ydoc, binaryData);
-    const prosemirrorDoc = ydoc.getXmlFragment('prosemirror');
-
-    let plaintext = '';
-    prosemirrorDoc.forEach((node) => {
-        plaintext += node.toString();
-    });
-
-    // clean up the plaintext by removing XML tags
-    plaintext = plaintext.replace(/<\/?[^>]+(>|$)/g, ' ').trim();
-    plaintext = plaintext.replace(/\s+/g, ' ');
-
-    return plaintext;
 };
 
 /**

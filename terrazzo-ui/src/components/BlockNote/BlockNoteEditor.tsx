@@ -1,4 +1,5 @@
 import '@blocknote/core/fonts/inter.css';
+import { yDocToBlocks } from '@blocknote/core/yjs';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
@@ -70,7 +71,7 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     useEffect(() => {
         socketIOProvider.awareness.setLocalStateField('user', {
             name: name,
-            color: idle ? IDLE_COLOR : (pfpColor ?? 'black'),
+            color: idle ? IDLE_COLOR : (pfpColor ?? 'white'),
         });
     }, [socketIOProvider, pfpColor, idle, name]);
 
@@ -80,7 +81,7 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
             fragment: doc.getXmlFragment('document-store'),
             user: {
                 name: name,
-                color: idle ? IDLE_COLOR : (pfpColor ?? 'black'),
+                color: idle ? IDLE_COLOR : (pfpColor ?? 'white'),
             },
             showCursorLabels: 'activity',
         },
@@ -94,6 +95,14 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
                 Status: {status} | Active Users: {clients.join(', ')} | Synced: {socketIOProvider.synced.toString()}
             </p>
             <BlockNoteView editor={editor} />
+            <button
+                onClick={() => {
+                    const blocks = yDocToBlocks(editor, doc, 'document-store');
+                    console.log('Current Blocks:', blocks);
+                }}
+            >
+                Log Current Blocks
+            </button>
         </div>
     );
 };

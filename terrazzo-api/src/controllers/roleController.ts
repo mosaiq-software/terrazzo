@@ -2,6 +2,7 @@ import { getMaxUserRole, OrganizationId, PermissionFlag, Role, RoleId, UserId } 
 import { syncRolesForUserInOrg, syncUpdateOrganizationRoles } from '@trz-api/broadcasters';
 import { getRoleIdsForUserInOrgDb, setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { createRoleOnOrgDb, deleteRoleDb, getNextRoleOrderDb, getRolesByOrgIdDb, updateRoleDb } from '@trz-api/persistence/rolePersistence';
+import { SocketManager } from '@trz-api/utils/socket/socketManager';
 import { userIsOrgOwner } from './organizationController';
 
 export const getRolesForOrg = async (orgId: OrganizationId) => {
@@ -103,4 +104,5 @@ export const setRolesForUserInOrg = async (userId: UserId, orgId: OrganizationId
     await validateUserCanAssignRoles(userId, orgId, roleIds, assignedByUserId);
     await setRoleIdsForUserInOrgDb(userId, orgId, roleIds);
     await syncRolesForUserInOrg(userId, orgId);
+    await SocketManager.syncUserSocketDataForUser(userId);
 };

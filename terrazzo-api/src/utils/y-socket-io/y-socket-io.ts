@@ -30,7 +30,7 @@
  *    sends the update to clients connected to the document namespace.
  */
 
-import { ServerSocketIOEvent, SocketHandshakeAuth, TextBlockId, YjsEvent } from '@mosaiq/terrazzo-common';
+import { ServerSocketIOEvent, SocketHandshakeAuth, TextBlockId, UserId, YjsEvent } from '@mosaiq/terrazzo-common';
 import { checkCanUserEditTextBlock, loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
 import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
@@ -38,7 +38,7 @@ import * as AwarenessProtocol from 'y-protocols/awareness';
 import * as Y from 'yjs';
 import { YSocketData } from '../socket/socketTypes';
 import { getValidAuthSessionFromSocketHandshake, getYSocketData, setYSocketData } from '../socket/socketUtils';
-import { Callbacks, Document } from './document';
+import { Document } from './document';
 
 /**
  * Simple persistence object using string storage
@@ -100,6 +100,25 @@ export class YSocketIO extends Observable<string> {
     }
 
     /**
+     * Sync the edit permissions for all sockets of a given user across all documents.
+     */
+    public async syncSocketEditStatusForUser(userId: UserId): Promise<void> {
+        if (!this.nsp) {
+            return;
+        }
+        const sockets = Array.from(this.nsp.sockets.values());
+        for (const socket of sockets) {
+            const textBlockId = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
+            const canEdit = await checkCanUserEditTextBlock(userId, textBlockId);
+            const sockData = getYSocketData(socket);
+            if (sockData?.userId === userId) {
+                sockData.canEdit = canEdit;
+                setYSocketData(socket, sockData);
+            }
+        }
+    }
+
+    /**
      * The document map's getter. If you want to delete a document externally, make sure you don't delete
      * the document directly from the map, instead use the "destroy" method of the document you want to delete,
      * this way when you destroy the document you are also closing any existing connection on the document.
@@ -117,9 +136,9 @@ export class YSocketIO extends Observable<string> {
      *      - Emit the `document-loaded` event
      */
     private async initDocument(textBlockId: TextBlockId, namespace: Namespace): Promise<Document> {
-        let doc = this._documents.get(textBlockId);
-        if (!doc) {
-            const callbacks: Callbacks = {
+        const doc =
+            this._documents.get(textBlockId) ??
+            new Document(textBlockId, namespace, {
                 onUpdate: async (doc, update) => {
                     this.emit(YjsEvent.DOCUMENT_UPDATE, [doc, update]);
                     // Save document when updated
@@ -135,9 +154,7 @@ export class YSocketIO extends Observable<string> {
                     this._documents.delete(doc.textBlockId);
                     this.emit(YjsEvent.DOCUMENT_DESTROY, [doc]);
                 },
-            };
-            doc = new Document(textBlockId, namespace, callbacks);
-        }
+            });
         doc.gc = true;
         if (!this._documents.has(textBlockId)) {
             // Load existing document data if available
