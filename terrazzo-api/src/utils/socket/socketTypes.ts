@@ -12,4 +12,5 @@ export interface YSocketData {
     userId: UserId | undefined;
     authToken: string | undefined;
     connectedAt: Date;
+    canEdit: boolean;
 }

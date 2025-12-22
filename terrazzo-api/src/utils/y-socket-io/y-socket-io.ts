@@ -30,15 +30,14 @@
  *    sends the update to clients connected to the document namespace.
  */
 
-import { ServerSocketIOEvent, TextBlockId, YjsEvent } from '@mosaiq/terrazzo-common';
-import { loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
+import { ServerSocketIOEvent, SocketHandshakeAuth, TextBlockId, YjsEvent } from '@mosaiq/terrazzo-common';
+import { checkCanUserEditTextBlock, loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
 import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
 import * as Y from 'yjs';
-import { userCanEditDocument } from '../permissions';
 import { YSocketData } from '../socket/socketTypes';
-import { getYSocketData, setYSocketData } from '../socket/socketUtils';
+import { getValidAuthSessionFromSocketHandshake, getYSocketData, setYSocketData } from '../socket/socketUtils';
 import { Document } from './document';
 
 /**
@@ -49,36 +48,15 @@ export interface Persistence {
     writeState: (textBlockId: TextBlockId, ydoc: Document) => Promise<void>;
 }
 
-/**
- * YSocketIO instance configuration
- */
-export interface YSocketIOConfiguration {
-    /**
-     * Enable/Disable garbage collection
-     * @default true
-     */
-    gcEnabled?: boolean;
-    /**
-     * Callback to authenticate the client connection.
-     *
-     *  It can be a promise and if it returns true, the connection is allowed; otherwise, if it returns false, the connection is rejected.
-     * @param handshake Provided from the handshake attribute of the socket io
-     * @throws Will throw an error if the authentication fails
-     */
-    initializeSocket: (socket: Socket) => Promise<YSocketData> | YSocketData;
-}
-
 export class YSocketIO extends Observable<string> {
     private readonly _documents: Map<string, Document> = new Map<string, Document>();
     private readonly io: Server;
-    private readonly configuration?: YSocketIOConfiguration;
     private readonly persistence: Persistence;
     public nsp: Namespace | null = null;
 
-    constructor(io: Server, configuration?: YSocketIOConfiguration) {
+    constructor(io: Server) {
         super();
         this.io = io;
-        this.configuration = configuration;
         this.persistence = this.initStringPersistence();
     }
 
@@ -93,23 +71,22 @@ export class YSocketIO extends Observable<string> {
     public initialize(): void {
         this.nsp = this.io.of(/^\/yjs\|.*$/);
 
-        this.nsp.use(async (socket, next) => {
-            if (!this.configuration?.initializeSocket) {
-                return next();
-            }
-            try {
-                const socketData = await this.configuration.initializeSocket(socket);
-                setYSocketData(socket, socketData);
-                return next();
-            } catch {
-                return next(new Error('Unauthorized'));
-            }
-        });
-
         this.nsp.on(ServerSocketIOEvent.CONNECTION, async (socket) => {
-            const namespace = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
+            const textBlockId = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
+            const authSession = await getValidAuthSessionFromSocketHandshake(socket.handshake.auth as any as SocketHandshakeAuth);
 
-            const doc = await this.initDocument(namespace, socket.nsp, this.configuration?.gcEnabled);
+            const canEdit = !!authSession?.userId && (await checkCanUserEditTextBlock(authSession.userId, textBlockId));
+
+            const sockData: YSocketData = {
+                sid: socket.id,
+                userId: authSession?.userId,
+                authToken: authSession?.authToken,
+                connectedAt: new Date(),
+                canEdit: canEdit,
+            };
+            setYSocketData(socket, sockData);
+
+            const doc = await this.initDocument(textBlockId, socket.nsp);
             await this.initPublicListeners(socket, doc);
             await this.initWriteOnlyListeners(socket, doc);
             await this.startSynchronization(socket, doc);
@@ -133,7 +110,7 @@ export class YSocketIO extends Observable<string> {
      *      - Adds the new document to the documents map.
      *      - Emit the `document-loaded` event
      */
-    private async initDocument(textBlockId: TextBlockId, namespace: Namespace, gc: boolean = true): Promise<Document> {
+    private async initDocument(textBlockId: TextBlockId, namespace: Namespace): Promise<Document> {
         const doc =
             this._documents.get(textBlockId) ??
             new Document(textBlockId, namespace, {
@@ -148,7 +125,7 @@ export class YSocketIO extends Observable<string> {
                     this.emit(YjsEvent.DOCUMENT_DESTROY, [doc]);
                 },
             });
-        doc.gc = gc;
+        doc.gc = true;
         if (!this._documents.has(textBlockId)) {
             // Load existing document data if available
             await this.persistence.bindState(textBlockId, doc);
@@ -193,7 +170,12 @@ export class YSocketIO extends Observable<string> {
         });
 
         socket.on(ServerSocketIOEvent.DISCONNECT, async () => {
-            if ((await socket.nsp.allSockets()).size === 0) {
+            const allSockets = socket.nsp.sockets.entries();
+            const socketsWithEditPermissions = Array.from(allSockets).filter(([_, s]) => {
+                const sockData = getYSocketData(s);
+                return sockData?.canEdit;
+            });
+            if (socketsWithEditPermissions.length === 0) {
                 this.emit(YjsEvent.ALL_DOCUMENT_CONNECTIONS_CLOSED, [doc]);
 
                 // Persist document state when all connections are closed and destroy the document
@@ -208,10 +190,14 @@ export class YSocketIO extends Observable<string> {
     };
 
     private readonly initWriteOnlyListeners = async (socket: Socket, doc: Document) => {
-        const socketData = getYSocketData(socket);
-        const userCanWrite = await userCanEditDocument(socketData?.userId, doc.textBlockId);
-
+        // Regardless of permissions, all sockets will have the event listeners registered,
+        // but only sockets with edit permissions will be able to make changes to the document.
+        // Should the permissions change, this will allow the socket to continue functioning without needing to reconnect.
         socket.on(YjsEvent.SYNC_UPDATE, (update: Uint8Array) => {
+            const socketData = getYSocketData(socket);
+            if (!socketData?.canEdit) {
+                return;
+            }
             Y.applyUpdate(doc, update, null);
         });
     };

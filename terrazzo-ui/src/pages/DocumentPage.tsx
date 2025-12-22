@@ -110,7 +110,7 @@ const DocumentPage = (): React.JSX.Element => {
                         </Group>
                         <BlockNoteEditor
                             textBlockId={document.textBlockId}
-                            placeholder="Start writing here..."
+                            placeholder="Start writing or hit / for commands..."
                             viewOnly={viewOnly}
                         />
                         <Group

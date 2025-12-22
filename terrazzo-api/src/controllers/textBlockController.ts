@@ -1,6 +1,35 @@
-import { TextBlockId } from '@mosaiq/terrazzo-common';
+import { TextBlockId, UserId } from '@mosaiq/terrazzo-common';
+import { getCardsByDescriptionTextBlockIdDb } from '@trz-api/persistence/cardPersistence';
+import { getDocumentsByTextBlockIdDb } from '@trz-api/persistence/documentPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, writeTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
+import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
 import * as Y from 'yjs';
+import { getBoardIDFromCardID } from './cardController';
+
+export const checkCanUserEditTextBlock = async (userId: UserId | undefined, textBlockId: TextBlockId): Promise<boolean> => {
+    const relevantCards = await getCardsByDescriptionTextBlockIdDb(textBlockId);
+    if (relevantCards.length > 1) {
+        throw new Error(`Text block ${textBlockId} is associated with multiple cards, cannot determine edit permissions.`);
+    }
+    if (relevantCards.length === 1) {
+        const card = relevantCards[0];
+        const boardId = await getBoardIDFromCardID(card.id);
+        const canEditCard = await userCanEditCard(userId, boardId);
+        return canEditCard;
+    }
+
+    const relevantDocs = await getDocumentsByTextBlockIdDb(textBlockId);
+    if (relevantDocs.length > 1) {
+        throw new Error(`Text block ${textBlockId} is associated with multiple documents, cannot determine edit permissions.`);
+    }
+    if (relevantDocs.length === 1) {
+        const doc = relevantDocs[0];
+        const canEditDoc = await userCanEditDocument(userId, doc.id);
+        return canEditDoc;
+    }
+
+    throw new Error(`Text block ${textBlockId} is not associated with any cards or documents, cannot determine edit permissions.`);
+};
 
 export const storeTextBlockEncodedData = async (_textBlockId: TextBlockId, data: string) => {
     let textBlockId = (await getTextBlockByIdDb(_textBlockId))?.id;

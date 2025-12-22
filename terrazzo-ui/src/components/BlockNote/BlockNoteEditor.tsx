@@ -69,7 +69,7 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
 
     useEffect(() => {
         socketIOProvider.awareness.setLocalStateField('user', {
-            name: name || 'Unknown User',
+            name: name,
             color: idle ? IDLE_COLOR : (pfpColor ?? 'black'),
         });
     }, [socketIOProvider, pfpColor, idle, name]);
@@ -79,13 +79,14 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
             provider: socketIOProvider,
             fragment: doc.getXmlFragment('document-store'),
             user: {
-                name: name || 'Unknown User',
+                name: name,
                 color: idle ? IDLE_COLOR : (pfpColor ?? 'black'),
             },
             showCursorLabels: 'activity',
         },
         uploadFile: fileUploader.uploadFile,
     });
+    editor.isEditable = !props.viewOnly;
 
     return (
         <div>

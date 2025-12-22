@@ -127,7 +127,7 @@ export const setSocketData = (socket: Socket, data: SocketData) => {
  * Gets the Terrazzo-specific data stored on the socket.
  */
 export const getYSocketData = (socket: Socket) => {
-    return (socket as any).terrazzoSocketData as YSocketData;
+    return (socket as any).terrazzoSocketData as YSocketData | undefined;
 };
 
 /**

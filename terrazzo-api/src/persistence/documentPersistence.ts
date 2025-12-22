@@ -27,6 +27,13 @@ export const getDocumentByIdDb = async (id: DocumentId) => {
     return model?.toJSON();
 };
 
+export const getDocumentsByTextBlockIdDb = async (textBlockId: TextBlockId) => {
+    const models = await DocumentModel.findAll({
+        where: { textBlockId },
+    });
+    return models.map((doc) => doc.toJSON());
+};
+
 export const createDocumentDb = async (document: DocumentModelType) => {
     const model = await DocumentModel.create({ ...document });
     return model.toJSON();
@@ -40,11 +47,4 @@ export const updateDocumentDb = async (id: DocumentId, document: Partial<Documen
         { where: { id: id } }
     );
     return updated;
-};
-
-export const getDocumentByTextBlockIdDb = async (textBlockId: string) => {
-    const model = await DocumentModel.findOne({
-        where: { textBlockId },
-    });
-    return model?.toJSON();
 };

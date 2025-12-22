@@ -41,6 +41,7 @@ export class Document extends Y.Doc {
     private readonly namespace: Namespace;
     public awareness: AwarenessProtocol.Awareness;
     private readonly callbacks?: Callbacks;
+    public lastSavedAt: number;
 
     constructor(textBlockId: TextBlockId, namespace: Namespace, callbacks?: Callbacks) {
         super({ gc: gcEnabled });
@@ -49,6 +50,7 @@ export class Document extends Y.Doc {
         this.awareness = new AwarenessProtocol.Awareness(this);
         this.awareness.setLocalState(null);
         this.callbacks = callbacks;
+        this.lastSavedAt = Date.now();
 
         this.awareness.on(YjsEvent.UPDATE, this.onUpdateAwareness);
 
