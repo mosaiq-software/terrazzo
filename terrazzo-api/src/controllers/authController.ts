@@ -1,7 +1,6 @@
 import { AuthProvider, AuthProviderCallbackData, AuthSession, breakNames, exhaustiveCheck, ExistingAuthToken, LinkedAccountProvider, UserId, UserIdWithAuth } from '@mosaiq/terrazzo-common';
 import { createAuthSessionDb, deleteAuthSessionByUserIdDb, getAuthSessionByAuthTokenDb, getAuthSessionByUserIdDb } from '@trz-api/persistence/authSessionPersistence';
 import { getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccountPersistence';
-import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { generateAuthToken } from '@trz-api/utils/authUtils';
 import { isDev } from '@trz-api/utils/envUtils';
 import { getGithubAccessTokenFromCode, getPrivateGitHubUserData } from '@trz-api/utils/githubUtils';
@@ -12,24 +11,13 @@ const EXPIRE_AUTH_SESSIONS_AFTER_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 
 /**
  * Starts a new authenticated session for the given user ID
- * If an existing valid session exists, it is returned instead
- * If an existing session is expired, it is refreshed
- * If no existing session, a new one is created
+ * If there is a current session, it is deleted first, and a new one is created
  */
 export const startAuthenticatedSession = async (userId: UserId): Promise<AuthSession | undefined> => {
-    // Can only start a session for an existing user
-    const user = await getUserHeaderByIdDb(userId);
-    if (!user) {
-        return undefined;
-    }
-
     const existingSession = await getAuthSessionByUserIdDb(userId);
     if (existingSession) {
         if (existingSession.userId !== userId) {
             throw new Error('Auth session user ID does not match requested user ID');
-        }
-        if (Date.now() - existingSession.createdAt < EXPIRE_AUTH_SESSIONS_AFTER_MS) {
-            return existingSession;
         }
         await deleteAuthSessionByUserIdDb(userId);
     }

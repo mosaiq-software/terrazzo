@@ -10,11 +10,6 @@ export interface UserData {
     mouseRoomData?: MouseRoomUserData;
 }
 
-export interface YSocketData {
-    sid: SocketId;
-    userId: UserId | undefined;
-}
-
 export interface SocketHandshakeAuth {
     userId: UserId | undefined;
     authToken: string | undefined;

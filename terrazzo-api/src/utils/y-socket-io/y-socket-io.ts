@@ -3,12 +3,14 @@
  * https://github.com/ivan-topp/y-socket.io/blob/main/src/server/y-socket-io.ts
  */
 
-import { ServerSocketIOEvent, TextBlockId, YjsEvent, YSocketData } from '@mosaiq/terrazzo-common';
+import { ServerSocketIOEvent, TextBlockId, YjsEvent } from '@mosaiq/terrazzo-common';
 import { loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
 import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
 import * as Y from 'yjs';
+import { YSocketData } from '../socket/socketTypes';
+import { setYSocketData } from '../socket/socketUtils';
 import { Document } from './document';
 
 /**
@@ -69,9 +71,12 @@ export class YSocketIO extends Observable<string> {
         this.nsp = this.io.of(/^\/yjs\|.*$/);
 
         this.nsp.use(async (socket, next) => {
-            if (this.configuration?.initializeSocket == null) return next();
+            if (!this.configuration?.initializeSocket) {
+                return next();
+            }
             try {
-                await this.configuration.initializeSocket(socket);
+                const socketData = await this.configuration.initializeSocket(socket);
+                setYSocketData(socket, socketData);
                 return next();
             } catch {
                 return next(new Error('Unauthorized'));
@@ -132,7 +137,7 @@ export class YSocketIO extends Observable<string> {
     }
 
     /**
-     * This method sets up string-based persistence using the mock functions.
+     * This method sets up string persistence for Yjs documents.
      */
     private initStringPersistence(): Persistence {
         return {
@@ -166,20 +171,26 @@ export class YSocketIO extends Observable<string> {
      * This function initializes the socket event listeners to synchronize document changes.
      *
      *  The synchronization protocol is as follows:
+     *
      *  - A client emits the sync step one event (`sync-step-1`) which sends the document as a state vector
      *    and the sync step two callback as an acknowledgment according to the socket io acknowledgments.
+     *
      *  - When the server receives the `sync-step-1` event, it executes the `syncStep2` acknowledgment callback and sends
      *    the difference between the received state vector and the local document (this difference is called an update).
+     *
      *  - The second step of the sync is to apply the update sent in the `syncStep2` callback parameters from the server
      *    to the document on the client side.
+     *
      *  - There is another event (`sync-update`) that is emitted from the client, which sends an update for the document,
      *    and when the server receives this event, it applies the received update to the local document.
+     *
      *  - When an update is applied to a document, it will fire the document's "update" event, which
      *    sends the update to clients connected to the document's namespace.
      */
     private readonly initSyncListeners = (socket: Socket, doc: Document): void => {
         socket.on(YjsEvent.SYNC_STEP_1, (stateVector: Uint8Array, syncStep2: (update: Uint8Array) => void) => {
-            syncStep2(Y.encodeStateAsUpdate(doc, new Uint8Array(stateVector)));
+            const diffVec = Y.encodeStateAsUpdate(doc, new Uint8Array(stateVector));
+            syncStep2(diffVec);
         });
 
         socket.on(YjsEvent.SYNC_UPDATE, (update: Uint8Array) => {

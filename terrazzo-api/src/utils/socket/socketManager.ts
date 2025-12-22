@@ -1,12 +1,12 @@
-import { ServerSE, ServerSocketIOEvent, YSocketData } from '@mosaiq/terrazzo-common';
+import { ServerSE, ServerSocketIOEvent, SocketHandshakeAuth } from '@mosaiq/terrazzo-common';
 import { instrument } from '@socket.io/admin-ui';
 import * as socketListeners from '@trz-api/listeners';
-import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { YSocketIO } from '../y-socket-io';
 import { registerEngineSocketEvents } from './socketEngineHandlers';
-import { initializeSocketData, loginSocket, setSocketData } from './socketUtils';
+import { YSocketData } from './socketTypes';
+import { getValidAuthSessionFromSocketHandshake, initializeSocketData, loginSocket, setSocketData } from './socketUtils';
 
 const listenerRegistrars = [registerEngineSocketEvents, ...Object.values(socketListeners)];
 
@@ -48,13 +48,12 @@ export class SocketManager {
 
         const yioEngine = new YSocketIO(ioEngine, {
             initializeSocket: async (socket) => {
-                let user = undefined;
-                if (socket.handshake.auth.userId) {
-                    user = await getUserHeaderByIdDb(socket.handshake.auth.userId);
-                }
+                const authSession = await getValidAuthSessionFromSocketHandshake(socket.handshake.auth as any as SocketHandshakeAuth);
                 const data: YSocketData = {
                     sid: socket.id,
-                    userId: user?.id,
+                    userId: authSession?.userId,
+                    authToken: authSession?.authToken,
+                    connectedAt: new Date(),
                 };
                 return data;
             },

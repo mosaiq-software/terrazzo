@@ -1,9 +1,9 @@
 import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
 import { syncUserJoinedRoom, syncUserLeftRoom } from '@trz-api/broadcasters/realtimeBroadcasters';
-import { startAuthenticatedSession } from '@trz-api/controllers/authController';
+import { signInWithExistingAuth } from '@trz-api/controllers/authController';
 import { Socket } from 'socket.io';
 import { SocketManager } from './socketManager';
-import { SocketData } from './socketTypes';
+import { SocketData, YSocketData } from './socketTypes';
 
 /**
  * Gets all rooms the socket is currently in, excluding its own personal room.
@@ -120,7 +120,20 @@ export const getSocketData = (socket: Socket) => {
  * Sets the Terrazzo-specific data stored on the socket.
  */
 export const setSocketData = (socket: Socket, data: SocketData) => {
-    // TODO validate each field before setting to ensure no data corruption or injection
+    (socket as any).terrazzoSocketData = data;
+};
+
+/**
+ * Gets the Terrazzo-specific data stored on the socket.
+ */
+export const getYSocketData = (socket: Socket) => {
+    return (socket as any).terrazzoSocketData as YSocketData;
+};
+
+/**
+ * Sets the Terrazzo-specific data stored on the socket.
+ */
+export const setYSocketData = (socket: Socket, data: YSocketData) => {
     (socket as any).terrazzoSocketData = data;
 };
 
@@ -196,7 +209,7 @@ export const subscribe = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (d
 export const initializeSocketData = async (socket: Socket): Promise<SocketData> => {
     try {
         const auth: SocketHandshakeAuth = socket.handshake.auth as any;
-        const authSession = await getValidAuthSessionFromSocketAuth(auth);
+        const authSession = await getValidAuthSessionFromSocketHandshake(auth);
         let userData: UserData | undefined = undefined;
         if (authSession) {
             userData = {
@@ -219,9 +232,9 @@ export const initializeSocketData = async (socket: Socket): Promise<SocketData> 
     }
 };
 
-export const getValidAuthSessionFromSocketAuth = async (auth: SocketHandshakeAuth) => {
+export const getValidAuthSessionFromSocketHandshake = async (auth: SocketHandshakeAuth) => {
     if (auth.userId && auth.authToken) {
-        const authSession = await startAuthenticatedSession(auth.userId);
+        const authSession = await signInWithExistingAuth({ userId: auth.userId, trzAuthToken: auth.authToken });
         return authSession;
     }
     return undefined;
