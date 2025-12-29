@@ -235,6 +235,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             placeholder="Start writing here..."
                             viewOnly={!perms.editCard}
                             resourceType="card"
+                            resourceId={card.id}
                         />
                         <Stack
                             style={{

@@ -1,31 +1,31 @@
 import { Block } from '@blocknote/core';
 import { ServerBlockNoteEditor } from '@blocknote/server-util';
-import { BLOCKNOTE_FRAGMENT_ID, TextBlockId, UserId } from '@mosaiq/terrazzo-common';
-import { getCardsByDescriptionTextBlockIdDb } from '@trz-api/persistence/cardPersistence';
-import { getDocumentsByTextBlockIdDb } from '@trz-api/persistence/documentPersistence';
+import { BLOCKNOTE_FRAGMENT_ID, TextBlockId, TextSocketHandshakeAuth, UID, UserId } from '@mosaiq/terrazzo-common';
+import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
+import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, writeTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
 import { Doc } from 'yjs';
+import { getBoardIDFromCardID } from './cardController';
 
-export const checkCanUserEditTextBlock = async (userId: UserId | undefined, textBlockId: TextBlockId, resourceType: 'card' | 'document'): Promise<boolean> => {
+export const checkCanUserEditTextBlock = async (userId: UserId | undefined, textBlockId: TextBlockId, resourceId: UID, resourceType: TextSocketHandshakeAuth['resource']['type']): Promise<boolean> => {
     switch (resourceType) {
         case 'card': {
-            const cards = await getCardsByDescriptionTextBlockIdDb(textBlockId);
-            if (cards.length !== 1) {
+            const card = await getCardByIdDb(resourceId);
+            if (!card) {
                 return false;
             }
-            const card = cards[0];
-            if (!(await userCanEditCard(userId, card.id))) {
+            const boardId = await getBoardIDFromCardID(card.id);
+            if (!(await userCanEditCard(userId, boardId))) {
                 return false;
             }
             return true;
         }
         case 'document': {
-            const documents = await getDocumentsByTextBlockIdDb(textBlockId);
-            if (documents.length !== 1) {
+            const document = await getDocumentByIdDb(resourceId);
+            if (!document) {
                 return false;
             }
-            const document = documents[0];
             if (!(await userCanEditDocument(userId, document.id))) {
                 return false;
             }
@@ -58,7 +58,6 @@ export const loadTextBlockEncodedData = async (textBlockId: TextBlockId): Promis
         }
         const textData = textBlock.text;
         const blocks = JSON.parse(textData) as Block[];
-        console.log('blocks', blocks);
         if (blocks.length === 0) {
             return new Doc();
         }

@@ -30,8 +30,8 @@
  *    sends the update to clients connected to the document namespace.
  */
 
-import { ServerSocketIOEvent, SocketHandshakeAuth, TextBlockId, UserId, YjsEvent } from '@mosaiq/terrazzo-common';
-import { loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
+import { ServerSocketIOEvent, TextBlockId, TextSocketHandshakeAuth, UserId, YjsEvent } from '@mosaiq/terrazzo-common';
+import { checkCanUserEditTextBlock, loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
 import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
@@ -69,9 +69,10 @@ export class YSocketIO extends Observable<string> {
 
         this.nsp.on(ServerSocketIOEvent.CONNECTION, async (socket) => {
             const textBlockId = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
-            const authSession = await getValidAuthSessionFromSocketHandshake(socket.handshake.auth as any as SocketHandshakeAuth);
-
-            const canEdit = !!authSession?.userId; //TODO && (await checkCanUserEditTextBlock(authSession.userId, textBlockId));
+            const auth = socket.handshake.auth as TextSocketHandshakeAuth;
+            const authSession = await getValidAuthSessionFromSocketHandshake(auth);
+            const userCanEditResource = await checkCanUserEditTextBlock(auth.userId, textBlockId, auth.resource.id, auth.resource.type);
+            const canEdit = !!authSession?.userId && userCanEditResource;
 
             const sockData: YSocketData = {
                 sid: socket.id,
@@ -173,6 +174,7 @@ export class YSocketIO extends Observable<string> {
                 return sockData?.canEdit;
             });
             if (socketsWithEditPermissions.length === 0) {
+                await storeTextBlockEncodedData(doc.textBlockId, doc);
                 this.emit(YjsEvent.ALL_DOCUMENT_CONNECTIONS_CLOSED, [doc]);
                 await doc.destroy();
             }

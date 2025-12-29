@@ -3,8 +3,7 @@ import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
 import { useIdle } from '@mantine/hooks';
-import { BLOCKNOTE_FRAGMENT_ID, fullName, SocketHandshakeAuth, TextBlockId } from '@mosaiq/terrazzo-common';
-import { useSocket } from '@trz/contexts/socket-context';
+import { BLOCKNOTE_FRAGMENT_ID, fullName, TextBlockId, TextSocketHandshakeAuth, UID } from '@mosaiq/terrazzo-common';
 import { useUserContext } from '@trz/contexts/user-context';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useImageColor } from '@trz/hooks/useImageColor';
@@ -30,12 +29,12 @@ interface BlockNoteEditorProps {
     fontSize?: number;
     placeholder?: string;
     viewOnly?: boolean;
-    resourceType: 'card' | 'document';
+    resourceId: UID;
+    resourceType: TextSocketHandshakeAuth['resource']['type'];
 }
 export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     const userCtx = useUserContext();
     const me = useMe();
-    const sockCtx = useSocket();
     const pfpColor = useImageColor(me?.profilePicture);
     const [status, setStatus] = useState<string>('unknown');
     const [clients, setClients] = useState<string[]>([]);
@@ -47,9 +46,13 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
         const pConf: ProviderConfiguration = {
             autoConnect: true,
         };
-        const auth: SocketHandshakeAuth = {
+        const auth: TextSocketHandshakeAuth = {
             userId: userCtx.userId,
             authToken: userCtx.authToken,
+            resource: {
+                id: props.resourceId,
+                type: props.resourceType,
+            },
         };
         const sockConf: Partial<ManagerOptions & SocketOptions> = {
             path: '/socket',
