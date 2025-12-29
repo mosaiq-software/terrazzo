@@ -31,7 +31,7 @@
  */
 
 import { ServerSocketIOEvent, SocketHandshakeAuth, TextBlockId, UserId, YjsEvent } from '@mosaiq/terrazzo-common';
-import { checkCanUserEditTextBlock, loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
+import { loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
 import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
@@ -39,14 +39,6 @@ import * as Y from 'yjs';
 import { YSocketData } from '../socket/socketTypes';
 import { getValidAuthSessionFromSocketHandshake, getYSocketData, setYSocketData } from '../socket/socketUtils';
 import { Document } from './document';
-
-/**
- * Simple persistence object using string storage
- */
-export interface Persistence {
-    bindState: (textBlockId: TextBlockId, ydoc: Document) => Promise<void>;
-    writeState: (textBlockId: TextBlockId, ydoc: Document) => Promise<void>;
-}
 
 /**
  * Frequency of automatic document saves in milliseconds.
@@ -57,13 +49,11 @@ const DOC_AUTOSAVE_INTERVAL_MS = 1000 * 5;
 export class YSocketIO extends Observable<string> {
     private readonly _documents: Map<string, Document> = new Map<string, Document>();
     private readonly io: Server;
-    private readonly persistence: Persistence;
     public nsp: Namespace | null = null;
 
     constructor(io: Server) {
         super();
         this.io = io;
-        this.persistence = this.initStringPersistence();
     }
 
     /**
@@ -81,7 +71,7 @@ export class YSocketIO extends Observable<string> {
             const textBlockId = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
             const authSession = await getValidAuthSessionFromSocketHandshake(socket.handshake.auth as any as SocketHandshakeAuth);
 
-            const canEdit = !!authSession?.userId && (await checkCanUserEditTextBlock(authSession.userId, textBlockId));
+            const canEdit = !!authSession?.userId; //TODO && (await checkCanUserEditTextBlock(authSession.userId, textBlockId));
 
             const sockData: YSocketData = {
                 sid: socket.id,
@@ -109,7 +99,7 @@ export class YSocketIO extends Observable<string> {
         const sockets = Array.from(this.nsp.sockets.values());
         for (const socket of sockets) {
             const textBlockId = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
-            const canEdit = await checkCanUserEditTextBlock(userId, textBlockId);
+            const canEdit = true; //TODO await checkCanUserEditTextBlock(userId, textBlockId, );
             const sockData = getYSocketData(socket);
             if (sockData?.userId === userId) {
                 sockData.canEdit = canEdit;
@@ -146,7 +136,7 @@ export class YSocketIO extends Observable<string> {
                     const now = Date.now();
                     if (now - lastSave > DOC_AUTOSAVE_INTERVAL_MS) {
                         doc.lastSavedAt = now;
-                        await this.persistence.writeState(doc.textBlockId, doc);
+                        await storeTextBlockEncodedData(doc.textBlockId, doc);
                     }
                 },
                 onChangeAwareness: (doc, update) => this.emit(YjsEvent.AWARENESS_UPDATE, [doc, update]),
@@ -158,39 +148,16 @@ export class YSocketIO extends Observable<string> {
         doc.gc = true;
         if (!this._documents.has(textBlockId)) {
             // Load existing document data if available
-            await this.persistence.bindState(textBlockId, doc);
+            const ydoc = await loadTextBlockEncodedData(textBlockId);
+            if (ydoc) {
+                const update = Y.encodeStateAsUpdate(ydoc);
+                Y.applyUpdate(doc, update, this);
+                this.emit(YjsEvent.DOCUMENT_LOADED, [doc]);
+            }
             this._documents.set(textBlockId, doc);
             this.emit(YjsEvent.DOCUMENT_LOADED, [doc]);
         }
         return doc;
-    }
-
-    private initStringPersistence(): Persistence {
-        return {
-            bindState: async (textBlockId: TextBlockId, ydoc: Document) => {
-                // Load existing document data if available
-                const persistedData = await loadTextBlockEncodedData(textBlockId);
-                if (persistedData) {
-                    try {
-                        // Convert the stored string back to Uint8Array and apply to document
-                        const uint8Array = new Uint8Array(Buffer.from(persistedData, 'base64'));
-                        Y.applyUpdate(ydoc, uint8Array);
-                    } catch (error) {
-                        console.error(`Error loading document ${textBlockId}:`, error);
-                    }
-                }
-            },
-            writeState: async (textBlockId: TextBlockId, ydoc: Document) => {
-                try {
-                    // Encode the document state as an update and convert to base64 string
-                    const update = Y.encodeStateAsUpdate(ydoc);
-                    const base64String = Buffer.from(update).toString('base64');
-                    await storeTextBlockEncodedData(textBlockId, base64String);
-                } catch (error) {
-                    console.error(`Error storing document ${textBlockId}:`, error);
-                }
-            },
-        };
     }
 
     private readonly initPublicListeners = async (socket: Socket, doc: Document) => {
@@ -207,9 +174,6 @@ export class YSocketIO extends Observable<string> {
             });
             if (socketsWithEditPermissions.length === 0) {
                 this.emit(YjsEvent.ALL_DOCUMENT_CONNECTIONS_CLOSED, [doc]);
-
-                // Persist document state when all connections are closed and destroy the document
-                await this.persistence.writeState(doc.textBlockId, doc);
                 await doc.destroy();
             }
         });
@@ -236,6 +200,8 @@ export class YSocketIO extends Observable<string> {
         socket.emit(YjsEvent.SYNC_STEP_1, Y.encodeStateVector(doc), (update: Uint8Array) => {
             Y.applyUpdate(doc, new Uint8Array(update), this);
         });
-        socket.emit(YjsEvent.AWARENESS_UPDATE, AwarenessProtocol.encodeAwarenessUpdate(doc.awareness, Array.from(doc.awareness.getStates().keys())));
+        socket.emit(YjsEvent.AWARENESS_UPDATE, () => {
+            AwarenessProtocol.encodeAwarenessUpdate(doc.awareness, Array.from(doc.awareness.getStates().keys()));
+        });
     };
 }

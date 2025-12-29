@@ -1,10 +1,10 @@
 import '@blocknote/core/fonts/inter.css';
-import { yDocToBlocks } from '@blocknote/core/yjs';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
 import { useIdle } from '@mantine/hooks';
-import { fullName, SocketHandshakeAuth, TextBlockId } from '@mosaiq/terrazzo-common';
+import { BLOCKNOTE_FRAGMENT_ID, fullName, SocketHandshakeAuth, TextBlockId } from '@mosaiq/terrazzo-common';
+import { useSocket } from '@trz/contexts/socket-context';
 import { useUserContext } from '@trz/contexts/user-context';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useImageColor } from '@trz/hooks/useImageColor';
@@ -30,10 +30,12 @@ interface BlockNoteEditorProps {
     fontSize?: number;
     placeholder?: string;
     viewOnly?: boolean;
+    resourceType: 'card' | 'document';
 }
 export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     const userCtx = useUserContext();
     const me = useMe();
+    const sockCtx = useSocket();
     const pfpColor = useImageColor(me?.profilePicture);
     const [status, setStatus] = useState<string>('unknown');
     const [clients, setClients] = useState<string[]>([]);
@@ -78,7 +80,7 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     const editor = useCreateBlockNote({
         collaboration: {
             provider: socketIOProvider,
-            fragment: doc.getXmlFragment('document-store'),
+            fragment: doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID),
             user: {
                 name: name,
                 color: idle ? IDLE_COLOR : (pfpColor ?? 'white'),
@@ -87,7 +89,12 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
         },
         uploadFile: fileUploader.uploadFile,
     });
-    editor.isEditable = !props.viewOnly;
+
+    useEffect(() => {
+        if (editor) {
+            editor.isEditable = !props.viewOnly;
+        }
+    }, [editor, props.viewOnly]);
 
     return (
         <div>
@@ -95,14 +102,6 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
                 Status: {status} | Active Users: {clients.join(', ')} | Synced: {socketIOProvider.synced.toString()}
             </p>
             <BlockNoteView editor={editor} />
-            <button
-                onClick={() => {
-                    const blocks = yDocToBlocks(editor, doc, 'document-store');
-                    console.log('Current Blocks:', blocks);
-                }}
-            >
-                Log Current Blocks
-            </button>
         </div>
     );
 };

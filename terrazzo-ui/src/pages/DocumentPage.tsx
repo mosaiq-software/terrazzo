@@ -113,6 +113,7 @@ const DocumentPage = (): React.JSX.Element => {
                             textBlockId={document.textBlockId}
                             placeholder="Start writing or hit / for commands..."
                             viewOnly={!userCanEditDocument}
+                            resourceType="document"
                         />
                         <Group
                             w="100%"

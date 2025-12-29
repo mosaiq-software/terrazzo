@@ -10,7 +10,7 @@ import { getTextBlockByIdDb } from '@trz-api/persistence/textBlockPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
 import { getBoardIDFromListID } from './listController';
-import { createTextBlockWithEncodedData } from './textBlockController';
+import { createTextBlockWithMarkdown } from './textBlockController';
 
 export const MOVING_LIST_ORDER = -10000;
 //Gets
@@ -98,7 +98,7 @@ export async function addCard(listID: ListId, cardName: string, description?: st
         createdBy: createdById ? await getUserHeaderByIdDb(createdById) : undefined,
     };
     try {
-        const descBlock = await createTextBlockWithEncodedData('');
+        const descBlock = await createTextBlockWithMarkdown('');
         if (!descBlock) {
             throw new Error('Failed to create description text block');
         }
@@ -165,14 +165,14 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         const currentEncodedDesc = await getTextBlockByIdDb(existingCard.descriptionTextBlockId);
         let newTextBlockId: TextBlockId | undefined = undefined;
         if (currentEncodedDesc) {
-            const descBlock = await createTextBlockWithEncodedData(currentEncodedDesc.text);
+            const descBlock = await createTextBlockWithMarkdown(currentEncodedDesc.text);
             if (!descBlock) {
                 throw new Error('Failed to create description text block');
             }
             newTextBlockId = descBlock.id;
         } else {
             const description = '';
-            const descBlock = await createTextBlockWithEncodedData('');
+            const descBlock = await createTextBlockWithMarkdown('');
             if (!descBlock) {
                 throw new Error('Failed to create description text block');
             }
