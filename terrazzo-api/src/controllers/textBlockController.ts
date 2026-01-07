@@ -5,6 +5,7 @@ import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
 import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, writeTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
+import console from 'console';
 import { Doc } from 'yjs';
 import { getBoardIDFromCardID } from './cardController';
 
@@ -44,6 +45,7 @@ export const storeTextBlockEncodedData = async (textBlockId: TextBlockId, ydoc: 
         const blocks = BLOCKNOTE_EDITOR.yXmlFragmentToBlocks(fragment);
         const stringified = JSON.stringify(blocks);
         await writeTextBlockDb(textBlockId, stringified);
+        console.log(`Saved text block ${textBlockId} with ${blocks.length} blocks`);
     } catch (error: any) {
         console.error('Unable to save text block ' + textBlockId + ' : ' + error.message);
         throw new Error('Unable to save text block ' + textBlockId + ' : ' + error.message);
@@ -57,11 +59,26 @@ export const loadTextBlockEncodedData = async (textBlockId: TextBlockId): Promis
             throw new Error(`Text block ${textBlockId} not found`);
         }
         const textData = textBlock.text;
-        const blocks = JSON.parse(textData) as Block[];
+        let blocks: Block[] = [];
+        if (textData && textData.length > 0) {
+            try {
+                blocks = JSON.parse(textData);
+            } catch (e: any) {
+                console.warn(`Failed to parse text block data for text block ${textBlockId}`, {
+                    error: e,
+                    textData,
+                });
+                const blocksFromMarkdown = await maybeParseMarkdownToBlocks(textData);
+                blocks = blocksFromMarkdown;
+            }
+        }
         if (blocks.length === 0) {
             return new Doc();
         }
-        const ydoc = BLOCKNOTE_EDITOR.blocksToYDoc(blocks);
+
+        // BlockNote's blocksToYDoc uses 'prosemirror' fragment by default, but we need 'document-store'
+        const ydoc = BLOCKNOTE_EDITOR.blocksToYDoc(blocks, BLOCKNOTE_FRAGMENT_ID);
+
         return ydoc;
     } catch (error: any) {
         console.error(`Unable to load text block ${textBlockId}`, {
@@ -74,23 +91,34 @@ export const loadTextBlockEncodedData = async (textBlockId: TextBlockId): Promis
 
 export const createTextBlockWithMarkdown = async (markdownText?: string) => {
     try {
-        let blocksJsonString = '';
+        const blocks = await maybeParseMarkdownToBlocks(markdownText);
+        const blocksJsonString = JSON.stringify(blocks);
+        const uid = await createTextBlockDb(blocksJsonString);
+        return uid;
+    } catch (e: any) {
+        console.error(`Unable to create text block`, e);
+        return null;
+    }
+};
+
+const maybeParseMarkdownToBlocks = async (markdownText?: string): Promise<Block[]> => {
+    try {
+        let blocks: Block[] = [];
         try {
             if (markdownText) {
-                const blocks = BLOCKNOTE_EDITOR.tryParseMarkdownToBlocks(markdownText);
-                blocksJsonString = JSON.stringify(blocks);
+                blocks = await BLOCKNOTE_EDITOR.tryParseMarkdownToBlocks(markdownText);
             }
         } catch (e: any) {
             console.error('Failed to parse markdown', {
                 error: e,
                 markdownText,
             });
-            blocksJsonString = '';
+            blocks = [];
         }
 
         //default to blocknote's hardcoded block with the text if for some reason its not valid markdown
-        if (!blocksJsonString?.length && markdownText?.length) {
-            blocksJsonString = JSON.stringify([
+        if (!blocks.length && markdownText?.length) {
+            blocks = [
                 {
                     id: 'initialBlockId',
                     type: 'paragraph',
@@ -119,12 +147,11 @@ export const createTextBlockWithMarkdown = async (markdownText?: string) => {
                     content: [],
                     children: [],
                 },
-            ]);
+            ];
         }
-        const uid = await createTextBlockDb(blocksJsonString);
-        return uid;
+        return blocks;
     } catch (e: any) {
         console.error(`Unable to create text block`, e);
-        return null;
+        return [];
     }
 };

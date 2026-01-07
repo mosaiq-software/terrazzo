@@ -145,7 +145,7 @@ export const joinRoom = async (socket: Socket, room: RoomId): Promise<UserData[]
     if (room && typeof room === 'string') {
         const rooms = getSocketRooms(socket);
         if (!rooms || rooms.find((r) => r === room)) {
-            console.warn(`Socket ${socket.id} tried to join its own room ${room}`);
+            // console.warn(`Socket ${socket.id} tried to join its own room ${room}`);
             return [];
         }
         const roomUsers = await getUsersInRoom(room);
@@ -156,7 +156,7 @@ export const joinRoom = async (socket: Socket, room: RoomId): Promise<UserData[]
         socket.join(room);
         return roomUsers;
     }
-    console.warn(`Socket ${socket.id} tried to join an invalid room ${room}`);
+    // console.warn(`Socket ${socket.id} tried to join an invalid room ${room}`);
     return [];
 };
 
@@ -167,7 +167,7 @@ export const leaveRoom = async (socket: Socket, room: RoomId) => {
     if (room) {
         const rooms = getSocketRooms(socket);
         if (!rooms || !rooms.find((r) => r === room)) {
-            console.warn(`Socket ${socket.id} tried to leave room ${room} its not in`);
+            // console.warn(`Socket ${socket.id} tried to leave room ${room} its not in`);
             return;
         }
         socket.leave(room);

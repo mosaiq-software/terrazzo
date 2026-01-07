@@ -127,38 +127,39 @@ export class YSocketIO extends Observable<string> {
      *      - Emit the `document-loaded` event
      */
     private async initDocument(textBlockId: TextBlockId, namespace: Namespace): Promise<Document> {
-        const doc =
-            this._documents.get(textBlockId) ??
-            new Document(textBlockId, namespace, {
-                onUpdate: async (doc, update) => {
-                    this.emit(YjsEvent.DOCUMENT_UPDATE, [doc, update]);
-                    // Save document when updated
-                    const lastSave = doc.lastSavedAt;
-                    const now = Date.now();
-                    if (now - lastSave > DOC_AUTOSAVE_INTERVAL_MS) {
-                        doc.lastSavedAt = now;
-                        await storeTextBlockEncodedData(doc.textBlockId, doc);
-                    }
-                },
-                onChangeAwareness: (doc, update) => this.emit(YjsEvent.AWARENESS_UPDATE, [doc, update]),
-                onDestroy: async (doc) => {
-                    this._documents.delete(doc.textBlockId);
-                    this.emit(YjsEvent.DOCUMENT_DESTROY, [doc]);
-                },
-            });
-        doc.gc = true;
-        if (!this._documents.has(textBlockId)) {
-            // Load existing document data if available
-            const ydoc = await loadTextBlockEncodedData(textBlockId);
-            if (ydoc) {
-                const update = Y.encodeStateAsUpdate(ydoc);
-                Y.applyUpdate(doc, update, this);
-                this.emit(YjsEvent.DOCUMENT_LOADED, [doc]);
-            }
-            this._documents.set(textBlockId, doc);
-            this.emit(YjsEvent.DOCUMENT_LOADED, [doc]);
+        const existingDoc = this._documents.get(textBlockId);
+        if (existingDoc) {
+            return existingDoc;
         }
-        return doc;
+
+        const newDoc = new Document(textBlockId, namespace, {
+            onUpdate: async (doc, update) => {
+                this.emit(YjsEvent.DOCUMENT_UPDATE, [doc, update]);
+                // Save document when updated
+                const lastSave = doc.lastSavedAt;
+                const now = Date.now();
+                if (now - lastSave > DOC_AUTOSAVE_INTERVAL_MS) {
+                    doc.lastSavedAt = now;
+                    await storeTextBlockEncodedData(doc.textBlockId, doc);
+                }
+            },
+            onChangeAwareness: (doc, update) => this.emit(YjsEvent.AWARENESS_UPDATE, [doc, update]),
+            onDestroy: async (doc) => {
+                this._documents.delete(doc.textBlockId);
+                this.emit(YjsEvent.DOCUMENT_DESTROY, [doc]);
+            },
+        });
+        newDoc.gc = true;
+        // Load existing document data if available
+        const ydoc = await loadTextBlockEncodedData(textBlockId);
+        if (ydoc) {
+            const update = Y.encodeStateAsUpdate(ydoc);
+            Y.applyUpdate(newDoc, update, this);
+            this.emit(YjsEvent.DOCUMENT_LOADED, [newDoc]);
+        }
+        this._documents.set(textBlockId, newDoc);
+        this.emit(YjsEvent.DOCUMENT_LOADED, [newDoc]);
+        return newDoc;
     }
 
     private readonly initPublicListeners = async (socket: Socket, doc: Document) => {
@@ -174,6 +175,7 @@ export class YSocketIO extends Observable<string> {
                 return sockData?.canEdit;
             });
             if (socketsWithEditPermissions.length === 0) {
+                console.log(`No more sockets with edit permissions connected to document ${doc.textBlockId}. Saving and destroying document.`);
                 await storeTextBlockEncodedData(doc.textBlockId, doc);
                 this.emit(YjsEvent.ALL_DOCUMENT_CONNECTIONS_CLOSED, [doc]);
                 await doc.destroy();
@@ -199,11 +201,17 @@ export class YSocketIO extends Observable<string> {
     };
 
     private readonly startSynchronization = async (socket: Socket, doc: Document) => {
+        // The server initiates sync by sending its state vector to the client
+        // The client responds with the diff via the callback
         socket.emit(YjsEvent.SYNC_STEP_1, Y.encodeStateVector(doc), (update: Uint8Array) => {
             Y.applyUpdate(doc, new Uint8Array(update), this);
         });
-        socket.emit(YjsEvent.AWARENESS_UPDATE, () => {
-            AwarenessProtocol.encodeAwarenessUpdate(doc.awareness, Array.from(doc.awareness.getStates().keys()));
-        });
+
+        // Send current awareness state
+        const awarenessStates = Array.from(doc.awareness.getStates().keys());
+        if (awarenessStates.length > 0) {
+            const awarenessUpdate = AwarenessProtocol.encodeAwarenessUpdate(doc.awareness, awarenessStates);
+            socket.emit(YjsEvent.AWARENESS_UPDATE, awarenessUpdate);
+        }
     };
 }
