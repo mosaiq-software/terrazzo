@@ -2,20 +2,18 @@ import '@blocknote/core/fonts/inter.css';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
-import { Group } from '@mantine/core';
-import { useIdle } from '@mantine/hooks';
-import { BLOCKNOTE_FRAGMENT_ID, fullName, RoomType, TextBlockId, TextSocketHandshakeAuth, UID } from '@mosaiq/terrazzo-common';
+import { Alert, Stack } from '@mantine/core';
+import { useIdle, useThrottledState } from '@mantine/hooks';
+import { BLOCKNOTE_FRAGMENT_ID, fullName, TextBlockId, TextSocketHandshakeAuth, UID } from '@mosaiq/terrazzo-common';
 import { useUserContext } from '@trz/contexts/user-context';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { useMe } from '@trz/hooks/useMe';
-import { useRoom } from '@trz/hooks/useRoom';
 import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ManagerOptions, SocketOptions } from 'socket.io-client';
 import { ProviderConfiguration, SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
-import { AvatarRow } from '../UI/AvatarRow';
 
 const IDLE_COLOR = '#afafaf';
 enum YSOCKET_STATUS_CODE {
@@ -40,11 +38,18 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     const me = useMe();
     const pfpColor = useImageColor(me?.profilePicture);
     const [status, setStatus] = useState<string>('unknown');
-    const [clients, setClients] = useState<string[]>([]);
     const idle = useIdle(IDLE_TIMEOUT_MS);
     const name = fullName(me);
-    const [roomUsers] = useRoom(RoomType.TEXT, props.textBlockId, undefined, true);
-    const users = useMemo(() => Array.from(roomUsers.values()).map((u) => u.userId), [roomUsers.values()]);
+    const [throttledSyncState, setThrottledSyncState] = useThrottledState<boolean | undefined>(undefined, 500);
+    const [showAlerts, setShowAlerts] = useState(false);
+
+    // Wait 5 seconds before allowing alerts to show
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowAlerts(true);
+        }, 5000);
+        return () => clearTimeout(timer);
+    }, []);
 
     const [doc] = useState(() => new Y.Doc());
     const [socketIOProvider] = useState(() => {
@@ -69,7 +74,6 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     const fileUploader = useFileUploader();
 
     useEffect(() => {
-        socketIOProvider.awareness.on('change', () => setClients(Array.from(socketIOProvider.awareness.getStates().keys()).map((key) => `${key}`)));
         socketIOProvider.on('status', ({ status: _status }: { status: string }) => {
             setStatus(_status);
         });
@@ -104,21 +108,29 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
         }
     }, [editor, props.viewOnly]);
 
+    useEffect(() => {
+        setThrottledSyncState(socketIOProvider.synced);
+    }, [socketIOProvider.synced]);
+
     return (
-        <div>
-            <p>
-                Status: {status} | Active Users: {clients.join(', ')} | Synced: {socketIOProvider.synced.toString()}
-            </p>
-            <Group>
-                <AvatarRow
-                    users={me ? [me.id, ...users] : users}
-                    maxUsers={5}
-                    showProfilePopover
-                    showTooltip
-                    animateOnHover
-                />
-            </Group>
+        <Stack>
+            {!props.viewOnly && showAlerts && status !== 'connected' && (
+                <Alert
+                    title="Disconnected!"
+                    color="red"
+                >
+                    It seems you are disconnected from the server. Your changes might not be saved.
+                </Alert>
+            )}
+            {!props.viewOnly && showAlerts && throttledSyncState === false && (
+                <Alert
+                    title="Syncing..."
+                    color="yellow"
+                >
+                    The document is syncing with the server. Some changes might not be visible to other collaborators yet.
+                </Alert>
+            )}
             <BlockNoteView editor={editor} />
-        </div>
+        </Stack>
     );
 };
