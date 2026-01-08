@@ -9,6 +9,8 @@ export enum RoomType {
     USER = 'USER',
     /** For updating arbitrary fields realtime */
     DATA = 'DATA',
+    /** For collaborative text editing */
+    TEXT = 'TEXT',
 }
 export enum RoomSpecifier {
     /** Unspecified data type */

@@ -2,17 +2,20 @@ import '@blocknote/core/fonts/inter.css';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
+import { Group } from '@mantine/core';
 import { useIdle } from '@mantine/hooks';
-import { BLOCKNOTE_FRAGMENT_ID, fullName, TextBlockId, TextSocketHandshakeAuth, UID } from '@mosaiq/terrazzo-common';
+import { BLOCKNOTE_FRAGMENT_ID, fullName, RoomType, TextBlockId, TextSocketHandshakeAuth, UID } from '@mosaiq/terrazzo-common';
 import { useUserContext } from '@trz/contexts/user-context';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { useMe } from '@trz/hooks/useMe';
+import { useRoom } from '@trz/hooks/useRoom';
 import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ManagerOptions, SocketOptions } from 'socket.io-client';
 import { ProviderConfiguration, SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
+import { AvatarRow } from '../UI/AvatarRow';
 
 const IDLE_COLOR = '#afafaf';
 enum YSOCKET_STATUS_CODE {
@@ -40,6 +43,8 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     const [clients, setClients] = useState<string[]>([]);
     const idle = useIdle(IDLE_TIMEOUT_MS);
     const name = fullName(me);
+    const [roomUsers] = useRoom(RoomType.TEXT, props.textBlockId, undefined, true);
+    const users = useMemo(() => Array.from(roomUsers.values()).map((u) => u.userId), [roomUsers.values()]);
 
     const [doc] = useState(() => new Y.Doc());
     const [socketIOProvider] = useState(() => {
@@ -104,6 +109,15 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
             <p>
                 Status: {status} | Active Users: {clients.join(', ')} | Synced: {socketIOProvider.synced.toString()}
             </p>
+            <Group>
+                <AvatarRow
+                    users={me ? [me.id, ...users] : users}
+                    maxUsers={5}
+                    showProfilePopover
+                    showTooltip
+                    animateOnHover
+                />
+            </Group>
             <BlockNoteView editor={editor} />
         </div>
     );
