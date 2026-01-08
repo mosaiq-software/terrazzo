@@ -42,6 +42,7 @@ export class Document extends Y.Doc {
     public awareness: AwarenessProtocol.Awareness;
     private readonly callbacks?: Callbacks;
     public lastSavedAt: number;
+    public saveTimer?: NodeJS.Timeout;
 
     constructor(textBlockId: TextBlockId, namespace: Namespace, callbacks?: Callbacks) {
         super({ gc: gcEnabled });
@@ -91,6 +92,9 @@ export class Document extends Y.Doc {
      * Destroy the document and remove the listeners.
      */
     public async destroy(): Promise<void> {
+        if (this.saveTimer) {
+            clearTimeout(this.saveTimer);
+        }
         if (this.callbacks?.onDestroy != null) {
             try {
                 await this.callbacks.onDestroy(this);

@@ -135,13 +135,14 @@ export class YSocketIO extends Observable<string> {
         const newDoc = new Document(textBlockId, namespace, {
             onUpdate: async (doc, update) => {
                 this.emit(YjsEvent.DOCUMENT_UPDATE, [doc, update]);
-                // Save document when updated
-                const lastSave = doc.lastSavedAt;
-                const now = Date.now();
-                if (now - lastSave > DOC_AUTOSAVE_INTERVAL_MS) {
-                    doc.lastSavedAt = now;
-                    await storeTextBlockEncodedData(doc.textBlockId, doc);
+                // Debounce saves using a timer
+                if (doc.saveTimer) {
+                    clearTimeout(doc.saveTimer);
                 }
+                doc.saveTimer = setTimeout(async () => {
+                    await storeTextBlockEncodedData(doc.textBlockId, doc);
+                    doc.saveTimer = undefined;
+                }, DOC_AUTOSAVE_INTERVAL_MS);
             },
             onChangeAwareness: (doc, update) => this.emit(YjsEvent.AWARENESS_UPDATE, [doc, update]),
             onDestroy: async (doc) => {
@@ -201,11 +202,13 @@ export class YSocketIO extends Observable<string> {
     };
 
     private readonly startSynchronization = async (socket: Socket, doc: Document) => {
-        // The server initiates sync by sending its state vector to the client
-        // The client responds with the diff via the callback
-        socket.emit(YjsEvent.SYNC_STEP_1, Y.encodeStateVector(doc), (update: Uint8Array) => {
-            Y.applyUpdate(doc, new Uint8Array(update), this);
-        });
+        // Send SYNC_STEP_1 with state vector to mark as synced
+        const stateVector = Y.encodeStateVector(doc);
+        socket.emit(YjsEvent.SYNC_STEP_1, stateVector);
+
+        // Also send the full document state as a SYNC_UPDATE so client gets the content
+        const fullState = Y.encodeStateAsUpdate(doc);
+        socket.emit(YjsEvent.SYNC_UPDATE, fullState);
 
         // Send current awareness state
         const awarenessStates = Array.from(doc.awareness.getStates().keys());
