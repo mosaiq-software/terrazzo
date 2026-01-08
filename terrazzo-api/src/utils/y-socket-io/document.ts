@@ -43,6 +43,7 @@ export class Document extends Y.Doc {
     private readonly callbacks?: Callbacks;
     public lastSavedAt: number;
     public saveTimer?: NodeJS.Timeout;
+    public isSaving: boolean = false;
 
     constructor(textBlockId: TextBlockId, namespace: Namespace, callbacks?: Callbacks) {
         super({ gc: gcEnabled });

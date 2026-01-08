@@ -44,11 +44,22 @@ export const storeTextBlockEncodedData = async (textBlockId: TextBlockId, ydoc: 
         const fragment = ydoc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
         const blocks = BLOCKNOTE_EDITOR.yXmlFragmentToBlocks(fragment);
         const stringified = JSON.stringify(blocks);
+
+        // Validate data integrity before saving
+        try {
+            const parsed = JSON.parse(stringified);
+            if (!Array.isArray(parsed)) {
+                throw new Error('Serialized blocks is not an array');
+            }
+        } catch (validationError) {
+            throw new Error(`Data validation failed: ${validationError}`);
+        }
+
         await writeTextBlockDb(textBlockId, stringified);
         console.log(`Saved text block ${textBlockId} with ${blocks.length} blocks`);
     } catch (error: any) {
         console.error('Unable to save text block ' + textBlockId + ' : ' + error.message);
-        throw new Error('Unable to save text block ' + textBlockId + ' : ' + error.message);
+        throw error;
     }
 };
 

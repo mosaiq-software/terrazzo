@@ -140,8 +140,26 @@ export class YSocketIO extends Observable<string> {
                     clearTimeout(doc.saveTimer);
                 }
                 doc.saveTimer = setTimeout(async () => {
-                    await storeTextBlockEncodedData(doc.textBlockId, doc);
                     doc.saveTimer = undefined;
+                    if (doc.isSaving) {
+                        return; // Skip if save already in progress
+                    }
+                    doc.isSaving = true;
+                    try {
+                        await storeTextBlockEncodedData(doc.textBlockId, doc);
+                    } catch (error) {
+                        console.error(`Save failed for ${doc.textBlockId}, retrying...`, error);
+                        // Retry once after 1 second
+                        setTimeout(async () => {
+                            try {
+                                await storeTextBlockEncodedData(doc.textBlockId, doc);
+                            } catch (retryError) {
+                                console.error(`Retry save failed for ${doc.textBlockId}`, retryError);
+                            }
+                        }, 1000);
+                    } finally {
+                        doc.isSaving = false;
+                    }
                 }, DOC_AUTOSAVE_INTERVAL_MS);
             },
             onChangeAwareness: (doc, update) => this.emit(YjsEvent.AWARENESS_UPDATE, [doc, update]),
@@ -177,7 +195,27 @@ export class YSocketIO extends Observable<string> {
             });
             if (socketsWithEditPermissions.length === 0) {
                 console.log(`No more sockets with edit permissions connected to document ${doc.textBlockId}. Saving and destroying document.`);
-                await storeTextBlockEncodedData(doc.textBlockId, doc);
+
+                // Cancel pending timer to force immediate save
+                if (doc.saveTimer) {
+                    clearTimeout(doc.saveTimer);
+                    doc.saveTimer = undefined;
+                }
+
+                // Wait for any in-progress save to complete (max 5 seconds)
+                let waitCount = 0;
+                while (doc.isSaving && waitCount < 50) {
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                    waitCount++;
+                }
+
+                // Final save before destroy
+                try {
+                    await storeTextBlockEncodedData(doc.textBlockId, doc);
+                } catch (error) {
+                    console.error(`Final save failed for ${doc.textBlockId}:`, error);
+                }
+
                 this.emit(YjsEvent.ALL_DOCUMENT_CONNECTIONS_CLOSED, [doc]);
                 await doc.destroy();
             }
