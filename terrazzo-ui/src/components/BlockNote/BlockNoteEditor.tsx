@@ -2,18 +2,20 @@ import '@blocknote/core/fonts/inter.css';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
-import { Alert, Stack } from '@mantine/core';
+import { Alert, Group, Stack } from '@mantine/core';
 import { useIdle, useThrottledState } from '@mantine/hooks';
-import { BLOCKNOTE_FRAGMENT_ID, fullName, TextBlockId, TextSocketHandshakeAuth, UID } from '@mosaiq/terrazzo-common';
+import { BLOCKNOTE_FRAGMENT_ID, fullName, RoomType, TextBlockId, TextSocketHandshakeAuth, UID, UserId } from '@mosaiq/terrazzo-common';
 import { useUserContext } from '@trz/contexts/user-context';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { useMe } from '@trz/hooks/useMe';
+import { useRoom } from '@trz/hooks/useRoom';
 import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ManagerOptions, SocketOptions } from 'socket.io-client';
 import { ProviderConfiguration, SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
+import { AvatarRow } from '../UI/AvatarRow';
 
 const IDLE_COLOR = '#afafaf';
 enum YSOCKET_STATUS_CODE {
@@ -42,6 +44,15 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     const name = fullName(me);
     const [throttledSyncState, setThrottledSyncState] = useThrottledState<boolean | undefined>(undefined, 500);
     const [showAlerts, setShowAlerts] = useState(false);
+    const [roomUsers] = useRoom(RoomType.TEXT, props.textBlockId, undefined, true);
+    const roomUserIds = useMemo(() => {
+        const ids: Set<UserId> = new Set();
+        if (me) {
+            ids.add(me.id);
+        }
+        roomUsers.forEach((u) => ids.add(u.userId));
+        return ids;
+    }, [roomUsers.values(), me]);
 
     // Wait 5 seconds before allowing alerts to show
     useEffect(() => {
@@ -130,6 +141,15 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
                     The document is syncing with the server. Some changes might not be visible to other collaborators yet.
                 </Alert>
             )}
+            <Group justify="flex-end">
+                <AvatarRow
+                    users={Array.from(roomUserIds.values())}
+                    maxUsers={5}
+                    showTooltip
+                    showProfilePopover
+                    animateOnHover
+                />
+            </Group>
             <BlockNoteView editor={editor} />
         </Stack>
     );
