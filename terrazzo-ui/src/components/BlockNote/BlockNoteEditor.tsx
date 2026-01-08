@@ -76,7 +76,7 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     useEffect(() => {
         socketIOProvider.awareness.setLocalStateField('user', {
             name: name,
-            color: idle ? IDLE_COLOR : (pfpColor ?? 'white'),
+            color: idle ? IDLE_COLOR : (pfpColor ?? '#ffffff'),
         });
     }, [socketIOProvider, pfpColor, idle, name]);
 
@@ -86,7 +86,7 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
             fragment: doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID),
             user: {
                 name: name,
-                color: idle ? IDLE_COLOR : (pfpColor ?? 'white'),
+                color: idle ? IDLE_COLOR : (pfpColor ?? '#ffffff'),
             },
             showCursorLabels: 'activity',
         },
