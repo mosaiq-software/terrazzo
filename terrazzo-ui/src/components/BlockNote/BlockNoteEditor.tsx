@@ -1,5 +1,5 @@
 import '@blocknote/core/fonts/inter.css';
-import { BlockNoteView } from '@blocknote/mantine';
+import { BlockNoteView, darkDefaultTheme, lightDefaultTheme, Theme } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
 import { Alert, Group, Stack } from '@mantine/core';
@@ -19,15 +19,96 @@ import { AvatarRow } from '../UI/AvatarRow';
 
 /** DANGER! Allows anyone to edit the document regardless of permissions. Only for testing server-side auth */
 const ALLOW_ANYONE_TO_EDIT = false;
+
 const IDLE_COLOR = '#afafaf';
+
 enum YSOCKET_STATUS_CODE {
     SYNC = 'sync',
     STATUS = 'status',
     CONNECTION_CLOSED = 'connection-close',
     CONNECTION_ERROR = 'connection-error',
 }
+
 const SOCKET_URL = import.meta.env.SOCKET_URL;
 if (!SOCKET_URL) throw new Error('SOCKET_URL environment variable is not set');
+
+const sharedTheme: Theme = {
+    borderRadius: 4,
+    fontFamily: 'Helvetica Neue, sans-serif',
+};
+
+const lightTheme: Theme = {
+    ...sharedTheme,
+    colors: {
+        editor: {
+            text: '#222222',
+            background: '#ffeeee',
+        },
+        menu: {
+            text: '#ffffff',
+            background: '#9b0000',
+        },
+        tooltip: {
+            text: '#ffffff',
+            background: '#b00000',
+        },
+        hovered: {
+            text: '#ffffff',
+            background: '#b00000',
+        },
+        selected: {
+            text: '#ffffff',
+            background: '#c50000',
+        },
+        disabled: {
+            text: '#9b0000',
+            background: '#7d0000',
+        },
+        shadow: '#640000',
+        border: '#870000',
+        sideMenu: '#bababa',
+        highlights: lightDefaultTheme.colors.highlights,
+    },
+};
+
+const darkTheme: Theme = {
+    ...sharedTheme,
+    colors: {
+        editor: {
+            text: '#ffffff',
+            background: '#15161a',
+        },
+        menu: {
+            text: '#ffffff',
+            background: '#17191b',
+        },
+        tooltip: {
+            text: '#ffffff',
+            background: '#17191b',
+        },
+        hovered: {
+            text: '#ffffff',
+            background: '#17191b',
+        },
+        selected: {
+            text: '#ffffff',
+            background: '#484f57',
+        },
+        disabled: {
+            text: '#34373b',
+            background: '#00000040',
+        },
+        shadow: '#00000000',
+        border: '#828282',
+        sideMenu: '#828282',
+        highlights: darkDefaultTheme.colors.highlights,
+    },
+};
+
+const theme = {
+    light: lightTheme,
+    dark: darkTheme,
+};
 
 interface BlockNoteEditorProps {
     textBlockId: TextBlockId;
@@ -152,7 +233,10 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
                     animateOnHover
                 />
             </Group>
-            <BlockNoteView editor={editor} />
+            <BlockNoteView
+                editor={editor}
+                theme={theme}
+            />
         </Stack>
     );
 };
