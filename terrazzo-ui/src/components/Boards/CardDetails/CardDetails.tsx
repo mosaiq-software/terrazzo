@@ -232,7 +232,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                         </Group>
                         <BlockNoteEditor
                             textBlockId={card.descriptionTextBlockId}
-                            placeholder="Start writing here..."
+                            placeholder="Start writing a description or hit '/' for commands..."
                             viewOnly={!perms.editCard}
                             resourceType="card"
                             resourceId={card.id}

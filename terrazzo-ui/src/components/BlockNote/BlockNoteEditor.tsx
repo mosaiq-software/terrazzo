@@ -1,6 +1,7 @@
 import { codeBlockOptions } from '@blocknote/code-block';
 import { BlockNoteSchema, createCodeBlockSpec } from '@blocknote/core';
 import '@blocknote/core/fonts/inter.css';
+import { en } from '@blocknote/core/locales';
 import { BlockNoteView, darkDefaultTheme, lightDefaultTheme, Theme } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
@@ -186,6 +187,7 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
         });
     }, [socketIOProvider, pfpColor, idle, name]);
 
+    const locale = en;
     const editor = useCreateBlockNote({
         collaboration: {
             provider: socketIOProvider,
@@ -202,6 +204,10 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
                 codeBlock: createCodeBlockSpec(codeBlockOptions),
             },
         }),
+        placeholders: {
+            ...locale.placeholders,
+            emptyDocument: props.placeholder || locale.placeholders.emptyDocument,
+        },
     });
 
     useEffect(() => {
