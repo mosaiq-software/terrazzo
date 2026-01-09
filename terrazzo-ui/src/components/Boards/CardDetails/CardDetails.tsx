@@ -4,6 +4,7 @@ import { CardId, fullName } from '@mosaiq/terrazzo-common';
 import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
+import { RectHoldingButton } from '@trz/components/UI/RectHoldingButton';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUserContext } from '@trz/contexts/user-context';
 import { updateCardAssignee, updateCardField } from '@trz/emitters';
@@ -247,18 +248,18 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                 Created at {new Date(card.createdAt).toLocaleString()} by {fullName(card.createdBy)}
                             </Text>
                             {perms?.editCard && (
-                                <Tooltip label="Archived cards can be restored later">
-                                    <Button
-                                        variant="subtle"
-                                        c="white"
-                                        key={card.archived ? 'Unarchive' : 'Archive'}
-                                        leftSection={<FaArchive />}
-                                        justify={'flex-start'}
-                                        onClick={() => onArchiveCard(!card.archived)}
-                                    >
-                                        {card.archived ? 'Unarchive' : 'Archive'}
-                                    </Button>
-                                </Tooltip>
+                                <RectHoldingButton
+                                    durationMs={500}
+                                    tooltip="Archived cards can be restored later"
+                                    tooltipDelay={500}
+                                    height="40px"
+                                    variant="outline"
+                                    borderColor="red"
+                                    onClick={() => onArchiveCard(!card.archived)}
+                                    leftSection={<FaArchive />}
+                                >
+                                    {card.archived ? 'Unarchive' : 'Archive'}
+                                </RectHoldingButton>
                             )}
                         </Stack>
                     </Stack>

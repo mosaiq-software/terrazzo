@@ -127,6 +127,9 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                 onFocus={(e) => {
                     completelyCaptureEvent(e);
                 }}
+                style={{
+                    width: 'fit-content',
+                }}
             >
                 <Box
                     ref={boxRef}
