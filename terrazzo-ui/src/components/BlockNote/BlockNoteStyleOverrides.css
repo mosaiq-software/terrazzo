@@ -1,0 +1,13 @@
+.bn-block-content[data-content-type=codeBlock] {
+    position: relative;
+    background-color: #0c0c10;
+    font-family: 'Fira Code', monospace;
+    border-radius: 6px;
+    
+}
+
+.bn-inline-content code {
+    font-family: 'Fira Code', monospace;
+    background-color: #0c0c10;
+    padding: 4px 6px;
+}

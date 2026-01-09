@@ -1,3 +1,5 @@
+import { codeBlockOptions } from '@blocknote/code-block';
+import { BlockNoteSchema, createCodeBlockSpec } from '@blocknote/core';
 import '@blocknote/core/fonts/inter.css';
 import { BlockNoteView, darkDefaultTheme, lightDefaultTheme, Theme } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
@@ -16,6 +18,7 @@ import { ManagerOptions, SocketOptions } from 'socket.io-client';
 import { ProviderConfiguration, SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
 import { AvatarRow } from '../UI/AvatarRow';
+import './BlockNoteStyleOverrides.css';
 
 /** DANGER! Allows anyone to edit the document regardless of permissions. Only for testing server-side auth */
 const ALLOW_ANYONE_TO_EDIT = false;
@@ -76,7 +79,7 @@ const darkTheme: Theme = {
     colors: {
         editor: {
             text: '#ffffff',
-            background: '#15161a',
+            background: '#00000000',
         },
         menu: {
             text: '#ffffff',
@@ -194,6 +197,11 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
             showCursorLabels: 'activity',
         },
         uploadFile: fileUploader.uploadFile,
+        schema: BlockNoteSchema.create().extend({
+            blockSpecs: {
+                codeBlock: createCodeBlockSpec(codeBlockOptions),
+            },
+        }),
     });
 
     useEffect(() => {
@@ -208,22 +216,32 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
 
     return (
         <Stack>
-            {!props.viewOnly && showAlerts && status !== 'connected' && (
-                <Alert
-                    title="Disconnected!"
-                    color="red"
-                >
-                    It seems you are disconnected from the server. Your changes might not be saved.
-                </Alert>
-            )}
-            {!props.viewOnly && showAlerts && throttledSyncState === false && (
-                <Alert
-                    title="Syncing..."
-                    color="yellow"
-                >
-                    The document is syncing with the server. Some changes might not be visible to other collaborators yet.
-                </Alert>
-            )}
+            {!props.viewOnly &&
+                showAlerts &&
+                (status !== 'connected' ? (
+                    <Alert
+                        title="Disconnected!"
+                        color="red"
+                    >
+                        It seems you are disconnected from the server. Your changes might not be saved.
+                    </Alert>
+                ) : throttledSyncState === undefined ? (
+                    <Alert
+                        title="Connecting..."
+                        color="blue"
+                    >
+                        Establishing connection to the server...
+                    </Alert>
+                ) : (
+                    throttledSyncState === false && (
+                        <Alert
+                            title="Syncing..."
+                            color="yellow"
+                        >
+                            The document is syncing with the server. Some changes might not be visible to other collaborators yet.
+                        </Alert>
+                    )
+                ))}
             <Group justify="flex-end">
                 <AvatarRow
                     users={Array.from(roomUserIds.values())}
