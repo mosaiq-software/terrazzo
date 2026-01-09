@@ -17,6 +17,8 @@ import { ProviderConfiguration, SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
 import { AvatarRow } from '../UI/AvatarRow';
 
+/** DANGER! Allows anyone to edit the document regardless of permissions. Only for testing server-side auth */
+const ALLOW_ANYONE_TO_EDIT = false;
 const IDLE_COLOR = '#afafaf';
 enum YSOCKET_STATUS_CODE {
     SYNC = 'sync',
@@ -115,7 +117,7 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
 
     useEffect(() => {
         if (editor) {
-            editor.isEditable = !props.viewOnly;
+            editor.isEditable = !props.viewOnly || ALLOW_ANYONE_TO_EDIT;
         }
     }, [editor, props.viewOnly]);
 

@@ -3,6 +3,7 @@ import { TextBlockId } from '@mosaiq/terrazzo-common/types/genericTypes';
 import { Namespace, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
 import * as Y from 'yjs';
+import { getYSocketData } from '../socket/socketUtils';
 
 export interface AwarenessChange {
     added: number[];
@@ -77,6 +78,15 @@ export class Document extends Y.Doc {
      * Handles the awareness update and emit the changes to clients.
      */
     private readonly onUpdateAwareness = ({ added, updated, removed }: AwarenessChange, _socket: Socket | null): void => {
+        //Check that the user is an editor before emitting awareness changes
+        if (!_socket) {
+            return;
+        }
+        const socketData = getYSocketData(_socket);
+        if (!socketData?.canEdit) {
+            return;
+        }
+
         const changedClients = added.concat(updated, removed);
         const update = AwarenessProtocol.encodeAwarenessUpdate(this.awareness, changedClients);
         if (this.callbacks?.onChangeAwareness != null) {

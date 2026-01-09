@@ -9,7 +9,7 @@ import console from 'console';
 import { Doc } from 'yjs';
 import { getBoardIDFromCardID } from './cardController';
 
-export const checkCanUserEditTextBlock = async (userId: UserId | undefined, textBlockId: TextBlockId, resourceId: UID, resourceType: TextSocketHandshakeAuth['resource']['type']): Promise<boolean> => {
+export const checkCanUserEditTextBlock = async (userId: UserId | undefined, resourceId: UID, resourceType: TextSocketHandshakeAuth['resource']['type']): Promise<boolean> => {
     switch (resourceType) {
         case 'card': {
             const card = await getCardByIdDb(resourceId);

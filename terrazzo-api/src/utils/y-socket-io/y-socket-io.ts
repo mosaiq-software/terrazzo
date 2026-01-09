@@ -71,7 +71,7 @@ export class YSocketIO extends Observable<string> {
             const textBlockId = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
             const auth = socket.handshake.auth as TextSocketHandshakeAuth;
             const authSession = await getValidAuthSessionFromSocketHandshake(auth);
-            const userCanEditResource = await checkCanUserEditTextBlock(auth.userId, textBlockId, auth.resource.id, auth.resource.type);
+            const userCanEditResource = await checkCanUserEditTextBlock(auth.userId, auth.resource.id, auth.resource.type);
             const canEdit = !!authSession?.userId && userCanEditResource;
 
             const sockData: YSocketData = {
@@ -98,14 +98,22 @@ export class YSocketIO extends Observable<string> {
             return;
         }
         const sockets = Array.from(this.nsp.sockets.values());
-        for (const socket of sockets) {
-            const textBlockId = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
-            const canEdit = true; //TODO await checkCanUserEditTextBlock(userId, textBlockId, );
+        const syncPromises = sockets.map((socket) => this.syncSocketEditStatusForSocket(socket, userId));
+        await Promise.all(syncPromises);
+    }
+
+    private async syncSocketEditStatusForSocket(socket: Socket, userId: UserId): Promise<void> {
+        try {
+            const auth = socket.handshake.auth as TextSocketHandshakeAuth;
             const sockData = getYSocketData(socket);
-            if (sockData?.userId === userId) {
-                sockData.canEdit = canEdit;
-                setYSocketData(socket, sockData);
+            if (auth.userId !== userId || !sockData?.userId || sockData.userId !== userId) {
+                return;
             }
+            const canEdit = await checkCanUserEditTextBlock(userId, auth.resource.id, auth.resource.type);
+            sockData.canEdit = canEdit;
+            setYSocketData(socket, sockData);
+        } catch (error) {
+            console.error(`Error syncing socket edit status for user ${userId} on socket ${socket.id}:`, error);
         }
     }
 
