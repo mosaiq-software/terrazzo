@@ -7,6 +7,8 @@ export enum LocalStorageKey {
 
 export const TEMPORARY_ID: UID = 'THIS-IS-A-TEMPORARY-ID';
 
+export const BLOCKNOTE_FRAGMENT_ID = 'document-store';
+
 export enum Priority {
     LOW = 1,
     MEDIUM = 2,

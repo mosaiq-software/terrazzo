@@ -1,4 +1,4 @@
-import { ServerSE, ServerSocketIOEvent } from '@mosaiq/terrazzo-common';
+import { ServerSE, ServerSocketIOEvent, UserId } from '@mosaiq/terrazzo-common';
 import { instrument } from '@socket.io/admin-ui';
 import * as socketListeners from '@trz-api/listeners';
 import { createServer } from 'http';
@@ -16,10 +16,12 @@ export class SocketManager {
     private static instance: SocketManager;
     public io: Server;
     public yio: YSocketIO;
+
     private constructor(io: Server, yio: YSocketIO) {
         this.io = io;
         this.yio = yio;
     }
+
     public static initialize(socketPort: number): SocketManager {
         if (SocketManager.instance) {
             return SocketManager.instance;
@@ -45,7 +47,7 @@ export class SocketManager {
             mode: 'production',
         });
 
-        const yioEngine = new YSocketIO(ioEngine, {});
+        const yioEngine = new YSocketIO(ioEngine);
         yioEngine.initialize();
 
         ioEngine.on(ServerSocketIOEvent.CONNECTION, async (socket) => {
@@ -76,10 +78,25 @@ export class SocketManager {
 
         return SocketManager.instance;
     }
+
+    /**
+     * Get the singleton SocketManager instance
+     */
     public static getInstance(): SocketManager {
         if (!SocketManager.instance) {
             throw new Error('SocketManager is not initialized');
         }
         return SocketManager.instance;
+    }
+
+    /**
+     * Syncs any socket data that may have updated since the socket was initialized for the given user
+     *
+     * This should be called whenever:
+     * - User roles are updated (sync users's permissions to edit text blocks)
+     * - A role the user has its permissions updated (sync user's permissions to edit text blocks)
+     */
+    public static async syncUserSocketDataForUser(userId: UserId): Promise<void> {
+        await this.getInstance().yio.syncSocketEditStatusForUser(userId);
     }
 }

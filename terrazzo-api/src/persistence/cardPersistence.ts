@@ -1,4 +1,4 @@
-import { CardHeader, CardId, ListId } from '@mosaiq/terrazzo-common';
+import { CardHeader, CardId, ListId, TextBlockId } from '@mosaiq/terrazzo-common';
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model } from 'sequelize';
 
@@ -77,6 +77,11 @@ export const updateCardDb = async (card: CardHeader) => {
 
 export const getCardsByListIdDownDb = async (listId: ListId) => {
     const models = await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] });
+    return models.map((card) => card.toJSON());
+};
+
+export const getCardsByDescriptionTextBlockIdDb = async (textBlockId: TextBlockId) => {
+    const models = await CardModel.findAll({ where: { descriptionTextBlockId: textBlockId } });
     return models.map((card) => card.toJSON());
 };
 

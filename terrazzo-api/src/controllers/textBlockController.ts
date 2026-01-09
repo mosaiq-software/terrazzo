@@ -1,49 +1,110 @@
-import { TextBlockId } from '@mosaiq/terrazzo-common';
+import { Block } from '@blocknote/core';
+import { ServerBlockNoteEditor } from '@blocknote/server-util';
+import { BLOCKNOTE_FRAGMENT_ID, TextBlockId, TextSocketHandshakeAuth, UID, UserId } from '@mosaiq/terrazzo-common';
+import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
+import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, writeTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
-import * as Y from 'yjs';
+import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
+import console from 'console';
+import { Doc } from 'yjs';
+import { getBoardIDFromCardID } from './cardController';
 
-export const storeTextBlockEncodedData = async (_textBlockId: TextBlockId, data: string) => {
-    let textBlockId = (await getTextBlockByIdDb(_textBlockId))?.id;
-    if (!textBlockId) {
-        textBlockId = (await createTextBlockDb(data)).id;
-    }
-    if (!textBlockId) {
-        throw new Error(`Unable to find or create text block ${_textBlockId}`);
-    }
-
-    try {
-        await writeTextBlockDb(textBlockId, data);
-    } catch (error: any) {
-        console.error('Unable to save text block ' + textBlockId + ' : ' + error.message);
-        throw new Error('Unable to save text block ' + textBlockId + ' : ' + error.message);
+export const checkCanUserEditTextBlock = async (userId: UserId | undefined, resourceId: UID, resourceType: TextSocketHandshakeAuth['resource']['type']): Promise<boolean> => {
+    switch (resourceType) {
+        case 'card': {
+            const card = await getCardByIdDb(resourceId);
+            if (!card) {
+                return false;
+            }
+            const boardId = await getBoardIDFromCardID(card.id);
+            if (!(await userCanEditCard(userId, boardId))) {
+                return false;
+            }
+            return true;
+        }
+        case 'document': {
+            const document = await getDocumentByIdDb(resourceId);
+            if (!document) {
+                return false;
+            }
+            if (!(await userCanEditDocument(userId, document.id))) {
+                return false;
+            }
+            return true;
+        }
+        default:
+            return false;
     }
 };
 
-export const loadTextBlockEncodedData = async (textBlockId: TextBlockId) => {
+const BLOCKNOTE_EDITOR = ServerBlockNoteEditor.create();
+
+export const storeTextBlockEncodedData = async (textBlockId: TextBlockId, ydoc: Doc): Promise<void> => {
+    try {
+        const fragment = ydoc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
+        const blocks = BLOCKNOTE_EDITOR.yXmlFragmentToBlocks(fragment);
+        const stringified = JSON.stringify(blocks);
+
+        // Validate data integrity before saving
+        try {
+            const parsed = JSON.parse(stringified);
+            if (!Array.isArray(parsed)) {
+                throw new Error('Serialized blocks is not an array');
+            }
+        } catch (validationError) {
+            throw new Error(`Data validation failed: ${validationError}`);
+        }
+
+        await writeTextBlockDb(textBlockId, stringified);
+        console.log(`Saved text block ${textBlockId} with ${blocks.length} blocks`);
+    } catch (error: any) {
+        console.error('Unable to save text block ' + textBlockId + ' : ' + error.message);
+        throw error;
+    }
+};
+
+export const loadTextBlockEncodedData = async (textBlockId: TextBlockId): Promise<Doc | null> => {
     try {
         const textBlock = await getTextBlockByIdDb(textBlockId);
         if (!textBlock) {
             throw new Error(`Text block ${textBlockId} not found`);
         }
-        const text = textBlock.text;
-        if (isValidBase64(text)) {
-            return text;
+        const textData = textBlock.text;
+        let blocks: Block[] = [];
+        if (textData && textData.length > 0) {
+            try {
+                blocks = JSON.parse(textData);
+            } catch (e: any) {
+                console.warn(`Failed to parse text block data for text block ${textBlockId}`, {
+                    error: e,
+                    textData,
+                });
+                const blocksFromMarkdown = await maybeParseMarkdownToBlocks(textData);
+                blocks = blocksFromMarkdown;
+            }
         }
-        return plaintextToRemirrorYjs(text);
+        if (blocks.length === 0) {
+            return new Doc();
+        }
+
+        // BlockNote's blocksToYDoc uses 'prosemirror' fragment by default, but we need 'document-store'
+        const ydoc = BLOCKNOTE_EDITOR.blocksToYDoc(blocks, BLOCKNOTE_FRAGMENT_ID);
+
+        return ydoc;
     } catch (error: any) {
-        console.error(`Unable to load text block ${textBlockId} : ${error.message}`);
+        console.error(`Unable to load text block ${textBlockId}`, {
+            message: error.message,
+            trace: error.stack,
+        });
         return null;
     }
 };
 
-export const createTextBlockWithPlaintext = async (plaintext?: string) => {
-    const encoded = plaintextToRemirrorYjs(plaintext ?? '');
-    return await createTextBlockWithEncodedData(encoded);
-};
-
-export const createTextBlockWithEncodedData = async (data: string) => {
+export const createTextBlockWithMarkdown = async (markdownText?: string) => {
     try {
-        const uid = await createTextBlockDb(data);
+        const blocks = await maybeParseMarkdownToBlocks(markdownText);
+        const blocksJsonString = JSON.stringify(blocks);
+        const uid = await createTextBlockDb(blocksJsonString);
         return uid;
     } catch (e: any) {
         console.error(`Unable to create text block`, e);
@@ -51,81 +112,57 @@ export const createTextBlockWithEncodedData = async (data: string) => {
     }
 };
 
-/**
- * Converts plain text to a Y.js document that can be saved as base64 string
- * Creates a Remirror-compatible ProseMirror document structure in Y.js format
- * @param text The plain text to convert
- * @returns Base64 encoded Y.js document state
- */
-export const plaintextToRemirrorYjs = (text: string): string => {
-    const ydoc = new Y.Doc();
-
-    // Based on inspection, we need to create the shared types that Remirror expects
-    // The rawSharedTypes shows both 'prosemirror' and 'default' exist as AbstractType
-    // Let's try different approaches to see what works
-
-    // Approach 1: Create as XmlFragment (most common for ProseMirror)
-    const prosemirrorDoc = ydoc.getXmlFragment('prosemirror');
-
-    if (text) {
-        // Create a simple paragraph structure that ProseMirror expects
-        const paragraph = new Y.XmlElement('paragraph');
-        const textNode = new Y.XmlText();
-        textNode.insert(0, text);
-        paragraph.insert(0, [textNode]);
-        prosemirrorDoc.insert(0, [paragraph]);
-    } else {
-        // Empty document should still have a paragraph
-        const paragraph = new Y.XmlElement('paragraph');
-        prosemirrorDoc.insert(0, [paragraph]);
-    }
-
-    const update = Y.encodeStateAsUpdate(ydoc);
-    const base64String = Buffer.from(update).toString('base64');
-    return base64String;
-};
-
-export const remirrorYjsToPlaintext = (base64Data: string): string => {
-    const binaryData = Buffer.from(base64Data, 'base64');
-    const ydoc = new Y.Doc();
-    Y.applyUpdate(ydoc, binaryData);
-    const prosemirrorDoc = ydoc.getXmlFragment('prosemirror');
-
-    let plaintext = '';
-    prosemirrorDoc.forEach((node) => {
-        plaintext += node.toString();
-    });
-
-    // clean up the plaintext by removing XML tags
-    plaintext = plaintext.replace(/<\/?[^>]+(>|$)/g, ' ').trim();
-    plaintext = plaintext.replace(/\s+/g, ' ');
-
-    return plaintext;
-};
-
-/**
- * Validates if a string is a valid base64 encoded string
- * @param str The string to validate
- * @returns true if the string is valid base64, false otherwise
- */
-export const isValidBase64 = (str: string): boolean => {
-    if (!str || typeof str !== 'string') {
-        return false;
-    }
-    const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
-    if (!base64Regex.test(str)) {
-        return false;
-    }
-    if (str.length % 4 !== 0) {
-        return false;
-    }
-
+const maybeParseMarkdownToBlocks = async (markdownText?: string): Promise<Block[]> => {
     try {
-        Buffer.from(str, 'base64');
-        const decoded = Buffer.from(str, 'base64');
-        const reencoded = decoded.toString('base64');
-        return reencoded === str;
-    } catch (error) {
-        return false;
+        let blocks: Block[] = [];
+        try {
+            if (markdownText) {
+                blocks = await BLOCKNOTE_EDITOR.tryParseMarkdownToBlocks(markdownText);
+            }
+        } catch (e: any) {
+            console.error('Failed to parse markdown', {
+                error: e,
+                markdownText,
+            });
+            blocks = [];
+        }
+
+        //default to blocknote's hardcoded block with the text if for some reason its not valid markdown
+        if (!blocks.length && markdownText?.length) {
+            blocks = [
+                {
+                    id: 'initialBlockId',
+                    type: 'paragraph',
+                    props: {
+                        backgroundColor: 'default',
+                        textColor: 'default',
+                        textAlignment: 'left',
+                    },
+                    content: [
+                        {
+                            type: 'text',
+                            text: markdownText,
+                            styles: {},
+                        },
+                    ],
+                    children: [],
+                },
+                {
+                    id: crypto.randomUUID(),
+                    type: 'paragraph',
+                    props: {
+                        backgroundColor: 'default',
+                        textColor: 'default',
+                        textAlignment: 'left',
+                    },
+                    content: [],
+                    children: [],
+                },
+            ];
+        }
+        return blocks;
+    } catch (e: any) {
+        console.error(`Unable to create text block`, e);
+        return [];
     }
 };

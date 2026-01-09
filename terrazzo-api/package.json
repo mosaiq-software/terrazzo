@@ -16,6 +16,8 @@
     "author": "",
     "license": "UNLICENCED",
     "dependencies": {
+        "@blocknote/core": "^0.45.0",
+        "@blocknote/server-util": "^0.45.0",
         "@mosaiq/terrazzo-common": "file:../terrazzo-common/dist",
         "@socket.io/admin-ui": "^0.5.1",
         "axios": "^1.7.9",

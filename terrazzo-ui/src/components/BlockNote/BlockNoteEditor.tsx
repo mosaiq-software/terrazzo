@@ -2,14 +2,23 @@ import '@blocknote/core/fonts/inter.css';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
-import { TextBlockId } from '@mosaiq/terrazzo-common';
+import { Alert, Group, Stack } from '@mantine/core';
+import { useIdle, useThrottledState } from '@mantine/hooks';
+import { BLOCKNOTE_FRAGMENT_ID, fullName, RoomType, TextBlockId, TextSocketHandshakeAuth, UID, UserId } from '@mosaiq/terrazzo-common';
+import { useUserContext } from '@trz/contexts/user-context';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useImageColor } from '@trz/hooks/useImageColor';
-import { useEffect, useState } from 'react';
+import { useMe } from '@trz/hooks/useMe';
+import { useRoom } from '@trz/hooks/useRoom';
+import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
+import { useEffect, useMemo, useState } from 'react';
 import { ManagerOptions, SocketOptions } from 'socket.io-client';
 import { ProviderConfiguration, SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
+import { AvatarRow } from '../UI/AvatarRow';
 
+/** DANGER! Allows anyone to edit the document regardless of permissions. Only for testing server-side auth */
+const ALLOW_ANYONE_TO_EDIT = false;
 const IDLE_COLOR = '#afafaf';
 enum YSOCKET_STATUS_CODE {
     SYNC = 'sync',
@@ -24,24 +33,53 @@ interface BlockNoteEditorProps {
     textBlockId: TextBlockId;
     fontSize?: number;
     placeholder?: string;
-    name?: string;
-    color?: string;
-    avatarUrl?: string;
-    idle: boolean;
     viewOnly?: boolean;
+    resourceId: UID;
+    resourceType: TextSocketHandshakeAuth['resource']['type'];
 }
 export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
-    const imgColor = useImageColor(props.avatarUrl);
+    const userCtx = useUserContext();
+    const me = useMe();
+    const pfpColor = useImageColor(me?.profilePicture);
     const [status, setStatus] = useState<string>('unknown');
-    const [clients, setClients] = useState<string[]>([]);
+    const idle = useIdle(IDLE_TIMEOUT_MS);
+    const name = fullName(me);
+    const [throttledSyncState, setThrottledSyncState] = useThrottledState<boolean | undefined>(undefined, 500);
+    const [showAlerts, setShowAlerts] = useState(false);
+    const [roomUsers] = useRoom(RoomType.TEXT, props.textBlockId, undefined, true);
+    const roomUserIds = useMemo(() => {
+        const ids: Set<UserId> = new Set();
+        if (me) {
+            ids.add(me.id);
+        }
+        roomUsers.forEach((u) => ids.add(u.userId));
+        return ids;
+    }, [roomUsers.values(), me]);
+
+    // Wait 5 seconds before allowing alerts to show
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowAlerts(true);
+        }, 5000);
+        return () => clearTimeout(timer);
+    }, []);
 
     const [doc] = useState(() => new Y.Doc());
     const [socketIOProvider] = useState(() => {
         const pConf: ProviderConfiguration = {
             autoConnect: true,
         };
+        const auth: TextSocketHandshakeAuth = {
+            userId: userCtx.userId,
+            authToken: userCtx.authToken,
+            resource: {
+                id: props.resourceId,
+                type: props.resourceType,
+            },
+        };
         const sockConf: Partial<ManagerOptions & SocketOptions> = {
             path: '/socket',
+            auth: auth,
         };
         return new SocketIOProvider(SOCKET_URL, props.textBlockId, doc, pConf, sockConf);
     });
@@ -49,7 +87,6 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     const fileUploader = useFileUploader();
 
     useEffect(() => {
-        socketIOProvider.awareness.on('change', () => setClients(Array.from(socketIOProvider.awareness.getStates().keys()).map((key) => `${key}`)));
         socketIOProvider.on('status', ({ status: _status }: { status: string }) => {
             setStatus(_status);
         });
@@ -60,30 +97,62 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
 
     useEffect(() => {
         socketIOProvider.awareness.setLocalStateField('user', {
-            name: props.name || 'Unknown User',
-            color: props.idle ? IDLE_COLOR : (imgColor ?? props.color ?? 'black'),
+            name: name,
+            color: idle ? IDLE_COLOR : (pfpColor ?? '#ffffff'),
         });
-    }, [socketIOProvider, imgColor, props.color, props.idle, props.name]);
+    }, [socketIOProvider, pfpColor, idle, name]);
 
     const editor = useCreateBlockNote({
         collaboration: {
             provider: socketIOProvider,
-            fragment: doc.getXmlFragment('document-store'),
+            fragment: doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID),
             user: {
-                name: props.name || 'Unknown User',
-                color: props.idle ? IDLE_COLOR : (imgColor ?? props.color ?? 'black'),
+                name: name,
+                color: idle ? IDLE_COLOR : (pfpColor ?? '#ffffff'),
             },
             showCursorLabels: 'activity',
         },
         uploadFile: fileUploader.uploadFile,
     });
 
+    useEffect(() => {
+        if (editor) {
+            editor.isEditable = !props.viewOnly || ALLOW_ANYONE_TO_EDIT;
+        }
+    }, [editor, props.viewOnly]);
+
+    useEffect(() => {
+        setThrottledSyncState(socketIOProvider.synced);
+    }, [socketIOProvider.synced]);
+
     return (
-        <div>
-            <p>
-                Status: {status} | Active Users: {clients.join(', ')} | Synced: {socketIOProvider.synced.toString()}
-            </p>
+        <Stack>
+            {!props.viewOnly && showAlerts && status !== 'connected' && (
+                <Alert
+                    title="Disconnected!"
+                    color="red"
+                >
+                    It seems you are disconnected from the server. Your changes might not be saved.
+                </Alert>
+            )}
+            {!props.viewOnly && showAlerts && throttledSyncState === false && (
+                <Alert
+                    title="Syncing..."
+                    color="yellow"
+                >
+                    The document is syncing with the server. Some changes might not be visible to other collaborators yet.
+                </Alert>
+            )}
+            <Group justify="flex-end">
+                <AvatarRow
+                    users={Array.from(roomUserIds.values())}
+                    maxUsers={5}
+                    showTooltip
+                    showProfilePopover
+                    animateOnHover
+                />
+            </Group>
             <BlockNoteView editor={editor} />
-        </div>
+        </Stack>
     );
 };

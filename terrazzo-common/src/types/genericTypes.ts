@@ -17,3 +17,7 @@ export type RoleId = UID;
 export type UploadedFileId = UID;
 
 export type Position = { x: number; y: number };
+
+export type JSONType = string | number | boolean | null | JSONObject | JSONArray;
+export type JSONObject = { [key: string]: JSONType };
+export type JSONArray = JSONType[];

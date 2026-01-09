@@ -1,9 +1,9 @@
 import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
 import { syncUserJoinedRoom, syncUserLeftRoom } from '@trz-api/broadcasters/realtimeBroadcasters';
-import { startAuthenticatedSession } from '@trz-api/controllers/authController';
+import { signInWithExistingAuth } from '@trz-api/controllers/authController';
 import { Socket } from 'socket.io';
 import { SocketManager } from './socketManager';
-import { SocketData } from './socketTypes';
+import { SocketData, YSocketData } from './socketTypes';
 
 /**
  * Gets all rooms the socket is currently in, excluding its own personal room.
@@ -120,7 +120,20 @@ export const getSocketData = (socket: Socket) => {
  * Sets the Terrazzo-specific data stored on the socket.
  */
 export const setSocketData = (socket: Socket, data: SocketData) => {
-    // TODO validate each field before setting to ensure no data corruption or injection
+    (socket as any).terrazzoSocketData = data;
+};
+
+/**
+ * Gets the Terrazzo-specific data stored on the socket.
+ */
+export const getYSocketData = (socket: Socket) => {
+    return (socket as any).terrazzoSocketData as YSocketData | undefined;
+};
+
+/**
+ * Sets the Terrazzo-specific data stored on the socket.
+ */
+export const setYSocketData = (socket: Socket, data: YSocketData) => {
     (socket as any).terrazzoSocketData = data;
 };
 
@@ -132,7 +145,7 @@ export const joinRoom = async (socket: Socket, room: RoomId): Promise<UserData[]
     if (room && typeof room === 'string') {
         const rooms = getSocketRooms(socket);
         if (!rooms || rooms.find((r) => r === room)) {
-            console.warn(`Socket ${socket.id} tried to join its own room ${room}`);
+            // console.warn(`Socket ${socket.id} tried to join its own room ${room}`);
             return [];
         }
         const roomUsers = await getUsersInRoom(room);
@@ -143,7 +156,7 @@ export const joinRoom = async (socket: Socket, room: RoomId): Promise<UserData[]
         socket.join(room);
         return roomUsers;
     }
-    console.warn(`Socket ${socket.id} tried to join an invalid room ${room}`);
+    // console.warn(`Socket ${socket.id} tried to join an invalid room ${room}`);
     return [];
 };
 
@@ -154,7 +167,7 @@ export const leaveRoom = async (socket: Socket, room: RoomId) => {
     if (room) {
         const rooms = getSocketRooms(socket);
         if (!rooms || !rooms.find((r) => r === room)) {
-            console.warn(`Socket ${socket.id} tried to leave room ${room} its not in`);
+            // console.warn(`Socket ${socket.id} tried to leave room ${room} its not in`);
             return;
         }
         socket.leave(room);
@@ -196,16 +209,14 @@ export const subscribe = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (d
 export const initializeSocketData = async (socket: Socket): Promise<SocketData> => {
     try {
         const auth: SocketHandshakeAuth = socket.handshake.auth as any;
+        const authSession = await getValidAuthSessionFromSocketHandshake(auth);
         let userData: UserData | undefined = undefined;
-        if (auth.userId && auth.authToken) {
-            const authSession = await startAuthenticatedSession(auth.userId);
-            if (authSession) {
-                userData = {
-                    sid: socket.id,
-                    idle: false,
-                    userId: authSession.userId,
-                };
-            }
+        if (authSession) {
+            userData = {
+                sid: socket.id,
+                idle: false,
+                userId: authSession.userId,
+            };
         }
 
         const socketData: SocketData = {
@@ -217,7 +228,14 @@ export const initializeSocketData = async (socket: Socket): Promise<SocketData> 
         return socketData;
     } catch (error) {
         console.error('Error initializing socket data for ' + socket.id, error);
-        socket.disconnect(true);
         throw error;
     }
+};
+
+export const getValidAuthSessionFromSocketHandshake = async (auth: SocketHandshakeAuth) => {
+    if (auth.userId && auth.authToken) {
+        const authSession = await signInWithExistingAuth({ userId: auth.userId, trzAuthToken: auth.authToken });
+        return authSession;
+    }
+    return undefined;
 };
