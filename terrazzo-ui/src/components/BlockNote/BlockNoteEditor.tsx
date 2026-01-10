@@ -1,28 +1,16 @@
-import { codeBlockOptions } from '@blocknote/code-block';
-import { BlockNoteSchema, createCodeBlockSpec } from '@blocknote/core';
 import '@blocknote/core/fonts/inter.css';
-import { en } from '@blocknote/core/locales';
-import { BlockNoteView, darkDefaultTheme, lightDefaultTheme, Theme } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
-import { useCreateBlockNote } from '@blocknote/react';
-import { Alert, Group, Stack } from '@mantine/core';
 import { useIdle, useThrottledState } from '@mantine/hooks';
-import { BLOCKNOTE_FRAGMENT_ID, fullName, RoomType, TextBlockId, TextSocketHandshakeAuth, UID, UserId } from '@mosaiq/terrazzo-common';
+import { fullName, TextBlockId, TextSocketHandshakeAuth, UID } from '@mosaiq/terrazzo-common';
 import { useUserContext } from '@trz/contexts/user-context';
-import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { useMe } from '@trz/hooks/useMe';
-import { useRoom } from '@trz/hooks/useRoom';
 import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
 import { useEffect, useMemo, useState } from 'react';
 import { ManagerOptions, SocketOptions } from 'socket.io-client';
 import { ProviderConfiguration, SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
-import { AvatarRow } from '../UI/AvatarRow';
-import './BlockNoteStyleOverrides.css';
-
-/** DANGER! Allows anyone to edit the document regardless of permissions. Only for testing server-side auth */
-const ALLOW_ANYONE_TO_EDIT = false;
+import { BaseBlockNoteEditor } from './BaseBlockNoteEditor';
 
 const IDLE_COLOR = '#afafaf';
 
@@ -34,94 +22,24 @@ enum YSOCKET_STATUS_CODE {
 }
 
 const SOCKET_URL = import.meta.env.SOCKET_URL;
-if (!SOCKET_URL) throw new Error('SOCKET_URL environment variable is not set');
-
-const sharedTheme: Theme = {
-    borderRadius: 4,
-    fontFamily: 'Helvetica Neue, sans-serif',
-};
-
-const lightTheme: Theme = {
-    ...sharedTheme,
-    colors: {
-        editor: {
-            text: '#222222',
-            background: '#ffeeee',
-        },
-        menu: {
-            text: '#ffffff',
-            background: '#9b0000',
-        },
-        tooltip: {
-            text: '#ffffff',
-            background: '#b00000',
-        },
-        hovered: {
-            text: '#ffffff',
-            background: '#b00000',
-        },
-        selected: {
-            text: '#ffffff',
-            background: '#c50000',
-        },
-        disabled: {
-            text: '#9b0000',
-            background: '#7d0000',
-        },
-        shadow: '#640000',
-        border: '#870000',
-        sideMenu: '#bababa',
-        highlights: lightDefaultTheme.colors.highlights,
-    },
-};
-
-const darkTheme: Theme = {
-    ...sharedTheme,
-    colors: {
-        editor: {
-            text: '#ffffff',
-            background: '#00000000',
-        },
-        menu: {
-            text: '#ffffff',
-            background: '#17191b',
-        },
-        tooltip: {
-            text: '#ffffff',
-            background: '#17191b',
-        },
-        hovered: {
-            text: '#ffffff',
-            background: '#17191b',
-        },
-        selected: {
-            text: '#ffffff',
-            background: '#484f57',
-        },
-        disabled: {
-            text: '#34373b',
-            background: '#00000040',
-        },
-        shadow: '#00000000',
-        border: '#828282',
-        sideMenu: '#828282',
-        highlights: darkDefaultTheme.colors.highlights,
-    },
-};
-
-const theme = {
-    light: lightTheme,
-    dark: darkTheme,
-};
 
 interface BlockNoteEditorProps {
+    /** The ID of the text block to be edited */
     textBlockId: TextBlockId;
+    /** Optional font size for the editor */
     fontSize?: number;
+    /** Optional placeholder text for the editor */
     placeholder?: string;
+    /** Whether the editor should be in view-only mode */
     viewOnly?: boolean;
+    /** The resource (doc, card, etc..) ID associated with the text block */
     resourceId: UID;
+    /** The resource (doc, card, etc..) type associated with the text block */
     resourceType: TextSocketHandshakeAuth['resource']['type'];
 }
+/**
+ * Full BlockNote Editor component that creates its own socket for collaboration
+ */
 export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     const userCtx = useUserContext();
     const me = useMe();
@@ -130,27 +48,18 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     const idle = useIdle(IDLE_TIMEOUT_MS);
     const name = fullName(me);
     const [throttledSyncState, setThrottledSyncState] = useThrottledState<boolean | undefined>(undefined, 500);
-    const [showAlerts, setShowAlerts] = useState(false);
-    const [roomUsers] = useRoom(RoomType.TEXT, props.textBlockId, undefined, true);
-    const roomUserIds = useMemo(() => {
-        const ids: Set<UserId> = new Set();
-        if (me) {
-            ids.add(me.id);
-        }
-        roomUsers.forEach((u) => ids.add(u.userId));
-        return ids;
-    }, [roomUsers.values(), me]);
+    const userColor = useMemo(() => {
+        return idle ? IDLE_COLOR : (pfpColor ?? '#ffffff');
+    }, [idle, pfpColor]);
 
-    // Wait 5 seconds before allowing alerts to show
+    const [provider, setProvider] = useState<{ doc: Y.Doc; socket: SocketIOProvider } | undefined>(undefined);
+
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setShowAlerts(true);
-        }, 5000);
-        return () => clearTimeout(timer);
-    }, []);
+        setProvider(undefined);
+        setStatus('connecting');
+        setThrottledSyncState(undefined);
 
-    const [doc] = useState(() => new Y.Doc());
-    const [socketIOProvider] = useState(() => {
+        const doc = new Y.Doc();
         const pConf: ProviderConfiguration = {
             autoConnect: true,
         };
@@ -166,101 +75,50 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
             path: '/socket',
             auth: auth,
         };
-        return new SocketIOProvider(SOCKET_URL, props.textBlockId, doc, pConf, sockConf);
-    });
+        const socketIOProvider = new SocketIOProvider(SOCKET_URL, props.textBlockId, doc, pConf, sockConf);
 
-    const fileUploader = useFileUploader();
-
-    useEffect(() => {
         socketIOProvider.on('status', ({ status: _status }: { status: string }) => {
             setStatus(_status);
         });
+        setProvider({ doc, socket: socketIOProvider });
+
         return () => {
+            doc.destroy();
             socketIOProvider.destroy();
         };
-    }, [socketIOProvider]);
+    }, [userCtx.userId, userCtx.authToken, props.resourceId, props.resourceType, props.textBlockId]);
 
     useEffect(() => {
-        socketIOProvider.awareness.setLocalStateField('user', {
-            name: name,
-            color: idle ? IDLE_COLOR : (pfpColor ?? '#ffffff'),
-        });
-    }, [socketIOProvider, pfpColor, idle, name]);
-
-    const locale = en;
-    const editor = useCreateBlockNote({
-        collaboration: {
-            provider: socketIOProvider,
-            fragment: doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID),
-            user: {
-                name: name,
-                color: idle ? IDLE_COLOR : (pfpColor ?? '#ffffff'),
-            },
-            showCursorLabels: 'activity',
-        },
-        uploadFile: fileUploader.uploadFile,
-        schema: BlockNoteSchema.create().extend({
-            blockSpecs: {
-                codeBlock: createCodeBlockSpec(codeBlockOptions),
-            },
-        }),
-        placeholders: {
-            ...locale.placeholders,
-            emptyDocument: props.placeholder || locale.placeholders.emptyDocument,
-        },
-    });
-
-    useEffect(() => {
-        if (editor) {
-            editor.isEditable = !props.viewOnly || ALLOW_ANYONE_TO_EDIT;
+        if (!provider) {
+            return;
         }
-    }, [editor, props.viewOnly]);
+        provider.socket.awareness.setLocalStateField('user', {
+            name: name,
+            color: userColor,
+        });
+    }, [provider?.socket, userColor, name]);
 
     useEffect(() => {
-        setThrottledSyncState(socketIOProvider.synced);
-    }, [socketIOProvider.synced]);
+        setThrottledSyncState(provider?.socket.synced);
+    }, [provider?.socket.synced]);
+
+    if (!provider) {
+        return null;
+    }
 
     return (
-        <Stack>
-            {!props.viewOnly &&
-                showAlerts &&
-                (status !== 'connected' ? (
-                    <Alert
-                        title="Disconnected!"
-                        color="red"
-                    >
-                        It seems you are disconnected from the server. Your changes might not be saved.
-                    </Alert>
-                ) : throttledSyncState === undefined ? (
-                    <Alert
-                        title="Connecting..."
-                        color="blue"
-                    >
-                        Establishing connection to the server...
-                    </Alert>
-                ) : (
-                    throttledSyncState === false && (
-                        <Alert
-                            title="Syncing..."
-                            color="yellow"
-                        >
-                            The document is syncing with the server. Some changes might not be visible to other collaborators yet.
-                        </Alert>
-                    )
-                ))}
-            <Group justify="flex-end">
-                <AvatarRow
-                    users={Array.from(roomUserIds.values())}
-                    maxUsers={5}
-                    showTooltip
-                    showProfilePopover
-                    animateOnHover
-                />
-            </Group>
-            <BlockNoteView
-                editor={editor}
-                theme={theme}
-            />
-        </Stack>
+        <BaseBlockNoteEditor
+            key={props.textBlockId}
+            socketIOProvider={provider.socket}
+            doc={provider.doc}
+            textBlockId={props.textBlockId}
+            placeholder={props.placeholder}
+            viewOnly={props.viewOnly}
+            myId={userCtx.userId}
+            myName={name}
+            pfpColor={userColor}
+            syncStatus={throttledSyncState}
+            connectionStatus={status}
+        />
     );
 };

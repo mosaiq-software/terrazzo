@@ -18,7 +18,7 @@
     "license": "UNLICENSED",
     "dependencies": {
         "@ashwamegh/react-link-preview": "^1.0.1",
-        "@blocknote/code-block": "^0.46.0",
+        "@blocknote/code-block": "^0.45.0",
         "@blocknote/core": "^0.45.0",
         "@blocknote/mantine": "^0.45.0",
         "@blocknote/react": "^0.45.0",
