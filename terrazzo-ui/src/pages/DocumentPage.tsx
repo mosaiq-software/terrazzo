@@ -111,7 +111,7 @@ const DocumentPage = (): React.JSX.Element => {
                         </Group>
                         <BlockNoteEditor
                             textBlockId={document.textBlockId}
-                            placeholder="Start writing or hit / for commands..."
+                            placeholder="Start writing your document or hit '/' for commands..."
                             viewOnly={!userCanEditDocument}
                             resourceType="document"
                             resourceId={document.id}
