@@ -41,5 +41,16 @@ export const useOrgMembers = (orgId?: OrganizationId) => {
         [orgId]
     );
 
+    useSocketListener(ServerSE.UPDATE_USER_FIELD, (payload) => {
+        setMembers((prevMembers) =>
+            prevMembers.map((mem) => {
+                if (mem.userId === payload.id) {
+                    return { ...mem, user: { ...mem.user, ...payload } };
+                }
+                return mem;
+            })
+        );
+    });
+
     return members;
 };
