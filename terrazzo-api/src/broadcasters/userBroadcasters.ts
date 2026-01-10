@@ -29,9 +29,11 @@ export const syncUsersOrgs = async (userId: UserId) => {
  */
 export const syncUpdateUserField = async (userId: UserId, updates: Partial<UserHeader> & { id: UserId }) => {
     try {
+        const usersOrgs = await getOrgsForUser(userId);
+        const orgRoomCodes = usersOrgs.map((org) => getRoomCode(RoomType.DATA, org.id));
         broadcast({
             event: ServerSE.UPDATE_USER_FIELD,
-            toRoomIds: [getRoomCode(RoomType.DATA, userId), getRoomCode(RoomType.USER, userId)],
+            toRoomIds: [getRoomCode(RoomType.DATA, userId), getRoomCode(RoomType.USER, userId), ...orgRoomCodes],
             buildPayload: async (userId) => {
                 // A users header is viewable by all users, so no permission check is needed here
                 return updates;
