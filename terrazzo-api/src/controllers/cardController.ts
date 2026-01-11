@@ -1,9 +1,26 @@
-import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
+import {
+    Card,
+    CardHeader,
+    CardId,
+    LabelId,
+    ListId,
+    TextBlockId,
+    updateBaseFromPartial,
+    UserId,
+} from '@mosaiq/terrazzo-common';
 import { syncAddCard, syncMovedCard, syncUpdateCardField } from '@trz-api/broadcasters';
 import { syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
-import { createCardOnListDb, getCardByIdDb, getCardsByListIdDownDb, getCardsByListIdShortUpDb, updateCardDb, updateCardListDb, updateCardOrderDb } from '@trz-api/persistence/cardPersistence';
+import {
+    createCardOnListDb,
+    getCardByIdDb,
+    getCardsByListIdDownDb,
+    getCardsByListIdShortUpDb,
+    updateCardDb,
+    updateCardListDb,
+    updateCardOrderDb,
+} from '@trz-api/persistence/cardPersistence';
 import { addLabelToCardDb, deleteLabelsOnCardDb, getLabelsOnCardDb } from '@trz-api/persistence/labelPersistence';
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { getTextBlockByIdDb } from '@trz-api/persistence/textBlockPersistence';
@@ -66,7 +83,13 @@ export async function getSingleFullCard(cardId: CardId): Promise<Card | undefine
  * @param listID
  * @param cardName
  */
-export async function addCard(listID: ListId, cardName: string, description?: string, explicitCardNumber?: number, createdById?: UserId) {
+export async function addCard(
+    listID: ListId,
+    cardName: string,
+    description?: string,
+    explicitCardNumber?: number,
+    createdById?: UserId
+) {
     //pull board from db with ID
     const updatingList = await getListByIdDb(listID);
 

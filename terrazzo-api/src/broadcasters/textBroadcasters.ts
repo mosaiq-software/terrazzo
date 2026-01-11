@@ -2,7 +2,11 @@ import { getRoomCode, RoomType, ServerSE, TextBlockId, TextBlockResourceType, UI
 import { checkCanUserEditTextBlock, getTextBlockSnapshotsWithContent } from '@trz-api/controllers/textBlockController';
 import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
-export const syncTextHistorySnapshots = async (textBlockId: TextBlockId, resourceId: UID, resourceType: TextBlockResourceType) => {
+export const syncTextHistorySnapshots = async (
+    textBlockId: TextBlockId,
+    resourceId: UID,
+    resourceType: TextBlockResourceType
+) => {
     try {
         const snapshots = await getTextBlockSnapshotsWithContent(textBlockId);
         broadcast({

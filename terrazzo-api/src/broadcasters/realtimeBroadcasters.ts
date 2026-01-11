@@ -1,4 +1,14 @@
-import { BoardId, getRoomCode, MouseRoomUserData, NonEmptyArray, RoomId, RoomType, ServerSE, SocketId, UserData } from '@mosaiq/terrazzo-common';
+import {
+    BoardId,
+    getRoomCode,
+    MouseRoomUserData,
+    NonEmptyArray,
+    RoomId,
+    RoomType,
+    ServerSE,
+    SocketId,
+    UserData,
+} from '@mosaiq/terrazzo-common';
 import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
 export const syncUserJoinedRoom = async (roomId: RoomId, userData: UserData) => {

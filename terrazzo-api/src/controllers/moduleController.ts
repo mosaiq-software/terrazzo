@@ -1,5 +1,17 @@
-import { calculateModuleEffectivePermissions, ModuleHeader, ModulePermissions, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
-import { createModuleDb, getModuleByIdDb, getModulesByParentIdDb, getNextModuleOrderInParentDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
+import {
+    calculateModuleEffectivePermissions,
+    ModuleHeader,
+    ModulePermissions,
+    TrzModuleType,
+    UID,
+} from '@mosaiq/terrazzo-common';
+import {
+    createModuleDb,
+    getModuleByIdDb,
+    getModulesByParentIdDb,
+    getNextModuleOrderInParentDb,
+    updateModuleDb,
+} from '@trz-api/persistence/modulePersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 
 export const createNewModule = async (name: string, parentId: UID, type: TrzModuleType): Promise<ModuleHeader> => {
@@ -67,10 +79,16 @@ const updateModulePermissions = async (id: UID, desiredPermissions: ModulePermis
     await recursivelyUpdateModuleEffectivePermissions(id, newEffectivePermissions);
 };
 
-const recursivelyUpdateModuleEffectivePermissions = async (id: UID, parentEffectivePermissions: ModulePermissions): Promise<void> => {
+const recursivelyUpdateModuleEffectivePermissions = async (
+    id: UID,
+    parentEffectivePermissions: ModulePermissions
+): Promise<void> => {
     const childModules = await getModulesByParentIdDb(id);
     for (const childModule of childModules) {
-        const newEffectivePermissions = calculateModuleEffectivePermissions(parentEffectivePermissions, childModule.desiredPermissions);
+        const newEffectivePermissions = calculateModuleEffectivePermissions(
+            parentEffectivePermissions,
+            childModule.desiredPermissions
+        );
         await updateModuleDb(childModule.id, {
             effectivePermissions: newEffectivePermissions,
         });

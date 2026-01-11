@@ -1,5 +1,9 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { addOrganization, getOrganizationPreview, updateOrganizationFromPartial } from '@trz-api/controllers/organizationController';
+import {
+    addOrganization,
+    getOrganizationPreview,
+    updateOrganizationFromPartial,
+} from '@trz-api/controllers/organizationController';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
 import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';

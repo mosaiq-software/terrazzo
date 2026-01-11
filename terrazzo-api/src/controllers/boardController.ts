@@ -1,9 +1,32 @@
-import { BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, ListId, TrelloExportType, TrelloLabelColorsMap, TrzModuleType } from '@mosaiq/terrazzo-common';
+import {
+    BoardHeader,
+    BoardId,
+    BoardRes,
+    DirectoryId,
+    Label,
+    LabelId,
+    ListId,
+    TrelloExportType,
+    TrelloLabelColorsMap,
+    TrzModuleType,
+} from '@mosaiq/terrazzo-common';
 import { syncBoardFields, syncDirectoryContents, syncParentsDirectoryContents } from '@trz-api/broadcasters';
 import { syncBoardLabels } from '@trz-api/broadcasters/labelBroadcaster';
-import { addList, getListAndCardIdsOnBoard, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
+import {
+    addList,
+    getListAndCardIdsOnBoard,
+    moveList,
+    updateListFromPartial,
+} from '@trz-api/controllers/listController';
 import { BoardModelType, createBoardDb, getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
-import { createLabelOnBoardDb, deleteLabelDb, deleteLabelingOnCardsByLabelIdDb, getLabelByIdDb, getLabelsByBoardIdDb, updateLabelDb } from '@trz-api/persistence/labelPersistence';
+import {
+    createLabelOnBoardDb,
+    deleteLabelDb,
+    deleteLabelingOnCardsByLabelIdDb,
+    getLabelByIdDb,
+    getLabelsByBoardIdDb,
+    updateLabelDb,
+} from '@trz-api/persistence/labelPersistence';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
 
@@ -142,7 +165,11 @@ export const createTerrazzoBoardFromTrelloBoard = async (onParentId: DirectoryId
         }
 
         for (const trlLabel of trelloBoard.labels) {
-            const labelId = await createBoardLabelSingle(trzBoardId, trlLabel.name, TrelloLabelColorsMap[trlLabel.color]);
+            const labelId = await createBoardLabelSingle(
+                trzBoardId,
+                trlLabel.name,
+                TrelloLabelColorsMap[trlLabel.color]
+            );
             labelMap[trlLabel.id] = labelId;
         }
 

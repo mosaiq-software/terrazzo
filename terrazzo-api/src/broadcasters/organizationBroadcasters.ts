@@ -2,7 +2,10 @@ import { getRoomCode, OrganizationHeader, OrganizationId, RoomType, ServerSE } f
 import { userCanViewOrganization } from '@trz-api/utils/permissions';
 import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
-export const syncUpdateOrgField = async (orgId: OrganizationId, updates: Partial<OrganizationHeader> & { id: OrganizationId }) => {
+export const syncUpdateOrgField = async (
+    orgId: OrganizationId,
+    updates: Partial<OrganizationHeader> & { id: OrganizationId }
+) => {
     try {
         broadcast({
             event: ServerSE.UPDATE_ORG_FIELD,

@@ -1,6 +1,12 @@
 import { Member, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
 import { syncMembersInOrg, syncUsersOrgs } from '@trz-api/broadcasters';
-import { createOrganizationMembershipDb, deleteOrganizationMembershipDb, getOrganizationMembershipDb, getOrganizationMembershipsForOrgDb, getOrganizationMembershipsForUserDb } from '@trz-api/persistence/organizationMembershipPersistence';
+import {
+    createOrganizationMembershipDb,
+    deleteOrganizationMembershipDb,
+    getOrganizationMembershipDb,
+    getOrganizationMembershipsForOrgDb,
+    getOrganizationMembershipsForUserDb,
+} from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';

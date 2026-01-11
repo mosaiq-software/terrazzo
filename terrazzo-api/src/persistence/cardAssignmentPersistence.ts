@@ -30,7 +30,10 @@ export const getCardAssignmentsForCardDb = async (cardId: CardId): Promise<UserI
     return models.map((asn) => asn.toJSON().userId);
 };
 
-export const getCardAssignmentRecordsForUserOnCardDb = async (userId: UserId, cardId: CardId): Promise<CardAssignment[]> => {
+export const getCardAssignmentRecordsForUserOnCardDb = async (
+    userId: UserId,
+    cardId: CardId
+): Promise<CardAssignment[]> => {
     const models = await CardAssignmentModel.findAll({ where: { cardId, userId } });
     return models.map((asn) => asn.toJSON());
 };

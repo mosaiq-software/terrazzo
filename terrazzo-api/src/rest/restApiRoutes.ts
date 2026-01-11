@@ -1,5 +1,16 @@
-import { LinkedAccountProvider, RestRequestBody, RestRequestParams, RestResponse, RestRoutes, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
-import { handleAuthProviderCallback, signInWithExistingAuth, startAuthenticatedSession } from '@trz-api/controllers/authController';
+import {
+    LinkedAccountProvider,
+    RestRequestBody,
+    RestRequestParams,
+    RestResponse,
+    RestRoutes,
+    TEMPORARY_ID,
+} from '@mosaiq/terrazzo-common';
+import {
+    handleAuthProviderCallback,
+    signInWithExistingAuth,
+    startAuthenticatedSession,
+} from '@trz-api/controllers/authController';
 import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
 import { addLinkedAccountToUser } from '@trz-api/controllers/linkedAccountController';
 import { DEV_upsertFakeUser } from '@trz-api/controllers/userController';
@@ -53,7 +64,8 @@ router.post(RestRoutes.USER_FAKE_DEV, async (req, res) => {
 });
 
 router.post(RestRoutes.IMPORT_FROM_TRELLO, async (req, res) => {
-    const params: RestRequestParams[RestRoutes.IMPORT_FROM_TRELLO] = req.params as RestRequestParams[RestRoutes.IMPORT_FROM_TRELLO];
+    const params: RestRequestParams[RestRoutes.IMPORT_FROM_TRELLO] =
+        req.params as RestRequestParams[RestRoutes.IMPORT_FROM_TRELLO];
     const body: RestRequestBody[RestRoutes.IMPORT_FROM_TRELLO] = req.body;
     try {
         const boardId = await createTerrazzoBoardFromTrelloBoard(params.parentId, body);

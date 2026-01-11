@@ -1,6 +1,13 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
 import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/cardAssignmentController';
-import { addCard, duplicateCard, getBoardIDFromCardID, getSingleFullCard, moveCardToList, updateCardFromPartial } from '@trz-api/controllers/cardController';
+import {
+    addCard,
+    duplicateCard,
+    getBoardIDFromCardID,
+    getSingleFullCard,
+    moveCardToList,
+    updateCardFromPartial,
+} from '@trz-api/controllers/cardController';
 import { getBoardIDFromListID } from '@trz-api/controllers/listController';
 import { userCanEditCard, userCanMoveCardsOnBoard, userCanViewBoard } from '@trz-api/utils/permissions';
 import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';

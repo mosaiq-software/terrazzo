@@ -1,4 +1,11 @@
-import { OrganizationHeader, OrganizationId, PermissionFlag, recordValues, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
+import {
+    OrganizationHeader,
+    OrganizationId,
+    PermissionFlag,
+    recordValues,
+    updateBaseFromPartial,
+    UserId,
+} from '@mosaiq/terrazzo-common';
 import { syncUpdateOrgField } from '@trz-api/broadcasters';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
@@ -47,7 +54,10 @@ export async function addOrganization(name: string, creator: UserId) {
 const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
     // create default roles
     const adminRole = await createRole('Admin', '#D31757', orgId, recordValues(PermissionFlag));
-    const guest = await createRole('Guest', '#2384CA', orgId, [PermissionFlag.VIEW_BOARD, PermissionFlag.VIEW_DOCUMENT]);
+    const guest = await createRole('Guest', '#2384CA', orgId, [
+        PermissionFlag.VIEW_BOARD,
+        PermissionFlag.VIEW_DOCUMENT,
+    ]);
 
     // assign admin role to creator
     await setRoleIdsForUserInOrgDb(creator, orgId, [adminRole.id]);
@@ -62,7 +72,11 @@ export const userIsValidMemberOfOrg = async (userId: UserId, orgId: Organization
     return !!orgMembership;
 };
 
-export async function updateOrganizationFromPartial(orgId: OrganizationId, partial: Partial<OrganizationHeader>, updatedBy?: UserId) {
+export async function updateOrganizationFromPartial(
+    orgId: OrganizationId,
+    partial: Partial<OrganizationHeader>,
+    updatedBy?: UserId
+) {
     const updatingOrg = await getOrgByIdDb(orgId);
     if (updatingOrg == null) {
         throw new Error('Org not found');

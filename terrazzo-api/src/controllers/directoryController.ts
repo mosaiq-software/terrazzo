@@ -1,6 +1,11 @@
 import { DirectoryHeader, DirectoryId, ModuleHeader, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common';
 import { syncDirectoryContents, syncDirectoryField } from '@trz-api/broadcasters';
-import { createDirectoryDb, DirectoryModelType, getDirectoryByIdDb, updateDirectoryDb } from '@trz-api/persistence/directoryPersistence';
+import {
+    createDirectoryDb,
+    DirectoryModelType,
+    getDirectoryByIdDb,
+    updateDirectoryDb,
+} from '@trz-api/persistence/directoryPersistence';
 import { getModulesByParentIdDb } from '@trz-api/persistence/modulePersistence';
 import { userCanViewBoard, userCanViewDirectory, userCanViewDocument } from '@trz-api/utils/permissions';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
@@ -47,7 +52,10 @@ export const updateDirectory = async (id: DirectoryId, header: Partial<Directory
     await syncDirectoryContents(updatedDir.parentId);
 };
 
-export const getDirectoryContentsForUser = async (dirId: DirectoryId, userId: UserId): Promise<(ModuleHeader & { canAccess: boolean })[]> => {
+export const getDirectoryContentsForUser = async (
+    dirId: DirectoryId,
+    userId: UserId
+): Promise<(ModuleHeader & { canAccess: boolean })[]> => {
     const modules = await getModulesByParentIdDb(dirId);
     const canAccessModules: (ModuleHeader & { canAccess: boolean })[] = await Promise.all(
         modules.map(async (mod) => {

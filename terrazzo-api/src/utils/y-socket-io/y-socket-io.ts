@@ -30,8 +30,20 @@
  *    sends the update to clients connected to the document namespace.
  */
 
-import { ServerSocketIOEvent, TextBlockId, TextBlockResourceType, TextSocketHandshakeAuth, UID, UserId, YjsEvent } from '@mosaiq/terrazzo-common';
-import { checkCanUserEditTextBlock, loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
+import {
+    ServerSocketIOEvent,
+    TextBlockId,
+    TextBlockResourceType,
+    TextSocketHandshakeAuth,
+    UID,
+    UserId,
+    YjsEvent,
+} from '@mosaiq/terrazzo-common';
+import {
+    checkCanUserEditTextBlock,
+    loadTextBlockEncodedData,
+    storeTextBlockEncodedData,
+} from '@trz-api/controllers/textBlockController';
 import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
@@ -71,7 +83,11 @@ export class YSocketIO extends Observable<string> {
             const textBlockId = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
             const auth = socket.handshake.auth as TextSocketHandshakeAuth;
             const authSession = await getValidAuthSessionFromSocketHandshake(auth);
-            const authorizedTextBlockId = await checkCanUserEditTextBlock(auth.userId, auth.resourceId, auth.resourceType);
+            const authorizedTextBlockId = await checkCanUserEditTextBlock(
+                auth.userId,
+                auth.resourceId,
+                auth.resourceType
+            );
             const canEdit = !!authSession?.userId && !!authorizedTextBlockId && authorizedTextBlockId === textBlockId;
 
             const sockData: YSocketData = {
@@ -134,7 +150,12 @@ export class YSocketIO extends Observable<string> {
      *      - Adds the new document to the documents map.
      *      - Emit the `document-loaded` event
      */
-    private async initDocument(textBlockId: TextBlockId, resourceId: UID, resourceType: TextBlockResourceType, namespace: Namespace): Promise<Document> {
+    private async initDocument(
+        textBlockId: TextBlockId,
+        resourceId: UID,
+        resourceType: TextBlockResourceType,
+        namespace: Namespace
+    ): Promise<Document> {
         const existingDoc = this._documents.get(textBlockId);
         if (existingDoc) {
             return existingDoc;
@@ -202,7 +223,9 @@ export class YSocketIO extends Observable<string> {
                 return sockData?.canEdit;
             });
             if (socketsWithEditPermissions.length === 0) {
-                console.log(`No more sockets with edit permissions connected to document ${doc.textBlockId}. Saving and destroying document.`);
+                console.log(
+                    `No more sockets with edit permissions connected to document ${doc.textBlockId}. Saving and destroying document.`
+                );
 
                 // Cancel pending timer to force immediate save
                 if (doc.saveTimer) {
