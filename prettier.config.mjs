@@ -9,7 +9,7 @@ const PrettierConfig = {
     useTabs: false,
     endOfLine: 'auto',
     singleAttributePerLine: true,
-    printWidth: 999999,
+    printWidth: 120,
 };
 
 export default PrettierConfig;

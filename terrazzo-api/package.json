@@ -9,6 +9,10 @@
         "start:prod": "npm run common:prod && npm run start",
         "lint": "eslint .",
         "types": "tsc --noemit",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "test:run": "vitest run",
+        "test:coverage": "vitest run --coverage",
         "update": "git fetch origin develop && git merge origin/develop",
         "common:prod": "npm un @mosaiq/terrazzo-common && npm i @mosaiq/terrazzo-common@latest",
         "common:dev": "npm un @mosaiq/terrazzo-common && npm i ../terrazzo-common/dist"
@@ -41,8 +45,10 @@
         "@types/diff": "^7.0.2",
         "@types/express": "^5.0.0",
         "@types/node": "^22.10.2",
+        "@vitest/ui": "^4.0.16",
         "eslint": "^9.21.0",
         "globals": "^16.0.0",
-        "typescript-eslint": "^8.24.1"
+        "typescript-eslint": "^8.24.1",
+        "vitest": "^4.0.16"
     }
 }
