@@ -242,7 +242,7 @@ export class YSocketIO extends Observable<string> {
 
                 // Final save before destroy
                 try {
-                    await storeTextBlockEncodedData(doc);
+                    await storeTextBlockEncodedData(doc, true);
                 } catch (error) {
                     console.error(`Final save failed for ${doc.textBlockId}:`, error);
                 }

@@ -59,9 +59,9 @@ export const checkCanUserEditTextBlock = async (
 
 const BLOCKNOTE_EDITOR = ServerBlockNoteEditor.create();
 
-const SNAPSHOT_INTERVAL_MS = 1; //5 * 60 * 1000; // 5 minutes
+const SNAPSHOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 
-export const storeTextBlockEncodedData = async (doc: Document): Promise<void> => {
+export const storeTextBlockEncodedData = async (doc: Document, forceSnapshot?: boolean): Promise<void> => {
     try {
         const { textBlockId, resourceId, resourceType } = doc;
         const textBlock = await getTextBlockByIdDb(textBlockId);
@@ -88,8 +88,8 @@ export const storeTextBlockEncodedData = async (doc: Document): Promise<void> =>
         const now = Date.now();
         if (
             textBlock.trackHistory &&
-            textBlock.lastSnapshotAt !== undefined &&
-            now - textBlock.lastSnapshotAt >= SNAPSHOT_INTERVAL_MS
+            ((textBlock.lastSnapshotAt !== undefined && now - textBlock.lastSnapshotAt >= SNAPSHOT_INTERVAL_MS) ||
+                forceSnapshot)
         ) {
             await updateTextBlockDb(textBlockId, { text: content, lastSnapshotAt: now });
             await createTextBlockHistorySnapshot(textBlockId, resourceId, resourceType, content);
@@ -266,6 +266,42 @@ export const getTextBlockSnapshotsWithContent = async (textBlockId: TextBlockId)
     }
 };
 
+/**
+ * Process a bucket of snapshots and determine which ones to delete based on time intervals.
+ * @param snapshots - Array of snapshots to process (assumes first snapshot is always kept)
+ * @param intervalMs - Minimum time interval between kept snapshots
+ * @param snapshotsToDelete - Set to add snapshot IDs that should be deleted
+ * @param fixedTimeBlocks - If true, only consider fixed time intervals; if false, allow variable intervals
+ */
+const processSnapshotBucket = (
+    snapshots: TextBlockSnapshot[],
+    intervalMs: number,
+    snapshotsToDelete: Set<UID>,
+    fixedTimeBlocks: boolean = false
+): void => {
+    if (snapshots.length === 0) {
+        return;
+    }
+
+    let lastTimestamp = snapshots[0].timestamp; // Keep first snapshot in bucket
+
+    for (let i = 1; i < snapshots.length; i++) {
+        const snapshot = snapshots[i];
+        const timeSinceLast = lastTimestamp - snapshot.timestamp;
+
+        if (timeSinceLast >= intervalMs) {
+            // Keep this snapshot - sufficient time has passed
+            lastTimestamp = snapshot.timestamp;
+        } else {
+            // Delete this snapshot - too soon after last kept
+            snapshotsToDelete.add(snapshot.snapshotId);
+            if (!fixedTimeBlocks) {
+                lastTimestamp = snapshot.timestamp;
+            }
+        }
+    }
+};
+
 export const determineSnapshotsToDelete = (
     snapshots: TextBlockSnapshot[],
     currentTime: number = Date.now()
@@ -317,38 +353,9 @@ export const determineSnapshotsToDelete = (
         }
     }
 
-    // Process 1 hour to 1 day bucket: Keep one snapshot per 30-minute interval
-    if (oneHourTo1Day.length > 0) {
-        let lastKeptTimestamp = oneHourTo1Day[0].timestamp; // Keep first snapshot in this bucket
-
-        for (let i = 1; i < oneHourTo1Day.length; i++) {
-            const snapshot = oneHourTo1Day[i];
-            const timeSinceLastKept = lastKeptTimestamp - snapshot.timestamp;
-
-            if (timeSinceLastKept >= INTERVAL_30_MIN_MS) {
-                // Keep this snapshot - it's been 30+ minutes
-                lastKeptTimestamp = snapshot.timestamp;
-            } else {
-                // Delete this snapshot - too soon after last kept
-                snapshotsToDelete.add(snapshot.snapshotId);
-            }
-        }
-    }
-
-    // Process more than 1 day bucket: Keep one snapshot per editing session
-    if (moreThan1Day.length > 0) {
-        let lastTimestampInSession = moreThan1Day[0].timestamp; // Keep first snapshot in this bucket
-
-        for (let i = 1; i < moreThan1Day.length; i++) {
-            const snapshot = moreThan1Day[i];
-            const timeSinceLast = lastTimestampInSession - snapshot.timestamp;
-            if (timeSinceLast < SESSION_GAP_MS) {
-                // Same session - delete this snapshot
-                snapshotsToDelete.add(snapshot.snapshotId);
-            }
-            lastTimestampInSession = snapshot.timestamp; // Update last timestamp in session
-        }
-    }
+    processSnapshotBucket(lessThan1Hour, SNAPSHOT_INTERVAL_MS, snapshotsToDelete, true);
+    processSnapshotBucket(oneHourTo1Day, INTERVAL_30_MIN_MS, snapshotsToDelete, true);
+    processSnapshotBucket(moreThan1Day, SESSION_GAP_MS, snapshotsToDelete, false);
 
     return snapshotsToDelete;
 };
