@@ -1,10 +1,23 @@
 import { Block } from '@blocknote/core';
 import { ServerBlockNoteEditor } from '@blocknote/server-util';
-import { BLOCKNOTE_FRAGMENT_ID, exhaustiveCheck, TextBlockId, TextBlockResourceType, TextBlockSnapshot, TextBlockType, UID, UserId } from '@mosaiq/terrazzo-common';
+import {
+    BLOCKNOTE_FRAGMENT_ID,
+    exhaustiveCheck,
+    TextBlockId,
+    TextBlockResourceType,
+    TextBlockSnapshot,
+    TextBlockType,
+    UID,
+    UserId,
+} from '@mosaiq/terrazzo-common';
 import { syncTextHistorySnapshots } from '@trz-api/broadcasters/textBroadcasters';
 import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
 import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
-import { createTextBlockHistorySnapshotDb, deleteTextBlockHistorySnapshotDb, getTextBlockHistorySnapshotsForTextBlockDb } from '@trz-api/persistence/textBlockHistoryPersistence';
+import {
+    createTextBlockHistorySnapshotDb,
+    deleteTextBlockHistorySnapshotDb,
+    getTextBlockHistorySnapshotsForTextBlockDb,
+} from '@trz-api/persistence/textBlockHistoryPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
 import { Document } from '@trz-api/utils/y-socket-io';
@@ -12,7 +25,11 @@ import console from 'console';
 import { Doc, XmlText } from 'yjs';
 import { getBoardIDFromCardID } from './cardController';
 
-export const checkCanUserEditTextBlock = async (userId: UserId | undefined, resourceId: UID, resourceType: TextBlockResourceType): Promise<TextBlockId | undefined> => {
+export const checkCanUserEditTextBlock = async (
+    userId: UserId | undefined,
+    resourceId: UID,
+    resourceType: TextBlockResourceType
+): Promise<TextBlockId | undefined> => {
     switch (resourceType) {
         case 'card': {
             const card = await getCardByIdDb(resourceId);
@@ -69,7 +86,11 @@ export const storeTextBlockEncodedData = async (doc: Document): Promise<void> =>
         }
 
         const now = Date.now();
-        if (textBlock.trackHistory && textBlock.lastSnapshotAt !== undefined && now - textBlock.lastSnapshotAt >= SNAPSHOT_INTERVAL_MS) {
+        if (
+            textBlock.trackHistory &&
+            textBlock.lastSnapshotAt !== undefined &&
+            now - textBlock.lastSnapshotAt >= SNAPSHOT_INTERVAL_MS
+        ) {
             await updateTextBlockDb(textBlockId, { text: content, lastSnapshotAt: now });
             await createTextBlockHistorySnapshot(textBlockId, resourceId, resourceType, content);
         } else {
@@ -81,7 +102,12 @@ export const storeTextBlockEncodedData = async (doc: Document): Promise<void> =>
     }
 };
 
-export const createTextBlockHistorySnapshot = async (textBlockId: TextBlockId, resourceId: UID, resourceType: TextBlockResourceType, content: string): Promise<void> => {
+export const createTextBlockHistorySnapshot = async (
+    textBlockId: TextBlockId,
+    resourceId: UID,
+    resourceType: TextBlockResourceType,
+    content: string
+): Promise<void> => {
     const snapshot: TextBlockSnapshot = {
         snapshotId: crypto.randomUUID(),
         textBlockId: textBlockId,
@@ -240,35 +266,10 @@ export const getTextBlockSnapshotsWithContent = async (textBlockId: TextBlockId)
     }
 };
 
-/*
-    Snapshot Reduction Strategy
-    
-    Goal: Balance granular history during active editing with efficient long-term storage
-    
-    Time-based bucketing:
-    1. < 1 hour old: Keep all snapshots (full granularity during active editing)
-    2. 1 hour - 1 day old: Keep one snapshot per 30-minute window
-    3. > 1 day old: Keep one snapshot per "session" (sessions separated by 3+ hour gaps)
-    
-    Edge cases handled:
-    - Empty snapshot list: No-op
-    - Single snapshot: Always kept
-    - Identical timestamps: All kept (shouldn't happen but safe)
-    - Boundary times (exactly 1hr, exactly 1day): Correctly categorized
-    - Unsorted input: Explicitly sorted before processing
-    - Concurrent reduction calls: Idempotent (same result regardless of timing)
-    - Content deduplication: Not implemented (future optimization)
-*/
-
-/**
- * Pure function that determines which snapshot IDs should be deleted based on reduction strategy.
- * This is extracted for testability - no side effects, no DB calls.
- *
- * @param snapshots All snapshots for a text block
- * @param currentTime The current timestamp (for testing, defaults to Date.now())
- * @returns Set of snapshot IDs that should be deleted
- */
-export const determineSnapshotsToDelete = (snapshots: TextBlockSnapshot[], currentTime: number = Date.now()): Set<UID> => {
+export const determineSnapshotsToDelete = (
+    snapshots: TextBlockSnapshot[],
+    currentTime: number = Date.now()
+): Set<UID> => {
     const snapshotsToDelete = new Set<UID>();
 
     // Early exit if no snapshots or only one snapshot

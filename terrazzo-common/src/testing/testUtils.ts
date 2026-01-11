@@ -15,7 +15,7 @@ export const UIDD = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
 export const UIDE = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee';
 export const UIDF = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
 
-export const now = () => {
+export const fixedTimestamp = () => {
     return 1000000000000;
 };
 
