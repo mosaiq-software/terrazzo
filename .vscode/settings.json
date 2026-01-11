@@ -1,5 +1,5 @@
 {
-    "cSpell.words": ["Collab", "milkdown", "mosaiq"],
+    "cSpell.words": ["Blocknote", "Collab", "milkdown", "mosaiq", "prosemirror", "ydoc"],
     "typescript.tsdk": "node_modules/typescript/lib",
     "editor.codeActionsOnSave": {
         "source.organizeImports": "always",

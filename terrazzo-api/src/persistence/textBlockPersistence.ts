@@ -10,6 +10,9 @@ TextBlockModel.init(
             primaryKey: true,
         },
         text: DataTypes.TEXT,
+        type: DataTypes.STRING,
+        trackHistory: DataTypes.BOOLEAN,
+        lastSnapshotAt: DataTypes.NUMBER,
     },
     { sequelize, timestamps: false }
 );
@@ -19,21 +22,12 @@ export const getTextBlockByIdDb = async (id: TextBlockId) => {
     return model?.toJSON();
 };
 
-export const createTextBlockDb = async (text?: string) => {
-    const uid = crypto.randomUUID();
-    const model = await TextBlockModel.create({
-        id: uid,
-        text: text ?? '',
-    });
+export const createTextBlockDb = async (textBlock: TextBlock) => {
+    const model = await TextBlockModel.create({ ...textBlock });
     return model.toJSON();
 };
 
-export const writeTextBlockDb = async (id: TextBlockId, text: string) => {
-    const [updated] = await TextBlockModel.update(
-        {
-            text,
-        },
-        { where: { id: id } }
-    );
+export const updateTextBlockDb = async (id: TextBlockId, update: Partial<TextBlock>) => {
+    const [updated] = await TextBlockModel.update({ ...update }, { where: { id: id } });
     return updated;
 };

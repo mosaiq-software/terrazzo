@@ -2,11 +2,11 @@ import { DocumentHeader, DocumentId, TrzModuleType, UID, UserId } from '@mosaiq/
 import { syncDirectoryContents, syncDocumentField } from '@trz-api/broadcasters';
 import { createDocumentDb, DocumentModelType, getDocumentByIdDb, updateDocumentDb } from '@trz-api/persistence/documentPersistence';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
-import { createTextBlockWithMarkdown } from './textBlockController';
+import { createBlocknoteTextBlockWithMarkdown } from './textBlockController';
 
 export const createNewDocument = async (title: string, parentId: UID, createdByUserId: UserId) => {
     const docModule = await createNewModule(title, parentId, TrzModuleType.Document);
-    const textBlock = await createTextBlockWithMarkdown('');
+    const textBlock = await createBlocknoteTextBlockWithMarkdown('');
     if (!textBlock) {
         throw new Error('Failed to create main text block for document');
     }

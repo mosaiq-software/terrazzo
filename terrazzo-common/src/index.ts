@@ -8,6 +8,7 @@ export * from './types/inviteTypes';
 export * from './types/linkedAccountTypes';
 export * from './types/organizationTypes';
 export * from './types/queryTypes';
+export * from './types/textTypes';
 export * from './types/userTypes';
 
 // Types - Permissions

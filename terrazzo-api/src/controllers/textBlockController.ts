@@ -1,12 +1,14 @@
 import { Block } from '@blocknote/core';
 import { ServerBlockNoteEditor } from '@blocknote/server-util';
-import { BLOCKNOTE_FRAGMENT_ID, TextBlockId, TextSocketHandshakeAuth, UID, UserId } from '@mosaiq/terrazzo-common';
+import { BLOCKNOTE_FRAGMENT_ID, exhaustiveCheck, TextBlockHistorySnapshot, TextBlockId, TextBlockType, TextSocketHandshakeAuth, UID, UserId } from '@mosaiq/terrazzo-common';
 import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
 import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
-import { createTextBlockDb, getTextBlockByIdDb, writeTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
+import { createTextBlockHistorySnapshotDb } from '@trz-api/persistence/textBlockHistoryPersistence';
+import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
 import console from 'console';
-import { Doc } from 'yjs';
+import { applyPatch, createPatch } from 'diff';
+import { Doc, XmlText } from 'yjs';
 import { getBoardIDFromCardID } from './cardController';
 
 export const checkCanUserEditTextBlock = async (userId: UserId | undefined, resourceId: UID, resourceType: TextSocketHandshakeAuth['resource']['type']): Promise<boolean> => {
@@ -39,24 +41,64 @@ export const checkCanUserEditTextBlock = async (userId: UserId | undefined, reso
 
 const BLOCKNOTE_EDITOR = ServerBlockNoteEditor.create();
 
+const SNAPSHOT_INTERVAL_MS = 1; //5 * 60 * 1000; // 5 minutes
+
 export const storeTextBlockEncodedData = async (textBlockId: TextBlockId, ydoc: Doc): Promise<void> => {
     try {
-        const fragment = ydoc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
-        const blocks = BLOCKNOTE_EDITOR.yXmlFragmentToBlocks(fragment);
-        const stringified = JSON.stringify(blocks);
-
-        // Validate data integrity before saving
-        try {
-            const parsed = JSON.parse(stringified);
-            if (!Array.isArray(parsed)) {
-                throw new Error('Serialized blocks is not an array');
-            }
-        } catch (validationError) {
-            throw new Error(`Data validation failed: ${validationError}`);
+        const textBlock = await getTextBlockByIdDb(textBlockId);
+        if (!textBlock) {
+            throw new Error(`Text block ${textBlockId} not found`);
         }
 
-        await writeTextBlockDb(textBlockId, stringified);
-        console.log(`Saved text block ${textBlockId} with ${blocks.length} blocks`);
+        let content: string = '';
+        let prettyContent: string = '';
+        switch (textBlock.type) {
+            case TextBlockType.PlainText: {
+                const fragment = ydoc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
+                const textElements = fragment.toArray().filter((item) => item instanceof XmlText) as XmlText[];
+                content = textElements.map((te) => te.toString()).join('\n');
+                prettyContent = content; // Plain text doesn't need separate pretty version
+                break;
+            }
+            case TextBlockType.BlockNote: {
+                const fragment = ydoc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
+                const blocks = BLOCKNOTE_EDITOR.yXmlFragmentToBlocks(fragment);
+                content = JSON.stringify(blocks); // Compact for storage
+                prettyContent = JSON.stringify(blocks, null, 2); // Pretty for diffing
+                break;
+            }
+        }
+
+        const now = Date.now();
+        if (textBlock.trackHistory && textBlock.lastSnapshotAt !== undefined && now - textBlock.lastSnapshotAt >= SNAPSHOT_INTERVAL_MS) {
+            // Get the previous snapshot's text and pretty-print it for diffing
+            const previousText = textBlock.text || '';
+            let previousPrettyText = previousText;
+            if (textBlock.type === TextBlockType.BlockNote && previousText) {
+                try {
+                    const previousBlocks = JSON.parse(previousText);
+                    previousPrettyText = JSON.stringify(previousBlocks, null, 2);
+                } catch (e) {
+                    // If parsing fails, use as-is
+                    previousPrettyText = previousText;
+                }
+            }
+
+            // Compute diff on pretty-printed versions for efficient line-based diffs
+            const patch = getSnapshotDifference(previousPrettyText, prettyContent);
+
+            // Store compact version in database
+            await updateTextBlockDb(textBlockId, { text: content, lastSnapshotAt: now });
+            const snapshot: TextBlockHistorySnapshot = {
+                snapshotId: crypto.randomUUID(),
+                textBlockId: textBlockId,
+                timestamp: now,
+                diff: patch,
+            };
+            await createTextBlockHistorySnapshotDb(snapshot);
+        } else {
+            await updateTextBlockDb(textBlockId, { text: content });
+        }
     } catch (error: any) {
         console.error('Unable to save text block ' + textBlockId + ' : ' + error.message);
         throw error;
@@ -69,28 +111,37 @@ export const loadTextBlockEncodedData = async (textBlockId: TextBlockId): Promis
         if (!textBlock) {
             throw new Error(`Text block ${textBlockId} not found`);
         }
-        const textData = textBlock.text;
-        let blocks: Block[] = [];
-        if (textData && textData.length > 0) {
-            try {
-                blocks = JSON.parse(textData);
-            } catch (e: any) {
-                console.warn(`Failed to parse text block data for text block ${textBlockId}`, {
-                    error: e,
-                    textData,
-                });
-                const blocksFromMarkdown = await maybeParseMarkdownToBlocks(textData);
-                blocks = blocksFromMarkdown;
+
+        switch (textBlock.type) {
+            case TextBlockType.BlockNote: {
+                let blocks: Block[] = [];
+                if (textBlock.text && textBlock.text.length > 0) {
+                    try {
+                        blocks = JSON.parse(textBlock.text);
+                    } catch (e: any) {
+                        console.warn(`Failed to parse text block data for text block ${textBlockId}`, {
+                            error: e,
+                            textData: textBlock.text,
+                        });
+                        const blocksFromMarkdown = await maybeParseMarkdownToBlocks(textBlock.text);
+                        blocks = blocksFromMarkdown;
+                    }
+                }
+                return BLOCKNOTE_EDITOR.blocksToYDoc(blocks, BLOCKNOTE_FRAGMENT_ID);
             }
+            case TextBlockType.PlainText: {
+                const ydoc = new Doc();
+                const fragment = ydoc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
+                const textElement = new XmlText();
+                if (textBlock.text) {
+                    textElement.insert(0, textBlock.text);
+                }
+                fragment.insert(0, [textElement]);
+                return ydoc;
+            }
+            default:
+                return exhaustiveCheck(textBlock.type, `Unsupported text block type for text block ${textBlockId}`);
         }
-        if (blocks.length === 0) {
-            return new Doc();
-        }
-
-        // BlockNote's blocksToYDoc uses 'prosemirror' fragment by default, but we need 'document-store'
-        const ydoc = BLOCKNOTE_EDITOR.blocksToYDoc(blocks, BLOCKNOTE_FRAGMENT_ID);
-
-        return ydoc;
     } catch (error: any) {
         console.error(`Unable to load text block ${textBlockId}`, {
             message: error.message,
@@ -100,12 +151,32 @@ export const loadTextBlockEncodedData = async (textBlockId: TextBlockId): Promis
     }
 };
 
-export const createTextBlockWithMarkdown = async (markdownText?: string) => {
+export const createBlocknoteTextBlockWithMarkdown = async (markdownText?: string) => {
     try {
         const blocks = await maybeParseMarkdownToBlocks(markdownText);
         const blocksJsonString = JSON.stringify(blocks);
-        const uid = await createTextBlockDb(blocksJsonString);
-        return uid;
+        const tb = await createTextBlockDb({
+            id: crypto.randomUUID(),
+            text: blocksJsonString,
+            type: TextBlockType.BlockNote,
+            trackHistory: true,
+        });
+        return tb;
+    } catch (e: any) {
+        console.error(`Unable to create text block`, e);
+        return null;
+    }
+};
+
+export const createPlainTextBlock = async (plainText: string) => {
+    try {
+        const tb = await createTextBlockDb({
+            id: crypto.randomUUID(),
+            text: plainText,
+            type: TextBlockType.PlainText,
+            trackHistory: true,
+        });
+        return tb;
     } catch (e: any) {
         console.error(`Unable to create text block`, e);
         return null;
@@ -165,4 +236,59 @@ const maybeParseMarkdownToBlocks = async (markdownText?: string): Promise<Block[
         console.error(`Unable to create text block`, e);
         return [];
     }
+};
+
+// ======
+// These next 2 fns are to handle diffing snapshots.
+// Each snapshot in the history stack will be stored as a diff from the previous snapshot to save space.
+// Always starting from the empty string, we can apply n diffs to get to snapshot n.
+// This should be a fully reversible process so we can go back and forth between snapshots without loss of data.
+// ( '' + snap1 + snap2 + snap3 = currentText) and (currentText - snap3 - snap2 = snap1) etc.
+// These snapshots should also be collapsible, such that later on we can combine multiple close diffs into one larger diff for efficiency.
+
+/**
+ * Given two strings, compute a Git-style patch that represents the changes from oldText to newText.
+ * Only stores the actual changes (additions/deletions) with minimal context, not all unchanged content.
+ * This is space-efficient like Git patches.
+ * @param oldText The original text
+ * @param newText The new text with changes applied
+ * @return A patch string that can be applied to oldText to get newText
+ */
+const getSnapshotDifference = (oldText: string, newText: string): string => {
+    // createPatch generates a unified diff format (like Git)
+    // We use empty filename since we're just diffing content
+    const patch = createPatch('', oldText, newText, '', '');
+    return patch;
+};
+
+/**
+ * Apply a Git-style patch to base text to get the next version.
+ * This is like applying a Git commit - the patch only contains the delta.
+ * @param baseText The text to apply the patch to
+ * @param patch The patch string from getSnapshotDifference
+ * @return The reconstructed text after applying the patch
+ */
+const applySnapshotDifference = (baseText: string, patch: string): string => {
+    const result = applyPatch(baseText, patch);
+    if (result === false) {
+        throw new Error('Failed to apply snapshot patch - patch may be corrupted or incompatible');
+    }
+    return result;
+};
+
+/**
+ * Given a series of snapshot patches, reconstruct the full text by applying them in order.
+ * Starts from an empty string and applies each patch sequentially, like Git commits.
+ * This is how we rebuild any version in the history: apply patches 1 through N.
+ * @param snapshotPatches Array of patch strings in chronological order
+ * @return The final reconstructed text
+ */
+const reconstructTextFromSnapshots = (snapshotPatches: string[]): string => {
+    let text = '';
+
+    for (const patch of snapshotPatches) {
+        text = applySnapshotDifference(text, patch);
+    }
+
+    return text;
 };
