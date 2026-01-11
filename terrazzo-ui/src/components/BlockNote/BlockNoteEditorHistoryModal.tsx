@@ -4,7 +4,7 @@ import { TextBlockId, TextBlockResourceType, TextBlockSnapshot, UID } from '@mos
 import { useSocket } from '@trz/contexts/socket-context';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useTextBlockHistorySnapshots } from '@trz/hooks/useTextBlockHistorySnapshots';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ReadonlyBlockNote } from './ReadonlyBlockNote';
 
 interface BlockNoteEditorHistoryModalProps {
@@ -120,9 +120,8 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                             <Stack gap={2}>
                                 {snapshots.map((snapshot, index) => {
                                     return (
-                                        <>
+                                        <React.Fragment key={snapshot.snapshotId}>
                                             <Stack
-                                                key={snapshot.snapshotId}
                                                 gap={0}
                                                 style={{
                                                     cursor: 'pointer',
@@ -144,7 +143,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                                                 <Text>{new Date(snapshot.timestamp).toLocaleString()}</Text>
                                             </Stack>
                                             {index < snapshots.length - 1 && <Divider my="xs" />}
-                                        </>
+                                        </React.Fragment>
                                     );
                                 })}
                             </Stack>

@@ -272,23 +272,27 @@ export const determineSnapshotsToDelete = (
 ): Set<UID> => {
     const snapshotsToDelete = new Set<UID>();
 
-    // Early exit if no snapshots or only one snapshot
-    if (snapshots.length <= 1) {
-        return snapshotsToDelete;
-    }
-
-    // Remove duplicates (same content or same timestamp)
-    const dedupedSnapshots: TextBlockSnapshot[] = [];
+    // Remove duplicates (same content or same timestamp) or empty content
+    const filteredSnapshots: TextBlockSnapshot[] = [];
     const seenContents = new Set<string>();
     const seenTimestamps = new Set<number>();
     for (const snapshot of snapshots) {
+        if (!snapshot.content || snapshot.content.length === 0) {
+            snapshotsToDelete.add(snapshot.snapshotId);
+            continue;
+        }
         if (seenContents.has(snapshot.content) || seenTimestamps.has(snapshot.timestamp)) {
             snapshotsToDelete.add(snapshot.snapshotId);
         } else {
             seenContents.add(snapshot.content);
             seenTimestamps.add(snapshot.timestamp);
-            dedupedSnapshots.push(snapshot);
+            filteredSnapshots.push(snapshot);
         }
+    }
+
+    if (filteredSnapshots.length <= 1) {
+        // Nothing to delete
+        return snapshotsToDelete;
     }
 
     // Time constants
@@ -302,7 +306,7 @@ export const determineSnapshotsToDelete = (
     const oneHourTo1Day: TextBlockSnapshot[] = [];
     const moreThan1Day: TextBlockSnapshot[] = [];
 
-    for (const snapshot of dedupedSnapshots) {
+    for (const snapshot of filteredSnapshots) {
         const age = currentTime - snapshot.timestamp;
         if (age < ONE_HOUR_MS) {
             lessThan1Hour.push(snapshot);
