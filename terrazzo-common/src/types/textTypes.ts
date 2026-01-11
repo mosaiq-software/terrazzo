@@ -18,11 +18,12 @@ export interface TextBlock {
     lastSnapshotAt?: number;
 }
 
-export interface TextBlockHistorySnapshot {
+export interface TextBlockSnapshot {
     snapshotId: UID;
     textBlockId: TextBlockId;
     timestamp: number;
-    diff: string; // Git-style patch string
+    /** Full content of the text block at this snapshot */
+    content: string;
 }
 
 export interface UploadedFile {

@@ -1,4 +1,4 @@
-import { TextBlockHistorySnapshot, TextBlockResourceType } from '../../..';
+import { TextBlockResourceType, TextBlockSnapshot } from '../../..';
 import { BoardId, CardId, DirectoryId, DocumentId, InviteId, LabelId, ListId, OrganizationId, RoleId, UID, UploadedFileId, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
@@ -169,7 +169,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: RoleId[] | undefined;
     [ClientSE.GET_USERS_LINKED_ACCOUNTS]: LinkedAccount[] | undefined;
     [ClientSE.GET_USERNAME_AVAILABLE]: boolean;
-    [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: TextBlockHistorySnapshot[] | undefined;
+    [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: TextBlockSnapshot[] | undefined;
 
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
     [ClientSE.CREATE_BOARD]: BoardId | undefined;

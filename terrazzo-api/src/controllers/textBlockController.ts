@@ -1,15 +1,14 @@
 import { Block } from '@blocknote/core';
 import { ServerBlockNoteEditor } from '@blocknote/server-util';
-import { BLOCKNOTE_FRAGMENT_ID, exhaustiveCheck, TextBlockHistorySnapshot, TextBlockId, TextBlockResourceType, TextBlockType, UID, UserId } from '@mosaiq/terrazzo-common';
+import { BLOCKNOTE_FRAGMENT_ID, exhaustiveCheck, TextBlockId, TextBlockResourceType, TextBlockSnapshot, TextBlockType, UID, UserId } from '@mosaiq/terrazzo-common';
 import { syncTextHistorySnapshots } from '@trz-api/broadcasters/textBroadcasters';
 import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
 import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
-import { createTextBlockHistorySnapshotDb } from '@trz-api/persistence/textBlockHistoryPersistence';
+import { createTextBlockHistorySnapshotDb, getTextBlockHistorySnapshotsForTextBlockDb } from '@trz-api/persistence/textBlockHistoryPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
 import { Document } from '@trz-api/utils/y-socket-io';
 import console from 'console';
-import { applyPatch, createPatch } from 'diff';
 import { Doc, XmlText } from 'yjs';
 import { getBoardIDFromCardID } from './cardController';
 
@@ -54,52 +53,25 @@ export const storeTextBlockEncodedData = async (doc: Document): Promise<void> =>
         }
 
         let content: string = '';
-        let prettyContent: string = '';
         switch (textBlock.type) {
             case TextBlockType.PlainText: {
                 const fragment = doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
                 const textElements = fragment.toArray().filter((item) => item instanceof XmlText) as XmlText[];
                 content = textElements.map((te) => te.toString()).join('\n');
-                prettyContent = content; // Plain text doesn't need separate pretty version
                 break;
             }
             case TextBlockType.BlockNote: {
                 const fragment = doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
                 const blocks = BLOCKNOTE_EDITOR.yXmlFragmentToBlocks(fragment);
                 content = JSON.stringify(blocks); // Compact for storage
-                prettyContent = JSON.stringify(blocks, null, 2); // Pretty for diffing
                 break;
             }
         }
 
         const now = Date.now();
         if (textBlock.trackHistory && textBlock.lastSnapshotAt !== undefined && now - textBlock.lastSnapshotAt >= SNAPSHOT_INTERVAL_MS) {
-            // Get the previous snapshot's text and pretty-print it for diffing
-            const previousText = textBlock.text || '';
-            let previousPrettyText = previousText;
-            if (textBlock.type === TextBlockType.BlockNote && previousText) {
-                try {
-                    const previousBlocks = JSON.parse(previousText);
-                    previousPrettyText = JSON.stringify(previousBlocks, null, 2);
-                } catch (e) {
-                    // If parsing fails, use as-is
-                    previousPrettyText = previousText;
-                }
-            }
-
-            // Compute diff on pretty-printed versions for efficient line-based diffs
-            const patch = getSnapshotDifference(previousPrettyText, prettyContent);
-
-            // Store compact version in database
             await updateTextBlockDb(textBlockId, { text: content, lastSnapshotAt: now });
-            const snapshot: TextBlockHistorySnapshot = {
-                snapshotId: crypto.randomUUID(),
-                textBlockId: textBlockId,
-                timestamp: now,
-                diff: patch,
-            };
-            await createTextBlockHistorySnapshotDb(snapshot);
-            await syncTextHistorySnapshots(textBlockId, resourceId, resourceType);
+            await createTextBlockHistorySnapshot(textBlockId, resourceId, resourceType, content);
         } else {
             await updateTextBlockDb(textBlockId, { text: content });
         }
@@ -107,6 +79,18 @@ export const storeTextBlockEncodedData = async (doc: Document): Promise<void> =>
         console.error('Unable to save text block ' + doc.textBlockId + ' : ' + error.message);
         throw error;
     }
+};
+
+export const createTextBlockHistorySnapshot = async (textBlockId: TextBlockId, resourceId: UID, resourceType: TextBlockResourceType, content: string): Promise<void> => {
+    const snapshot: TextBlockSnapshot = {
+        snapshotId: crypto.randomUUID(),
+        textBlockId: textBlockId,
+        timestamp: Date.now(),
+        content,
+    };
+    await createTextBlockHistorySnapshotDb(snapshot);
+    await reduceSnapshotsForTextBlock(textBlockId);
+    await syncTextHistorySnapshots(textBlockId, resourceId, resourceType);
 };
 
 export const loadTextBlockEncodedData = async (textBlockId: TextBlockId): Promise<Doc | null> => {
@@ -242,49 +226,62 @@ const maybeParseMarkdownToBlocks = async (markdownText?: string): Promise<Block[
     }
 };
 
-/**
- * Given two strings, compute a Git-style patch that represents the changes from oldText to newText.
- * Only stores the actual changes (additions/deletions) with minimal context, not all unchanged content.
- * This is space-efficient like Git patches.
- * @param oldText The original text
- * @param newText The new text with changes applied
- * @return A patch string that can be applied to oldText to get newText
- */
-const getSnapshotDifference = (oldText: string, newText: string): string => {
-    // createPatch generates a unified diff format (like Git)
-    // We use empty filename since we're just diffing content
-    const patch = createPatch('', oldText, newText, '', '');
-    return patch;
+export const getTextBlockSnapshotsWithContent = async (textBlockId: TextBlockId): Promise<TextBlockSnapshot[]> => {
+    try {
+        // Snapshots already contain full content - just return them
+        const snapshots = await getTextBlockHistorySnapshotsForTextBlockDb(textBlockId);
+        return snapshots;
+    } catch (error: any) {
+        console.error(`Unable to get text block snapshots with content for text block ${textBlockId}`, {
+            message: error.message,
+            trace: error.stack,
+        });
+        return [];
+    }
 };
 
-/**
- * Apply a Git-style patch to base text to get the next version.
- * This is like applying a Git commit - the patch only contains the delta.
- * @param baseText The text to apply the patch to
- * @param patch The patch string from getSnapshotDifference
- * @return The reconstructed text after applying the patch
- */
-const applySnapshotDifference = (baseText: string, patch: string): string => {
-    const result = applyPatch(baseText, patch);
-    if (result === false) {
-        throw new Error('Failed to apply snapshot patch - patch may be corrupted or incompatible');
+/*
+    Thoughts on reduction logic
+
+    Likely, while you are actively working thats when youd want to see the most fine grained edit history. Once you leave though, it probably doesnt need to be as fine grain. For the next few days, there is a chance you want to see a particular thing, but after that, a user is unlikely to remember exact edits.
+
+    To implement this, I am thinking
+
+    While the user is editing, save a snapshot every 5-10 mins
+
+    Any snapshot that is from more than an hour ago, reduce them to be in spans of 30-60 mins
+
+    Any snapshots that are from over a day ago, group it into sessions
+
+    A session is any chunk of time where a bunch of edits were made with a gap of time around them. For this, say, 3 hours.
+*/
+const reduceSnapshotsForTextBlock = async (textBlockId: TextBlockId) => {
+    try {
+        const snapshots = await getTextBlockHistorySnapshotsForTextBlockDb(textBlockId);
+        const now = Date.now();
+
+        const snapshotsToDelete = new Set<UID>();
+
+        // split snapshots into time buckets (less than 1 hour, 1 hour to 1 day, more than 1 day)
+        const lessThan1Hour: TextBlockSnapshot[] = [];
+        const lessThan1HourMs = 60 * 60 * 1000;
+        const oneHourTo1Day: TextBlockSnapshot[] = [];
+        const oneDayMs = 24 * 60 * 60 * 1000;
+        const moreThan1Day: TextBlockSnapshot[] = [];
+        for (const snapshot of snapshots) {
+            const age = now - snapshot.timestamp;
+            if (age <= lessThan1HourMs) {
+                lessThan1Hour.push(snapshot);
+            } else if (age <= oneDayMs) {
+                oneHourTo1Day.push(snapshot);
+            } else {
+                moreThan1Day.push(snapshot);
+            }
+        }
+    } catch (error: any) {
+        console.error(`Unable to reduce text block snapshots for text block ${textBlockId}`, {
+            message: error.message,
+            trace: error.stack,
+        });
     }
-    return result;
-};
-
-/**
- * Given a series of snapshot patches, reconstruct the full text by applying them in order.
- * Starts from an empty string and applies each patch sequentially, like Git commits.
- * This is how we rebuild any version in the history: apply patches 1 through N.
- * @param snapshotPatches Array of patch strings in chronological order
- * @return The final reconstructed text
- */
-const reconstructTextFromSnapshots = (snapshotPatches: string[]): string => {
-    let text = '';
-
-    for (const patch of snapshotPatches) {
-        text = applySnapshotDifference(text, patch);
-    }
-
-    return text;
 };

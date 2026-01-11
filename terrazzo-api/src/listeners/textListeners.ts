@@ -1,6 +1,5 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { checkCanUserEditTextBlock } from '@trz-api/controllers/textBlockController';
-import { getTextBlockHistorySnapshotsForTextBlockDb } from '@trz-api/persistence/textBlockHistoryPersistence';
+import { checkCanUserEditTextBlock, getTextBlockSnapshotsWithContent } from '@trz-api/controllers/textBlockController';
 import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 
@@ -15,7 +14,7 @@ export const registerTextListeners = (socket: Socket) => {
         if (!authorizedTextBlockId) {
             throw new Error(`User does not have permission to view text block history snapshots`);
         }
-        const textBlockHistorySnapshots = await getTextBlockHistorySnapshotsForTextBlockDb(authorizedTextBlockId);
+        const textBlockHistorySnapshots = await getTextBlockSnapshotsWithContent(authorizedTextBlockId);
         return textBlockHistorySnapshots;
     });
 };

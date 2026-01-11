@@ -1,10 +1,11 @@
-import { Button, Center, Divider, Group, Loader, Modal, Stack, Text } from '@mantine/core';
-import { TextBlockId, TextBlockResourceType, UID } from '@mosaiq/terrazzo-common';
+import { Block } from '@blocknote/core';
+import { Button, Center, Divider, Group, Loader, Modal, ScrollArea, Stack, Text } from '@mantine/core';
+import { TextBlockId, TextBlockResourceType, TextBlockSnapshot, UID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useTextBlockHistorySnapshots } from '@trz/hooks/useTextBlockHistorySnapshots';
 import { useState } from 'react';
-import { BaseBlockNoteEditor } from './BaseBlockNoteEditor';
+import { ReadonlyBlockNote } from './ReadonlyBlockNote';
 
 interface BlockNoteEditorHistoryModalProps {
     textBlockId: TextBlockId;
@@ -15,6 +16,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
     const [modalOpened, setModalOpened] = useState(false);
     const sockCtx = useSocket();
     const snapshots = useTextBlockHistorySnapshots(modalOpened ? props.textBlockId : undefined, props.resourceId, props.resourceType);
+    const [selectedSnapshot, setSelectedSnapshot] = useState<TextBlockSnapshot | undefined>(undefined);
     useCatchSaveKey();
 
     if (!modalOpened) {
@@ -32,6 +34,8 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
         );
     }
 
+    const content = selectedSnapshot ? (JSON.parse(selectedSnapshot.content) as Block[]) : [];
+    console.log('Rendering history modal with snapshots:', snapshots, 'and selected snapshot:', selectedSnapshot);
     return (
         <Modal.Root
             opened
@@ -50,8 +54,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                 bg={'#1d2022'}
                 c={'white'}
                 style={{
-                    overflowX: 'hidden',
-                    overflowY: 'scroll',
+                    overflow: 'hidden',
                 }}
             >
                 <Modal.Header
@@ -79,38 +82,57 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                         />
                     </Modal.Title>
                 </Modal.Header>
-                <Modal.Body p={20}>
+                <Modal.Body
+                    p={20}
+                    style={{ overflow: 'hidden', height: 'calc(90vh - 80px)', display: 'flex' }}
+                >
                     <Group
-                        style={{
-                            position: 'relative',
-                        }}
-                        pb="8rem"
+                        justify="space-between"
+                        align="flex-start"
+                        wrap="nowrap"
+                        style={{ flex: 1, height: '100%' }}
                     >
-                        <BaseBlockNoteEditor
-                            viewOnly={true}
-                            textBlockId={props.textBlockId}
-                            socketIOProvider={undefined}
-                            doc={undefined}
-                            placeholder={undefined}
-                            myId={undefined}
-                            myName={undefined}
-                            pfpColor={undefined}
-                            syncStatus={undefined}
-                            connectionStatus={undefined}
-                        />
-                        <Stack>
-                            {snapshots.map((snapshot) => {
-                                return (
-                                    <Stack
-                                        key={snapshot.snapshotId}
-                                        gap={0}
-                                    >
-                                        <Text>{new Date(snapshot.timestamp).toLocaleString()}</Text>
-                                        <Divider my="xs" />
-                                    </Stack>
-                                );
-                            })}
-                        </Stack>
+                        <ScrollArea style={{ flex: 1, height: '100%' }}>
+                            {content?.length ? (
+                                <ReadonlyBlockNote content={content} />
+                            ) : (
+                                <Center
+                                    h={'100%'}
+                                    w={'100%'}
+                                >
+                                    {selectedSnapshot ? <Text c="dimmed">No content available for this snapshot.</Text> : <Text c="dimmed">Select a snapshot to view its content.</Text>}
+                                </Center>
+                            )}
+                        </ScrollArea>
+                        <ScrollArea
+                            w={250}
+                            h={'100%'}
+                            style={{ flexShrink: 0 }}
+                        >
+                            <Stack gap={2}>
+                                {snapshots.map((snapshot, index) => {
+                                    return (
+                                        <>
+                                            <Stack
+                                                key={snapshot.snapshotId}
+                                                gap={0}
+                                                style={{ cursor: 'pointer', backgroundColor: selectedSnapshot?.snapshotId === snapshot.snapshotId ? 'rgba(255, 255, 255, 0.1)' : 'transparent', padding: '8px', borderRadius: '4px' }}
+                                                onClick={() => {
+                                                    if (selectedSnapshot?.snapshotId === snapshot.snapshotId) {
+                                                        setSelectedSnapshot(undefined);
+                                                    } else {
+                                                        setSelectedSnapshot(snapshot);
+                                                    }
+                                                }}
+                                            >
+                                                <Text>{new Date(snapshot.timestamp).toLocaleString()}</Text>
+                                            </Stack>
+                                            {index < snapshots.length - 1 && <Divider my="xs" />}
+                                        </>
+                                    );
+                                })}
+                            </Stack>
+                        </ScrollArea>
                     </Group>
                 </Modal.Body>
             </Modal.Content>

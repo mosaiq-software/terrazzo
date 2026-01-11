@@ -1,11 +1,10 @@
 import { getRoomCode, RoomType, ServerSE, TextBlockId, TextBlockResourceType, UID } from '@mosaiq/terrazzo-common';
-import { checkCanUserEditTextBlock } from '@trz-api/controllers/textBlockController';
-import { getTextBlockHistorySnapshotsForTextBlockDb } from '@trz-api/persistence/textBlockHistoryPersistence';
+import { checkCanUserEditTextBlock, getTextBlockSnapshotsWithContent } from '@trz-api/controllers/textBlockController';
 import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
 export const syncTextHistorySnapshots = async (textBlockId: TextBlockId, resourceId: UID, resourceType: TextBlockResourceType) => {
     try {
-        const snapshots = await getTextBlockHistorySnapshotsForTextBlockDb(textBlockId);
+        const snapshots = await getTextBlockSnapshotsWithContent(textBlockId);
         broadcast({
             event: ServerSE.UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS,
             toRoomIds: [getRoomCode(RoomType.DATA, textBlockId)],
