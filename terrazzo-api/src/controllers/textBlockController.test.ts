@@ -1,5 +1,7 @@
 import {
+    daysMs,
     fixedTimestamp,
+    hoursMs,
     minutesMs,
     TextBlockSnapshot,
     UID,
@@ -123,9 +125,9 @@ describe('determineSnapshotsToDelete', () => {
 
         it('should handle boundary at exactly 1 hour', () => {
             const snapshots = [
-                createSnapshot(UID1, 59, fixedTimestamp()), // keep (<1hr)
-                createSnapshot(UID2, 60, fixedTimestamp()), // keep (first in 1hr-1day bucket)
-                createSnapshot(UID3, 61, fixedTimestamp()), // delete (within 30min of UID2)
+                createSnapshot(UID1, minutesMs(59), fixedTimestamp()), // keep (<1hr)
+                createSnapshot(UID2, minutesMs(60), fixedTimestamp()), // keep (first in 1hr-1day bucket)
+                createSnapshot(UID3, minutesMs(61), fixedTimestamp()), // delete (within 30min of UID2)
             ];
             const result = determineSnapshotsToDelete(snapshots, fixedTimestamp());
             expect(result.size).toBe(1);
@@ -133,5 +135,24 @@ describe('determineSnapshotsToDelete', () => {
         });
     });
 
-    describe('More Than 1 Day Bucket (session-based)', () => {});
+    describe('More Than 1 Day Bucket (session-based)', () => {
+        it('should keep one snapshot per editing session', () => {
+            const snapshots = [
+                // Session 1
+                createSnapshot(UID1, daysMs(2) + minutesMs(10), fixedTimestamp()), // keep
+                createSnapshot(UID2, daysMs(2) + minutesMs(20), fixedTimestamp()), // delete
+                createSnapshot(UID3, daysMs(2) + hoursMs(2) + minutesMs(5), fixedTimestamp()), // delete
+                // Session 2
+                createSnapshot(UID4, daysMs(2) + hoursMs(7) + minutesMs(15), fixedTimestamp()), // keep
+                createSnapshot(UID5, daysMs(2) + hoursMs(7) + minutesMs(25), fixedTimestamp()), // delete
+                // Session 3
+                createSnapshot(UID6, daysMs(3) + hoursMs(1), fixedTimestamp()), // keep
+            ];
+            const result = determineSnapshotsToDelete(snapshots, fixedTimestamp());
+            expect(result.size).toBe(3);
+            expect(result.has(UID2)).toBe(true);
+            expect(result.has(UID3)).toBe(true);
+            expect(result.has(UID5)).toBe(true);
+        });
+    });
 });

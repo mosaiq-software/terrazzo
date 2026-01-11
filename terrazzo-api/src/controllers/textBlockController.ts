@@ -277,6 +277,20 @@ export const determineSnapshotsToDelete = (
         return snapshotsToDelete;
     }
 
+    // Remove duplicates (same content or same timestamp)
+    const dedupedSnapshots: TextBlockSnapshot[] = [];
+    const seenContents = new Set<string>();
+    const seenTimestamps = new Set<number>();
+    for (const snapshot of snapshots) {
+        if (seenContents.has(snapshot.content) || seenTimestamps.has(snapshot.timestamp)) {
+            snapshotsToDelete.add(snapshot.snapshotId);
+        } else {
+            seenContents.add(snapshot.content);
+            seenTimestamps.add(snapshot.timestamp);
+            dedupedSnapshots.push(snapshot);
+        }
+    }
+
     // Time constants
     const ONE_HOUR_MS = 60 * 60 * 1000;
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -288,7 +302,7 @@ export const determineSnapshotsToDelete = (
     const oneHourTo1Day: TextBlockSnapshot[] = [];
     const moreThan1Day: TextBlockSnapshot[] = [];
 
-    for (const snapshot of snapshots) {
+    for (const snapshot of dedupedSnapshots) {
         const age = currentTime - snapshot.timestamp;
         if (age < ONE_HOUR_MS) {
             lessThan1Hour.push(snapshot);
@@ -300,15 +314,12 @@ export const determineSnapshotsToDelete = (
     }
 
     // Process 1 hour to 1 day bucket: Keep one snapshot per 30-minute interval
-    // Sort ascending (oldest first) to process chronologically
-    oneHourTo1Day.sort((a, b) => a.timestamp - b.timestamp);
-
     if (oneHourTo1Day.length > 0) {
-        let lastKeptTimestamp = oneHourTo1Day[0].timestamp; // Keep first snapshot
+        let lastKeptTimestamp = oneHourTo1Day[0].timestamp; // Keep first snapshot in this bucket
 
         for (let i = 1; i < oneHourTo1Day.length; i++) {
             const snapshot = oneHourTo1Day[i];
-            const timeSinceLastKept = snapshot.timestamp - lastKeptTimestamp;
+            const timeSinceLastKept = lastKeptTimestamp - snapshot.timestamp;
 
             if (timeSinceLastKept >= INTERVAL_30_MIN_MS) {
                 // Keep this snapshot - it's been 30+ minutes
@@ -320,26 +331,18 @@ export const determineSnapshotsToDelete = (
         }
     }
 
-    // Process > 1 day bucket: Keep one snapshot per "session"
-    // A session is a burst of activity; sessions are separated by 3+ hour gaps
-    // Sort ascending (oldest first) to process chronologically
-    moreThan1Day.sort((a, b) => a.timestamp - b.timestamp);
-
+    // Process more than 1 day bucket: Keep one snapshot per editing session
     if (moreThan1Day.length > 0) {
-        let lastKeptTimestamp = moreThan1Day[0].timestamp; // Keep first snapshot
+        let lastTimestampInSession = moreThan1Day[0].timestamp; // Keep first snapshot in this bucket
 
         for (let i = 1; i < moreThan1Day.length; i++) {
             const snapshot = moreThan1Day[i];
-            const timeSinceLastKept = snapshot.timestamp - lastKeptTimestamp;
-
-            if (timeSinceLastKept >= SESSION_GAP_MS) {
-                // New session started - keep this snapshot
-                lastKeptTimestamp = snapshot.timestamp;
-            } else {
-                // Still in same session - delete this snapshot
-                // We keep the first snapshot of each session
+            const timeSinceLast = lastTimestampInSession - snapshot.timestamp;
+            if (timeSinceLast < SESSION_GAP_MS) {
+                // Same session - delete this snapshot
                 snapshotsToDelete.add(snapshot.snapshotId);
             }
+            lastTimestampInSession = snapshot.timestamp; // Update last timestamp in session
         }
     }
 
