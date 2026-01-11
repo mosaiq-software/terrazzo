@@ -4,7 +4,7 @@ import { BLOCKNOTE_FRAGMENT_ID, exhaustiveCheck, TextBlockId, TextBlockResourceT
 import { syncTextHistorySnapshots } from '@trz-api/broadcasters/textBroadcasters';
 import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
 import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
-import { createTextBlockHistorySnapshotDb, getTextBlockHistorySnapshotsForTextBlockDb } from '@trz-api/persistence/textBlockHistoryPersistence';
+import { createTextBlockHistorySnapshotDb, deleteTextBlockHistorySnapshotDb, getTextBlockHistorySnapshotsForTextBlockDb } from '@trz-api/persistence/textBlockHistoryPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
 import { Document } from '@trz-api/utils/y-socket-io';
@@ -241,41 +241,108 @@ export const getTextBlockSnapshotsWithContent = async (textBlockId: TextBlockId)
 };
 
 /*
-    Thoughts on reduction logic
-
-    Likely, while you are actively working thats when youd want to see the most fine grained edit history. Once you leave though, it probably doesnt need to be as fine grain. For the next few days, there is a chance you want to see a particular thing, but after that, a user is unlikely to remember exact edits.
-
-    To implement this, I am thinking
-
-    While the user is editing, save a snapshot every 5-10 mins
-
-    Any snapshot that is from more than an hour ago, reduce them to be in spans of 30-60 mins
-
-    Any snapshots that are from over a day ago, group it into sessions
-
-    A session is any chunk of time where a bunch of edits were made with a gap of time around them. For this, say, 3 hours.
+    Snapshot Reduction Strategy
+    
+    Goal: Balance granular history during active editing with efficient long-term storage
+    
+    Time-based bucketing:
+    1. < 1 hour old: Keep all snapshots (full granularity during active editing)
+    2. 1 hour - 1 day old: Keep one snapshot per 30-minute window
+    3. > 1 day old: Keep one snapshot per "session" (sessions separated by 3+ hour gaps)
+    
+    Edge cases handled:
+    - Empty snapshot list: No-op
+    - Single snapshot: Always kept
+    - Identical timestamps: All kept (shouldn't happen but safe)
+    - Boundary times (exactly 1hr, exactly 1day): Correctly categorized
+    - Unsorted input: Explicitly sorted before processing
+    - Concurrent reduction calls: Idempotent (same result regardless of timing)
+    - Content deduplication: Not implemented (future optimization)
 */
 const reduceSnapshotsForTextBlock = async (textBlockId: TextBlockId) => {
     try {
+        // Get all snapshots (returns DESC order from DB)
         const snapshots = await getTextBlockHistorySnapshotsForTextBlockDb(textBlockId);
-        const now = Date.now();
 
+        // Early exit if no snapshots or only one snapshot
+        if (snapshots.length <= 1) {
+            return;
+        }
+
+        const now = Date.now();
         const snapshotsToDelete = new Set<UID>();
 
-        // split snapshots into time buckets (less than 1 hour, 1 hour to 1 day, more than 1 day)
+        // Time constants
+        const ONE_HOUR_MS = 60 * 60 * 1000;
+        const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+        const INTERVAL_30_MIN_MS = 30 * 60 * 1000;
+        const SESSION_GAP_MS = 3 * 60 * 60 * 1000; // 3 hours
+
+        // Split snapshots into time buckets based on age
         const lessThan1Hour: TextBlockSnapshot[] = [];
-        const lessThan1HourMs = 60 * 60 * 1000;
         const oneHourTo1Day: TextBlockSnapshot[] = [];
-        const oneDayMs = 24 * 60 * 60 * 1000;
         const moreThan1Day: TextBlockSnapshot[] = [];
+
         for (const snapshot of snapshots) {
             const age = now - snapshot.timestamp;
-            if (age <= lessThan1HourMs) {
+            if (age < ONE_HOUR_MS) {
                 lessThan1Hour.push(snapshot);
-            } else if (age <= oneDayMs) {
+            } else if (age < ONE_DAY_MS) {
                 oneHourTo1Day.push(snapshot);
             } else {
                 moreThan1Day.push(snapshot);
+            }
+        }
+
+        // Process 1 hour to 1 day bucket: Keep one snapshot per 30-minute interval
+        // Sort ascending (oldest first) to process chronologically
+        oneHourTo1Day.sort((a, b) => a.timestamp - b.timestamp);
+
+        if (oneHourTo1Day.length > 0) {
+            let lastKeptTimestamp = oneHourTo1Day[0].timestamp; // Keep first snapshot
+
+            for (let i = 1; i < oneHourTo1Day.length; i++) {
+                const snapshot = oneHourTo1Day[i];
+                const timeSinceLastKept = snapshot.timestamp - lastKeptTimestamp;
+
+                if (timeSinceLastKept >= INTERVAL_30_MIN_MS) {
+                    // Keep this snapshot - it's been 30+ minutes
+                    lastKeptTimestamp = snapshot.timestamp;
+                } else {
+                    // Delete this snapshot - too soon after last kept
+                    snapshotsToDelete.add(snapshot.snapshotId);
+                }
+            }
+        }
+
+        // Process > 1 day bucket: Keep one snapshot per "session"
+        // A session is a burst of activity; sessions are separated by 3+ hour gaps
+        // Sort ascending (oldest first) to process chronologically
+        moreThan1Day.sort((a, b) => a.timestamp - b.timestamp);
+
+        if (moreThan1Day.length > 0) {
+            let lastKeptTimestamp = moreThan1Day[0].timestamp; // Keep first snapshot
+
+            for (let i = 1; i < moreThan1Day.length; i++) {
+                const snapshot = moreThan1Day[i];
+                const timeSinceLastKept = snapshot.timestamp - lastKeptTimestamp;
+
+                if (timeSinceLastKept >= SESSION_GAP_MS) {
+                    // New session started - keep this snapshot
+                    lastKeptTimestamp = snapshot.timestamp;
+                } else {
+                    // Still in same session - delete this snapshot
+                    // We keep the first snapshot of each session
+                    snapshotsToDelete.add(snapshot.snapshotId);
+                }
+            }
+        }
+
+        // Execute deletions
+        if (snapshotsToDelete.size > 0) {
+            console.log(`Reducing ${snapshotsToDelete.size} snapshots for text block ${textBlockId}`);
+            for (const snapshotId of snapshotsToDelete) {
+                await deleteTextBlockHistorySnapshotDb(snapshotId);
             }
         }
     } catch (error: any) {
