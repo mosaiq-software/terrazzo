@@ -9,6 +9,7 @@ import { Alert, Group, Stack } from '@mantine/core';
 import { BLOCKNOTE_FRAGMENT_ID, RoomType, TextBlockId, UserId } from '@mosaiq/terrazzo-common';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useRoom } from '@trz/hooks/useRoom';
+import { CollaborationOptions } from 'node_modules/@blocknote/core/types/src/extensions/Collaboration/Collaboration';
 import { useEffect, useMemo, useState } from 'react';
 import { SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
@@ -20,16 +21,16 @@ import './BlockNoteStyleOverrides.css';
 const ALLOW_ANYONE_TO_EDIT = false;
 
 interface BaseEditorProps {
-    socketIOProvider: SocketIOProvider;
-    doc: Y.Doc;
+    socketIOProvider: SocketIOProvider | undefined;
+    doc: Y.Doc | undefined;
     textBlockId: TextBlockId;
     placeholder?: string;
     viewOnly?: boolean;
     myId: UserId | undefined;
-    myName: string;
-    pfpColor: string;
+    myName: string | undefined;
+    pfpColor: string | undefined;
     syncStatus: boolean | undefined;
-    connectionStatus: string;
+    connectionStatus: string | undefined;
 }
 /**
  * Base BlockNote Editor component that render the editor with collaboration features
@@ -59,17 +60,21 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
     }, []);
 
     const locale = en;
+    const collabOptions: CollaborationOptions | undefined =
+        props.socketIOProvider && props.doc
+            ? {
+                  provider: props.socketIOProvider,
+                  fragment: props.doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID),
+                  user: {
+                      name: props.myName || 'Anonymous',
+                      color: props.pfpColor || '#ffffff',
+                  },
+                  showCursorLabels: 'activity',
+              }
+            : undefined;
     const editor = useCreateBlockNote(
         {
-            collaboration: {
-                provider: props.socketIOProvider,
-                fragment: props.doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID),
-                user: {
-                    name: props.myName,
-                    color: props.pfpColor,
-                },
-                showCursorLabels: 'activity',
-            },
+            collaboration: collabOptions,
             uploadFile: fileUploader.uploadFile,
             schema: BlockNoteSchema.create().extend({
                 blockSpecs: {
@@ -118,15 +123,17 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
                         </Alert>
                     )
                 ))}
-            <Group justify="flex-end">
-                <AvatarRow
-                    users={Array.from(roomUserIds.values())}
-                    maxUsers={5}
-                    showTooltip
-                    showProfilePopover
-                    animateOnHover
-                />
-            </Group>
+            {!props.viewOnly && (
+                <Group justify="flex-end">
+                    <AvatarRow
+                        users={Array.from(roomUserIds.values())}
+                        maxUsers={5}
+                        showTooltip
+                        showProfilePopover
+                        animateOnHover
+                    />
+                </Group>
+            )}
             <BlockNoteView
                 editor={editor}
                 theme={blockNoteEditorTheme}

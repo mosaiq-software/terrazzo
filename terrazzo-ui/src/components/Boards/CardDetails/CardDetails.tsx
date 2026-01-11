@@ -1,6 +1,6 @@
 import { ActionIcon, Box, Button, Center, Group, Loader, Modal, Stack, Text, Tooltip, useCombobox } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { CardId, fullName } from '@mosaiq/terrazzo-common';
+import { CardId, fullName, TextBlockResourceType } from '@mosaiq/terrazzo-common';
 import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
@@ -235,7 +235,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             textBlockId={card.descriptionTextBlockId}
                             placeholder="Start writing a description or hit '/' for commands..."
                             viewOnly={!perms.editCard}
-                            resourceType="card"
+                            resourceType={TextBlockResourceType.Card}
                             resourceId={card.id}
                         />
                         <Stack

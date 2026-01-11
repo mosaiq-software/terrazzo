@@ -1,6 +1,7 @@
 import { Box, Group, Loader, ScrollArea, Stack, Text } from '@mantine/core';
-import { DocumentId, fullName, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { DocumentId, fullName, PermissibleAction, TextBlockResourceType } from '@mosaiq/terrazzo-common';
 import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
+import { BlockNoteEditorHistoryModal } from '@trz/components/BlockNote/BlockNoteEditorHistoryModal';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
@@ -113,7 +114,7 @@ const DocumentPage = (): React.JSX.Element => {
                             textBlockId={document.textBlockId}
                             placeholder="Start writing your document or hit '/' for commands..."
                             viewOnly={!userCanEditDocument}
-                            resourceType="document"
+                            resourceType={TextBlockResourceType.Document}
                             resourceId={document.id}
                         />
                         <Group
@@ -132,6 +133,11 @@ const DocumentPage = (): React.JSX.Element => {
                                     collaborative text area yet.
                                 */}
                             </Text>
+                            <BlockNoteEditorHistoryModal
+                                textBlockId={document.textBlockId}
+                                resourceId={document.id}
+                                resourceType={TextBlockResourceType.Document}
+                            />
                         </Group>
                     </Stack>
                 </Box>

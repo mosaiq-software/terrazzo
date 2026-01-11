@@ -1,41 +1,43 @@
 import { Block } from '@blocknote/core';
 import { ServerBlockNoteEditor } from '@blocknote/server-util';
-import { BLOCKNOTE_FRAGMENT_ID, exhaustiveCheck, TextBlockHistorySnapshot, TextBlockId, TextBlockType, TextSocketHandshakeAuth, UID, UserId } from '@mosaiq/terrazzo-common';
+import { BLOCKNOTE_FRAGMENT_ID, exhaustiveCheck, TextBlockHistorySnapshot, TextBlockId, TextBlockResourceType, TextBlockType, UID, UserId } from '@mosaiq/terrazzo-common';
+import { syncTextHistorySnapshots } from '@trz-api/broadcasters/textBroadcasters';
 import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
 import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
 import { createTextBlockHistorySnapshotDb } from '@trz-api/persistence/textBlockHistoryPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
+import { Document } from '@trz-api/utils/y-socket-io';
 import console from 'console';
 import { applyPatch, createPatch } from 'diff';
 import { Doc, XmlText } from 'yjs';
 import { getBoardIDFromCardID } from './cardController';
 
-export const checkCanUserEditTextBlock = async (userId: UserId | undefined, resourceId: UID, resourceType: TextSocketHandshakeAuth['resource']['type']): Promise<boolean> => {
+export const checkCanUserEditTextBlock = async (userId: UserId | undefined, resourceId: UID, resourceType: TextBlockResourceType): Promise<TextBlockId | undefined> => {
     switch (resourceType) {
         case 'card': {
             const card = await getCardByIdDb(resourceId);
             if (!card) {
-                return false;
+                return undefined;
             }
             const boardId = await getBoardIDFromCardID(card.id);
             if (!(await userCanEditCard(userId, boardId))) {
-                return false;
+                return undefined;
             }
-            return true;
+            return card.descriptionTextBlockId;
         }
         case 'document': {
             const document = await getDocumentByIdDb(resourceId);
             if (!document) {
-                return false;
+                return undefined;
             }
             if (!(await userCanEditDocument(userId, document.id))) {
-                return false;
+                return undefined;
             }
-            return true;
+            return document.textBlockId;
         }
         default:
-            return false;
+            return undefined;
     }
 };
 
@@ -43,8 +45,9 @@ const BLOCKNOTE_EDITOR = ServerBlockNoteEditor.create();
 
 const SNAPSHOT_INTERVAL_MS = 1; //5 * 60 * 1000; // 5 minutes
 
-export const storeTextBlockEncodedData = async (textBlockId: TextBlockId, ydoc: Doc): Promise<void> => {
+export const storeTextBlockEncodedData = async (doc: Document): Promise<void> => {
     try {
+        const { textBlockId, resourceId, resourceType } = doc;
         const textBlock = await getTextBlockByIdDb(textBlockId);
         if (!textBlock) {
             throw new Error(`Text block ${textBlockId} not found`);
@@ -54,14 +57,14 @@ export const storeTextBlockEncodedData = async (textBlockId: TextBlockId, ydoc: 
         let prettyContent: string = '';
         switch (textBlock.type) {
             case TextBlockType.PlainText: {
-                const fragment = ydoc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
+                const fragment = doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
                 const textElements = fragment.toArray().filter((item) => item instanceof XmlText) as XmlText[];
                 content = textElements.map((te) => te.toString()).join('\n');
                 prettyContent = content; // Plain text doesn't need separate pretty version
                 break;
             }
             case TextBlockType.BlockNote: {
-                const fragment = ydoc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
+                const fragment = doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
                 const blocks = BLOCKNOTE_EDITOR.yXmlFragmentToBlocks(fragment);
                 content = JSON.stringify(blocks); // Compact for storage
                 prettyContent = JSON.stringify(blocks, null, 2); // Pretty for diffing
@@ -96,11 +99,12 @@ export const storeTextBlockEncodedData = async (textBlockId: TextBlockId, ydoc: 
                 diff: patch,
             };
             await createTextBlockHistorySnapshotDb(snapshot);
+            await syncTextHistorySnapshots(textBlockId, resourceId, resourceType);
         } else {
             await updateTextBlockDb(textBlockId, { text: content });
         }
     } catch (error: any) {
-        console.error('Unable to save text block ' + textBlockId + ' : ' + error.message);
+        console.error('Unable to save text block ' + doc.textBlockId + ' : ' + error.message);
         throw error;
     }
 };
@@ -237,14 +241,6 @@ const maybeParseMarkdownToBlocks = async (markdownText?: string): Promise<Block[
         return [];
     }
 };
-
-// ======
-// These next 2 fns are to handle diffing snapshots.
-// Each snapshot in the history stack will be stored as a diff from the previous snapshot to save space.
-// Always starting from the empty string, we can apply n diffs to get to snapshot n.
-// This should be a fully reversible process so we can go back and forth between snapshots without loss of data.
-// ( '' + snap1 + snap2 + snap3 = currentText) and (currentText - snap3 - snap2 = snap1) etc.
-// These snapshots should also be collapsible, such that later on we can combine multiple close diffs into one larger diff for efficiency.
 
 /**
  * Given two strings, compute a Git-style patch that represents the changes from oldText to newText.

@@ -5,6 +5,11 @@ export enum TextBlockType {
     BlockNote = 'BlockNote',
 }
 
+export enum TextBlockResourceType {
+    Card = 'card',
+    Document = 'document',
+}
+
 export interface TextBlock {
     id: TextBlockId;
     text: string;

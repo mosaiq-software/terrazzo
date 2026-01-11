@@ -1,5 +1,5 @@
-import { YjsEvent } from '@mosaiq/terrazzo-common';
-import { TextBlockId } from '@mosaiq/terrazzo-common/types/genericTypes';
+import { TextBlockResourceType, YjsEvent } from '@mosaiq/terrazzo-common';
+import { TextBlockId, UID } from '@mosaiq/terrazzo-common/types/genericTypes';
 import { Namespace, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
 import * as Y from 'yjs';
@@ -39,6 +39,8 @@ export interface Callbacks {
  */
 export class Document extends Y.Doc {
     public textBlockId: TextBlockId;
+    public resourceId: UID;
+    public resourceType: TextBlockResourceType;
     private readonly namespace: Namespace;
     public awareness: AwarenessProtocol.Awareness;
     private readonly callbacks?: Callbacks;
@@ -46,9 +48,11 @@ export class Document extends Y.Doc {
     public saveTimer?: NodeJS.Timeout;
     public isSaving: boolean = false;
 
-    constructor(textBlockId: TextBlockId, namespace: Namespace, callbacks?: Callbacks) {
+    constructor(textBlockId: TextBlockId, resourceId: UID, resourceType: TextBlockResourceType, namespace: Namespace, callbacks?: Callbacks) {
         super({ gc: gcEnabled });
         this.textBlockId = textBlockId;
+        this.resourceId = resourceId;
+        this.resourceType = resourceType;
         this.namespace = namespace;
         this.awareness = new AwarenessProtocol.Awareness(this);
         this.awareness.setLocalState(null);

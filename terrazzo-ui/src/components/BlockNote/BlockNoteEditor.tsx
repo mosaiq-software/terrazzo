@@ -1,7 +1,7 @@
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/mantine/style.css';
 import { useIdle, useThrottledState } from '@mantine/hooks';
-import { fullName, TextBlockId, TextSocketHandshakeAuth, UID } from '@mosaiq/terrazzo-common';
+import { fullName, TextBlockId, TextBlockResourceType, TextSocketHandshakeAuth, UID } from '@mosaiq/terrazzo-common';
 import { useUserContext } from '@trz/contexts/user-context';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { useMe } from '@trz/hooks/useMe';
@@ -35,7 +35,7 @@ interface BlockNoteEditorProps {
     /** The resource (doc, card, etc..) ID associated with the text block */
     resourceId: UID;
     /** The resource (doc, card, etc..) type associated with the text block */
-    resourceType: TextSocketHandshakeAuth['resource']['type'];
+    resourceType: TextBlockResourceType;
 }
 /**
  * Full BlockNote Editor component that creates its own socket for collaboration
@@ -66,10 +66,8 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
         const auth: TextSocketHandshakeAuth = {
             userId: userCtx.userId,
             authToken: userCtx.authToken,
-            resource: {
-                id: props.resourceId,
-                type: props.resourceType,
-            },
+            resourceId: props.resourceId,
+            resourceType: props.resourceType,
         };
         const sockConf: Partial<ManagerOptions & SocketOptions> = {
             path: '/socket',

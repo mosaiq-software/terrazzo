@@ -1,3 +1,4 @@
+import { TextBlockHistorySnapshot, TextBlockResourceType } from '../../..';
 import { BoardId, CardId, DirectoryId, DocumentId, InviteId, LabelId, ListId, OrganizationId, RoleId, UID, UploadedFileId, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
@@ -42,6 +43,7 @@ export enum ClientSE {
     GET_ROLES_FOR_USER_IN_ORG = 'GET_ROLES_FOR_USER_IN_ORG',
     GET_USERS_LINKED_ACCOUNTS = 'GET_USERS_LINKED_ACCOUNTS',
     GET_USERNAME_AVAILABLE = 'GET_USERNAME_AVAILABLE',
+    GET_TEXT_BLOCK_HISTORY_SNAPSHOTS = 'GET_TEXT_BLOCK_HISTORY_SNAPSHOTS',
 
     CREATE_ORG = 'CREATE_ORG',
     CREATE_BOARD = 'CREATE_BOARD',
@@ -104,6 +106,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId };
     [ClientSE.GET_USERS_LINKED_ACCOUNTS]: UserId;
     [ClientSE.GET_USERNAME_AVAILABLE]: string;
+    [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: { resourceId: UID; resourceType: TextBlockResourceType };
 
     [ClientSE.CREATE_ORG]: { name: string };
     [ClientSE.CREATE_BOARD]: { name: string; boardCode: string; parentId: DirectoryId };
@@ -166,6 +169,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: RoleId[] | undefined;
     [ClientSE.GET_USERS_LINKED_ACCOUNTS]: LinkedAccount[] | undefined;
     [ClientSE.GET_USERNAME_AVAILABLE]: boolean;
+    [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: TextBlockHistorySnapshot[] | undefined;
 
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
     [ClientSE.CREATE_BOARD]: BoardId | undefined;
