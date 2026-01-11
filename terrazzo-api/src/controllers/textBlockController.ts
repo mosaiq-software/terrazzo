@@ -16,10 +16,12 @@ import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
 import {
     createTextBlockHistorySnapshotDb,
     deleteTextBlockHistorySnapshotDb,
+    getTextBlockHistorySnapshotDb,
     getTextBlockHistorySnapshotsForTextBlockDb,
 } from '@trz-api/persistence/textBlockHistoryPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
+import { SocketManager } from '@trz-api/utils/socket/socketManager';
 import { Document } from '@trz-api/utils/y-socket-io';
 import console from 'console';
 import { Doc, XmlText } from 'yjs';
@@ -61,30 +63,31 @@ const BLOCKNOTE_EDITOR = ServerBlockNoteEditor.create();
 
 const SNAPSHOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 
+const getContentFromDoc = (doc: Document, type: TextBlockType): string => {
+    const fragment = doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
+    switch (type) {
+        case TextBlockType.PlainText: {
+            const textElements = fragment.toArray().filter((item) => item instanceof XmlText) as XmlText[];
+            return textElements.map((te) => te.toString()).join('\n');
+        }
+        case TextBlockType.BlockNote: {
+            const blocks = BLOCKNOTE_EDITOR.yXmlFragmentToBlocks(fragment);
+            return JSON.stringify(blocks); // Compact for storage
+        }
+        default:
+            return exhaustiveCheck(type, `Unsupported text block type for content extraction`);
+    }
+};
+
 export const storeTextBlockEncodedData = async (doc: Document, forceSnapshot?: boolean): Promise<void> => {
+    const { textBlockId, resourceId, resourceType } = doc;
     try {
-        const { textBlockId, resourceId, resourceType } = doc;
         const textBlock = await getTextBlockByIdDb(textBlockId);
         if (!textBlock) {
             throw new Error(`Text block ${textBlockId} not found`);
         }
 
-        let content: string = '';
-        switch (textBlock.type) {
-            case TextBlockType.PlainText: {
-                const fragment = doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
-                const textElements = fragment.toArray().filter((item) => item instanceof XmlText) as XmlText[];
-                content = textElements.map((te) => te.toString()).join('\n');
-                break;
-            }
-            case TextBlockType.BlockNote: {
-                const fragment = doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
-                const blocks = BLOCKNOTE_EDITOR.yXmlFragmentToBlocks(fragment);
-                content = JSON.stringify(blocks); // Compact for storage
-                break;
-            }
-        }
-
+        const content = getContentFromDoc(doc, textBlock.type);
         const now = Date.now();
         if (
             textBlock.trackHistory &&
@@ -97,7 +100,7 @@ export const storeTextBlockEncodedData = async (doc: Document, forceSnapshot?: b
             await updateTextBlockDb(textBlockId, { text: content });
         }
     } catch (error: any) {
-        console.error('Unable to save text block ' + doc.textBlockId + ' : ' + error.message);
+        console.error('Unable to save text block ' + textBlockId + ' : ' + error.message);
         throw error;
     }
 };
@@ -308,19 +311,17 @@ export const determineSnapshotsToDelete = (
 ): Set<UID> => {
     const snapshotsToDelete = new Set<UID>();
 
-    // Remove duplicates (same content or same timestamp) or empty content
+    // Remove duplicates or empty content
     const filteredSnapshots: TextBlockSnapshot[] = [];
-    const seenContents = new Set<string>();
     const seenTimestamps = new Set<number>();
     for (const snapshot of snapshots) {
         if (!snapshot.content || snapshot.content.length === 0) {
             snapshotsToDelete.add(snapshot.snapshotId);
             continue;
         }
-        if (seenContents.has(snapshot.content) || seenTimestamps.has(snapshot.timestamp)) {
+        if (seenTimestamps.has(snapshot.timestamp)) {
             snapshotsToDelete.add(snapshot.snapshotId);
         } else {
-            seenContents.add(snapshot.content);
             seenTimestamps.add(snapshot.timestamp);
             filteredSnapshots.push(snapshot);
         }
@@ -379,5 +380,31 @@ const reduceSnapshotsForTextBlock = async (textBlockId: TextBlockId) => {
             message: error.message,
             trace: error.stack,
         });
+    }
+};
+
+export const restoreTextBlockSnapshot = async (snapshotId: UID): Promise<void> => {
+    try {
+        const snapshot = await getTextBlockHistorySnapshotDb(snapshotId);
+        if (!snapshot) {
+            throw new Error(`Snapshot ${snapshotId} not found`);
+        }
+        const textBlock = await getTextBlockByIdDb(snapshot.textBlockId);
+        if (!textBlock) {
+            throw new Error(`Text block ${snapshot.textBlockId} not found`);
+        }
+
+        await updateTextBlockDb(textBlock.id, { text: snapshot.content });
+        const ydoc = await loadTextBlockEncodedData(textBlock.id);
+        if (!ydoc) {
+            throw new Error(`Failed to load YDoc for text block ${textBlock.id} during snapshot restore`);
+        }
+        await SocketManager.getInstance().yio.broadcastDocumentUpdate(snapshot.textBlockId, ydoc);
+    } catch (error: any) {
+        console.error(`Unable to restore text block snapshot ${snapshotId}`, {
+            message: error.message,
+            trace: error.stack,
+        });
+        throw error;
     }
 };

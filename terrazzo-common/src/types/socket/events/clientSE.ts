@@ -91,6 +91,7 @@ export enum ClientSE {
     DELETE_USER_LINKED_ACCOUNT = 'DELETE_USER_LINKED_ACCOUNT',
 
     USE_INVITE = 'USE_INVITE',
+    USE_TEXT_BLOCK_HISTORY_SNAPSHOT = 'USE_TEXT_BLOCK_HISTORY_SNAPSHOT',
 }
 export interface ClientSEPayload {
     // Client to Server
@@ -154,6 +155,11 @@ export interface ClientSEPayload {
     [ClientSE.DELETE_USER_LINKED_ACCOUNT]: { userId: UserId; provider: LinkedAccountProvider; accountId: string };
 
     [ClientSE.USE_INVITE]: { inviteId: InviteId };
+    [ClientSE.USE_TEXT_BLOCK_HISTORY_SNAPSHOT]: {
+        snapshotId: UID;
+        resourceId: UID;
+        resourceType: TextBlockResourceType;
+    };
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
@@ -217,5 +223,6 @@ export interface ClientSEReplies {
     [ClientSE.DELETE_USER_LINKED_ACCOUNT]: undefined;
 
     [ClientSE.USE_INVITE]: boolean;
+    [ClientSE.USE_TEXT_BLOCK_HISTORY_SNAPSHOT]: boolean;
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;

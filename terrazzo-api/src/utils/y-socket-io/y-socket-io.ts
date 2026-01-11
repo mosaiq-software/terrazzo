@@ -118,6 +118,27 @@ export class YSocketIO extends Observable<string> {
         await Promise.all(syncPromises);
     }
 
+    /**
+     * Broadcast a document update to all connected clients for a specific text block.
+     * This overwrites the document content and syncs it to all clients in real-time.
+     * Useful for operations like version history restoration.
+     *
+     * @param textBlockId - The ID of the text block to update
+     * @param ydoc - The Y.Doc containing the new content to broadcast
+     * @returns true if broadcast succeeded, false if document not found or not initialized
+     */
+    public async broadcastDocumentUpdate(textBlockId: TextBlockId, ydoc: Y.Doc): Promise<boolean> {
+        const doc = this._documents.get(textBlockId);
+        if (!doc) {
+            console.warn(`Cannot broadcast update: Document ${textBlockId} not found in active documents`);
+            return false;
+        }
+        const update = Y.encodeStateAsUpdate(ydoc);
+        Y.applyUpdate(doc, update, this);
+        console.log(`Broadcasted document update for text block ${textBlockId} to all connected clients`);
+        return true;
+    }
+
     private async syncSocketEditStatusForSocket(socket: Socket, userId: UserId): Promise<void> {
         try {
             const auth = socket.handshake.auth as TextSocketHandshakeAuth;

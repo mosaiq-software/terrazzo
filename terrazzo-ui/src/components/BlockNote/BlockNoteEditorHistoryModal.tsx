@@ -2,9 +2,11 @@ import { Block } from '@blocknote/core';
 import { Button, Center, Divider, Group, Loader, Modal, ScrollArea, Stack, Text } from '@mantine/core';
 import { TextBlockId, TextBlockResourceType, TextBlockSnapshot, UID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
+import { restoreTextBlockSnapshot } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useTextBlockHistorySnapshots } from '@trz/hooks/useTextBlockHistorySnapshots';
 import React, { useState } from 'react';
+import { RectHoldingButton } from '../UI/RectHoldingButton';
 import { ReadonlyBlockNote } from './ReadonlyBlockNote';
 
 interface BlockNoteEditorHistoryModalProps {
@@ -39,7 +41,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
     }
 
     const content = selectedSnapshot ? (JSON.parse(selectedSnapshot.content) as Block[]) : [];
-    console.log('Rendering history modal with snapshots:', snapshots, 'and selected snapshot:', selectedSnapshot);
+
     return (
         <Modal.Root
             opened
@@ -141,6 +143,22 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                                                 }}
                                             >
                                                 <Text>{new Date(snapshot.timestamp).toLocaleString()}</Text>
+                                                <RectHoldingButton
+                                                    variant="outline"
+                                                    durationMs={2000}
+                                                    borderColor="orange"
+                                                    onClick={async () => {
+                                                        await restoreTextBlockSnapshot(
+                                                            sockCtx,
+                                                            snapshot.snapshotId,
+                                                            props.resourceId,
+                                                            props.resourceType
+                                                        );
+                                                        setModalOpened(false);
+                                                    }}
+                                                >
+                                                    Restore
+                                                </RectHoldingButton>
                                             </Stack>
                                             {index < snapshots.length - 1 && <Divider my="xs" />}
                                         </React.Fragment>

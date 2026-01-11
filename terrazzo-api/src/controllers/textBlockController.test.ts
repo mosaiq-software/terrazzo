@@ -42,18 +42,6 @@ describe('determineSnapshotsToDelete', () => {
             createSnapshot(UID3, minutesMs(10), fixedTimestamp()),
         ];
         const result = determineSnapshotsToDelete(snapshots, fixedTimestamp());
-        // Should delete 2 of the 3
-        expect(result.size).toBe(2);
-    });
-
-    it('should handle snapshots with identical content', () => {
-        const snapshots = [
-            createSnapshot(UID1, minutesMs(10), fixedTimestamp(), 'same content'),
-            createSnapshot(UID2, minutesMs(9), fixedTimestamp(), 'same content'),
-            createSnapshot(UID3, minutesMs(8), fixedTimestamp(), 'same content'),
-        ];
-        const result = determineSnapshotsToDelete(snapshots, fixedTimestamp());
-        // Should delete 2 of the 3
         expect(result.size).toBe(2);
     });
 
