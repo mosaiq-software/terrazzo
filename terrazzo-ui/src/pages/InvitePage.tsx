@@ -24,7 +24,10 @@ const InvitePage = (): React.JSX.Element => {
         setTitle(`Invite | Terrazzo`);
     }, []);
 
-    const userIsInOrg = useMemo(() => orgCtx.allOrganizations.some((org) => org.id === invite?.forOrganizationId), [orgCtx.allOrganizations, invite]);
+    const userIsInOrg = useMemo(
+        () => orgCtx.allOrganizations.some((org) => org.id === invite?.forOrganizationId),
+        [orgCtx.allOrganizations, invite]
+    );
 
     const handleAcceptInvite = useCallback(async () => {
         if (!invite) {
@@ -71,7 +74,11 @@ const InvitePage = (): React.JSX.Element => {
                             name={invitingOrg?.name}
                             color={'initials'}
                         />
-                        <Text>{userIsInOrg ? `Hi ${me.firstName}, welcome back to` : `Hi ${me.firstName}, you have been invited to join`}</Text>
+                        <Text>
+                            {userIsInOrg
+                                ? `Hi ${me.firstName}, welcome back to`
+                                : `Hi ${me.firstName}, you have been invited to join`}
+                        </Text>
                         <Title>{invitingOrg?.name || 'Unknown Organization'}</Title>
                         <Text>{invitingOrg?.description || null}</Text>
                         <Space h="1rem" />

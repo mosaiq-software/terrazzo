@@ -6,7 +6,11 @@ export const getListData = async (sockCtx: SocketContextType, listId: BoardId): 
     return list;
 };
 
-export const createList = async (sockCtx: SocketContextType, boardID: BoardId, listName: string): Promise<ListId | undefined> => {
+export const createList = async (
+    sockCtx: SocketContextType,
+    boardID: BoardId,
+    listName: string
+): Promise<ListId | undefined> => {
     return await sockCtx.emit(ClientSE.CREATE_LIST, { boardID, listName });
 };
 

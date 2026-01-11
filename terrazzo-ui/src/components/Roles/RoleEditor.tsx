@@ -19,7 +19,11 @@ export const RoleEditor = (props: RoleEditorProps) => {
 
     const isChanged = useCallback(
         (edited: Role) => {
-            return edited.name !== props.role.name || edited.color !== props.role.color || edited.defaultPermissions.sort().join() !== props.role.defaultPermissions.sort().join();
+            return (
+                edited.name !== props.role.name ||
+                edited.color !== props.role.color ||
+                edited.defaultPermissions.sort().join() !== props.role.defaultPermissions.sort().join()
+            );
         },
         [props.role]
     );
@@ -94,7 +98,10 @@ export const RoleEditor = (props: RoleEditorProps) => {
                                 permissionDescription={permData.description}
                                 isEnabled={enabled}
                                 onToggle={(checked) => {
-                                    change('defaultPermissions', withPermissionFlag(editingRole.defaultPermissions, permission, checked));
+                                    change(
+                                        'defaultPermissions',
+                                        withPermissionFlag(editingRole.defaultPermissions, permission, checked)
+                                    );
                                 }}
                             />
                         );

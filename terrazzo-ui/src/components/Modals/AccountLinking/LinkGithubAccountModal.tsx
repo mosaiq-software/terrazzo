@@ -64,7 +64,8 @@ const LinkGithubAccount = (props: ContextModalProps<{}>): React.JSX.Element => {
                     >
                         2.{' '}
                     </Text>
-                    Return to this page, click "Link Github Account", and sign in with the GitHub account you want to link.
+                    Return to this page, click "Link Github Account", and sign in with the GitHub account you want to
+                    link.
                 </Text>
                 <Button
                     disabled={!hasLoggedOut}
@@ -74,7 +75,8 @@ const LinkGithubAccount = (props: ContextModalProps<{}>): React.JSX.Element => {
                 </Button>
                 <Space h="md" />
                 <Text>
-                    Once linked, you should see the Github account appear in your <Link to="/settings">User Settings</Link> page.
+                    Once linked, you should see the Github account appear in your{' '}
+                    <Link to="/settings">User Settings</Link> page.
                 </Text>
                 <Space h="md" />
             </Stack>

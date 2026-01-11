@@ -172,7 +172,9 @@ export const InvitesPanel = (props: InvitesPanelProps) => {
                             onDeleteInvite={() => handleDeleteInvite(invite)}
                         />
                     ))}
-                    {sortedInvites.expiredInvites.length > 0 && sortedInvites.nonExpiredInvites.length > 0 && <Divider />}
+                    {sortedInvites.expiredInvites.length > 0 && sortedInvites.nonExpiredInvites.length > 0 && (
+                        <Divider />
+                    )}
                     {sortedInvites.expiredInvites.length > 0 && (
                         <Text
                             c="dimmed"

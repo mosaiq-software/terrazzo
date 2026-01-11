@@ -1,4 +1,16 @@
-import { ActionIcon, Box, Button, Center, Group, Loader, Modal, Stack, Text, Tooltip, useCombobox } from '@mantine/core';
+import {
+    ActionIcon,
+    Box,
+    Button,
+    Center,
+    Group,
+    Loader,
+    Modal,
+    Stack,
+    Text,
+    Tooltip,
+    useCombobox,
+} from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { CardId, fullName, TextBlockResourceType } from '@mosaiq/terrazzo-common';
 import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';

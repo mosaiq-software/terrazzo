@@ -6,7 +6,11 @@ export const getCardData = async (sockCtx: SocketContextType, cardId: BoardId): 
     return card;
 };
 
-export const createCard = async (sockCtx: SocketContextType, listID: ListId, cardName: string): Promise<CardId | undefined> => {
+export const createCard = async (
+    sockCtx: SocketContextType,
+    listID: ListId,
+    cardName: string
+): Promise<CardId | undefined> => {
     return await sockCtx.emit(ClientSE.CREATE_CARD, { listID, cardName });
 };
 
@@ -18,10 +22,20 @@ export const updateCardField = async (sockCtx: SocketContextType, id: CardId, pa
     await sockCtx.emit(ClientSE.UPDATE_CARD_FIELD, { ...partial, id });
 };
 
-export const updateCardAssignee = async (sockCtx: SocketContextType, cardId: CardId, userId: UserId, assigned: boolean) => {
+export const updateCardAssignee = async (
+    sockCtx: SocketContextType,
+    cardId: CardId,
+    userId: UserId,
+    assigned: boolean
+) => {
     await sockCtx.emit(ClientSE.UPDATE_CARD_ASSIGNEE, { cardId, userId, assigned });
 };
 
-export const emitMoveCard = async (sockCtx: SocketContextType, cardId: CardId, toList: ListId, position?: number): Promise<void> => {
+export const emitMoveCard = async (
+    sockCtx: SocketContextType,
+    cardId: CardId,
+    toList: ListId,
+    position?: number
+): Promise<void> => {
     await sockCtx.emit(ClientSE.MOVE_CARD, { cardId, toList, position });
 };

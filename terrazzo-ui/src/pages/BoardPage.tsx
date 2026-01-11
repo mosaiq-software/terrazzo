@@ -1,8 +1,32 @@
-import { closestCenter, CollisionDetection, DndContext, DragEndEvent, DragOverlay, DragStartEvent, KeyboardSensor, MeasuringStrategy, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import {
+    closestCenter,
+    CollisionDetection,
+    DndContext,
+    DragEndEvent,
+    DragOverlay,
+    DragStartEvent,
+    KeyboardSensor,
+    MeasuringStrategy,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
 import { DragAbortEvent, DragCancelEvent, DragOverEvent } from '@dnd-kit/core/dist/types';
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Container, Loader } from '@mantine/core';
-import { arrayMoveInPlace, BoardId, BoardRes, CardId, Label, ListId, PermissibleAction, RoomType, ServerSE, UID, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
+import {
+    arrayMoveInPlace,
+    BoardId,
+    BoardRes,
+    CardId,
+    Label,
+    ListId,
+    PermissibleAction,
+    RoomType,
+    ServerSE,
+    UID,
+    updateBaseFromPartial,
+} from '@mosaiq/terrazzo-common';
 import CardDetails from '@trz/components/Boards/CardDetails/CardDetails';
 import CreateList from '@trz/components/Boards/CreateList';
 import SortableList from '@trz/components/DragAndDrop/SortableList';
@@ -16,7 +40,12 @@ import { useModulePermission } from '@trz/hooks/usePermissions';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { CARD_CACHE_PREFIX, getBoardNameWithCode, LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
-import { boardDropAnimation, horizontalCollisionDetection, renderCardDragOverlay, renderListDragOverlay } from '@trz/util/dragAndDropUtils';
+import {
+    boardDropAnimation,
+    horizontalCollisionDetection,
+    renderCardDragOverlay,
+    renderListDragOverlay,
+} from '@trz/util/dragAndDropUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -157,8 +186,15 @@ const BoardPage = (): React.JSX.Element => {
                 return;
             }
             if (payload.name || payload.boardCode) {
-                setTitle(`${getBoardNameWithCode((payload.name || boardData?.name) ?? '', payload.boardCode || boardData?.boardCode)} | Terrazzo`);
-                uiCtx.setPageTitle(getBoardNameWithCode((payload.name || boardData?.name) ?? '', payload.boardCode || boardData?.boardCode));
+                setTitle(
+                    `${getBoardNameWithCode((payload.name || boardData?.name) ?? '', payload.boardCode || boardData?.boardCode)} | Terrazzo`
+                );
+                uiCtx.setPageTitle(
+                    getBoardNameWithCode(
+                        (payload.name || boardData?.name) ?? '',
+                        payload.boardCode || boardData?.boardCode
+                    )
+                );
             }
             setBoardData((prev) => {
                 if (!prev) {
@@ -443,7 +479,12 @@ const BoardPage = (): React.JSX.Element => {
     const collisionDetectionStrategy: CollisionDetection = useCallback(
         (args) => {
             // Get the closest list horizontally
-            const onlyListArgs = { ...args, droppableContainers: args.droppableContainers.filter((container) => listToCardsMap.has(container.id.toString() as UID)) };
+            const onlyListArgs = {
+                ...args,
+                droppableContainers: args.droppableContainers.filter((container) =>
+                    listToCardsMap.has(container.id.toString() as UID)
+                ),
+            };
             let intersectingId = horizontalCollisionDetection(onlyListArgs) as UID;
 
             // If theres no intersection, fall back to the last known intersected item
@@ -533,7 +574,14 @@ const BoardPage = (): React.JSX.Element => {
         return <Loader />;
     }
 
-    const onRender: React.ProfilerOnRenderCallback = (id, phase, actualDuration, baseDuration, startTime, commitTime) => {
+    const onRender: React.ProfilerOnRenderCallback = (
+        id,
+        phase,
+        actualDuration,
+        baseDuration,
+        startTime,
+        commitTime
+    ) => {
         // console.log("Rendered", id, "in", phase, "for", actualDuration+"ms", "from", startTime+"ms", "to", commitTime+"ms");
     };
 
@@ -591,7 +639,16 @@ const BoardPage = (): React.JSX.Element => {
                             >
                                 {memoizedSortableLists}
                             </SortableContext>
-                            {createPortal(<DragOverlay dropAnimation={boardDropAnimation}>{activeObject ? (listToCardsMap.has(activeObject) ? renderListDragOverlay(activeObject, boardData.boardCode ?? '#') : renderCardDragOverlay(activeObject, boardData.boardCode ?? '#')) : null}</DragOverlay>, document.body)}
+                            {createPortal(
+                                <DragOverlay dropAnimation={boardDropAnimation}>
+                                    {activeObject
+                                        ? listToCardsMap.has(activeObject)
+                                            ? renderListDragOverlay(activeObject, boardData.boardCode ?? '#')
+                                            : renderCardDragOverlay(activeObject, boardData.boardCode ?? '#')
+                                        : null}
+                                </DragOverlay>,
+                                document.body
+                            )}
                         </BoardContext.Provider>
                     </DndContext>
                     {!viewOnly && userCanEditBoard && (

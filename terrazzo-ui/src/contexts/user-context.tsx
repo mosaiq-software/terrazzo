@@ -1,5 +1,12 @@
 import { useLocalStorage, useSessionStorage } from '@mantine/hooks';
-import { AuthProviderCallbackBody, AuthProviderCallbackData, ExistingAuthToken, RestRoutes, UserId, UserIdWithAuth } from '@mosaiq/terrazzo-common';
+import {
+    AuthProviderCallbackBody,
+    AuthProviderCallbackData,
+    ExistingAuthToken,
+    RestRoutes,
+    UserId,
+    UserIdWithAuth,
+} from '@mosaiq/terrazzo-common';
 import { callTrzApi } from '@trz/util/apiUtils';
 import { isDev } from '@trz/util/envUtils';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -28,7 +35,9 @@ const UserProvider: React.FC<any> = ({ children }) => {
     const [authToken, setAuthToken] = useState<string | undefined>(undefined);
     const navigate = useNavigate();
     const [localSavedAuth, setLocalSavedAuth, removeLocalSavedAuth] = useLocalStorage({ key: LOCAL_SAVED_AUTH_KEY });
-    const [sessionSavedLoginRoute, setSessionSavedLoginRoute, removeSessionSavedLoginRoute] = useSessionStorage({ key: SESSION_POST_LOGIN_REDIRECT_KEY });
+    const [sessionSavedLoginRoute, setSessionSavedLoginRoute, removeSessionSavedLoginRoute] = useSessionStorage({
+        key: SESSION_POST_LOGIN_REDIRECT_KEY,
+    });
 
     /**
      * Saves the current route to session storage for redirecting post-login

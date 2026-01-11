@@ -1,4 +1,17 @@
-import { Box, Burger, Button, Divider, Group, Kbd, Popover, ScrollAreaAutosize, Stack, Text, Title, Tooltip } from '@mantine/core';
+import {
+    Box,
+    Burger,
+    Button,
+    Divider,
+    Group,
+    Kbd,
+    Popover,
+    ScrollAreaAutosize,
+    Stack,
+    Text,
+    Title,
+    Tooltip,
+} from '@mantine/core';
 import { useHotkeys, useLocalStorage } from '@mantine/hooks';
 import { LocalStorageKey } from '@mosaiq/terrazzo-common';
 import TerrazzoLogo from '@trz/assets//terrazzo-logo.svg?react';
@@ -19,7 +32,10 @@ const AppLayout = () => {
     const userCtx = useUserContext();
     const { showContextMenu } = useContextMenu();
 
-    const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage<boolean>({ key: LocalStorageKey.SIDEBAR_COLLAPSED, defaultValue: false });
+    const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage<boolean>({
+        key: LocalStorageKey.SIDEBAR_COLLAPSED,
+        defaultValue: false,
+    });
 
     useHotkeys([
         [

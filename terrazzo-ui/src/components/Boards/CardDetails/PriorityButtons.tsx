@@ -5,7 +5,12 @@ import { updateCardField } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import React from 'react';
 import { MdOutlineRadioButtonUnchecked, MdRadioButtonChecked } from 'react-icons/md';
-import { PiCellSignalFullFill, PiCellSignalLowFill, PiCellSignalMediumFill, PiCellSignalNoneDuotone } from 'react-icons/pi';
+import {
+    PiCellSignalFullFill,
+    PiCellSignalLowFill,
+    PiCellSignalMediumFill,
+    PiCellSignalNoneDuotone,
+} from 'react-icons/pi';
 
 export const priorityColors: string[] = ['#817d7eff', '#e6abb9ff', '#ee809bff', '#fd2d61ff'];
 
@@ -81,7 +86,13 @@ export const PriorityButtons = (props: PriorityButtonsProps): React.JSX.Element 
                                 ta={'center'}
                                 justify={'center'}
                                 c={'#fff'}
-                                leftSection={priority === index ? <MdRadioButtonChecked size={16} /> : <MdOutlineRadioButtonUnchecked size={16} />}
+                                leftSection={
+                                    priority === index ? (
+                                        <MdRadioButtonChecked size={16} />
+                                    ) : (
+                                        <MdOutlineRadioButtonUnchecked size={16} />
+                                    )
+                                }
                                 onClick={() => {
                                     handleOnChange(index);
                                 }}

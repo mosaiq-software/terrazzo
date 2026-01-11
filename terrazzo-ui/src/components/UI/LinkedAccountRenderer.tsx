@@ -17,7 +17,11 @@ export const LinkedAccountRenderer = (props: LinkedAccountProps) => {
             borderColor="red"
             variant="outline"
             onClick={() => props.onUnlink && props.onUnlink(props.account)}
-            tooltip={props.isOnlyAccount ? 'You must have at least 1 account linked' : `You will no longer be able to sign in using this ${props.account.provider} account`}
+            tooltip={
+                props.isOnlyAccount
+                    ? 'You must have at least 1 account linked'
+                    : `You will no longer be able to sign in using this ${props.account.provider} account`
+            }
             disabled={props.isOnlyAccount}
         >
             Unlink

@@ -1,5 +1,18 @@
 import { TextBlockResourceType, TextBlockSnapshot } from '../../..';
-import { BoardId, CardId, DirectoryId, DocumentId, InviteId, LabelId, ListId, OrganizationId, RoleId, UID, UploadedFileId, UserId } from '../../genericTypes';
+import {
+    BoardId,
+    CardId,
+    DirectoryId,
+    DocumentId,
+    InviteId,
+    LabelId,
+    ListId,
+    OrganizationId,
+    RoleId,
+    UID,
+    UploadedFileId,
+    UserId,
+} from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
 import { Board, BoardRes, Label } from '../../modules/board/boardTypes';

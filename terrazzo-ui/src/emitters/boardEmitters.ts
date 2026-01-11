@@ -6,7 +6,12 @@ export const getBoardData = async (sockCtx: SocketContextType, boardId: BoardId)
     return board;
 };
 
-export const createBoard = async (sockCtx: SocketContextType, name: string, boardCode: string, parentId: UID): Promise<BoardId | undefined> => {
+export const createBoard = async (
+    sockCtx: SocketContextType,
+    name: string,
+    boardCode: string,
+    parentId: UID
+): Promise<BoardId | undefined> => {
     return await sockCtx.emit(ClientSE.CREATE_BOARD, { name, boardCode, parentId });
 };
 

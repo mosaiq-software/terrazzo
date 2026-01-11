@@ -1,4 +1,11 @@
-import { RoomType, ServerSE, TextBlockId, TextBlockResourceType, TextBlockSnapshot, UID } from '@mosaiq/terrazzo-common';
+import {
+    RoomType,
+    ServerSE,
+    TextBlockId,
+    TextBlockResourceType,
+    TextBlockSnapshot,
+    UID,
+} from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getTextBlockHistorySnapshots } from '@trz/emitters/textEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -6,7 +13,11 @@ import { useEffect, useState } from 'react';
 import { useRoom } from './useRoom';
 import { useSocketListener } from './useSocketListener';
 
-export const useTextBlockHistorySnapshots = (textBlockId?: TextBlockId, resourceId?: UID, resourceType?: TextBlockResourceType) => {
+export const useTextBlockHistorySnapshots = (
+    textBlockId?: TextBlockId,
+    resourceId?: UID,
+    resourceType?: TextBlockResourceType
+) => {
     useRoom(RoomType.DATA, textBlockId);
     const sockCtx = useSocket();
     const [snapshots, setSnapshots] = useState<TextBlockSnapshot[]>([]);

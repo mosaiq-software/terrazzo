@@ -9,7 +9,11 @@ export const useFileUploader = () => {
     const uploadFile = async (file: File): Promise<string> => {
         const base64 = await fileToBase64(file);
         // const fileId = await createFileUpload(sockCtx, file.name, base64, file.type);
-        const fileId = (await callTrzApi(RestRoutes.UPLOAD_FILE, {}, { base64, fileName: file.name, mimeType: file.type })) as UploadedFileId | undefined;
+        const fileId = (await callTrzApi(
+            RestRoutes.UPLOAD_FILE,
+            {},
+            { base64, fileName: file.name, mimeType: file.type }
+        )) as UploadedFileId | undefined;
         if (!fileId) {
             throw new Error('File upload failed');
         }

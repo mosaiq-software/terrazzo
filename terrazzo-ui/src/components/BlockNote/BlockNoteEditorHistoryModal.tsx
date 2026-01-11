@@ -15,7 +15,11 @@ interface BlockNoteEditorHistoryModalProps {
 export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalProps) => {
     const [modalOpened, setModalOpened] = useState(false);
     const sockCtx = useSocket();
-    const snapshots = useTextBlockHistorySnapshots(modalOpened ? props.textBlockId : undefined, props.resourceId, props.resourceType);
+    const snapshots = useTextBlockHistorySnapshots(
+        modalOpened ? props.textBlockId : undefined,
+        props.resourceId,
+        props.resourceType
+    );
     const [selectedSnapshot, setSelectedSnapshot] = useState<TextBlockSnapshot | undefined>(undefined);
     useCatchSaveKey();
 
@@ -100,7 +104,11 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                                     h={'100%'}
                                     w={'100%'}
                                 >
-                                    {selectedSnapshot ? <Text c="dimmed">No content available for this snapshot.</Text> : <Text c="dimmed">Select a snapshot to view its content.</Text>}
+                                    {selectedSnapshot ? (
+                                        <Text c="dimmed">No content available for this snapshot.</Text>
+                                    ) : (
+                                        <Text c="dimmed">Select a snapshot to view its content.</Text>
+                                    )}
                                 </Center>
                             )}
                         </ScrollArea>
@@ -116,7 +124,15 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                                             <Stack
                                                 key={snapshot.snapshotId}
                                                 gap={0}
-                                                style={{ cursor: 'pointer', backgroundColor: selectedSnapshot?.snapshotId === snapshot.snapshotId ? 'rgba(255, 255, 255, 0.1)' : 'transparent', padding: '8px', borderRadius: '4px' }}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    backgroundColor:
+                                                        selectedSnapshot?.snapshotId === snapshot.snapshotId
+                                                            ? 'rgba(255, 255, 255, 0.1)'
+                                                            : 'transparent',
+                                                    padding: '8px',
+                                                    borderRadius: '4px',
+                                                }}
                                                 onClick={() => {
                                                     if (selectedSnapshot?.snapshotId === snapshot.snapshotId) {
                                                         setSelectedSnapshot(undefined);

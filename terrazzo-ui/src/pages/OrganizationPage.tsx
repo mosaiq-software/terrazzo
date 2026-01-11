@@ -106,7 +106,13 @@ const OrganizationPage = (): React.JSX.Element => {
                             keepMounted={false}
                         >
                             <Tabs.List>
-                                {['Organization', 'Members', ...withIf('Roles', userCanEditRoles), 'Settings', ...withIf('Archive', userCanEditRootDirectory)].map((t) => {
+                                {[
+                                    'Organization',
+                                    'Members',
+                                    ...withIf('Roles', userCanEditRoles),
+                                    'Settings',
+                                    ...withIf('Archive', userCanEditRootDirectory),
+                                ].map((t) => {
                                     return (
                                         <Tabs.Tab
                                             value={t}

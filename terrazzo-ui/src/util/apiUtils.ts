@@ -1,4 +1,11 @@
-import { RestMethods, RestRequestBody, RestRequestMethod, RestRequestParams, RestResponse, RestRoutes } from '@mosaiq/terrazzo-common';
+import {
+    RestMethods,
+    RestRequestBody,
+    RestRequestMethod,
+    RestRequestParams,
+    RestResponse,
+    RestRoutes,
+} from '@mosaiq/terrazzo-common';
 
 export const getApiUrl = () => {
     const apiUrl = import.meta.env.API_URL;
@@ -10,7 +17,11 @@ export const getApiUrl = () => {
     return apiUrl;
 };
 
-export async function callTrzApi<T extends RestRoutes>(endpoint: T, params: RestRequestParams[T], body: RestRequestBody[T]): Promise<RestResponse<T>> {
+export async function callTrzApi<T extends RestRoutes>(
+    endpoint: T,
+    params: RestRequestParams[T],
+    body: RestRequestBody[T]
+): Promise<RestResponse<T>> {
     try {
         const epString = replaceParams(endpoint, params);
         const method = RestRequestMethod[endpoint];

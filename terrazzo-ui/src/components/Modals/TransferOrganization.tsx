@@ -96,7 +96,8 @@ const TransferOrganization = (props: ContextModalProps<{}>): React.JSX.Element =
                         mt="sm"
                         mb="md"
                     >
-                        This will transfer full ownership of the organization to the selected user. You will lose access to administrative functions unless the new owner grants them back to you.
+                        This will transfer full ownership of the organization to the selected user. You will lose access
+                        to administrative functions unless the new owner grants them back to you.
                     </Text>
                 </>
             ) : (
@@ -128,7 +129,11 @@ const TransferOrganization = (props: ContextModalProps<{}>): React.JSX.Element =
                 <RectHoldingButton
                     onClick={onSubmit}
                     durationMs={2000}
-                    tooltip={toUserId ? 'This action cannot be undone. Hold to confirm.' : 'Select a user to transfer the organization to.'}
+                    tooltip={
+                        toUserId
+                            ? 'This action cannot be undone. Hold to confirm.'
+                            : 'Select a user to transfer the organization to.'
+                    }
                     width={250}
                     borderColor="red"
                     disabled={!toUserId}

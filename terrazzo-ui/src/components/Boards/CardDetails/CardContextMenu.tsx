@@ -12,7 +12,16 @@ import { useCard } from '@trz/hooks/useCard';
 import { getCardLink } from '@trz/util/linkUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
-import { MdBarChart, MdCheckBox, MdDocumentScanner, MdLabel, MdLink, MdOutlineCheckBoxOutlineBlank, MdOutlineRadioButtonUnchecked, MdRadioButtonChecked } from 'react-icons/md';
+import {
+    MdBarChart,
+    MdCheckBox,
+    MdDocumentScanner,
+    MdLabel,
+    MdLink,
+    MdOutlineCheckBoxOutlineBlank,
+    MdOutlineRadioButtonUnchecked,
+    MdRadioButtonChecked,
+} from 'react-icons/md';
 import { priorityColors, PriorityIcons } from './PriorityButtons';
 
 interface CardContextMenuProps {
@@ -41,7 +50,11 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
                         id: label.id,
                         label: label.name,
                         color: label.color,
-                        leftIcon: card.labels.includes(label.id) ? <MdCheckBox size={16} /> : <MdOutlineCheckBoxOutlineBlank size={16} />,
+                        leftIcon: card.labels.includes(label.id) ? (
+                            <MdCheckBox size={16} />
+                        ) : (
+                            <MdOutlineCheckBoxOutlineBlank size={16} />
+                        ),
                     }))}
                     onSelect={async (selected) => {
                         const labels = card.labels;
@@ -64,7 +77,12 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
                         id: index.toString(),
                         label: PriorityIcons[index]({ size: 16 }),
                         color: color,
-                        leftIcon: (card.priority ?? 0) === index ? <MdRadioButtonChecked size={16} /> : <MdOutlineRadioButtonUnchecked size={16} />,
+                        leftIcon:
+                            (card.priority ?? 0) === index ? (
+                                <MdRadioButtonChecked size={16} />
+                            ) : (
+                                <MdOutlineRadioButtonUnchecked size={16} />
+                            ),
                     }))
                     .reverse()}
                 onSelect={async (selected) => {
@@ -78,7 +96,11 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
                     orgCtx.members.map((memRec) => ({
                         id: memRec.user.id,
                         label: fullName(memRec.user),
-                        rightIcon: card.assignees.includes(memRec.user.id) ? <MdCheckBox size={16} /> : <MdOutlineCheckBoxOutlineBlank size={16} />,
+                        rightIcon: card.assignees.includes(memRec.user.id) ? (
+                            <MdCheckBox size={16} />
+                        ) : (
+                            <MdOutlineCheckBoxOutlineBlank size={16} />
+                        ),
                         leftIcon: (
                             <Avatar
                                 src={memRec.user.profilePicture}
@@ -98,7 +120,13 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
             {userCtx.userId && (
                 <>
                     <ContextMenuButton
-                        icon={card.assignees.includes(userCtx.userId) ? <FaUserMinus size={16} /> : <FaUserPlus size={16} />}
+                        icon={
+                            card.assignees.includes(userCtx.userId) ? (
+                                <FaUserMinus size={16} />
+                            ) : (
+                                <FaUserPlus size={16} />
+                            )
+                        }
                         text={card.assignees.includes(userCtx.userId) ? 'Leave' : 'Join'}
                         onClick={async () => {
                             if (!card || !userCtx.userId) {

@@ -66,4 +66,6 @@ const CreateOrganization = (props: ContextModalProps<{ modalBody: string }>): Re
     );
 };
 
-export const CreateOrganizationModal = (props: ContextModalProps<{ modalBody: string }>) => <CreateOrganization {...props} />;
+export const CreateOrganizationModal = (props: ContextModalProps<{ modalBody: string }>) => (
+    <CreateOrganization {...props} />
+);

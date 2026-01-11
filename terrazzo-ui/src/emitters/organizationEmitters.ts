@@ -1,16 +1,26 @@
 import { ClientSE, OrganizationHeader, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
-export const getOrganizationData = async (sockCtx: SocketContextType, orgId: OrganizationId): Promise<OrganizationHeader | undefined> => {
+export const getOrganizationData = async (
+    sockCtx: SocketContextType,
+    orgId: OrganizationId
+): Promise<OrganizationHeader | undefined> => {
     const org = await sockCtx.emit(ClientSE.GET_ORGANIZATION, orgId);
     return org;
 };
 
-export const createOrganization = async (sockCtx: SocketContextType, name: string): Promise<OrganizationId | undefined> => {
+export const createOrganization = async (
+    sockCtx: SocketContextType,
+    name: string
+): Promise<OrganizationId | undefined> => {
     return await sockCtx.emit(ClientSE.CREATE_ORG, { name });
 };
 
-export const updateOrgField = async (sockCtx: SocketContextType, id: OrganizationId, partial: Partial<OrganizationHeader>) => {
+export const updateOrgField = async (
+    sockCtx: SocketContextType,
+    id: OrganizationId,
+    partial: Partial<OrganizationHeader>
+) => {
     await sockCtx.emit(ClientSE.UPDATE_ORG_FIELD, { ...partial, id });
 };
 

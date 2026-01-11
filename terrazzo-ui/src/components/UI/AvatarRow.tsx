@@ -70,7 +70,9 @@ export const AvatarRow = (props: AvatarRowProps) => {
                         withArrow
                         radius="lg"
                         label={users.slice(props.maxUsers).map((user, index) => (
-                            <Text key={user.id}>{user.firstName + ' ' + user.lastName + '(' + user.username + ')'}</Text>
+                            <Text key={user.id}>
+                                {user.firstName + ' ' + user.lastName + '(' + user.username + ')'}
+                            </Text>
                         ))}
                     >
                         <Avatar size="sm">+{props.users.length - 3}</Avatar>

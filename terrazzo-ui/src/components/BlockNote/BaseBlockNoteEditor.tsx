@@ -119,7 +119,8 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
                             title="Syncing..."
                             color="yellow"
                         >
-                            The document is syncing with the server. Some changes might not be visible to other collaborators yet.
+                            The document is syncing with the server. Some changes might not be visible to other
+                            collaborators yet.
                         </Alert>
                     )
                 ))}

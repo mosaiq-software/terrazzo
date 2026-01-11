@@ -30,7 +30,9 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
     const handleLeaveOrg = useCallback(async () => {
         try {
             if (iAmOwner) {
-                throw new Error('Organization owners cannot leave their own organization. Please transfer ownership first.');
+                throw new Error(
+                    'Organization owners cannot leave their own organization. Please transfer ownership first.'
+                );
             }
             await removeUserFromOrg(sockCtx, props.myMembershipRecord.userId, props.orgData.id);
             notify(NoteType.LEFT_ENTITY, [props.orgData.name]);
@@ -156,7 +158,11 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         <RectHoldingButton
                             onClick={handleLeaveOrg}
                             durationMs={5000}
-                            tooltip={iAmOwner ? 'Organization owners cannot leave their own organization. Please transfer ownership first.' : 'Hold to leave this organization'}
+                            tooltip={
+                                iAmOwner
+                                    ? 'Organization owners cannot leave their own organization. Please transfer ownership first.'
+                                    : 'Hold to leave this organization'
+                            }
                             disabled={iAmOwner}
                             borderColor={'red'}
                             defaultBorderColor={COLOR_UNSET}

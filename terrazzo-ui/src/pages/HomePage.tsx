@@ -1,4 +1,16 @@
-import { Avatar, Box, Button, Center, Divider, Flex, Group, ScrollArea, Stack, Title, UnstyledButton } from '@mantine/core';
+import {
+    Avatar,
+    Box,
+    Button,
+    Center,
+    Divider,
+    Flex,
+    Group,
+    ScrollArea,
+    Stack,
+    Title,
+    UnstyledButton,
+} from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';

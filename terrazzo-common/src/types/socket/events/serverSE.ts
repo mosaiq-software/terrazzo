@@ -1,4 +1,15 @@
-import { BoardId, CardId, DirectoryId, DocumentId, LabelId, ListId, OrganizationId, RoleId, TextBlockId, UserId } from '../../genericTypes';
+import {
+    BoardId,
+    CardId,
+    DirectoryId,
+    DocumentId,
+    LabelId,
+    ListId,
+    OrganizationId,
+    RoleId,
+    TextBlockId,
+    UserId,
+} from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount } from '../../linkedAccountTypes';
 import { BoardHeader, Label } from '../../modules/board/boardTypes';
@@ -72,7 +83,10 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ServerSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ServerSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
-    [ServerSE.UPDATE_DIRECTORY_CONTENTS]: { directoryId: DirectoryId; contents: (ModuleHeader & { canAccess: boolean })[] };
+    [ServerSE.UPDATE_DIRECTORY_CONTENTS]: {
+        directoryId: DirectoryId;
+        contents: (ModuleHeader & { canAccess: boolean })[];
+    };
     [ServerSE.UPDATE_USERS_ORGANIZATIONS]: { userId: UserId; organizations: OrganizationHeader[] };
     [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: { orgId: OrganizationId; members: Member[] };
     [ServerSE.UPDATE_ORGANIZATION_INVITES]: { orgId: OrganizationId; invites: Invite[] };

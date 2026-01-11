@@ -30,9 +30,13 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
 
     let noSelectionMessage = <Text c="dimmed">Select a role to view or edit its permissions.</Text>;
     if (orgCtx.roles.length === 0) {
-        noSelectionMessage = <Text c="dimmed">No roles available. Please create roles in the Organization Settings.</Text>;
+        noSelectionMessage = (
+            <Text c="dimmed">No roles available. Please create roles in the Organization Settings.</Text>
+        );
     } else if (assignedRoles.length === 0) {
-        noSelectionMessage = <Text c="dimmed">No roles assigned to this module. Use the "Add Role" button to assign roles.</Text>;
+        noSelectionMessage = (
+            <Text c="dimmed">No roles assigned to this module. Use the "Add Role" button to assign roles.</Text>
+        );
     }
 
     return (
