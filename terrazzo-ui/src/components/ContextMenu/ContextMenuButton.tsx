@@ -1,4 +1,5 @@
 import { Button, ButtonProps } from '@mantine/core';
+import { COLORS } from '@trz/util/colors';
 import React, { forwardRef } from 'react';
 
 interface ContextMenuButtonProps extends Omit<ButtonProps, 'children'> {
@@ -15,7 +16,7 @@ export const ContextMenuButton = forwardRef<HTMLButtonElement, ContextMenuButton
                 fullWidth
                 justify="start"
                 variant="subtle"
-                c="white"
+                c={COLORS.text.primary}
                 leftSection={icon}
                 onClick={(e) => {
                     e.preventDefault();

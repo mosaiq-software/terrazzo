@@ -5,6 +5,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { acceptInvite } from '@trz/emitters';
 import { useInvite } from '@trz/hooks/useInvite';
 import { useMe } from '@trz/hooks/useMe';
+import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { useCallback, useEffect, useMemo } from 'react';
@@ -84,7 +85,9 @@ const InvitePage = (): React.JSX.Element => {
                         <Space h="1rem" />
                         {isInviteExpired(invite) ? (
                             <>
-                                <Text c="red">This invite has expired and can no longer be used.</Text>
+                                <Text c={COLORS.semantic.error}>
+                                    This invite has expired and can no longer be used.
+                                </Text>
                                 <Button
                                     variant="subtle"
                                     fullWidth

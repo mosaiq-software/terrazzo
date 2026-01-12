@@ -4,6 +4,7 @@ import { RoleTabs } from '@trz/components/Roles/RoleTabs';
 import { RoleTag } from '@trz/components/Roles/RoleTag';
 import { useOrg } from '@trz/contexts/org-context';
 import { usePermission } from '@trz/contexts/permission-context';
+import { COLORS } from '@trz/util/colors';
 import { completelyCaptureEvent } from '@trz/util/eventUtils';
 import { MdAdd } from 'react-icons/md';
 import { PermissionsEditorPermissionsList } from './PermissionsEditorPermissionsList';
@@ -28,14 +29,16 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
         });
     };
 
-    let noSelectionMessage = <Text c="dimmed">Select a role to view or edit its permissions.</Text>;
+    let noSelectionMessage = <Text c={COLORS.text.muted}>Select a role to view or edit its permissions.</Text>;
     if (orgCtx.roles.length === 0) {
         noSelectionMessage = (
-            <Text c="dimmed">No roles available. Please create roles in the Organization Settings.</Text>
+            <Text c={COLORS.text.muted}>No roles available. Please create roles in the Organization Settings.</Text>
         );
     } else if (assignedRoles.length === 0) {
         noSelectionMessage = (
-            <Text c="dimmed">No roles assigned to this module. Use the "Add Role" button to assign roles.</Text>
+            <Text c={COLORS.text.muted}>
+                No roles assigned to this module. Use the "Add Role" button to assign roles.
+            </Text>
         );
     }
 
@@ -63,7 +66,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                                     leftSection={<MdAdd />}
                                     justify="flex-start"
                                     px={'1rem'}
-                                    c="white"
+                                    c={COLORS.text.primary}
                                 >
                                     Add Role
                                 </Button>
@@ -94,7 +97,7 @@ export const PermissionsEditor = (props: PermissionsEditorProps) => {
                                     {unAssignedRoles.length === 0 && (
                                         <Box
                                             style={{
-                                                color: 'dimmed',
+                                                color: COLORS.text.muted,
                                                 fontSize: '14px',
                                                 textAlign: 'center',
                                                 padding: '8px',

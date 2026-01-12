@@ -53,7 +53,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                 >
                     <MdHistory
                         size={20}
-                        color="white"
+                        color={COLORS.text.primary}
                     />
                 </ActionIcon>
             </Tooltip>
@@ -88,7 +88,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
             />
             <Modal.Content
                 bg={COLORS.background.medium}
-                c={'white'}
+                c={COLORS.text.primary}
             >
                 <Modal.Header bg={COLORS.background.dark}>
                     <Modal.Title w={'100%'}>
@@ -102,7 +102,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                         </Group>
                         <Modal.CloseButton
                             variant="transparent"
-                            c={'white'}
+                            c={COLORS.text.primary}
                             style={{
                                 position: 'absolute',
                                 top: '0.75rem',
@@ -131,9 +131,9 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                                 {content?.length ? (
                                     <ReadonlyBlockNote content={content} />
                                 ) : selectedSnapshot ? (
-                                    <Text c="dimmed">No content available for this snapshot.</Text>
+                                    <Text c={COLORS.text.muted}>No content available for this snapshot.</Text>
                                 ) : (
-                                    <Text c="dimmed">Select a snapshot to view its content.</Text>
+                                    <Text c={COLORS.text.muted}>Select a snapshot to view its content.</Text>
                                 )}
                             </Center>
                         </ScrollArea>
@@ -174,7 +174,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                                     p="xs"
                                 >
                                     <Text
-                                        c="dimmed"
+                                        c={COLORS.text.muted}
                                         size="xs"
                                         ta="center"
                                     >
@@ -238,7 +238,7 @@ const SnapshotItem = (props: SnapshotItemProps) => {
                     <RectHoldingButton
                         variant="outline"
                         durationMs={2000}
-                        borderColor="orange"
+                        borderColor={COLORS.semantic.warning}
                         onClick={props.onRestore}
                     >
                         Restore

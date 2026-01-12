@@ -1,6 +1,7 @@
 import { Button, ColorInput, Divider, Group, Stack, Title } from '@mantine/core';
 import { PermissionFlagData, Role, RoleId, withPermissionFlag } from '@mosaiq/terrazzo-common';
 import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
+import { COLORS } from '@trz/util/colors';
 import { useCallback, useEffect, useState } from 'react';
 import { MdOutlineDelete } from 'react-icons/md';
 import EditableTextbox from '../UI/EditableTextbox';
@@ -68,7 +69,7 @@ export const RoleEditor = (props: RoleEditorProps) => {
                         }}
                         titleProps={{
                             order: 4,
-                            c: 'white',
+                            c: COLORS.text.primary,
                         }}
                     />
                     <ColorInput
@@ -115,7 +116,7 @@ export const RoleEditor = (props: RoleEditorProps) => {
                     durationMs={1000}
                     ringSize={50}
                     ringThickness={6}
-                    color="red"
+                    color={COLORS.semantic.error}
                     onClick={async () => {
                         props.onDelete(props.role.id);
                     }}

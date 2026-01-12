@@ -1,6 +1,7 @@
 import { Avatar, Group, Stack, Text } from '@mantine/core';
 import { fullName, UserHeader } from '@mosaiq/terrazzo-common';
 import { RolesList } from '@trz/components/Roles/RolesList';
+import { COLORS } from '@trz/util/colors';
 import { forAllClickEvents, noEventBubble } from '@trz/util/eventUtils';
 
 interface UserProfilePopupProps {
@@ -23,7 +24,7 @@ export const UserProfilePopup = (props: UserProfilePopupProps) => {
                     <Text fw={500}>{fullName(props.user)}</Text>
                     <Text
                         size="sm"
-                        c="dimmed"
+                        c={COLORS.text.muted}
                     >
                         @{props.user.username}
                     </Text>

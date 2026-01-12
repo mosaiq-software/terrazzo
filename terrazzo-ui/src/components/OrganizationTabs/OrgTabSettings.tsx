@@ -164,7 +164,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                                     : 'Hold to leave this organization'
                             }
                             disabled={iAmOwner}
-                            borderColor={'red'}
+                            borderColor={COLORS.semantic.error}
                             defaultBorderColor={COLORS.border}
                         >
                             Hold to Leave Organization
@@ -172,7 +172,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                         {iAmOwner && (
                             <Button
                                 variant="outline"
-                                color="red"
+                                color={COLORS.semantic.error}
                                 onClick={() => {
                                     modals.openContextModal({
                                         modal: 'transferOrganization',

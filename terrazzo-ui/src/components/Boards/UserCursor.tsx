@@ -3,7 +3,6 @@ import { fullName, Position, UserId } from '@mosaiq/terrazzo-common';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { useUser } from '@trz/hooks/useUser';
 import { COLORS } from '@trz/util/colors';
-import React from 'react';
 import { GiArrowCursor } from 'react-icons/gi';
 
 interface UserCursorProps {
@@ -14,11 +13,7 @@ interface UserCursorProps {
 
 const UserCursor = (props: UserCursorProps) => {
     const user = useUser(props.userId);
-    const [color, setColor] = React.useState<string | undefined>(undefined);
     const imgColor = useImageColor(user?.profilePicture);
-    React.useEffect(() => {
-        setColor(imgColor ?? 'black');
-    }, [imgColor]);
 
     if (!props.position) {
         return null;
@@ -34,10 +29,10 @@ const UserCursor = (props: UserCursorProps) => {
         >
             <GiArrowCursor
                 size={'1.25rem'}
-                color={props.idle ? COLORS.text.disabled : color}
+                color={props.idle ? COLORS.text.disabled : imgColor || COLORS.text.primary}
             />
             <Badge
-                color={props.idle ? COLORS.text.disabled : color}
+                color={props.idle ? COLORS.text.disabled : imgColor || COLORS.text.primary}
                 size="xs"
                 ml={5}
                 bd={`1px solid ${COLORS.border}`}

@@ -1,5 +1,6 @@
 import { Box, Group, Tooltip, UnstyledButton } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
+import { COLORS } from '@trz/util/colors';
 import { completelyCaptureEvent } from '@trz/util/eventUtils';
 import { useEffect, useRef, useState } from 'react';
 
@@ -93,7 +94,8 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
 
     const borderRadius = props.borderRadius ?? 4;
     const strokeWidth = props.borderThickness ?? 1;
-    const defaultBorderColor = props.defaultBorderColor || (props.variant === 'outline' ? 'white' : undefined);
+    const defaultBorderColor =
+        props.defaultBorderColor || (props.variant === 'outline' ? COLORS.text.primary : undefined);
 
     // Calculate the perimeter of the rounded rectangle
     const rectWidth = dimensions.width - strokeWidth;
@@ -137,7 +139,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                         position: 'relative',
                         width: props.width,
                         height: props.height,
-                        backgroundColor: props.backgroundColor || 'transparent',
+                        backgroundColor: props.backgroundColor || COLORS.transparent,
                         padding: '8px 18px',
                         borderRadius,
                         display: 'inline-flex',
@@ -160,7 +162,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                             left: 0,
                             pointerEvents: 'none',
                             overflow: 'visible',
-                            backgroundColor: hovered ? '#ffffff20' : 'transparent',
+                            backgroundColor: hovered ? '#ffffff20' : COLORS.transparent,
                             borderRadius: borderRadius,
                             transition: 'background-color 0.1s ease',
                             zIndex: 0,
@@ -188,7 +190,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                             rx={radius}
                             ry={radius}
                             fill="none"
-                            stroke={props.borderColor || 'white'}
+                            stroke={props.borderColor || COLORS.text.primary}
                             strokeWidth={strokeWidth}
                             strokeDasharray={totalPerimeter}
                             strokeDashoffset={totalPerimeter - progressLength}

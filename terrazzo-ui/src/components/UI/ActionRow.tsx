@@ -76,7 +76,7 @@ export const ActionRow = (props: ActionRowProps) => {
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                     <Group gap="xs">
                         <Text
-                            c="white"
+                            c={COLORS.text.primary}
                             fw={500}
                             size="sm"
                             style={{
@@ -89,7 +89,7 @@ export const ActionRow = (props: ActionRowProps) => {
                         </Text>{' '}
                     </Group>
                     <Text
-                        c="dimmed"
+                        c={COLORS.text.muted}
                         size="xs"
                         style={{
                             overflow: 'hidden',
@@ -118,7 +118,7 @@ export const ActionRow = (props: ActionRowProps) => {
                         <Menu.Target>
                             <ActionIcon
                                 variant="subtle"
-                                c="white"
+                                c={COLORS.text.primary}
                                 size="lg"
                             >
                                 <HiDotsVertical size={18} />
@@ -139,8 +139,8 @@ export const ActionRow = (props: ActionRowProps) => {
                                             disabled={item.disabled}
                                             durationMs={2000}
                                             width="100%"
-                                            backgroundColor="transparent"
-                                            borderColor={item.color || 'white'}
+                                            backgroundColor={COLORS.transparent}
+                                            borderColor={item.color || COLORS.text.primary}
                                             style={{
                                                 fontSize: '14px',
                                                 padding: '8px 12px',

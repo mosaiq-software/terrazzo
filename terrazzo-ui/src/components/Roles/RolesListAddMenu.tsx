@@ -36,7 +36,7 @@ export const RolesListAddMenu = (props: RolesListAddMenuProps) => {
                         variant="outline"
                         color="gray"
                         style={{
-                            backgroundColor: 'transparent',
+                            backgroundColor: COLORS.transparent,
                             cursor: 'pointer',
                         }}
                         leftSection={
@@ -46,7 +46,7 @@ export const RolesListAddMenu = (props: RolesListAddMenuProps) => {
                             >
                                 <MdAdd
                                     size={12}
-                                    color="white"
+                                    color={COLORS.text.primary}
                                 />
                             </ActionIcon>
                         }
@@ -56,7 +56,7 @@ export const RolesListAddMenu = (props: RolesListAddMenuProps) => {
                 ) : (
                     <ActionIcon
                         variant="light"
-                        color="gray"
+                        color={COLORS.text.muted}
                         size="sm"
                         radius="xl"
                         style={{

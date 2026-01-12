@@ -4,6 +4,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { updateBoardField } from '@trz/emitters';
 import { useBoard } from '@trz/hooks/useBoard';
 import { useModulePermission } from '@trz/hooks/usePermissions';
+import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
 import { NotFound } from '../UI/NotFound';
@@ -63,7 +64,7 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
             <TextInput
                 w="8rem"
                 labelProps={{
-                    c: 'white',
+                    c: COLORS.text.primary,
                 }}
                 label="Board Code"
                 placeholder="#"
@@ -80,7 +81,7 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
             />
             <Fieldset
                 legend="Labels"
-                bg="transparent"
+                bg={COLORS.transparent}
             >
                 <LabelEditor
                     labels={boardLabels}

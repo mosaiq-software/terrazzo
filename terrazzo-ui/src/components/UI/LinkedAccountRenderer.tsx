@@ -1,4 +1,5 @@
 import { exhaustiveCheck, LinkedAccount, LinkedAccountProvider } from '@mosaiq/terrazzo-common';
+import { COLORS } from '@trz/util/colors';
 import { BsGithub } from 'react-icons/bs';
 import { FaCode } from 'react-icons/fa';
 import { ActionRow } from './ActionRow';
@@ -14,7 +15,7 @@ export const LinkedAccountRenderer = (props: LinkedAccountProps) => {
         <RectHoldingButton
             key={`unlink-${props.account.provider.toLowerCase()}`}
             durationMs={2000}
-            borderColor="red"
+            borderColor={COLORS.semantic.error}
             variant="outline"
             onClick={() => props.onUnlink && props.onUnlink(props.account)}
             tooltip={

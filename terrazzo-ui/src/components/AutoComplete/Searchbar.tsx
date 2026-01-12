@@ -3,6 +3,7 @@ import { useDebouncedCallback, useHotkeys } from '@mantine/hooks';
 import { DatapointType, QueryResult } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getSearchResults } from '@trz/emitters';
+import { COLORS } from '@trz/util/colors';
 import React, { useState } from 'react';
 import { BsCardText } from 'react-icons/bs';
 import { IoDocumentOutline } from 'react-icons/io5';
@@ -185,7 +186,7 @@ const RenderedSearchResult = (props: RenderedSearchResultProps) => {
                     <Text
                         ta="left"
                         size="sm"
-                        c="dimmed"
+                        c={COLORS.text.muted}
                         w="100%"
                         truncate
                     >

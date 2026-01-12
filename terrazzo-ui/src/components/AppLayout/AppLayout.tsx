@@ -91,7 +91,7 @@ const AppLayout = () => {
                                 opened={!sidebarCollapsed}
                                 size="20px"
                                 p="5px"
-                                color="white"
+                                color={COLORS.text.primary}
                                 onClick={() => {
                                     setSidebarCollapsed(!sidebarCollapsed);
                                 }}

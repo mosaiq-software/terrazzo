@@ -1,6 +1,7 @@
 import { Box, Center, Tabs, Text } from '@mantine/core';
 import { Role } from '@mosaiq/terrazzo-common';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
+import { COLORS } from '@trz/util/colors';
 import { useState } from 'react';
 import { MdCircle } from 'react-icons/md';
 
@@ -44,7 +45,7 @@ export const RoleTabs = (props: RoleTabProps) => {
                 <Tabs.List
                     style={{
                         width: '10rem',
-                        color: 'white',
+                        color: COLORS.text.primary,
                         gap: 'lg',
                     }}
                 >
@@ -85,7 +86,7 @@ export const RoleTabs = (props: RoleTabProps) => {
                         h="100%"
                         p="md"
                     >
-                        {props.noSelectionMessage || <Text c="dimmed">No role selected</Text>}
+                        {props.noSelectionMessage || <Text c={COLORS.text.muted}>No role selected</Text>}
                     </Center>
                 </Tabs.Panel>
             </Tabs>

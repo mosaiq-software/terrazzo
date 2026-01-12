@@ -1,6 +1,7 @@
 import { Box, Tabs } from '@mantine/core';
 import { Member, MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useOrgPermission } from '@trz/hooks/usePermissions';
+import { COLORS } from '@trz/util/colors';
 import { MdOutlineMailOutline, MdOutlinePerson } from 'react-icons/md';
 import { InvitesPanel } from './InvitesPanel';
 import { MembersPanel } from './MembersPanel';
@@ -36,7 +37,7 @@ export const OrgTabMembers = (props: OrgTabMembersProps) => {
                 <Tabs.List
                     style={{
                         width: '10rem',
-                        color: 'white',
+                        color: COLORS.text.primary,
                         gap: 'lg',
                     }}
                 >

@@ -99,11 +99,11 @@ const DocumentPage = (): React.JSX.Element => {
                                     order: 2,
                                     textWrap: 'nowrap',
                                     fw: 600,
-                                    c: 'white',
+                                    c: COLORS.text.primary,
                                 }}
                                 inputProps={{
                                     w: '100%',
-                                    bg: 'transparent',
+                                    bg: COLORS.transparent,
                                 }}
                                 style={{
                                     width: '95%',
@@ -123,7 +123,7 @@ const DocumentPage = (): React.JSX.Element => {
                             justify="flex-end"
                         >
                             <Text
-                                c="dimmed"
+                                c={COLORS.text.muted}
                                 fz="sm"
                             >
                                 Created {niceDateWithTime(document.createdAt)}

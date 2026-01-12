@@ -137,7 +137,7 @@ export const LabelDisplay = (props: LabelDisplayProps) => {
             {props.showAdd && !props.labels.length && (
                 <MdLabel
                     size="1.5rem"
-                    color="white"
+                    color={COLORS.text.primary}
                 />
             )}
         </Pill.Group>

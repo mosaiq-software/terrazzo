@@ -4,6 +4,7 @@ import { usePermission } from '@trz/contexts/permission-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { createRoleOnOrg, deleteRole, updateRole } from '@trz/emitters/roleEmitters';
+import { COLORS } from '@trz/util/colors';
 import { generateRandomColor } from '@trz/util/colorUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback } from 'react';
@@ -81,7 +82,7 @@ export const OrgTabRoles = (props: OrgTabRolesProps) => {
                         onClick={createNewRole}
                         justify="flex-start"
                         px={'1rem'}
-                        c="white"
+                        c={COLORS.text.primary}
                     >
                         Create Role
                     </Button>
@@ -90,14 +91,14 @@ export const OrgTabRoles = (props: OrgTabRolesProps) => {
                     props.roles.length === 0 ? (
                         <Button
                             variant="subtle"
-                            c="white"
+                            c={COLORS.text.primary}
                             leftSection={<MdAdd />}
                             onClick={createNewRole}
                         >
                             Create a new role to get started
                         </Button>
                     ) : (
-                        <Text c="subtle">Select a role to view or edit its details.</Text>
+                        <Text c={COLORS.text.muted}>Select a role to view or edit its details.</Text>
                     )
                 }
                 selectedRolePanel={(role: Role) => (

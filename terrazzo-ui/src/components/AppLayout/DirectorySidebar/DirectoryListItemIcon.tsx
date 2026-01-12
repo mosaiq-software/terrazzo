@@ -1,4 +1,5 @@
 import { TrzModuleType } from '@mosaiq/terrazzo-common';
+import { COLORS } from '@trz/util/colors';
 import { ModuleIcon } from '@trz/util/moduleUtils';
 import { FaChevronDown } from 'react-icons/fa';
 
@@ -14,7 +15,7 @@ export const DirectoryListItemIcon = (props: DirectoryListItemIconProps) => {
         }
         return (
             <FaChevronDown
-                color="white"
+                color={COLORS.text.primary}
                 style={{
                     transform: props.collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
                     transition: 'transform 200ms',
@@ -26,5 +27,5 @@ export const DirectoryListItemIcon = (props: DirectoryListItemIconProps) => {
     if (!Icon) {
         return <></>;
     }
-    return <Icon color="white" />;
+    return <Icon color={COLORS.text.primary} />;
 };

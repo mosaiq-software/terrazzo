@@ -11,7 +11,7 @@ export const COLORS = {
             light: '#fd2d61',
         },
         teal: {
-            dark: '1e383e',
+            dark: '#1e383e',
             light: '#3fbbc9',
         },
     },

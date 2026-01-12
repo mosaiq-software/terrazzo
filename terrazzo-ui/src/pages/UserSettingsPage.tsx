@@ -144,7 +144,7 @@ const UserSettingsPage = (): React.JSX.Element => {
                                                 <Group gap={4}>
                                                     <Text
                                                         span
-                                                        c="dimmed"
+                                                        c={COLORS.text.muted}
                                                         fz="xs"
                                                     >
                                                         How about
@@ -153,7 +153,7 @@ const UserSettingsPage = (): React.JSX.Element => {
                                                         variant="subtle"
                                                         size="compact-xs"
                                                         p={0}
-                                                        c="dimmed"
+                                                        c={COLORS.text.muted}
                                                         fw="normal"
                                                         td="underline"
                                                         onClick={() => {
@@ -221,7 +221,7 @@ const UserSettingsPage = (): React.JSX.Element => {
                         </Fieldset>
                         <Fieldset
                             legend="Linked Accounts"
-                            bg="transparent"
+                            bg={COLORS.transparent}
                         >
                             <Stack gap={'lg'}>
                                 {linkedAccounts.map((account) => (

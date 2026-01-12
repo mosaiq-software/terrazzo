@@ -113,14 +113,14 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
                 (props.connectionStatus !== 'connected' ? (
                     <Alert
                         title="Disconnected!"
-                        color="red"
+                        color={COLORS.semantic.error}
                     >
                         It seems you are disconnected from the server. Your changes might not be saved.
                     </Alert>
                 ) : props.syncStatus === undefined ? (
                     <Alert
                         title="Connecting..."
-                        color="blue"
+                        color={COLORS.semantic.info}
                     >
                         Establishing connection to the server...
                     </Alert>
@@ -128,7 +128,7 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
                     props.syncStatus === false && (
                         <Alert
                             title="Syncing..."
-                            color="yellow"
+                            color={COLORS.semantic.warning}
                         >
                             The document is syncing with the server. Some changes might not be visible to other
                             collaborators yet.

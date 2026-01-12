@@ -78,7 +78,7 @@ const LandingPage = () => {
                                     <Anchor
                                         component={Link}
                                         to="/dashboard"
-                                        c={'white'}
+                                        c={COLORS.text.primary}
                                     >
                                         Dashboard
                                     </Anchor>

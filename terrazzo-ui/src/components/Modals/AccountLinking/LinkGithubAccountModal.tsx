@@ -3,6 +3,7 @@ import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
 import { useUserContext } from '@trz/contexts/user-context';
 import { getGithubLoginUrl } from '@trz/util/authUtils';
+import { COLORS } from '@trz/util/colors';
 import React, { useCallback } from 'react';
 import { MdCheck } from 'react-icons/md';
 import { Link } from 'react-router';
@@ -51,7 +52,7 @@ const LinkGithubAccount = (props: ContextModalProps<{}>): React.JSX.Element => {
                     onClick={handleLogoutAndContinue}
                     variant={hasLoggedOut ? 'outline' : 'filled'}
                     leftSection={hasLoggedOut ? <MdCheck /> : undefined}
-                    color={hasLoggedOut ? 'green' : undefined}
+                    color={hasLoggedOut ? COLORS.semantic.success : undefined}
                 >
                     Log out of Github
                 </Button>

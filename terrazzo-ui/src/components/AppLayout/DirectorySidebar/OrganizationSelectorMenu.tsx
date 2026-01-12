@@ -142,10 +142,10 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                     >
                         <MdMailOutline
                             size={'1.25rem'}
-                            color="subtle"
+                            color={COLORS.text.muted}
                         />
                         <Text
-                            c="subtle"
+                            c={COLORS.text.muted}
                             style={{
                                 textWrap: 'nowrap',
                                 textAlign: 'left',
@@ -163,10 +163,10 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                     >
                         <MdAdd
                             size={'1.25rem'}
-                            color="subtle"
+                            color={COLORS.text.muted}
                         />
                         <Text
-                            c="subtle"
+                            c={COLORS.text.muted}
                             style={{
                                 textWrap: 'nowrap',
                                 textAlign: 'left',

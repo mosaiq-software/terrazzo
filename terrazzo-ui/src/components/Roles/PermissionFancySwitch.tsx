@@ -40,7 +40,7 @@ export const PermissionFancySwitch = (props: PermissionFancySwitchProps) => {
                 <Text size="sm">{permissionName}</Text>
                 <Text
                     size="sm"
-                    c="dimmed"
+                    c={COLORS.text.muted}
                 >
                     {permissionDescription}
                 </Text>

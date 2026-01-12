@@ -69,7 +69,7 @@ export const UserProfileIcon = () => {
             <Menu.Dropdown>
                 <Menu.Item onClick={handleNavigateToSettings}>Settings</Menu.Item>
                 <Menu.Item
-                    color="red"
+                    color={COLORS.semantic.error}
                     onClick={handleLogout}
                 >
                     Logout

@@ -74,7 +74,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                             <ActionIcon
                                 size="input-xs"
                                 radius={'100%'}
-                                bg={'transparent'}
+                                bg={COLORS.transparent}
                                 onClick={() => {
                                     setEditingLabel(label);
                                 }}
@@ -124,7 +124,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                             durationMs={1000}
                             ringSize={50}
                             ringThickness={6}
-                            color="red"
+                            color={COLORS.semantic.error}
                             onClick={async () => {
                                 setEditingLabel(undefined);
                                 deleteBoardLabel(sockCtx, props.boardId, editingLabel.id);
