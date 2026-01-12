@@ -5,7 +5,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { removeUserFromOrg, updateOrgField } from '@trz/emitters';
 import { useOrgPermission } from '@trz/hooks/usePermissions';
-import { COLOR_UNSET } from '@trz/util/colorUtils';
+import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -165,7 +165,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                             }
                             disabled={iAmOwner}
                             borderColor={'red'}
-                            defaultBorderColor={COLOR_UNSET}
+                            defaultBorderColor={COLORS.border}
                         >
                             Hold to Leave Organization
                         </RectHoldingButton>

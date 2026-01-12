@@ -2,6 +2,7 @@ import { ActionIcon, ColorInput, Group, Stack, Text, TextInput, Tooltip } from '
 import { BoardId, Label, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createBoardLabel, deleteBoardLabel, updateBoardLabel } from '@trz/emitters';
+import { COLORS } from '@trz/util/colors';
 import { colorIsDarkAdvanced, generateRandomColor } from '@trz/util/colorUtils';
 import { useState } from 'react';
 import { MdOutlineAdd, MdOutlineCheck, MdOutlineClose, MdOutlineDelete, MdOutlineEdit } from 'react-icons/md';
@@ -50,7 +51,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                 wrap="wrap"
             >
                 {props.labels.map((label) => {
-                    const textColor = colorIsDarkAdvanced(label.color) ? '#ffffff' : '#000000';
+                    const textColor = colorIsDarkAdvanced(label.color) ? COLORS.text.primary : COLORS.background.dark;
                     return (
                         <Group
                             key={label.id}

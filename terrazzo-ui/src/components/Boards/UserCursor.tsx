@@ -2,6 +2,7 @@ import { Badge, Box } from '@mantine/core';
 import { fullName, Position, UserId } from '@mosaiq/terrazzo-common';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { useUser } from '@trz/hooks/useUser';
+import { COLORS } from '@trz/util/colors';
 import React from 'react';
 import { GiArrowCursor } from 'react-icons/gi';
 
@@ -14,7 +15,6 @@ interface UserCursorProps {
 const UserCursor = (props: UserCursorProps) => {
     const user = useUser(props.userId);
     const [color, setColor] = React.useState<string | undefined>(undefined);
-    const IDLE_COLOR = '#afafaf';
     const imgColor = useImageColor(user?.profilePicture);
     React.useEffect(() => {
         setColor(imgColor ?? 'black');
@@ -34,13 +34,13 @@ const UserCursor = (props: UserCursorProps) => {
         >
             <GiArrowCursor
                 size={'1.25rem'}
-                color={props.idle ? IDLE_COLOR : color}
+                color={props.idle ? COLORS.text.disabled : color}
             />
             <Badge
-                color={props.idle ? IDLE_COLOR : color}
+                color={props.idle ? COLORS.text.disabled : color}
                 size="xs"
                 ml={5}
-                bd="1px solid #fff"
+                bd={`1px solid ${COLORS.border}`}
             >
                 {fullName(user)}
             </Badge>

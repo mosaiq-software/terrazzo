@@ -16,6 +16,7 @@ import {
 } from '@mosaiq/terrazzo-common';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useRoom } from '@trz/hooks/useRoom';
+import { COLORS } from '@trz/util/colors';
 import { CollaborationOptions } from 'node_modules/@blocknote/core/types/src/extensions/Collaboration/Collaboration';
 import { useEffect, useMemo, useState } from 'react';
 import { SocketIOProvider } from 'y-socket.io';
@@ -77,7 +78,7 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
                   fragment: props.doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID),
                   user: {
                       name: props.myName || 'Anonymous',
-                      color: props.pfpColor || '#ffffff',
+                      color: props.pfpColor || COLORS.text.primary,
                   },
                   showCursorLabels: 'activity',
               }

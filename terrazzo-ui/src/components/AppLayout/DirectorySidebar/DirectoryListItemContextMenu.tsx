@@ -1,3 +1,4 @@
+import { Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { ModuleHeader, PermissibleAction, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
 import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
@@ -7,6 +8,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { createDocument } from '@trz/emitters';
 import { createDirectory } from '@trz/emitters/directoryEmitters';
 import { useModulePermission, useOrgPermission } from '@trz/hooks/usePermissions';
+import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useMemo } from 'react';
 import { MdAdd, MdSettings } from 'react-icons/md';
@@ -121,7 +123,7 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
                 />
             )}
             {!showCreateOptions && !showEditOptions && (
-                <div style={{ padding: '8px', color: '#888' }}>No actions available</div>
+                <Text style={{ padding: '8px', color: COLORS.text.muted }}>No actions available</Text>
             )}
         </ContextMenuLayout>
     );

@@ -11,6 +11,7 @@ import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-contex
 import { getUsernameAvailable, unlinkAccountFromUser, updateUserField } from '@trz/emitters';
 import { useMe } from '@trz/hooks/useMe';
 import { useUserLinkedAccounts } from '@trz/hooks/useUserLinkedAccounts';
+import { COLORS } from '@trz/util/colors';
 import { isDev } from '@trz/util/envUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
@@ -100,7 +101,7 @@ const UserSettingsPage = (): React.JSX.Element => {
     return (
         <ScrollArea h={`calc(100vh - ${uiCtx.navbarHeight}px)`}>
             <Stack
-                bg="#15161A"
+                bg={COLORS.background.medium}
                 mih="100vh"
                 pb="10vh"
                 align="center"
@@ -123,7 +124,7 @@ const UserSettingsPage = (): React.JSX.Element => {
                         </Group>
                         <Fieldset
                             legend="Account"
-                            bg="transparent"
+                            bg={COLORS.transparent}
                         >
                             <Stack gap={'lg'}>
                                 <TextInput

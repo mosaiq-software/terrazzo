@@ -4,6 +4,7 @@ import { OrganizationId } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
+import { COLORS } from '@trz/util/colors';
 import { useCallback } from 'react';
 import { MdAdd, MdMailOutline } from 'react-icons/md';
 import { useNavigate } from 'react-router';
@@ -85,7 +86,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                             />
                         )}
                         <Text
-                            c="#fff"
+                            c={COLORS.text.primary}
                             style={{
                                 transition: `padding ${uiCtx.animationDuration}ms, width ${uiCtx.animationDuration}ms`,
                                 textWrap: 'nowrap',
@@ -117,7 +118,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                                 size={'sm'}
                             />
                             <Text
-                                c="#fff"
+                                c={COLORS.text.primary}
                                 style={{
                                     textWrap: 'nowrap',
                                     textAlign: 'left',

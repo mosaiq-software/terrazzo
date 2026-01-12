@@ -1,6 +1,7 @@
 import { Button, Center, Container, Loader, Paper, Stack, Text, Title } from '@mantine/core';
 import { AuthProvider } from '@mosaiq/terrazzo-common';
 import { useUserContext } from '@trz/contexts/user-context';
+import { COLORS } from '@trz/util/colors';
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -60,16 +61,16 @@ export const GithubAuthHandler = () => {
             fluid
             maw="100%"
             p="lg"
-            bg="#1d2022"
+            bg={COLORS.background.medium}
         >
             <Center>
-                <Paper bg={'#0c0c10'}>
+                <Paper bg={COLORS.background.dark}>
                     <Stack
                         px={50}
                         py={30}
                         mih={400}
                         ta="center"
-                        c={'#ebebeb'}
+                        c={COLORS.text.primary}
                         align="center"
                     >
                         {error ? (

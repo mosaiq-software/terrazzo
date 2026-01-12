@@ -2,7 +2,8 @@ import { ActionIcon, Button, MantineSize, Menu, Pill, Stack, Tooltip } from '@ma
 import { Card, Label, LabelId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardsLabels } from '@trz/emitters';
-import { COLOR_UNSET, colorIsDarkAdvanced } from '@trz/util/colorUtils';
+import { COLORS } from '@trz/util/colors';
+import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
 import { IoMdInformationCircleOutline } from 'react-icons/io';
 import { MdCheck, MdLabel, MdLabelOutline } from 'react-icons/md';
 
@@ -49,13 +50,13 @@ export const LabelsMenu = (props: LabelsMenuProps) => {
                 ) : props.viewOnly ? (
                     <MdLabelOutline
                         size="1.5rem"
-                        color={COLOR_UNSET}
+                        color={COLORS.foreground.medium}
                     />
                 ) : (
                     <Tooltip label="No labels available. Create labels in board settings to assign them to cards.">
                         <ActionIcon
                             variant="subtle"
-                            c="white"
+                            c={COLORS.text.primary}
                         >
                             <IoMdInformationCircleOutline size="1.5rem" />
                         </ActionIcon>
@@ -69,7 +70,9 @@ export const LabelsMenu = (props: LabelsMenuProps) => {
                 <Menu.Label>Labels</Menu.Label>
                 <Stack gap={1}>
                     {props.boardLabels.map((label) => {
-                        const textColor = colorIsDarkAdvanced(label.color) ? '#fff' : '#000';
+                        const textColor = colorIsDarkAdvanced(label.color)
+                            ? COLORS.text.primary
+                            : COLORS.background.dark;
                         return (
                             <Button
                                 key={label.id}
@@ -119,7 +122,7 @@ export const LabelDisplay = (props: LabelDisplayProps) => {
             {props.labels.map((labelId) => {
                 const label = props.boardLabels.filter((l) => l.id === labelId)[0];
                 if (!label) return null;
-                const textColor = colorIsDarkAdvanced(label.color) ? '#fff' : '#000';
+                const textColor = colorIsDarkAdvanced(label.color) ? COLORS.text.primary : COLORS.background.dark;
                 return (
                     <Pill
                         key={label.id}

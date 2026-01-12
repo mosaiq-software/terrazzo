@@ -1,6 +1,7 @@
 import { Image } from '@mantine/core';
 import { useFileDialog, useHover } from '@mantine/hooks';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
+import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import { MdUpload } from 'react-icons/md';
 
@@ -44,7 +45,7 @@ export const ImageUpload = (props: ImageUploadProps) => {
                     left: 0,
                     width: '100%',
                     height: '100%',
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    backgroundColor: COLORS.overlay.dark,
                     color: 'white',
                     display: 'flex',
                     alignItems: 'center',

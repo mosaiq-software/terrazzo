@@ -11,6 +11,7 @@ import { HiDotsVertical } from 'react-icons/hi';
 import { IoChevronDown } from 'react-icons/io5';
 import { InfinityChar } from '../../UI/InfinityChar';
 import { InviteRow } from './InviteRow';
+import { COLORS } from '@trz/util/colors';
 
 interface InvitesPanelProps {
     orgData: OrganizationHeader;
@@ -92,7 +93,7 @@ export const InvitesPanel = (props: InvitesPanelProps) => {
             >
                 <Title
                     order={4}
-                    c="#fff"
+                    c={COLORS.text.primary}
                 >
                     Invites
                 </Title>

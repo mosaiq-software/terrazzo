@@ -40,6 +40,7 @@ import { useModulePermission } from '@trz/hooks/usePermissions';
 import { useRoom } from '@trz/hooks/useRoom';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { CARD_CACHE_PREFIX, getBoardNameWithCode, LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
+import { COLORS } from '@trz/util/colors';
 import {
     boardDropAnimation,
     horizontalCollisionDetection,
@@ -592,7 +593,7 @@ const BoardPage = (): React.JSX.Element => {
             fluid
             maw="100%"
             p="0"
-            bg="#1d2022"
+            bg={COLORS.background.medium}
             style={{
                 overflowX: 'scroll',
             }}

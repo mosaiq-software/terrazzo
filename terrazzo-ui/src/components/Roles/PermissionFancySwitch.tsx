@@ -1,5 +1,5 @@
 import { Group, SegmentedControl, Stack, Text } from '@mantine/core';
-import { COLOR_ERROR, COLOR_SUCCESS, COLOR_UNSET } from '@trz/util/colorUtils';
+import { COLORS } from '@trz/util/colors';
 import { useCallback } from 'react';
 import { MdCheck, MdClose, MdOutlineCircle } from 'react-icons/md';
 
@@ -77,10 +77,10 @@ export const PermissionFancySwitch = (props: PermissionFancySwitchProps) => {
 
 const getValue = (isEnabled: boolean | undefined) => {
     if (isEnabled === true) {
-        return { value: 'enabled', color: COLOR_SUCCESS };
+        return { value: 'enabled', color: COLORS.semantic.success };
     } else if (isEnabled === false) {
-        return { value: 'disabled', color: COLOR_ERROR };
+        return { value: 'disabled', color: COLORS.semantic.error };
     } else {
-        return { value: 'unset', color: COLOR_UNSET };
+        return { value: 'unset', color: COLORS.semantic.unset };
     }
 };

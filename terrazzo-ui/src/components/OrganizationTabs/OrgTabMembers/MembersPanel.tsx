@@ -6,6 +6,7 @@ import { removeUserFromOrg } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback, useMemo } from 'react';
 import { MemberRow } from './MemberRow';
+import { COLORS } from '@trz/util/colors';
 
 interface MembersPanelProps {
     orgData: OrganizationHeader;
@@ -55,7 +56,7 @@ export const MembersPanel = (props: MembersPanelProps) => {
             >
                 <Title
                     order={4}
-                    c="#fff"
+                    c={COLORS.text.primary}
                 >
                     Members
                 </Title>

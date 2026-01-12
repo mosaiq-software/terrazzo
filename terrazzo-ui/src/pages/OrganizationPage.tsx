@@ -12,6 +12,7 @@ import { useUI } from '@trz/contexts/ui-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useUserContext } from '@trz/contexts/user-context';
 import { useOrgPermission } from '@trz/hooks/usePermissions';
+import { COLORS } from '@trz/util/colors';
 import { setTitle } from '@trz/util/tabUtils';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -71,7 +72,7 @@ const OrganizationPage = (): React.JSX.Element => {
                 w="100%"
             >
                 <Stack
-                    bg="#15161A"
+                    bg={COLORS.background.medium}
                     mih="100vh"
                     pb="10vh"
                     align="center"
@@ -93,15 +94,15 @@ const OrganizationPage = (): React.JSX.Element => {
                                 radius={'lg'}
                             />
                             <Flex direction="column">
-                                <Title c="white">{orgCtx.active.name}</Title>
-                                <Text c="#6C6C6C">{orgCtx.active.description}</Text>
+                                <Title c={COLORS.text.primary}>{orgCtx.active.name}</Title>
+                                <Text c={COLORS.text.secondary}>{orgCtx.active.description}</Text>
                             </Flex>
                         </Group>
                         <Tabs
                             value={getTab()}
                             pt="30"
                             onChange={onChangeTab}
-                            color="#F2187E"
+                            color={COLORS.accent.pink.light}
                             variant="default"
                             keepMounted={false}
                         >
@@ -118,12 +119,7 @@ const OrganizationPage = (): React.JSX.Element => {
                                             value={t}
                                             key={t}
                                         >
-                                            <Text
-                                                c="white"
-                                                fw="bold"
-                                            >
-                                                {t}
-                                            </Text>
+                                            <Text c={COLORS.text.primary}>{t}</Text>
                                         </Tabs.Tab>
                                     );
                                 })}

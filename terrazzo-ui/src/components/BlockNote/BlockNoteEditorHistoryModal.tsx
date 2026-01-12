@@ -19,6 +19,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { restoreTextBlockSnapshot } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useTextBlockHistorySnapshots } from '@trz/hooks/useTextBlockHistorySnapshots';
+import { COLORS } from '@trz/util/colors';
 import { getRandomColorFromString } from '@trz/util/colorUtils';
 import { niceDateWithTime } from '@trz/util/dateUtils';
 import { completelyCaptureEvent } from '@trz/util/eventUtils';
@@ -86,10 +87,10 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                 blur={3}
             />
             <Modal.Content
-                bg={'#15161a'}
+                bg={COLORS.background.medium}
                 c={'white'}
             >
-                <Modal.Header bg={'#0c0c10'}>
+                <Modal.Header bg={COLORS.background.dark}>
                     <Modal.Title w={'100%'}>
                         <Group justify="space-between">
                             <Text
@@ -143,7 +144,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                         >
                             <Stack
                                 gap="xs"
-                                bg={'#0c0c10'}
+                                bg={COLORS.background.dark}
                                 pr="sm"
                                 mih="80vh"
                             >
@@ -205,7 +206,7 @@ const SnapshotItem = (props: SnapshotItemProps) => {
             p="sm"
             style={{
                 cursor: 'pointer',
-                backgroundColor: props.isSelected ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                backgroundColor: props.isSelected ? COLORS.overlay.light : 'transparent',
                 borderRadius: '4px',
             }}
             onClick={() => {

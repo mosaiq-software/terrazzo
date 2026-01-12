@@ -20,10 +20,6 @@ export function generateRandomColor() {
     return '#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0');
 }
 
-export const COLOR_SUCCESS = '#41aa53';
-export const COLOR_ERROR = '#cf4545';
-export const COLOR_UNSET = '#2e2e2e';
-
 /**
  * Creates a hex color code based on a string input.
  * All colors will be mid-range brightness/saturation for readability. The hue is derived from the string.

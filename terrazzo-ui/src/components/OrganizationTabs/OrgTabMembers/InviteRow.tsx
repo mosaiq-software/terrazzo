@@ -1,6 +1,7 @@
 import { Button, Group, Text, Tooltip } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { Invite, isInviteExpired, withIf } from '@mosaiq/terrazzo-common';
+import { COLORS } from '@trz/util/colors';
 import { formatTimeAgo } from '@trz/util/dateUtils';
 import { uuidToReadableUuid } from '@trz/util/idUtils';
 import { getInviteLink } from '@trz/util/linkUtils';
@@ -38,14 +39,14 @@ export const InviteRow = (props: InviteRowProps) => {
                         gap="xs"
                         px="sm"
                         py={4}
-                        bg="rgba(255, 255, 255, 0.05)"
+                        bg={COLORS.overlay.light}
                         style={{
                             borderRadius: '4px',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            border: `1px solid ${COLORS.border}`,
                         }}
                     >
                         <Text
-                            c="white"
+                            c={COLORS.text.primary}
                             size="xs"
                             fw={500}
                         >
@@ -66,7 +67,7 @@ export const InviteRow = (props: InviteRowProps) => {
                     size="xs"
                     leftSection={<MdContentCopy size={14} />}
                     onClick={() => clipboard.copy(inviteUrl)}
-                    color={clipboard.copied ? 'green' : 'blue'}
+                    color={clipboard.copied ? COLORS.semantic.success : undefined}
                     disabled={isExpired}
                 >
                     {clipboard.copied ? 'Copied!' : 'Copy Link'}
@@ -79,7 +80,7 @@ export const InviteRow = (props: InviteRowProps) => {
                         label: 'Delete Invite',
                         onClick: () => props.onDeleteInvite?.(props.invite),
                         icon: <MdDelete size={16} />,
-                        color: 'red',
+                        color: COLORS.semantic.error,
                     },
                     props.canManageInvites && !!props.onDeleteInvite
                 ),

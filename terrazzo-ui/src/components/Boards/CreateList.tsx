@@ -1,5 +1,6 @@
 import { Button, CloseButton, Flex, FocusTrap, Paper, TextInput } from '@mantine/core';
 import { getHotkeyHandler, useClickOutside } from '@mantine/hooks';
+import { COLORS } from '@trz/util/colors';
 import React, { useState } from 'react';
 
 interface CreateListProps {
@@ -40,7 +41,7 @@ const CreateList = (props: CreateListProps): React.JSX.Element => {
                     miw="250px"
                     maw="250px"
                     onClick={() => setVisible((v) => !v)}
-                    color={'#121314'}
+                    color={COLORS.foreground.dark}
                     justify="left"
                 >
                     + Add List
@@ -48,7 +49,7 @@ const CreateList = (props: CreateListProps): React.JSX.Element => {
             )}
             {visible && (
                 <Paper
-                    bg={'#121314'}
+                    bg={COLORS.background.medium}
                     w="250"
                     radius="md"
                     shadow="lg"
