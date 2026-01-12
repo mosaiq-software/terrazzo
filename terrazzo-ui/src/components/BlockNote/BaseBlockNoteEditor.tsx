@@ -6,7 +6,14 @@ import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
 import { Alert, Group, Stack } from '@mantine/core';
-import { BLOCKNOTE_FRAGMENT_ID, RoomType, TextBlockId, UserId } from '@mosaiq/terrazzo-common';
+import {
+    BLOCKNOTE_FRAGMENT_ID,
+    RoomType,
+    TextBlockId,
+    TextBlockResourceType,
+    UID,
+    UserId,
+} from '@mosaiq/terrazzo-common';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useRoom } from '@trz/hooks/useRoom';
 import { CollaborationOptions } from 'node_modules/@blocknote/core/types/src/extensions/Collaboration/Collaboration';
@@ -14,6 +21,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
 import { AvatarRow } from '../UI/AvatarRow';
+import { BlockNoteEditorHistoryModal } from './BlockNoteEditorHistoryModal';
 import { blockNoteEditorTheme } from './BlockNoteEditorTheme';
 import './BlockNoteStyleOverrides.css';
 
@@ -24,6 +32,8 @@ interface BaseEditorProps {
     socketIOProvider: SocketIOProvider | undefined;
     doc: Y.Doc | undefined;
     textBlockId: TextBlockId;
+    resourceId: UID;
+    resourceType: TextBlockResourceType;
     placeholder?: string;
     viewOnly?: boolean;
     myId: UserId | undefined;
@@ -132,6 +142,11 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
                         showTooltip
                         showProfilePopover
                         animateOnHover
+                    />
+                    <BlockNoteEditorHistoryModal
+                        textBlockId={props.textBlockId}
+                        resourceId={props.resourceId}
+                        resourceType={props.resourceType}
                     />
                 </Group>
             )}

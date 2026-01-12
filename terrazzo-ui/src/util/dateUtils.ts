@@ -11,3 +11,28 @@ export const formatTimeAgo = (timestamp: number): string => {
     if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
     return 'just now';
 };
+
+export const niceDate = (timestamp: number): string => {
+    return new Date(timestamp).toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+};
+
+export const niceDateWithTime = (timestamp: number): string => {
+    return new Date(timestamp).toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+    });
+};
+
+export const niceTime = (timestamp: number): string => {
+    return new Date(timestamp).toLocaleString(undefined, {
+        hour: 'numeric',
+        minute: 'numeric',
+    });
+};

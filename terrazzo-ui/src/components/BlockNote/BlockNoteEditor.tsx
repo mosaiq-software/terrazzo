@@ -110,6 +110,8 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
             socketIOProvider={provider.socket}
             doc={provider.doc}
             textBlockId={props.textBlockId}
+            resourceId={props.resourceId}
+            resourceType={props.resourceType}
             placeholder={props.placeholder}
             viewOnly={props.viewOnly}
             myId={userCtx.userId}
