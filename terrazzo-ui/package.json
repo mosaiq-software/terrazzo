@@ -3,7 +3,9 @@
     "version": "1.0.1",
     "type": "module",
     "scripts": {
-        "test": "test",
+        "test": "echo \"No tests specified\" && exit 0",
+        "test:watch": "echo \"No tests specified\" && exit 0",
+        "test:coverage": "echo \"No tests specified\" && exit 0",
         "preview": "vite preview",
         "start": "vite --port 8080 --strictPort --host",
         "start:open": "vite --port 8080 --open --strictPort",

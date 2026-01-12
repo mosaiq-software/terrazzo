@@ -1,4 +1,18 @@
-import { BoardId, CardId, DirectoryId, DocumentId, InviteId, LabelId, ListId, OrganizationId, RoleId, UID, UploadedFileId, UserId } from '../../genericTypes';
+import { TextBlockResourceType, TextBlockSnapshot } from '../../..';
+import {
+    BoardId,
+    CardId,
+    DirectoryId,
+    DocumentId,
+    InviteId,
+    LabelId,
+    ListId,
+    OrganizationId,
+    RoleId,
+    UID,
+    UploadedFileId,
+    UserId,
+} from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
 import { Board, BoardRes, Label } from '../../modules/board/boardTypes';
@@ -42,6 +56,7 @@ export enum ClientSE {
     GET_ROLES_FOR_USER_IN_ORG = 'GET_ROLES_FOR_USER_IN_ORG',
     GET_USERS_LINKED_ACCOUNTS = 'GET_USERS_LINKED_ACCOUNTS',
     GET_USERNAME_AVAILABLE = 'GET_USERNAME_AVAILABLE',
+    GET_TEXT_BLOCK_HISTORY_SNAPSHOTS = 'GET_TEXT_BLOCK_HISTORY_SNAPSHOTS',
 
     CREATE_ORG = 'CREATE_ORG',
     CREATE_BOARD = 'CREATE_BOARD',
@@ -76,6 +91,7 @@ export enum ClientSE {
     DELETE_USER_LINKED_ACCOUNT = 'DELETE_USER_LINKED_ACCOUNT',
 
     USE_INVITE = 'USE_INVITE',
+    USE_TEXT_BLOCK_HISTORY_SNAPSHOT = 'USE_TEXT_BLOCK_HISTORY_SNAPSHOT',
 }
 export interface ClientSEPayload {
     // Client to Server
@@ -104,6 +120,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId };
     [ClientSE.GET_USERS_LINKED_ACCOUNTS]: UserId;
     [ClientSE.GET_USERNAME_AVAILABLE]: string;
+    [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: { resourceId: UID; resourceType: TextBlockResourceType };
 
     [ClientSE.CREATE_ORG]: { name: string };
     [ClientSE.CREATE_BOARD]: { name: string; boardCode: string; parentId: DirectoryId };
@@ -138,6 +155,11 @@ export interface ClientSEPayload {
     [ClientSE.DELETE_USER_LINKED_ACCOUNT]: { userId: UserId; provider: LinkedAccountProvider; accountId: string };
 
     [ClientSE.USE_INVITE]: { inviteId: InviteId };
+    [ClientSE.USE_TEXT_BLOCK_HISTORY_SNAPSHOT]: {
+        snapshotId: UID;
+        resourceId: UID;
+        resourceType: TextBlockResourceType;
+    };
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
@@ -166,6 +188,7 @@ export interface ClientSEReplies {
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: RoleId[] | undefined;
     [ClientSE.GET_USERS_LINKED_ACCOUNTS]: LinkedAccount[] | undefined;
     [ClientSE.GET_USERNAME_AVAILABLE]: boolean;
+    [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: TextBlockSnapshot[] | undefined;
 
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
     [ClientSE.CREATE_BOARD]: BoardId | undefined;
@@ -200,5 +223,6 @@ export interface ClientSEReplies {
     [ClientSE.DELETE_USER_LINKED_ACCOUNT]: undefined;
 
     [ClientSE.USE_INVITE]: boolean;
+    [ClientSE.USE_TEXT_BLOCK_HISTORY_SNAPSHOT]: boolean;
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;

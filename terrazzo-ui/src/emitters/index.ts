@@ -8,4 +8,5 @@ export * from './listEmitters';
 export * from './membershipEmitters';
 export * from './organizationEmitters';
 export * from './queryEmitters';
+export * from './textEmitters';
 export * from './userEmitters';

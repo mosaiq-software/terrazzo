@@ -23,3 +23,16 @@ export function generateRandomColor() {
 export const COLOR_SUCCESS = '#41aa53';
 export const COLOR_ERROR = '#cf4545';
 export const COLOR_UNSET = '#2e2e2e';
+
+/**
+ * Creates a hex color code based on a string input.
+ * All colors will be mid-range brightness/saturation for readability. The hue is derived from the string.
+ */
+export const getRandomColorFromString = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 23) - hash);
+    }
+    const hue = hash % 360;
+    return `hsl(${hue}, 60%, 40%)`;
+};

@@ -156,7 +156,10 @@ const UserSettingsPage = (): React.JSX.Element => {
                                                         fw="normal"
                                                         td="underline"
                                                         onClick={() => {
-                                                            change('username', `${editedUserData.username ?? me.username}${randomDiscriminator}`);
+                                                            change(
+                                                                'username',
+                                                                `${editedUserData.username ?? me.username}${randomDiscriminator}`
+                                                            );
                                                         }}
                                                     >
                                                         {`${editedUserData.username ?? me.username}${randomDiscriminator}`}
@@ -165,7 +168,11 @@ const UserSettingsPage = (): React.JSX.Element => {
                                             </Stack>
                                         ) : undefined
                                     }
-                                    rightSection={usernameAvailable === undefined && !!editedUserData.username?.length ? <Loader size="xs" /> : null}
+                                    rightSection={
+                                        usernameAvailable === undefined && !!editedUserData.username?.length ? (
+                                            <Loader size="xs" />
+                                        ) : null
+                                    }
                                 />
                                 <Group>
                                     <TextInput

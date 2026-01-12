@@ -41,7 +41,10 @@ export const syncMovedCard = async (payload: ServerSEPayload[ServerSE.MOVE_CARD]
     });
 };
 
-export const syncUpdateCardAssignee = async (payload: ServerSEPayload[ServerSE.UPDATE_CARD_ASSIGNEE], onBoardId: BoardId) => {
+export const syncUpdateCardAssignee = async (
+    payload: ServerSEPayload[ServerSE.UPDATE_CARD_ASSIGNEE],
+    onBoardId: BoardId
+) => {
     await broadcast({
         event: ServerSE.UPDATE_CARD_ASSIGNEE,
         toRoomIds: [getRoomCode(RoomType.DATA, onBoardId), getRoomCode(RoomType.USER, payload.userId)],

@@ -48,13 +48,20 @@ export const ContextMenuSelectorMenu = <T extends string = string>(props: Contex
                 <Menu.Label>{props.title}</Menu.Label>
                 <Stack gap={1}>
                     {props.items.map((item) => {
-                        const textColor = props.textColor ?? (colorIsDarkAdvanced(item.color ?? DEFAULT_COLOR) ? '#fff' : '#000');
+                        const textColor =
+                            props.textColor ?? (colorIsDarkAdvanced(item.color ?? DEFAULT_COLOR) ? '#fff' : '#000');
                         return (
                             <Button
                                 key={item.id}
                                 bg={item.color ?? DEFAULT_COLOR}
                                 ta={props.textAlign ?? 'left'}
-                                justify={props.textAlign === 'center' ? 'center' : props.textAlign === 'right' ? 'flex-end' : 'flex-start'}
+                                justify={
+                                    props.textAlign === 'center'
+                                        ? 'center'
+                                        : props.textAlign === 'right'
+                                          ? 'flex-end'
+                                          : 'flex-start'
+                                }
                                 c={textColor}
                                 leftSection={item.leftIcon}
                                 rightSection={item.rightIcon}

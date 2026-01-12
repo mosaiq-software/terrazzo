@@ -6,13 +6,22 @@ import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
 import { Alert, Group, Stack } from '@mantine/core';
-import { BLOCKNOTE_FRAGMENT_ID, RoomType, TextBlockId, UserId } from '@mosaiq/terrazzo-common';
+import {
+    BLOCKNOTE_FRAGMENT_ID,
+    RoomType,
+    TextBlockId,
+    TextBlockResourceType,
+    UID,
+    UserId,
+} from '@mosaiq/terrazzo-common';
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useRoom } from '@trz/hooks/useRoom';
+import { CollaborationOptions } from 'node_modules/@blocknote/core/types/src/extensions/Collaboration/Collaboration';
 import { useEffect, useMemo, useState } from 'react';
 import { SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
 import { AvatarRow } from '../UI/AvatarRow';
+import { BlockNoteEditorHistoryModal } from './BlockNoteEditorHistoryModal';
 import { blockNoteEditorTheme } from './BlockNoteEditorTheme';
 import './BlockNoteStyleOverrides.css';
 
@@ -20,16 +29,18 @@ import './BlockNoteStyleOverrides.css';
 const ALLOW_ANYONE_TO_EDIT = false;
 
 interface BaseEditorProps {
-    socketIOProvider: SocketIOProvider;
-    doc: Y.Doc;
+    socketIOProvider: SocketIOProvider | undefined;
+    doc: Y.Doc | undefined;
     textBlockId: TextBlockId;
+    resourceId: UID;
+    resourceType: TextBlockResourceType;
     placeholder?: string;
     viewOnly?: boolean;
     myId: UserId | undefined;
-    myName: string;
-    pfpColor: string;
+    myName: string | undefined;
+    pfpColor: string | undefined;
     syncStatus: boolean | undefined;
-    connectionStatus: string;
+    connectionStatus: string | undefined;
 }
 /**
  * Base BlockNote Editor component that render the editor with collaboration features
@@ -59,17 +70,21 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
     }, []);
 
     const locale = en;
+    const collabOptions: CollaborationOptions | undefined =
+        props.socketIOProvider && props.doc
+            ? {
+                  provider: props.socketIOProvider,
+                  fragment: props.doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID),
+                  user: {
+                      name: props.myName || 'Anonymous',
+                      color: props.pfpColor || '#ffffff',
+                  },
+                  showCursorLabels: 'activity',
+              }
+            : undefined;
     const editor = useCreateBlockNote(
         {
-            collaboration: {
-                provider: props.socketIOProvider,
-                fragment: props.doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID),
-                user: {
-                    name: props.myName,
-                    color: props.pfpColor,
-                },
-                showCursorLabels: 'activity',
-            },
+            collaboration: collabOptions,
             uploadFile: fileUploader.uploadFile,
             schema: BlockNoteSchema.create().extend({
                 blockSpecs: {
@@ -114,19 +129,27 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
                             title="Syncing..."
                             color="yellow"
                         >
-                            The document is syncing with the server. Some changes might not be visible to other collaborators yet.
+                            The document is syncing with the server. Some changes might not be visible to other
+                            collaborators yet.
                         </Alert>
                     )
                 ))}
-            <Group justify="flex-end">
-                <AvatarRow
-                    users={Array.from(roomUserIds.values())}
-                    maxUsers={5}
-                    showTooltip
-                    showProfilePopover
-                    animateOnHover
-                />
-            </Group>
+            {!props.viewOnly && (
+                <Group justify="flex-end">
+                    <AvatarRow
+                        users={Array.from(roomUserIds.values())}
+                        maxUsers={5}
+                        showTooltip
+                        showProfilePopover
+                        animateOnHover
+                    />
+                    <BlockNoteEditorHistoryModal
+                        textBlockId={props.textBlockId}
+                        resourceId={props.resourceId}
+                        resourceType={props.resourceType}
+                    />
+                </Group>
+            )}
             <BlockNoteView
                 editor={editor}
                 theme={blockNoteEditorTheme}

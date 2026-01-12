@@ -1,16 +1,33 @@
-import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, updateBaseFromPartial, UserId } from '@mosaiq/terrazzo-common';
+import {
+    Card,
+    CardHeader,
+    CardId,
+    LabelId,
+    ListId,
+    TextBlockId,
+    updateBaseFromPartial,
+    UserId,
+} from '@mosaiq/terrazzo-common';
 import { syncAddCard, syncMovedCard, syncUpdateCardField } from '@trz-api/broadcasters';
 import { syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
-import { createCardOnListDb, getCardByIdDb, getCardsByListIdDownDb, getCardsByListIdShortUpDb, updateCardDb, updateCardListDb, updateCardOrderDb } from '@trz-api/persistence/cardPersistence';
+import {
+    createCardOnListDb,
+    getCardByIdDb,
+    getCardsByListIdDownDb,
+    getCardsByListIdShortUpDb,
+    updateCardDb,
+    updateCardListDb,
+    updateCardOrderDb,
+} from '@trz-api/persistence/cardPersistence';
 import { addLabelToCardDb, deleteLabelsOnCardDb, getLabelsOnCardDb } from '@trz-api/persistence/labelPersistence';
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { getTextBlockByIdDb } from '@trz-api/persistence/textBlockPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
 import { getBoardIDFromListID } from './listController';
-import { createTextBlockWithMarkdown } from './textBlockController';
+import { createBlocknoteTextBlockWithMarkdown } from './textBlockController';
 
 export const MOVING_LIST_ORDER = -10000;
 //Gets
@@ -66,7 +83,13 @@ export async function getSingleFullCard(cardId: CardId): Promise<Card | undefine
  * @param listID
  * @param cardName
  */
-export async function addCard(listID: ListId, cardName: string, description?: string, explicitCardNumber?: number, createdById?: UserId) {
+export async function addCard(
+    listID: ListId,
+    cardName: string,
+    description?: string,
+    explicitCardNumber?: number,
+    createdById?: UserId
+) {
     //pull board from db with ID
     const updatingList = await getListByIdDb(listID);
 
@@ -98,7 +121,7 @@ export async function addCard(listID: ListId, cardName: string, description?: st
         createdBy: createdById ? await getUserHeaderByIdDb(createdById) : undefined,
     };
     try {
-        const descBlock = await createTextBlockWithMarkdown('');
+        const descBlock = await createBlocknoteTextBlockWithMarkdown('');
         if (!descBlock) {
             throw new Error('Failed to create description text block');
         }
@@ -165,14 +188,14 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         const currentEncodedDesc = await getTextBlockByIdDb(existingCard.descriptionTextBlockId);
         let newTextBlockId: TextBlockId | undefined = undefined;
         if (currentEncodedDesc) {
-            const descBlock = await createTextBlockWithMarkdown(currentEncodedDesc.text);
+            const descBlock = await createBlocknoteTextBlockWithMarkdown(currentEncodedDesc.text);
             if (!descBlock) {
                 throw new Error('Failed to create description text block');
             }
             newTextBlockId = descBlock.id;
         } else {
             const description = '';
-            const descBlock = await createTextBlockWithMarkdown('');
+            const descBlock = await createBlocknoteTextBlockWithMarkdown('');
             if (!descBlock) {
                 throw new Error('Failed to create description text block');
             }

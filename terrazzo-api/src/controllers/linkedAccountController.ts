@@ -1,6 +1,13 @@
 import { exhaustiveCheck, LinkedAccount, LinkedAccountProvider, UserId } from '@mosaiq/terrazzo-common';
 import { syncUsersLinkedAccounts } from '@trz-api/broadcasters';
-import { createLinkedAccountDb, deleteLinkedAccountDb, getLinkedAccountForProviderDb, getLinkedAccountsForUserDb, getPrivateLinkedAccountDb, updateLinkedAccountDb } from '@trz-api/persistence/linkedAccountPersistence';
+import {
+    createLinkedAccountDb,
+    deleteLinkedAccountDb,
+    getLinkedAccountForProviderDb,
+    getLinkedAccountsForUserDb,
+    getPrivateLinkedAccountDb,
+    updateLinkedAccountDb,
+} from '@trz-api/persistence/linkedAccountPersistence';
 import { revokeGithubAuth } from '@trz-api/utils/githubUtils';
 
 export const getLinkedAccountsForUser = async (userId: UserId) => {
@@ -21,7 +28,12 @@ export const addLinkedAccountToUser = async (linkedAccount: Required<LinkedAccou
     return linkedAccount;
 };
 
-export const updateLinkedAccountForUser = async (provider: LinkedAccountProvider, accountId: string, userId: UserId, updatedData: Partial<LinkedAccount>) => {
+export const updateLinkedAccountForUser = async (
+    provider: LinkedAccountProvider,
+    accountId: string,
+    userId: UserId,
+    updatedData: Partial<LinkedAccount>
+) => {
     const existingAccount = await getLinkedAccountForProviderDb(provider, accountId);
     if (!existingAccount || existingAccount.userId !== userId) {
         throw new Error(`Linked account does not exist for this user`);
@@ -30,7 +42,11 @@ export const updateLinkedAccountForUser = async (provider: LinkedAccountProvider
     await syncUsersLinkedAccounts(userId);
 };
 
-export const removeLinkedAccountFromUser = async (userId: UserId, provider: LinkedAccountProvider, accountId: string) => {
+export const removeLinkedAccountFromUser = async (
+    userId: UserId,
+    provider: LinkedAccountProvider,
+    accountId: string
+) => {
     const existingAccount = await getLinkedAccountForProviderDb(provider, accountId);
     if (!existingAccount || existingAccount.userId !== userId) {
         throw new Error(`Linked account does not exist for this user`);

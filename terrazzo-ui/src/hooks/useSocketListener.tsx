@@ -2,7 +2,11 @@ import { ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useEffect } from 'react';
 
-export function useSocketListener<T extends ServerSE>(event: T, callback: (payload: ServerSEPayload[T]) => void, extraDeps: any[] = []): void {
+export function useSocketListener<T extends ServerSE>(
+    event: T,
+    callback: (payload: ServerSEPayload[T]) => void,
+    extraDeps: any[] = []
+): void {
     const sockCtx = useSocket();
     useEffect(() => {
         if (sockCtx.socket) {

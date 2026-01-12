@@ -1,4 +1,14 @@
-import { calculateTrueModulePermissionsInOrg, evaluateOrganizationPermissionForRoles, evaluatePermissionForRoles, getMaxUserRole, meetsRequirementsForPermissibleAction, ModuleHeader, PermissibleAction, Role, RoleId } from '@mosaiq/terrazzo-common';
+import {
+    calculateTrueModulePermissionsInOrg,
+    evaluateOrganizationPermissionForRoles,
+    evaluatePermissionForRoles,
+    getMaxUserRole,
+    meetsRequirementsForPermissibleAction,
+    ModuleHeader,
+    PermissibleAction,
+    Role,
+    RoleId,
+} from '@mosaiq/terrazzo-common';
 import { useRoleForUserInOrg } from '@trz/hooks/useRolesForUserInOrg';
 import React, { createContext, useContext } from 'react';
 import { useOrg } from './org-context';
@@ -29,7 +39,10 @@ const PermissionProvider: React.FC<any> = ({ children }) => {
         return meetsRequirementsForPermissibleAction(grantedFlags, permissibleAction);
     };
 
-    const checkModulePermission = async (permissibleAction: PermissibleAction, moduleHeader: ModuleHeader): Promise<boolean> => {
+    const checkModulePermission = async (
+        permissibleAction: PermissibleAction,
+        moduleHeader: ModuleHeader
+    ): Promise<boolean> => {
         if (!userCtx.userId || !orgCtx.active?.id) {
             return false;
         }

@@ -1,7 +1,11 @@
 import { UID, NonEmptyArray } from '../types/genericTypes';
 import { RoomId, RoomSpecifier, RoomType } from '../types/socket/roomTypes';
 
-export const getRoomCode = (roomType: RoomType, uid: UID | string, specifier: string = RoomSpecifier.DEFAULT): RoomId => {
+export const getRoomCode = (
+    roomType: RoomType,
+    uid: UID | string,
+    specifier: string = RoomSpecifier.DEFAULT
+): RoomId => {
     return `${roomType}@${uid}@${specifier}`;
 };
 
@@ -13,4 +17,5 @@ export const getRoomType = (roomId: RoomId): RoomType => {
     return (roomId?.split('@')[0] as RoomType) || RoomType.INVALID_DO_NOT_USE;
 };
 
-export const allRoomTypes = (): NonEmptyArray<RoomType> => Object.values(RoomType).filter((r) => r !== RoomType.INVALID_DO_NOT_USE) as any;
+export const allRoomTypes = (): NonEmptyArray<RoomType> =>
+    Object.values(RoomType).filter((r) => r !== RoomType.INVALID_DO_NOT_USE) as any;

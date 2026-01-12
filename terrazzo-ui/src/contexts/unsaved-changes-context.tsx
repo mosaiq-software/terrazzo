@@ -119,7 +119,10 @@ const UnsavedChangesProvider: React.FC<any> = ({ children }) => {
                     <Text>
                         You have unsaved changes to <strong>{itemsToCommaSeparatedList(unsavedChanges)}</strong>.
                     </Text>
-                    <Text>Are you sure you want to discard {unsavedChanges.length === 1 ? 'this change' : 'these changes'}?</Text>
+                    <Text>
+                        Are you sure you want to discard {unsavedChanges.length === 1 ? 'this change' : 'these changes'}
+                        ?
+                    </Text>
                     <Group>
                         <Button
                             variant="outline"

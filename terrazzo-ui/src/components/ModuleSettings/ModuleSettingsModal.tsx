@@ -44,7 +44,8 @@ const ModuleSettings = (props: ContextModalProps<ModuleSettingsGenericProps>) =>
         default:
             Settings = (
                 <Text>
-                    {props.innerProps.moduleHeader.name} is a {props.innerProps.moduleHeader.type}, which is not supported.
+                    {props.innerProps.moduleHeader.name} is a {props.innerProps.moduleHeader.type}, which is not
+                    supported.
                 </Text>
             );
     }
@@ -52,4 +53,6 @@ const ModuleSettings = (props: ContextModalProps<ModuleSettingsGenericProps>) =>
     return <Container onKeyDown={getHotkeyHandler([['Escape', handleClose]])}>{Settings}</Container>;
 };
 
-export const ModuleSettingsModal = (props: ContextModalProps<ModuleSettingsGenericProps>) => <ModuleSettings {...props} />;
+export const ModuleSettingsModal = (props: ContextModalProps<ModuleSettingsGenericProps>) => (
+    <ModuleSettings {...props} />
+);

@@ -30,8 +30,20 @@
  *    sends the update to clients connected to the document namespace.
  */
 
-import { ServerSocketIOEvent, TextBlockId, TextSocketHandshakeAuth, UserId, YjsEvent } from '@mosaiq/terrazzo-common';
-import { checkCanUserEditTextBlock, loadTextBlockEncodedData, storeTextBlockEncodedData } from '@trz-api/controllers/textBlockController';
+import {
+    ServerSocketIOEvent,
+    TextBlockId,
+    TextBlockResourceType,
+    TextSocketHandshakeAuth,
+    UID,
+    UserId,
+    YjsEvent,
+} from '@mosaiq/terrazzo-common';
+import {
+    checkCanUserEditTextBlock,
+    loadTextBlockEncodedData,
+    storeTextBlockEncodedData,
+} from '@trz-api/controllers/textBlockController';
 import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
@@ -71,8 +83,12 @@ export class YSocketIO extends Observable<string> {
             const textBlockId = socket.nsp.name.replace(/\/yjs\|/, '') as TextBlockId;
             const auth = socket.handshake.auth as TextSocketHandshakeAuth;
             const authSession = await getValidAuthSessionFromSocketHandshake(auth);
-            const userCanEditResource = await checkCanUserEditTextBlock(auth.userId, auth.resource.id, auth.resource.type);
-            const canEdit = !!authSession?.userId && userCanEditResource;
+            const authorizedTextBlockId = await checkCanUserEditTextBlock(
+                auth.userId,
+                auth.resourceId,
+                auth.resourceType
+            );
+            const canEdit = !!authSession?.userId && !!authorizedTextBlockId && authorizedTextBlockId === textBlockId;
 
             const sockData: YSocketData = {
                 sid: socket.id,
@@ -83,7 +99,7 @@ export class YSocketIO extends Observable<string> {
             };
             setYSocketData(socket, sockData);
 
-            const doc = await this.initDocument(textBlockId, socket.nsp);
+            const doc = await this.initDocument(textBlockId, auth.resourceId, auth.resourceType, socket.nsp);
             await this.initPublicListeners(socket, doc);
             await this.initWriteOnlyListeners(socket, doc);
             await this.startSynchronization(socket, doc);
@@ -102,6 +118,27 @@ export class YSocketIO extends Observable<string> {
         await Promise.all(syncPromises);
     }
 
+    /**
+     * Broadcast a document update to all connected clients for a specific text block.
+     * This overwrites the document content and syncs it to all clients in real-time.
+     * Useful for operations like version history restoration.
+     *
+     * @param textBlockId - The ID of the text block to update
+     * @param ydoc - The Y.Doc containing the new content to broadcast
+     * @returns true if broadcast succeeded, false if document not found or not initialized
+     */
+    public async broadcastDocumentUpdate(textBlockId: TextBlockId, ydoc: Y.Doc): Promise<boolean> {
+        const doc = this._documents.get(textBlockId);
+        if (!doc) {
+            console.warn(`Cannot broadcast update: Document ${textBlockId} not found in active documents`);
+            return false;
+        }
+        const update = Y.encodeStateAsUpdate(ydoc);
+        Y.applyUpdate(doc, update, this);
+        console.log(`Broadcasted document update for text block ${textBlockId} to all connected clients`);
+        return true;
+    }
+
     private async syncSocketEditStatusForSocket(socket: Socket, userId: UserId): Promise<void> {
         try {
             const auth = socket.handshake.auth as TextSocketHandshakeAuth;
@@ -109,8 +146,8 @@ export class YSocketIO extends Observable<string> {
             if (auth.userId !== userId || !sockData?.userId || sockData.userId !== userId) {
                 return;
             }
-            const canEdit = await checkCanUserEditTextBlock(userId, auth.resource.id, auth.resource.type);
-            sockData.canEdit = canEdit;
+            const authorizedTextBlockId = await checkCanUserEditTextBlock(userId, auth.resourceId, auth.resourceType);
+            sockData.canEdit = !!authorizedTextBlockId;
             setYSocketData(socket, sockData);
         } catch (error) {
             console.error(`Error syncing socket edit status for user ${userId} on socket ${socket.id}:`, error);
@@ -134,13 +171,18 @@ export class YSocketIO extends Observable<string> {
      *      - Adds the new document to the documents map.
      *      - Emit the `document-loaded` event
      */
-    private async initDocument(textBlockId: TextBlockId, namespace: Namespace): Promise<Document> {
+    private async initDocument(
+        textBlockId: TextBlockId,
+        resourceId: UID,
+        resourceType: TextBlockResourceType,
+        namespace: Namespace
+    ): Promise<Document> {
         const existingDoc = this._documents.get(textBlockId);
         if (existingDoc) {
             return existingDoc;
         }
 
-        const newDoc = new Document(textBlockId, namespace, {
+        const newDoc = new Document(textBlockId, resourceId, resourceType, namespace, {
             onUpdate: async (doc, update) => {
                 this.emit(YjsEvent.DOCUMENT_UPDATE, [doc, update]);
                 // Debounce saves using a timer
@@ -154,13 +196,13 @@ export class YSocketIO extends Observable<string> {
                     }
                     doc.isSaving = true;
                     try {
-                        await storeTextBlockEncodedData(doc.textBlockId, doc);
+                        await storeTextBlockEncodedData(doc);
                     } catch (error) {
                         console.error(`Save failed for ${doc.textBlockId}, retrying...`, error);
                         // Retry once after 1 second
                         setTimeout(async () => {
                             try {
-                                await storeTextBlockEncodedData(doc.textBlockId, doc);
+                                await storeTextBlockEncodedData(doc);
                             } catch (retryError) {
                                 console.error(`Retry save failed for ${doc.textBlockId}`, retryError);
                             }
@@ -202,7 +244,9 @@ export class YSocketIO extends Observable<string> {
                 return sockData?.canEdit;
             });
             if (socketsWithEditPermissions.length === 0) {
-                console.log(`No more sockets with edit permissions connected to document ${doc.textBlockId}. Saving and destroying document.`);
+                console.log(
+                    `No more sockets with edit permissions connected to document ${doc.textBlockId}. Saving and destroying document.`
+                );
 
                 // Cancel pending timer to force immediate save
                 if (doc.saveTimer) {
@@ -219,7 +263,7 @@ export class YSocketIO extends Observable<string> {
 
                 // Final save before destroy
                 try {
-                    await storeTextBlockEncodedData(doc.textBlockId, doc);
+                    await storeTextBlockEncodedData(doc, true);
                 } catch (error) {
                     console.error(`Final save failed for ${doc.textBlockId}:`, error);
                 }

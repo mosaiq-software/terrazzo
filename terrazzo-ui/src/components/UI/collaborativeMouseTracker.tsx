@@ -1,6 +1,15 @@
 import { Box, MantineStyleProp } from '@mantine/core';
 import { useIdle, useThrottledCallback } from '@mantine/hooks';
-import { BoardId, CardId, ClientSE, ListId, Position, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import {
+    BoardId,
+    CardId,
+    ClientSE,
+    ListId,
+    Position,
+    RoomSpecifier,
+    RoomType,
+    ServerSE,
+} from '@mosaiq/terrazzo-common';
 import UserCursor from '@trz/components/Boards/UserCursor';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useRoom } from '@trz/hooks/useRoom';
@@ -21,7 +30,12 @@ interface CollaborativeMouseTrackerProps {
 const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
     const ref = useRef<HTMLDivElement | null>(null);
     const sockCtx = useSocket();
-    const [roomUsers, setRoomUsersState] = useRoom(RoomType.MOUSE, props.disableTracking ? undefined : props.boardId, RoomSpecifier.DEFAULT, true);
+    const [roomUsers, setRoomUsersState] = useRoom(
+        RoomType.MOUSE,
+        props.disableTracking ? undefined : props.boardId,
+        RoomSpecifier.DEFAULT,
+        true
+    );
 
     useSocketListener(ServerSE.MOUSE_MOVE, (payload) => {
         const user = roomUsers.get(payload.sid);

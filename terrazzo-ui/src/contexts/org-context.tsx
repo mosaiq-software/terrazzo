@@ -1,5 +1,14 @@
 import { useLocalStorage } from '@mantine/hooks';
-import { LocalStorageKey, Member, OrganizationHeader, OrganizationId, Role, RoomType, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
+import {
+    LocalStorageKey,
+    Member,
+    OrganizationHeader,
+    OrganizationId,
+    Role,
+    RoomType,
+    ServerSE,
+    updateBaseFromPartial,
+} from '@mosaiq/terrazzo-common';
 import { createOrganization, getOrganizationData, getOrganizationsForUser } from '@trz/emitters';
 import { useOrgMembers } from '@trz/hooks/useOrgMembers';
 import { useOrgRoles } from '@trz/hooks/useOrgRoles';
@@ -29,7 +38,10 @@ const OrgProvider: React.FC<any> = ({ children }) => {
     const navigate = useNavigate();
     const [selectedOrganization, setSelectedOrganization] = useState<OrganizationHeader | undefined>(undefined);
     const [allOrganizations, setAllOrganizations] = useState<OrganizationHeader[]>([]);
-    const [lastSelectedOrgId, setLastSelectedOrgId] = useLocalStorage<OrganizationId | undefined>({ key: LocalStorageKey.LAST_SELECTED_ORG, defaultValue: undefined });
+    const [lastSelectedOrgId, setLastSelectedOrgId] = useLocalStorage<OrganizationId | undefined>({
+        key: LocalStorageKey.LAST_SELECTED_ORG,
+        defaultValue: undefined,
+    });
     useRoom(RoomType.DATA, selectedOrganization?.id);
     const members = useOrgMembers(selectedOrganization?.id);
     const roles = useOrgRoles(userCtx.userId ? selectedOrganization?.id : undefined);

@@ -8,6 +8,7 @@ export * from './types/inviteTypes';
 export * from './types/linkedAccountTypes';
 export * from './types/organizationTypes';
 export * from './types/queryTypes';
+export * from './types/textTypes';
 export * from './types/userTypes';
 
 // Types - Permissions
@@ -43,3 +44,6 @@ export * from './utils/inviteUtils';
 export * from './utils/permissionUtils';
 export * from './utils/socketUtils';
 export * from './utils/textUtils';
+
+// Testing
+export * from './testing/testUtils';

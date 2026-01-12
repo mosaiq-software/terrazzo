@@ -13,7 +13,10 @@ interface RolesListAddMenuProps {
 }
 export const RolesListAddMenu = (props: RolesListAddMenuProps) => {
     const orgCtx = useOrg();
-    const unAssignedRoles = useMemo(() => orgCtx.roles.filter((role) => !props.roles.find((r) => r.id === role.id)), [orgCtx.roles, props.roles]);
+    const unAssignedRoles = useMemo(
+        () => orgCtx.roles.filter((role) => !props.roles.find((r) => r.id === role.id)),
+        [orgCtx.roles, props.roles]
+    );
     return (
         <Menu
             position="bottom-start"

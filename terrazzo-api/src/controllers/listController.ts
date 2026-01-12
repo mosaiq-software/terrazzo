@@ -2,7 +2,15 @@ import { arrayMove, BoardId, CardId, List, ListHeader, ListId, updateBaseFromPar
 import { syncAddList, syncMoveList, syncUpdateListField } from '@trz-api/broadcasters';
 import { getAllCardsOfList, getCardIdsOnList } from '@trz-api/controllers/cardController';
 import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
-import { createListOnBoardDb, getListByIdDb, getListsBoardIdDb, getListsByBoardIdOrderDb, getNextListOrderDb, updateListDb, updateListOrderDb } from '@trz-api/persistence/listPersistence';
+import {
+    createListOnBoardDb,
+    getListByIdDb,
+    getListsBoardIdDb,
+    getListsByBoardIdOrderDb,
+    getNextListOrderDb,
+    updateListDb,
+    updateListOrderDb,
+} from '@trz-api/persistence/listPersistence';
 
 //Gets
 
@@ -37,7 +45,10 @@ export async function getAllListsOfBoard(boardID: BoardId, archived: boolean) {
     }
 }
 
-export async function getListAndCardIdsOnBoard(boardID: BoardId, archived: boolean): Promise<{ listId: ListId; cardIds: CardId[] }[]> {
+export async function getListAndCardIdsOnBoard(
+    boardID: BoardId,
+    archived: boolean
+): Promise<{ listId: ListId; cardIds: CardId[] }[]> {
     const listHeaders = await getListsByBoardIdOrderDb(boardID, archived);
     if (listHeaders == null) {
         return [];

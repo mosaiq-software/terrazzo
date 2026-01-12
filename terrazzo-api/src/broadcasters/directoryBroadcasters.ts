@@ -1,4 +1,12 @@
-import { DirectoryHeader, DirectoryId, getRoomCode, RoomSpecifier, RoomType, ServerSE, UID } from '@mosaiq/terrazzo-common';
+import {
+    DirectoryHeader,
+    DirectoryId,
+    getRoomCode,
+    RoomSpecifier,
+    RoomType,
+    ServerSE,
+    UID,
+} from '@mosaiq/terrazzo-common';
 import { getDirectoryContentsForUser } from '@trz-api/controllers/directoryController';
 import { getModuleById } from '@trz-api/controllers/moduleController';
 import { userCanViewDirectory } from '@trz-api/utils/permissions';

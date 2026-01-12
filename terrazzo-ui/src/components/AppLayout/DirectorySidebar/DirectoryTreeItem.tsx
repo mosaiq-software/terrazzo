@@ -23,8 +23,14 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     const { showContextMenu } = useContextMenu();
     const uiCtx = useUI();
     const unsavedCtx = useUnsavedChanges();
-    const contents = useDirectoryContents(props.visible ? props.directoryListItem.id : undefined, props.directoryListItem.type);
-    const [collapsed, setCollapsed, deleteCollapsed] = useLocalStorage<boolean | undefined>({ key: `directory-tree-item-collapsed-${props.directoryListItem.id}`, defaultValue: undefined });
+    const contents = useDirectoryContents(
+        props.visible ? props.directoryListItem.id : undefined,
+        props.directoryListItem.type
+    );
+    const [collapsed, setCollapsed, deleteCollapsed] = useLocalStorage<boolean | undefined>({
+        key: `directory-tree-item-collapsed-${props.directoryListItem.id}`,
+        defaultValue: undefined,
+    });
 
     const selected = location.pathname.includes(props.directoryListItem.id);
 

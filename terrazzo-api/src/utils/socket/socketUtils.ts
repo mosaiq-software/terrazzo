@@ -1,4 +1,19 @@
-import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSEReply, getRoomCode, NonEmptyArray, RoomId, RoomType, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId, UserData, UserId } from '@mosaiq/terrazzo-common';
+import {
+    ClientSE,
+    ClientSEPayload,
+    ClientSEReplies,
+    ClientSEReply,
+    getRoomCode,
+    NonEmptyArray,
+    RoomId,
+    RoomType,
+    ServerSE,
+    ServerSEPayload,
+    SocketHandshakeAuth,
+    SocketId,
+    UserData,
+    UserId,
+} from '@mosaiq/terrazzo-common';
 import { syncUserJoinedRoom, syncUserLeftRoom } from '@trz-api/broadcasters/realtimeBroadcasters';
 import { signInWithExistingAuth } from '@trz-api/controllers/authController';
 import { Socket } from 'socket.io';
@@ -184,7 +199,12 @@ export type SubOptions = {
  * @param cb The callback to execute when the event is received
  * @param options Subscription options
  */
-export const subscribe = <T extends ClientSE>(socket: Socket, toEvent: T, cb: (data: ClientSEPayload[T]) => Promise<ClientSEReplies[T]>, options?: SubOptions) => {
+export const subscribe = <T extends ClientSE>(
+    socket: Socket,
+    toEvent: T,
+    cb: (data: ClientSEPayload[T]) => Promise<ClientSEReplies[T]>,
+    options?: SubOptions
+) => {
     socket.on(toEvent as any, async (data: ClientSEPayload[T], reply: ClientSEReply<T>) => {
         try {
             if (data === undefined && options?.allowEmptyData !== true) {

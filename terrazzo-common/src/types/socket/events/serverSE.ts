@@ -1,4 +1,15 @@
-import { BoardId, CardId, DirectoryId, DocumentId, LabelId, ListId, OrganizationId, RoleId, UserId } from '../../genericTypes';
+import {
+    BoardId,
+    CardId,
+    DirectoryId,
+    DocumentId,
+    LabelId,
+    ListId,
+    OrganizationId,
+    RoleId,
+    TextBlockId,
+    UserId,
+} from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount } from '../../linkedAccountTypes';
 import { BoardHeader, Label } from '../../modules/board/boardTypes';
@@ -9,6 +20,7 @@ import { DocumentHeader } from '../../modules/documentTypes';
 import { ModuleHeader } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
+import { TextBlockSnapshot } from '../../textTypes';
 import { UserHeader } from '../../userTypes';
 import { MouseRoomUserData } from '../roomTypes';
 import { SocketId, UserData } from '../socketTypes';
@@ -45,6 +57,7 @@ export enum ServerSE {
     UPDATE_ORGANIZATION_ROLES = 'UPDATE_ORGANIZATION_ROLES',
     UPDATE_ROLES_FOR_USER_IN_ORG = 'UPDATE_ROLES_FOR_USER_IN_ORG',
     UPDATE_USERS_LINKED_ACCOUNTS = 'UPDATE_USERS_LINKED_ACCOUNTS',
+    UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS = 'UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS',
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -70,13 +83,17 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ServerSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
     [ServerSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
-    [ServerSE.UPDATE_DIRECTORY_CONTENTS]: { directoryId: DirectoryId; contents: (ModuleHeader & { canAccess: boolean })[] };
+    [ServerSE.UPDATE_DIRECTORY_CONTENTS]: {
+        directoryId: DirectoryId;
+        contents: (ModuleHeader & { canAccess: boolean })[];
+    };
     [ServerSE.UPDATE_USERS_ORGANIZATIONS]: { userId: UserId; organizations: OrganizationHeader[] };
     [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: { orgId: OrganizationId; members: Member[] };
     [ServerSE.UPDATE_ORGANIZATION_INVITES]: { orgId: OrganizationId; invites: Invite[] };
     [ServerSE.UPDATE_ORGANIZATION_ROLES]: { orgId: OrganizationId; roles: Role[] };
     [ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
     [ServerSE.UPDATE_USERS_LINKED_ACCOUNTS]: { userId: UserId; linkedAccounts: LinkedAccount[] };
+    [ServerSE.UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS]: { textBlockId: TextBlockId; snapshots: TextBlockSnapshot[] };
 }
 export interface ServerSEReplies {
     // Server to Client req - Client to Server callback
@@ -109,5 +126,6 @@ export interface ServerSEReplies {
     [ServerSE.UPDATE_ORGANIZATION_ROLES]: void;
     [ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG]: void;
     [ServerSE.UPDATE_USERS_LINKED_ACCOUNTS]: void;
+    [ServerSE.UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS]: void;
 }
 export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;

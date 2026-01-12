@@ -23,7 +23,9 @@ export const getUserHeaderByIdDb = async (id: UserId) => {
 };
 
 export const getUserHeaderByUsernameDb = async (username: string) => {
-    const model = await UserModel.findOne({ where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('username')), sequelize.fn('lower', username)) });
+    const model = await UserModel.findOne({
+        where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('username')), sequelize.fn('lower', username)),
+    });
     return model?.toJSON();
 };
 

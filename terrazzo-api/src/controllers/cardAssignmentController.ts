@@ -1,6 +1,10 @@
 import { CardId, UserId } from '@mosaiq/terrazzo-common';
 import { syncUpdateCardAssignee } from '@trz-api/broadcasters';
-import { createCardAssignmentRecordDb, deleteCardAssignmentRecordDb, getCardAssignmentRecordsForUserOnCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
+import {
+    createCardAssignmentRecordDb,
+    deleteCardAssignmentRecordDb,
+    getCardAssignmentRecordsForUserOnCardDb,
+} from '@trz-api/persistence/cardAssignmentPersistence';
 import { getBoardIDFromCardID } from './cardController';
 
 export const addAssigneeToCard = async (cardId: CardId, userId: UserId) => {

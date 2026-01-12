@@ -1,4 +1,13 @@
-import { ClientSE, ClientSEPayload, ClientSEReplies, ClientSocketIOEvent, ServerSE, ServerSEPayload, SocketHandshakeAuth, SocketId } from '@mosaiq/terrazzo-common';
+import {
+    ClientSE,
+    ClientSEPayload,
+    ClientSEReplies,
+    ClientSocketIOEvent,
+    ServerSE,
+    ServerSEPayload,
+    SocketHandshakeAuth,
+    SocketId,
+} from '@mosaiq/terrazzo-common';
 import { NoteType, notify } from '@trz/util/notifications';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
@@ -12,7 +21,10 @@ export type SocketContextType = {
     sid: SocketId | undefined;
     connected: boolean;
     emit<T extends ClientSE>(event: T, payload: ClientSEPayload[T]): Promise<ClientSEReplies[T] | undefined>;
-    volatileEmit: <T extends ClientSE>(event: ClientSE, payload: ClientSEPayload[T]) => Promise<ClientSEReplies[T] | undefined>;
+    volatileEmit: <T extends ClientSE>(
+        event: ClientSE,
+        payload: ClientSEPayload[T]
+    ) => Promise<ClientSEReplies[T] | undefined>;
 };
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);

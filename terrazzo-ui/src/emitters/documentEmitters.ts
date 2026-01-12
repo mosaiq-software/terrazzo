@@ -9,6 +9,10 @@ export const createDocument = async (sockCtx: SocketContextType, title: string, 
     return await sockCtx.emit(ClientSE.CREATE_DOCUMENT, { parentId, title });
 };
 
-export const updateDocumentMetadata = async (sockCtx: SocketContextType, documentId: DocumentId, partial: Partial<DocumentHeader>) => {
+export const updateDocumentMetadata = async (
+    sockCtx: SocketContextType,
+    documentId: DocumentId,
+    partial: Partial<DocumentHeader>
+) => {
     await sockCtx.emit(ClientSE.UPDATE_DOCUMENT_FIELD, { ...partial, id: documentId });
 };

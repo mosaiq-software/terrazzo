@@ -1,6 +1,18 @@
-import { ActionIcon, Box, Button, Center, Group, Loader, Modal, Stack, Text, Tooltip, useCombobox } from '@mantine/core';
+import {
+    ActionIcon,
+    Box,
+    Button,
+    Center,
+    Group,
+    Loader,
+    Modal,
+    Stack,
+    Text,
+    Tooltip,
+    useCombobox,
+} from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { CardId, fullName } from '@mosaiq/terrazzo-common';
+import { CardId, fullName, TextBlockResourceType } from '@mosaiq/terrazzo-common';
 import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
@@ -12,6 +24,7 @@ import { useCard } from '@trz/hooks/useCard';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';
+import { niceDateWithTime } from '@trz/util/dateUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import React from 'react';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
@@ -200,6 +213,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             position: 'relative',
                         }}
                         pb="8rem"
+                        gap={'lg'}
                     >
                         <Group>
                             <PriorityButtons
@@ -235,7 +249,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             textBlockId={card.descriptionTextBlockId}
                             placeholder="Start writing a description or hit '/' for commands..."
                             viewOnly={!perms.editCard}
-                            resourceType="card"
+                            resourceType={TextBlockResourceType.Card}
                             resourceId={card.id}
                         />
                         <Stack
@@ -244,8 +258,11 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                 bottom: 0,
                             }}
                         >
-                            <Text>
-                                Created at {new Date(card.createdAt).toLocaleString()} by {fullName(card.createdBy)}
+                            <Text
+                                c="dimmed"
+                                fz="sm"
+                            >
+                                Created at {niceDateWithTime(card.createdAt)} by {fullName(card.createdBy)}
                             </Text>
                             {perms?.editCard && (
                                 <RectHoldingButton

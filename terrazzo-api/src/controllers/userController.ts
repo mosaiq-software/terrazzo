@@ -1,7 +1,20 @@
-import { BoardId, generateUsernameDiscriminator, List, MembershipRecord, OrganizationId, UserHeader, UserId } from '@mosaiq/terrazzo-common';
+import {
+    BoardId,
+    generateUsernameDiscriminator,
+    List,
+    MembershipRecord,
+    OrganizationId,
+    UserHeader,
+    UserId,
+} from '@mosaiq/terrazzo-common';
 import { syncUpdateUserField } from '@trz-api/broadcasters';
 import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
-import { createUserHeaderDb, getUserHeaderByIdDb, getUserHeaderByUsernameDb, updateUserHeaderDb } from '@trz-api/persistence/userPersistence';
+import {
+    createUserHeaderDb,
+    getUserHeaderByIdDb,
+    getUserHeaderByUsernameDb,
+    updateUserHeaderDb,
+} from '@trz-api/persistence/userPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
 import { addBoard } from './boardController';
 import { addCard } from './cardController';
@@ -57,7 +70,10 @@ const seedNewUserProfile = async (userId: UserId) => {
             joinedAt: Date.now(),
         };
         await createOrganizationMembershipDb(orgMembershipRecord);
-        await updateOrganizationFromPartial(personalOrgId, { logoUrl: user.profilePicture, description: 'A place to keep your personal projects' });
+        await updateOrganizationFromPartial(personalOrgId, {
+            logoUrl: user.profilePicture,
+            description: 'A place to keep your personal projects',
+        });
         const personalBoardId: BoardId = await addBoard('Task Tracking', '', personalOrgId);
         const personalListTodo: List = await addList(personalBoardId, 'To do');
         const personalListDoing: List = await addList(personalBoardId, 'Doing');
@@ -103,7 +119,18 @@ export const DEV_upsertFakeUser = async (username: string): Promise<UserHeader> 
     if (!user) {
         const randomId = crypto.randomUUID();
         const firstNames = ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Heidi', 'Ivan', 'Judy'];
-        const lastNames = ['Anderson', 'Brown', 'Clark', 'Davis', 'Evans', 'Franklin', 'Garcia', 'Harris', 'Ivanov', 'Johnson'];
+        const lastNames = [
+            'Anderson',
+            'Brown',
+            'Clark',
+            'Davis',
+            'Evans',
+            'Franklin',
+            'Garcia',
+            'Harris',
+            'Ivanov',
+            'Johnson',
+        ];
         const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
         const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
         const profilePicture = `https://i.pravatar.cc/150?u=${randomId}`;

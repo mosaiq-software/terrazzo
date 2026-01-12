@@ -75,7 +75,12 @@ export const deleteLinkedAccountDb = async (provider: LinkedAccountProvider, acc
     return deleted;
 };
 
-export const updateLinkedAccountDb = async (provider: LinkedAccountProvider, accountId: string, userId: UserId, updates: Partial<LinkedAccount>) => {
+export const updateLinkedAccountDb = async (
+    provider: LinkedAccountProvider,
+    accountId: string,
+    userId: UserId,
+    updates: Partial<LinkedAccount>
+) => {
     const [updatedCount] = await LinkedAccountModel.update(updates, { where: { provider, accountId, userId } });
     return updatedCount;
 };

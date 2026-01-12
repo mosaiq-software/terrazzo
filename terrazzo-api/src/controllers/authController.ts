@@ -1,5 +1,20 @@
-import { AuthProvider, AuthProviderCallbackData, AuthSession, breakNames, exhaustiveCheck, ExistingAuthToken, LinkedAccountProvider, UserId, UserIdWithAuth } from '@mosaiq/terrazzo-common';
-import { createAuthSessionDb, deleteAuthSessionByUserIdDb, getAuthSessionByAuthTokenDb, getAuthSessionByUserIdDb } from '@trz-api/persistence/authSessionPersistence';
+import {
+    AuthProvider,
+    AuthProviderCallbackData,
+    AuthSession,
+    breakNames,
+    exhaustiveCheck,
+    ExistingAuthToken,
+    LinkedAccountProvider,
+    UserId,
+    UserIdWithAuth,
+} from '@mosaiq/terrazzo-common';
+import {
+    createAuthSessionDb,
+    deleteAuthSessionByUserIdDb,
+    getAuthSessionByAuthTokenDb,
+    getAuthSessionByUserIdDb,
+} from '@trz-api/persistence/authSessionPersistence';
 import { getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccountPersistence';
 import { generateAuthToken } from '@trz-api/utils/authUtils';
 import { isDev } from '@trz-api/utils/envUtils';
@@ -66,7 +81,9 @@ export const signInWithExistingAuth = async (existingAuth: ExistingAuthToken): P
  * Handles the auth provider callback and returns an auth session
  * Delegates to specific provider handlers based on the provider type
  */
-export const handleAuthProviderCallback = async (providerData: AuthProviderCallbackData): Promise<AuthSession | undefined | 'already-linked'> => {
+export const handleAuthProviderCallback = async (
+    providerData: AuthProviderCallbackData
+): Promise<AuthSession | undefined | 'already-linked'> => {
     switch (providerData.provider) {
         case AuthProvider.Github:
             return handleGithubAuth(providerData.code, providerData.accessToken, providerData.auth);
@@ -83,7 +100,10 @@ export const handleAuthProviderCallback = async (providerData: AuthProviderCallb
  * @param username The dev username
  * @param auth Optional existing user auth to link the DEV account to
  */
-const handleDevAuth = async (username: string, auth?: UserIdWithAuth): Promise<AuthSession | undefined | 'already-linked'> => {
+const handleDevAuth = async (
+    username: string,
+    auth?: UserIdWithAuth
+): Promise<AuthSession | undefined | 'already-linked'> => {
     if (!isDev()) {
         console.warn('Attempted to handle DEV auth callback in non-dev environment');
         return undefined;
@@ -101,7 +121,9 @@ const handleDevAuth = async (username: string, auth?: UserIdWithAuth): Promise<A
                 privateAccountData: {},
             });
         } else {
-            throw new Error(`DEV users must have a linked account to sign in. No linked account found for username: ${username}`);
+            throw new Error(
+                `DEV users must have a linked account to sign in. No linked account found for username: ${username}`
+            );
         }
     }
 
@@ -120,7 +142,11 @@ const handleDevAuth = async (username: string, auth?: UserIdWithAuth): Promise<A
  * @param accessToken the GitHub access token
  * @param auth Optional existing user auth to link the GitHub account to
  */
-const handleGithubAuth = async (code: string | undefined, accessToken: string | undefined, auth?: UserIdWithAuth): Promise<AuthSession | undefined | 'already-linked'> => {
+const handleGithubAuth = async (
+    code: string | undefined,
+    accessToken: string | undefined,
+    auth?: UserIdWithAuth
+): Promise<AuthSession | undefined | 'already-linked'> => {
     let githubAuthToken = accessToken;
     if (!githubAuthToken) {
         if (!code) {

@@ -1,4 +1,5 @@
 import { UID, UserId } from '../genericTypes';
+import { TextBlockResourceType } from '../textTypes';
 import { MouseRoomUserData } from './roomTypes';
 
 export type SocketId = string;
@@ -16,8 +17,6 @@ export interface SocketHandshakeAuth {
 }
 
 export interface TextSocketHandshakeAuth extends SocketHandshakeAuth {
-    resource: {
-        id: UID;
-        type: 'card' | 'document';
-    };
+    resourceId: UID;
+    resourceType: TextBlockResourceType;
 }

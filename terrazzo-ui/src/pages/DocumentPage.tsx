@@ -1,5 +1,5 @@
 import { Box, Group, Loader, ScrollArea, Stack, Text } from '@mantine/core';
-import { DocumentId, fullName, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { DocumentId, fullName, PermissibleAction, TextBlockResourceType } from '@mosaiq/terrazzo-common';
 import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
@@ -9,6 +9,7 @@ import { updateDocumentMetadata } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useDocument } from '@trz/hooks/useDocument';
 import { useModulePermission } from '@trz/hooks/usePermissions';
+import { niceDateWithTime } from '@trz/util/dateUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { useEffect } from 'react';
@@ -113,7 +114,7 @@ const DocumentPage = (): React.JSX.Element => {
                             textBlockId={document.textBlockId}
                             placeholder="Start writing your document or hit '/' for commands..."
                             viewOnly={!userCanEditDocument}
-                            resourceType="document"
+                            resourceType={TextBlockResourceType.Document}
                             resourceId={document.id}
                         />
                         <Group
@@ -124,7 +125,7 @@ const DocumentPage = (): React.JSX.Element => {
                                 c="dimmed"
                                 fz="sm"
                             >
-                                Created {new Date(document.createdAt).toLocaleString()}
+                                Created {niceDateWithTime(document.createdAt)}
                                 {lastEditor ? ` by ${fullName(lastEditor)}` : ''}
                                 {/*
                                     Last editor is currently stuck as the user who created the document.

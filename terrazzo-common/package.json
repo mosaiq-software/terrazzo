@@ -11,7 +11,10 @@
         "lint": "eslint .",
         "types": "tsc --noemit",
         "update": "git fetch origin develop && git merge origin/develop",
-        "publish:prod": "npm ci && npm run build && npm publish ./dist"
+        "publish:prod": "npm ci && npm run build && npm publish ./dist",
+        "test": "echo \"No tests specified\" && exit 0",
+        "test:watch": "echo \"No tests specified\" && exit 0",
+        "test:coverage": "echo \"No tests specified\" && exit 0"
     },
     "publishConfig": {
         "registry": "https://registry.mosaiq.dev"

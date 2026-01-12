@@ -32,7 +32,10 @@ export const MembersPanel = (props: MembersPanelProps) => {
         [props.orgData.id, props.userCanAdmin, sockCtx]
     );
 
-    const orgOwner = useMemo(() => props.members.find((m) => m.userId === props.orgData.ownerId), [props.members, props.orgData.ownerId]);
+    const orgOwner = useMemo(
+        () => props.members.find((m) => m.userId === props.orgData.ownerId),
+        [props.members, props.orgData.ownerId]
+    );
 
     const otherMembersSorted = useMemo(() => {
         return props.members.filter((m) => m.userId !== props.orgData.ownerId).sort((a, b) => a.joinedAt - b.joinedAt);

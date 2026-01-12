@@ -1,5 +1,11 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { addList, getBoardIDFromListID, getListRes, moveList, updateListFromPartial } from '@trz-api/controllers/listController';
+import {
+    addList,
+    getBoardIDFromListID,
+    getListRes,
+    moveList,
+    updateListFromPartial,
+} from '@trz-api/controllers/listController';
 import { userCanEditBoard, userCanViewBoard } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';

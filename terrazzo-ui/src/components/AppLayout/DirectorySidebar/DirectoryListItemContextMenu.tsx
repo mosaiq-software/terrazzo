@@ -26,9 +26,18 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
     const userCanCreateDocuments = useModulePermission(props.moduleHeader, PermissibleAction.CreateDocument);
     const userCanCreateDirectories = useModulePermission(props.moduleHeader, PermissibleAction.CreateDirectory);
 
-    const userCanCreateBoardsOrg = useOrgPermission(props.isRoot ? props.parentId : undefined, PermissibleAction.CreateBoard);
-    const userCanCreateDocumentsOrg = useOrgPermission(props.isRoot ? props.parentId : undefined, PermissibleAction.CreateDocument);
-    const userCanCreateDirectoriesOrg = useOrgPermission(props.isRoot ? props.parentId : undefined, PermissibleAction.CreateDirectory);
+    const userCanCreateBoardsOrg = useOrgPermission(
+        props.isRoot ? props.parentId : undefined,
+        PermissibleAction.CreateBoard
+    );
+    const userCanCreateDocumentsOrg = useOrgPermission(
+        props.isRoot ? props.parentId : undefined,
+        PermissibleAction.CreateDocument
+    );
+    const userCanCreateDirectoriesOrg = useOrgPermission(
+        props.isRoot ? props.parentId : undefined,
+        PermissibleAction.CreateDirectory
+    );
 
     const creationMenuItems: { id: TrzModuleType; label: string }[] = useMemo(() => {
         const items: { id: TrzModuleType; label: string }[] = [];
@@ -42,7 +51,14 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
             items.push({ id: TrzModuleType.Document, label: 'Document' });
         }
         return items;
-    }, [userCanCreateBoards, userCanCreateDocuments, userCanCreateDirectories, userCanCreateBoardsOrg, userCanCreateDocumentsOrg, userCanCreateDirectoriesOrg]);
+    }, [
+        userCanCreateBoards,
+        userCanCreateDocuments,
+        userCanCreateDirectories,
+        userCanCreateBoardsOrg,
+        userCanCreateDocumentsOrg,
+        userCanCreateDirectoriesOrg,
+    ]);
 
     const showCreateOptions = creationMenuItems.length > 0;
     const showEditOptions = !!props.moduleHeader;
@@ -104,7 +120,9 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
                     }}
                 />
             )}
-            {!showCreateOptions && !showEditOptions && <div style={{ padding: '8px', color: '#888' }}>No actions available</div>}
+            {!showCreateOptions && !showEditOptions && (
+                <div style={{ padding: '8px', color: '#888' }}>No actions available</div>
+            )}
         </ContextMenuLayout>
     );
 };

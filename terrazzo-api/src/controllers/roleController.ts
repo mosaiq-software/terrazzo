@@ -1,7 +1,13 @@
 import { getMaxUserRole, OrganizationId, PermissionFlag, Role, RoleId, UserId } from '@mosaiq/terrazzo-common';
 import { syncRolesForUserInOrg, syncUpdateOrganizationRoles } from '@trz-api/broadcasters';
 import { getRoleIdsForUserInOrgDb, setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
-import { createRoleOnOrgDb, deleteRoleDb, getNextRoleOrderDb, getRolesByOrgIdDb, updateRoleDb } from '@trz-api/persistence/rolePersistence';
+import {
+    createRoleOnOrgDb,
+    deleteRoleDb,
+    getNextRoleOrderDb,
+    getRolesByOrgIdDb,
+    updateRoleDb,
+} from '@trz-api/persistence/rolePersistence';
 import { SocketManager } from '@trz-api/utils/socket/socketManager';
 import { userIsOrgOwner } from './organizationController';
 
@@ -9,7 +15,12 @@ export const getRolesForOrg = async (orgId: OrganizationId) => {
     return await getRolesByOrgIdDb(orgId);
 };
 
-export const createRole = async (name: string, color: string, orgId: OrganizationId, defaultPermissions: PermissionFlag[] = []) => {
+export const createRole = async (
+    name: string,
+    color: string,
+    orgId: OrganizationId,
+    defaultPermissions: PermissionFlag[] = []
+) => {
     const nextOrder = await getNextRoleOrderDb(orgId);
     const role: Role = {
         id: crypto.randomUUID(),
@@ -66,7 +77,12 @@ export const deleteRole = async (role: Role, deletedBy: UserId) => {
     await syncUpdateOrganizationRoles(role.orgId, roles);
 };
 
-export const validateUserCanAssignRoles = async (assigningToUserId: UserId, inOrgId: OrganizationId, roleIdsToAssign: RoleId[], assignedByUserId: UserId) => {
+export const validateUserCanAssignRoles = async (
+    assigningToUserId: UserId,
+    inOrgId: OrganizationId,
+    roleIdsToAssign: RoleId[],
+    assignedByUserId: UserId
+) => {
     const assignedByUserRoles = await getUserRolesInOrg(assignedByUserId, inOrgId);
     const maxAssignedByUserRole = getMaxUserRole(assignedByUserRoles);
     const rolesToAssign = await getSpecificRolesInOrg(roleIdsToAssign, inOrgId);
@@ -84,7 +100,11 @@ export const validateUserCanAssignRoles = async (assigningToUserId: UserId, inOr
  * @param roleB - The role being managed.
  * @returns Whether roleA can manage roleB.
  */
-export const roleACanManageRoleB = (roleA: Role | undefined, roleB: Role | undefined, roleAIsOrgOwner: boolean): boolean => {
+export const roleACanManageRoleB = (
+    roleA: Role | undefined,
+    roleB: Role | undefined,
+    roleAIsOrgOwner: boolean
+): boolean => {
     if (roleAIsOrgOwner) {
         // If the user is the org owner, they can manage any role
         return true;
@@ -100,7 +120,12 @@ export const roleACanManageRoleB = (roleA: Role | undefined, roleB: Role | undef
     return roleB.order >= roleA.order;
 };
 
-export const setRolesForUserInOrg = async (userId: UserId, orgId: OrganizationId, roleIds: RoleId[], assignedByUserId: UserId) => {
+export const setRolesForUserInOrg = async (
+    userId: UserId,
+    orgId: OrganizationId,
+    roleIds: RoleId[],
+    assignedByUserId: UserId
+) => {
     await validateUserCanAssignRoles(userId, orgId, roleIds, assignedByUserId);
     await setRoleIdsForUserInOrgDb(userId, orgId, roleIds);
     await syncRolesForUserInOrg(userId, orgId);

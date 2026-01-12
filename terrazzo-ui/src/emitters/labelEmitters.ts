@@ -1,7 +1,12 @@
 import { BoardId, CardId, ClientSE, Label, LabelId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
-export const createBoardLabel = async (sockCtx: SocketContextType, boardId: BoardId, name: string, color: string): Promise<LabelId | undefined> => {
+export const createBoardLabel = async (
+    sockCtx: SocketContextType,
+    boardId: BoardId,
+    name: string,
+    color: string
+): Promise<LabelId | undefined> => {
     return await sockCtx.emit(ClientSE.CREATE_BOARD_LABEL, { boardId, name, color });
 };
 

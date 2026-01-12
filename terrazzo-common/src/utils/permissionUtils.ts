@@ -27,7 +27,10 @@ export const withPermissionFlag = (existing: PermissionFlag[] | undefined, flag:
  * @param lowerPrecedence - The OverridePermissions with lower precedence.
  * @param higherPrecedence - The OverridePermissions with higher precedence.
  */
-export const combinePermissions = (lowerPrecedence: OverridePermissions | undefined, higherPrecedence: OverridePermissions | undefined): OverridePermissions => {
+export const combinePermissions = (
+    lowerPrecedence: OverridePermissions | undefined,
+    higherPrecedence: OverridePermissions | undefined
+): OverridePermissions => {
     const effective: OverridePermissions = { ...(lowerPrecedence ?? {}), ...(higherPrecedence ?? {}) };
     return effective;
 };
@@ -37,7 +40,10 @@ export const combinePermissions = (lowerPrecedence: OverridePermissions | undefi
  * @param permissionsList - The list of OverridePermissions to combine
  * @param order - "first-priority" means earlier items in the list take precedence, "last-priority" means later items take precedence
  */
-export const combineOrderedPermissionsList = (permissionsList: OverridePermissions[], order: 'first-priority' | 'last-priority'): OverridePermissions => {
+export const combineOrderedPermissionsList = (
+    permissionsList: OverridePermissions[],
+    order: 'first-priority' | 'last-priority'
+): OverridePermissions => {
     if (permissionsList.length === 0) {
         return {};
     }
@@ -57,7 +63,10 @@ export const combineOrderedPermissionsList = (permissionsList: OverridePermissio
  * @param childPermissions - The desired permissions for any role on the child module.
  * @returns The effective permissions for all roles on the child module.
  */
-export const calculateModuleEffectivePermissions = (parentPermissions: ModulePermissions | undefined, childPermissions: ModulePermissions): ModulePermissions => {
+export const calculateModuleEffectivePermissions = (
+    parentPermissions: ModulePermissions | undefined,
+    childPermissions: ModulePermissions
+): ModulePermissions => {
     const effectivePermissions: ModulePermissions = {};
     const parentRoleIds = recordKeys(parentPermissions ?? {});
     const childRoleIds = recordKeys(childPermissions);
@@ -76,7 +85,10 @@ export const calculateModuleEffectivePermissions = (parentPermissions: ModulePer
  * @param orgDefaultPermissions - The default permissions for each role in the organization.
  * @returns The true permissions for each role on the module within the organization.
  */
-export const calculateTrueModulePermissionsInOrg = (moduleEffectivePermissions: ModulePermissions, orgRoles: Role[]): ModulePermissions => {
+export const calculateTrueModulePermissionsInOrg = (
+    moduleEffectivePermissions: ModulePermissions,
+    orgRoles: Role[]
+): ModulePermissions => {
     const orgDefaultPermissions = mapRolesToPermissions(orgRoles);
     const truePermissions: ModulePermissions = {};
     const allRoleIds = recordKeys(orgDefaultPermissions);
@@ -114,7 +126,11 @@ export const getPermissionFlagsFromOverrides = (overrides: OverridePermissions):
  * @param effectivePermissions - The ModulePermissions representing the effective permissions on the module.
  * @returns The list of PermissionFlags that are granted to the given roles.
  */
-export const evaluatePermissionForRoles = (roles: RoleId[], effectivePermissions: ModulePermissions, isOwner?: boolean): PermissionFlag[] => {
+export const evaluatePermissionForRoles = (
+    roles: RoleId[],
+    effectivePermissions: ModulePermissions,
+    isOwner?: boolean
+): PermissionFlag[] => {
     const grantedFlags = new Set<PermissionFlag>();
     for (const roleId of roles) {
         const roleOverrides = effectivePermissions[roleId];
@@ -138,7 +154,10 @@ export const evaluatePermissionForRoles = (roles: RoleId[], effectivePermissions
  * Can be thought of as: [[A and B] or [C and D] or ...]
  * @returns True if any inner array of required flags is fully met by the granted flags, false otherwise.
  */
-export const meetsRequirementsForPermissibleAction = (grantedFlags: PermissionFlag[], permissibleAction: PermissibleAction): boolean => {
+export const meetsRequirementsForPermissibleAction = (
+    grantedFlags: PermissionFlag[],
+    permissibleAction: PermissibleAction
+): boolean => {
     const requirementsGroup = PermissibleActionRequirements[permissibleAction];
     for (const requiredFlagGroup of requirementsGroup) {
         const groupMet = requiredFlagGroup.every((flag) => grantedFlags.includes(flag));
@@ -155,7 +174,11 @@ export const meetsRequirementsForPermissibleAction = (grantedFlags: PermissionFl
  * @param orgDefaultPermissions - The default permissions for each role in the organization.
  * @returns The list of PermissionFlags that are granted to the given roles.
  */
-export const evaluateOrganizationPermissionForRoles = (roleIds: RoleId[], orgRoles: Role[], isOwner?: boolean): PermissionFlag[] => {
+export const evaluateOrganizationPermissionForRoles = (
+    roleIds: RoleId[],
+    orgRoles: Role[],
+    isOwner?: boolean
+): PermissionFlag[] => {
     const orgDefaultPermissions = mapRolesToPermissions(orgRoles);
     const grantedFlags = new Set<PermissionFlag>();
     for (const roleId of roleIds) {
