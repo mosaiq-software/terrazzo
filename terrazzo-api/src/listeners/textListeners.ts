@@ -32,7 +32,7 @@ export const registerTextListeners = (socket: Socket) => {
         if (!authorizedTextBlockId) {
             throw new Error(`User does not have permission to restore text block history snapshots`);
         }
-        await restoreTextBlockSnapshot(snapshotId);
+        await restoreTextBlockSnapshot(snapshotId, resourceId, resourceType);
         return true;
     });
 };

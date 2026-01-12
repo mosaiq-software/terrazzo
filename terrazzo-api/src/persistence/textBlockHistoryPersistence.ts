@@ -12,6 +12,7 @@ TextBlockHistoryModel.init(
         textBlockId: DataTypes.STRING,
         timestamp: DataTypes.NUMBER,
         content: DataTypes.TEXT,
+        tags: DataTypes.JSON,
     },
     { sequelize, timestamps: false }
 );

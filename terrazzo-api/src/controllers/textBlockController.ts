@@ -109,13 +109,15 @@ export const createTextBlockHistorySnapshot = async (
     textBlockId: TextBlockId,
     resourceId: UID,
     resourceType: TextBlockResourceType,
-    content: string
+    content: string,
+    tags?: string[]
 ): Promise<void> => {
     const snapshot: TextBlockSnapshot = {
         snapshotId: crypto.randomUUID(),
         textBlockId: textBlockId,
         timestamp: Date.now(),
         content,
+        tags,
     };
     await createTextBlockHistorySnapshotDb(snapshot);
     await reduceSnapshotsForTextBlock(textBlockId);
@@ -292,7 +294,7 @@ const processSnapshotBucket = (
         const snapshot = snapshots[i];
         const timeSinceLast = lastTimestamp - snapshot.timestamp;
 
-        if (timeSinceLast >= intervalMs) {
+        if (timeSinceLast >= intervalMs || snapshot.tags?.length) {
             // Keep this snapshot - sufficient time has passed
             lastTimestamp = snapshot.timestamp;
         } else {
@@ -307,24 +309,52 @@ const processSnapshotBucket = (
 
 export const determineSnapshotsToDelete = (
     snapshots: TextBlockSnapshot[],
-    currentTime: number = Date.now()
+    currentTime: number = Date.now(),
+    textBlockType: TextBlockType = TextBlockType.BlockNote
 ): Set<UID> => {
     const snapshotsToDelete = new Set<UID>();
 
     // Remove duplicates or empty content
     const filteredSnapshots: TextBlockSnapshot[] = [];
     const seenTimestamps = new Set<number>();
+    let lastSeenSnapshot: TextBlockSnapshot | null = null;
     for (const snapshot of snapshots) {
-        if (!snapshot.content || snapshot.content.length === 0) {
+        // Delete empty content snapshots
+        if (
+            !snapshot.content ||
+            snapshot.content.length === 0 ||
+            (textBlockType === TextBlockType.BlockNote && snapshot.content === '[]')
+        ) {
             snapshotsToDelete.add(snapshot.snapshotId);
             continue;
         }
+
+        // Delete duplicate timestamp snapshots
         if (seenTimestamps.has(snapshot.timestamp)) {
             snapshotsToDelete.add(snapshot.snapshotId);
-        } else {
-            seenTimestamps.add(snapshot.timestamp);
-            filteredSnapshots.push(snapshot);
+            continue;
         }
+        seenTimestamps.add(snapshot.timestamp);
+
+        // Delete consecutive duplicate content snapshots
+        // Prioritize deleting snapshots without tags if content is the same
+        if (lastSeenSnapshot !== null && snapshot.content === lastSeenSnapshot.content) {
+            const thisSnapHasTags = snapshot.tags && snapshot.tags.length > 0;
+            const lastSnapHasTags = lastSeenSnapshot.tags && lastSeenSnapshot.tags.length > 0;
+            if (!lastSnapHasTags && thisSnapHasTags) {
+                snapshotsToDelete.add(lastSeenSnapshot.snapshotId);
+                filteredSnapshots.pop();
+            } else if (!thisSnapHasTags && lastSnapHasTags) {
+                snapshotsToDelete.add(snapshot.snapshotId);
+            } else if (!thisSnapHasTags && !lastSnapHasTags) {
+                snapshotsToDelete.add(snapshot.snapshotId);
+            }
+            lastSeenSnapshot = snapshot;
+            continue;
+        }
+        lastSeenSnapshot = snapshot;
+
+        filteredSnapshots.push(snapshot);
     }
 
     if (filteredSnapshots.length <= 1) {
@@ -363,10 +393,12 @@ export const determineSnapshotsToDelete = (
 
 const reduceSnapshotsForTextBlock = async (textBlockId: TextBlockId) => {
     try {
-        // Get all snapshots (returns DESC order from DB)
+        const textBlock = await getTextBlockByIdDb(textBlockId);
+        if (!textBlock) {
+            throw new Error(`Text block ${textBlockId} not found`);
+        }
         const snapshots = await getTextBlockHistorySnapshotsForTextBlockDb(textBlockId);
-
-        const snapshotsToDelete = determineSnapshotsToDelete(snapshots);
+        const snapshotsToDelete = determineSnapshotsToDelete(snapshots, Date.now(), textBlock.type);
 
         // Execute deletions
         if (snapshotsToDelete.size > 0) {
@@ -383,7 +415,11 @@ const reduceSnapshotsForTextBlock = async (textBlockId: TextBlockId) => {
     }
 };
 
-export const restoreTextBlockSnapshot = async (snapshotId: UID): Promise<void> => {
+export const restoreTextBlockSnapshot = async (
+    snapshotId: UID,
+    resourceId: UID,
+    resourceType: TextBlockResourceType
+): Promise<void> => {
     try {
         const snapshot = await getTextBlockHistorySnapshotDb(snapshotId);
         if (!snapshot) {
@@ -393,8 +429,9 @@ export const restoreTextBlockSnapshot = async (snapshotId: UID): Promise<void> =
         if (!textBlock) {
             throw new Error(`Text block ${snapshot.textBlockId} not found`);
         }
-
+        await createTextBlockHistorySnapshot(textBlock.id, resourceId, resourceType, textBlock.text, ['Pre-Restore']);
         await updateTextBlockDb(textBlock.id, { text: snapshot.content });
+        await createTextBlockHistorySnapshot(textBlock.id, resourceId, resourceType, snapshot.content, ['Restored']);
         const ydoc = await loadTextBlockEncodedData(textBlock.id);
         if (!ydoc) {
             throw new Error(`Failed to load YDoc for text block ${textBlock.id} during snapshot restore`);

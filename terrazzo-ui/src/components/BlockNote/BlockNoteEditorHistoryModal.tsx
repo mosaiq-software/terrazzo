@@ -1,5 +1,5 @@
 import { Block } from '@blocknote/core';
-import { Button, Center, Divider, Group, Loader, Modal, ScrollArea, Stack, Text } from '@mantine/core';
+import { Button, Center, Divider, Group, Loader, Modal, Pill, ScrollArea, Stack, Text } from '@mantine/core';
 import { TextBlockId, TextBlockResourceType, TextBlockSnapshot, UID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { restoreTextBlockSnapshot } from '@trz/emitters';
@@ -142,7 +142,28 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                                                     }
                                                 }}
                                             >
-                                                <Text>{new Date(snapshot.timestamp).toLocaleString()}</Text>
+                                                <Text>
+                                                    {new Date(snapshot.timestamp).toLocaleString(undefined, {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        hour: 'numeric',
+                                                        minute: 'numeric',
+                                                    })}
+                                                </Text>
+                                                <Group>
+                                                    {snapshot.tags &&
+                                                        snapshot.tags.map((tag) => (
+                                                            <Pill
+                                                                key={tag}
+                                                                size="xs"
+                                                                variant="filled"
+                                                                color="blue"
+                                                            >
+                                                                <Text size="xs">{tag}</Text>
+                                                            </Pill>
+                                                        ))}
+                                                </Group>
                                                 <RectHoldingButton
                                                     variant="outline"
                                                     durationMs={2000}

@@ -17,11 +17,18 @@ import { describe, expect, it } from 'vitest';
 import { determineSnapshotsToDelete } from './textBlockController';
 
 describe('determineSnapshotsToDelete', () => {
-    const createSnapshot = (id: UID, msAgo: number, now: number, content?: string): TextBlockSnapshot => ({
+    const createSnapshot = (
+        id: UID,
+        msAgo: number,
+        now: number,
+        content?: string,
+        tags?: string[]
+    ): TextBlockSnapshot => ({
         snapshotId: id,
         textBlockId: UID0,
         timestamp: now - msAgo,
         content: content ?? `content-${id}`,
+        tags,
     });
 
     it('should return empty set for empty snapshot list', () => {
@@ -141,5 +148,53 @@ describe('determineSnapshotsToDelete', () => {
         expect(result.has(UID2)).toBe(true);
         expect(result.has(UID3)).toBe(true);
         expect(result.has(UID5)).toBe(true);
+    });
+
+    it('should not delete tagged snapshots', () => {
+        const snapshots = [
+            // bucket 1 - all reducibles within 30 mins
+            createSnapshot(UID1, minutesMs(80), fixedTimestamp()), // reducible, keep
+            createSnapshot(UID2, minutesMs(81), fixedTimestamp()), // reducible, delete
+            // bucket 2 - mix of reducible and non-reducibles within 30 mins
+            createSnapshot(UID3, minutesMs(82), fixedTimestamp(), undefined, ['tagged']), // non-reducible, keep
+            createSnapshot(UID4, minutesMs(83), fixedTimestamp()), // reducible, delete
+            // bucket 3 - all non-reducibles within 30 mins
+            createSnapshot(UID5, minutesMs(201), fixedTimestamp(), undefined, ['tagged']), // non-reducible, keep
+            createSnapshot(UID6, minutesMs(202), fixedTimestamp(), undefined, ['tagged']), // non-reducible, keep
+        ];
+        const result = determineSnapshotsToDelete(snapshots, fixedTimestamp());
+        expect(result.size).toBe(2);
+        expect(result.has(UID2)).toBe(true);
+        expect(result.has(UID4)).toBe(true);
+    });
+
+    it('should reduce consecutive reducible snapshots with identical content', () => {
+        const snapshots = [
+            createSnapshot(UID1, hoursMs(1), fixedTimestamp(), 'same content'), // keep
+            createSnapshot(UID2, hoursMs(2), fixedTimestamp(), 'same content'), // delete
+            createSnapshot(UID3, hoursMs(3), fixedTimestamp(), 'same content'), // delete
+            createSnapshot(UID4, hoursMs(4), fixedTimestamp(), 'different content'), // keep
+            createSnapshot(UID5, hoursMs(5), fixedTimestamp(), 'different content'), // delete
+            createSnapshot(UID6, hoursMs(6), fixedTimestamp(), 'same content'), // keep
+        ];
+        const result = determineSnapshotsToDelete(snapshots, fixedTimestamp());
+        expect(result.size).toBe(3);
+        expect(result.has(UID2)).toBe(true);
+        expect(result.has(UID3)).toBe(true);
+        expect(result.has(UID5)).toBe(true);
+    });
+
+    it('should prioritize keeping tagged snapshots when there is identical content', () => {
+        const snapshots = [
+            createSnapshot(UID1, hoursMs(1), fixedTimestamp(), 'same content'), // delete
+            createSnapshot(UID2, hoursMs(2), fixedTimestamp(), 'same content', ['tagged']), // keep
+            createSnapshot(UID3, hoursMs(3), fixedTimestamp(), 'same content'), // delete
+            createSnapshot(UID4, hoursMs(4), fixedTimestamp(), 'content 2', ['tagged']), // keep
+            createSnapshot(UID5, hoursMs(5), fixedTimestamp(), 'content 2', ['tagged']), //keep
+        ];
+        const result = determineSnapshotsToDelete(snapshots, fixedTimestamp());
+        expect(result.size).toBe(2);
+        expect(result.has(UID1)).toBe(true);
+        expect(result.has(UID3)).toBe(true);
     });
 });

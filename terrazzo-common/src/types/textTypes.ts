@@ -24,6 +24,7 @@ export interface TextBlockSnapshot {
     timestamp: number;
     /** Full content of the text block at this snapshot */
     content: string;
+    tags?: string[];
 }
 
 export interface UploadedFile {
