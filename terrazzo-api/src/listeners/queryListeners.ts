@@ -9,7 +9,7 @@ export const registerQueryListeners = (socket: Socket) => {
         if (!socketData.user?.userId) {
             throw new Error('User not authenticated');
         }
-        const results = await executeQueryForUser(socketData.user.userId, data.query, data.searchSessionId);
+        const results = await executeQueryForUser(socketData.user.userId, data.orgId, data.query, data.searchSessionId);
         return { results };
     });
 };
