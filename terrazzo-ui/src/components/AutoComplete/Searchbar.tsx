@@ -83,12 +83,16 @@ export function SearchBar() {
         }
     };
 
+    if (!orgCtx.active) {
+        return null;
+    }
+
     return (
         <>
             <TextInput
                 onClick={startNewSearchSession}
                 readOnly
-                value="Search"
+                value={`Search ${orgCtx.active.name}...`}
                 rightSection={
                     <Text
                         span
@@ -112,13 +116,11 @@ export function SearchBar() {
                                 setSearchQuery(e.currentTarget.value);
                                 debouncedSearch();
                             }}
-                            placeholder="Start typing..."
+                            placeholder={`Search ${orgCtx.active.name}...`}
                             autoFocus
                             onKeyDown={handleKeyDown}
                         />
-                        {searchQuery.trim().length === 0 ? (
-                            <Text mt="md">Search all your boards and cards</Text>
-                        ) : (
+                        {searchQuery.trim().length === 0 ? null : (
                             <Stack>
                                 {searchResults.length === 0 ? <Text>No results found</Text> : null}
                                 <Divider />
