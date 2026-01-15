@@ -23,7 +23,7 @@ export const COLORS = {
     foreground: {
         dark: '#303138',
         medium: '#43444e',
-        light: '#43444e',
+        light: '#6d6e7c',
     },
     text: {
         primary: '#ffffff',
@@ -35,6 +35,7 @@ export const COLORS = {
     divider: '#454547',
     transparent: 'transparent',
     overlay: {
+        extraDark: '#00000080',
         dark: '#00000010',
         light: '#ffffff20',
     },

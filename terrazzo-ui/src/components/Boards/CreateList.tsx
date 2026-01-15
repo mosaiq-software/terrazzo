@@ -41,7 +41,7 @@ const CreateList = (props: CreateListProps): React.JSX.Element => {
                     miw="250px"
                     maw="250px"
                     onClick={() => setVisible((v) => !v)}
-                    color={COLORS.foreground.dark}
+                    bg={COLORS.foreground.dark}
                     justify="left"
                 >
                     + Add List

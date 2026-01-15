@@ -162,7 +162,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                             left: 0,
                             pointerEvents: 'none',
                             overflow: 'visible',
-                            backgroundColor: hovered ? '#ffffff20' : COLORS.transparent,
+                            backgroundColor: hovered ? COLORS.overlay.light : COLORS.transparent,
                             borderRadius: borderRadius,
                             transition: 'background-color 0.1s ease',
                             zIndex: 0,

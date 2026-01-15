@@ -31,7 +31,7 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                 <Stack>
                     <Text>This {props.moduleHeader.type} is archived and can only be viewed.</Text>
                     <Button
-                        variant={COLORS.text.muted}
+                        variant="subtle"
                         onClick={() => {
                             props.onSave({ archived: false });
                         }}

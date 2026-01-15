@@ -24,7 +24,7 @@ export const RoleTag = (props: RoleTagProps) => {
                 padding: variant === 'tag' ? '3px 8px' : '6px 12px',
                 borderRadius: variant === 'tag' ? '12px' : '0px',
                 border: variant === 'tag' ? `1px solid ${COLORS.border}` : 'none',
-                backgroundColor: variant === 'item' && isHovered ? COLORS.border : COLORS.transparent,
+                backgroundColor: variant === 'item' && isHovered ? COLORS.overlay.dark : COLORS.transparent,
                 width: variant === 'item' ? '100%' : 'auto',
                 transition: 'background-color 0.15s ease',
             }}

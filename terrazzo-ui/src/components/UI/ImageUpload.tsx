@@ -45,7 +45,7 @@ export const ImageUpload = (props: ImageUploadProps) => {
                     left: 0,
                     width: '100%',
                     height: '100%',
-                    backgroundColor: COLORS.overlay.dark,
+                    backgroundColor: COLORS.overlay.extraDark,
                     color: COLORS.text.primary,
                     display: 'flex',
                     alignItems: 'center',
