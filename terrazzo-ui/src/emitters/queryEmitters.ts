@@ -9,3 +9,12 @@ export const getSearchResults = async (
 ) => {
     return await sockCtx.emit(ClientSE.GET_SEARCH_RESULTS, { query, searchSessionId, orgId });
 };
+
+export const getSearchTags = async (
+    sockCtx: SocketContextType,
+    query: string,
+    searchSessionId: string,
+    orgId: OrganizationId
+) => {
+    return await sockCtx.emit(ClientSE.GET_SEARCH_TAGS, { query, searchSessionId, orgId });
+};
