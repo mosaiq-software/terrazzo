@@ -107,6 +107,7 @@ export async function addCard(
     const newCard: Card = {
         id: cardUid,
         listId: listID,
+        boardId: board.id,
         cardNumber: explicitCardNumber ?? board.totalCards + 1,
         name: cardName,
         descriptionTextBlockId: cardUid, // placeholder id
@@ -131,7 +132,7 @@ export async function addCard(
     }
 
     try {
-        await createCardOnListDb(newCard, listID);
+        await createCardOnListDb(newCard);
         await updateBoardDb(board.id, { totalCards: board.totalCards + 1 });
         await syncAddCard(newCard, board.id);
     } catch (e) {
@@ -170,6 +171,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     const newCard: Card = {
         id: newCardId,
         listId: list.id,
+        boardId: board.id,
         cardNumber: board.totalCards + 1,
         name: existingCard.name + ' (Copy)',
         descriptionTextBlockId: newCardId, // placeholder id
@@ -207,7 +209,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     }
 
     try {
-        await createCardOnListDb(newCard, list.id);
+        await createCardOnListDb(newCard);
         await updateBoardDb(board.id, { totalCards: board.totalCards + 1 });
     } catch (e) {
         throw new Error('Failed to save Card' + e);
@@ -274,14 +276,10 @@ export async function getListIDFromCardID(cardID: CardId) {
 
 export async function getBoardIDFromCardID(cardID: CardId) {
     const card = await getCardByIdDb(cardID);
-    if (card == null || !card.listId) {
+    if (card == null || !card.boardId) {
         throw new Error('Card not found');
     }
-    const list = await getListByIdDb(card.listId);
-    if (list == null) {
-        throw new Error('List not found');
-    }
-    return list.boardId;
+    return card.boardId;
 }
 
 /*

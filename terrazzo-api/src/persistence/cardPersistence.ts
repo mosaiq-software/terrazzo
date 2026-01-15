@@ -1,4 +1,4 @@
-import { CardHeader, CardId, ListId, TextBlockId } from '@mosaiq/terrazzo-common';
+import { BoardId, CardHeader, CardId, ListId, TextBlockId } from '@mosaiq/terrazzo-common';
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model } from 'sequelize';
 
@@ -13,6 +13,7 @@ CardModel.init(
             type: DataTypes.STRING,
             allowNull: true,
         },
+        boardId: DataTypes.STRING,
         cardNumber: DataTypes.INTEGER,
         name: DataTypes.STRING,
         descriptionTextBlockId: DataTypes.STRING,
@@ -42,36 +43,18 @@ export const getCardsByListIdShortUpDb = async (listId: ListId, archived: boolea
     return models.map((card) => card.toJSON());
 };
 
-export const createCardOnListDb = async (card: CardHeader, listId: ListId) => {
-    const model = await CardModel.create({
-        id: card.id,
-        listId,
-        cardNumber: card.cardNumber,
-        name: card.name,
-        descriptionTextBlockId: card.descriptionTextBlockId,
-        priority: card.priority,
-        storyPoints: card.storyPoints,
-        archived: false,
-        order: card.order,
-        createdById: card.createdById,
-        createdAt: card.createdAt,
-    });
+export const getCardsByBoardIdDb = async (boardId: BoardId, options: Partial<CardHeader>) => {
+    const models = await CardModel.findAll({ where: { boardId, ...options } });
+    return models.map((card) => card.toJSON());
+};
+
+export const createCardOnListDb = async (card: CardHeader) => {
+    const model = await CardModel.create({ ...card });
     return model.toJSON();
 };
 
-export const updateCardDb = async (card: CardHeader) => {
-    const [updated] = await CardModel.update(
-        {
-            cardNumber: card.cardNumber,
-            name: card.name,
-            descriptionTextBlockId: card.descriptionTextBlockId,
-            priority: card.priority,
-            storyPoints: card.storyPoints,
-            archived: card.archived,
-            order: card.order,
-        },
-        { where: { id: card.id } }
-    );
+export const updateCardDb = async (card: Partial<CardHeader>) => {
+    const [updated] = await CardModel.update({ ...card }, { where: { id: card.id } });
     return updated;
 };
 
