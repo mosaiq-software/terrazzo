@@ -1,4 +1,4 @@
-import { Block } from '@blocknote/core';
+import { Block, BlockNoteSchema, createInlineContentSpec, defaultInlineContentSpecs } from '@blocknote/core';
 import { ServerBlockNoteEditor } from '@blocknote/server-util';
 import {
     BLOCKNOTE_FRAGMENT_ID,
@@ -24,6 +24,7 @@ import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions
 import { SocketManager } from '@trz-api/utils/socket/socketManager';
 import { Document } from '@trz-api/utils/y-socket-io';
 import console from 'console';
+import { JSDOM } from 'jsdom';
 import { Doc, XmlText } from 'yjs';
 import { getBoardIDFromCardID } from './cardController';
 
@@ -59,7 +60,50 @@ export const checkCanUserEditTextBlock = async (
     }
 };
 
-const BLOCKNOTE_EDITOR = ServerBlockNoteEditor.create();
+const BlockNoteMention = createInlineContentSpec(
+    {
+        type: 'mention',
+        content: 'none',
+        propSchema: {
+            tag: {
+                default: '',
+            },
+            id: {
+                default: '',
+            },
+            type: {
+                default: '',
+            },
+        },
+    },
+    {
+        render: (inlineContent) => {
+            const dom = new JSDOM('<!doctype html><html><body></body></html>');
+            const document = dom.window.document;
+
+            const serverSideHtml = document.createElement('span');
+            serverSideHtml.className = 'bn-mention';
+            const tag = inlineContent?.props?.tag || '';
+            const id = inlineContent?.props?.id || '';
+            serverSideHtml.textContent = `@${tag}`;
+            serverSideHtml.setAttribute('data-mention-id', id);
+
+            return { dom: serverSideHtml };
+        },
+    }
+);
+
+const BNSchema = BlockNoteSchema.create().extend({
+    blockSpecs: {},
+    inlineContentSpecs: {
+        ...defaultInlineContentSpecs,
+        mention: BlockNoteMention,
+    },
+});
+
+const BLOCKNOTE_EDITOR = ServerBlockNoteEditor.create({
+    schema: BNSchema,
+});
 
 const SNAPSHOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 
