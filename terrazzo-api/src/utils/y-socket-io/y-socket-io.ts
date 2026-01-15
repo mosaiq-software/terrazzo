@@ -135,7 +135,6 @@ export class YSocketIO extends Observable<string> {
         }
         const update = Y.encodeStateAsUpdate(ydoc);
         Y.applyUpdate(doc, update, this);
-        console.log(`Broadcasted document update for text block ${textBlockId} to all connected clients`);
         return true;
     }
 

@@ -446,7 +446,6 @@ const reduceSnapshotsForTextBlock = async (textBlockId: TextBlockId) => {
 
         // Execute deletions
         if (snapshotsToDelete.size > 0) {
-            console.log(`Reducing ${snapshotsToDelete.size} snapshots for text block ${textBlockId}`);
             for (const snapshotId of snapshotsToDelete) {
                 await deleteTextBlockHistorySnapshotDb(snapshotId);
             }
