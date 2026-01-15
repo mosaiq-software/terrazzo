@@ -7,6 +7,8 @@ import {
     QueryableDatapoint,
     QueryableItem,
     QueryResult,
+    QueryTag,
+    ScoredQueryTag,
     settlePromises,
     TrzModuleType,
     UserId,
@@ -22,6 +24,7 @@ import { getQueryableTextBlockContent } from './textBlockController';
 
 /** Cache each search session so that we only index once per use of the searchbar */
 const CachedSearchSessions = new Map<UserId, { searchSessionId: string; datapoints: QueryableDatapoint[] }>();
+const CachedTagSessions = new Map<UserId, { searchSessionId: string; tags: QueryTag[] }>();
 
 const getAllQueryableDataForUserInOrg = async (userId: UserId, orgId: OrganizationId) => {
     const orgMemberships = await getOrganizationMembershipsForUserDb(userId);
@@ -160,4 +163,99 @@ export const executeQueryForUser = async (
     const topResults = sortedResults.slice(0, 10);
 
     return topResults;
+};
+
+const getTagsForUserInOrg = async (userId: UserId, orgId: OrganizationId): Promise<QueryTag[]> => {
+    const queryTags: QueryTag[] = [];
+    const org = await getOrgByIdDb(orgId);
+    if (!org) {
+        throw new Error('Organization not found');
+    }
+    const boardModules = await getModulesByOrgIdDb(org.id, { type: TrzModuleType.Board, archived: false });
+    const boardPromises: Promise<void>[] = [];
+    for (const board of boardModules) {
+        boardPromises.push(
+            (async () => {
+                const boardData = await getBoardByIdDb(board.id);
+                if (!boardData) {
+                    throw new Error('Board not found');
+                }
+                queryTags.push({
+                    id: board.id,
+                    name: boardNameWithCode(board.name, boardData.boardCode),
+                    type: QueryableItem.Board,
+                });
+
+                const cards = await getCardsByBoardIdDb(board.id, { archived: false });
+                for (const card of cards) {
+                    queryTags.push({
+                        id: card.id,
+                        name: cardNameWithBoardCodeAndNumber(card.name, boardData.boardCode, card.cardNumber),
+                        type: QueryableItem.Card,
+                    });
+                }
+            })()
+        );
+    }
+    await settlePromises(boardPromises);
+
+    const documentModules = await getModulesByOrgIdDb(org.id, { type: TrzModuleType.Document, archived: false });
+    for (const document of documentModules) {
+        queryTags.push({
+            id: document.id,
+            name: document.name,
+            type: QueryableItem.Document,
+        });
+    }
+    return queryTags;
+};
+
+export const executeTagQuery = async (
+    userId: UserId,
+    orgId: OrganizationId,
+    query: string,
+    searchSessionId: string
+): Promise<QueryTag[]> => {
+    try {
+        let queryTags: QueryTag[] = [];
+        const org = await getOrgByIdDb(orgId);
+        if (!org) {
+            throw new Error('Organization not found');
+        }
+
+        const cachedSession = CachedTagSessions.get(userId);
+        if (!cachedSession || cachedSession.searchSessionId !== searchSessionId) {
+            queryTags = await getTagsForUserInOrg(userId, orgId);
+            CachedTagSessions.set(userId, { searchSessionId, tags: queryTags });
+        } else {
+            queryTags = cachedSession.tags;
+        }
+
+        const fuse = new Fuse(queryTags, {
+            keys: ['name'],
+            ignoreDiacritics: true,
+            includeScore: true,
+        });
+
+        const fuseResults = fuse.search(query);
+
+        const results: ScoredQueryTag[] = fuseResults.map((result) => {
+            return {
+                ...result.item,
+                score: result.score ?? 0,
+            };
+        });
+
+        const sortedResults = results.sort((a, b) => a.score - b.score);
+        const topResults = sortedResults.slice(0, 10);
+
+        return topResults;
+    } catch (e) {
+        console.error('Error fetching search tags for user in org:', {
+            userId,
+            orgId,
+            error: e,
+        });
+        throw e;
+    }
 };
