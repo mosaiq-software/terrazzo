@@ -115,7 +115,7 @@ const DocumentMentionPopup = (props: DelegatedBlockNoteMentionPopupProps) => {
                     <Text>{document.name}</Text>
                     <ActionIcon
                         variant="subtle"
-                        onClick={() => navigate(`/document/${document.id}`)}
+                        onClick={() => navigate(`/doc/${document.id}`)}
                         size="input-xs"
                     >
                         <MdArrowForward />

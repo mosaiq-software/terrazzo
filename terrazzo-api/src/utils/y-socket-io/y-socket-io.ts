@@ -243,10 +243,6 @@ export class YSocketIO extends Observable<string> {
                 return sockData?.canEdit;
             });
             if (socketsWithEditPermissions.length === 0) {
-                console.log(
-                    `No more sockets with edit permissions connected to document ${doc.textBlockId}. Saving and destroying document.`
-                );
-
                 // Cancel pending timer to force immediate save
                 if (doc.saveTimer) {
                     clearTimeout(doc.saveTimer);
