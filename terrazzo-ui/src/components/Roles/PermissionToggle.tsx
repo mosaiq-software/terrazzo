@@ -1,5 +1,5 @@
 import { Group, Stack, Switch, Text } from '@mantine/core';
-import { COLOR_SUCCESS, COLOR_UNSET } from '@trz/util/colorUtils';
+import { COLORS } from '@trz/util/colors';
 import { MdCheck, MdClose } from 'react-icons/md';
 
 interface PermissionToggleProps {
@@ -20,24 +20,24 @@ export const PermissionToggle = (props: PermissionToggleProps) => {
                 <Text size="sm">{permissionName}</Text>
                 <Text
                     size="sm"
-                    c="dimmed"
+                    c={COLORS.text.muted}
                 >
                     {permissionDescription}
                 </Text>
             </Stack>
             <Switch
-                color={COLOR_SUCCESS}
+                color={COLORS.semantic.success}
                 size="md"
                 thumbIcon={
                     isEnabled ? (
                         <MdCheck
                             size={12}
-                            color={COLOR_SUCCESS}
+                            color={COLORS.semantic.success}
                         />
                     ) : (
                         <MdClose
                             size={12}
-                            color={COLOR_UNSET}
+                            color={COLORS.semantic.unset}
                         />
                     )
                 }

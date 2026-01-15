@@ -4,6 +4,7 @@ import { ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useUI } from '@trz/contexts/ui-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
+import { COLORS } from '@trz/util/colors';
 import { getModuleRelativeUrl } from '@trz/util/moduleUtils';
 import { useContextMenu } from 'mantine-contextmenu';
 import { useNavigate } from 'react-router';
@@ -91,7 +92,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                         subItemsCount={contents?.length}
                     />
                     <Text
-                        c="#fff"
+                        c={COLORS.text.primary}
                         style={{
                             transition: `padding ${uiCtx.animationDuration}ms, width ${uiCtx.animationDuration}ms`,
                             textWrap: 'nowrap',

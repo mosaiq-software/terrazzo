@@ -1,5 +1,6 @@
 import { Center, Tooltip } from '@mantine/core';
 import { fullName, Member, MembershipRecord, withIf } from '@mosaiq/terrazzo-common';
+import { COLORS } from '@trz/util/colors';
 import { MdPersonRemove, MdStar } from 'react-icons/md';
 import { RolesList } from '../../Roles/RolesList';
 import { ActionRow } from '../../UI/ActionRow';
@@ -46,7 +47,7 @@ export const MemberRow = (props: MemberRowProps) => {
                         label: 'Hold to Remove Member',
                         onClick: () => props.onRemoveMember?.(props.member),
                         icon: <MdPersonRemove size={16} />,
-                        color: 'red',
+                        color: COLORS.semantic.error,
                         longHold: true,
                     },
                     !props.isCurrentUser && !!props.onRemoveMember

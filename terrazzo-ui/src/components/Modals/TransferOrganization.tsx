@@ -6,6 +6,7 @@ import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUserContext } from '@trz/contexts/user-context';
 import { updateOrgField } from '@trz/emitters';
+import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import React, { useState } from 'react';
 import { RectHoldingButton } from '../UI/RectHoldingButton';
@@ -81,7 +82,7 @@ const TransferOrganization = (props: ContextModalProps<{}>): React.JSX.Element =
                                         <Title order={5}>{name}</Title>
                                         <Text
                                             size="sm"
-                                            c="dimmed"
+                                            c={COLORS.text.muted}
                                         >
                                             @{username}
                                         </Text>
@@ -91,7 +92,7 @@ const TransferOrganization = (props: ContextModalProps<{}>): React.JSX.Element =
                         }}
                     />
                     <Text
-                        c="dimmed"
+                        c={COLORS.text.muted}
                         size="sm"
                         mt="sm"
                         mb="md"
@@ -111,7 +112,7 @@ const TransferOrganization = (props: ContextModalProps<{}>): React.JSX.Element =
                         Looks like it's just you!
                     </Title>
                     <Text
-                        c="dimmed"
+                        c={COLORS.text.muted}
                         size="sm"
                         mb="md"
                     >
@@ -135,7 +136,7 @@ const TransferOrganization = (props: ContextModalProps<{}>): React.JSX.Element =
                             : 'Select a user to transfer the organization to.'
                     }
                     width={250}
-                    borderColor="red"
+                    borderColor={COLORS.semantic.error}
                     disabled={!toUserId}
                 >
                     Hold to Transfer Organization

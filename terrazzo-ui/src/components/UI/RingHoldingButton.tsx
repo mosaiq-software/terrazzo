@@ -1,5 +1,6 @@
 import { Center, RingProgress, Tooltip, UnstyledButton } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
+import { COLORS } from '@trz/util/colors';
 import { useEffect, useState } from 'react';
 
 interface RingHoldingButtonProps {
@@ -71,7 +72,9 @@ export const RingHoldingButton = (props: RingHoldingButtonProps) => {
                 <RingProgress
                     size={props.ringSize}
                     thickness={props.ringThickness}
-                    sections={[{ value: 100 * (progress / props.durationMs), color: props.color ?? 'white' }]}
+                    sections={[
+                        { value: 100 * (progress / props.durationMs), color: props.color ?? COLORS.text.primary },
+                    ]}
                     label={<Center>{props.children}</Center>}
                 />
             </UnstyledButton>

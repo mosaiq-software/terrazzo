@@ -9,6 +9,7 @@ import { NoteType, notify } from '@trz/util/notifications';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useMemo } from 'react';
 import { ActionRow } from '../UI/ActionRow';
+import { COLORS } from '@trz/util/colors';
 
 interface OrgTabArchiveProps {
     orgId: OrganizationId;
@@ -64,7 +65,7 @@ export const OrgTabArchive = (props: OrgTabArchiveProps) => {
                 <Fieldset
                     legend="Archived Items"
                     w="100%"
-                    bg="transparent"
+                    bg={COLORS.transparent}
                 >
                     <Stack>
                         {archivedSubitems.length === 0 && 'No archived items in this directory.'}

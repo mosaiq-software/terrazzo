@@ -9,6 +9,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { useUserContext } from '@trz/contexts/user-context';
 import { createDuplicateCard, updateCardAssignee, updateCardField, updateCardsLabels } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
+import { COLORS } from '@trz/util/colors';
 import { getCardLink } from '@trz/util/linkUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
@@ -70,7 +71,7 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
             <ContextMenuSelectorMenu
                 title="Priority"
                 icon={<MdBarChart size={16} />}
-                textColor="#fff"
+                textColor={COLORS.text.primary}
                 textAlign="left"
                 items={priorityColors
                     .map((color, index) => ({

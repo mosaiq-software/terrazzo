@@ -1,6 +1,7 @@
-import { ActionIcon, Badge, Box, Menu, Stack } from '@mantine/core';
+import { ActionIcon, Badge, Box, Menu, Stack, Text } from '@mantine/core';
 import { Role, RoleId, UserId } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
+import { COLORS } from '@trz/util/colors';
 import { completelyCaptureEvent } from '@trz/util/eventUtils';
 import { useMemo } from 'react';
 import { MdAdd } from 'react-icons/md';
@@ -35,7 +36,7 @@ export const RolesListAddMenu = (props: RolesListAddMenuProps) => {
                         variant="outline"
                         color="gray"
                         style={{
-                            backgroundColor: 'transparent',
+                            backgroundColor: COLORS.transparent,
                             cursor: 'pointer',
                         }}
                         leftSection={
@@ -45,7 +46,7 @@ export const RolesListAddMenu = (props: RolesListAddMenuProps) => {
                             >
                                 <MdAdd
                                     size={12}
-                                    color="white"
+                                    color={COLORS.text.primary}
                                 />
                             </ActionIcon>
                         }
@@ -55,7 +56,7 @@ export const RolesListAddMenu = (props: RolesListAddMenuProps) => {
                 ) : (
                     <ActionIcon
                         variant="light"
-                        color="gray"
+                        color={COLORS.text.muted}
                         size="sm"
                         radius="xl"
                         style={{
@@ -90,16 +91,14 @@ export const RolesListAddMenu = (props: RolesListAddMenuProps) => {
                         </Box>
                     ))}
                     {unAssignedRoles.length === 0 && (
-                        <Box
-                            style={{
-                                color: '#888',
-                                fontSize: '14px',
-                                textAlign: 'center',
-                                padding: '8px',
-                            }}
+                        <Text
+                            c={COLORS.text.secondary}
+                            fz="sm"
+                            ta="center"
+                            p={8}
                         >
                             All roles assigned
-                        </Box>
+                        </Text>
                     )}
                 </Stack>
             </Menu.Dropdown>

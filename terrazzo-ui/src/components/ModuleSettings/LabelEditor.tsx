@@ -2,6 +2,7 @@ import { ActionIcon, ColorInput, Group, Stack, Text, TextInput, Tooltip } from '
 import { BoardId, Label, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createBoardLabel, deleteBoardLabel, updateBoardLabel } from '@trz/emitters';
+import { COLORS } from '@trz/util/colors';
 import { colorIsDarkAdvanced, generateRandomColor } from '@trz/util/colorUtils';
 import { useState } from 'react';
 import { MdOutlineAdd, MdOutlineCheck, MdOutlineClose, MdOutlineDelete, MdOutlineEdit } from 'react-icons/md';
@@ -50,7 +51,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                 wrap="wrap"
             >
                 {props.labels.map((label) => {
-                    const textColor = colorIsDarkAdvanced(label.color) ? '#ffffff' : '#000000';
+                    const textColor = colorIsDarkAdvanced(label.color) ? COLORS.text.primary : COLORS.background.dark;
                     return (
                         <Group
                             key={label.id}
@@ -73,7 +74,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                             <ActionIcon
                                 size="input-xs"
                                 radius={'100%'}
-                                bg={'transparent'}
+                                bg={COLORS.transparent}
                                 onClick={() => {
                                     setEditingLabel(label);
                                 }}
@@ -123,7 +124,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                             durationMs={1000}
                             ringSize={50}
                             ringThickness={6}
-                            color="red"
+                            color={COLORS.semantic.error}
                             onClick={async () => {
                                 setEditingLabel(undefined);
                                 deleteBoardLabel(sockCtx, props.boardId, editingLabel.id);

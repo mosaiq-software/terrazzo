@@ -24,6 +24,7 @@ import { useCard } from '@trz/hooks/useCard';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';
+import { COLORS } from '@trz/util/colors';
 import { niceDateWithTime } from '@trz/util/dateUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import React from 'react';
@@ -120,8 +121,8 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
             />
             <Modal.Content
                 h={'90vh'}
-                bg={'#1d2022'}
-                c={'white'}
+                bg={COLORS.background.light}
+                c={COLORS.text.primary}
                 style={{
                     overflowX: 'hidden',
                     overflowY: 'scroll',
@@ -129,7 +130,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
             >
                 <Modal.Header
                     p="0"
-                    bg={'#1d2022'}
+                    bg={COLORS.background.light}
                 >
                     <Modal.Title w={'100%'}>
                         <Group justify="space-between">
@@ -139,7 +140,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             >
                                 {card.archived && (
                                     <Box
-                                        bg="yellow"
+                                        bg={COLORS.semantic.warning}
                                         p="sm"
                                     >
                                         <Group justify="space-between">
@@ -167,7 +168,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                         }}
                                         inputProps={{
                                             w: '100%',
-                                            bg: 'transparent',
+                                            bg: COLORS.transparent,
                                         }}
                                         style={{
                                             width: '95%',
@@ -177,14 +178,14 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                     <Tooltip label="Copy card ID">
                                         <Button
                                             variant="subtle"
-                                            c="white"
+                                            c={COLORS.text.primary}
                                             onClick={() => {
                                                 clipboard.copy(getCardNumber(props.boardCode, card.cardNumber));
                                             }}
                                         >
                                             {clipboard.copied ? (
                                                 <MdFileCopy
-                                                    color="white"
+                                                    color={COLORS.text.primary}
                                                     size="1rem"
                                                 />
                                             ) : (
@@ -197,7 +198,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                         </Group>
                         <Modal.CloseButton
                             variant="transparent"
-                            c={'white'}
+                            c={COLORS.text.primary}
                             style={{
                                 position: 'absolute',
                                 top: '0.75rem',
@@ -233,7 +234,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                 <Tooltip label={`${joinedCard ? 'Leave' : 'Join'} Card`}>
                                     <ActionIcon
                                         variant="subtle"
-                                        c="white"
+                                        c={COLORS.text.primary}
                                         onClick={() => {
                                             if (usr.userId) {
                                                 updateCardAssignee(sockCtx, card.id, usr.userId, !joinedCard);
@@ -259,7 +260,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             }}
                         >
                             <Text
-                                c="dimmed"
+                                c={COLORS.text.secondary}
                                 fz="sm"
                             >
                                 Created at {niceDateWithTime(card.createdAt)} by {fullName(card.createdBy)}
@@ -271,7 +272,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                     tooltipDelay={500}
                                     height="40px"
                                     variant="outline"
-                                    borderColor="red"
+                                    borderColor={COLORS.semantic.error}
                                     onClick={() => onArchiveCard(!card.archived)}
                                     leftSection={<FaArchive />}
                                 >

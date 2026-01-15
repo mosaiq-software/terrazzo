@@ -1,4 +1,5 @@
 import { Group, Input, InputProps, Text, TextProps, Title, TitleProps } from '@mantine/core';
+import { COLORS } from '@trz/util/colors';
 import { captureDraggableEvents, completelyCaptureEvent, forAllClickEvents, noEventBubble } from '@trz/util/eventUtils';
 import React, { CSSProperties } from 'react';
 import { MdEdit } from 'react-icons/md';
@@ -78,7 +79,7 @@ const EditableTextbox = (props: EditableTextboxProps) => {
                     >
                         {props.showEditIcon && (
                             <MdEdit
-                                color="subtle"
+                                color={COLORS.text.muted}
                                 style={{ marginTop: '2px' }}
                             />
                         )}

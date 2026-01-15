@@ -8,6 +8,7 @@ import { createCard, getListData, updateListField } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { BoardContext, useBoardMetadata } from '@trz/pages/BoardPage';
 import { LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
+import { COLORS } from '@trz/util/colors';
 import { captureDraggableEvents, completelyCaptureEvent } from '@trz/util/eventUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import React, { useContext, useEffect, useState } from 'react';
@@ -126,7 +127,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
 
     return (
         <Paper
-            bg="#121314"
+            bg={COLORS.background.light}
             radius="md"
             shadow="lg"
             style={{
@@ -144,7 +145,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                         ? {
                               transform: 'rotateZ(3deg) scale(1.02)',
                               boxShadow: '10px 8px 25px black',
-                              border: '1px solid #14222e',
+                              border: `1px solid ${COLORS.border}`,
                               zIndex: 11,
                           }
                         : {
@@ -177,7 +178,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                     onChange={onTitleChange}
                     placeholder="Click to edit!"
                     type="title"
-                    titleProps={{ order: 6, c: '#ffffff' }}
+                    titleProps={{ order: 6, c: COLORS.text.primary }}
                     style={{
                         width: '90%',
                     }}
@@ -198,7 +199,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                             <Button
                                 {...captureDraggableEvents(completelyCaptureEvent)}
                                 variant="subtle"
-                                c="#ffffff"
+                                c={COLORS.text.primary}
                                 h="100%"
                                 px={5}
                             >
@@ -236,7 +237,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
             <Group>
                 {cardNameInputVisible && (
                     <Paper
-                        bg={'#121314'}
+                        bg={COLORS.background.light}
                         w="250"
                         radius="md"
                         shadow="lg"

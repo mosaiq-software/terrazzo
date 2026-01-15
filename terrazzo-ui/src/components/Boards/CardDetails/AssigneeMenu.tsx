@@ -4,6 +4,7 @@ import { AvatarRow } from '@trz/components/UI/AvatarRow';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardAssignee } from '@trz/emitters';
+import { COLORS } from '@trz/util/colors';
 import { MdOutlineAddCircle } from 'react-icons/md';
 
 interface AssigneeMenuProps {
@@ -46,7 +47,7 @@ export const AssigneeMenu = (props: AssigneeMenuProps) => {
                         ) : (
                             <MdOutlineAddCircle
                                 size="1.5rem"
-                                color="white"
+                                color={COLORS.text.primary}
                             />
                         )}
                     </Button>
@@ -63,10 +64,10 @@ export const AssigneeMenu = (props: AssigneeMenuProps) => {
                         return (
                             <Button
                                 key={memRec.user.id}
-                                bg={isMember ? 'blue' : 'transparent'}
+                                bg={isMember ? COLORS.semantic.info : COLORS.transparent}
                                 ta="left"
                                 justify="start"
-                                c={'white'}
+                                c={COLORS.text.primary}
                                 style={{
                                     borderRadius: '4px',
                                 }}

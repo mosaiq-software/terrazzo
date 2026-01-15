@@ -4,6 +4,7 @@ import { Invite, isInviteExpired, OrganizationHeader } from '@mosaiq/terrazzo-co
 import { useSocket } from '@trz/contexts/socket-context';
 import { createInvite, deleteInvite } from '@trz/emitters';
 import { useOrgInvites } from '@trz/hooks/useOrgInvites';
+import { COLORS } from '@trz/util/colors';
 import { getInviteLink } from '@trz/util/linkUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useMemo } from 'react';
@@ -92,7 +93,7 @@ export const InvitesPanel = (props: InvitesPanelProps) => {
             >
                 <Title
                     order={4}
-                    c="#fff"
+                    c={COLORS.text.primary}
                 >
                     Invites
                 </Title>
@@ -136,7 +137,7 @@ export const InvitesPanel = (props: InvitesPanelProps) => {
                             </Menu.Target>
                             <Menu.Dropdown>
                                 <Menu.Item
-                                    color="red"
+                                    color={COLORS.semantic.error}
                                     onClick={handleDeleteAllInvites}
                                 >
                                     Revoke All Invites
@@ -148,7 +149,7 @@ export const InvitesPanel = (props: InvitesPanelProps) => {
             </Group>
             {invites.length === 0 ? (
                 <Text
-                    c="dimmed"
+                    c={COLORS.text.muted}
                     ta="center"
                     py="xl"
                 >
@@ -158,7 +159,7 @@ export const InvitesPanel = (props: InvitesPanelProps) => {
                 <Stack gap="sm">
                     {sortedInvites.nonExpiredInvites.length > 0 && (
                         <Text
-                            c="dimmed"
+                            c={COLORS.text.muted}
                             fz="sm"
                         >
                             Pending Invites
@@ -177,7 +178,7 @@ export const InvitesPanel = (props: InvitesPanelProps) => {
                     )}
                     {sortedInvites.expiredInvites.length > 0 && (
                         <Text
-                            c="dimmed"
+                            c={COLORS.text.muted}
                             fz="sm"
                         >
                             Past Invites

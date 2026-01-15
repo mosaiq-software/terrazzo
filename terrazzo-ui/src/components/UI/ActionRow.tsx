@@ -1,4 +1,5 @@
 import { ActionIcon, Avatar, Box, Group, Menu, Text } from '@mantine/core';
+import { COLORS } from '@trz/util/colors';
 import { IconType } from 'react-icons';
 import { HiDotsVertical } from 'react-icons/hi';
 import { RectHoldingButton } from './RectHoldingButton';
@@ -31,7 +32,7 @@ export const ActionRow = (props: ActionRowProps) => {
             w="100%"
             px="md"
             py="sm"
-            bg={props.bg || '#212226'}
+            bg={props.bg || COLORS.background.medium}
             style={{
                 borderRadius: '8px',
                 opacity: props.disabled ? 0.5 : 1,
@@ -58,7 +59,7 @@ export const ActionRow = (props: ActionRowProps) => {
                             width: '40px',
                             height: '40px',
                             borderRadius: '50%',
-                            backgroundColor: props.iconColor || 'rgba(64, 192, 207, 0.2)',
+                            backgroundColor: props.iconColor || COLORS.accent.teal.dark,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -68,14 +69,14 @@ export const ActionRow = (props: ActionRowProps) => {
                             typeof props.icon === 'function' &&
                             props.icon({
                                 size: 20,
-                                color: props.iconColor || 'rgba(64, 192, 207, 0.8)',
+                                color: props.iconColor || COLORS.accent.teal.light,
                             })}
                     </Box>
                 )}
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                     <Group gap="xs">
                         <Text
-                            c="white"
+                            c={COLORS.text.primary}
                             fw={500}
                             size="sm"
                             style={{
@@ -88,7 +89,7 @@ export const ActionRow = (props: ActionRowProps) => {
                         </Text>{' '}
                     </Group>
                     <Text
-                        c="dimmed"
+                        c={COLORS.text.muted}
                         size="xs"
                         style={{
                             overflow: 'hidden',
@@ -117,7 +118,7 @@ export const ActionRow = (props: ActionRowProps) => {
                         <Menu.Target>
                             <ActionIcon
                                 variant="subtle"
-                                c="white"
+                                c={COLORS.text.primary}
                                 size="lg"
                             >
                                 <HiDotsVertical size={18} />
@@ -138,8 +139,8 @@ export const ActionRow = (props: ActionRowProps) => {
                                             disabled={item.disabled}
                                             durationMs={2000}
                                             width="100%"
-                                            backgroundColor="transparent"
-                                            borderColor={item.color || 'white'}
+                                            backgroundColor={COLORS.transparent}
+                                            borderColor={item.color || COLORS.text.primary}
                                             style={{
                                                 fontSize: '14px',
                                                 padding: '8px 12px',

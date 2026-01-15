@@ -3,6 +3,7 @@ import { OverridePermissions, PermissionFlagCategory, PermissionFlagData } from 
 import { PermissionFancySwitch } from '@trz/components/Roles/PermissionFancySwitch';
 import { PermissionFlagGrouper } from '@trz/components/Roles/PermissionFlagGrouper';
 import { RingHoldingButton } from '@trz/components/UI/RingHoldingButton';
+import { COLORS } from '@trz/util/colors';
 import { MdOutlineDelete } from 'react-icons/md';
 
 interface PermissionsEditorPermissionsListProps {
@@ -46,7 +47,7 @@ export const PermissionsEditorPermissionsList = (props: PermissionsEditorPermiss
                     durationMs={1000}
                     ringSize={50}
                     ringThickness={6}
-                    color="red"
+                    color={COLORS.semantic.error}
                     onClick={() => {
                         props.onRemoveOverride();
                     }}

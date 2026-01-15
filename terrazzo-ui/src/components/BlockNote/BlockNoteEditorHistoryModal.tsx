@@ -19,6 +19,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { restoreTextBlockSnapshot } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useTextBlockHistorySnapshots } from '@trz/hooks/useTextBlockHistorySnapshots';
+import { COLORS } from '@trz/util/colors';
 import { getRandomColorFromString } from '@trz/util/colorUtils';
 import { niceDateWithTime } from '@trz/util/dateUtils';
 import { completelyCaptureEvent } from '@trz/util/eventUtils';
@@ -52,7 +53,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                 >
                     <MdHistory
                         size={20}
-                        color="white"
+                        color={COLORS.text.primary}
                     />
                 </ActionIcon>
             </Tooltip>
@@ -86,10 +87,10 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                 blur={3}
             />
             <Modal.Content
-                bg={'#15161a'}
-                c={'white'}
+                bg={COLORS.background.medium}
+                c={COLORS.text.primary}
             >
-                <Modal.Header bg={'#0c0c10'}>
+                <Modal.Header bg={COLORS.background.dark}>
                     <Modal.Title w={'100%'}>
                         <Group justify="space-between">
                             <Text
@@ -101,7 +102,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                         </Group>
                         <Modal.CloseButton
                             variant="transparent"
-                            c={'white'}
+                            c={COLORS.text.primary}
                             style={{
                                 position: 'absolute',
                                 top: '0.75rem',
@@ -130,9 +131,9 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                                 {content?.length ? (
                                     <ReadonlyBlockNote content={content} />
                                 ) : selectedSnapshot ? (
-                                    <Text c="dimmed">No content available for this snapshot.</Text>
+                                    <Text c={COLORS.text.muted}>No content available for this snapshot.</Text>
                                 ) : (
-                                    <Text c="dimmed">Select a snapshot to view its content.</Text>
+                                    <Text c={COLORS.text.muted}>Select a snapshot to view its content.</Text>
                                 )}
                             </Center>
                         </ScrollArea>
@@ -143,7 +144,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                         >
                             <Stack
                                 gap="xs"
-                                bg={'#0c0c10'}
+                                bg={COLORS.background.dark}
                                 pr="sm"
                                 mih="80vh"
                             >
@@ -173,7 +174,7 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                                     p="xs"
                                 >
                                     <Text
-                                        c="dimmed"
+                                        c={COLORS.text.muted}
                                         size="xs"
                                         ta="center"
                                     >
@@ -205,7 +206,7 @@ const SnapshotItem = (props: SnapshotItemProps) => {
             p="sm"
             style={{
                 cursor: 'pointer',
-                backgroundColor: props.isSelected ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                backgroundColor: props.isSelected ? COLORS.overlay.light : 'transparent',
                 borderRadius: '4px',
             }}
             onClick={() => {
@@ -237,7 +238,7 @@ const SnapshotItem = (props: SnapshotItemProps) => {
                     <RectHoldingButton
                         variant="outline"
                         durationMs={2000}
-                        borderColor="orange"
+                        borderColor={COLORS.semantic.warning}
                         onClick={props.onRestore}
                     >
                         Restore

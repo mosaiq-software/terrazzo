@@ -7,6 +7,7 @@ import {
     recordEntries,
     recordValues,
 } from '@mosaiq/terrazzo-common';
+import { COLORS } from '@trz/util/colors';
 import React, { useMemo } from 'react';
 
 const allPermissions = recordValues(PermissionFlag);
@@ -61,7 +62,7 @@ export const PermissionFlagGrouper = (props: PermissionFlagGrouperProps) => {
                     >
                         <Accordion.Control>
                             <Text
-                                c="dimmed"
+                                c={COLORS.text.muted}
                                 fz="sm"
                             >
                                 {catData.title}

@@ -4,19 +4,12 @@ import { Link, NavLink } from 'react-router-dom';
 
 import { UserProfileIcon } from '@trz/components/AppLayout/Navbar/UserProfileIcon';
 import { useUserContext } from '@trz/contexts/user-context';
+import { COLORS } from '@trz/util/colors';
 import { setTitle } from '@trz/util/tabUtils';
 import mosaiqLogo from '../assets/mosaiq-logo.png';
 import TerrazzoLogo from '../assets/terrazzo-logo.svg?react';
 import terrazzoScreenshot from '../assets/terrazzo-screenshot.png';
 import './LandingPage.css';
-
-const COLORS = {
-    background: '#19191b',
-    divider: '#2c2c2d',
-    primary: '#fafafa',
-    secondary: '#918e8e',
-};
-// -----------------------------------
 
 const MAX_WIDTH = 700;
 
@@ -27,13 +20,13 @@ const LandingPage = () => {
     }, []);
     return (
         <Box
-            bg={COLORS.background}
+            bg={COLORS.background.medium}
             style={{ overflow: 'scroll', height: '100vh' }}
         >
             {/* Navbar */}
             <Box
                 component="nav"
-                bg={COLORS.background}
+                bg={COLORS.background.medium}
                 style={{
                     position: 'sticky',
                     top: 0,
@@ -62,14 +55,14 @@ const LandingPage = () => {
                         >
                             <TerrazzoLogo
                                 style={{
-                                    fill: '#fff',
+                                    fill: COLORS.text.primary,
                                     width: 16,
                                     height: 20,
                                 }}
                             />
                             <Title
                                 order={2}
-                                c="#fff"
+                                c={COLORS.text.primary}
                                 fw={700}
                                 style={{
                                     letterSpacing: 1,
@@ -85,7 +78,7 @@ const LandingPage = () => {
                                     <Anchor
                                         component={Link}
                                         to="/dashboard"
-                                        c={'white'}
+                                        c={COLORS.text.primary}
                                     >
                                         Dashboard
                                     </Anchor>
@@ -93,8 +86,8 @@ const LandingPage = () => {
                                 </>
                             ) : (
                                 <Button
-                                    color={COLORS.primary}
-                                    c={COLORS.background}
+                                    color={COLORS.text.primary}
+                                    c={COLORS.background.medium}
                                     variant="filled"
                                     radius="md"
                                     onClick={goToLogin}
@@ -128,14 +121,14 @@ const LandingPage = () => {
                         order={1}
                         ta="center"
                         fw={900}
-                        c={COLORS.primary}
+                        c={COLORS.text.primary}
                         style={{ fontSize: 40, lineHeight: 1.1 }}
                     >
                         Project management <br /> Without restrictions
                     </Title>
                     <Text
                         ta="center"
-                        c={COLORS.secondary}
+                        c={COLORS.text.secondary}
                         fz="lg"
                         mb="md"
                     >
@@ -149,8 +142,8 @@ const LandingPage = () => {
                             <Button
                                 component={Link}
                                 to="/dashboard"
-                                color={COLORS.primary}
-                                c={COLORS.background}
+                                color={COLORS.text.primary}
+                                c={COLORS.background.medium}
                                 size="md"
                                 radius="md"
                                 fw={600}
@@ -159,8 +152,8 @@ const LandingPage = () => {
                             </Button>
                         ) : (
                             <Button
-                                color={COLORS.primary}
-                                c={COLORS.background}
+                                color={COLORS.text.primary}
+                                c={COLORS.background.medium}
                                 size="md"
                                 radius="md"
                                 fw={600}
@@ -175,7 +168,7 @@ const LandingPage = () => {
                     <div id="before">
                         <div className="feature">
                             <Text
-                                c={COLORS.secondary}
+                                c={COLORS.text.secondary}
                                 fz="sm"
                             >
                                 Easily sort tasks into columns
@@ -185,7 +178,7 @@ const LandingPage = () => {
                         </div>
                         <div className="feature">
                             <Text
-                                c={COLORS.secondary}
+                                c={COLORS.text.secondary}
                                 fz="sm"
                             >
                                 Easily manage multiple workspaces
@@ -203,7 +196,7 @@ const LandingPage = () => {
                             <div className="node"></div>
                             <div className="connector"></div>
                             <Text
-                                c={COLORS.secondary}
+                                c={COLORS.text.secondary}
                                 fz="sm"
                             >
                                 Track progress using size and status
@@ -213,7 +206,7 @@ const LandingPage = () => {
                             <div className="node"></div>
                             <div className="connector"></div>
                             <Text
-                                c={COLORS.secondary}
+                                c={COLORS.text.secondary}
                                 fz="sm"
                             >
                                 Add context with labels and descriptions
@@ -233,7 +226,7 @@ const LandingPage = () => {
                         mt={10}
                     >
                         <Text
-                            c={COLORS.secondary}
+                            c={COLORS.text.secondary}
                             fz="sm"
                         >
                             Proudly created and used by
@@ -250,7 +243,7 @@ const LandingPage = () => {
                             />
                             <Text
                                 fw={700}
-                                c={COLORS.primary}
+                                c={COLORS.text.primary}
                             >
                                 Mosaiq Software
                             </Text>
@@ -259,7 +252,7 @@ const LandingPage = () => {
                             href="https://mosaiq.dev"
                             target="_blank"
                             rel="noopener noreferrer"
-                            c={COLORS.primary}
+                            c={COLORS.text.primary}
                             underline="always"
                             fw={500}
                             style={{ fontSize: 15 }}
@@ -282,7 +275,7 @@ const LandingPage = () => {
             >
                 <Center>
                     <Text
-                        c={COLORS.secondary}
+                        c={COLORS.text.secondary}
                         fz="sm"
                     >
                         © Mosaiq Software, 2025

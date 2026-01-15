@@ -5,14 +5,13 @@ import { fullName, TextBlockId, TextBlockResourceType, TextSocketHandshakeAuth, 
 import { useUserContext } from '@trz/contexts/user-context';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { useMe } from '@trz/hooks/useMe';
+import { COLORS } from '@trz/util/colors';
 import { IDLE_TIMEOUT_MS } from '@trz/util/realtimeUtils';
 import { useEffect, useMemo, useState } from 'react';
 import { ManagerOptions, SocketOptions } from 'socket.io-client';
 import { ProviderConfiguration, SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
 import { BaseBlockNoteEditor } from './BaseBlockNoteEditor';
-
-const IDLE_COLOR = '#afafaf';
 
 enum YSOCKET_STATUS_CODE {
     SYNC = 'sync',
@@ -49,7 +48,7 @@ export const BlockNoteEditor = (props: BlockNoteEditorProps) => {
     const name = fullName(me);
     const [throttledSyncState, setThrottledSyncState] = useThrottledState<boolean | undefined>(undefined, 500);
     const userColor = useMemo(() => {
-        return idle ? IDLE_COLOR : (pfpColor ?? '#ffffff');
+        return idle ? COLORS.semantic.unset : (pfpColor ?? COLORS.text.primary);
     }, [idle, pfpColor]);
 
     const [provider, setProvider] = useState<{ doc: Y.Doc; socket: SocketIOProvider } | undefined>(undefined);

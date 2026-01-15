@@ -5,6 +5,7 @@ import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useUserContext } from '@trz/contexts/user-context';
 import { logoutUser } from '@trz/emitters';
 import { useUser } from '@trz/hooks/useUser';
+import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router';
@@ -56,8 +57,8 @@ export const UserProfileIcon = () => {
                     />
                 ) : (
                     <Button
-                        color="#fafafa"
-                        c="#19191b"
+                        color={COLORS.text.primary}
+                        c={COLORS.foreground.dark}
                         variant="filled"
                         onClick={userCtx.goToLogin}
                     >
@@ -68,7 +69,7 @@ export const UserProfileIcon = () => {
             <Menu.Dropdown>
                 <Menu.Item onClick={handleNavigateToSettings}>Settings</Menu.Item>
                 <Menu.Item
-                    color="red"
+                    color={COLORS.semantic.error}
                     onClick={handleLogout}
                 >
                     Logout

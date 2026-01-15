@@ -2,10 +2,10 @@ import { Button, Menu, Stack } from '@mantine/core';
 import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
 import React from 'react';
 import { ContextMenuButton } from './ContextMenuButton';
+import { COLORS } from '@trz/util/colors';
 
 const OPEN_DELAY = 100;
 const CLOSE_DELAY = 100;
-const DEFAULT_COLOR = '#242424';
 
 export interface ContextMenuSelectorMenuItem<T = string> {
     id: T;
@@ -49,11 +49,14 @@ export const ContextMenuSelectorMenu = <T extends string = string>(props: Contex
                 <Stack gap={1}>
                     {props.items.map((item) => {
                         const textColor =
-                            props.textColor ?? (colorIsDarkAdvanced(item.color ?? DEFAULT_COLOR) ? '#fff' : '#000');
+                            props.textColor ??
+                            (colorIsDarkAdvanced(item.color ?? COLORS.background.dark)
+                                ? COLORS.text.primary
+                                : COLORS.background.dark);
                         return (
                             <Button
                                 key={item.id}
-                                bg={item.color ?? DEFAULT_COLOR}
+                                bg={item.color ?? COLORS.background.dark}
                                 ta={props.textAlign ?? 'left'}
                                 justify={
                                     props.textAlign === 'center'

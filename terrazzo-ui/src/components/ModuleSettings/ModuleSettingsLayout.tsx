@@ -1,5 +1,6 @@
 import { Alert, Box, Button, CopyButton, Group, Stack, Switch, Text, TextInput, Tooltip } from '@mantine/core';
 import { ModuleHeader } from '@mosaiq/terrazzo-common';
+import { COLORS } from '@trz/util/colors';
 import { getModulePublicUrl } from '@trz/util/moduleUtils';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useEffect, useState } from 'react';
@@ -25,7 +26,7 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
         return (
             <Alert
                 title={`Archived ${toTitleCase(props.moduleHeader.type)}`}
-                color="yellow"
+                color={COLORS.semantic.warning}
             >
                 <Stack>
                     <Text>This {props.moduleHeader.type} is archived and can only be viewed.</Text>
@@ -50,7 +51,7 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
         >
             <TextInput
                 labelProps={{
-                    c: 'white',
+                    c: COLORS.text.primary,
                 }}
                 label={toTitleCase(`${props.moduleHeader.type} Name`)}
                 placeholder={toTitleCase(`My ${props.moduleHeader.type}`)}
@@ -118,7 +119,7 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                     onClick={() => {
                         props.onSave({ archived: true });
                     }}
-                    borderColor="red"
+                    borderColor={COLORS.semantic.error}
                     variant="outline"
                     disabled={props.disabled}
                     tooltip={`Archived ${props.moduleHeader.type}s can be restored at any time`}

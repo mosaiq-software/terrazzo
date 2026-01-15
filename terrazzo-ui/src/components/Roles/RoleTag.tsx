@@ -1,5 +1,6 @@
 import { Box, Text } from '@mantine/core';
 import { Role } from '@mosaiq/terrazzo-common';
+import { COLORS } from '@trz/util/colors';
 import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
 import { useState } from 'react';
 import { MdClose } from 'react-icons/md';
@@ -11,7 +12,7 @@ interface RoleTagProps {
 }
 export const RoleTag = (props: RoleTagProps) => {
     const [isHovered, setIsHovered] = useState(false);
-    const iconColor = colorIsDarkAdvanced(props.role.color) ? '#fff' : '#000';
+    const iconColor = colorIsDarkAdvanced(props.role.color) ? COLORS.text.primary : COLORS.background.dark;
     const variant = props.variant ?? 'tag';
 
     return (
@@ -22,8 +23,8 @@ export const RoleTag = (props: RoleTagProps) => {
                 gap: 4,
                 padding: variant === 'tag' ? '3px 8px' : '6px 12px',
                 borderRadius: variant === 'tag' ? '12px' : '0px',
-                border: variant === 'tag' ? '1px solid #373A40' : 'none',
-                backgroundColor: variant === 'item' && isHovered ? '#00000010' : 'transparent',
+                border: variant === 'tag' ? `1px solid ${COLORS.border}` : 'none',
+                backgroundColor: variant === 'item' && isHovered ? COLORS.overlay.dark : COLORS.transparent,
                 width: variant === 'item' ? '100%' : 'auto',
                 transition: 'background-color 0.15s ease',
             }}

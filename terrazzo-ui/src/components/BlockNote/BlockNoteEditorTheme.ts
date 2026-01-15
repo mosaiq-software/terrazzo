@@ -1,4 +1,5 @@
 import { darkDefaultTheme, lightDefaultTheme, Theme } from '@blocknote/mantine';
+import { COLORS } from '@trz/util/colors';
 
 const sharedTheme: Theme = {
     borderRadius: 4,
@@ -43,32 +44,32 @@ const darkTheme: Theme = {
     ...sharedTheme,
     colors: {
         editor: {
-            text: '#ffffff',
-            background: '#00000000',
+            text: COLORS.text.primary,
+            background: COLORS.transparent,
         },
         menu: {
-            text: '#ffffff',
-            background: '#17191b',
+            text: COLORS.text.primary,
+            background: COLORS.background.medium,
         },
         tooltip: {
-            text: '#ffffff',
-            background: '#17191b',
+            text: COLORS.text.primary,
+            background: COLORS.background.medium,
         },
         hovered: {
-            text: '#ffffff',
-            background: '#17191b',
+            text: COLORS.text.primary,
+            background: COLORS.background.medium,
         },
         selected: {
-            text: '#ffffff',
-            background: '#484f57',
+            text: COLORS.text.primary,
+            background: COLORS.foreground.dark,
         },
         disabled: {
-            text: '#34373b',
-            background: '#00000040',
+            text: COLORS.text.disabled,
+            background: COLORS.overlay.dark,
         },
-        shadow: '#00000000',
-        border: '#828282',
-        sideMenu: '#828282',
+        shadow: COLORS.transparent,
+        border: COLORS.border,
+        sideMenu: COLORS.foreground.medium,
         highlights: darkDefaultTheme.colors.highlights,
     },
 };

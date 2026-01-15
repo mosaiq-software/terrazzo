@@ -15,6 +15,7 @@ import { modals } from '@mantine/modals';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { useMe } from '@trz/hooks/useMe';
+import { COLORS } from '@trz/util/colors';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -31,7 +32,7 @@ const HomePage = (): React.JSX.Element => {
 
     return (
         <ScrollArea
-            bg="#15161A"
+            bg={COLORS.background.medium}
             h={`calc(100vh - ${uiCtx.navbarHeight}px)`}
         >
             <Center h="100%">
@@ -46,14 +47,14 @@ const HomePage = (): React.JSX.Element => {
                         py="25"
                     >
                         <Title
-                            c="white"
+                            c={COLORS.text.primary}
                             order={2}
                         >
                             Welcome {me?.firstName ?? ''}
                         </Title>
                     </Flex>
                     <Divider
-                        color="#5B5857"
+                        color={COLORS.divider}
                         mb="15"
                     />
                     <Box
@@ -65,7 +66,7 @@ const HomePage = (): React.JSX.Element => {
                         }}
                     >
                         <Title
-                            c="white"
+                            c={COLORS.text.primary}
                             order={4}
                             my="xs"
                         >
@@ -79,7 +80,7 @@ const HomePage = (): React.JSX.Element => {
                                 >
                                     <UnstyledButton
                                         variant="subtle"
-                                        c="white"
+                                        c={COLORS.text.primary}
                                         onClick={() => navigate('/org/' + org.id)}
                                         w={'100%'}
                                     >
@@ -94,7 +95,7 @@ const HomePage = (): React.JSX.Element => {
                                                 />
                                                 <Title
                                                     order={3}
-                                                    c="#fff"
+                                                    c={COLORS.text.primary}
                                                     td="none"
                                                 >
                                                     {org.name}

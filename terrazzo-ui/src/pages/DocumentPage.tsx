@@ -9,6 +9,7 @@ import { updateDocumentMetadata } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useDocument } from '@trz/hooks/useDocument';
 import { useModulePermission } from '@trz/hooks/usePermissions';
+import { COLORS } from '@trz/util/colors';
 import { niceDateWithTime } from '@trz/util/dateUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { setTitle } from '@trz/util/tabUtils';
@@ -69,7 +70,7 @@ const DocumentPage = (): React.JSX.Element => {
     return (
         <ScrollArea h={`calc(100vh - ${uiCtx.navbarHeight}px)`}>
             <Stack
-                bg="#15161A"
+                bg={COLORS.background.medium}
                 mih="100vh"
                 pb="10vh"
                 align="center"
@@ -98,11 +99,11 @@ const DocumentPage = (): React.JSX.Element => {
                                     order: 2,
                                     textWrap: 'nowrap',
                                     fw: 600,
-                                    c: 'white',
+                                    c: COLORS.text.primary,
                                 }}
                                 inputProps={{
                                     w: '100%',
-                                    bg: 'transparent',
+                                    bg: COLORS.transparent,
                                 }}
                                 style={{
                                     width: '95%',
@@ -122,7 +123,7 @@ const DocumentPage = (): React.JSX.Element => {
                             justify="flex-end"
                         >
                             <Text
-                                c="dimmed"
+                                c={COLORS.text.muted}
                                 fz="sm"
                             >
                                 Created {niceDateWithTime(document.createdAt)}

@@ -23,6 +23,7 @@ import { SearchBar } from '@trz/components/AutoComplete/Searchbar';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { useUserContext } from '@trz/contexts/user-context';
+import { COLORS } from '@trz/util/colors';
 import { useContextMenu } from 'mantine-contextmenu';
 import { NavLink, Outlet } from 'react-router-dom';
 
@@ -66,7 +67,7 @@ const AppLayout = () => {
                     style={{
                         transition: `padding ${uiCtx.animationDuration}ms`,
                     }}
-                    bg="#0c0c10"
+                    bg={COLORS.background.dark}
                     h="100vh"
                     pt={10}
                 >
@@ -90,7 +91,7 @@ const AppLayout = () => {
                                 opened={!sidebarCollapsed}
                                 size="20px"
                                 p="5px"
-                                color="white"
+                                color={COLORS.text.primary}
                                 onClick={() => {
                                     setSidebarCollapsed(!sidebarCollapsed);
                                 }}
@@ -110,14 +111,14 @@ const AppLayout = () => {
                         >
                             <TerrazzoLogo
                                 style={{
-                                    fill: '#282836',
+                                    fill: COLORS.foreground.dark,
                                     width: 16,
                                     height: 20,
                                 }}
                             />
                             <Title
                                 order={2}
-                                c="#282836"
+                                c={COLORS.foreground.dark}
                                 fw={700}
                                 style={{
                                     letterSpacing: 1,
@@ -186,14 +187,14 @@ const AppLayout = () => {
                     gap={0}
                     justify="space-between"
                     align="center"
-                    bg="#0c0c10"
+                    bg={COLORS.background.dark}
                     h={uiCtx.navbarHeight}
                     px="md"
                 >
                     <Group>
                         <Text
                             pl="lg"
-                            c="#fff"
+                            c={COLORS.text.primary}
                         >
                             {uiCtx.pageTitle}
                         </Text>

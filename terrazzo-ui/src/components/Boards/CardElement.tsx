@@ -4,6 +4,7 @@ import { CardId } from '@mosaiq/terrazzo-common';
 import { AvatarRow } from '@trz/components/UI/AvatarRow';
 import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';
+import { COLORS } from '@trz/util/colors';
 import { useContextMenu } from 'mantine-contextmenu';
 import React from 'react';
 import { useCard } from '../../hooks/useCard';
@@ -35,7 +36,7 @@ const CardElement = (props: CardElementProps) => {
     return (
         <Paper
             ref={viewportRef}
-            bg="#17191b"
+            bg={COLORS.foreground.dark}
             radius="md"
             p="sm"
             shadow="md"
@@ -50,7 +51,7 @@ const CardElement = (props: CardElementProps) => {
                         ? {
                               transform: 'rotateZ(3deg) scale(1.02)',
                               boxShadow: '10px 8px 25px black',
-                              border: '1px solid #14222e',
+                              border: `1px solid ${COLORS.border}`,
                               zIndex: 12,
                           }
                         : {
@@ -83,7 +84,7 @@ const CardElement = (props: CardElementProps) => {
                     />
                     <Text
                         lineClamp={7}
-                        c="#ffffff"
+                        c={COLORS.text.primary}
                         fz="sm"
                         style={{
                             wordWrap: 'break-word',
@@ -95,7 +96,7 @@ const CardElement = (props: CardElementProps) => {
                     </Text>
                     <Text
                         size="xs"
-                        c="#878787"
+                        c={COLORS.text.secondary}
                         style={{
                             userSelect: 'none',
                         }}
