@@ -108,7 +108,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_BOARD]: BoardId;
     [ClientSE.GET_LIST]: ListId;
     [ClientSE.GET_CARD]: CardId;
-    [ClientSE.GET_SEARCH_RESULTS]: { query: string; searchSessionId: string };
+    [ClientSE.GET_SEARCH_RESULTS]: { query: string; searchSessionId: string; orgId: OrganizationId };
     [ClientSE.GET_DOCUMENT]: DocumentId;
     [ClientSE.GET_DIRECTORY]: DirectoryId;
     [ClientSE.GET_DIRECTORY_CONTENTS]: DirectoryId;

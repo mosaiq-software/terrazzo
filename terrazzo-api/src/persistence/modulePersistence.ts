@@ -36,9 +36,9 @@ export const getModulesByParentIdDb = async (parentId: UID) => {
     return models.map((mdl) => mdl.toJSON());
 };
 
-export const getModulesByOrgIdDb = async (orgId: UID) => {
+export const getModulesByOrgIdDb = async (orgId: UID, options?: Partial<ModuleHeader>) => {
     const models = await ModuleModel.findAll({
-        where: { orgId },
+        where: { orgId, ...options },
         order: [['order', 'ASC']],
     });
     return models.map((mdl) => mdl.toJSON());

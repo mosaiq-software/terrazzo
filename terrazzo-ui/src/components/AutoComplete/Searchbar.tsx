@@ -1,9 +1,9 @@
 import { Button, Divider, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
 import { useDebouncedCallback, useHotkeys } from '@mantine/hooks';
-import { DatapointType, QueryResult } from '@mosaiq/terrazzo-common';
+import { QueryableItem, QueryResult } from '@mosaiq/terrazzo-common';
+import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getSearchResults } from '@trz/emitters';
-import { COLORS } from '@trz/util/colors';
 import React, { useState } from 'react';
 import { BsCardText } from 'react-icons/bs';
 import { IoDocumentOutline } from 'react-icons/io5';
@@ -17,6 +17,7 @@ export function SearchBar() {
     const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
     const sockCtx = useSocket();
     const navigate = useNavigate();
+    const orgCtx = useOrg();
 
     useHotkeys([
         [
@@ -38,7 +39,11 @@ export function SearchBar() {
             console.error('No active search session ID');
             return;
         }
-        const res = await getSearchResults(sockCtx, searchQuery, searchSessionId);
+        if (!orgCtx.active) {
+            console.error('No active organization context');
+            return;
+        }
+        const res = await getSearchResults(sockCtx, searchQuery, searchSessionId, orgCtx.active.id);
         setSearchResults(res?.results || []);
     }, 300);
 
@@ -140,7 +145,7 @@ interface RenderedSearchResultProps {
     onClose: () => void;
 }
 const RenderedSearchResult = (props: RenderedSearchResultProps) => {
-    const { id, display, type, title } = props.result;
+    const { id, display, type } = props.result;
     const extra = getExtra(type, id);
     const navigate = useNavigate();
 
@@ -181,16 +186,7 @@ const RenderedSearchResult = (props: RenderedSearchResultProps) => {
                         w="100%"
                         truncate
                     >
-                        {title}
-                    </Text>
-                    <Text
-                        ta="left"
-                        size="sm"
-                        c={COLORS.text.muted}
-                        w="100%"
-                        truncate
-                    >
-                        {extra.typeName}: {display}
+                        {display}
                     </Text>
                 </Stack>
                 <extra.icon size={16} />
@@ -199,33 +195,27 @@ const RenderedSearchResult = (props: RenderedSearchResultProps) => {
     );
 };
 
-const getExtra = (type: DatapointType, id: string) => {
+const getExtra = (type: QueryableItem, id: string) => {
     switch (type) {
-        case DatapointType.BoardTitle:
+        case QueryableItem.Board:
             return {
                 link: `/board/${id}`,
                 icon: MdOutlineViewKanban,
-                typeName: 'Board',
             };
-        case DatapointType.CardTitle:
-        case DatapointType.CardDescription:
+        case QueryableItem.Card:
             return {
                 link: `/card/${id}`,
                 icon: BsCardText,
-                typeName: 'Card',
             };
-        case DatapointType.DocumentTitle:
-        case DatapointType.DocumentContent:
+        case QueryableItem.Document:
             return {
                 link: `/doc/${id}`,
                 icon: IoDocumentOutline,
-                typeName: 'Document',
             };
         default:
             return {
                 link: '#',
                 icon: MdOutlineIncompleteCircle,
-                typeName: 'Other',
             };
     }
 };

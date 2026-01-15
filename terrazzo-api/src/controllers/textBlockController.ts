@@ -445,3 +445,54 @@ export const restoreTextBlockSnapshot = async (
         throw error;
     }
 };
+
+/**
+ * Gets the text content of a text block suitable for querying/indexing.
+ * If the block is plain text, returns the text directly.
+ * If the block is BlockNote, extracts the content from the stored blocks.
+ */
+export const getQueryableTextBlockContent = async (textBlockId: TextBlockId): Promise<string> => {
+    try {
+        const textBlock = await getTextBlockByIdDb(textBlockId);
+        if (!textBlock) {
+            throw new Error(`Text block ${textBlockId} not found`);
+        }
+        switch (textBlock.type) {
+            case TextBlockType.PlainText:
+                return textBlock.text;
+            case TextBlockType.BlockNote: {
+                let blocks: Block[] = [];
+                if (textBlock.text && textBlock.text.length > 0) {
+                    blocks = JSON.parse(textBlock.text);
+                }
+                return await convertBlocknoteBlocksToPlaintext(blocks);
+            }
+            default:
+                return exhaustiveCheck(textBlock.type, `Unsupported text block type for text block ${textBlockId}`);
+        }
+    } catch (error: any) {
+        console.error(`Unable to get queryable content for text block ${textBlockId}`, {
+            message: error.message,
+            trace: error.stack,
+        });
+        return '';
+    }
+};
+
+const convertBlocknoteBlocksToPlaintext = async (blocks: Block[]): Promise<string> => {
+    const html = await BLOCKNOTE_EDITOR.blocksToHTMLLossy(blocks);
+    return getInnerTextFromHtml(html);
+};
+
+const getInnerTextFromHtml = (html: string): string => {
+    const blockLevelTags = ['div', 'p', 'br', 'li', 'ul', 'ol', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote'];
+    let text = html;
+    for (const tag of blockLevelTags) {
+        const regexOpen = new RegExp(`<${tag}[^>]*>`, 'gi');
+        const regexClose = new RegExp(`</${tag}>`, 'gi');
+        text = text.replace(regexOpen, '\n').replace(regexClose, '\n');
+    }
+    text = text.replace(/<[^>]+>/g, '');
+    text = text.replace(/\n+/g, '\n').trim();
+    return text;
+};
