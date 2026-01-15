@@ -43,3 +43,17 @@ export const withIf = <T>(item: T | T[], condition: any): T[] => {
 export const exhaustiveCheck = (param: never, message?: string): never => {
     throw new Error(message || `Exhaustive check failed for value: ${param}`);
 };
+
+export const settlePromises = async <T>(promises: Promise<T>[]): Promise<{ fulfilled: T[]; rejected: any[] }> => {
+    const results = await Promise.allSettled(promises);
+    const fulfilled: T[] = [];
+    const rejected: any[] = [];
+    for (const result of results) {
+        if (result.status === 'fulfilled') {
+            fulfilled.push(result.value);
+        } else {
+            rejected.push(result.reason);
+        }
+    }
+    return { fulfilled, rejected };
+};
