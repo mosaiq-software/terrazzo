@@ -7,6 +7,7 @@ import { useCard } from '@trz/hooks/useCard';
 import { useDocument } from '@trz/hooks/useDocument';
 import { useUser } from '@trz/hooks/useUser';
 import { forAllClickEvents, noEventBubble } from '@trz/util/eventUtils';
+import { MdArrowForward } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 
 /**
@@ -62,7 +63,7 @@ const BoardMentionPopup = (props: DelegatedBlockNoteMentionPopupProps) => {
                         onClick={() => navigate(`/board/${boardData.id}`)}
                         size="input-xs"
                     >
-                        ➔
+                        <MdArrowForward />
                     </ActionIcon>
                 </Group>
             ) : (
@@ -90,7 +91,7 @@ const CardMentionPopup = (props: DelegatedBlockNoteMentionPopupProps) => {
                         onClick={() => navigate(`/card/${card.id}`)}
                         size="input-xs"
                     >
-                        ➔
+                        <MdArrowForward />
                     </ActionIcon>
                 </Group>
             ) : (
@@ -117,7 +118,7 @@ const DocumentMentionPopup = (props: DelegatedBlockNoteMentionPopupProps) => {
                         onClick={() => navigate(`/document/${document.id}`)}
                         size="input-xs"
                     >
-                        ➔
+                        <MdArrowForward />
                     </ActionIcon>
                 </Group>
             ) : (
