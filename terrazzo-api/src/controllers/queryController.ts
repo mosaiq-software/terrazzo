@@ -2,6 +2,7 @@ import {
     boardNameWithCode,
     CardHeader,
     cardNameWithBoardCodeAndNumber,
+    fullNameWithUsername,
     ModuleHeader,
     OrganizationId,
     QueryableDatapoint,
@@ -20,6 +21,7 @@ import { getModulesByOrgIdDb } from '@trz-api/persistence/modulePersistence';
 import { getOrganizationMembershipsForUserDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import Fuse from 'fuse.js';
+import { getMembersInOrg } from './membershipController';
 import { getQueryableTextBlockContent } from './textBlockController';
 
 /** Cache each search session so that we only index once per use of the searchbar */
@@ -207,6 +209,16 @@ const getTagsForUserInOrg = async (userId: UserId, orgId: OrganizationId): Promi
             type: QueryableItem.Document,
         });
     }
+
+    const membersOfOrg = await getMembersInOrg(org.id);
+    for (const member of membersOfOrg) {
+        queryTags.push({
+            id: member.user.id,
+            name: fullNameWithUsername(member.user),
+            type: QueryableItem.User,
+        });
+    }
+
     return queryTags;
 };
 

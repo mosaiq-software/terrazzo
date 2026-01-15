@@ -8,7 +8,8 @@ export const COLORS = {
     },
     accent: {
         pink: {
-            light: '#fd2d61',
+            darkMuted: '#68081b',
+            vibrant: '#fd2d61',
         },
         teal: {
             dark: '#1e383e',

@@ -1,5 +1,7 @@
 import { createReactInlineContentSpec } from '@blocknote/react';
+import { Menu } from '@mantine/core';
 import { COLORS } from '@trz/util/colors';
+import { BlockNoteMentionPopup } from './BlockNoteMentionPopup';
 
 export const BlockNoteMention = createReactInlineContentSpec(
     {
@@ -19,7 +21,29 @@ export const BlockNoteMention = createReactInlineContentSpec(
     },
     {
         render: (props) => (
-            <span style={{ backgroundColor: COLORS.accent.pink.light }}>@{props.inlineContent.props.tag}</span>
+            <Menu
+                width={400}
+                position="bottom-end"
+                arrowPosition="center"
+                arrowSize={10}
+                withArrow
+                shadow="md"
+                trigger="hover"
+                closeOnClickOutside
+                withinPortal
+            >
+                <Menu.Target>
+                    <span style={{ backgroundColor: COLORS.accent.pink.darkMuted }}>
+                        @{props.inlineContent.props.tag}
+                    </span>
+                </Menu.Target>
+                <Menu.Dropdown>
+                    <BlockNoteMentionPopup
+                        type={props.inlineContent.props.type}
+                        id={props.inlineContent.props.id}
+                    />
+                </Menu.Dropdown>
+            </Menu>
         ),
     }
 );

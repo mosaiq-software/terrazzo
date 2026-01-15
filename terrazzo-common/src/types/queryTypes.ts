@@ -4,6 +4,7 @@ export enum QueryableItem {
     Board = 'board',
     Card = 'card',
     Document = 'document',
+    User = 'user',
 }
 
 /**
