@@ -1,5 +1,8 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { executeQueryForUser, executeTagQuery } from '@trz-api/controllers/queryController/queryController';
+import {
+    executeSearchQueryForUser,
+    executeTagQueryForUser,
+} from '@trz-api/controllers/queryController/queryController';
 import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 
@@ -9,7 +12,12 @@ export const registerQueryListeners = (socket: Socket) => {
         if (!socketData.user?.userId) {
             throw new Error('User not authenticated');
         }
-        const results = await executeQueryForUser(socketData.user.userId, data.orgId, data.query, data.searchSessionId);
+        const results = await executeSearchQueryForUser(
+            socketData.user.userId,
+            data.orgId,
+            data.query,
+            data.searchSessionId
+        );
         return { results };
     });
 
@@ -18,7 +26,7 @@ export const registerQueryListeners = (socket: Socket) => {
         if (!socketData.user?.userId) {
             throw new Error('User not authenticated');
         }
-        const tags = await executeTagQuery(socketData.user.userId, data.orgId, data.query, data.searchSessionId);
+        const tags = await executeTagQueryForUser(socketData.user.userId, data.orgId, data.query, data.searchSessionId);
         return { tags };
     });
 };
