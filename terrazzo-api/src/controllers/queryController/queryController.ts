@@ -2,6 +2,7 @@ import {
     boardNameWithCode,
     CardHeader,
     cardNameWithBoardCodeAndNumber,
+    fullName,
     fullNameWithUsername,
     ModuleHeader,
     OrganizationId,
@@ -21,12 +22,12 @@ import { getModulesByOrgIdDb } from '@trz-api/persistence/modulePersistence';
 import { getOrganizationMembershipsForUserDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import Fuse from 'fuse.js';
-import { getMembersInOrg } from './membershipController';
-import { getQueryableTextBlockContent } from './textBlockController';
+import { getMembersInOrg } from '../membershipController';
+import { getQueryableTextBlockContent } from '../textBlockController/textBlockController';
 
 /** Cache each search session so that we only index once per use of the searchbar */
 const CachedSearchSessions = new Map<UserId, { searchSessionId: string; datapoints: QueryableDatapoint[] }>();
-const CachedTagSessions = new Map<UserId, { searchSessionId: string; tags: QueryTag[] }>();
+const CachedTagSessions = new Map<UserId, { searchSessionId: string; datapoints: QueryableDatapoint[] }>();
 
 const getAllQueryableDataForUserInOrg = async (userId: UserId, orgId: OrganizationId) => {
     const orgMemberships = await getOrganizationMembershipsForUserDb(userId);
@@ -167,8 +168,8 @@ export const executeQueryForUser = async (
     return topResults;
 };
 
-const getTagsForUserInOrg = async (userId: UserId, orgId: OrganizationId): Promise<QueryTag[]> => {
-    const queryTags: QueryTag[] = [];
+const getTagsForUserInOrg = async (userId: UserId, orgId: OrganizationId): Promise<QueryableDatapoint[]> => {
+    const queryableData: QueryableDatapoint[] = [];
     const org = await getOrgByIdDb(orgId);
     if (!org) {
         throw new Error('Organization not found');
@@ -182,17 +183,19 @@ const getTagsForUserInOrg = async (userId: UserId, orgId: OrganizationId): Promi
                 if (!boardData) {
                     throw new Error(`Board not found: ${board.id}`);
                 }
-                queryTags.push({
+                queryableData.push({
                     id: board.id,
-                    name: boardNameWithCode(board.name, boardData.boardCode),
+                    display: boardNameWithCode(board.name, boardData.boardCode),
+                    content: buildBoardNameVariants(board.name, boardData.boardCode),
                     type: QueryableItem.Board,
                 });
 
                 const cards = await getCardsByBoardIdDb(board.id, { archived: false });
                 for (const card of cards) {
-                    queryTags.push({
+                    queryableData.push({
                         id: card.id,
-                        name: cardNameWithBoardCodeAndNumber(card.name, boardData.boardCode, card.cardNumber),
+                        display: cardNameWithBoardCodeAndNumber(card.name, boardData.boardCode, card.cardNumber),
+                        content: buildCardNameVariants(card.name, boardData.boardCode, card.cardNumber),
                         type: QueryableItem.Card,
                     });
                 }
@@ -203,23 +206,25 @@ const getTagsForUserInOrg = async (userId: UserId, orgId: OrganizationId): Promi
 
     const documentModules = await getModulesByOrgIdDb(org.id, { type: TrzModuleType.Document, archived: false });
     for (const document of documentModules) {
-        queryTags.push({
+        queryableData.push({
             id: document.id,
-            name: document.name,
+            display: document.name,
+            content: getDocumentNameVariants(document.name),
             type: QueryableItem.Document,
         });
     }
 
     const membersOfOrg = await getMembersInOrg(org.id);
     for (const member of membersOfOrg) {
-        queryTags.push({
+        queryableData.push({
             id: member.user.id,
-            name: fullNameWithUsername(member.user),
+            display: fullNameWithUsername(member.user),
+            content: getUserNameVariants(fullName(member.user), member.user.username),
             type: QueryableItem.User,
         });
     }
 
-    return queryTags;
+    return queryableData;
 };
 
 export const executeTagQuery = async (
@@ -229,7 +234,7 @@ export const executeTagQuery = async (
     searchSessionId: string
 ): Promise<QueryTag[]> => {
     try {
-        let queryTags: QueryTag[] = [];
+        let queryableData: QueryableDatapoint[] = [];
         const org = await getOrgByIdDb(orgId);
         if (!org) {
             throw new Error('Organization not found');
@@ -237,13 +242,13 @@ export const executeTagQuery = async (
 
         const cachedSession = CachedTagSessions.get(userId);
         if (!cachedSession || cachedSession.searchSessionId !== searchSessionId) {
-            queryTags = await getTagsForUserInOrg(userId, orgId);
-            CachedTagSessions.set(userId, { searchSessionId, tags: queryTags });
+            queryableData = await getTagsForUserInOrg(userId, orgId);
+            CachedTagSessions.set(userId, { searchSessionId, datapoints: queryableData });
         } else {
-            queryTags = cachedSession.tags;
+            queryableData = cachedSession.datapoints;
         }
 
-        const fuse = new Fuse(queryTags, {
+        const fuse = new Fuse(queryableData, {
             keys: ['name'],
             ignoreDiacritics: true,
             includeScore: true,
@@ -253,7 +258,9 @@ export const executeTagQuery = async (
 
         const results: ScoredQueryTag[] = fuseResults.map((result) => {
             return {
-                ...result.item,
+                id: result.item.id,
+                type: result.item.type,
+                name: result.item.display,
                 score: result.score ?? 0,
             };
         });
@@ -270,4 +277,41 @@ export const executeTagQuery = async (
         });
         throw e;
     }
+};
+
+const VARIANT_SPACING = 3;
+const buildBoardNameVariants = (boardName: string, boardCode: string): string => {
+    return [`${boardName} ${boardCode}`, `${boardCode} ${boardName}`, boardName, boardCode, boardCode]
+        .join(' '.repeat(VARIANT_SPACING))
+        .toLowerCase();
+};
+
+const buildCardNameVariants = (cardName: string, boardCode: string, cardNumber: number): string => {
+    return [
+        `[${boardCode}-${cardNumber}] ${cardName}`,
+        `${boardCode}-${cardNumber}`,
+        `${boardCode}${cardNumber}`,
+        `${boardCode} ${cardNumber}`,
+        `${cardNumber}`,
+        `${cardNumber}`,
+        `${cardNumber}`,
+        `${cardNumber}`,
+        `${cardNumber}`,
+        `${cardNumber}`,
+        `${cardNumber}`,
+        `${cardNumber}`,
+        `${cardName}`,
+    ]
+        .join(' '.repeat(VARIANT_SPACING))
+        .toLowerCase();
+};
+
+const getDocumentNameVariants = (documentName: string): string => {
+    return documentName.toLowerCase();
+};
+
+const getUserNameVariants = (fullName: string, username: string): string => {
+    return [`${fullName} (${username})`, `${username} (${fullName})`, fullName, username, `@${username}`]
+        .join(' '.repeat(VARIANT_SPACING))
+        .toLowerCase();
 };

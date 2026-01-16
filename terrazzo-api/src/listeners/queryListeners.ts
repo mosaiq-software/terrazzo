@@ -1,5 +1,5 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { executeQueryForUser, executeTagQuery } from '@trz-api/controllers/queryController';
+import { executeQueryForUser, executeTagQuery } from '@trz-api/controllers/queryController/queryController';
 import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 
