@@ -70,7 +70,7 @@ export const CustomBlockNoteViewer = (props: CustomBlockNoteViewerProps) => {
                     }
 
                     const res = await getSearchTags(sockCtx, query, session.id, orgCtx.active.id);
-                    const tags = res?.tags || [];
+                    const tags = res?.results || [];
                     setSearchResults(tags);
                     pendingSearchRef.current?.(tags);
                     pendingSearchRef.current = null;
