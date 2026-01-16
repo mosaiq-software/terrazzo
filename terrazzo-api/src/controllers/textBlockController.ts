@@ -60,6 +60,7 @@ export const checkCanUserEditTextBlock = async (
     }
 };
 
+const JsDomInstance = new JSDOM('<!doctype html><html><body></body></html>');
 const BlockNoteMention = createInlineContentSpec(
     {
         type: 'mention',
@@ -78,8 +79,7 @@ const BlockNoteMention = createInlineContentSpec(
     },
     {
         render: (inlineContent) => {
-            const dom = new JSDOM('<!doctype html><html><body></body></html>');
-            const document = dom.window.document;
+            const document = JsDomInstance.window.document;
 
             const serverSideHtml = document.createElement('span');
             serverSideHtml.className = 'bn-mention';

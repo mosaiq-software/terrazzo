@@ -180,7 +180,7 @@ const getTagsForUserInOrg = async (userId: UserId, orgId: OrganizationId): Promi
             (async () => {
                 const boardData = await getBoardByIdDb(board.id);
                 if (!boardData) {
-                    throw new Error('Board not found');
+                    throw new Error(`Board not found: ${board.id}`);
                 }
                 queryTags.push({
                     id: board.id,
