@@ -10,31 +10,34 @@ import {
     TrzModuleType,
     UserId,
 } from '@mosaiq/terrazzo-common';
-import { getQueryableTextBlockContent } from '@trz-api/controllers/textBlockController/textBlockController';
-import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
-import { getCardsByBoardIdDb } from '@trz-api/persistence/cardPersistence';
-import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
-import { getModulesByOrgIdDb } from '@trz-api/persistence/modulePersistence';
-import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import {
-    buildDocumentNameAndContentVariants,
     buildBoardNameVariants,
     buildCardNameAndContentVariants,
+    buildDocumentNameAndContentVariants,
 } from '../queryVariantBuilders';
+import { defaultSearchQueryDataSource, SearchQueryDataSource } from './queryDataSources';
 
 export const getAllQueryableDataForUserInOrg = async (userId: UserId, orgId: OrganizationId) => {
+    return buildSearchIndex(defaultSearchQueryDataSource, userId, orgId);
+};
+
+export const buildSearchIndex = async (
+    dataSource: SearchQueryDataSource,
+    userId: UserId,
+    orgId: OrganizationId
+): Promise<QueryableDatapoint[]> => {
     const queryableData: QueryableDatapoint[] = [];
 
-    const org = await getOrgByIdDb(orgId);
-    if (!org) {
-        return queryableData;
-    }
+    const allBoardsInOrg = await dataSource.getModulesByOrgIdDb(orgId, { type: TrzModuleType.Board, archived: false });
+    const boardIndexingPromises = allBoardsInOrg.map((boardModule) => indexBoard(dataSource, boardModule));
 
-    const allBoardsInOrg = await getModulesByOrgIdDb(org.id, { type: TrzModuleType.Board, archived: false });
-    const boardIndexingPromises = allBoardsInOrg.map((boardModule) => indexBoard(boardModule));
-
-    const allDocumentsInOrg = await getModulesByOrgIdDb(org.id, { type: TrzModuleType.Document, archived: false });
-    const documentIndexingPromises = allDocumentsInOrg.map((documentModule) => indexDocument(documentModule));
+    const allDocumentsInOrg = await dataSource.getModulesByOrgIdDb(orgId, {
+        type: TrzModuleType.Document,
+        archived: false,
+    });
+    const documentIndexingPromises = allDocumentsInOrg.map((documentModule) =>
+        indexDocument(dataSource, documentModule)
+    );
 
     const allIndexingPromises = [...boardIndexingPromises, ...documentIndexingPromises];
     const { fulfilled } = await settlePromises(allIndexingPromises);
@@ -44,13 +47,16 @@ export const getAllQueryableDataForUserInOrg = async (userId: UserId, orgId: Org
     return queryableData;
 };
 
-const indexDocument = async (documentModule: ModuleHeader): Promise<QueryableDatapoint[]> => {
+const indexDocument = async (
+    dataSource: SearchQueryDataSource,
+    documentModule: ModuleHeader
+): Promise<QueryableDatapoint[]> => {
     try {
-        const document = await getDocumentByIdDb(documentModule.id);
+        const document = await dataSource.getDocumentByIdDb(documentModule.id);
         if (!document) {
             throw new Error('Document not found');
         }
-        const textBlockContent = await getQueryableTextBlockContent(document.textBlockId);
+        const textBlockContent = await dataSource.getQueryableTextBlockContent(document.textBlockId);
         const documentQueryable: QueryableDatapoint = {
             display: documentModule.name,
             content: buildDocumentNameAndContentVariants(documentModule.name, textBlockContent),
@@ -67,9 +73,12 @@ const indexDocument = async (documentModule: ModuleHeader): Promise<QueryableDat
     }
 };
 
-const indexBoard = async (boardModule: ModuleHeader): Promise<QueryableDatapoint[]> => {
+const indexBoard = async (
+    dataSource: SearchQueryDataSource,
+    boardModule: ModuleHeader
+): Promise<QueryableDatapoint[]> => {
     try {
-        const board = await getBoardByIdDb(boardModule.id);
+        const board = await dataSource.getBoardByIdDb(boardModule.id);
         if (!board) {
             throw new Error('Board not found');
         }
@@ -80,10 +89,10 @@ const indexBoard = async (boardModule: ModuleHeader): Promise<QueryableDatapoint
             type: QueryableItem.Board,
         };
 
-        const cardsInBoard = await getCardsByBoardIdDb(boardModule.id, { archived: false });
+        const cardsInBoard = await dataSource.getCardsByBoardIdDb(boardModule.id, { archived: false });
         const cardIndexingPromises: Promise<QueryableDatapoint>[] = [];
         for (const card of cardsInBoard) {
-            cardIndexingPromises.push(indexCard(card, board.boardCode));
+            cardIndexingPromises.push(indexCard(dataSource, card, board.boardCode));
         }
         const { fulfilled } = await settlePromises(cardIndexingPromises);
 
@@ -97,9 +106,13 @@ const indexBoard = async (boardModule: ModuleHeader): Promise<QueryableDatapoint
     }
 };
 
-const indexCard = async (card: CardHeader, boardCode: string): Promise<QueryableDatapoint> => {
+const indexCard = async (
+    dataSource: SearchQueryDataSource,
+    card: CardHeader,
+    boardCode: string
+): Promise<QueryableDatapoint> => {
     try {
-        const textBlockContent = await getQueryableTextBlockContent(card.descriptionTextBlockId);
+        const textBlockContent = await dataSource.getQueryableTextBlockContent(card.descriptionTextBlockId);
         const cardQueryable: QueryableDatapoint = {
             display: cardNameWithBoardCodeAndNumber(card.name, boardCode, card.cardNumber),
             content: buildCardNameAndContentVariants(card.name, boardCode, card.cardNumber, textBlockContent),

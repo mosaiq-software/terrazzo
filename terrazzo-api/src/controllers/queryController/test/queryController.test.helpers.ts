@@ -1,5 +1,4 @@
 import { OrganizationId, QueryableDatapoint, TrzModuleType, UID, UserHeader, UserId } from '@mosaiq/terrazzo-common';
-import { expect } from 'vitest';
 import { getAllQueryableDataForUserInOrg } from '../indexers/searchQueryIndexer';
 import { getQueryableTagsForUserInOrg } from '../indexers/tagQueryIndexer';
 import {
@@ -202,10 +201,4 @@ export const buildTagDatapoints = async (data: {
         users: data.users,
     });
     return await getQueryableTagsForUserInOrg(data.userId, data.orgId);
-};
-
-export const assertScoresAscending = (scores: number[]) => {
-    for (let i = 1; i < scores.length; i++) {
-        expect(scores[i]).toBeGreaterThanOrEqual(scores[i - 1]);
-    }
 };
