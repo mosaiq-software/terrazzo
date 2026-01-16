@@ -3,7 +3,7 @@ import {
     checkCanUserEditTextBlock,
     getTextBlockSnapshotsWithContent,
     restoreTextBlockSnapshot,
-} from '@trz-api/controllers/textBlockController';
+} from '@trz-api/controllers/textBlockController/textBlockController';
 import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 

@@ -25,7 +25,7 @@ import { SocketManager } from '@trz-api/utils/socket/socketManager';
 import { Document } from '@trz-api/utils/y-socket-io';
 import console from 'console';
 import { Doc, XmlText } from 'yjs';
-import { getBoardIDFromCardID } from './cardController';
+import { getBoardIDFromCardID } from '../cardController';
 
 export const checkCanUserEditTextBlock = async (
     userId: UserId | undefined,

@@ -7,7 +7,7 @@ import {
     updateDocumentDb,
 } from '@trz-api/persistence/documentPersistence';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
-import { createBlocknoteTextBlockWithMarkdown } from './textBlockController';
+import { createBlocknoteTextBlockWithMarkdown } from './textBlockController/textBlockController';
 
 export const createNewDocument = async (title: string, parentId: UID, createdByUserId: UserId) => {
     const docModule = await createNewModule(title, parentId, TrzModuleType.Document);

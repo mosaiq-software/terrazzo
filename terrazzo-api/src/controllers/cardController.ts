@@ -27,7 +27,7 @@ import { getTextBlockByIdDb } from '@trz-api/persistence/textBlockPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
 import { getBoardIDFromListID } from './listController';
-import { createBlocknoteTextBlockWithMarkdown } from './textBlockController';
+import { createBlocknoteTextBlockWithMarkdown } from './textBlockController/textBlockController';
 
 export const MOVING_LIST_ORDER = -10000;
 //Gets
