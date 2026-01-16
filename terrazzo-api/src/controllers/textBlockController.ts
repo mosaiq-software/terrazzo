@@ -24,7 +24,6 @@ import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions
 import { SocketManager } from '@trz-api/utils/socket/socketManager';
 import { Document } from '@trz-api/utils/y-socket-io';
 import console from 'console';
-import { JSDOM } from 'jsdom';
 import { Doc, XmlText } from 'yjs';
 import { getBoardIDFromCardID } from './cardController';
 
@@ -60,7 +59,6 @@ export const checkCanUserEditTextBlock = async (
     }
 };
 
-const JsDomInstance = new JSDOM('<!doctype html><html><body></body></html>');
 const BlockNoteMention = createInlineContentSpec(
     {
         type: 'mention',
@@ -79,8 +77,6 @@ const BlockNoteMention = createInlineContentSpec(
     },
     {
         render: (inlineContent) => {
-            const document = JsDomInstance.window.document;
-
             const serverSideHtml = document.createElement('span');
             serverSideHtml.className = 'bn-mention';
             const tag = inlineContent?.props?.tag || '';
