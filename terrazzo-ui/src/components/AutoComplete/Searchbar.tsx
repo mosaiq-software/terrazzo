@@ -1,6 +1,6 @@
 import { Button, Divider, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
 import { useDebouncedCallback, useHotkeys } from '@mantine/hooks';
-import { QueryableItem, QueryResult } from '@mosaiq/terrazzo-common';
+import { QueryableItem, ScoredQueryableDatapoint } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getSearchResults } from '@trz/emitters';
@@ -142,7 +142,7 @@ export function SearchBar() {
 }
 
 interface RenderedSearchResultProps {
-    result: QueryResult;
+    result: ScoredQueryableDatapoint;
     highlighted: boolean;
     onClose: () => void;
 }

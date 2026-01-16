@@ -26,7 +26,12 @@ export const registerQueryListeners = (socket: Socket) => {
         if (!socketData.user?.userId) {
             throw new Error('User not authenticated');
         }
-        const tags = await executeTagQueryForUser(socketData.user.userId, data.orgId, data.query, data.searchSessionId);
-        return { tags };
+        const results = await executeTagQueryForUser(
+            socketData.user.userId,
+            data.orgId,
+            data.query,
+            data.searchSessionId
+        );
+        return { results };
     });
 };

@@ -2,7 +2,7 @@ import { codeBlockOptions } from '@blocknote/code-block';
 import { BlockNoteSchema, createCodeBlockSpec } from '@blocknote/core';
 import { BlockNoteView } from '@blocknote/mantine';
 import { DefaultReactSuggestionItem, SuggestionMenuController } from '@blocknote/react';
-import { QueryTag } from '@mosaiq/terrazzo-common';
+import { QueryItem } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getSearchTags } from '@trz/emitters';
@@ -28,15 +28,15 @@ const SEARCH_SESSION_TIMEOUT_MS = 1000 * 30; // 30 seconds
 
 export const CustomBlockNoteViewer = (props: CustomBlockNoteViewerProps) => {
     const [searchSession, setSearchSession] = useState<{ id: string; expires: number } | undefined>(undefined);
-    const [searchResults, setSearchResults] = useState<QueryTag[]>([]);
+    const [searchResults, setSearchResults] = useState<QueryItem[]>([]);
     const searchSessionRef = useRef<{ id: string; expires: number } | undefined>(undefined);
     const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-    const pendingSearchRef = useRef<((tags: QueryTag[]) => void) | null>(null);
+    const pendingSearchRef = useRef<((tags: QueryItem[]) => void) | null>(null);
     const sockCtx = useSocket();
     const orgCtx = useOrg();
 
     const performSearch = useCallback(
-        (query: string): Promise<QueryTag[]> => {
+        (query: string): Promise<QueryItem[]> => {
             return new Promise((resolve) => {
                 if (searchTimeoutRef.current) {
                     clearTimeout(searchTimeoutRef.current);
@@ -105,16 +105,16 @@ export const CustomBlockNoteViewer = (props: CustomBlockNoteViewerProps) => {
 
 export const getMentionMenuItems = (
     editor: typeof BNSchema.BlockNoteEditor,
-    searchTags: QueryTag[]
+    searchTags: QueryItem[]
 ): DefaultReactSuggestionItem[] => {
     return searchTags.map((tag) => ({
-        title: tag.name,
+        title: tag.display,
         onItemClick: () => {
             editor.insertInlineContent([
                 {
                     type: 'mention',
                     props: {
-                        tag: tag.name,
+                        tag: tag.display,
                         id: tag.id,
                         type: tag.type,
                     },
