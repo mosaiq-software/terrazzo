@@ -11,7 +11,7 @@ import { getQueryableTagsForUserInOrg } from './indexers/tagQueryIndexer';
 
 const MAX_SEARCH_RESULTS = 10;
 
-const executeQuery = async (dataset: QueryableDatapoint[], query: string): Promise<QueryItem[]> => {
+export const executeQuery = async (dataset: QueryableDatapoint[], query: string): Promise<QueryItem[]> => {
     const fuse = new Fuse(dataset, {
         keys: ['content'],
         ignoreDiacritics: true,

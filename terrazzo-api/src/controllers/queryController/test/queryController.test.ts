@@ -1,139 +1,111 @@
-// import { OrganizationId, UserId } from '@mosaiq/terrazzo-common';
-// import { beforeEach, describe, expect, it, vi } from 'vitest';
-// import * as searchIndexer from '../indexers/searchQueryIndexer';
-// import { executeSearchQueryForUser } from '../queryController';
-// import { assertScoresAscending, buildSearchDatapoints, DocumentConfig, makeUid } from './queryController.test.helpers';
-// import './queryController.test.mocks';
+import { describe, expect, it } from 'vitest';
+import { buildSearchIndex } from '../indexers/searchQueryIndexer';
+import { executeQuery } from '../queryController';
+import { buildSearchDataSource, makeUid, TestDocumentConfig } from './queryController.test.helpers';
 
-// beforeEach(() => {
-//     vi.clearAllMocks();
-// });
+describe('search query pipeline', () => {
+    it('returns the best matching card for card code searches', async () => {
+        const userId = makeUid('user-1');
+        const orgId = makeUid('org-1');
 
-// describe('executeSearchQueryForUser', () => {
-//     it('returns the best matching card for card code searches and orders by score', async () => {
-//         const userId = makeUid('user-1') as UserId;
-//         const orgId = makeUid('org-1') as OrganizationId;
-//         const sessionId = 'session-1';
+        const dataSource = buildSearchDataSource({
+            orgId,
+            boards: [
+                {
+                    id: makeUid('board-1'),
+                    name: 'Roadmap',
+                    code: 'RM',
+                    cards: [
+                        { id: makeUid('card-1'), name: 'Release Plan', number: 12, content: 'launch alpha' },
+                        { id: makeUid('card-2'), name: 'Beta Tasks', number: 7, content: 'prepare beta release' },
+                    ],
+                },
+            ],
+        });
 
-//         await buildSearchDatapoints({
-//             userId,
-//             orgId,
-//             boards: [
-//                 {
-//                     id: makeUid('board-1'),
-//                     name: 'Roadmap',
-//                     code: 'RM',
-//                     cards: [
-//                         {
-//                             id: makeUid('card-1'),
-//                             name: 'Release Plan',
-//                             number: 12,
-//                             content: 'launch alpha',
-//                         },
-//                         {
-//                             id: makeUid('card-2'),
-//                             name: 'Beta Tasks',
-//                             number: 7,
-//                             content: 'prepare beta release',
-//                         },
-//                         {
-//                             id: makeUid('card-3'),
-//                             name: 'Final Review',
-//                             number: 20,
-//                             content: 'finalize for launch',
-//                         },
-//                     ],
-//                 },
-//             ],
-//         });
+        const dataset = await buildSearchIndex(dataSource, userId, orgId);
+        const results = await executeQuery(dataset, 'RM-12');
 
-//         const results = await executeSearchQueryForUser(userId, orgId, 'RM-12', sessionId);
+        expect(results[0]).toEqual({
+            id: makeUid('card-1'),
+            type: 'card',
+            display: '[RM-12] Release Plan',
+        });
+    });
 
-//         expect(results[0]?.id).toBe(makeUid('card-1'));
-//         assertScoresAscending(results.map((result) => result.score));
-//     });
+    it('prioritizes document title matches for phrase searches', async () => {
+        const userId = makeUid('user-2');
+        const orgId = makeUid('org-1');
 
-//     it('prioritizes document title matches for phrase searches', async () => {
-//         const userId = makeUid('user-2') as UserId;
-//         const orgId = makeUid('org-1') as OrganizationId;
-//         const sessionId = 'session-2';
+        const dataSource = buildSearchDataSource({
+            orgId,
+            boards: [
+                {
+                    id: makeUid('board-1'),
+                    name: 'Projects',
+                    code: 'PRJ',
+                    cards: [{ id: makeUid('card-1'), name: 'Alpha Task', number: 3, content: 'alpha' }],
+                },
+            ],
+            documents: [{ id: makeUid('doc-1'), name: 'Alpha Spec', content: 'alpha spec details' }],
+        });
 
-//         await buildSearchDatapoints({
-//             userId,
-//             orgId,
-//             boards: [
-//                 {
-//                     id: makeUid('board-1'),
-//                     name: 'Projects',
-//                     code: 'PRJ',
-//                     cards: [{ id: makeUid('card-1'), name: 'Alpha Task', number: 3, content: 'alpha' }],
-//                 },
-//             ],
-//             documents: [{ id: makeUid('doc-1'), name: 'Alpha Spec', content: 'alpha spec details' }],
-//         });
+        const dataset = await buildSearchIndex(dataSource, userId, orgId);
+        const results = await executeQuery(dataset, 'alpha spec');
 
-//         const results = await executeSearchQueryForUser(userId, orgId, 'alpha spec', sessionId);
+        expect(results[0]?.id).toBe(makeUid('doc-1'));
+        expect(results[0]?.display).toBe('Alpha Spec');
+    });
 
-//         expect(results[0]?.id).toBe(makeUid('doc-1'));
-//         assertScoresAscending(results.map((result) => result.score));
-//     });
+    it('handles diacritics-insensitive searches', async () => {
+        const userId = makeUid('user-3');
+        const orgId = makeUid('org-1');
 
-//     it('handles diacritics-insensitive searches', async () => {
-//         const userId = makeUid('user-3') as UserId;
-//         const orgId = makeUid('org-1') as OrganizationId;
-//         const sessionId = 'session-3';
+        const dataSource = buildSearchDataSource({
+            orgId,
+            documents: [{ id: makeUid('doc-1'), name: 'Café Plan', content: 'café roadmap' }],
+        });
 
-//         await buildSearchDatapoints({
-//             userId,
-//             orgId,
-//             documents: [{ id: makeUid('doc-1'), name: 'Café Plan', content: 'café roadmap' }],
-//         });
+        const dataset = await buildSearchIndex(dataSource, userId, orgId);
+        const results = await executeQuery(dataset, 'cafe plan');
 
-//         const results = await executeSearchQueryForUser(userId, orgId, 'cafe plan', sessionId);
+        expect(results[0]?.id).toBe(makeUid('doc-1'));
+    });
 
-//         expect(results[0]?.id).toBe(makeUid('doc-1'));
-//     });
+    it('limits results to the top 10', async () => {
+        const userId = makeUid('user-4');
+        const orgId = makeUid('org-1');
 
-//     it('limits results to the top 10 by score', async () => {
-//         const userId = makeUid('user-4') as UserId;
-//         const orgId = makeUid('org-1') as OrganizationId;
-//         const sessionId = 'session-4';
+        const documents: TestDocumentConfig[] = Array.from({ length: 11 }).map((_, index) => ({
+            id: makeUid(`doc-${index}`),
+            name: `Doc ${index}`,
+            content: `Doc ${index} foo bar baz`,
+        }));
 
-//         const documents: DocumentConfig[] = Array.from({ length: 11 }).map((_, index) => ({
-//             id: makeUid(`doc-${index}`),
-//             name: `Doc ${index}`,
-//             content: `Doc ${index} foo bar baz`,
-//         }));
+        const dataSource = buildSearchDataSource({
+            orgId,
+            documents,
+        });
 
-//         await buildSearchDatapoints({
-//             userId,
-//             orgId,
-//             documents,
-//         });
+        const dataset = await buildSearchIndex(dataSource, userId, orgId);
+        const results = await executeQuery(dataset, 'foo');
 
-//         const results = await executeSearchQueryForUser(userId, orgId, 'foo', sessionId);
+        expect(results).toHaveLength(10);
+    });
 
-//         expect(results).toHaveLength(10);
-//         assertScoresAscending(results.map((result) => result));
-//     });
+    it('does not return content to the client', async () => {
+        const userId = makeUid('user-5');
+        const orgId = makeUid('org-1');
 
-//     it('caches queryable data by search session id', async () => {
-//         const userId = makeUid('user-5') as UserId;
-//         const orgId = makeUid('org-1') as OrganizationId;
+        const dataSource = buildSearchDataSource({
+            orgId,
+            documents: [{ id: makeUid('doc-1'), name: 'Release Notes', content: 'notes' }],
+        });
 
-//         const searchIndexerSpy = vi.spyOn(searchIndexer, 'getAllQueryableDataForUserInOrg');
+        const dataset = await buildSearchIndex(dataSource, userId, orgId);
+        const results = await executeQuery(dataset, 'release');
 
-//         await buildSearchDatapoints({
-//             userId,
-//             orgId,
-//             documents: [{ id: makeUid('doc-1'), name: 'Release Notes', content: 'notes' }],
-//         });
-//         searchIndexerSpy.mockClear();
-
-//         await executeSearchQueryForUser(userId, orgId, 'release', 'session-a');
-//         await executeSearchQueryForUser(userId, orgId, 'notes', 'session-a');
-//         await executeSearchQueryForUser(userId, orgId, 'notes', 'session-b');
-
-//         expect(searchIndexerSpy).toHaveBeenCalledTimes(2);
-//     });
-// });
+        expect(results[0]).toBeDefined();
+        expect('content' in results[0]).toBe(false);
+    });
+});
