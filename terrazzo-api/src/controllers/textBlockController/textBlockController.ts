@@ -304,6 +304,11 @@ const maybeParseMarkdownToBlocks = async (markdownText?: string): Promise<Block[
         let blocks: Block[] = [];
         try {
             if (markdownText) {
+                // @Camo651 - Jan 17th, 2026
+                // This line likes to show a TS error but it works at runtime. It only shows it inconsistently...
+                // Likely Due to something with having a custom schema defined.
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore - Ignored instead of expect-error since this is frustratingly inconsistent
                 blocks = await BLOCKNOTE_EDITOR.tryParseMarkdownToBlocks(markdownText);
             }
         } catch (e: any) {
@@ -354,6 +359,9 @@ const maybeParseMarkdownToBlocks = async (markdownText?: string): Promise<Block[
     }
 };
 
+/**
+ * Fetches all snapshots for a given text block that contain actual content.
+ */
 export const getTextBlockSnapshotsWithContent = async (textBlockId: TextBlockId): Promise<TextBlockSnapshot[]> => {
     try {
         // Snapshots already contain full content - just return them
@@ -404,6 +412,13 @@ const processSnapshotBucket = (
     }
 };
 
+/**
+ * Determines which snapshots to delete based on retention policy.
+ * @param snapshots Array of all snapshots for a text block
+ * @param currentTime Current timestamp in milliseconds. @defaults to Date.now()
+ * @param textBlockType Type of the text block. @defaults to TextBlockType.BlockNote
+ * @returns
+ */
 export const determineSnapshotsToDelete = (
     snapshots: TextBlockSnapshot[],
     currentTime: number = Date.now(),
@@ -488,6 +503,10 @@ export const determineSnapshotsToDelete = (
     return snapshotsToDelete;
 };
 
+/**
+ * Reduces the number of snapshots for a given text block according to retention policy.
+ * Deletes snapshots that are deemed unnecessary based on age and content.
+ */
 const reduceSnapshotsForTextBlock = async (textBlockId: TextBlockId) => {
     try {
         const textBlock = await getTextBlockByIdDb(textBlockId);
@@ -511,6 +530,9 @@ const reduceSnapshotsForTextBlock = async (textBlockId: TextBlockId) => {
     }
 };
 
+/**
+ * Restores a text block to the content of a specified snapshot.
+ */
 export const restoreTextBlockSnapshot = async (
     snapshotId: UID,
     resourceId: UID,
@@ -575,6 +597,12 @@ export const getQueryableTextBlockContent = async (textBlockId: TextBlockId): Pr
     }
 };
 
+/**
+ * Retrieves the display text for a mention based on its ID and type.
+ * @param id The unique identifier of the mention
+ * @param type The type of the mention (e.g., User, Card, Document, Board)
+ * @returns The display text for the mention or undefined if not found
+ */
 const retrieveMentionDisplayText = async (id: UID, type: QueryableItem): Promise<string | undefined> => {
     switch (type) {
         case QueryableItem.User: {
@@ -603,6 +631,9 @@ const retrieveMentionDisplayText = async (id: UID, type: QueryableItem): Promise
     }
 };
 
+/**
+ * Converts BlockNote blocks to plaintext, replacing mentions with their display text.
+ */
 const convertBlocknoteBlocksToPlaintext = async (blocks: Block[]): Promise<string> => {
     const html = await BLOCKNOTE_EDITOR.blocksToHTMLLossy(blocks);
     const text = getInnerTextFromHtml(html);
@@ -612,6 +643,12 @@ const convertBlocknoteBlocksToPlaintext = async (blocks: Block[]): Promise<strin
     return textWithMentions;
 };
 
+/**
+ * Extracts and returns the inner text from the provided HTML string, stripping out all HTML tags.
+ * Handles block-level tags by replacing them with newlines to preserve text structure.
+ * @param html The HTML string to extract text from
+ * @returns The extracted inner text
+ */
 const getInnerTextFromHtml = (html: string): string => {
     const blockLevelTags = ['div', 'p', 'br', 'li', 'ul', 'ol', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote'];
     let text = html;
