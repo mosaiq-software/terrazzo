@@ -1,12 +1,20 @@
-import { Button, Container, Fieldset, FileInput, Flex, Space, Text, TextInput } from '@mantine/core';
-import { getHotkeyHandler } from '@mantine/hooks';
+import { Button, Container, Fieldset, FileInput, Group, Select, Space, Stack, Text, TextInput } from '@mantine/core';
 import { ContextModalProps } from '@mantine/modals';
-import { RestRoutes, TrelloExportType, UID } from '@mosaiq/terrazzo-common';
+import {
+    fullNameWithUsername,
+    RestRoutes,
+    TrelloExportType,
+    TrelloUserToTerrazzoUserMap,
+    UID,
+} from '@mosaiq/terrazzo-common';
+import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createBoard } from '@trz/emitters';
 import { callTrzApi } from '@trz/util/apiUtils';
+import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { MdOutlineArrowForward, MdOutlineUploadFile } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 
 const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Element => {
@@ -15,9 +23,50 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
     const [errorName, setErrorName] = useState('');
     const [errorAbv, setErrorAbv] = useState('');
     const [trelloImport, setTrelloImport] = useState<File | null>(null);
+    const [trelloImportData, setTrelloImportData] = useState<TrelloExportType | null>(null);
     const [trelloImportStatus, setTrelloImportStatus] = useState<string>('Upload');
+    const [trelloUsers, setTrelloUsers] = useState<Record<string, { id: string; name: string; username: string }>>({});
+    const [trelloToTrzUserMap, setTrelloToTrzUserMap] = useState<TrelloUserToTerrazzoUserMap>({});
     const sockCtx = useSocket();
     const navigate = useNavigate();
+    const orgCtx = useOrg();
+
+    useEffect(() => {
+        if (!trelloImport) {
+            setTrelloImportData(null);
+            return;
+        }
+        const loadTrelloData = async () => {
+            try {
+                // Read file
+                const text = await trelloImport.text();
+                const trelloJson = JSON.parse(text) as TrelloExportType;
+                setTrelloImportData(trelloJson);
+
+                // Build user map
+                const users: typeof trelloUsers = {};
+                for (const user of trelloJson.members) {
+                    users[user.id] = {
+                        id: user.id,
+                        name: user.fullName,
+                        username: user.username,
+                    };
+                }
+                setTrelloUsers(users);
+
+                // For now, map all Trello users to undefined
+                const userMap: TrelloUserToTerrazzoUserMap = {};
+                for (const userId in users) {
+                    userMap[userId] = undefined;
+                }
+                setTrelloToTrzUserMap(userMap);
+            } catch (e) {
+                notify(NoteType.BOARD_CREATION_ERROR, 'Failed to parse Trello JSON file');
+                setTrelloImport(null);
+            }
+        };
+        loadTrelloData();
+    }, [trelloImport]);
 
     async function onSubmit() {
         setErrorAbv('');
@@ -40,13 +89,15 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
 
     async function handleImportFromTrello() {
         try {
-            if (!trelloImport) {
+            if (!trelloImportData) {
                 throw new Error('No file provided');
             }
             setTrelloImportStatus('Uploading... This may take some time');
-            const text = await trelloImport.text();
-            const json = JSON.parse(text) as TrelloExportType;
-            const res = await callTrzApi(RestRoutes.IMPORT_FROM_TRELLO, { parentId: props.innerProps.parentId }, json);
+            const res = await callTrzApi(
+                RestRoutes.IMPORT_FROM_TRELLO,
+                { parentId: props.innerProps.parentId },
+                { data: trelloImportData, userMap: trelloToTrzUserMap }
+            );
             setTrelloImportStatus('Loading...');
             await new Promise((r) => setTimeout(r, 2000));
             navigate(`/board/${res}`);
@@ -61,15 +112,98 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
         props.context.closeModal(props.id);
     };
 
+    if (trelloImportData) {
+        return (
+            <Container>
+                <Stack
+                    justify="center"
+                    align="center"
+                    gap="md"
+                >
+                    <Stack gap={1}>
+                        <Text
+                            fz="sm"
+                            c={COLORS.text.muted}
+                        >
+                            {' '}
+                            Importing
+                        </Text>
+                        <Text
+                            c={COLORS.text.primary}
+                            fw={700}
+                        >
+                            {trelloImportData.name}
+                        </Text>
+                        <Group>
+                            <Text>{trelloImportData.cards.length} Cards</Text>
+                        </Group>
+                    </Stack>
+                    <Fieldset legend="Users">
+                        <Text
+                            fz="xs"
+                            c={COLORS.text.muted}
+                            mb="xs"
+                        >
+                            We don't know who's who yet. Map Trello users to Terrazzo users below.
+                        </Text>
+                        <Stack>
+                            {Object.values(trelloUsers).map((user) => (
+                                <Group
+                                    key={user.id}
+                                    wrap="nowrap"
+                                >
+                                    <Stack
+                                        gap={0}
+                                        w={'40%'}
+                                    >
+                                        <Text fw={500}>{user.name}</Text>
+                                        <Text
+                                            fz="xs"
+                                            c={COLORS.text.muted}
+                                        >
+                                            @{user.username}
+                                        </Text>
+                                    </Stack>
+                                    <MdOutlineArrowForward
+                                        width={'20%'}
+                                        size="1.5rem"
+                                    />
+                                    <Select
+                                        width="40%"
+                                        data={[
+                                            { value: '', label: 'Unassigned' },
+                                            ...orgCtx.members.map((mem) => ({
+                                                value: mem.user.id,
+                                                label: fullNameWithUsername(mem.user),
+                                            })),
+                                        ]}
+                                        value={trelloToTrzUserMap[user.id] || ''}
+                                        onChange={(val) => {
+                                            setTrelloToTrzUserMap((prev) => ({
+                                                ...prev,
+                                                [user.id]: val ? (val as UID) : undefined,
+                                            }));
+                                        }}
+                                    />
+                                </Group>
+                            ))}
+                        </Stack>
+                    </Fieldset>
+                    <Button
+                        fullWidth
+                        mt="md"
+                        onClick={handleImportFromTrello}
+                    >
+                        {trelloImportStatus}
+                    </Button>
+                </Stack>
+            </Container>
+        );
+    }
+
     return (
-        <Container
-            onKeyDown={getHotkeyHandler([
-                ['Enter', onSubmit],
-                ['Escape', handleClose],
-            ])}
-        >
-            <Flex
-                direction="column"
+        <Container>
+            <Stack
                 justify="center"
                 align="center"
                 gap="md"
@@ -92,7 +226,7 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
                     value={boardAbbreviation}
                     onChange={(event) => setBoardAbbreviation(event.currentTarget.value)}
                 />
-            </Flex>
+            </Stack>
 
             <Button
                 fullWidth
@@ -111,20 +245,13 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
             <Fieldset>
                 <FileInput
                     label="Import from Trello"
-                    placeholder="board.json"
+                    placeholder="my-board.json"
                     accept="application/json"
                     clearable
                     value={trelloImport}
                     onChange={setTrelloImport}
-                />
-                <Button
-                    fullWidth
-                    mt="md"
-                    onClick={handleImportFromTrello}
-                    disabled={!trelloImport}
-                >
-                    {trelloImportStatus}
-                </Button>
+                    leftSection={<MdOutlineUploadFile />}
+                ></FileInput>
             </Fieldset>
         </Container>
     );

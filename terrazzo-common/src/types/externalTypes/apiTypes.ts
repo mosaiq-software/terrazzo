@@ -1,6 +1,6 @@
 import { AuthProviderCallbackData, AuthSession, ExistingAuthToken } from '../authTypes';
 import { BoardId, UID, UploadedFileId } from '../genericTypes';
-import { TrelloExportType } from './trelloTypes';
+import { TrelloExportType, TrelloUserToTerrazzoUserMap } from './trelloTypes';
 
 /**
  * Data types for the REST API
@@ -46,7 +46,7 @@ export interface RestRequestParams {
 export interface RestRequestBody {
     [RestRoutes.INDEX]: undefined;
     [RestRoutes.USER_FAKE_DEV]: undefined;
-    [RestRoutes.IMPORT_FROM_TRELLO]: TrelloExportType;
+    [RestRoutes.IMPORT_FROM_TRELLO]: { data: TrelloExportType; userMap: TrelloUserToTerrazzoUserMap };
     [RestRoutes.GET_FILE]: undefined;
     [RestRoutes.UPLOAD_FILE]: { base64: string; fileName: string; mimeType: string };
     [RestRoutes.AUTH_PROVIDER_CALLBACK]: AuthProviderCallbackData;

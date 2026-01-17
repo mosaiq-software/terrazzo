@@ -3,11 +3,13 @@ import {
     BoardId,
     BoardRes,
     DirectoryId,
+    getFileUrl,
     Label,
     LabelId,
     ListId,
     TrelloExportType,
     TrelloLabelColorsMap,
+    TrelloUserToTerrazzoUserMap,
     TrzModuleType,
 } from '@mosaiq/terrazzo-common';
 import { syncBoardFields, syncDirectoryContents, syncParentsDirectoryContents } from '@trz-api/broadcasters';
@@ -27,7 +29,10 @@ import {
     getLabelsByBoardIdDb,
     updateLabelDb,
 } from '@trz-api/persistence/labelPersistence';
+import { getApiUrl } from '@trz-api/utils/envUtils';
+import { addAssigneeToCard } from './cardAssignmentController';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
+import { yoinkFile } from './fileController';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
 
 export const getBoardHeader = async (boardID: BoardId): Promise<BoardHeader | undefined> => {
@@ -143,7 +148,11 @@ export async function updateBoardLabels(boardId: BoardId, updatedLabel: Label) {
     await syncBoardLabels(boardId, labels);
 }
 
-export const createTerrazzoBoardFromTrelloBoard = async (onParentId: DirectoryId, trelloBoard: TrelloExportType) => {
+export const createTerrazzoBoardFromTrelloBoard = async (
+    onParentId: DirectoryId,
+    trelloBoard: TrelloExportType,
+    userMap: TrelloUserToTerrazzoUserMap
+) => {
     const boardName = trelloBoard.name;
     const trelloLists = trelloBoard.lists;
     const trelloCards = trelloBoard.cards;
@@ -153,6 +162,7 @@ export const createTerrazzoBoardFromTrelloBoard = async (onParentId: DirectoryId
     const labelMap: { [trl: string]: LabelId } = {};
 
     try {
+        // Create the Terrazzo board
         const trzBoardId = await addBoard(boardName, '', onParentId);
         for (const trelloList of trelloLists) {
             const trelloListName = trelloList.name;
@@ -164,39 +174,70 @@ export const createTerrazzoBoardFromTrelloBoard = async (onParentId: DirectoryId
             listMap[trelloList.id] = trzList.id;
         }
 
-        for (const trlLabel of trelloBoard.labels) {
+        // Add labels to the board
+        for (const trelloLabel of trelloBoard.labels) {
             const labelId = await createBoardLabelSingle(
                 trzBoardId,
-                trlLabel.name,
-                TrelloLabelColorsMap[trlLabel.color]
+                trelloLabel.name,
+                TrelloLabelColorsMap[trelloLabel.color]
             );
-            labelMap[trlLabel.id] = labelId;
+            labelMap[trelloLabel.id] = labelId;
         }
 
-        for (const trlCard of trelloCards) {
-            const trlCardName = trlCard.name;
-            const trlCardDesc = trlCard.desc;
-            const trlCardLabelIds = trlCard.idLabels;
-            const trlCardListId = trlCard.idList;
-            const trlCardOrder = trlCard.pos;
-            const trlCardNumber = trlCard.idShort;
+        // Get the date when each card was created
+        const cardCreatedDateMap: Record<string, Date> = {};
+        for (const action of trelloBoard?.actions || []) {
+            if (action.type === 'createCard') {
+                const cardId = action.data.card.id;
+                cardCreatedDateMap[cardId] = new Date(action.date);
+            }
+        }
 
+        // Add cards to the board
+        for (const trelloCard of trelloCards) {
+            // Copy over each image in the card description to Terrazzo's storage
+            let cardDesc = trelloCard.desc;
+            const extractedImages = extractMarkdownImagesFromText(cardDesc);
+            for (const imageUrl of extractedImages) {
+                try {
+                    const createdFile = await yoinkFile(imageUrl);
+                    const terrazzoFileUrl = getFileUrl(createdFile.id, getApiUrl());
+                    const regex = new RegExp(imageUrl, 'g');
+                    cardDesc = cardDesc.replace(regex, terrazzoFileUrl);
+                } catch (error) {
+                    console.error('Error yoinking file from Trello card description:', error);
+                }
+            }
+
+            // Create the card
+            const trlCardName = trelloCard.name;
+            const trlCardLabelIds = trelloCard.idLabels;
+            const trlCardListId = trelloCard.idList;
+            const trlCardOrder = trelloCard.pos;
+            const trlCardNumber = trelloCard.idShort;
+            const trlCardCreatedDate = cardCreatedDateMap[trelloCard.id] || new Date();
             const trzListId = listMap[trlCardListId];
-            const trzCard = await addCard(trzListId, trlCardName, trlCardDesc, trlCardNumber, undefined);
+            const trzCard = await addCard(trzListId, trlCardName, cardDesc, trlCardNumber, undefined);
             await moveCardToList(trzCard.id, trzListId, trlCardOrder);
             const trzLabelIds = trlCardLabelIds.map((trlLabelId) => labelMap[trlLabelId]);
             await setCardsLabels(trzCard.id, trzLabelIds);
 
-            const trelloCardPlugins = trlCard.pluginData;
-            const storyPointPluginId = '638372c5e00ec1016bb45460';
-            let sp: number | undefined = undefined;
-            trelloCardPlugins.forEach((plugin) => {
-                if (plugin.idPlugin === storyPointPluginId) {
-                    const val = plugin.value; //{\"storyPoints\":2}
-                    sp = parseInt(val.replace(/\D/g, ''));
+            // Map Trello members to Terrazzo users
+            for (const trelloMemberId of trelloCard.idMembers) {
+                const trzUserId = userMap[trelloMemberId];
+                if (trzUserId) {
+                    await addAssigneeToCard(trzCard.id, trzUserId);
                 }
+            }
+
+            const trelloCreatorId = trelloCard.idMemberCreator;
+            const trzCreatorId = userMap[trelloCreatorId];
+
+            await updateCardFromPartial(trzCard.id, {
+                archived: trelloCard.closed,
+                createdById: trzCreatorId,
+                createdAt: trlCardCreatedDate.getTime(),
             });
-            await updateCardFromPartial(trzCard.id, { archived: trlCard.closed, storyPoints: sp });
         }
 
         return trzBoardId;
@@ -204,4 +245,18 @@ export const createTerrazzoBoardFromTrelloBoard = async (onParentId: DirectoryId
         console.error('Error importing from trello', error);
         return undefined;
     }
+};
+
+/**
+ * Given a markdown text, extracts all image URLs from it.
+ * Images are in markdown format: ![alt text](image_url)
+ */
+const extractMarkdownImagesFromText = (text: string): string[] => {
+    const imageUrls: string[] = [];
+    const markdownImageRegex = /!\[.*?\]\((.*?)\)/g;
+    let match;
+    while ((match = markdownImageRegex.exec(text)) !== null) {
+        imageUrls.push(match[1]);
+    }
+    return imageUrls;
 };

@@ -68,7 +68,7 @@ router.post(RestRoutes.IMPORT_FROM_TRELLO, async (req, res) => {
         req.params as RestRequestParams[RestRoutes.IMPORT_FROM_TRELLO];
     const body: RestRequestBody[RestRoutes.IMPORT_FROM_TRELLO] = req.body;
     try {
-        const boardId = await createTerrazzoBoardFromTrelloBoard(params.parentId, body);
+        const boardId = await createTerrazzoBoardFromTrelloBoard(params.parentId, body.data, body.userMap);
         const response: RestResponse<RestRoutes.IMPORT_FROM_TRELLO> = boardId;
         res.status(200).send(response);
     } catch (error) {

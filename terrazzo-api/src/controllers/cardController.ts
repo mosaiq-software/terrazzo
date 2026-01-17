@@ -122,7 +122,7 @@ export async function addCard(
         createdBy: createdById ? await getUserHeaderByIdDb(createdById) : undefined,
     };
     try {
-        const descBlock = await createBlocknoteTextBlockWithMarkdown('');
+        const descBlock = await createBlocknoteTextBlockWithMarkdown(description ?? '');
         if (!descBlock) {
             throw new Error('Failed to create description text block');
         }

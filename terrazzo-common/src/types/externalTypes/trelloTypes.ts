@@ -1,3 +1,6 @@
+import { UserId } from '../genericTypes';
+import { TrelloActionType } from './trelloActionTypes';
+
 export interface TrelloExportType {
     id: string;
     nodeId: string;
@@ -236,7 +239,7 @@ export interface TrelloExportType {
     powerUps: unknown[];
     idTags: unknown[];
     premiumFeatures: string[];
-    actions: [];
+    actions: TrelloActionType[];
     cards: TrelloCardType[];
     labels: {
         id: string;
@@ -291,10 +294,10 @@ export interface TrelloCardType {
     creationMethodLoadingStartedAt: null;
     dueComplete: false;
     dateClosed: null;
-    dateLastActivity: 'string';
+    dateLastActivity: string;
     dateCompleted: null;
     dateViewedByCreator: null;
-    desc: 'string smaller stories';
+    desc: string;
     descData: {
         emoji: unknown;
     };
@@ -388,7 +391,7 @@ export interface TrelloCardType {
 }
 export interface TrelloListType {
     id: string;
-    name: 'Done';
+    name: string;
     closed: boolean;
     color: null;
     idBoard: string;
@@ -520,3 +523,5 @@ export const TrelloLabelColorsMap: { [key: string]: string } = {
     pink_light: '#e774bb',
     black_light: '#8c9bab',
 };
+
+export type TrelloUserToTerrazzoUserMap = Record<string, UserId | undefined>;
