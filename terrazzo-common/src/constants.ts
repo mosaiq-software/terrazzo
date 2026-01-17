@@ -6,6 +6,7 @@ export enum LocalStorageKey {
 }
 
 export const TEMPORARY_ID: UID = 'THIS-IS-A-TEMPORARY-ID';
+export const SYSTEM_USER_ID: UID = 'system-system-system-system-system';
 
 export const BLOCKNOTE_FRAGMENT_ID = 'document-store';
 

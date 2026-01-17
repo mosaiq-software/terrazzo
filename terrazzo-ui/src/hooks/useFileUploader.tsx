@@ -1,6 +1,5 @@
-import { RestRoutes, UploadedFileId } from '@mosaiq/terrazzo-common';
-import { callTrzApi } from '@trz/util/apiUtils';
-import { fileToBase64, getFileUrl } from '@trz/util/fileUtils';
+import { fileToBase64, getFileUrl, RestRoutes, UploadedFileId } from '@mosaiq/terrazzo-common';
+import { callTrzApi, getApiUrl } from '@trz/util/apiUtils';
 
 export const useFileUploader = () => {
     /**
@@ -17,7 +16,7 @@ export const useFileUploader = () => {
         if (!fileId) {
             throw new Error('File upload failed');
         }
-        const url = getFileUrl(fileId);
+        const url = getFileUrl(fileId, getApiUrl());
         return url;
     };
     return { uploadFile };

@@ -1,5 +1,4 @@
-import { UploadedFileId } from '@mosaiq/terrazzo-common';
-import { getApiUrl } from './apiUtils';
+import { UploadedFileId } from '../types/genericTypes';
 
 export const fileToBase64 = async (file: File): Promise<string> => {
     const arrayBuffer = await file.arrayBuffer();
@@ -8,7 +7,6 @@ export const fileToBase64 = async (file: File): Promise<string> => {
     return base64;
 };
 
-export const getFileUrl = (fileId: UploadedFileId) => {
-    const apiUrl = getApiUrl();
+export const getFileUrl = (fileId: UploadedFileId, apiUrl: string) => {
     return `${apiUrl}/file/${fileId}`;
 };
