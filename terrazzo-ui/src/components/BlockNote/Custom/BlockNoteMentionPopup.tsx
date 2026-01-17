@@ -1,4 +1,4 @@
-import { ActionIcon, Group, Stack, Text } from '@mantine/core';
+import { ActionIcon, Group, Menu, Stack, Text } from '@mantine/core';
 import { boardNameWithCode, cardNameWithBoardCodeAndNumber, QueryableItem, UID } from '@mosaiq/terrazzo-common';
 import { FullLoader } from '@trz/components/UI/LoadingWrapper';
 import { UserProfilePopup } from '@trz/components/UI/UserAvatar/UserProfilePopup';
@@ -6,6 +6,7 @@ import { useBoard } from '@trz/hooks/useBoard';
 import { useCard } from '@trz/hooks/useCard';
 import { useDocument } from '@trz/hooks/useDocument';
 import { useUser } from '@trz/hooks/useUser';
+import { COLORS } from '@trz/util/colors';
 import { forAllClickEvents, noEventBubble } from '@trz/util/eventUtils';
 import { MdArrowForward } from 'react-icons/md';
 import { useNavigate } from 'react-router';
@@ -13,14 +14,14 @@ import { useNavigate } from 'react-router';
 /**
  * type and id can be '' if something went wrong, so we treat them as strings
  */
-interface BlockNoteMentionPopupProps {
+interface BlockNoteMentionWithPopupProps {
     type: string;
     id: string;
 }
-interface DelegatedBlockNoteMentionPopupProps {
+interface DelegatedBlockNoteMentionWithPopupProps {
     id: UID;
 }
-export const BlockNoteMentionPopup = (props: BlockNoteMentionPopupProps) => {
+export const BlockNoteMentionWithPopup = (props: BlockNoteMentionWithPopupProps) => {
     const type = (props.type || undefined) as QueryableItem | undefined;
     const id = (props.id || undefined) as UID | undefined;
 
@@ -42,22 +43,56 @@ const MentionPopupBase = ({ children }: { children: React.ReactNode | React.Reac
     );
 };
 
-const UserMentionPopup = (props: DelegatedBlockNoteMentionPopupProps) => {
-    const user = useUser(props.id);
-    return <MentionPopupBase>{user ? <UserProfilePopup user={user} /> : <FullLoader />}</MentionPopupBase>;
+const MentionTag = (props: { title: string }) => {
+    {
+        return <span style={{ backgroundColor: COLORS.accent.pink.darkMuted }}>@{props.title}</span>;
+    }
 };
 
-const BoardMentionPopup = (props: DelegatedBlockNoteMentionPopupProps) => {
+const Mention = (props: { title: string; children: React.ReactNode }) => {
+    return (
+        <Menu
+            width={400}
+            position="bottom-end"
+            arrowPosition="center"
+            arrowSize={10}
+            withArrow
+            shadow="md"
+            trigger="hover"
+            closeOnClickOutside
+            withinPortal
+        >
+            <Menu.Target>
+                <Text span>
+                    <MentionTag title={props.title} />
+                </Text>
+            </Menu.Target>
+            <Menu.Dropdown>
+                <MentionPopupBase>{props.children}</MentionPopupBase>
+            </Menu.Dropdown>
+        </Menu>
+    );
+};
+
+const UserMentionPopup = (props: DelegatedBlockNoteMentionWithPopupProps) => {
+    const user = useUser(props.id);
+    const title = user ? `${user.firstName} ${user.lastName}` : 'Loading...';
+    return <Mention title={title}>{user ? <UserProfilePopup user={user} /> : <FullLoader />}</Mention>;
+};
+
+const BoardMentionPopup = (props: DelegatedBlockNoteMentionWithPopupProps) => {
     const { boardData } = useBoard(props.id);
     const navigate = useNavigate();
+    const title = boardData ? boardNameWithCode(boardData.name, boardData.boardCode) : 'Loading...';
+
     return (
-        <MentionPopupBase>
+        <Mention title={title}>
             {boardData ? (
                 <Group
                     wrap="nowrap"
                     justify="space-between"
                 >
-                    <Text>{boardNameWithCode(boardData.name, boardData.boardCode)}</Text>
+                    <Text>{title}</Text>
                     <ActionIcon
                         variant="subtle"
                         onClick={() => navigate(`/board/${boardData.id}`)}
@@ -69,23 +104,25 @@ const BoardMentionPopup = (props: DelegatedBlockNoteMentionPopupProps) => {
             ) : (
                 <FullLoader />
             )}
-        </MentionPopupBase>
+        </Mention>
     );
 };
 
-const CardMentionPopup = (props: DelegatedBlockNoteMentionPopupProps) => {
+const CardMentionPopup = (props: DelegatedBlockNoteMentionWithPopupProps) => {
     const card = useCard(props.id, false, true);
     const { boardData } = useBoard(card?.boardId);
     const navigate = useNavigate();
-
+    const title = card
+        ? cardNameWithBoardCodeAndNumber(card.name, boardData?.boardCode, card.cardNumber)
+        : 'Loading...';
     return (
-        <MentionPopupBase>
+        <Mention title={title}>
             {card ? (
                 <Group
                     wrap="nowrap"
                     justify="space-between"
                 >
-                    <Text>{cardNameWithBoardCodeAndNumber(card.name, boardData?.boardCode, card.cardNumber)}</Text>
+                    <Text>{title}</Text>
                     <ActionIcon
                         variant="subtle"
                         onClick={() => navigate(`/card/${card.id}`)}
@@ -97,16 +134,17 @@ const CardMentionPopup = (props: DelegatedBlockNoteMentionPopupProps) => {
             ) : (
                 <FullLoader />
             )}
-        </MentionPopupBase>
+        </Mention>
     );
 };
 
-const DocumentMentionPopup = (props: DelegatedBlockNoteMentionPopupProps) => {
+const DocumentMentionPopup = (props: DelegatedBlockNoteMentionWithPopupProps) => {
     const { document } = useDocument(props.id);
     const navigate = useNavigate();
+    const title = document ? document.name : 'Loading...';
 
     return (
-        <MentionPopupBase>
+        <Mention title={title}>
             {document ? (
                 <Group
                     wrap="nowrap"
@@ -124,11 +162,11 @@ const DocumentMentionPopup = (props: DelegatedBlockNoteMentionPopupProps) => {
             ) : (
                 <FullLoader />
             )}
-        </MentionPopupBase>
+        </Mention>
     );
 };
 
-const MentionPopups: Record<QueryableItem, React.FC<DelegatedBlockNoteMentionPopupProps>> = {
+const MentionPopups: Record<QueryableItem, React.FC<DelegatedBlockNoteMentionWithPopupProps>> = {
     [QueryableItem.User]: UserMentionPopup,
     [QueryableItem.Board]: BoardMentionPopup,
     [QueryableItem.Card]: CardMentionPopup,

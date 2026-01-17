@@ -2,7 +2,11 @@ import { Block, BlockNoteSchema, createInlineContentSpec, defaultInlineContentSp
 import { ServerBlockNoteEditor } from '@blocknote/server-util';
 import {
     BLOCKNOTE_FRAGMENT_ID,
+    boardNameWithCode,
+    cardNameWithBoardCodeAndNumber,
     exhaustiveCheck,
+    fullNameWithUsername,
+    QueryableItem,
     TextBlockId,
     TextBlockResourceType,
     TextBlockSnapshot,
@@ -11,8 +15,10 @@ import {
     UserId,
 } from '@mosaiq/terrazzo-common';
 import { syncTextHistorySnapshots } from '@trz-api/broadcasters/textBroadcasters';
+import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
 import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
+import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
 import {
     createTextBlockHistorySnapshotDb,
     deleteTextBlockHistorySnapshotDb,
@@ -20,6 +26,7 @@ import {
     getTextBlockHistorySnapshotsForTextBlockDb,
 } from '@trz-api/persistence/textBlockHistoryPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
+import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
 import { SocketManager } from '@trz-api/utils/socket/socketManager';
 import { Document } from '@trz-api/utils/y-socket-io';
@@ -59,14 +66,65 @@ export const checkCanUserEditTextBlock = async (
     }
 };
 
+/**
+ * Random string that is extremely unlikely to appear in normal text.
+ * DO NOT CHANGE THIS! IT WILL BREAK EXISTING MENTIONS IN SAVED TEXT BLOCKS!
+ */
+const mentionEncodings = {
+    delimiter: '3fu8h3490fh302hf08ug2308hf4tn453o8hqo4iha1awd543g5yb356',
+    identifier: 'MENTION_ENCODED=======',
+    innerDelimiter: ':::',
+};
+
+/**
+ * Mentions need to be encoded in a way that they can be stored in the text content, then dynamically decoded and fetched on render.
+ */
+const encodedMention = (id: string, type: string): string => {
+    return `${mentionEncodings.delimiter}${mentionEncodings.identifier}${mentionEncodings.innerDelimiter}${type}${mentionEncodings.innerDelimiter}${id}${mentionEncodings.delimiter}`;
+};
+
+/**
+ * Replaces all encoded mentions in the given text using the provided asynchronous replacement function.
+ * @param rawText The text containing encoded mentions
+ * @param replaceFn Function that takes an id and type, and returns a Promise resolving to the replacement string
+ * @returns A Promise resolving to the text with all encoded mentions replaced
+ */
+const replaceEncodedMentionsInText = async (
+    rawText: string,
+    replaceFn: (id: UID, type: QueryableItem) => Promise<string>
+): Promise<string> => {
+    const pattern = new RegExp(
+        `${mentionEncodings.delimiter}${mentionEncodings.identifier}${mentionEncodings.innerDelimiter}(\\w+)${mentionEncodings.innerDelimiter}([\\w-]+)${mentionEncodings.delimiter}`,
+        'g'
+    );
+
+    // Asynchronously process all matches
+    const segments: string[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(rawText)) !== null) {
+        const precedingText = rawText.substring(lastIndex, match.index);
+        segments.push(precedingText);
+        const type = match[1] as QueryableItem;
+        const id = match[2] as UID;
+        if (!type || !id) {
+            console.error('Invalid encoded mention format', { match, p1: match[1], p2: match[2] });
+            segments.push(match[0]); // Push the original match if parsing fails
+        } else {
+            const replacement = await replaceFn(id, type);
+            segments.push(replacement);
+        }
+        lastIndex = match.index + match[0].length;
+    }
+    segments.push(rawText.substring(lastIndex));
+    return segments.join('');
+};
+
 const BlockNoteMention = createInlineContentSpec(
     {
         type: 'mention',
         content: 'none',
         propSchema: {
-            tag: {
-                default: '',
-            },
             id: {
                 default: '',
             },
@@ -79,11 +137,10 @@ const BlockNoteMention = createInlineContentSpec(
         render: (inlineContent) => {
             const serverSideHtml = document.createElement('span');
             serverSideHtml.className = 'bn-mention';
-            const tag = inlineContent?.props?.tag || '';
             const id = inlineContent?.props?.id || '';
-            serverSideHtml.textContent = `@${tag}`;
+            const type = inlineContent?.props?.type || '';
+            serverSideHtml.textContent = encodedMention(id, type);
             serverSideHtml.setAttribute('data-mention-id', id);
-
             return { dom: serverSideHtml };
         },
     }
@@ -107,12 +164,12 @@ const getContentFromDoc = (doc: Document, type: TextBlockType): string => {
     const fragment = doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
     switch (type) {
         case TextBlockType.PlainText: {
-            const textElements = fragment.toArray().filter((item) => item instanceof XmlText) as XmlText[];
+            const textElements = fragment.toArray().filter((item) => item instanceof XmlText);
             return textElements.map((te) => te.toString()).join('\n');
         }
         case TextBlockType.BlockNote: {
             const blocks = BLOCKNOTE_EDITOR.yXmlFragmentToBlocks(fragment);
-            return JSON.stringify(blocks); // Compact for storage
+            return JSON.stringify(blocks);
         }
         default:
             return exhaustiveCheck(type, `Unsupported text block type for content extraction`);
@@ -518,9 +575,41 @@ export const getQueryableTextBlockContent = async (textBlockId: TextBlockId): Pr
     }
 };
 
+const retrieveMentionDisplayText = async (id: UID, type: QueryableItem): Promise<string | undefined> => {
+    switch (type) {
+        case QueryableItem.User: {
+            const userHeader = await getUserHeaderByIdDb(id);
+            return userHeader ? fullNameWithUsername(userHeader) : undefined;
+        }
+        case QueryableItem.Card: {
+            const card = await getCardByIdDb(id);
+            if (!card) {
+                return undefined;
+            }
+            const boardModule = await getBoardByIdDb(card.boardId);
+            return cardNameWithBoardCodeAndNumber(card.name, boardModule?.boardCode, card.cardNumber);
+        }
+        case QueryableItem.Document: {
+            const documentModule = await getModuleByIdDb(id);
+            return documentModule ? documentModule.name : ``;
+        }
+        case QueryableItem.Board: {
+            const boardModule = await getModuleByIdDb(id);
+            const board = await getBoardByIdDb(id);
+            return boardModule ? boardNameWithCode(boardModule.name, board?.boardCode) : undefined;
+        }
+        default:
+            exhaustiveCheck(type, `Unsupported mention type ${type}`);
+    }
+};
+
 const convertBlocknoteBlocksToPlaintext = async (blocks: Block[]): Promise<string> => {
     const html = await BLOCKNOTE_EDITOR.blocksToHTMLLossy(blocks);
-    return getInnerTextFromHtml(html);
+    const text = getInnerTextFromHtml(html);
+    const textWithMentions = await replaceEncodedMentionsInText(text, async (id, type) => {
+        return (await retrieveMentionDisplayText(id, type)) || `(${type} ${id})`;
+    });
+    return textWithMentions;
 };
 
 const getInnerTextFromHtml = (html: string): string => {
