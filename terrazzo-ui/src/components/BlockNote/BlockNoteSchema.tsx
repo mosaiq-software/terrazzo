@@ -114,7 +114,6 @@ export const getMentionMenuItems = (
                 {
                     type: 'mention',
                     props: {
-                        tag: tag.display,
                         id: tag.id,
                         type: tag.type,
                     },
