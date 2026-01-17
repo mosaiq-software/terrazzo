@@ -10,6 +10,14 @@ export const fullName = (user: UserHeader | undefined | null) => {
     return `${user.firstName} ${user.lastName}`;
 };
 
+export const fullNameWithUsername = (user: UserHeader | undefined | null) => {
+    if (!user) {
+        return 'Anonymous';
+    }
+    const namePart = fullName(user);
+    return `${namePart} (@${user.username})`;
+};
+
 export const breakNames = (name: string) => {
     if (!name.trim()) {
         return { firstName: '', lastName: '' };

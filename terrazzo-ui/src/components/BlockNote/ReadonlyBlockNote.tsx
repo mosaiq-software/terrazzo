@@ -1,11 +1,9 @@
-import { codeBlockOptions } from '@blocknote/code-block';
-import { Block, BlockNoteSchema, createCodeBlockSpec } from '@blocknote/core';
+import { Block } from '@blocknote/core';
 import '@blocknote/core/fonts/inter.css';
-import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
 import { useEffect } from 'react';
-import { blockNoteEditorTheme } from './BlockNoteEditorTheme';
+import { BNSchema, CustomBlockNoteViewer } from './BlockNoteSchema';
 import './BlockNoteStyleOverrides.css';
 
 interface BaseEditorProps {
@@ -16,11 +14,7 @@ interface BaseEditorProps {
 export const ReadonlyBlockNote = (props: BaseEditorProps) => {
     const editor = useCreateBlockNote(
         {
-            schema: BlockNoteSchema.create().extend({
-                blockSpecs: {
-                    codeBlock: createCodeBlockSpec(codeBlockOptions),
-                },
-            }),
+            schema: BNSchema,
             initialContent: props.content,
         },
         [props.content]
@@ -33,9 +27,8 @@ export const ReadonlyBlockNote = (props: BaseEditorProps) => {
     }, [editor]);
 
     return (
-        <BlockNoteView
+        <CustomBlockNoteViewer
             editor={editor}
-            theme={blockNoteEditorTheme}
             style={{
                 width: '100%',
             }}

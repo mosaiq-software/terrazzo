@@ -23,7 +23,7 @@ import { DocumentHeader } from '../../modules/documentTypes';
 import { ModuleHeader } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
-import { QueryResult } from '../../queryTypes';
+import { QueryItem } from '../../queryTypes';
 import { UserHeader } from '../../userTypes';
 import { MouseRoomUserData, RoomId } from '../roomTypes';
 import { UserData } from '../socketTypes';
@@ -45,6 +45,7 @@ export enum ClientSE {
     GET_LIST = 'GET_LIST',
     GET_CARD = 'GET_CARD',
     GET_SEARCH_RESULTS = 'GET_SEARCH_RESULTS',
+    GET_SEARCH_TAGS = 'GET_SEARCH_TAGS',
     GET_DOCUMENT = 'GET_DOCUMENT',
     GET_DIRECTORY = 'GET_DIRECTORY',
     GET_DIRECTORY_CONTENTS = 'GET_DIRECTORY_CONTENTS',
@@ -109,6 +110,7 @@ export interface ClientSEPayload {
     [ClientSE.GET_LIST]: ListId;
     [ClientSE.GET_CARD]: CardId;
     [ClientSE.GET_SEARCH_RESULTS]: { query: string; searchSessionId: string; orgId: OrganizationId };
+    [ClientSE.GET_SEARCH_TAGS]: { query: string; searchSessionId: string; orgId: OrganizationId };
     [ClientSE.GET_DOCUMENT]: DocumentId;
     [ClientSE.GET_DIRECTORY]: DirectoryId;
     [ClientSE.GET_DIRECTORY_CONTENTS]: DirectoryId;
@@ -176,7 +178,8 @@ export interface ClientSEReplies {
     [ClientSE.GET_BOARD]: BoardRes | undefined;
     [ClientSE.GET_LIST]: ListHeader | undefined;
     [ClientSE.GET_CARD]: Card | undefined;
-    [ClientSE.GET_SEARCH_RESULTS]: { results: QueryResult[] } | undefined;
+    [ClientSE.GET_SEARCH_RESULTS]: { results: QueryItem[] } | undefined;
+    [ClientSE.GET_SEARCH_TAGS]: { results: QueryItem[] } | undefined;
     [ClientSE.GET_DOCUMENT]: DocumentHeader | undefined;
     [ClientSE.GET_DIRECTORY]: DirectoryHeader | undefined;
     [ClientSE.GET_DIRECTORY_CONTENTS]: (ModuleHeader & { canAccess: boolean })[] | undefined;

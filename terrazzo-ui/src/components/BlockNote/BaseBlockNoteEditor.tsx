@@ -1,8 +1,5 @@
-import { codeBlockOptions } from '@blocknote/code-block';
-import { BlockNoteSchema, createCodeBlockSpec } from '@blocknote/core';
 import '@blocknote/core/fonts/inter.css';
 import { en } from '@blocknote/core/locales';
-import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/mantine/style.css';
 import { useCreateBlockNote } from '@blocknote/react';
 import { Alert, Group, Stack } from '@mantine/core';
@@ -23,7 +20,7 @@ import { SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
 import { AvatarRow } from '../UI/AvatarRow';
 import { BlockNoteEditorHistoryModal } from './BlockNoteEditorHistoryModal';
-import { blockNoteEditorTheme } from './BlockNoteEditorTheme';
+import { BNSchema, CustomBlockNoteViewer } from './BlockNoteSchema';
 import './BlockNoteStyleOverrides.css';
 
 /** DANGER! Allows anyone to edit the document regardless of permissions. Only for testing server-side auth */
@@ -87,11 +84,7 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
         {
             collaboration: collabOptions,
             uploadFile: fileUploader.uploadFile,
-            schema: BlockNoteSchema.create().extend({
-                blockSpecs: {
-                    codeBlock: createCodeBlockSpec(codeBlockOptions),
-                },
-            }),
+            schema: BNSchema,
             placeholders: {
                 ...locale.placeholders,
                 emptyDocument: props.placeholder || locale.placeholders.emptyDocument,
@@ -151,10 +144,7 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
                     />
                 </Group>
             )}
-            <BlockNoteView
-                editor={editor}
-                theme={blockNoteEditorTheme}
-            />
+            <CustomBlockNoteViewer editor={editor} />
         </Stack>
     );
 };

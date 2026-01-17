@@ -1,23 +1,20 @@
-import {
-    DocumentHeader,
-    DocumentId,
-    RoomType,
-    ServerSE,
-    updateBaseFromPartial,
-    UserHeader,
-} from '@mosaiq/terrazzo-common';
+import { DocumentHeader, DocumentId, RoomType, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
-import { getDocument, getUserHeader } from '@trz/emitters';
+import { getDocument } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
 import { useRoom } from './useRoom';
 import { useSocketListener } from './useSocketListener';
+import { useUser } from './useUser';
 
-export const useDocument = (documentId?: DocumentId) => {
+export interface UseDocumentOptions {
+    fetchLastEditor?: boolean;
+}
+export const useDocument = (documentId?: DocumentId, options?: UseDocumentOptions) => {
     useRoom(RoomType.DATA, documentId);
 
     const [document, setDocument] = useState<DocumentHeader | undefined>(undefined);
-    const [lastEditor, setLastEditor] = useState<UserHeader | null>(null);
+    const lastEditor = useUser(options?.fetchLastEditor ? document?.lastModifiedByUserId : undefined);
 
     const sockCtx = useSocket();
 
@@ -39,17 +36,6 @@ export const useDocument = (documentId?: DocumentId) => {
         };
         fetchDocumentData();
     }, [documentId, sockCtx.connected]);
-
-    useEffect(() => {
-        const fetchLastEditor = async () => {
-            if (!document) {
-                return;
-            }
-            const lastEditor = await getUserHeader(sockCtx, document?.lastModifiedByUserId);
-            setLastEditor(lastEditor || null);
-        };
-        fetchLastEditor();
-    }, [document?.lastModifiedByUserId, sockCtx.connected]);
 
     useSocketListener(
         ServerSE.UPDATE_DOCUMENT_FIELD,

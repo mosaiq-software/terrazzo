@@ -43,7 +43,7 @@ import {
     checkCanUserEditTextBlock,
     loadTextBlockEncodedData,
     storeTextBlockEncodedData,
-} from '@trz-api/controllers/textBlockController';
+} from '@trz-api/controllers/textBlockController/textBlockController';
 import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
@@ -135,7 +135,6 @@ export class YSocketIO extends Observable<string> {
         }
         const update = Y.encodeStateAsUpdate(ydoc);
         Y.applyUpdate(doc, update, this);
-        console.log(`Broadcasted document update for text block ${textBlockId} to all connected clients`);
         return true;
     }
 
@@ -244,10 +243,6 @@ export class YSocketIO extends Observable<string> {
                 return sockData?.canEdit;
             });
             if (socketsWithEditPermissions.length === 0) {
-                console.log(
-                    `No more sockets with edit permissions connected to document ${doc.textBlockId}. Saving and destroying document.`
-                );
-
                 // Cancel pending timer to force immediate save
                 if (doc.saveTimer) {
                     clearTimeout(doc.saveTimer);

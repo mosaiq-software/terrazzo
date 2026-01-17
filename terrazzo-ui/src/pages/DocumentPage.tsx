@@ -21,7 +21,7 @@ const DocumentPage = (): React.JSX.Element => {
     const sockCtx = useSocket();
     const uiCtx = useUI();
     const docId = params.documentId as DocumentId | undefined;
-    const { document, lastEditor } = useDocument(docId);
+    const { document, lastEditor } = useDocument(docId, { fetchLastEditor: true });
     const userCanExplicitlyViewDocument = useModulePermission(document, PermissibleAction.ViewDocument);
     const viewOnly = !userCanExplicitlyViewDocument && document?.public;
     const userCanViewDocument = userCanExplicitlyViewDocument || document?.public;

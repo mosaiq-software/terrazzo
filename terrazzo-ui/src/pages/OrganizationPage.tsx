@@ -102,7 +102,7 @@ const OrganizationPage = (): React.JSX.Element => {
                             value={getTab()}
                             pt="30"
                             onChange={onChangeTab}
-                            color={COLORS.accent.pink.light}
+                            color={COLORS.accent.pink.vibrant}
                             variant="default"
                             keepMounted={false}
                         >
