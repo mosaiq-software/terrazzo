@@ -28,7 +28,6 @@ const SEARCH_SESSION_TIMEOUT_MS = 1000 * 30; // 30 seconds
 
 export const CustomBlockNoteViewer = (props: CustomBlockNoteViewerProps) => {
     const [searchSession, setSearchSession] = useState<{ id: string; expires: number } | undefined>(undefined);
-    const [searchResults, setSearchResults] = useState<QueryItem[]>([]);
     const searchSessionRef = useRef<{ id: string; expires: number } | undefined>(undefined);
     const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
     const pendingSearchRef = useRef<((tags: QueryItem[]) => void) | null>(null);
@@ -48,14 +47,12 @@ export const CustomBlockNoteViewer = (props: CustomBlockNoteViewerProps) => {
 
                 searchTimeoutRef.current = setTimeout(async () => {
                     if (!query || query.trim().length === 0) {
-                        setSearchResults([]);
                         pendingSearchRef.current?.([]);
                         pendingSearchRef.current = null;
                         return;
                     }
                     if (!orgCtx.active) {
                         console.error('No active organization context');
-                        setSearchResults([]);
                         pendingSearchRef.current?.([]);
                         pendingSearchRef.current = null;
                         return;
@@ -71,7 +68,6 @@ export const CustomBlockNoteViewer = (props: CustomBlockNoteViewerProps) => {
 
                     const res = await getSearchTags(sockCtx, query, session.id, orgCtx.active.id);
                     const tags = res?.results || [];
-                    setSearchResults(tags);
                     pendingSearchRef.current?.(tags);
                     pendingSearchRef.current = null;
                 }, 300);
