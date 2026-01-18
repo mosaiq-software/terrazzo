@@ -27,7 +27,7 @@ import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
 import { getBoardIDFromListID } from './listController';
-import { createBlocknoteTextBlockWithBlocks, getTextBlockBlocks } from './textBlockController/textBlockController';
+import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
 
 export const MOVING_LIST_ORDER = -10000;
 //Gets
@@ -171,7 +171,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
 
     let descriptionTextBlockId: TextBlockId;
     try {
-        const currentBlocks = await getTextBlockBlocks(existingCard.descriptionTextBlockId);
+        const currentBlocks = await getTextBlockAsBlocks(existingCard.descriptionTextBlockId);
         const descBlock = await createBlocknoteTextBlockWithBlocks(currentBlocks ?? []);
         if (!descBlock) {
             throw new Error('Failed to create description text block');

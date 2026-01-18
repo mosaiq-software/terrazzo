@@ -16,7 +16,7 @@ import {
     settlePromises,
 } from '@mosaiq/terrazzo-common';
 import { getApiUrl } from '@trz-api/utils/envUtils';
-import { extractMarkdownImagesFromText, replaceFirstOccurrence } from '@trz-api/utils/textUtils';
+import { extractMarkdownImagesFromText, replaceAllOccurrences } from '@trz-api/utils/textUtils';
 import { addAssigneeToCard } from '../cardAssignmentController';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from '../cardController';
 import { saveFileFromUrl } from '../fileController';
@@ -25,7 +25,7 @@ import {
     getBlocknoteChecklistBlock,
     getBlocknoteMediaBlock,
     maybeParseMarkdownToBlocks,
-} from '../textBlockController/textBlockController';
+} from '../textBlockController/blocknoteUtils';
 import { addBoard, createBoardLabelSingle } from './boardController';
 
 export const createTerrazzoBoardFromTrelloBoard = async (
@@ -146,7 +146,7 @@ const processCardDescription = async (description: string): Promise<Block[]> => 
         try {
             const createdFile = await saveFileFromUrl(imageUrl);
             const terrazzoFileUrl = getFileUrl(createdFile.id, getApiUrl());
-            cardDesc = replaceFirstOccurrence(cardDesc, imageUrl, terrazzoFileUrl);
+            cardDesc = replaceAllOccurrences(cardDesc, imageUrl, terrazzoFileUrl);
         } catch (error) {
             console.error('Error saving file from Trello card description:', error);
         }

@@ -1,8 +1,6 @@
 import { getRoomCode, RoomType, ServerSE, TextBlockId, TextBlockResourceType, UID } from '@mosaiq/terrazzo-common';
-import {
-    checkCanUserEditTextBlock,
-    getTextBlockSnapshotsWithContent,
-} from '@trz-api/controllers/textBlockController/textBlockController';
+import { getTextBlockSnapshotsWithContent } from '@trz-api/controllers/textBlockController/historySnapshots';
+import { checkCanUserEditTextBlock } from '@trz-api/controllers/textBlockController/textBlockController';
 import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
 export const syncTextHistorySnapshots = async (
