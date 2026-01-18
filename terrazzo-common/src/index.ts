@@ -40,6 +40,7 @@ export * from './types/socket/socketTypes';
 
 // Utils
 export * from './utils/arrayUtils';
+export * from './utils/fileUtils';
 export * from './utils/inviteUtils';
 export * from './utils/permissionUtils';
 export * from './utils/socketUtils';

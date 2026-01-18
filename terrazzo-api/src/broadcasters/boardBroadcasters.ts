@@ -1,5 +1,5 @@
 import { BoardId, getRoomCode, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
-import { getBoardHeader } from '@trz-api/controllers/boardController';
+import { getBoardHeader } from '@trz-api/controllers/boardController/boardController';
 import { userCanViewBoard } from '@trz-api/utils/permissions';
 import { broadcast } from '@trz-api/utils/socket/socketUtils';
 

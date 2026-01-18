@@ -1,3 +1,6 @@
+import { UserId } from '../genericTypes';
+import { TrelloActionType } from './trelloActionTypes';
+
 export interface TrelloExportType {
     id: string;
     nodeId: string;
@@ -236,21 +239,22 @@ export interface TrelloExportType {
     powerUps: unknown[];
     idTags: unknown[];
     premiumFeatures: string[];
-    actions: [];
+    actions: TrelloActionType[];
     cards: TrelloCardType[];
-    labels: {
-        id: string;
-        idBoard: string;
-        name: string;
-        color: string;
-        uses: number;
-    }[];
+    labels: TrelloLabelType[];
     lists: TrelloListType[];
     members: TrelloMemberType[];
     checklists: TrelloChecklistType[];
     customFields: unknown[];
     memberships: TrelloMembershipType[];
     pluginData: TrelloPluginType[];
+}
+export interface TrelloLabelType {
+    id: string;
+    idBoard: string;
+    name: string;
+    color: string;
+    uses: number;
 }
 export interface TrelloCardType {
     id: string;
@@ -291,10 +295,10 @@ export interface TrelloCardType {
     creationMethodLoadingStartedAt: null;
     dueComplete: false;
     dateClosed: null;
-    dateLastActivity: 'string';
+    dateLastActivity: string;
     dateCompleted: null;
     dateViewedByCreator: null;
-    desc: 'string smaller stories';
+    desc: string;
     descData: {
         emoji: unknown;
     };
@@ -312,17 +316,15 @@ export interface TrelloCardType {
     idOrganization: string;
     idShort: number;
     idAttachmentCover: null;
-    labels: [
-        {
-            id: string;
-            idBoard: string;
-            idOrganization: string;
-            name: string;
-            nodeId: string;
-            color: string;
-            uses: number;
-        },
-    ];
+    labels: {
+        id: string;
+        idBoard: string;
+        idOrganization: string;
+        name: string;
+        nodeId: string;
+        color: string;
+        uses: number;
+    }[];
     limits: {
         attachments: {
             perCard: {
@@ -372,23 +374,43 @@ export interface TrelloCardType {
     cardRole: null;
     mirrorSourceId: null;
     mirrorSourceNodeId: null;
-    attachments: [];
-    pluginData: [
-        {
+    attachments: {
+        id: string;
+        bytes: number;
+        date: string;
+        edgeColor: string;
+        idMember: string;
+        isMalicious: boolean;
+        isUpload: boolean;
+        mimeType: string;
+        name: string;
+        previews: {
+            url: string;
+            _id: string;
             id: string;
-            idPlugin: string;
-            scope: string;
-            idModel: string;
-            value: string;
-            access: string;
-            dateLastUpdated: string;
-        },
-    ];
+            scaled: boolean;
+            bytes: number;
+            height: number;
+            width: number;
+        }[];
+        url: string;
+        pos: number;
+        fileName: string;
+    }[];
+    pluginData: {
+        id: string;
+        idPlugin: string;
+        scope: string;
+        idModel: string;
+        value: string;
+        access: string;
+        dateLastUpdated: string;
+    }[];
     customFieldItems: [];
 }
 export interface TrelloListType {
     id: string;
-    name: 'Done';
+    name: string;
     closed: boolean;
     color: null;
     idBoard: string;
@@ -520,3 +542,5 @@ export const TrelloLabelColorsMap: { [key: string]: string } = {
     pink_light: '#e774bb',
     black_light: '#8c9bab',
 };
+
+export type TrelloUserToTerrazzoUserMap = Record<string, UserId | undefined>;

@@ -16,7 +16,7 @@ import {
     updateUserHeaderDb,
 } from '@trz-api/persistence/userPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
-import { addBoard } from './boardController';
+import { addBoard } from './boardController/boardController';
 import { addCard } from './cardController';
 import { addList } from './listController';
 import { addOrganization, updateOrganizationFromPartial } from './organizationController';

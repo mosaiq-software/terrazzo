@@ -1,9 +1,9 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
 import {
-    checkCanUserEditTextBlock,
     getTextBlockSnapshotsWithContent,
     restoreTextBlockSnapshot,
-} from '@trz-api/controllers/textBlockController/textBlockController';
+} from '@trz-api/controllers/textBlockController/historySnapshots';
+import { checkCanUserEditTextBlock } from '@trz-api/controllers/textBlockController/textBlockController';
 import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 

@@ -1,5 +1,5 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { addBoard, getBoardRes, updateBoardFromPartial } from '@trz-api/controllers/boardController';
+import { addBoard, getBoardRes, updateBoardFromPartial } from '@trz-api/controllers/boardController/boardController';
 import { userCanCreateBoard, userCanEditBoard, userCanViewBoard } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';

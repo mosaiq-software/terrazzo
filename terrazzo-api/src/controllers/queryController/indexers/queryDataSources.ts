@@ -1,4 +1,4 @@
-import { getQueryableTextBlockContent } from '@trz-api/controllers/textBlockController/textBlockController';
+import { getTextBlocksAsPlaintext } from '@trz-api/controllers/textBlockController/textBlockController';
 import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import { getCardsByBoardIdDb } from '@trz-api/persistence/cardPersistence';
 import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
@@ -14,7 +14,7 @@ export interface SearchQueryDataSource {
     getCardsByBoardIdDb: typeof getCardsByBoardIdDb;
     getOrganizationMembershipsForOrgDb: typeof getOrganizationMembershipsForOrgDb;
     getDocumentByIdDb: typeof getDocumentByIdDb;
-    getQueryableTextBlockContent: typeof getQueryableTextBlockContent;
+    getQueryableTextBlockContent: typeof getTextBlocksAsPlaintext;
 }
 
 export const defaultSearchQueryDataSource: SearchQueryDataSource = {
@@ -23,7 +23,7 @@ export const defaultSearchQueryDataSource: SearchQueryDataSource = {
     getCardsByBoardIdDb: getCardsByBoardIdDb,
     getOrganizationMembershipsForOrgDb: getOrganizationMembershipsForOrgDb,
     getDocumentByIdDb: getDocumentByIdDb,
-    getQueryableTextBlockContent: getQueryableTextBlockContent,
+    getQueryableTextBlockContent: getTextBlocksAsPlaintext,
 };
 
 // Tags

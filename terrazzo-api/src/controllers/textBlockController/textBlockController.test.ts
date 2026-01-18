@@ -14,7 +14,7 @@ import {
     UID6,
 } from '@mosaiq/terrazzo-common';
 import { describe, expect, it } from 'vitest';
-import { determineSnapshotsToDelete } from './textBlockController';
+import { determineSnapshotsToDelete } from './historySnapshots';
 
 describe('determineSnapshotsToDelete', () => {
     const createSnapshot = (

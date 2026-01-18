@@ -1,38 +1,25 @@
-import { Block, BlockNoteSchema, createInlineContentSpec, defaultInlineContentSpecs } from '@blocknote/core';
-import { ServerBlockNoteEditor } from '@blocknote/server-util';
+import { Block } from '@blocknote/core';
 import {
     BLOCKNOTE_FRAGMENT_ID,
-    boardNameWithCode,
-    cardNameWithBoardCodeAndNumber,
     exhaustiveCheck,
-    fullNameWithUsername,
-    QueryableItem,
     TextBlockId,
     TextBlockResourceType,
-    TextBlockSnapshot,
     TextBlockType,
     UID,
     UserId,
 } from '@mosaiq/terrazzo-common';
-import { syncTextHistorySnapshots } from '@trz-api/broadcasters/textBroadcasters';
-import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
 import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
-import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
-import {
-    createTextBlockHistorySnapshotDb,
-    deleteTextBlockHistorySnapshotDb,
-    getTextBlockHistorySnapshotDb,
-    getTextBlockHistorySnapshotsForTextBlockDb,
-} from '@trz-api/persistence/textBlockHistoryPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
-import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
-import { SocketManager } from '@trz-api/utils/socket/socketManager';
 import { Document } from '@trz-api/utils/y-socket-io';
 import console from 'console';
 import { Doc, XmlText } from 'yjs';
 import { getBoardIDFromCardID } from '../cardController';
+import { BLOCKNOTE_EDITOR } from './blocknote';
+import { convertBlocknoteBlocksToPlaintext, maybeParseMarkdownToBlocks } from './blocknoteUtils';
+import { createTextBlockHistorySnapshot, HISTORY_SNAPSHOT_INTERVAL_MS } from './historySnapshots';
+import { getContentFromDoc } from './yjsUtils';
 
 export const checkCanUserEditTextBlock = async (
     userId: UserId | undefined,
@@ -66,116 +53,6 @@ export const checkCanUserEditTextBlock = async (
     }
 };
 
-/**
- * Random string that is extremely unlikely to appear in normal text.
- * DO NOT CHANGE THIS! IT WILL BREAK EXISTING MENTIONS IN SAVED TEXT BLOCKS!
- */
-const mentionEncodings = {
-    delimiter: '3fu8h3490fh302hf08ug2308hf4tn453o8hqo4iha1awd543g5yb356',
-    identifier: 'MENTION_ENCODED=======',
-    innerDelimiter: ':::',
-};
-
-/**
- * Mentions need to be encoded in a way that they can be stored in the text content, then dynamically decoded and fetched on render.
- */
-const encodedMention = (id: string, type: string): string => {
-    return `${mentionEncodings.delimiter}${mentionEncodings.identifier}${mentionEncodings.innerDelimiter}${type}${mentionEncodings.innerDelimiter}${id}${mentionEncodings.delimiter}`;
-};
-
-/**
- * Replaces all encoded mentions in the given text using the provided asynchronous replacement function.
- * @param rawText The text containing encoded mentions
- * @param replaceFn Function that takes an id and type, and returns a Promise resolving to the replacement string
- * @returns A Promise resolving to the text with all encoded mentions replaced
- */
-const replaceEncodedMentionsInText = async (
-    rawText: string,
-    replaceFn: (id: UID, type: QueryableItem) => Promise<string>
-): Promise<string> => {
-    const pattern = new RegExp(
-        `${mentionEncodings.delimiter}${mentionEncodings.identifier}${mentionEncodings.innerDelimiter}(\\w+)${mentionEncodings.innerDelimiter}([\\w-]+)${mentionEncodings.delimiter}`,
-        'g'
-    );
-
-    // Asynchronously process all matches
-    const segments: string[] = [];
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-    while ((match = pattern.exec(rawText)) !== null) {
-        const precedingText = rawText.substring(lastIndex, match.index);
-        segments.push(precedingText);
-        const type = match[1] as QueryableItem;
-        const id = match[2] as UID;
-        if (!type || !id) {
-            console.error('Invalid encoded mention format', { match, p1: match[1], p2: match[2] });
-            segments.push(match[0]); // Push the original match if parsing fails
-        } else {
-            const replacement = await replaceFn(id, type);
-            segments.push(replacement);
-        }
-        lastIndex = match.index + match[0].length;
-    }
-    segments.push(rawText.substring(lastIndex));
-    return segments.join('');
-};
-
-const BlockNoteMention = createInlineContentSpec(
-    {
-        type: 'mention',
-        content: 'none',
-        propSchema: {
-            id: {
-                default: '',
-            },
-            type: {
-                default: '',
-            },
-        },
-    },
-    {
-        render: (inlineContent) => {
-            const serverSideHtml = document.createElement('span');
-            serverSideHtml.className = 'bn-mention';
-            const id = inlineContent?.props?.id || '';
-            const type = inlineContent?.props?.type || '';
-            serverSideHtml.textContent = encodedMention(id, type);
-            serverSideHtml.setAttribute('data-mention-id', id);
-            return { dom: serverSideHtml };
-        },
-    }
-);
-
-const BNSchema = BlockNoteSchema.create().extend({
-    blockSpecs: {},
-    inlineContentSpecs: {
-        ...defaultInlineContentSpecs,
-        mention: BlockNoteMention,
-    },
-});
-
-const BLOCKNOTE_EDITOR = ServerBlockNoteEditor.create({
-    schema: BNSchema,
-});
-
-const SNAPSHOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
-
-const getContentFromDoc = (doc: Document, type: TextBlockType): string => {
-    const fragment = doc.getXmlFragment(BLOCKNOTE_FRAGMENT_ID);
-    switch (type) {
-        case TextBlockType.PlainText: {
-            const textElements = fragment.toArray().filter((item) => item instanceof XmlText);
-            return textElements.map((te) => te.toString()).join('\n');
-        }
-        case TextBlockType.BlockNote: {
-            const blocks = BLOCKNOTE_EDITOR.yXmlFragmentToBlocks(fragment);
-            return JSON.stringify(blocks);
-        }
-        default:
-            return exhaustiveCheck(type, `Unsupported text block type for content extraction`);
-    }
-};
-
 export const storeTextBlockEncodedData = async (doc: Document, forceSnapshot?: boolean): Promise<void> => {
     const { textBlockId, resourceId, resourceType } = doc;
     try {
@@ -188,7 +65,8 @@ export const storeTextBlockEncodedData = async (doc: Document, forceSnapshot?: b
         const now = Date.now();
         if (
             textBlock.trackHistory &&
-            ((textBlock.lastSnapshotAt !== undefined && now - textBlock.lastSnapshotAt >= SNAPSHOT_INTERVAL_MS) ||
+            ((textBlock.lastSnapshotAt !== undefined &&
+                now - textBlock.lastSnapshotAt >= HISTORY_SNAPSHOT_INTERVAL_MS) ||
                 forceSnapshot)
         ) {
             await updateTextBlockDb(textBlockId, { text: content, lastSnapshotAt: now });
@@ -200,25 +78,6 @@ export const storeTextBlockEncodedData = async (doc: Document, forceSnapshot?: b
         console.error('Unable to save text block ' + textBlockId + ' : ' + error.message);
         throw error;
     }
-};
-
-export const createTextBlockHistorySnapshot = async (
-    textBlockId: TextBlockId,
-    resourceId: UID,
-    resourceType: TextBlockResourceType,
-    content: string,
-    tags?: string[]
-): Promise<void> => {
-    const snapshot: TextBlockSnapshot = {
-        snapshotId: crypto.randomUUID(),
-        textBlockId: textBlockId,
-        timestamp: Date.now(),
-        content,
-        tags,
-    };
-    await createTextBlockHistorySnapshotDb(snapshot);
-    await reduceSnapshotsForTextBlock(textBlockId);
-    await syncTextHistorySnapshots(textBlockId, resourceId, resourceType);
 };
 
 export const loadTextBlockEncodedData = async (textBlockId: TextBlockId): Promise<Doc | null> => {
@@ -267,6 +126,22 @@ export const loadTextBlockEncodedData = async (textBlockId: TextBlockId): Promis
     }
 };
 
+export const createBlocknoteTextBlockWithBlocks = async (blocks: Block[]) => {
+    try {
+        const blocksJsonString = JSON.stringify(blocks);
+        const tb = await createTextBlockDb({
+            id: crypto.randomUUID(),
+            text: blocksJsonString,
+            type: TextBlockType.BlockNote,
+            trackHistory: true,
+        });
+        return tb;
+    } catch (e: any) {
+        console.error(`Unable to create text block`, e);
+        return null;
+    }
+};
+
 export const createBlocknoteTextBlockWithMarkdown = async (markdownText?: string) => {
     try {
         const blocks = await maybeParseMarkdownToBlocks(markdownText);
@@ -299,277 +174,12 @@ export const createPlainTextBlock = async (plainText: string) => {
     }
 };
 
-const maybeParseMarkdownToBlocks = async (markdownText?: string): Promise<Block[]> => {
-    try {
-        let blocks: Block[] = [];
-        try {
-            if (markdownText) {
-                // @Camo651 - Jan 17th, 2026
-                // This line likes to show a TS error but it works at runtime. It only shows it inconsistently...
-                // Likely Due to something with having a custom schema defined.
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore - Ignored instead of expect-error since this is frustratingly inconsistent
-                blocks = await BLOCKNOTE_EDITOR.tryParseMarkdownToBlocks(markdownText);
-            }
-        } catch (e: any) {
-            console.error('Failed to parse markdown', {
-                error: e,
-                markdownText,
-            });
-            blocks = [];
-        }
-
-        //default to blocknote's hardcoded block with the text if for some reason its not valid markdown
-        if (!blocks.length && markdownText?.length) {
-            blocks = [
-                {
-                    id: 'initialBlockId',
-                    type: 'paragraph',
-                    props: {
-                        backgroundColor: 'default',
-                        textColor: 'default',
-                        textAlignment: 'left',
-                    },
-                    content: [
-                        {
-                            type: 'text',
-                            text: markdownText,
-                            styles: {},
-                        },
-                    ],
-                    children: [],
-                },
-                {
-                    id: crypto.randomUUID(),
-                    type: 'paragraph',
-                    props: {
-                        backgroundColor: 'default',
-                        textColor: 'default',
-                        textAlignment: 'left',
-                    },
-                    content: [],
-                    children: [],
-                },
-            ];
-        }
-        return blocks;
-    } catch (e: any) {
-        console.error(`Unable to create text block`, e);
-        return [];
-    }
-};
-
-/**
- * Fetches all snapshots for a given text block that contain actual content.
- */
-export const getTextBlockSnapshotsWithContent = async (textBlockId: TextBlockId): Promise<TextBlockSnapshot[]> => {
-    try {
-        // Snapshots already contain full content - just return them
-        const snapshots = await getTextBlockHistorySnapshotsForTextBlockDb(textBlockId);
-        return snapshots;
-    } catch (error: any) {
-        console.error(`Unable to get text block snapshots with content for text block ${textBlockId}`, {
-            message: error.message,
-            trace: error.stack,
-        });
-        return [];
-    }
-};
-
-/**
- * Process a bucket of snapshots and determine which ones to delete based on time intervals.
- * @param snapshots - Array of snapshots to process (assumes first snapshot is always kept)
- * @param intervalMs - Minimum time interval between kept snapshots
- * @param snapshotsToDelete - Set to add snapshot IDs that should be deleted
- * @param fixedTimeBlocks - If true, only consider fixed time intervals; if false, allow variable intervals
- */
-const processSnapshotBucket = (
-    snapshots: TextBlockSnapshot[],
-    intervalMs: number,
-    snapshotsToDelete: Set<UID>,
-    fixedTimeBlocks: boolean = false
-): void => {
-    if (snapshots.length === 0) {
-        return;
-    }
-
-    let lastTimestamp = snapshots[0].timestamp; // Keep first snapshot in bucket
-
-    for (let i = 1; i < snapshots.length; i++) {
-        const snapshot = snapshots[i];
-        const timeSinceLast = lastTimestamp - snapshot.timestamp;
-
-        if (timeSinceLast >= intervalMs || snapshot.tags?.length) {
-            // Keep this snapshot - sufficient time has passed
-            lastTimestamp = snapshot.timestamp;
-        } else {
-            // Delete this snapshot - too soon after last kept
-            snapshotsToDelete.add(snapshot.snapshotId);
-            if (!fixedTimeBlocks) {
-                lastTimestamp = snapshot.timestamp;
-            }
-        }
-    }
-};
-
-/**
- * Determines which snapshots to delete based on retention policy.
- * @param snapshots Array of all snapshots for a text block
- * @param currentTime Current timestamp in milliseconds. @defaults to Date.now()
- * @param textBlockType Type of the text block. @defaults to TextBlockType.BlockNote
- * @returns
- */
-export const determineSnapshotsToDelete = (
-    snapshots: TextBlockSnapshot[],
-    currentTime: number = Date.now(),
-    textBlockType: TextBlockType = TextBlockType.BlockNote
-): Set<UID> => {
-    const snapshotsToDelete = new Set<UID>();
-
-    // Remove duplicates or empty content
-    const filteredSnapshots: TextBlockSnapshot[] = [];
-    const seenTimestamps = new Set<number>();
-    let lastSeenSnapshot: TextBlockSnapshot | null = null;
-    for (const snapshot of snapshots) {
-        // Delete empty content snapshots
-        if (
-            !snapshot.content ||
-            snapshot.content.length === 0 ||
-            (textBlockType === TextBlockType.BlockNote && snapshot.content === '[]')
-        ) {
-            snapshotsToDelete.add(snapshot.snapshotId);
-            continue;
-        }
-
-        // Delete duplicate timestamp snapshots
-        if (seenTimestamps.has(snapshot.timestamp)) {
-            snapshotsToDelete.add(snapshot.snapshotId);
-            continue;
-        }
-        seenTimestamps.add(snapshot.timestamp);
-
-        // Delete consecutive duplicate content snapshots
-        // Prioritize deleting snapshots without tags if content is the same
-        if (lastSeenSnapshot !== null && snapshot.content === lastSeenSnapshot.content) {
-            const thisSnapHasTags = snapshot.tags && snapshot.tags.length > 0;
-            const lastSnapHasTags = lastSeenSnapshot.tags && lastSeenSnapshot.tags.length > 0;
-            if (!lastSnapHasTags && thisSnapHasTags) {
-                snapshotsToDelete.add(lastSeenSnapshot.snapshotId);
-                filteredSnapshots.pop();
-            } else if (!thisSnapHasTags && lastSnapHasTags) {
-                snapshotsToDelete.add(snapshot.snapshotId);
-            } else if (!thisSnapHasTags && !lastSnapHasTags) {
-                snapshotsToDelete.add(snapshot.snapshotId);
-            }
-            lastSeenSnapshot = snapshot;
-            continue;
-        }
-        lastSeenSnapshot = snapshot;
-
-        filteredSnapshots.push(snapshot);
-    }
-
-    if (filteredSnapshots.length <= 1) {
-        // Nothing to delete
-        return snapshotsToDelete;
-    }
-
-    // Time constants
-    const ONE_HOUR_MS = 60 * 60 * 1000;
-    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-    const INTERVAL_30_MIN_MS = 30 * 60 * 1000;
-    const SESSION_GAP_MS = 3 * 60 * 60 * 1000; // 3 hours
-
-    // Split snapshots into time buckets based on age
-    const lessThan1Hour: TextBlockSnapshot[] = [];
-    const oneHourTo1Day: TextBlockSnapshot[] = [];
-    const moreThan1Day: TextBlockSnapshot[] = [];
-
-    for (const snapshot of filteredSnapshots) {
-        const age = currentTime - snapshot.timestamp;
-        if (age < ONE_HOUR_MS) {
-            lessThan1Hour.push(snapshot);
-        } else if (age < ONE_DAY_MS) {
-            oneHourTo1Day.push(snapshot);
-        } else {
-            moreThan1Day.push(snapshot);
-        }
-    }
-
-    processSnapshotBucket(lessThan1Hour, SNAPSHOT_INTERVAL_MS, snapshotsToDelete, true);
-    processSnapshotBucket(oneHourTo1Day, INTERVAL_30_MIN_MS, snapshotsToDelete, true);
-    processSnapshotBucket(moreThan1Day, SESSION_GAP_MS, snapshotsToDelete, false);
-
-    return snapshotsToDelete;
-};
-
-/**
- * Reduces the number of snapshots for a given text block according to retention policy.
- * Deletes snapshots that are deemed unnecessary based on age and content.
- */
-const reduceSnapshotsForTextBlock = async (textBlockId: TextBlockId) => {
-    try {
-        const textBlock = await getTextBlockByIdDb(textBlockId);
-        if (!textBlock) {
-            throw new Error(`Text block ${textBlockId} not found`);
-        }
-        const snapshots = await getTextBlockHistorySnapshotsForTextBlockDb(textBlockId);
-        const snapshotsToDelete = determineSnapshotsToDelete(snapshots, Date.now(), textBlock.type);
-
-        // Execute deletions
-        if (snapshotsToDelete.size > 0) {
-            for (const snapshotId of snapshotsToDelete) {
-                await deleteTextBlockHistorySnapshotDb(snapshotId);
-            }
-        }
-    } catch (error: any) {
-        console.error(`Unable to reduce text block snapshots for text block ${textBlockId}`, {
-            message: error.message,
-            trace: error.stack,
-        });
-    }
-};
-
-/**
- * Restores a text block to the content of a specified snapshot.
- */
-export const restoreTextBlockSnapshot = async (
-    snapshotId: UID,
-    resourceId: UID,
-    resourceType: TextBlockResourceType
-): Promise<void> => {
-    try {
-        const snapshot = await getTextBlockHistorySnapshotDb(snapshotId);
-        if (!snapshot) {
-            throw new Error(`Snapshot ${snapshotId} not found`);
-        }
-        const textBlock = await getTextBlockByIdDb(snapshot.textBlockId);
-        if (!textBlock) {
-            throw new Error(`Text block ${snapshot.textBlockId} not found`);
-        }
-        await createTextBlockHistorySnapshot(textBlock.id, resourceId, resourceType, textBlock.text, ['Pre-Restore']);
-        await updateTextBlockDb(textBlock.id, { text: snapshot.content });
-        await createTextBlockHistorySnapshot(textBlock.id, resourceId, resourceType, snapshot.content, ['Restored']);
-        const ydoc = await loadTextBlockEncodedData(textBlock.id);
-        if (!ydoc) {
-            throw new Error(`Failed to load YDoc for text block ${textBlock.id} during snapshot restore`);
-        }
-        await SocketManager.getInstance().yio.broadcastDocumentUpdate(snapshot.textBlockId, ydoc);
-    } catch (error: any) {
-        console.error(`Unable to restore text block snapshot ${snapshotId}`, {
-            message: error.message,
-            trace: error.stack,
-        });
-        throw error;
-    }
-};
-
 /**
  * Gets the text content of a text block suitable for querying/indexing.
  * If the block is plain text, returns the text directly.
  * If the block is BlockNote, extracts the content from the stored blocks.
  */
-export const getQueryableTextBlockContent = async (textBlockId: TextBlockId): Promise<string> => {
+export const getTextBlocksAsPlaintext = async (textBlockId: TextBlockId): Promise<string> => {
     try {
         const textBlock = await getTextBlockByIdDb(textBlockId);
         if (!textBlock) {
@@ -598,66 +208,34 @@ export const getQueryableTextBlockContent = async (textBlockId: TextBlockId): Pr
 };
 
 /**
- * Retrieves the display text for a mention based on its ID and type.
- * @param id The unique identifier of the mention
- * @param type The type of the mention (e.g., User, Card, Document, Board)
- * @returns The display text for the mention or undefined if not found
+ * Retrieves the BlockNote blocks for a given text block ID.
+ * If the text block is of type BlockNote, returns the blocks.
+ * If the text block is of type PlainText, returns undefined.
  */
-const retrieveMentionDisplayText = async (id: UID, type: QueryableItem): Promise<string | undefined> => {
-    switch (type) {
-        case QueryableItem.User: {
-            const userHeader = await getUserHeaderByIdDb(id);
-            return userHeader ? fullNameWithUsername(userHeader) : undefined;
+export const getTextBlockAsBlocks = async (textBlockId: TextBlockId): Promise<Block[] | undefined> => {
+    try {
+        const textBlock = await getTextBlockByIdDb(textBlockId);
+        if (!textBlock) {
+            throw new Error(`Text block ${textBlockId} not found`);
         }
-        case QueryableItem.Card: {
-            const card = await getCardByIdDb(id);
-            if (!card) {
-                return undefined;
+        switch (textBlock.type) {
+            case TextBlockType.BlockNote: {
+                let blocks: Block[] = [];
+                if (textBlock.text && textBlock.text.length > 0) {
+                    blocks = JSON.parse(textBlock.text);
+                }
+                return blocks;
             }
-            const boardModule = await getBoardByIdDb(card.boardId);
-            return cardNameWithBoardCodeAndNumber(card.name, boardModule?.boardCode, card.cardNumber);
+            case TextBlockType.PlainText:
+                return undefined;
+            default:
+                return exhaustiveCheck(textBlock.type, `Unsupported text block type for text block ${textBlockId}`);
         }
-        case QueryableItem.Document: {
-            const documentModule = await getModuleByIdDb(id);
-            return documentModule ? documentModule.name : ``;
-        }
-        case QueryableItem.Board: {
-            const boardModule = await getModuleByIdDb(id);
-            const board = await getBoardByIdDb(id);
-            return boardModule ? boardNameWithCode(boardModule.name, board?.boardCode) : undefined;
-        }
-        default:
-            exhaustiveCheck(type, `Unsupported mention type ${type}`);
+    } catch (error: any) {
+        console.error(`Unable to get blocks for text block ${textBlockId}`, {
+            message: error.message,
+            trace: error.stack,
+        });
+        return undefined;
     }
-};
-
-/**
- * Converts BlockNote blocks to plaintext, replacing mentions with their display text.
- */
-const convertBlocknoteBlocksToPlaintext = async (blocks: Block[]): Promise<string> => {
-    const html = await BLOCKNOTE_EDITOR.blocksToHTMLLossy(blocks);
-    const text = getInnerTextFromHtml(html);
-    const textWithMentions = await replaceEncodedMentionsInText(text, async (id, type) => {
-        return (await retrieveMentionDisplayText(id, type)) || `(${type} ${id})`;
-    });
-    return textWithMentions;
-};
-
-/**
- * Extracts and returns the inner text from the provided HTML string, stripping out all HTML tags.
- * Handles block-level tags by replacing them with newlines to preserve text structure.
- * @param html The HTML string to extract text from
- * @returns The extracted inner text
- */
-const getInnerTextFromHtml = (html: string): string => {
-    const blockLevelTags = ['div', 'p', 'br', 'li', 'ul', 'ol', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote'];
-    let text = html;
-    for (const tag of blockLevelTags) {
-        const regexOpen = new RegExp(`<${tag}[^>]*>`, 'gi');
-        const regexClose = new RegExp(`</${tag}>`, 'gi');
-        text = text.replace(regexOpen, '\n').replace(regexClose, '\n');
-    }
-    text = text.replace(/<[^>]+>/g, '');
-    text = text.replace(/\n+/g, '\n').trim();
-    return text;
 };

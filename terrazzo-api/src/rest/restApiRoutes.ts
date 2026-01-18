@@ -4,17 +4,17 @@ import {
     RestRequestParams,
     RestResponse,
     RestRoutes,
-    TEMPORARY_ID,
+    SYSTEM_USER_ID,
 } from '@mosaiq/terrazzo-common';
 import {
     handleAuthProviderCallback,
     signInWithExistingAuth,
     startAuthenticatedSession,
 } from '@trz-api/controllers/authController';
-import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
+import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController/trelloImport';
+import { createFile, getFile } from '@trz-api/controllers/fileController';
 import { addLinkedAccountToUser } from '@trz-api/controllers/linkedAccountController';
 import { DEV_upsertFakeUser } from '@trz-api/controllers/userController';
-import { createFileDb, getFileByIdDb } from '@trz-api/persistence/filePersistence';
 import { getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccountPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
 import express from 'express';
@@ -68,7 +68,7 @@ router.post(RestRoutes.IMPORT_FROM_TRELLO, async (req, res) => {
         req.params as RestRequestParams[RestRoutes.IMPORT_FROM_TRELLO];
     const body: RestRequestBody[RestRoutes.IMPORT_FROM_TRELLO] = req.body;
     try {
-        const boardId = await createTerrazzoBoardFromTrelloBoard(params.parentId, body);
+        const boardId = await createTerrazzoBoardFromTrelloBoard(params.parentId, body.data, body.userMap);
         const response: RestResponse<RestRoutes.IMPORT_FROM_TRELLO> = boardId;
         res.status(200).send(response);
     } catch (error) {
@@ -84,12 +84,10 @@ router.get(RestRoutes.GET_FILE, async (req, res) => {
             res.status(400).send('No file ID provided');
             return;
         }
-        const retrievedFile = await getFileByIdDb(params.fileId);
-        const base64 = retrievedFile?.base64;
-        const file = Buffer.from(base64 || '', 'base64');
+        const retrievedFile = await getFile(params.fileId);
         res.setHeader('Content-Type', retrievedFile?.mimeType || 'application/octet-stream');
         res.setHeader('Content-Disposition', `attachment; filename="${retrievedFile?.fileName || 'file'}"`);
-        const response: RestResponse<RestRoutes.GET_FILE> = file;
+        const response: RestResponse<RestRoutes.GET_FILE> = retrievedFile.file;
         res.status(200).send(response);
     } catch (error) {
         console.error(error);
@@ -100,7 +98,7 @@ router.get(RestRoutes.GET_FILE, async (req, res) => {
 router.post(RestRoutes.UPLOAD_FILE, async (req, res) => {
     const body: RestRequestBody[RestRoutes.UPLOAD_FILE] = req.body;
     try {
-        const uploadedFile = await createFileDb(body.base64, body.fileName, body.mimeType, TEMPORARY_ID); //TODO: replace TEMPORARY_ID with actual user ID when auth is implemented
+        const uploadedFile = await createFile(body.base64, body.fileName, body.mimeType, SYSTEM_USER_ID);
         const response: RestResponse<RestRoutes.UPLOAD_FILE> = uploadedFile.id;
         res.status(200).send(response);
     } catch (error) {

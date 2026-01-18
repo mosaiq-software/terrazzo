@@ -7,11 +7,11 @@ import {
     updateDocumentDb,
 } from '@trz-api/persistence/documentPersistence';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
-import { createBlocknoteTextBlockWithMarkdown } from './textBlockController/textBlockController';
+import { createBlocknoteTextBlockWithBlocks } from './textBlockController/textBlockController';
 
 export const createNewDocument = async (title: string, parentId: UID, createdByUserId: UserId) => {
     const docModule = await createNewModule(title, parentId, TrzModuleType.Document);
-    const textBlock = await createBlocknoteTextBlockWithMarkdown('');
+    const textBlock = await createBlocknoteTextBlockWithBlocks([]);
     if (!textBlock) {
         throw new Error('Failed to create main text block for document');
     }

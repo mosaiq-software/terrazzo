@@ -1,23 +1,7 @@
-import {
-    BoardHeader,
-    BoardId,
-    BoardRes,
-    DirectoryId,
-    Label,
-    LabelId,
-    ListId,
-    TrelloExportType,
-    TrelloLabelColorsMap,
-    TrzModuleType,
-} from '@mosaiq/terrazzo-common';
+import { BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { syncBoardFields, syncDirectoryContents, syncParentsDirectoryContents } from '@trz-api/broadcasters';
 import { syncBoardLabels } from '@trz-api/broadcasters/labelBroadcaster';
-import {
-    addList,
-    getListAndCardIdsOnBoard,
-    moveList,
-    updateListFromPartial,
-} from '@trz-api/controllers/listController';
+import { getListAndCardIdsOnBoard } from '@trz-api/controllers/listController';
 import { BoardModelType, createBoardDb, getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
 import {
     createLabelOnBoardDb,
@@ -27,8 +11,7 @@ import {
     getLabelsByBoardIdDb,
     updateLabelDb,
 } from '@trz-api/persistence/labelPersistence';
-import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
-import { createNewModule, getModuleById, updateModule } from './moduleController';
+import { createNewModule, getModuleById, updateModule } from '../moduleController';
 
 export const getBoardHeader = async (boardID: BoardId): Promise<BoardHeader | undefined> => {
     const boardModel = await getBoardByIdDb(boardID);
@@ -142,66 +125,3 @@ export async function updateBoardLabels(boardId: BoardId, updatedLabel: Label) {
     const labels = await getLabelsByBoardIdDb(boardId);
     await syncBoardLabels(boardId, labels);
 }
-
-export const createTerrazzoBoardFromTrelloBoard = async (onParentId: DirectoryId, trelloBoard: TrelloExportType) => {
-    const boardName = trelloBoard.name;
-    const trelloLists = trelloBoard.lists;
-    const trelloCards = trelloBoard.cards;
-
-    // Trello id --> trz id
-    const listMap: { [trl: string]: ListId } = {};
-    const labelMap: { [trl: string]: LabelId } = {};
-
-    try {
-        const trzBoardId = await addBoard(boardName, '', onParentId);
-        for (const trelloList of trelloLists) {
-            const trelloListName = trelloList.name;
-            const trelloListOrder = trelloList.pos;
-
-            const trzList = await addList(trzBoardId, trelloListName);
-            await moveList(trzList.id, trelloListOrder);
-            await updateListFromPartial(trzList.id, { archived: trelloList.closed });
-            listMap[trelloList.id] = trzList.id;
-        }
-
-        for (const trlLabel of trelloBoard.labels) {
-            const labelId = await createBoardLabelSingle(
-                trzBoardId,
-                trlLabel.name,
-                TrelloLabelColorsMap[trlLabel.color]
-            );
-            labelMap[trlLabel.id] = labelId;
-        }
-
-        for (const trlCard of trelloCards) {
-            const trlCardName = trlCard.name;
-            const trlCardDesc = trlCard.desc;
-            const trlCardLabelIds = trlCard.idLabels;
-            const trlCardListId = trlCard.idList;
-            const trlCardOrder = trlCard.pos;
-            const trlCardNumber = trlCard.idShort;
-
-            const trzListId = listMap[trlCardListId];
-            const trzCard = await addCard(trzListId, trlCardName, trlCardDesc, trlCardNumber, undefined);
-            await moveCardToList(trzCard.id, trzListId, trlCardOrder);
-            const trzLabelIds = trlCardLabelIds.map((trlLabelId) => labelMap[trlLabelId]);
-            await setCardsLabels(trzCard.id, trzLabelIds);
-
-            const trelloCardPlugins = trlCard.pluginData;
-            const storyPointPluginId = '638372c5e00ec1016bb45460';
-            let sp: number | undefined = undefined;
-            trelloCardPlugins.forEach((plugin) => {
-                if (plugin.idPlugin === storyPointPluginId) {
-                    const val = plugin.value; //{\"storyPoints\":2}
-                    sp = parseInt(val.replace(/\D/g, ''));
-                }
-            });
-            await updateCardFromPartial(trzCard.id, { archived: trlCard.closed, storyPoints: sp });
-        }
-
-        return trzBoardId;
-    } catch (error: any) {
-        console.error('Error importing from trello', error);
-        return undefined;
-    }
-};

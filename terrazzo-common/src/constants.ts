@@ -6,6 +6,7 @@ export enum LocalStorageKey {
 }
 
 export const TEMPORARY_ID: UID = 'THIS-IS-A-TEMPORARY-ID';
+export const SYSTEM_USER_ID: UID = 'system-system-system-system-system';
 
 export const BLOCKNOTE_FRAGMENT_ID = 'document-store';
 
@@ -25,3 +26,9 @@ export enum StoryPoints {
     XL = 13,
     XXL = 21,
 }
+
+export const IMAGE_MIME_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'];
+export const VIDEO_MIME_TYPES = ['video/mp4', 'video/webm'];
+export const AUDIO_MIME_TYPES = ['audio/mpeg', 'audio/wav', 'audio/ogg'];
+export const FILE_MIME_TYPES = ['application/pdf'];
+export const SUPPORTED_MIME_TYPES = [...IMAGE_MIME_TYPES, ...VIDEO_MIME_TYPES, ...AUDIO_MIME_TYPES, ...FILE_MIME_TYPES];
