@@ -7,6 +7,7 @@ import {
     Label,
     LabelId,
     ListId,
+    SUPPORTED_MIME_TYPES,
     TrelloExportType,
     TrelloLabelColorsMap,
     TrelloUserToTerrazzoUserMap,
@@ -34,6 +35,7 @@ import { addAssigneeToCard } from './cardAssignmentController';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
 import { yoinkFile } from './fileController';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
+import { getBlocknoteMediaBlock, maybeParseMarkdownToBlocks } from './textBlockController/textBlockController';
 
 export const getBoardHeader = async (boardID: BoardId): Promise<BoardHeader | undefined> => {
     const boardModel = await getBoardByIdDb(boardID);
@@ -197,15 +199,38 @@ export const createTerrazzoBoardFromTrelloBoard = async (
         for (const trelloCard of trelloCards) {
             // Copy over each image in the card description to Terrazzo's storage
             let cardDesc = trelloCard.desc;
-            const extractedImages = extractMarkdownImagesFromText(cardDesc);
-            for (const imageUrl of extractedImages) {
+            const embeddedImages = extractMarkdownImagesFromText(cardDesc);
+            for (const imageUrl of embeddedImages) {
                 try {
                     const createdFile = await yoinkFile(imageUrl);
                     const terrazzoFileUrl = getFileUrl(createdFile.id, getApiUrl());
-                    const regex = new RegExp(imageUrl, 'g');
-                    cardDesc = cardDesc.replace(regex, terrazzoFileUrl);
+                    cardDesc = replaceFirstOccurrence(cardDesc, imageUrl, terrazzoFileUrl);
                 } catch (error) {
                     console.error('Error yoinking file from Trello card description:', error);
+                }
+            }
+
+            // Convert the markdown description to use blocknote
+            const descriptionBlocks = await maybeParseMarkdownToBlocks(cardDesc);
+
+            // Copy over attachment images that are not already embedded in the description
+            for (const att of trelloCard.attachments) {
+                if (!att.isUpload) {
+                    continue;
+                }
+                if (!SUPPORTED_MIME_TYPES.includes(att.mimeType || '')) {
+                    continue;
+                }
+                if (trelloCard.desc.includes(att.url)) {
+                    continue;
+                }
+                try {
+                    const createdFile = await yoinkFile(att.url);
+                    const terrazzoFileUrl = getFileUrl(createdFile.id, getApiUrl());
+                    const mediaBlock = getBlocknoteMediaBlock(terrazzoFileUrl, att.mimeType, att.name);
+                    descriptionBlocks.push(mediaBlock);
+                } catch (error) {
+                    console.error('Error yoinking file from Trello card attachment:', error);
                 }
             }
 
@@ -217,7 +242,7 @@ export const createTerrazzoBoardFromTrelloBoard = async (
             const trlCardNumber = trelloCard.idShort;
             const trlCardCreatedDate = cardCreatedDateMap[trelloCard.id] || new Date();
             const trzListId = listMap[trlCardListId];
-            const trzCard = await addCard(trzListId, trlCardName, cardDesc, trlCardNumber, undefined);
+            const trzCard = await addCard(trzListId, trlCardName, descriptionBlocks, trlCardNumber, undefined);
             await moveCardToList(trzCard.id, trzListId, trlCardOrder);
             const trzLabelIds = trlCardLabelIds.map((trlLabelId) => labelMap[trlLabelId]);
             await setCardsLabels(trzCard.id, trzLabelIds);
@@ -259,4 +284,12 @@ const extractMarkdownImagesFromText = (text: string): string[] => {
         imageUrls.push(match[1]);
     }
     return imageUrls;
+};
+
+const replaceFirstOccurrence = (text: string, searchValue: string, replacement: string): string => {
+    const index = text.indexOf(searchValue);
+    if (index === -1) {
+        return text;
+    }
+    return `${text.slice(0, index)}${replacement}${text.slice(index + searchValue.length)}`;
 };

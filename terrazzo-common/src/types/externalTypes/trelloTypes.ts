@@ -375,7 +375,33 @@ export interface TrelloCardType {
     cardRole: null;
     mirrorSourceId: null;
     mirrorSourceNodeId: null;
-    attachments: [];
+    attachments: [
+        {
+            id: string;
+            bytes: number;
+            date: string;
+            edgeColor: string;
+            idMember: string;
+            isMalicious: boolean;
+            isUpload: boolean;
+            mimeType: string;
+            name: string;
+            previews: [
+                {
+                    url: string;
+                    _id: string;
+                    id: string;
+                    scaled: boolean;
+                    bytes: number;
+                    height: number;
+                    width: number;
+                },
+            ];
+            url: string;
+            pos: number;
+            fileName: string;
+        },
+    ];
     pluginData: [
         {
             id: string;

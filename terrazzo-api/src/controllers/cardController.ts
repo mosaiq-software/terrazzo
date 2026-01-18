@@ -1,3 +1,4 @@
+import { Block } from '@blocknote/core';
 import {
     Card,
     CardHeader,
@@ -23,11 +24,10 @@ import {
 } from '@trz-api/persistence/cardPersistence';
 import { addLabelToCardDb, deleteLabelsOnCardDb, getLabelsOnCardDb } from '@trz-api/persistence/labelPersistence';
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
-import { getTextBlockByIdDb } from '@trz-api/persistence/textBlockPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
 import { getBoardIDFromListID } from './listController';
-import { createBlocknoteTextBlockWithMarkdown } from './textBlockController/textBlockController';
+import { createBlocknoteTextBlockWithBlocks, getTextBlockBlocks } from './textBlockController/textBlockController';
 
 export const MOVING_LIST_ORDER = -10000;
 //Gets
@@ -86,7 +86,7 @@ export async function getSingleFullCard(cardId: CardId): Promise<Card | undefine
 export async function addCard(
     listID: ListId,
     cardName: string,
-    description?: string,
+    descriptionBlocks: Block[] = [],
     explicitCardNumber?: number,
     createdById?: UserId
 ) {
@@ -103,6 +103,17 @@ export async function addCard(
         throw new Error('Board not found');
     }
 
+    let descriptionTextBlockId: TextBlockId;
+    try {
+        const descBlock = await createBlocknoteTextBlockWithBlocks(descriptionBlocks);
+        if (!descBlock) {
+            throw new Error('Failed to create description text block');
+        }
+        descriptionTextBlockId = descBlock.id;
+    } catch (error: any) {
+        throw new Error('Failed to create description text block');
+    }
+
     const cardUid = crypto.randomUUID();
     const newCard: Card = {
         id: cardUid,
@@ -110,7 +121,7 @@ export async function addCard(
         boardId: board.id,
         cardNumber: explicitCardNumber ?? board.totalCards + 1,
         name: cardName,
-        descriptionTextBlockId: cardUid, // placeholder id
+        descriptionTextBlockId: descriptionTextBlockId,
         priority: null,
         storyPoints: null,
         assignees: [],
@@ -121,15 +132,6 @@ export async function addCard(
         createdById: createdById ?? null,
         createdBy: createdById ? await getUserHeaderByIdDb(createdById) : undefined,
     };
-    try {
-        const descBlock = await createBlocknoteTextBlockWithMarkdown(description ?? '');
-        if (!descBlock) {
-            throw new Error('Failed to create description text block');
-        }
-        newCard.descriptionTextBlockId = descBlock.id;
-    } catch (error: any) {
-        throw new Error('Failed to create description text block');
-    }
 
     try {
         await createCardOnListDb(newCard);
@@ -167,6 +169,18 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         throw new Error('Error populating existing card');
     }
 
+    let descriptionTextBlockId: TextBlockId;
+    try {
+        const currentBlocks = await getTextBlockBlocks(existingCard.descriptionTextBlockId);
+        const descBlock = await createBlocknoteTextBlockWithBlocks(currentBlocks ?? []);
+        if (!descBlock) {
+            throw new Error('Failed to create description text block');
+        }
+        descriptionTextBlockId = descBlock.id;
+    } catch (error: any) {
+        throw new Error('Failed to create description text block ' + error.message);
+    }
+
     const newCardId = crypto.randomUUID();
     const newCard: Card = {
         id: newCardId,
@@ -174,7 +188,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         boardId: board.id,
         cardNumber: board.totalCards + 1,
         name: existingCard.name + ' (Copy)',
-        descriptionTextBlockId: newCardId, // placeholder id
+        descriptionTextBlockId: descriptionTextBlockId,
         priority: existingCard.priority,
         storyPoints: existingCard.storyPoints,
         assignees: existingCard.assignees,
@@ -185,28 +199,6 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         createdById: createdById ?? null,
         createdBy: createdById ? await getUserHeaderByIdDb(createdById) : undefined,
     };
-
-    try {
-        const currentEncodedDesc = await getTextBlockByIdDb(existingCard.descriptionTextBlockId);
-        let newTextBlockId: TextBlockId | undefined = undefined;
-        if (currentEncodedDesc) {
-            const descBlock = await createBlocknoteTextBlockWithMarkdown(currentEncodedDesc.text);
-            if (!descBlock) {
-                throw new Error('Failed to create description text block');
-            }
-            newTextBlockId = descBlock.id;
-        } else {
-            const description = '';
-            const descBlock = await createBlocknoteTextBlockWithMarkdown('');
-            if (!descBlock) {
-                throw new Error('Failed to create description text block');
-            }
-            newTextBlockId = descBlock.id;
-        }
-        newCard.descriptionTextBlockId = newTextBlockId;
-    } catch (error: any) {
-        throw new Error('Failed to create description text block ' + error.message);
-    }
 
     try {
         await createCardOnListDb(newCard);
@@ -224,7 +216,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     }
 
     try {
-        setCardsLabels(newCard.id, existingCard.labels);
+        await setCardsLabels(newCard.id, existingCard.labels);
     } catch (error: any) {
         throw new Error('Failed to add labels to card ' + error.message);
     }

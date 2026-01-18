@@ -267,6 +267,22 @@ export const loadTextBlockEncodedData = async (textBlockId: TextBlockId): Promis
     }
 };
 
+export const createBlocknoteTextBlockWithBlocks = async (blocks: Block[]) => {
+    try {
+        const blocksJsonString = JSON.stringify(blocks);
+        const tb = await createTextBlockDb({
+            id: crypto.randomUUID(),
+            text: blocksJsonString,
+            type: TextBlockType.BlockNote,
+            trackHistory: true,
+        });
+        return tb;
+    } catch (e: any) {
+        console.error(`Unable to create text block`, e);
+        return null;
+    }
+};
+
 export const createBlocknoteTextBlockWithMarkdown = async (markdownText?: string) => {
     try {
         const blocks = await maybeParseMarkdownToBlocks(markdownText);
@@ -299,7 +315,7 @@ export const createPlainTextBlock = async (plainText: string) => {
     }
 };
 
-const maybeParseMarkdownToBlocks = async (markdownText?: string): Promise<Block[]> => {
+export const maybeParseMarkdownToBlocks = async (markdownText?: string): Promise<Block[]> => {
     try {
         let blocks: Block[] = [];
         try {
@@ -660,4 +676,123 @@ const getInnerTextFromHtml = (html: string): string => {
     text = text.replace(/<[^>]+>/g, '');
     text = text.replace(/\n+/g, '\n').trim();
     return text;
+};
+
+/**
+ * Retrieves the BlockNote blocks for a given text block ID.
+ * If the text block is of type BlockNote, returns the blocks.
+ * If the text block is of type PlainText, returns undefined.
+ */
+export const getTextBlockBlocks = async (textBlockId: TextBlockId): Promise<Block[] | undefined> => {
+    try {
+        const textBlock = await getTextBlockByIdDb(textBlockId);
+        if (!textBlock) {
+            throw new Error(`Text block ${textBlockId} not found`);
+        }
+        switch (textBlock.type) {
+            case TextBlockType.BlockNote: {
+                let blocks: Block[] = [];
+                if (textBlock.text && textBlock.text.length > 0) {
+                    blocks = JSON.parse(textBlock.text);
+                }
+                return blocks;
+            }
+            case TextBlockType.PlainText:
+                return undefined;
+            default:
+                return exhaustiveCheck(textBlock.type, `Unsupported text block type for text block ${textBlockId}`);
+        }
+    } catch (error: any) {
+        console.error(`Unable to get blocks for text block ${textBlockId}`, {
+            message: error.message,
+            trace: error.stack,
+        });
+        return undefined;
+    }
+};
+
+export const getBlocknoteMediaBlock = (mediaUrl: string, mimeType: string, mediaName: string): Block => {
+    const isImage = mimeType.startsWith('image/');
+    const isVideo = mimeType.startsWith('video/');
+    const isAudio = mimeType.startsWith('audio/');
+    if (isImage) {
+        return getBlocknoteImageBlock(mediaUrl, mediaName);
+    } else if (isVideo) {
+        return getBlocknoteVideoBlock(mediaUrl, mediaName);
+    } else if (isAudio) {
+        return getBlocknoteAudioBlock(mediaUrl, mediaName);
+    } else {
+        return getBlocknoteFileBlock(mediaUrl, mediaName);
+    }
+};
+
+export const getBlocknoteImageBlock = (imageUrl: string, imageName: string): Block => {
+    const imageBlock: Block = {
+        id: crypto.randomUUID(),
+        type: 'image',
+        props: {
+            url: imageUrl,
+            caption: '',
+            previewWidth: 512,
+            showPreview: true,
+            name: imageName,
+            backgroundColor: 'default',
+            textAlignment: 'left',
+        },
+        content: undefined,
+        children: [],
+    };
+    return imageBlock;
+};
+
+export const getBlocknoteFileBlock = (fileUrl: string, fileName: string): Block => {
+    const fileBlock: Block = {
+        id: crypto.randomUUID(),
+        type: 'file',
+        props: {
+            url: fileUrl,
+            name: fileName,
+            caption: '',
+            backgroundColor: 'default',
+        },
+        content: undefined,
+        children: [],
+    };
+    return fileBlock;
+};
+
+export const getBlocknoteVideoBlock = (videoUrl: string, videoName: string): Block => {
+    const videoBlock: Block = {
+        id: crypto.randomUUID(),
+        type: 'video',
+        props: {
+            url: videoUrl,
+            caption: '',
+            previewWidth: 512,
+            showPreview: true,
+            name: videoName,
+            backgroundColor: 'default',
+            textAlignment: 'left',
+        },
+        content: undefined,
+        children: [],
+    };
+    return videoBlock;
+};
+
+export const getBlocknoteAudioBlock = (audioUrl: string, audioName: string): Block => {
+    const audioBlock: Block = {
+        id: crypto.randomUUID(),
+        type: 'audio',
+        props: {
+            url: audioUrl,
+            caption: '',
+            name: audioName,
+            showPreview: true,
+            backgroundColor: 'default',
+        },
+        content: undefined,
+        children: [],
+    };
+    return audioBlock;
 };
