@@ -8,6 +8,7 @@ import {
     LabelId,
     ListId,
     SUPPORTED_MIME_TYPES,
+    TrelloChecklistType,
     TrelloExportType,
     TrelloLabelColorsMap,
     TrelloUserToTerrazzoUserMap,
@@ -35,7 +36,11 @@ import { addAssigneeToCard } from './cardAssignmentController';
 import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from './cardController';
 import { yoinkFile } from './fileController';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
-import { getBlocknoteMediaBlock, maybeParseMarkdownToBlocks } from './textBlockController/textBlockController';
+import {
+    getBlocknoteChecklistBlock,
+    getBlocknoteMediaBlock,
+    maybeParseMarkdownToBlocks,
+} from './textBlockController/textBlockController';
 
 export const getBoardHeader = async (boardID: BoardId): Promise<BoardHeader | undefined> => {
     const boardModel = await getBoardByIdDb(boardID);
@@ -195,6 +200,16 @@ export const createTerrazzoBoardFromTrelloBoard = async (
             }
         }
 
+        // Get a list of checklists for each card
+        const cardChecklistsMap: Record<string, TrelloChecklistType[]> = {};
+        for (const checklist of trelloBoard.checklists) {
+            const cardId = checklist.idCard;
+            if (!cardChecklistsMap[cardId]) {
+                cardChecklistsMap[cardId] = [];
+            }
+            cardChecklistsMap[cardId].push(checklist);
+        }
+
         // Add cards to the board
         for (const trelloCard of trelloCards) {
             // Copy over each image in the card description to Terrazzo's storage
@@ -232,6 +247,20 @@ export const createTerrazzoBoardFromTrelloBoard = async (
                 } catch (error) {
                     console.error('Error yoinking file from Trello card attachment:', error);
                 }
+            }
+
+            // Copy over any checklists
+            const cardChecklists = cardChecklistsMap[trelloCard.id] || [];
+            for (const checklist of cardChecklists) {
+                const checklistItems: { text: string; checked: boolean }[] = [];
+                for (const item of checklist.checkItems) {
+                    checklistItems.push({
+                        text: item.name,
+                        checked: item.state === 'complete',
+                    });
+                }
+                const checklistBlock = getBlocknoteChecklistBlock(checklist.name, checklistItems);
+                descriptionBlocks.push(checklistBlock);
             }
 
             // Create the card

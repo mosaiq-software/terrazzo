@@ -796,3 +796,43 @@ export const getBlocknoteAudioBlock = (audioUrl: string, audioName: string): Blo
     };
     return audioBlock;
 };
+
+export const getBlocknoteChecklistBlock = (listName: string, items: { text: string; checked: boolean }[]): Block => {
+    const checklistItems: Block[] = items.map((item) => ({
+        id: crypto.randomUUID(),
+        type: 'checkListItem',
+        props: {
+            checked: item.checked,
+            backgroundColor: 'default',
+            textColor: 'default',
+            textAlignment: 'left',
+        },
+        content: [
+            {
+                type: 'text',
+                text: item.text,
+                styles: {},
+            },
+        ],
+        children: [],
+    }));
+    const checklistBlock: Block = {
+        id: crypto.randomUUID(),
+        type: 'heading',
+        props: {
+            level: 3,
+            backgroundColor: 'default',
+            textColor: 'default',
+            textAlignment: 'left',
+        },
+        content: [
+            {
+                type: 'text',
+                text: listName,
+                styles: {},
+            },
+        ],
+        children: checklistItems,
+    };
+    return checklistBlock;
+};
