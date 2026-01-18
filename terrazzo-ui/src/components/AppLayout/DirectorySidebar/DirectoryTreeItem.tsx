@@ -13,7 +13,6 @@ import { DirectoryListItemContextMenu } from './DirectoryListItemContextMenu';
 import { DirectoryListItemIcon } from './DirectoryListItemIcon';
 
 interface DirectoryTreeItemProps {
-    sidebarCollapsed: boolean;
     directoryListItem: ModuleHeader;
     indent: number;
     visible: boolean;
@@ -65,9 +64,8 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 ml="sm"
                 style={{
                     overflow: 'hidden',
-                    width: props.sidebarCollapsed ? '0px' : '100%',
-                    height: props.sidebarCollapsed ? '0px' : '36px',
-                    transition: `height ${uiCtx.animationDuration}ms, width ${uiCtx.animationDuration}ms, padding ${uiCtx.animationDuration}ms`,
+                    width: '100%',
+                    height: '36px',
                 }}
                 onContextMenuCapture={showContextMenu((close) => (
                     <DirectoryListItemContextMenu
@@ -94,11 +92,10 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                     <Text
                         c={COLORS.text.primary}
                         style={{
-                            transition: `padding ${uiCtx.animationDuration}ms, width ${uiCtx.animationDuration}ms`,
                             textWrap: 'nowrap',
                             textAlign: 'left',
-                            width: props.sidebarCollapsed ? '0px' : '100%',
-                            paddingLeft: props.sidebarCollapsed ? '0px' : '5px',
+                            width: '100%',
+                            paddingLeft: '5px',
                         }}
                     >
                         {props.directoryListItem.name}
@@ -113,7 +110,6 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 return (
                     <DirectoryTreeItem
                         key={subItem.id}
-                        sidebarCollapsed={props.sidebarCollapsed || !!collapsed}
                         directoryListItem={subItem}
                         indent={props.indent + 1}
                         visible={!collapsed}

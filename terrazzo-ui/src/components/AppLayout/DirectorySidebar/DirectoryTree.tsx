@@ -4,7 +4,6 @@ import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
 import { DirectoryTreeItem } from './DirectoryTreeItem';
 
 interface DirectoryTreeProps {
-    sidebarCollapsed: boolean;
     orgId: OrganizationId | undefined;
 }
 export const DirectoryTree = (props: DirectoryTreeProps) => {
@@ -26,7 +25,6 @@ export const DirectoryTree = (props: DirectoryTreeProps) => {
                 return (
                     <DirectoryTreeItem
                         key={item.id}
-                        sidebarCollapsed={props.sidebarCollapsed}
                         directoryListItem={item}
                         indent={0}
                         visible={true}

@@ -9,9 +9,7 @@ import { useCallback } from 'react';
 import { MdAdd, MdMailOutline } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 
-interface OrganizationSelectorMenuProps {
-    sidebarCollapsed: boolean;
-}
+interface OrganizationSelectorMenuProps {}
 export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) => {
     const navigate = useNavigate();
     const orgCtx = useOrg();
@@ -54,7 +52,7 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
 
     return (
         <Menu
-            position={props.sidebarCollapsed ? 'right-start' : 'bottom-start'}
+            position={'bottom-start'}
             width={200}
             withinPortal
             trigger="hover"
@@ -62,7 +60,6 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
         >
             <Menu.Target>
                 <Tooltip
-                    disabled={!props.sidebarCollapsed}
                     label={orgCtx.active?.name}
                     withArrow
                     arrowPosition="side"
@@ -88,11 +85,10 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                         <Text
                             c={COLORS.text.primary}
                             style={{
-                                transition: `padding ${uiCtx.animationDuration}ms, width ${uiCtx.animationDuration}ms`,
                                 textWrap: 'nowrap',
                                 textAlign: 'left',
-                                width: props.sidebarCollapsed ? '0px' : '220px',
-                                paddingLeft: props.sidebarCollapsed ? '0px' : '5px',
+                                width: '220px',
+                                paddingLeft: '5px',
                             }}
                         >
                             {orgCtx.active?.name ?? 'Select Organization'}
