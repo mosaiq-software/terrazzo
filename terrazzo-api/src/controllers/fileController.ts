@@ -19,8 +19,11 @@ export const createFile = async (base64: string, fileName: string, mimeType: str
 
 /**
  * Downloads a file from the given URL and stores it in Terrazzo's file storage.
+ * @param fileUrl The URL of the file to download and store.
+ * @returns The metadata of the created file in Terrazzo.
+ * @throws An error if the file could not be downloaded or stored.
  */
-export const yoinkFile = async (fileUrl: string) => {
+export const saveFileFromUrl = async (fileUrl: string) => {
     try {
         const response = await axios.get<ArrayBuffer>(fileUrl, { responseType: 'arraybuffer' });
         const fileBuffer = Buffer.from(response.data);
@@ -35,7 +38,7 @@ export const yoinkFile = async (fileUrl: string) => {
         const createdFile = await createFileDb(base64, fileName, contentType, SYSTEM_USER_ID);
         return createdFile;
     } catch (error) {
-        console.error('Error yoinking file:', error);
+        console.error('Error saving file from URL:', error);
         throw error;
     }
 };

@@ -11,7 +11,7 @@ import {
     signInWithExistingAuth,
     startAuthenticatedSession,
 } from '@trz-api/controllers/authController';
-import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController';
+import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController/trelloImport';
 import { createFile, getFile } from '@trz-api/controllers/fileController';
 import { addLinkedAccountToUser } from '@trz-api/controllers/linkedAccountController';
 import { DEV_upsertFakeUser } from '@trz-api/controllers/userController';

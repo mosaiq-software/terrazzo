@@ -24,7 +24,7 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
     const [errorAbv, setErrorAbv] = useState('');
     const [trelloImport, setTrelloImport] = useState<File | null>(null);
     const [trelloImportData, setTrelloImportData] = useState<TrelloExportType | null>(null);
-    const [trelloImportStatus, setTrelloImportStatus] = useState<string>('Upload');
+    const [trelloImportLoading, setTrelloImportLoading] = useState(false);
     const [trelloUsers, setTrelloUsers] = useState<Record<string, { id: string; name: string; username: string }>>({});
     const [trelloToTrzUserMap, setTrelloToTrzUserMap] = useState<TrelloUserToTerrazzoUserMap>({});
     const sockCtx = useSocket();
@@ -92,20 +92,19 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
             if (!trelloImportData) {
                 throw new Error('No file provided');
             }
-            setTrelloImportStatus('Uploading... This may take some time');
+            setTrelloImportLoading(true);
             const res = await callTrzApi(
                 RestRoutes.IMPORT_FROM_TRELLO,
                 { parentId: props.innerProps.parentId },
                 { data: trelloImportData, userMap: trelloToTrzUserMap }
             );
-            setTrelloImportStatus('Loading...');
             await new Promise((r) => setTimeout(r, 2000));
             navigate(`/board/${res}`);
+            props.context.closeModal(props.id);
+            setTrelloImportLoading(false);
         } catch (e: any) {
             notify(NoteType.BOARD_CREATION_ERROR, e);
         }
-        setTrelloImportStatus('Upload');
-        props.context.closeModal(props.id);
     }
 
     const handleClose = () => {
@@ -120,12 +119,15 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
                     align="center"
                     gap="md"
                 >
-                    <Stack gap={1}>
+                    <Stack
+                        gap="xs"
+                        w="100%"
+                        p="xs"
+                    >
                         <Text
                             fz="sm"
                             c={COLORS.text.muted}
                         >
-                            {' '}
                             Importing
                         </Text>
                         <Text
@@ -134,8 +136,11 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
                         >
                             {trelloImportData.name}
                         </Text>
-                        <Group>
+                        <Group justify="space-between">
                             <Text>{trelloImportData.cards.length} Cards</Text>
+                            <Text>{trelloImportData.lists.length} Lists</Text>
+                            <Text>{trelloImportData.members.length} Users</Text>
+                            <Text>{trelloImportData.labels.length} Labels</Text>
                         </Group>
                     </Stack>
                     <Fieldset legend="Users">
@@ -164,10 +169,7 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
                                             @{user.username}
                                         </Text>
                                     </Stack>
-                                    <MdOutlineArrowForward
-                                        width={'20%'}
-                                        size="1.5rem"
-                                    />
+                                    <MdOutlineArrowForward size="1.5rem" />
                                     <Select
                                         width="40%"
                                         data={[
@@ -192,9 +194,11 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
                     <Button
                         fullWidth
                         mt="md"
+                        loading={trelloImportLoading}
+                        disabled={trelloImportLoading}
                         onClick={handleImportFromTrello}
                     >
-                        {trelloImportStatus}
+                        {trelloImportLoading ? 'Importing...' : 'Import'}
                     </Button>
                 </Stack>
             </Container>

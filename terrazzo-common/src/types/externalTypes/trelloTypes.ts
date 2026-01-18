@@ -241,19 +241,20 @@ export interface TrelloExportType {
     premiumFeatures: string[];
     actions: TrelloActionType[];
     cards: TrelloCardType[];
-    labels: {
-        id: string;
-        idBoard: string;
-        name: string;
-        color: string;
-        uses: number;
-    }[];
+    labels: TrelloLabelType[];
     lists: TrelloListType[];
     members: TrelloMemberType[];
     checklists: TrelloChecklistType[];
     customFields: unknown[];
     memberships: TrelloMembershipType[];
     pluginData: TrelloPluginType[];
+}
+export interface TrelloLabelType {
+    id: string;
+    idBoard: string;
+    name: string;
+    color: string;
+    uses: number;
 }
 export interface TrelloCardType {
     id: string;
@@ -315,17 +316,15 @@ export interface TrelloCardType {
     idOrganization: string;
     idShort: number;
     idAttachmentCover: null;
-    labels: [
-        {
-            id: string;
-            idBoard: string;
-            idOrganization: string;
-            name: string;
-            nodeId: string;
-            color: string;
-            uses: number;
-        },
-    ];
+    labels: {
+        id: string;
+        idBoard: string;
+        idOrganization: string;
+        name: string;
+        nodeId: string;
+        color: string;
+        uses: number;
+    }[];
     limits: {
         attachments: {
             perCard: {
@@ -375,44 +374,38 @@ export interface TrelloCardType {
     cardRole: null;
     mirrorSourceId: null;
     mirrorSourceNodeId: null;
-    attachments: [
-        {
-            id: string;
-            bytes: number;
-            date: string;
-            edgeColor: string;
-            idMember: string;
-            isMalicious: boolean;
-            isUpload: boolean;
-            mimeType: string;
-            name: string;
-            previews: [
-                {
-                    url: string;
-                    _id: string;
-                    id: string;
-                    scaled: boolean;
-                    bytes: number;
-                    height: number;
-                    width: number;
-                },
-            ];
+    attachments: {
+        id: string;
+        bytes: number;
+        date: string;
+        edgeColor: string;
+        idMember: string;
+        isMalicious: boolean;
+        isUpload: boolean;
+        mimeType: string;
+        name: string;
+        previews: {
             url: string;
-            pos: number;
-            fileName: string;
-        },
-    ];
-    pluginData: [
-        {
+            _id: string;
             id: string;
-            idPlugin: string;
-            scope: string;
-            idModel: string;
-            value: string;
-            access: string;
-            dateLastUpdated: string;
-        },
-    ];
+            scaled: boolean;
+            bytes: number;
+            height: number;
+            width: number;
+        }[];
+        url: string;
+        pos: number;
+        fileName: string;
+    }[];
+    pluginData: {
+        id: string;
+        idPlugin: string;
+        scope: string;
+        idModel: string;
+        value: string;
+        access: string;
+        dateLastUpdated: string;
+    }[];
     customFieldItems: [];
 }
 export interface TrelloListType {
