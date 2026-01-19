@@ -1,8 +1,8 @@
 import { Avatar, Button, Divider, Group, Menu, Text, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
+import Clarity from '@microsoft/clarity';
 import { OrganizationId } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
-import { useUI } from '@trz/contexts/ui-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { COLORS } from '@trz/util/colors';
 import { useCallback } from 'react';
@@ -13,7 +13,6 @@ interface OrganizationSelectorMenuProps {}
 export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) => {
     const navigate = useNavigate();
     const orgCtx = useOrg();
-    const uiCtx = useUI();
     const unsavedCtx = useUnsavedChanges();
 
     const handleSelectOrganization = useCallback(
@@ -22,6 +21,8 @@ export const OrganizationSelectorMenu = (props: OrganizationSelectorMenuProps) =
                 return;
             }
             orgCtx.selectAndGoToOrganization(orgId);
+            Clarity.event('switch-organization');
+            Clarity.setTag('organization-id', orgId);
         },
         [unsavedCtx, orgCtx]
     );
