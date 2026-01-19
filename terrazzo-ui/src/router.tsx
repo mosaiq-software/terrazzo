@@ -1,3 +1,4 @@
+import { Stack, Text, Title } from '@mantine/core';
 import LoginPage from '@trz/pages/auth/LoginPage';
 import BoardPage from '@trz/pages/BoardPage';
 import HomePage from '@trz/pages/HomePage';
@@ -10,8 +11,36 @@ import { NotFound, PageErrors } from './components/UI/NotFound';
 import { GithubAuthHandler } from './pages/auth/GithubAuthHandler';
 import DocumentPage from './pages/DocumentPage';
 import InvitePage from './pages/InvitePage';
+import { useIsMobile } from './hooks/useIsMobile';
 
 const Router = () => {
+    const isMobile = useIsMobile();
+    if (isMobile) {
+        return (
+            <Stack
+                align="center"
+                w="100%"
+                h="100vh"
+                justify="center"
+                p="md"
+                maw={400}
+            >
+                <Title
+                    fz="10rem"
+                    mb="md"
+                >
+                    {':('}
+                </Title>
+                <Text
+                    ta="center"
+                    size="lg"
+                >
+                    Terrazzo is not yet supported on mobile devices. Please access Terrazzo from a desktop or laptop
+                    computer.
+                </Text>
+            </Stack>
+        );
+    }
     return (
         <Routes>
             <Route

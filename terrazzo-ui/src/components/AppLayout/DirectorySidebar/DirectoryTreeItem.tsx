@@ -1,28 +1,32 @@
-import { Button, Group, Text } from '@mantine/core';
-import { useLocalStorage } from '@mantine/hooks';
-import { ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
-import { useUI } from '@trz/contexts/ui-context';
+import { ActionIcon, Box, Collapse, Group, Menu, Text } from '@mantine/core';
+import { useHover, useLocalStorage } from '@mantine/hooks';
+import { modals } from '@mantine/modals';
+import { ModuleHeader, PermissibleAction, TrzModuleType, UID, withIf } from '@mosaiq/terrazzo-common';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
+import { useModulePermission } from '@trz/hooks/usePermissions';
 import { COLORS } from '@trz/util/colors';
+import { captureAllEvents, completelyCaptureEvent } from '@trz/util/eventUtils';
 import { getModuleRelativeUrl } from '@trz/util/moduleUtils';
 import { useContextMenu } from 'mantine-contextmenu';
+import { useMemo, useState } from 'react';
+import { MdAdd, MdSettings } from 'react-icons/md';
 import { useNavigate } from 'react-router';
 import { useLocation } from 'react-router-dom';
 import { DirectoryListItemContextMenu } from './DirectoryListItemContextMenu';
 import { DirectoryListItemIcon } from './DirectoryListItemIcon';
 
 interface DirectoryTreeItemProps {
-    sidebarCollapsed: boolean;
     directoryListItem: ModuleHeader;
-    indent: number;
     visible: boolean;
+    addItem: (toParentId: UID, type: TrzModuleType) => Promise<void>;
 }
 export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { showContextMenu } = useContextMenu();
-    const uiCtx = useUI();
+    const { hovered, ref: hoverRef } = useHover();
+    const [actionMenu, setActionMenu] = useState<'add' | undefined>(undefined);
     const unsavedCtx = useUnsavedChanges();
     const contents = useDirectoryContents(
         props.visible ? props.directoryListItem.id : undefined,
@@ -34,6 +38,30 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     });
 
     const selected = location.pathname.includes(props.directoryListItem.id);
+
+    const userCanCreateBoards = useModulePermission(props.directoryListItem, PermissibleAction.CreateBoard);
+    const userCanCreateDocuments = useModulePermission(props.directoryListItem, PermissibleAction.CreateDocument);
+    const userCanCreateDirectories = useModulePermission(props.directoryListItem, PermissibleAction.CreateDirectory);
+
+    const userCanEditBoard = useModulePermission(props.directoryListItem, PermissibleAction.EditBoard);
+    const userCanEditDocument = useModulePermission(props.directoryListItem, PermissibleAction.EditDocument);
+    const userCanEditDirectory = useModulePermission(props.directoryListItem, PermissibleAction.EditDirectory);
+
+    const creationMenuItems: { id: TrzModuleType; label: string }[] = useMemo(() => {
+        const items: { id: TrzModuleType; label: string }[] = [
+            ...withIf({ id: TrzModuleType.Directory, label: 'Directory' }, userCanCreateDirectories),
+            ...withIf({ id: TrzModuleType.Board, label: 'Board' }, userCanCreateBoards),
+            ...withIf({ id: TrzModuleType.Document, label: 'Document' }, userCanCreateDocuments),
+        ];
+        return items;
+    }, [userCanCreateBoards, userCanCreateDocuments, userCanCreateDirectories]);
+
+    const showCreateOptions = creationMenuItems.length > 0 && props.directoryListItem.type === TrzModuleType.Directory;
+    const showEditOptions =
+        !!props.directoryListItem &&
+        ((userCanEditBoard && props.directoryListItem.type === TrzModuleType.Board) ||
+            (userCanEditDocument && props.directoryListItem.type === TrzModuleType.Document) ||
+            (userCanEditDirectory && props.directoryListItem.type === TrzModuleType.Directory));
 
     const handleClick = async () => {
         if (props.directoryListItem.type === TrzModuleType.Directory) {
@@ -56,18 +84,19 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     }
 
     return (
-        <>
+        <Box>
             <Group
                 align="center"
-                justify="flex-start"
-                p="0"
-                pl={`${props.indent * 15}px`}
-                ml="sm"
+                justify="space-between"
+                wrap="nowrap"
+                p="4"
+                w="100%"
+                gap={0}
+                px={0}
+                onClick={handleClick}
+                bg={selected ? COLORS.background.light : hovered ? COLORS.background.medium : COLORS.transparent}
                 style={{
-                    overflow: 'hidden',
-                    width: props.sidebarCollapsed ? '0px' : '100%',
-                    height: props.sidebarCollapsed ? '0px' : '36px',
-                    transition: `height ${uiCtx.animationDuration}ms, width ${uiCtx.animationDuration}ms, padding ${uiCtx.animationDuration}ms`,
+                    cursor: 'pointer',
                 }}
                 onContextMenuCapture={showContextMenu((close) => (
                     <DirectoryListItemContextMenu
@@ -76,50 +105,116 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                         parentId={props.directoryListItem.id}
                         parentName={props.directoryListItem.name}
                         allowAddItem={props.directoryListItem.type === TrzModuleType.Directory}
+                        addItem={props.addItem}
                     />
                 ))}
+                ref={hoverRef}
             >
-                <Button
-                    display={'flex'}
-                    px={0}
-                    variant={selected ? 'light' : 'subtle'}
-                    onClick={handleClick}
-                    fullWidth
+                <DirectoryListItemIcon
+                    moduleType={props.directoryListItem.type}
+                    collapsed={!!collapsed}
+                    subItemsCount={contents?.length}
+                />
+                <Text
+                    c={COLORS.text.primary}
+                    style={{
+                        textWrap: 'nowrap',
+                        textAlign: 'left',
+                        width: '100%',
+                        paddingLeft: '5px',
+                    }}
                 >
-                    <DirectoryListItemIcon
-                        moduleType={props.directoryListItem.type}
-                        collapsed={!!collapsed}
-                        subItemsCount={contents?.length}
-                    />
-                    <Text
-                        c={COLORS.text.primary}
+                    {props.directoryListItem.name}
+                </Text>
+                <Group
+                    gap={0}
+                    wrap="nowrap"
+                    style={{
+                        visibility: hovered || actionMenu !== undefined ? 'visible' : 'hidden',
+                    }}
+                >
+                    {showCreateOptions && (
+                        <Menu
+                            withArrow
+                            position="bottom-end"
+                            shadow="md"
+                            closeOnItemClick
+                            closeOnClickOutside
+                            opened={actionMenu === 'add'}
+                            onOpen={() => setActionMenu('add')}
+                            onClose={() => setActionMenu(undefined)}
+                        >
+                            <Menu.Target>
+                                <ActionIcon
+                                    variant="subtle"
+                                    c="white"
+                                    {...captureAllEvents(completelyCaptureEvent)}
+                                >
+                                    <MdAdd />
+                                </ActionIcon>
+                            </Menu.Target>
+                            <Menu.Dropdown>
+                                {creationMenuItems.map((item) => (
+                                    <Menu.Item
+                                        key={item.id}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            props.addItem(props.directoryListItem.id, item.id);
+                                        }}
+                                    >
+                                        {item.label}
+                                    </Menu.Item>
+                                ))}
+                            </Menu.Dropdown>
+                        </Menu>
+                    )}
+                    {showEditOptions && (
+                        <ActionIcon
+                            variant="subtle"
+                            c="white"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                modals.openContextModal({
+                                    modal: 'moduleSettings',
+                                    title: 'Settings',
+                                    innerProps: { moduleHeader: props.directoryListItem },
+                                    size: 'xl',
+                                });
+                            }}
+                        >
+                            <MdSettings />
+                        </ActionIcon>
+                    )}
+                </Group>
+            </Group>
+            <Collapse in={!collapsed && props.visible}>
+                <Box
+                    style={{
+                        paddingLeft: 7.5,
+                    }}
+                >
+                    <Box
                         style={{
-                            transition: `padding ${uiCtx.animationDuration}ms, width ${uiCtx.animationDuration}ms`,
-                            textWrap: 'nowrap',
-                            textAlign: 'left',
-                            width: props.sidebarCollapsed ? '0px' : '100%',
-                            paddingLeft: props.sidebarCollapsed ? '0px' : '5px',
+                            borderLeft: `1px solid ${COLORS.background.medium}`,
+                            paddingLeft: 10,
                         }}
                     >
-                        {props.directoryListItem.name}
-                    </Text>
-                </Button>
-            </Group>
-
-            {contents?.map((subItem) => {
-                if (subItem.type !== TrzModuleType.Directory && !subItem.canAccess) {
-                    return null;
-                }
-                return (
-                    <DirectoryTreeItem
-                        key={subItem.id}
-                        sidebarCollapsed={props.sidebarCollapsed || !!collapsed}
-                        directoryListItem={subItem}
-                        indent={props.indent + 1}
-                        visible={!collapsed}
-                    />
-                );
-            })}
-        </>
+                        {contents?.map((subItem) => {
+                            if (subItem.type !== TrzModuleType.Directory && !subItem.canAccess) {
+                                return null;
+                            }
+                            return (
+                                <DirectoryTreeItem
+                                    key={subItem.id}
+                                    directoryListItem={subItem}
+                                    visible={!collapsed && props.visible}
+                                    addItem={props.addItem}
+                                />
+                            );
+                        })}
+                    </Box>
+                </Box>
+            </Collapse>
+        </Box>
     );
 };
