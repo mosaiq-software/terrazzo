@@ -19,6 +19,8 @@ services:
         depends_on:
             common-job:
                 condition: service_completed_successfully
+            db-migrate:
+                condition: service_completed_successfully
         ports:
             - "${API_PORT}:${API_PORT}"
             - "${SOCKET_PORT}:${SOCKET_PORT}"
@@ -30,6 +32,19 @@ services:
             timeout: 10s
             retries: 5
             start_period: 30s
+        volumes:
+            - type: bind
+              source: ${DATABASE_DIR}
+              target: ${DATABASE_DIR}
+              bind:
+                  create_host_path: true
+        env_file:
+            - .env
+
+    db-migrate:
+        build: ./terrazzo-db/
+        restart: "no"
+        command: ["npm", "run", "migrate:up"]
         volumes:
             - type: bind
               source: ${DATABASE_DIR}
