@@ -1,5 +1,5 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Button, CloseButton, Flex, FocusTrap, Group, Menu, Paper, Stack, Text, TextInput } from '@mantine/core';
+import { Button, CloseButton, Flex, FocusTrap, Group, Menu, Paper, Stack, TextInput } from '@mantine/core';
 import { getHotkeyHandler, useClickOutside } from '@mantine/hooks';
 import { CardId, ListHeader, ListId, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
@@ -159,7 +159,6 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                 e.preventDefault();
             }}
         >
-            {import.meta.env.DEBUG === 'true' && <Text fz="6pt">{props.listId}</Text>}
             <Group
                 {...props.handleProps}
                 justify="space-between"
