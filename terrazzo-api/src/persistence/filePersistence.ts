@@ -15,7 +15,7 @@ FileModel.init(
         createdAt: DataTypes.BIGINT,
         createdByUserId: DataTypes.STRING,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Files' }
 );
 
 export const getFileByIdDb = async (id: TextBlockId) => {

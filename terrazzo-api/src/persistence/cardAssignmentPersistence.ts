@@ -12,7 +12,7 @@ CardAssignmentModel.init(
         userId: DataTypes.STRING,
         cardId: DataTypes.STRING,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'CardAssignments' }
 );
 
 export const getCardAssignmentByIdDb = async (asnId: AssignmentId) => {

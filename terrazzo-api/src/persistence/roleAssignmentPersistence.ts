@@ -23,7 +23,7 @@ RoleAssignmentModel.init(
             primaryKey: true,
         },
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'RoleAssignments' }
 );
 
 export const getRoleIdsForUserInOrgDb = async (userId: UserId, orgId: OrganizationId): Promise<RoleId[]> => {

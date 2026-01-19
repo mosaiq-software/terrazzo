@@ -13,7 +13,7 @@ DirectoryModel.init(
             primaryKey: true,
         },
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Directories' }
 );
 
 export const getDirectoryByIdDb = async (id: DirectoryId) => {

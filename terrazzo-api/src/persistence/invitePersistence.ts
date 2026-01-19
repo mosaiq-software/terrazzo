@@ -22,7 +22,7 @@ InviteModel.init(
             allowNull: true,
         },
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Invites' }
 );
 
 export const getInviteRecordByIdDb = async (id: InviteId) => {

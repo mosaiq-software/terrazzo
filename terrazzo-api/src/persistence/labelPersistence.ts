@@ -13,7 +13,7 @@ LabelModel.init(
         name: DataTypes.STRING,
         color: DataTypes.STRING,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Labels' }
 );
 
 export const getLabelByIdDb = async (id: LabelId) => {

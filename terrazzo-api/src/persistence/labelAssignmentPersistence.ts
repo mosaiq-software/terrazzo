@@ -15,6 +15,7 @@ LabelAssignmentModel.init(
     {
         sequelize,
         timestamps: false,
+        tableName: 'LabelAssignments',
     }
 );
 

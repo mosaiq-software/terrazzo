@@ -14,7 +14,7 @@ UserModel.init(
         lastName: DataTypes.STRING,
         profilePicture: DataTypes.STRING,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Users' }
 );
 
 export const getUserHeaderByIdDb = async (id: UserId) => {

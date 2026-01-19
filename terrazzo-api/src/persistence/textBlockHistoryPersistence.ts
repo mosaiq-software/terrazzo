@@ -14,7 +14,7 @@ TextBlockHistoryModel.init(
         content: DataTypes.TEXT,
         tags: DataTypes.JSON,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'TextBlockHistories' }
 );
 
 export const createTextBlockHistorySnapshotDb = async (snapshot: TextBlockSnapshot) => {

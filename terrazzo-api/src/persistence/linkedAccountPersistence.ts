@@ -23,7 +23,7 @@ LinkedAccountModel.init(
             allowNull: true,
         },
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'LinkedAccounts' }
 );
 
 export const getLinkedAccountsForUserDb = async (userId: UserId) => {

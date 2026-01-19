@@ -24,7 +24,7 @@ CardModel.init(
         createdById: DataTypes.STRING,
         createdAt: DataTypes.NUMBER,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Cards' }
 );
 
 export const getCardByIdDb = async (id: CardId) => {
