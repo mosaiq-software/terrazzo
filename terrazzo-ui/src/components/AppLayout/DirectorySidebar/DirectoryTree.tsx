@@ -44,7 +44,6 @@ export const DirectoryTree = (props: DirectoryTreeProps) => {
                     <DirectoryTreeItem
                         key={item.id}
                         directoryListItem={item}
-                        indent={0}
                         visible={true}
                         addItem={props.addItem}
                     />
@@ -75,7 +74,7 @@ export const DirectoryTree = (props: DirectoryTreeProps) => {
                             {creationMenuItems.map((item) => (
                                 <Menu.Item
                                     key={item.id}
-                                    onClick={(e) => {
+                                    onClick={() => {
                                         if (!props.orgId) return;
                                         props.addItem(props.orgId, item.id);
                                     }}

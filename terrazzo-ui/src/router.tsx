@@ -11,10 +11,11 @@ import { NotFound, PageErrors } from './components/UI/NotFound';
 import { GithubAuthHandler } from './pages/auth/GithubAuthHandler';
 import DocumentPage from './pages/DocumentPage';
 import InvitePage from './pages/InvitePage';
-import { isMobile } from './util/envUtils';
+import { useIsMobile } from './hooks/useIsMobile';
 
 const Router = () => {
-    if (isMobile()) {
+    const isMobile = useIsMobile();
+    if (isMobile) {
         return (
             <Stack
                 align="center"

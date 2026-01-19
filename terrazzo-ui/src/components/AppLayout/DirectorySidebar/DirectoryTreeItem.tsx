@@ -2,7 +2,6 @@ import { ActionIcon, Box, Collapse, Group, Menu, Text } from '@mantine/core';
 import { useHover, useLocalStorage } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { ModuleHeader, PermissibleAction, TrzModuleType, UID, withIf } from '@mosaiq/terrazzo-common';
-import { useSocket } from '@trz/contexts/socket-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
 import { useModulePermission } from '@trz/hooks/usePermissions';
@@ -19,7 +18,6 @@ import { DirectoryListItemIcon } from './DirectoryListItemIcon';
 
 interface DirectoryTreeItemProps {
     directoryListItem: ModuleHeader;
-    indent: number;
     visible: boolean;
     addItem: (toParentId: UID, type: TrzModuleType) => Promise<void>;
 }
@@ -41,11 +39,13 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
 
     const selected = location.pathname.includes(props.directoryListItem.id);
 
-    const sockCtx = useSocket();
-
     const userCanCreateBoards = useModulePermission(props.directoryListItem, PermissibleAction.CreateBoard);
     const userCanCreateDocuments = useModulePermission(props.directoryListItem, PermissibleAction.CreateDocument);
     const userCanCreateDirectories = useModulePermission(props.directoryListItem, PermissibleAction.CreateDirectory);
+
+    const userCanEditBoard = useModulePermission(props.directoryListItem, PermissibleAction.EditBoard);
+    const userCanEditDocument = useModulePermission(props.directoryListItem, PermissibleAction.EditDocument);
+    const userCanEditDirectory = useModulePermission(props.directoryListItem, PermissibleAction.EditDirectory);
 
     const creationMenuItems: { id: TrzModuleType; label: string }[] = useMemo(() => {
         const items: { id: TrzModuleType; label: string }[] = [
@@ -57,7 +57,11 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     }, [userCanCreateBoards, userCanCreateDocuments, userCanCreateDirectories]);
 
     const showCreateOptions = creationMenuItems.length > 0 && props.directoryListItem.type === TrzModuleType.Directory;
-    const showEditOptions = !!props.directoryListItem;
+    const showEditOptions =
+        !!props.directoryListItem &&
+        ((userCanEditBoard && props.directoryListItem.type === TrzModuleType.Board) ||
+            (userCanEditDocument && props.directoryListItem.type === TrzModuleType.Document) ||
+            (userCanEditDirectory && props.directoryListItem.type === TrzModuleType.Directory));
 
     const handleClick = async () => {
         if (props.directoryListItem.type === TrzModuleType.Directory) {
@@ -168,7 +172,8 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                         <ActionIcon
                             variant="subtle"
                             c="white"
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 modals.openContextModal({
                                     modal: 'moduleSettings',
                                     title: 'Settings',
@@ -202,7 +207,6 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                                 <DirectoryTreeItem
                                     key={subItem.id}
                                     directoryListItem={subItem}
-                                    indent={props.indent + 1}
                                     visible={!collapsed && props.visible}
                                     addItem={props.addItem}
                                 />
