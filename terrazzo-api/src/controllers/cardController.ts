@@ -22,12 +22,16 @@ import {
     updateCardListDb,
     updateCardOrderDb,
 } from '@trz-api/persistence/cardPersistence';
-import { addLabelToCardDb, deleteLabelsOnCardDb, getLabelsOnCardDb } from '@trz-api/persistence/labelPersistence';
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
 import { getBoardIDFromListID } from './listController';
 import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
+import {
+    getLabelsOnCardDb,
+    deleteLabelsOnCardDb,
+    addLabelToCardDb,
+} from '@trz-api/persistence/labelAssignmentPersistence';
 
 export const MOVING_LIST_ORDER = -10000;
 //Gets

@@ -15,7 +15,7 @@ RoleModel.init(
         order: DataTypes.INTEGER,
         defaultPermissions: DataTypes.JSON,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Roles' }
 );
 
 export const getRoleByIdDb = async (id: RoleId) => {

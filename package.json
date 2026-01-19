@@ -6,6 +6,7 @@
         "start:api": "cd terrazzo-api && npm run start",
         "start:ui": "cd terrazzo-ui && npm run start",
         "build:common": "cd terrazzo-common && npm run build:watch",
+        "migrate:db": "cd terrazzo-db && npm run migrate:up",
         "pretty": "prettier --write \"./**/*.{ts,tsx,json}\"",
         "lint": "npm run lint:api && npm run lint:ui && npm run lint:common",
         "lint:api": "cd terrazzo-api && npm run lint",

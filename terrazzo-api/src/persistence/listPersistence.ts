@@ -14,7 +14,7 @@ ListModel.init(
         archived: DataTypes.BOOLEAN,
         order: DataTypes.INTEGER,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Lists' }
 );
 
 export const getListByIdDb = async (id: ListId) => {

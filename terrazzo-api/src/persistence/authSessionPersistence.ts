@@ -12,7 +12,7 @@ AuthSessionModel.init(
         authToken: DataTypes.STRING,
         createdAt: DataTypes.BIGINT,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'AuthSessions' }
 );
 
 export const getAuthSessionByUserIdDb = async (userId: UserId) => {

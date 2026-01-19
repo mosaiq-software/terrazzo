@@ -17,7 +17,7 @@ BoardModel.init(
         boardCode: DataTypes.STRING,
         totalCards: DataTypes.INTEGER,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Boards' }
 );
 
 export const getBoardsDb = async () => {

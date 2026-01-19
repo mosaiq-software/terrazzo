@@ -9,10 +9,10 @@ export const sequelize = new Sequelize({
 });
 
 sequelize
-    .sync({ alter: false })
+    .authenticate()
     .then(() => {
-        console.log('Database & tables created!');
+        console.log('Database connection established.');
     })
     .catch((error) => {
-        console.error('Error creating database or tables:', error);
+        console.error('Error connecting to database:', error);
     });

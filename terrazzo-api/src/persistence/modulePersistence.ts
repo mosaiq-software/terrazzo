@@ -20,7 +20,7 @@ ModuleModel.init(
         effectivePermissions: DataTypes.JSON,
         public: DataTypes.BOOLEAN,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Modules' }
 );
 
 export const getModuleByIdDb = async (id: UID) => {

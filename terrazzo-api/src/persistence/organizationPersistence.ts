@@ -15,7 +15,7 @@ OrgModel.init(
         description: DataTypes.TEXT,
         ownerId: DataTypes.STRING,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Organizations' }
 );
 
 export const getOrgByIdDb = async (id: OrganizationId) => {

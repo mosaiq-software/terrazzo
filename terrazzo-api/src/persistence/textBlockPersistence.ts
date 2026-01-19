@@ -14,7 +14,7 @@ TextBlockModel.init(
         trackHistory: DataTypes.BOOLEAN,
         lastSnapshotAt: DataTypes.NUMBER,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'TextBlocks' }
 );
 
 export const getTextBlockByIdDb = async (id: TextBlockId) => {

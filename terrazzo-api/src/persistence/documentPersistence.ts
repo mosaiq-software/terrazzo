@@ -19,7 +19,7 @@ DocumentModel.init(
         lastModifiedAt: DataTypes.INTEGER,
         lastModifiedByUserId: DataTypes.STRING,
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'Documents' }
 );
 
 export const getDocumentByIdDb = async (id: DocumentId) => {

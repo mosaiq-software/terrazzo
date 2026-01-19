@@ -18,7 +18,7 @@ OrganizationMembershipModel.init(
             allowNull: false,
         },
     },
-    { sequelize, timestamps: false }
+    { sequelize, timestamps: false, tableName: 'OrganizationMemberships' }
 );
 
 export const getOrganizationMembershipDb = async (userId: UserId, orgId: OrganizationId) => {

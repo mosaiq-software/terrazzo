@@ -1,0 +1,18 @@
+{
+    "name": "terrazzo-db",
+    "version": "0.0.0",
+    "scripts": {
+        "migrate:up": "sequelize-cli db:migrate",
+        "migrate:undo": "sequelize-cli db:migrate:undo",
+        "migrate:undo:all": "sequelize-cli db:migrate:undo:all",
+        "seed:all": "sequelize-cli db:seed:all"
+    },
+    "devDependencies": {
+        "sequelize-cli": "^6.6.5"
+    },
+    "dependencies": {
+        "dotenv": "^17.2.3",
+        "sequelize": "^6.37.7",
+        "sqlite3": "^5.1.7"
+    }
+}
