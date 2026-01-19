@@ -1,8 +1,7 @@
-import { ActionIcon, Group, Menu, Stack } from '@mantine/core';
+import { Button, Group, Menu, Stack } from '@mantine/core';
 import { OrganizationId, PermissibleAction, TrzModuleType, UID, withIf } from '@mosaiq/terrazzo-common';
 import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
 import { useOrgPermission } from '@trz/hooks/usePermissions';
-import { captureAllEvents, completelyCaptureEvent } from '@trz/util/eventUtils';
 import { useMemo } from 'react';
 import { MdAdd } from 'react-icons/md';
 import { DirectoryTreeItem } from './DirectoryTreeItem';
@@ -64,13 +63,13 @@ export const DirectoryTree = (props: DirectoryTreeProps) => {
                         closeOnClickOutside
                     >
                         <Menu.Target>
-                            <ActionIcon
+                            <Button
                                 variant="subtle"
                                 c="white"
-                                {...captureAllEvents(completelyCaptureEvent)}
+                                fullWidth
                             >
                                 <MdAdd />
-                            </ActionIcon>
+                            </Button>
                         </Menu.Target>
                         <Menu.Dropdown>
                             {creationMenuItems.map((item) => (
