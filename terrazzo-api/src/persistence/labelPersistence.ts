@@ -16,22 +16,6 @@ LabelModel.init(
     { sequelize, timestamps: false }
 );
 
-interface LabeledCard {
-    labelId: LabelId;
-    cardId: CardId;
-}
-class LabeledCardModel extends Model<LabeledCard> {}
-LabeledCardModel.init(
-    {
-        labelId: { type: DataTypes.STRING, primaryKey: true },
-        cardId: { type: DataTypes.STRING, primaryKey: true },
-    },
-    {
-        sequelize,
-        timestamps: false,
-    }
-);
-
 export const getLabelByIdDb = async (id: LabelId) => {
     const model = await LabelModel.findByPk(id);
     return model?.toJSON();
@@ -71,27 +55,4 @@ export const deleteLabelDb = async (id: LabelId) => {
 export const deleteLabelsByBoardIdDb = async (boardId: BoardId) => {
     const deleted = await LabelModel.destroy({ where: { boardId } });
     return deleted;
-};
-
-export const getLabelsOnCardDb = async (cardId: CardId) => {
-    const models = await LabeledCardModel.findAll({ where: { cardId } });
-    return models.map((label) => label.toJSON().labelId);
-};
-
-export const deleteLabelingOnCardsByLabelIdDb = async (labelId: LabelId) => {
-    const deleted = await LabeledCardModel.destroy({ where: { labelId } });
-    return deleted;
-};
-
-export const deleteLabelsOnCardDb = async (cardId: CardId) => {
-    const deleted = await LabeledCardModel.destroy({ where: { cardId } });
-    return deleted;
-};
-
-export const addLabelToCardDb = async (labelId: LabelId, cardId: CardId) => {
-    const model = await LabeledCardModel.create({
-        labelId,
-        cardId,
-    });
-    return model.toJSON();
 };

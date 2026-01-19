@@ -6,12 +6,12 @@ import { BoardModelType, createBoardDb, getBoardByIdDb, updateBoardDb } from '@t
 import {
     createLabelOnBoardDb,
     deleteLabelDb,
-    deleteLabelingOnCardsByLabelIdDb,
     getLabelByIdDb,
     getLabelsByBoardIdDb,
     updateLabelDb,
 } from '@trz-api/persistence/labelPersistence';
 import { createNewModule, getModuleById, updateModule } from '../moduleController';
+import { deleteLabelingOnCardsByLabelIdDb } from '@trz-api/persistence/labelAssignmentPersistence';
 
 export const getBoardHeader = async (boardID: BoardId): Promise<BoardHeader | undefined> => {
     const boardModel = await getBoardByIdDb(boardID);
