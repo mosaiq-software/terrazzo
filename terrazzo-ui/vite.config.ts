@@ -17,8 +17,6 @@ export default defineConfig(() => {
             'import.meta.env.GITHUB_AUTH_CLIENT_ID': JSON.stringify(process.env.GITHUB_AUTH_CLIENT_ID),
             'import.meta.env.GITHUB_AUTH_CALLBACK_URL': JSON.stringify(process.env.GITHUB_AUTH_CALLBACK_URL),
             'import.meta.env.NSM_WWW_PATH': JSON.stringify(process.env.NSM_WWW_PATH),
-            'import.meta.env.ORG_NAME': JSON.stringify(process.env.ORG_NAME),
-            'import.meta.env.DEBUG': JSON.stringify(process.env.DEBUG),
             'import.meta.env.MS_CLARITY_PROJECT_ID': JSON.stringify(process.env.MS_CLARITY_PROJECT_ID),
         },
         server: {
