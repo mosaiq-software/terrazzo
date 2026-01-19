@@ -4,12 +4,8 @@ import { ModuleHeader, PermissibleAction, TrzModuleType, UID } from '@mosaiq/ter
 import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
 import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
 import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';
-import { useSocket } from '@trz/contexts/socket-context';
-import { createDocument } from '@trz/emitters';
-import { createDirectory } from '@trz/emitters/directoryEmitters';
 import { useModulePermission, useOrgPermission } from '@trz/hooks/usePermissions';
 import { COLORS } from '@trz/util/colors';
-import { NoteType, notify } from '@trz/util/notifications';
 import { useMemo } from 'react';
 import { MdAdd, MdSettings } from 'react-icons/md';
 
@@ -20,10 +16,9 @@ interface DirectoryListItemContextMenuProps {
     allowAddItem?: boolean;
     isRoot?: boolean;
     onClose: () => void;
+    addItem: (toParentId: UID, type: TrzModuleType) => Promise<void>;
 }
 export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenuProps) => {
-    const sockCtx = useSocket();
-
     const userCanCreateBoards = useModulePermission(props.moduleHeader, PermissibleAction.CreateBoard);
     const userCanCreateDocuments = useModulePermission(props.moduleHeader, PermissibleAction.CreateDocument);
     const userCanCreateDirectories = useModulePermission(props.moduleHeader, PermissibleAction.CreateDirectory);
@@ -65,44 +60,15 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
     const showCreateOptions = creationMenuItems.length > 0;
     const showEditOptions = !!props.moduleHeader;
 
-    async function addItem(type: TrzModuleType) {
-        if (!props.parentId || !props.allowAddItem || !type) {
-            return;
-        }
-        try {
-            switch (type) {
-                case TrzModuleType.Directory:
-                    await createDirectory(sockCtx, 'New Directory', props.parentId);
-                    return;
-                case TrzModuleType.Document:
-                    await createDocument(sockCtx, 'New Document', props.parentId);
-                    return;
-                case TrzModuleType.Board:
-                    modals.openContextModal({
-                        modal: 'board',
-                        title: 'Create New Board',
-                        innerProps: { parentId: props.parentId },
-                    });
-                    return;
-                default:
-                    notify(NoteType.CARD_UPDATE_ERROR, 'Unknown module type: ' + type);
-                    return;
-            }
-        } catch (e) {
-            notify(NoteType.CARD_UPDATE_ERROR, e);
-            return;
-        }
-    }
-
     return (
         <ContextMenuLayout title={props.parentName}>
             {props.allowAddItem && showCreateOptions && (
                 <ContextMenuSelectorMenu
-                    title={`Create New`}
+                    title="Add New..."
                     icon={<MdAdd size={16} />}
                     items={creationMenuItems}
                     onSelect={(selected: TrzModuleType) => {
-                        addItem(selected);
+                        props.addItem(props.parentId, selected);
                         props.onClose();
                     }}
                 />
