@@ -1,4 +1,5 @@
 import { Avatar, Button, Menu } from '@mantine/core';
+import Clarity from '@microsoft/clarity';
 import { fullName } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
@@ -22,6 +23,7 @@ export const UserProfileIcon = () => {
             return;
         }
         try {
+            Clarity.event('logout');
             await logoutUser(sockCtx);
             userCtx.clearLocalLoginData();
             notify(NoteType.CHANGES_SAVED, 'Successfully logged out!');
@@ -35,6 +37,7 @@ export const UserProfileIcon = () => {
         if (await unsavedCtx.confirmKeepUnsavedChanges()) {
             return;
         }
+        Clarity.event('navigate-to-settings');
         navigate('/settings');
     }, [navigate, unsavedCtx]);
 

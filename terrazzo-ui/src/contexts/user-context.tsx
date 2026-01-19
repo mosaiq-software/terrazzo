@@ -1,4 +1,5 @@
 import { useLocalStorage, useSessionStorage } from '@mantine/hooks';
+import Clarity from '@microsoft/clarity';
 import {
     AuthProviderCallbackBody,
     AuthProviderCallbackData,
@@ -29,6 +30,12 @@ const DEFAULT_AUTHED_ROUTE = '/dashboard';
 const DEFAULT_NO_AUTH_ROUTE = '/login';
 const SESSION_POST_LOGIN_REDIRECT_KEY = 'login-route-destination';
 const LOCAL_SAVED_AUTH_KEY = 'saved-auth-provider';
+
+const MS_CLARITY_PROJECT_ID = import.meta.env.MS_CLARITY_PROJECT_ID;
+console.log('Clarity Project ID:', MS_CLARITY_PROJECT_ID);
+if (MS_CLARITY_PROJECT_ID) {
+    Clarity.init(MS_CLARITY_PROJECT_ID);
+}
 
 const UserProvider: React.FC<any> = ({ children }) => {
     const [userId, setUserId] = useState<UserId | undefined>(undefined);
@@ -123,6 +130,8 @@ const UserProvider: React.FC<any> = ({ children }) => {
                 if (!authObject) {
                     handleLocallySaveAuth(session.userId, session.authToken);
                 }
+                Clarity.event('login-success');
+                Clarity.setTag('auth-provider', providerData.provider);
                 handleNavigatePostLogin();
             } catch (error) {
                 console.error('Error during auth provider callback:', error);
@@ -165,6 +174,7 @@ const UserProvider: React.FC<any> = ({ children }) => {
                     clearLocalLoginData();
                     return;
                 }
+                Clarity.event('auto-login-success');
                 handleLocallySaveAuth(existingAuthResponse.userId, existingAuthResponse.authToken);
             } catch (e) {
                 console.error('Auto login with saved auth provider failed', e);
@@ -175,6 +185,20 @@ const UserProvider: React.FC<any> = ({ children }) => {
             strictIgnore = true;
         };
     }, [handleLocallySaveAuth, userId, authToken, localSavedAuth, setSessionSavedLoginRoute, clearLocalLoginData]);
+
+    /**
+     * Update Clarity with user info on change
+     */
+    useEffect(() => {
+        if (MS_CLARITY_PROJECT_ID) {
+            let sessionId = sessionStorage.getItem('clarity-session-id') || undefined;
+            if (!sessionId) {
+                sessionId = crypto.randomUUID();
+                sessionStorage.setItem('clarity-session-id', sessionId);
+            }
+            Clarity.identify(userId || 'anonymous', sessionId);
+        }
+    }, [userId]);
 
     return (
         <UserContext.Provider

@@ -34,6 +34,7 @@
         "@mantine/hooks": "^8.3.4",
         "@mantine/modals": "^8.3.4",
         "@mantine/notifications": "^8.3.4",
+        "@microsoft/clarity": "^1.0.2",
         "@mosaiq/terrazzo-common": "file:../terrazzo-common/dist",
         "dotenv": "^17.2.3",
         "fuse.js": "^7.1.0",
