@@ -18,6 +18,7 @@ export default defineConfig(() => {
             'import.meta.env.GITHUB_AUTH_CALLBACK_URL': JSON.stringify(process.env.GITHUB_AUTH_CALLBACK_URL),
             'import.meta.env.NSM_WWW_PATH': JSON.stringify(process.env.NSM_WWW_PATH),
             'import.meta.env.MS_CLARITY_PROJECT_ID': JSON.stringify(process.env.MS_CLARITY_PROJECT_ID),
+            'import.meta.env.TRZ_ENV': JSON.stringify(process.env.TRZ_ENV),
         },
         server: {
             port: 8080,
