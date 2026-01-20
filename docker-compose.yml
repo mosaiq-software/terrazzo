@@ -34,8 +34,8 @@ services:
             start_period: 30s
         volumes:
             - type: bind
-              source: ${DATABASE_DIR}
-              target: ${DATABASE_DIR}
+              source: ${VOLUME_PATH}/db
+              target: /db
               bind:
                   create_host_path: true
         env_file:
@@ -47,8 +47,8 @@ services:
         command: ["npm", "run", "migrate:up"]
         volumes:
             - type: bind
-              source: ${DATABASE_DIR}
-              target: ${DATABASE_DIR}
+              source: ${VOLUME_PATH}/db
+              target: /db
               bind:
                   create_host_path: true
         env_file:

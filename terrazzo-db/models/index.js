@@ -5,7 +5,7 @@ const path = require('path');
 const Sequelize = require('sequelize');
 const process = require('process');
 const basename = path.basename(__filename);
-const env = process.env.PRODUCTION === 'true' ? 'production' : 'development';
+const env = process.env.TRZ_ENV || 'development';
 const config = require(path.resolve(__dirname, '../config.js'))[env];
 const db = {};
 
