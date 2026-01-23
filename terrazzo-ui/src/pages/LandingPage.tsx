@@ -12,7 +12,7 @@ import terrazzoScreenshot from '../assets/terrazzo-screenshot.png';
 import './LandingPage.css';
 
 const MAX_WIDTH = 700;
-
+const  currentYear = new Date().getFullYear();
 const LandingPage = () => {
     const { userId, goToLogin } = useUserContext();
     useEffect(() => {
@@ -278,7 +278,7 @@ const LandingPage = () => {
                         c={COLORS.text.secondary}
                         fz="sm"
                     >
-                        © Mosaiq Software, 2025
+                        © Mosaiq Software, {currentYear}. All rights reserved.
                     </Text>
                 </Center>
             </Box>
