@@ -10,8 +10,8 @@ import { syncUpdateOrgField } from '@trz-api/broadcasters';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
-import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { createRole } from './roleController';
+import { getUserHeader } from './userController';
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
@@ -31,7 +31,7 @@ export async function addOrganization(name: string, creator: UserId) {
         throw new Error('Name must be 0 - 50 characters');
     }
 
-    const user = await getUserHeaderByIdDb(creator);
+    const user = await getUserHeader(creator);
     if (!user) {
         throw new Error('Org must have a creator');
     }
@@ -64,7 +64,7 @@ const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
 };
 
 export const userIsValidMemberOfOrg = async (userId: UserId, orgId: OrganizationId): Promise<boolean> => {
-    const userHeader = await getUserHeaderByIdDb(userId);
+    const userHeader = await getUserHeader(userId);
     if (!userHeader) {
         return false;
     }

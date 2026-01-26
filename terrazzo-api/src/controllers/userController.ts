@@ -2,6 +2,7 @@ import {
     generateUsernameDiscriminator,
     MembershipRecord,
     OrganizationId,
+    SYSTEM_USER_ID,
     UserHeader,
     UserId,
 } from '@mosaiq/terrazzo-common';
@@ -57,7 +58,7 @@ export async function createNewUser(username: string, firstName: string, lastNam
 const seedNewUserProfile = async (userId: UserId) => {
     // create a default personal org for the user to have projects in
     try {
-        const user = await getUserHeaderByIdDb(userId);
+        const user = await getUserHeader(userId);
         if (!user) {
             throw new Error(`Could not find seedable user: ${userId}`);
         }
@@ -76,17 +77,36 @@ const seedNewUserProfile = async (userId: UserId) => {
         const personalListTodo = await addList({ boardId: personalBoardId, name: 'To Do' });
         const personalListDoing = await addList({ boardId: personalBoardId, name: 'Doing' });
         const personalListDone = await addList({ boardId: personalBoardId, name: 'Done' });
-        await addCard(personalListTodo.id, '🔎 Explore Terrazzo!', undefined, undefined, user.id);
-        await addCard(personalListTodo.id, '📃 Add a card to a list', undefined, undefined, user.id);
-        await addCard(personalListTodo.id, '🧱 Start my own project', undefined, undefined, user.id);
-        await addCard(personalListTodo.id, '😀 Invite some friends', undefined, undefined, user.id);
+        const cards = [
+            '🔎 Explore Terrazzo!',
+            '📃 Add a card to a list',
+            '🧱 Start my own project',
+            '😀 Invite some friends',
+        ];
+        for (const cardName of cards) {
+            await addCard({
+                listId: personalListTodo.id,
+                name: cardName,
+                createdById: SYSTEM_USER_ID,
+            });
+        }
     } catch (e) {
         console.error(e);
         throw new Error('Failed to create users personal organization ' + e);
     }
 };
 
-export const getUserPreview = async (userId: UserId) => {
+const SYSTEM_USER_HEADER: UserHeader = {
+    id: SYSTEM_USER_ID,
+    username: 'system',
+    firstName: 'System',
+    lastName: 'User',
+    profilePicture: '',
+};
+export const getUserHeader = async (userId: UserId) => {
+    if (userId === SYSTEM_USER_ID) {
+        return SYSTEM_USER_HEADER;
+    }
     const user = await getUserHeaderByIdDb(userId);
     if (!user) {
         throw new Error('No user found');

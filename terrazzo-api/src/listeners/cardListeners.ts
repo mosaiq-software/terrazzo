@@ -35,7 +35,11 @@ export const registerCardListeners = (socket: Socket) => {
         if (!socketData.user?.userId) {
             throw new Error('User not authenticated');
         }
-        const card = await addCard(data.listID, data.cardName, undefined, undefined, socketData.user.userId);
+        const card = await addCard({
+            listId: data.listID,
+            name: data.cardName,
+            createdById: socketData.user.userId,
+        });
         return card.id;
     });
 

@@ -9,8 +9,8 @@ import {
 } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
-import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { userIsOrgOwner } from './organizationController';
+import { getUserHeader } from './userController';
 
 export const getMembersInOrg = async (orgId: OrganizationId) => {
     const org = await getOrgByIdDb(orgId);
@@ -24,7 +24,7 @@ export const getMembersInOrg = async (orgId: OrganizationId) => {
 
 const populateMemberships = async (records: MembershipRecord[]) => {
     const memberPromises = records.map(async (r) => {
-        const user = await getUserHeaderByIdDb(r.userId);
+        const user = await getUserHeader(r.userId);
         if (!user) {
             return undefined;
         }
