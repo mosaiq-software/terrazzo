@@ -13,8 +13,8 @@ import {
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount } from '../../linkedAccountTypes';
 import { BoardHeader, Label } from '../../modules/board/boardTypes';
-import { Card, CardHeader } from '../../modules/board/cardTypes';
-import { List, ListHeader } from '../../modules/board/listTypes';
+import { CardHeader } from '../../modules/board/cardTypes';
+import { ListHeader } from '../../modules/board/listTypes';
 import { DirectoryHeader } from '../../modules/directoryTypes';
 import { DocumentHeader } from '../../modules/documentTypes';
 import { ModuleHeader } from '../../modules/moduleTypes';
@@ -70,8 +70,8 @@ export interface ServerSEPayload {
     [ServerSE.MOVE_LIST]: { listId: ListId; position: number };
     [ServerSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number };
 
-    [ServerSE.ADD_LIST]: List;
-    [ServerSE.ADD_CARD]: Card;
+    [ServerSE.ADD_LIST]: { boardId: BoardId; listId: ListId };
+    [ServerSE.ADD_CARD]: { listId: ListId; cardId: CardId };
 
     [ServerSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
     [ServerSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };

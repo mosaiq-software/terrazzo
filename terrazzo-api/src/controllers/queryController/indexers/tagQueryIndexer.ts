@@ -135,7 +135,7 @@ const indexCard = async (
 
 const indexUser = async (dataSource: TagsQueryDataSource, userId: UserId): Promise<QueryableDatapoint[]> => {
     try {
-        const user = await dataSource.getUserHeaderByIdDb(userId);
+        const user = await dataSource.getUserHeader(userId);
         if (!user) {
             throw new Error('User not found');
         }

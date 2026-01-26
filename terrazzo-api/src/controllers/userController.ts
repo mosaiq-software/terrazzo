@@ -1,14 +1,5 @@
-import {
-    BoardId,
-    generateUsernameDiscriminator,
-    List,
-    MembershipRecord,
-    OrganizationId,
-    UserHeader,
-    UserId,
-} from '@mosaiq/terrazzo-common';
+import { generateUsernameDiscriminator, SYSTEM_USER_ID, UserHeader, UserId } from '@mosaiq/terrazzo-common';
 import { syncUpdateUserField } from '@trz-api/broadcasters';
-import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import {
     createUserHeaderDb,
     getUserHeaderByIdDb,
@@ -19,7 +10,7 @@ import { isDev } from '@trz-api/utils/envUtils';
 import { addBoard } from './boardController/boardController';
 import { addCard } from './cardController';
 import { addList } from './listController';
-import { addOrganization, updateOrganizationFromPartial } from './organizationController';
+import { addOrganization } from './organizationController';
 
 export async function checkUsernameTaken(username: string) {
     const user = await getUserHeaderByUsernameDb(username);
@@ -59,36 +50,51 @@ export async function createNewUser(username: string, firstName: string, lastNam
 const seedNewUserProfile = async (userId: UserId) => {
     // create a default personal org for the user to have projects in
     try {
-        const user = await getUserHeaderByIdDb(userId);
+        const user = await getUserHeader(userId);
         if (!user) {
             throw new Error(`Could not find seedable user: ${userId}`);
         }
-        const personalOrgId: OrganizationId = await addOrganization(user.firstName + "'s Space", user.id);
-        const orgMembershipRecord: MembershipRecord = {
-            orgId: personalOrgId,
-            userId: user.id,
-            joinedAt: Date.now(),
-        };
-        await createOrganizationMembershipDb(orgMembershipRecord);
-        await updateOrganizationFromPartial(personalOrgId, {
-            logoUrl: user.profilePicture,
+        const personalOrgId = await addOrganization({
+            name: `${user.firstName}'s Space`,
             description: 'A place to keep your personal projects',
+            logoUrl: user.profilePicture,
+            ownerId: user.id,
         });
-        const personalBoardId: BoardId = await addBoard('Task Tracking', '', personalOrgId);
-        const personalListTodo: List = await addList(personalBoardId, 'To do');
-        const personalListDoing: List = await addList(personalBoardId, 'Doing');
-        const personalListDone: List = await addList(personalBoardId, 'Done');
-        await addCard(personalListTodo.id, '🔎 Explore Terrazzo!', undefined, undefined, user.id);
-        await addCard(personalListTodo.id, '📃 Add a card to a list', undefined, undefined, user.id);
-        await addCard(personalListTodo.id, '🧱 Start my own project', undefined, undefined, user.id);
-        await addCard(personalListTodo.id, '😀 Invite some friends', undefined, undefined, user.id);
+        const personalBoardId = await addBoard('Task Tracking', '', personalOrgId);
+        const personalListTodo = await addList({ boardId: personalBoardId, name: 'To Do' });
+        const personalListDoing = await addList({ boardId: personalBoardId, name: 'Doing' });
+        const personalListDone = await addList({ boardId: personalBoardId, name: 'Done' });
+        const cards = {
+            '👓 Create a Terrazzo account': personalListDone.id,
+            '🔎 Explore Terrazzo!': personalListDoing.id,
+            '📃 Add a card to a list': personalListTodo.id,
+            '🧱 Start my own project': personalListTodo.id,
+            '😀 Invite some friends': personalListTodo.id,
+        };
+        for (const [cardName, listId] of Object.entries(cards)) {
+            await addCard({
+                listId: listId,
+                name: cardName,
+                createdById: SYSTEM_USER_ID,
+            });
+        }
     } catch (e) {
         console.error(e);
         throw new Error('Failed to create users personal organization ' + e);
     }
 };
 
-export const getUserPreview = async (userId: UserId) => {
+const SYSTEM_USER_HEADER: UserHeader = {
+    id: SYSTEM_USER_ID,
+    username: 'system',
+    firstName: 'System',
+    lastName: 'User',
+    profilePicture: '',
+};
+export const getUserHeader = async (userId: UserId) => {
+    if (userId === SYSTEM_USER_ID) {
+        return SYSTEM_USER_HEADER;
+    }
     const user = await getUserHeaderByIdDb(userId);
     if (!user) {
         throw new Error('No user found');

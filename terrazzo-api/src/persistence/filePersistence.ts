@@ -1,4 +1,4 @@
-import { TextBlockId, UploadedFile, UserId } from '@mosaiq/terrazzo-common';
+import { TextBlockId, UploadedFile } from '@mosaiq/terrazzo-common';
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model } from 'sequelize';
 
@@ -23,16 +23,8 @@ export const getFileByIdDb = async (id: TextBlockId) => {
     return model?.toJSON();
 };
 
-export const createFileDb = async (base64: string, fileName: string, mimeType: string, createdByUserId: UserId) => {
-    const uid = crypto.randomUUID();
-    const model = await FileModel.create({
-        id: uid,
-        base64,
-        fileName,
-        mimeType,
-        createdAt: Date.now(),
-        createdByUserId: createdByUserId,
-    });
+export const createFileDb = async (file: UploadedFile) => {
+    const model = await FileModel.create({ ...file });
     return model.toJSON();
 };
 

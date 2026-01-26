@@ -213,7 +213,7 @@ const BoardPage = (): React.JSX.Element => {
             if (payload.boardId !== boardId) {
                 return;
             }
-            listToCardsMap.set(payload.id, []);
+            listToCardsMap.set(payload.listId, []);
         },
         [boardId, listToCardsMap]
     );
@@ -225,10 +225,10 @@ const BoardPage = (): React.JSX.Element => {
                 console.warn('Tried to add a card to a non-existent list');
                 return;
             }
-            cardToListMap.set(payload.id, payload.listId);
+            cardToListMap.set(payload.cardId, payload.listId);
             const list = listToCardsMap.get(payload.listId);
             if (list) {
-                list.push(payload.id);
+                list.push(payload.cardId);
                 listToCardsMap.set(payload.listId, list);
             }
         },

@@ -18,9 +18,9 @@ import {
 import { getApiUrl } from '@trz-api/utils/envUtils';
 import { extractMarkdownImagesFromText, replaceAllOccurrences } from '@trz-api/utils/textUtils';
 import { addAssigneeToCard } from '../cardAssignmentController';
-import { addCard, moveCardToList, setCardsLabels, updateCardFromPartial } from '../cardController';
+import { addCard, moveCardToList, setCardsLabels } from '../cardController';
 import { saveFileFromUrl } from '../fileController';
-import { addList, moveList, updateListFromPartial } from '../listController';
+import { addList, moveList } from '../listController';
 import {
     getBlocknoteChecklistBlock,
     getBlocknoteMediaBlock,
@@ -28,6 +28,13 @@ import {
 } from '../textBlockController/blocknoteUtils';
 import { addBoard, createBoardLabelSingle } from './boardController';
 
+/**
+ * Creates a Terrazzo board from a Trello board export
+ * @param onParentId - The parent directory ID to create the board in
+ * @param trelloBoard - The Trello board export data
+ * @param userMap - A mapping of Trello user IDs to Terrazzo user IDs
+ * @returns The created Terrazzo board ID, or undefined if creation failed
+ */
 export const createTerrazzoBoardFromTrelloBoard = async (
     onParentId: DirectoryId,
     trelloBoard: TrelloExportType,
@@ -40,10 +47,11 @@ export const createTerrazzoBoardFromTrelloBoard = async (
         const { cardCreatedDateMap } = getActionsData(trelloBoard);
         const cardChecklistsMap = getChecklistsForCards(trelloBoard.checklists);
 
-        const cardCreationPromises = trelloBoard.cards.map((trelloCard) =>
-            createCard(trelloCard, cardChecklistsMap, cardCreatedDateMap, listMap, labelMap, userMap)
-        );
-        await settlePromises(cardCreationPromises);
+        // Run these in sequence to ensure order is preserved, and nothing gets rate limited.
+        // Creating hundreds of cards in parallel on the same board can lead to issues.
+        for (const trelloCard of trelloBoard.cards) {
+            await createCard(trelloCard, cardChecklistsMap, cardCreatedDateMap, listMap, labelMap, userMap);
+        }
 
         return trzBoardId;
     } catch (error: any) {
@@ -52,20 +60,34 @@ export const createTerrazzoBoardFromTrelloBoard = async (
     }
 };
 
+/**
+ * Creates Terrazzo lists from Trello lists
+ */
 const createLists = async (trzBoardId: BoardId, trelloLists: TrelloListType[]) => {
     const listMap: { [trl: string]: ListId } = {};
     for (const trelloList of trelloLists) {
         const trelloListName = trelloList.name;
         const trelloListOrder = trelloList.pos;
 
-        const trzList = await addList(trzBoardId, trelloListName);
-        await moveList(trzList.id, trelloListOrder);
-        await updateListFromPartial(trzList.id, { archived: trelloList.closed });
+        const trzList = await addList(
+            {
+                boardId: trzBoardId,
+                name: trelloListName,
+                archived: trelloList.closed,
+            },
+            {
+                preventSync: true,
+            }
+        );
+        await moveList(trzList.id, trelloListOrder, trzBoardId, { preventSync: true });
         listMap[trelloList.id] = trzList.id;
     }
     return listMap;
 };
 
+/**
+ * Creates Terrazzo labels from Trello labels
+ */
 const createLabels = async (trzBoardId: BoardId, trelloLabels: TrelloLabelType[]) => {
     const labelMap: { [trl: string]: LabelId } = {};
     for (const trelloLabel of trelloLabels) {
@@ -76,6 +98,9 @@ const createLabels = async (trzBoardId: BoardId, trelloLabels: TrelloLabelType[]
     return labelMap;
 };
 
+/**
+ * Extracts card creation dates from Trello actions
+ */
 const getActionsData = (trelloBoard: TrelloExportType) => {
     const cardCreatedDateMap: Record<string, Date> = {};
     for (const action of trelloBoard?.actions || []) {
@@ -87,6 +112,9 @@ const getActionsData = (trelloBoard: TrelloExportType) => {
     return { cardCreatedDateMap };
 };
 
+/**
+ * Groups checklists by their associated card IDs
+ */
 const getChecklistsForCards = (checklists: TrelloChecklistType[]) => {
     const cardChecklistsMap: Record<string, TrelloChecklistType[]> = {};
     for (const checklist of checklists) {
@@ -99,6 +127,9 @@ const getChecklistsForCards = (checklists: TrelloChecklistType[]) => {
     return cardChecklistsMap;
 };
 
+/**
+ * Creates a Terrazzo card from a Trello card
+ */
 const createCard = async (
     trelloCard: TrelloCardType,
     cardChecklistsMap: Record<string, TrelloChecklistType[]>,
@@ -121,31 +152,38 @@ const createCard = async (
         throw new Error('List not found for card');
     }
 
-    const trzCard = await addCard(trzListId, trelloCard.name, allBlocks, trelloCard.idShort, undefined);
-    await moveCardToList(trzCard.id, trzListId, trelloCard.pos);
+    const trzCreatorId = userMap[trelloCard.idMemberCreator];
+    const createdAt = cardCreatedDateMap[trelloCard.id]?.getTime() || Date.now();
+    const trzCard = await addCard(
+        {
+            listId: trzListId,
+            name: trelloCard.name,
+            archived: trelloCard.closed,
+            createdById: trzCreatorId,
+            createdAt: createdAt,
+            cardNumber: trelloCard.idShort,
+        },
+        {
+            preventSync: true,
+            descriptionBlocks: allBlocks,
+        }
+    );
+    await moveCardToList(trzCard.id, trzListId, trelloCard.pos, { preventSync: true });
     const trzLabelIds = trelloCard.idLabels.map((trlLabelId) => labelMap[trlLabelId]);
-    await setCardsLabels(trzCard.id, trzLabelIds);
-
-    const trelloCreatorId = trelloCard.idMemberCreator;
-    const trzCreatorId = userMap[trelloCreatorId];
-
+    await setCardsLabels(trzCard.id, trzLabelIds, { preventSync: true });
     await processCardAssignments(trelloCard, userMap, trzCard.id);
-
-    await updateCardFromPartial(trzCard.id, {
-        archived: trelloCard.closed,
-        createdById: trzCreatorId,
-        createdAt: cardCreatedDateMap[trelloCard.id].getTime() || Date.now(),
-    });
 };
 
+/**
+ * Processes the card description: copies images and converts markdown to blocks
+ */
 const processCardDescription = async (description: string): Promise<Block[]> => {
-    // Copy over each image in the card description to Terrazzo's storage
     let cardDesc = description;
     const embeddedImages = extractMarkdownImagesFromText(cardDesc);
     for (const imageUrl of embeddedImages) {
         try {
-            const createdFile = await saveFileFromUrl(imageUrl);
-            const terrazzoFileUrl = getFileUrl(createdFile.id, getApiUrl());
+            const createdFileId = saveFileFromUrl(imageUrl);
+            const terrazzoFileUrl = getFileUrl(createdFileId, getApiUrl());
             cardDesc = replaceAllOccurrences(cardDesc, imageUrl, terrazzoFileUrl);
         } catch (error) {
             console.error('Error saving file from Trello card description:', error);
@@ -157,6 +195,9 @@ const processCardDescription = async (description: string): Promise<Block[]> => 
     return descriptionBlocks;
 };
 
+/**
+ * Processes extra attachments on the Trello card that are not already embedded in the description
+ */
 const processExtraCardAttachments = async (trelloCard: TrelloCardType): Promise<Block[]> => {
     // Copy over attachment images that are not already embedded in the description
     const blockPromises: Promise<Block | null>[] = trelloCard.attachments.map(async (att) => {
@@ -167,8 +208,8 @@ const processExtraCardAttachments = async (trelloCard: TrelloCardType): Promise<
             return null;
         }
         try {
-            const createdFile = await saveFileFromUrl(att.url);
-            const terrazzoFileUrl = getFileUrl(createdFile.id, getApiUrl());
+            const createdFileId = saveFileFromUrl(att.url);
+            const terrazzoFileUrl = getFileUrl(createdFileId, getApiUrl());
             const mediaBlock = getBlocknoteMediaBlock(terrazzoFileUrl, att.mimeType, att.name);
             return mediaBlock;
         } catch (error) {
@@ -181,8 +222,10 @@ const processExtraCardAttachments = async (trelloCard: TrelloCardType): Promise<
     return blocks;
 };
 
+/**
+ * Processes Trello checklists into Terrazzo checklist blocks
+ */
 const processCardChecklists = (checklists: TrelloChecklistType[]): Block[] => {
-    // Copy over any checklists
     const blocks: Block[] = [];
     for (const checklist of checklists) {
         const checklistItems: { text: string; checked: boolean }[] = [];
@@ -198,16 +241,18 @@ const processCardChecklists = (checklists: TrelloChecklistType[]): Block[] => {
     return blocks;
 };
 
+/**
+ * Processes card assignments by mapping Trello members to Terrazzo users
+ */
 const processCardAssignments = async (
     trelloCard: TrelloCardType,
     userMap: TrelloUserToTerrazzoUserMap,
     trzCardId: CardId
 ) => {
-    // Map Trello members to Terrazzo users
     const assigneePromises = trelloCard.idMembers.map(async (trelloMemberId) => {
         const trzUserId = userMap[trelloMemberId];
         if (trzUserId) {
-            await addAssigneeToCard(trzCardId, trzUserId);
+            await addAssigneeToCard(trzCardId, trzUserId, { preventSync: true });
         }
     });
     await settlePromises(assigneePromises);

@@ -1,16 +1,16 @@
 import { createInlineContentSpec } from '@blocknote/core';
 import {
-    UID,
     QueryableItem,
-    fullNameWithUsername,
-    cardNameWithBoardCodeAndNumber,
+    UID,
     boardNameWithCode,
+    cardNameWithBoardCodeAndNumber,
     exhaustiveCheck,
+    fullNameWithUsername,
 } from '@mosaiq/terrazzo-common';
 import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
 import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
-import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
+import { getUserHeader } from '../userController';
 
 /**
  * Random string that is extremely unlikely to appear in normal text.
@@ -101,7 +101,7 @@ export const BlockNoteMention = createInlineContentSpec(
 export const retrieveMentionDisplayText = async (id: UID, type: QueryableItem): Promise<string | undefined> => {
     switch (type) {
         case QueryableItem.User: {
-            const userHeader = await getUserHeaderByIdDb(id);
+            const userHeader = await getUserHeader(id);
             return userHeader ? fullNameWithUsername(userHeader) : undefined;
         }
         case QueryableItem.Card: {

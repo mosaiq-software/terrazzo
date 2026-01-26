@@ -1,11 +1,9 @@
 import { arrayMove, BoardId, CardId, List, ListHeader, ListId, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import { syncAddList, syncMoveList, syncUpdateListField } from '@trz-api/broadcasters';
 import { getAllCardsOfList, getCardIdsOnList } from '@trz-api/controllers/cardController';
-import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import {
     createListOnBoardDb,
     getListByIdDb,
-    getListsBoardIdDb,
     getListsByBoardIdOrderDb,
     getNextListOrderDb,
     updateListDb,
@@ -81,25 +79,22 @@ export async function getListRes(listId: ListId): Promise<ListHeader | undefined
  * @param boardID
  * @param listName
  */
-export async function addList(boardID: BoardId, listName: string) {
-    //pull board from db with ID
-    const updatingBoard = await getBoardByIdDb(boardID);
-
-    if (updatingBoard == null) {
-        throw new Error('Board not found');
-    }
-
+interface AddListOptions {
+    preventSync?: boolean;
+}
+export async function addList(list: Partial<ListHeader> & { boardId: BoardId }, options?: AddListOptions) {
     try {
-        const newList: List = {
+        const newList: ListHeader = {
             id: crypto.randomUUID(),
-            boardId: boardID,
-            name: listName,
-            archived: false,
-            cards: [],
-            order: await getNextListOrderDb(boardID),
+            boardId: list.boardId,
+            name: list.name || '',
+            archived: list.archived || false,
+            order: await getNextListOrderDb(list.boardId),
         };
-        await createListOnBoardDb(newList, boardID);
-        await syncAddList(newList, boardID);
+        await createListOnBoardDb(newList);
+        if (!options?.preventSync) {
+            await syncAddList(newList, list.boardId);
+        }
         return newList;
     } catch (e) {
         throw new Error('Failed to save board' + e);
@@ -114,7 +109,7 @@ export async function updateListFromPartial(listId: ListId, partial: Partial<Lis
 
     const updated = updateBaseFromPartial(updatingList, partial);
     try {
-        await updateListDb(updated);
+        await updateListDb(updated.id, updated);
         await syncUpdateListField(updated.id, partial, updated.boardId);
     } catch (e: any) {
         throw new Error('Failed to update list ' + e);
@@ -132,23 +127,22 @@ export async function getBoardIDFromListID(listID: ListId) {
 
     return updatingList.boardId;
 }
-export async function moveList(listID: ListId, toPosition: number) {
+
+interface MoveListOptions {
+    preventSync?: boolean;
+}
+export async function moveList(listID: ListId, toPosition: number, onBoardId: BoardId, options?: MoveListOptions) {
     try {
-        const boardId = await getListsBoardIdDb(listID);
-        if (!boardId) {
-            throw new Error('No board found for list');
-        }
-        const lists = await getListsByBoardIdOrderDb(boardId, false); //assumes as of now that archived lists are not included
-        if (!lists) {
-            throw new Error('No lists found on board');
-        }
+        const lists = await getListsByBoardIdOrderDb(onBoardId);
         const index = lists.findIndex((l) => l.id === listID);
-        if (index < 0) {
-            throw new Error('List not found in list');
+        if (index === -1) {
+            throw new Error('List not found in board');
         }
-        const movedLists = arrayMove<ListHeader>(lists, index, toPosition);
+        const movedLists = arrayMove(lists, index, toPosition);
         await updateListOrderDb(movedLists);
-        await syncMoveList(listID, toPosition, boardId);
+        if (!options?.preventSync) {
+            await syncMoveList(listID, toPosition, onBoardId);
+        }
     } catch (error: any) {
         console.error(error);
         throw error;

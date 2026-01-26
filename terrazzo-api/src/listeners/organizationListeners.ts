@@ -19,7 +19,7 @@ export const registerOrganizationListeners = (socket: Socket) => {
         if (!socketData.user?.userId) {
             throw new Error(`User does not have permission to create an organization`);
         }
-        const orgId = await addOrganization(data.name, socketData.user.userId);
+        const orgId = await addOrganization({ name: data.name, ownerId: socketData.user.userId });
         return orgId;
     });
 
