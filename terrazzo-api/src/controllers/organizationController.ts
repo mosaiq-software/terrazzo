@@ -7,7 +7,10 @@ import {
     UserId,
 } from '@mosaiq/terrazzo-common';
 import { syncUpdateOrgField } from '@trz-api/broadcasters';
-import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
+import {
+    createOrganizationMembershipDb,
+    getOrganizationMembershipDb,
+} from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { createRole } from './roleController';
@@ -26,43 +29,43 @@ export async function getOrganizationPreview(orgId: OrganizationId) {
     }
 }
 
-export async function addOrganization(name: string, creator: UserId) {
+export async function addOrganization(organization: Partial<OrganizationHeader> & { name: string; ownerId: UserId }) {
+    const name = organization.name?.trim();
     if (name.length === 0 || name.length > 50) {
         throw new Error('Name must be 0 - 50 characters');
     }
 
-    const user = await getUserHeader(creator);
-    if (!user) {
-        throw new Error('Org must have a creator');
-    }
-
+    // Create the organization record
     const newOrg: OrganizationHeader = {
         id: crypto.randomUUID(),
         name,
-        createdAt: Date.now(),
-        logoUrl: '',
-        description: '',
-        ownerId: creator,
+        createdAt: organization.createdAt || Date.now(),
+        logoUrl: organization.logoUrl || '',
+        description: organization.description || '',
+        ownerId: organization.ownerId,
     };
-
     await createOrgDb(newOrg);
-    await seedFreshOrg(newOrg.id, creator);
 
-    return newOrg.id;
-}
+    // Assign membership to creator
+    const orgMembershipRecord = {
+        orgId: newOrg.id,
+        userId: organization.ownerId,
+        joinedAt: Date.now(),
+    };
+    await createOrganizationMembershipDb(orgMembershipRecord);
 
-const seedFreshOrg = async (orgId: OrganizationId, creator: UserId) => {
     // create default roles
-    const adminRole = await createRole('Admin', '#D31757', orgId, recordValues(PermissionFlag));
-    const guest = await createRole('Guest', '#2384CA', orgId, [
+    const adminRole = await createRole('Admin', '#D31757', newOrg.id, recordValues(PermissionFlag));
+    const guest = await createRole('Guest', '#2384CA', newOrg.id, [
         PermissionFlag.VIEW_BOARD,
         PermissionFlag.VIEW_DOCUMENT,
     ]);
 
     // assign admin role to creator
-    await setRoleIdsForUserInOrgDb(creator, orgId, [adminRole.id]);
-};
+    await setRoleIdsForUserInOrgDb(organization.ownerId, newOrg.id, [adminRole.id]);
 
+    return newOrg.id;
+}
 export const userIsValidMemberOfOrg = async (userId: UserId, orgId: OrganizationId): Promise<boolean> => {
     const userHeader = await getUserHeader(userId);
     if (!userHeader) {

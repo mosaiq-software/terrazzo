@@ -1,13 +1,5 @@
-import {
-    generateUsernameDiscriminator,
-    MembershipRecord,
-    OrganizationId,
-    SYSTEM_USER_ID,
-    UserHeader,
-    UserId,
-} from '@mosaiq/terrazzo-common';
+import { generateUsernameDiscriminator, SYSTEM_USER_ID, UserHeader, UserId } from '@mosaiq/terrazzo-common';
 import { syncUpdateUserField } from '@trz-api/broadcasters';
-import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import {
     createUserHeaderDb,
     getUserHeaderByIdDb,
@@ -18,7 +10,7 @@ import { isDev } from '@trz-api/utils/envUtils';
 import { addBoard } from './boardController/boardController';
 import { addCard } from './cardController';
 import { addList } from './listController';
-import { addOrganization, updateOrganizationFromPartial } from './organizationController';
+import { addOrganization } from './organizationController';
 
 export async function checkUsernameTaken(username: string) {
     const user = await getUserHeaderByUsernameDb(username);
@@ -62,30 +54,26 @@ const seedNewUserProfile = async (userId: UserId) => {
         if (!user) {
             throw new Error(`Could not find seedable user: ${userId}`);
         }
-        const personalOrgId: OrganizationId = await addOrganization(user.firstName + "'s Space", user.id);
-        const orgMembershipRecord: MembershipRecord = {
-            orgId: personalOrgId,
-            userId: user.id,
-            joinedAt: Date.now(),
-        };
-        await createOrganizationMembershipDb(orgMembershipRecord);
-        await updateOrganizationFromPartial(personalOrgId, {
-            logoUrl: user.profilePicture,
+        const personalOrgId = await addOrganization({
+            name: `${user.firstName}'s Space`,
             description: 'A place to keep your personal projects',
+            logoUrl: user.profilePicture,
+            ownerId: user.id,
         });
         const personalBoardId = await addBoard('Task Tracking', '', personalOrgId);
         const personalListTodo = await addList({ boardId: personalBoardId, name: 'To Do' });
         const personalListDoing = await addList({ boardId: personalBoardId, name: 'Doing' });
         const personalListDone = await addList({ boardId: personalBoardId, name: 'Done' });
-        const cards = [
-            '🔎 Explore Terrazzo!',
-            '📃 Add a card to a list',
-            '🧱 Start my own project',
-            '😀 Invite some friends',
-        ];
-        for (const cardName of cards) {
+        const cards = {
+            '👓 Create a Terrazzo account': personalListDone.id,
+            '🔎 Explore Terrazzo!': personalListDoing.id,
+            '📃 Add a card to a list': personalListTodo.id,
+            '🧱 Start my own project': personalListTodo.id,
+            '😀 Invite some friends': personalListTodo.id,
+        };
+        for (const [cardName, listId] of Object.entries(cards)) {
             await addCard({
-                listId: personalListTodo.id,
+                listId: listId,
                 name: cardName,
                 createdById: SYSTEM_USER_ID,
             });
