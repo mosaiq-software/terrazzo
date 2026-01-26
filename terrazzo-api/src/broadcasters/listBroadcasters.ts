@@ -11,7 +11,10 @@ export const syncAddList = async (list: ListHeader, boardId: BoardId) => {
                 if (!(await userCanViewBoard(userId, boardId))) {
                     throw new Error('Insufficient permissions to view this list');
                 }
-                return list;
+                return {
+                    boardId: list.boardId,
+                    listId: list.id,
+                };
             },
         });
     } catch (error: any) {

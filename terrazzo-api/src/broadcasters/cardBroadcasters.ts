@@ -10,7 +10,10 @@ export const syncAddCard = async (card: Card, onBoardId: BoardId) => {
             if (!(await userCanViewBoard(userId, onBoardId))) {
                 throw new Error('Insufficient permissions to view this card');
             }
-            return card;
+            return {
+                listId: card.listId,
+                cardId: card.id,
+            };
         },
     });
 };

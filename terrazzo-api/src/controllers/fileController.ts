@@ -27,7 +27,7 @@ export const createFile = async (base64: string, fileName: string, mimeType: str
 
 /**
  * Downloads a file from the given URL and stores it in Terrazzo's file storage.
- * If the failure occurs during download or storage, a placeholder "file not found" image is stored instead.
+ * If the failure occurs during download or storage, the error is logged but not thrown.
  * @param fileUrl The URL of the file to download and store.
  * @returns The id of the potentially created file in Terrazzo.
  */
@@ -48,10 +48,6 @@ export const saveFileFromUrl = (fileUrl: string): UploadedFileId => {
                 const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
                 if (fileNameMatch && fileNameMatch[1]) {
                     fileName = fileNameMatch[1];
-                }
-                if (!fileName) {
-                    const urlParts = fileUrl.split('/');
-                    fileName = urlParts[urlParts.length - 1] || 'file';
                 }
                 if (!base64 || !fileName || !contentType) {
                     throw new Error('Missing file data after download');

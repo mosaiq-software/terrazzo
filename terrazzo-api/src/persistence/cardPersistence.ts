@@ -33,7 +33,7 @@ export const getCardByIdDb = async (id: CardId) => {
 };
 
 export const getCardsByListIdShortUpDb = async (listId: ListId, archived?: boolean) => {
-    const query: any = { listId };
+    const query: { listId: ListId; archived?: boolean } = { listId };
     if (archived !== undefined) {
         query.archived = archived;
     }

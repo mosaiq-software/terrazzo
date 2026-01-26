@@ -70,8 +70,8 @@ export interface ServerSEPayload {
     [ServerSE.MOVE_LIST]: { listId: ListId; position: number };
     [ServerSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number };
 
-    [ServerSE.ADD_LIST]: ListHeader;
-    [ServerSE.ADD_CARD]: CardHeader;
+    [ServerSE.ADD_LIST]: { boardId: BoardId; listId: ListId };
+    [ServerSE.ADD_CARD]: { listId: ListId; cardId: CardId };
 
     [ServerSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
     [ServerSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };

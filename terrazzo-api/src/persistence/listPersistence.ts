@@ -28,7 +28,7 @@ export const getListsByBoardIdDb = async (boardId: BoardId) => {
 };
 
 export const getListsByBoardIdOrderDb = async (boardId: BoardId, archived?: boolean) => {
-    const query: any = { boardId };
+    const query: { boardId: BoardId; archived?: boolean } = { boardId };
     if (archived !== undefined) {
         query.archived = archived;
     }

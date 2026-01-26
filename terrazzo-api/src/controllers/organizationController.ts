@@ -32,7 +32,7 @@ export async function getOrganizationPreview(orgId: OrganizationId) {
 export async function addOrganization(organization: Partial<OrganizationHeader> & { name: string; ownerId: UserId }) {
     const name = organization.name?.trim();
     if (name.length === 0 || name.length > 50) {
-        throw new Error('Name must be 0 - 50 characters');
+        throw new Error('Name must be 1 - 50 characters');
     }
 
     // Create the organization record

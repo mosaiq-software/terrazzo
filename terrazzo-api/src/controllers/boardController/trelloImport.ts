@@ -161,6 +161,7 @@ const createCard = async (
             archived: trelloCard.closed,
             createdById: trzCreatorId,
             createdAt: createdAt,
+            cardNumber: trelloCard.idShort,
         },
         {
             preventSync: true,
