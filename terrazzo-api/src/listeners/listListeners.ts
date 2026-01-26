@@ -27,7 +27,7 @@ export const registerListListeners = (socket: Socket) => {
         if (!(await userCanEditBoard(socket, data.boardID))) {
             throw new Error('Insufficient permissions to create lists for this board');
         }
-        const list = await addList(data.boardID, data.listName);
+        const list = await addList({ boardId: data.boardID, name: data.listName });
         return list.id;
     });
 
@@ -45,7 +45,7 @@ export const registerListListeners = (socket: Socket) => {
         if (!(await userCanEditBoard(socket, boardId))) {
             throw new Error('Insufficient permissions to move this list');
         }
-        await moveList(data.listId, data.position);
+        await moveList(data.listId, data.position, boardId);
         return undefined;
     });
 };

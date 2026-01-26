@@ -7,21 +7,37 @@ import {
 } from '@trz-api/persistence/cardAssignmentPersistence';
 import { getBoardIDFromCardID } from './cardController';
 
-export const addAssigneeToCard = async (cardId: CardId, userId: UserId) => {
+interface AddAssigneeToCardOptions {
+    preventSync?: boolean;
+}
+export const addAssigneeToCard = async (cardId: CardId, userId: UserId, options?: AddAssigneeToCardOptions) => {
     const existingAssignment = await getCardAssignmentRecordsForUserOnCardDb(userId, cardId);
     if (existingAssignment?.length) {
         return;
     }
-    const boardId = await getBoardIDFromCardID(cardId);
     await createCardAssignmentRecordDb(userId, cardId);
-    await syncUpdateCardAssignee({ cardId, userId, assigned: true }, boardId);
+
+    if (!options?.preventSync) {
+        const boardId = await getBoardIDFromCardID(cardId);
+        await syncUpdateCardAssignee({ cardId, userId, assigned: true }, boardId);
+    }
 };
 
-export const removeAssigneeFromCard = async (cardId: CardId, userId: UserId) => {
+interface RemoveAssigneeFromCardOptions {
+    preventSync?: boolean;
+}
+export const removeAssigneeFromCard = async (
+    cardId: CardId,
+    userId: UserId,
+    options?: RemoveAssigneeFromCardOptions
+) => {
     const existingAssignment = await getCardAssignmentRecordsForUserOnCardDb(userId, cardId);
     if (existingAssignment?.length) {
         await deleteCardAssignmentRecordDb(existingAssignment[0].id);
     }
-    const boardId = await getBoardIDFromCardID(cardId);
-    await syncUpdateCardAssignee({ cardId, userId, assigned: false }, boardId);
+
+    if (!options?.preventSync) {
+        const boardId = await getBoardIDFromCardID(cardId);
+        await syncUpdateCardAssignee({ cardId, userId, assigned: false }, boardId);
+    }
 };

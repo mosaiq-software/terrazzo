@@ -1,8 +1,8 @@
-import { BoardId, getRoomCode, List, ListId, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { BoardId, getRoomCode, ListHeader, ListId, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { userCanViewBoard } from '@trz-api/utils/permissions';
 import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
-export const syncAddList = async (list: List, boardId: BoardId) => {
+export const syncAddList = async (list: ListHeader, boardId: BoardId) => {
     try {
         broadcast({
             event: ServerSE.ADD_LIST,

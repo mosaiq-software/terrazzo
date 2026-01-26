@@ -32,13 +32,14 @@ export const getCardByIdDb = async (id: CardId) => {
     return model?.toJSON();
 };
 
-export const getCardsByListIdShortUpDb = async (listId: ListId, archived: boolean) => {
+export const getCardsByListIdShortUpDb = async (listId: ListId, archived?: boolean) => {
+    const query: any = { listId };
+    if (archived !== undefined) {
+        query.archived = archived;
+    }
     const models = await CardModel.findAll({
-        where: { listId, archived },
+        where: query,
         order: [['order', 'ASC']],
-        attributes: {
-            exclude: ['description', 'updatedAt'],
-        },
     });
     return models.map((card) => card.toJSON());
 };

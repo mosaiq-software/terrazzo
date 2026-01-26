@@ -193,7 +193,7 @@ export interface TrelloExportType {
         backgroundImage: string;
         backgroundDarkImage: null;
         backgroundImageScaled: null;
-        backgroundTile: false;
+        backgroundTile: boolean;
         backgroundBrightness: string;
         sharedSourceUrl: null;
         backgroundBottomColor: string;
@@ -288,12 +288,12 @@ export interface TrelloCardType {
         idCheckItem: string;
         state: string;
     }[];
-    closed: false;
+    closed: boolean;
     coordinates: null;
     creationMethod: null;
     creationMethodError: null;
     creationMethodLoadingStartedAt: null;
-    dueComplete: false;
+    dueComplete: boolean;
     dateClosed: null;
     dateLastActivity: string;
     dateCompleted: null;

@@ -1,7 +1,5 @@
 import {
-    BoardId,
     generateUsernameDiscriminator,
-    List,
     MembershipRecord,
     OrganizationId,
     UserHeader,
@@ -74,10 +72,10 @@ const seedNewUserProfile = async (userId: UserId) => {
             logoUrl: user.profilePicture,
             description: 'A place to keep your personal projects',
         });
-        const personalBoardId: BoardId = await addBoard('Task Tracking', '', personalOrgId);
-        const personalListTodo: List = await addList(personalBoardId, 'To do');
-        const personalListDoing: List = await addList(personalBoardId, 'Doing');
-        const personalListDone: List = await addList(personalBoardId, 'Done');
+        const personalBoardId = await addBoard('Task Tracking', '', personalOrgId);
+        const personalListTodo = await addList({ boardId: personalBoardId, name: 'To Do' });
+        const personalListDoing = await addList({ boardId: personalBoardId, name: 'Doing' });
+        const personalListDone = await addList({ boardId: personalBoardId, name: 'Done' });
         await addCard(personalListTodo.id, '🔎 Explore Terrazzo!', undefined, undefined, user.id);
         await addCard(personalListTodo.id, '📃 Add a card to a list', undefined, undefined, user.id);
         await addCard(personalListTodo.id, '🧱 Start my own project', undefined, undefined, user.id);

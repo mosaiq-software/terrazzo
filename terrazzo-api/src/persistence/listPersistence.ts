@@ -27,9 +27,13 @@ export const getListsByBoardIdDb = async (boardId: BoardId) => {
     return models.map((list) => list.toJSON());
 };
 
-export const getListsByBoardIdOrderDb = async (boardId: BoardId, archived: boolean) => {
+export const getListsByBoardIdOrderDb = async (boardId: BoardId, archived?: boolean) => {
+    const query: any = { boardId };
+    if (archived !== undefined) {
+        query.archived = archived;
+    }
     const models = await ListModel.findAll({
-        where: { boardId, archived },
+        where: query,
         order: [['order', 'ASC']],
     });
     return models.map((list) => list.toJSON());
@@ -41,26 +45,13 @@ export const getNextListOrderDb = async (boardId: BoardId) => {
     return list ? list.length : 0;
 };
 
-export const createListOnBoardDb = async (list: ListHeader, boardId: BoardId) => {
-    const model = await ListModel.create({
-        id: list.id,
-        boardId,
-        name: list.name,
-        archived: false,
-        order: list.order,
-    });
+export const createListOnBoardDb = async (list: ListHeader) => {
+    const model = await ListModel.create({ ...list });
     return model.toJSON();
 };
 
-export const updateListDb = async (list: ListHeader) => {
-    const [updated] = await ListModel.update(
-        {
-            name: list.name,
-            archived: list.archived,
-            order: list.order,
-        },
-        { where: { id: list.id } }
-    );
+export const updateListDb = async (id: ListId, update: Partial<ListHeader>) => {
+    const [updated] = await ListModel.update({ ...update }, { where: { id: id } });
     return updated;
 };
 
