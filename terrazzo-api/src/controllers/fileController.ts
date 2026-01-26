@@ -1,4 +1,4 @@
-import { NOT_FOUND_FILE_BASE_64, SYSTEM_USER_ID, UploadedFileId, UserId } from '@mosaiq/terrazzo-common';
+import { SYSTEM_USER_ID, UploadedFileId, UserId } from '@mosaiq/terrazzo-common';
 import { createFileDb, getFileByIdDb } from '@trz-api/persistence/filePersistence';
 import axios from 'axios';
 
@@ -35,9 +35,9 @@ export const saveFileFromUrl = (fileUrl: string): UploadedFileId => {
     try {
         const uid = crypto.randomUUID();
         const handleFileCreation = async () => {
-            let base64: string = NOT_FOUND_FILE_BASE_64;
-            let fileName: string = 'file-not-found';
-            let contentType: string = 'image/png';
+            let base64: string | undefined = undefined;
+            let fileName: string | undefined = undefined;
+            let contentType: string | undefined = undefined;
             try {
                 const response = await axios.get<ArrayBuffer>(fileUrl, { responseType: 'arraybuffer' });
                 const fileBuffer = Buffer.from(response.data);
@@ -49,12 +49,20 @@ export const saveFileFromUrl = (fileUrl: string): UploadedFileId => {
                 if (fileNameMatch && fileNameMatch[1]) {
                     fileName = fileNameMatch[1];
                 }
+                if (!fileName) {
+                    const urlParts = fileUrl.split('/');
+                    fileName = urlParts[urlParts.length - 1] || 'file';
+                }
+                if (!base64 || !fileName || !contentType) {
+                    throw new Error('Missing file data after download');
+                }
             } catch (error) {
                 console.error('Error downloading or saving file from URL:', {
                     fileUrl,
                     uid,
                     error,
                 });
+                return;
             }
             try {
                 await createFileDb({
