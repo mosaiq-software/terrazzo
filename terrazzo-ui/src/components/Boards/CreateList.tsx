@@ -1,5 +1,6 @@
 import { Button, CloseButton, Flex, FocusTrap, Paper, TextInput } from '@mantine/core';
 import { getHotkeyHandler, useClickOutside } from '@mantine/hooks';
+import { MAX_NAME_LENGTH } from '@mosaiq/terrazzo-common';
 import { COLORS } from '@trz/util/colors';
 import React, { useState } from 'react';
 
@@ -20,8 +21,8 @@ const CreateList = (props: CreateListProps): React.JSX.Element => {
             return;
         }
 
-        if (title.length > 50) {
-            setError('Max 50 characters');
+        if (title.length > MAX_NAME_LENGTH) {
+            setError(`Max ${MAX_NAME_LENGTH} characters`);
             return;
         }
         props.onCreateList(title);
@@ -63,6 +64,7 @@ const CreateList = (props: CreateListProps): React.JSX.Element => {
                             onChange={(event) => setTitle(event.currentTarget.value)}
                             error={error}
                             p="5"
+                            maxLength={MAX_NAME_LENGTH}
                         />
                     </FocusTrap>
                     <Flex p="5">

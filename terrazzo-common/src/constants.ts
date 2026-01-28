@@ -32,3 +32,8 @@ export const VIDEO_MIME_TYPES = ['video/mp4', 'video/webm'];
 export const AUDIO_MIME_TYPES = ['audio/mpeg', 'audio/wav', 'audio/ogg'];
 export const FILE_MIME_TYPES = ['application/pdf'];
 export const SUPPORTED_MIME_TYPES = [...IMAGE_MIME_TYPES, ...VIDEO_MIME_TYPES, ...AUDIO_MIME_TYPES, ...FILE_MIME_TYPES];
+
+/**
+ * Max characters allowed in names (e.g., board name, organization name, etc.)
+ */
+export const MAX_NAME_LENGTH = 1000;

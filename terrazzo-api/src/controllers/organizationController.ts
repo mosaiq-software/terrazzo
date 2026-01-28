@@ -1,4 +1,5 @@
 import {
+    MAX_NAME_LENGTH,
     OrganizationHeader,
     OrganizationId,
     PermissionFlag,
@@ -31,8 +32,8 @@ export async function getOrganizationPreview(orgId: OrganizationId) {
 
 export async function addOrganization(organization: Partial<OrganizationHeader> & { name: string; ownerId: UserId }) {
     const name = organization.name?.trim();
-    if (name.length === 0 || name.length > 50) {
-        throw new Error('Name must be 1 - 50 characters');
+    if (name.length === 0 || name.length > MAX_NAME_LENGTH) {
+        throw new Error(`Name must be 1 - ${MAX_NAME_LENGTH} characters`);
     }
 
     // Create the organization record
