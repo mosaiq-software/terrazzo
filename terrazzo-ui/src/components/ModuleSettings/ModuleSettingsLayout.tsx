@@ -1,5 +1,5 @@
 import { Alert, Box, Button, CopyButton, Group, Stack, Switch, Text, TextInput, Tooltip } from '@mantine/core';
-import { ModuleHeader } from '@mosaiq/terrazzo-common';
+import { MAX_NAME_LENGTH, ModuleHeader } from '@mosaiq/terrazzo-common';
 import { COLORS } from '@trz/util/colors';
 import { getModulePublicUrl } from '@trz/util/moduleUtils';
 import { toTitleCase } from '@trz/util/textUtils';
@@ -62,6 +62,7 @@ export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
                 }}
                 onBlur={() => props.onSave({ name: editedTitle })}
                 disabled={props.disabled}
+                maxLength={MAX_NAME_LENGTH}
             />
             {props.children}
             <PermissionsEditor

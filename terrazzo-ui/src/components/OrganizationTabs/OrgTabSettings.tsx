@@ -1,6 +1,6 @@
 import { Box, Button, Divider, Group, Space, Stack, TextInput, Textarea } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { MAX_NAME_LENGTH, MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { removeUserFromOrg, updateOrgField } from '@trz/emitters';
@@ -103,6 +103,7 @@ export const OrgTabSettings = (props: OrgTabSettingsProps) => {
                             change('name', e.target.value);
                         }}
                         disabled={!userCanAdmin}
+                        maxLength={MAX_NAME_LENGTH}
                     />
                     <Textarea
                         label="Organization Description"
