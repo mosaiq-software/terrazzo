@@ -1,0 +1,13 @@
+name: Prod CD
+
+on:
+    push:
+        branches:
+            - deploy
+
+jobs:
+    deploy:
+        name: Deploy to Prod
+        runs-on: ubuntu-latest
+        steps:
+            - run: curl "https://api.nsm.mosaiq.dev/deploy/terrazzo/${{ secrets.NSM_KEY_PROD }}"
