@@ -69,9 +69,13 @@ export const getCardsByDescriptionTextBlockIdDb = async (textBlockId: TextBlockI
     return models.map((card) => card.toJSON());
 };
 
-export const moveCardDb = async (cardId: CardId, toPosition: number, toListId: ListId) => {
+export const moveCardDb = async (cardId: CardId, toPosition: number | undefined, toListId: ListId) => {
     const transaction = await sequelize.transaction();
     try {
+        if (toPosition === undefined) {
+            const cardCount = await CardModel.count({ where: { listId: toListId }, transaction });
+            toPosition = cardCount;
+        }
         const cardModel = await CardModel.findByPk(cardId, { transaction });
         if (!cardModel) {
             throw new Error('Card not found ' + cardId);

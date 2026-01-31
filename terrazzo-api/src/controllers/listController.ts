@@ -80,8 +80,6 @@ export async function updateListFromPartial(listId: ListId, partial: Partial<Lis
     }
 }
 
-//Utils
-
 export async function getBoardIDFromListID(listID: ListId) {
     const updatingList = await getListByIdDb(listID);
 

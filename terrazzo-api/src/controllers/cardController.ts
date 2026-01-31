@@ -12,11 +12,7 @@ import {
     moveCardDb,
     updateCardDb,
 } from '@trz-api/persistence/cardPersistence';
-import {
-    addLabelToCardDb,
-    deleteLabelsOnCardDb,
-    getLabelsOnCardDb,
-} from '@trz-api/persistence/labelAssignmentPersistence';
+import { getLabelsOnCardDb, setLabelsOnCardDb } from '@trz-api/persistence/labelAssignmentPersistence';
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
 import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
@@ -279,10 +275,6 @@ export async function moveCard(cardId: CardId, toListId: ListId, toPosition?: nu
             return;
         }
 
-        if (toPosition === undefined) {
-            toPosition = await getNextCardOrder(toListId);
-        }
-
         await moveCardDb(cardId, toPosition, toListId);
 
         if (!options?.preventSync) {
@@ -313,10 +305,7 @@ interface SetCardsLabelsOptions {
     preventSync?: boolean;
 }
 export const setCardsLabels = async (cardId: CardId, labelIds: LabelId[], options?: SetCardsLabelsOptions) => {
-    await deleteLabelsOnCardDb(cardId);
-    for (const labelId of labelIds) {
-        addLabelToCardDb(labelId, cardId);
-    }
+    await setLabelsOnCardDb(cardId, labelIds);
     if (!options?.preventSync) {
         const boardId = await getBoardIDFromCardID(cardId);
         await syncCardLabels(boardId, cardId, labelIds);
