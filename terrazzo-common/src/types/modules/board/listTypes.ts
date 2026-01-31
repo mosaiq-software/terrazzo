@@ -6,7 +6,7 @@ export interface ListHeader {
     boardId: BoardId;
     name: string;
     archived: boolean;
-    order: number;
+    order: number | null;
 }
 
 export interface List extends ListHeader {

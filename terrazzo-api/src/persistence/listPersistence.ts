@@ -12,7 +12,10 @@ ListModel.init(
         boardId: DataTypes.STRING,
         name: DataTypes.STRING,
         archived: DataTypes.BOOLEAN,
-        order: DataTypes.INTEGER,
+        order: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
     },
     { sequelize, timestamps: false, tableName: 'Lists' }
 );
@@ -67,6 +70,9 @@ export const moveListDb = async (listId: ListId, toPosition: number) => {
         }
         const list = listModel.toJSON();
         const currentPosition = list.order;
+        if (currentPosition === null || currentPosition === undefined) {
+            throw new Error('List order is null ' + listId);
+        }
         const boardId = list.boardId;
         if (toPosition < currentPosition) {
             await ListModel.increment('order', {

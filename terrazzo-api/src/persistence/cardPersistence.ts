@@ -20,7 +20,10 @@ CardModel.init(
         priority: DataTypes.INTEGER,
         storyPoints: DataTypes.INTEGER,
         archived: DataTypes.BOOLEAN,
-        order: DataTypes.INTEGER,
+        order: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
         createdById: DataTypes.STRING,
         createdAt: DataTypes.NUMBER,
     },
@@ -81,6 +84,9 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
         }
         const card = cardModel.toJSON();
         const currentPosition = card.order;
+        if (currentPosition === null || currentPosition === undefined) {
+            throw new Error('Card order is null ' + cardId);
+        }
         const currentListId = card.listId;
         if (toListId === currentListId) {
             // Moving within the same list

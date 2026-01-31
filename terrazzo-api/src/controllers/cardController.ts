@@ -99,6 +99,12 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
         throw new Error('Failed to create description text block');
     }
 
+    const archived = card.archived || false;
+    let order: number | null = null;
+    if (!archived) {
+        order = card.order || (await getCardCountOnListDb(card.listId));
+    }
+
     const cardUid = crypto.randomUUID();
     const newCard: Card = {
         id: cardUid,
@@ -109,8 +115,8 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
         descriptionTextBlockId: descriptionTextBlockId,
         priority: card.priority || null,
         storyPoints: card.storyPoints || null,
-        archived: card.archived || false,
-        order: card.order || (await getCardCountOnListDb(card.listId)),
+        archived: archived,
+        order: order,
         createdAt: card.createdAt || Date.now(),
         createdById: card.createdById || null,
         createdBy: card.createdById ? await getUserHeader(card.createdById) : undefined,
@@ -223,6 +229,9 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
 
 export async function updateCardFromPartial(cardId: CardId, partial: Partial<CardHeader>) {
     try {
+        if (partial.archived) {
+            partial.order = null;
+        }
         await updateCardDb({ id: cardId, ...partial });
     } catch (e: any) {
         throw new Error('Failed to update card ' + e);

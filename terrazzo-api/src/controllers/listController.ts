@@ -1,4 +1,4 @@
-import { BoardId, CardId, ListHeader, ListId, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
+import { BoardId, CardId, ListHeader, ListId } from '@mosaiq/terrazzo-common';
 import { syncAddList, syncMoveList, syncUpdateListField } from '@trz-api/broadcasters';
 import { getCardIdsOnList } from '@trz-api/controllers/cardController';
 import {
@@ -48,12 +48,17 @@ interface AddListOptions {
 }
 export async function addList(list: Partial<ListHeader> & { boardId: BoardId }, options?: AddListOptions) {
     try {
+        const archived = list.archived || false;
+        let order: number | null = null;
+        if (!archived) {
+            order = list.order ?? (await getActiveListCountOnBoard(list.boardId));
+        }
         const newList: ListHeader = {
             id: crypto.randomUUID(),
             boardId: list.boardId,
             name: list.name || '',
-            archived: list.archived || false,
-            order: await getActiveListCountOnBoard(list.boardId),
+            archived: archived,
+            order: order,
         };
         await createListOnBoardDb(newList);
         if (!options?.preventSync) {
@@ -66,17 +71,22 @@ export async function addList(list: Partial<ListHeader> & { boardId: BoardId }, 
 }
 
 export async function updateListFromPartial(listId: ListId, partial: Partial<ListHeader>) {
-    const updatingList = await getListByIdDb(listId);
-    if (updatingList == null) {
-        throw new Error('List not found');
-    }
-
-    const updated = updateBaseFromPartial(updatingList, partial);
     try {
-        await updateListDb(updated.id, updated);
-        await syncUpdateListField(updated.id, partial, updated.boardId);
+        if (partial.archived) {
+            partial.order = null;
+        }
+        await updateListDb(listId, partial);
     } catch (e: any) {
         throw new Error('Failed to update list ' + e);
+    }
+    try {
+        const updated = await getListByIdDb(listId);
+        if (!updated) {
+            throw new Error('List not found after update ' + listId);
+        }
+        await syncUpdateListField(updated.id, partial, updated.boardId);
+    } catch (e: any) {
+        throw new Error('Failed to sync updated list ' + e);
     }
 }
 

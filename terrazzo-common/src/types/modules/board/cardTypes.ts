@@ -11,7 +11,7 @@ export interface CardHeader {
     priority: Priority | null;
     storyPoints: StoryPoints | null;
     archived: boolean;
-    order: number;
+    order: number | null;
     descriptionTextBlockId: TextBlockId;
     createdAt: number;
     createdById: UserId | null;
