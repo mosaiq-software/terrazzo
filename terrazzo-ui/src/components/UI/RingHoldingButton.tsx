@@ -66,7 +66,11 @@ export const RingHoldingButton = (props: RingHoldingButtonProps) => {
                 onMouseUp={release}
                 onMouseLeave={release}
                 onMouseDown={down}
-                onClick={(e) => e.preventDefault()}
+                onClick={(e) => {
+                    if (e.shiftKey) {
+                        onComplete();
+                    }          
+                }}
                 disabled={props.disabled}
             >
                 <RingProgress
