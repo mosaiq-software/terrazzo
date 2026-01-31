@@ -39,12 +39,7 @@ export const getActiveListsByBoardIdOrderDb = async (boardId: BoardId) => {
 };
 
 export const getActiveListCountOnBoard = async (boardId: BoardId) => {
-    const models = await ListModel.findAll({
-        where: { boardId, archived: false },
-        order: [['order', 'DESC']],
-    });
-    const lists = models.map((list) => list.toJSON());
-    return lists.length;
+    return await ListModel.count({ where: { boardId, archived: false } });
 };
 
 export const createListOnBoardDb = async (list: ListHeader) => {

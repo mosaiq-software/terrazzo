@@ -18,9 +18,9 @@ import {
 import { getApiUrl } from '@trz-api/utils/envUtils';
 import { extractMarkdownImagesFromText, replaceAllOccurrences } from '@trz-api/utils/textUtils';
 import { addAssigneeToCard } from '../cardAssignmentController';
-import { addCard, moveCard, setCardsLabels } from '../cardController';
+import { addCard, setCardsLabels } from '../cardController';
 import { saveFileFromUrl } from '../fileController';
-import { addList, moveList } from '../listController';
+import { addList } from '../listController';
 import {
     getBlocknoteChecklistBlock,
     getBlocknoteMediaBlock,
@@ -67,7 +67,6 @@ const createLists = async (trzBoardId: BoardId, trelloLists: TrelloListType[]) =
     const listMap: { [trl: string]: ListId } = {};
     for (const trelloList of trelloLists) {
         const trelloListName = trelloList.name;
-        const trelloListOrder = trelloList.pos;
 
         const trzList = await addList(
             {
@@ -79,7 +78,6 @@ const createLists = async (trzBoardId: BoardId, trelloLists: TrelloListType[]) =
                 preventSync: true,
             }
         );
-        await moveList(trzList.id, trelloListOrder, trzBoardId, { preventSync: true });
         listMap[trelloList.id] = trzList.id;
     }
     return listMap;
@@ -168,7 +166,6 @@ const createCard = async (
             descriptionBlocks: allBlocks,
         }
     );
-    await moveCard(trzCard.id, trzListId, trelloCard.pos, { preventSync: true });
     const trzLabelIds = trelloCard.idLabels.map((trlLabelId) => labelMap[trlLabelId]);
     await setCardsLabels(trzCard.id, trzLabelIds, { preventSync: true });
     await processCardAssignments(trelloCard, userMap, trzCard.id);
