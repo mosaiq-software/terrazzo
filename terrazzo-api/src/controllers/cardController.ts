@@ -16,7 +16,6 @@ import { getLabelsOnCardDb, setLabelsOnCardDb } from '@trz-api/persistence/label
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
 import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
-import { getUserHeader } from './userController';
 
 export const MOVING_LIST_ORDER = -10000;
 //Gets
@@ -35,7 +34,7 @@ export async function getAllCardsOfList(listID: ListId, archived: boolean) {
         return [];
     }
 
-    cardHeaders = cardHeaders.filter((c) => !c.archived);
+    cardHeaders = cardHeaders.filter((c) => c.order != null);
 
     const cards = await populateCards(cardHeaders);
 
@@ -119,7 +118,6 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
         order: order,
         createdAt: card.createdAt || Date.now(),
         createdById: card.createdById || null,
-        createdBy: card.createdById ? await getUserHeader(card.createdById) : undefined,
         assignees: [],
         labels: [],
     };
@@ -194,7 +192,6 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         order: await getCardCountOnListDb(list.id),
         createdAt: Date.now(),
         createdById: createdById ?? null,
-        createdBy: createdById ? await getUserHeader(createdById) : undefined,
     };
 
     try {
@@ -298,7 +295,6 @@ export const populateCards = async (cardHeaders: CardHeader[]): Promise<Card[]> 
                 ...c,
                 assignees: await getCardAssignmentsForCardDb(c.id),
                 labels: await getLabelsOnCardDb(c.id),
-                createdBy: c.createdById ? await getUserHeader(c.createdById) : undefined,
             };
             return cc;
         })

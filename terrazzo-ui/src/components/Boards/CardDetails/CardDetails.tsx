@@ -22,6 +22,7 @@ import { useUserContext } from '@trz/contexts/user-context';
 import { updateCardAssignee, updateCardField } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
+import { useUser } from '@trz/hooks/useUser';
 import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';
 import { COLORS } from '@trz/util/colors';
@@ -50,6 +51,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
     useCatchSaveKey();
     const boardMeta = useBoardMetadata();
     const perms = boardMeta?.permissions;
+    const createdByUser = useUser(card?.createdById ?? undefined);
 
     const onCloseModal = () => {
         props.onClose();
@@ -263,7 +265,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                 c={COLORS.text.secondary}
                                 fz="sm"
                             >
-                                Created at {niceDateWithTime(card.createdAt)} by {fullName(card.createdBy)}
+                                Created at {niceDateWithTime(card.createdAt)} by {fullName(createdByUser)}
                             </Text>
                             {perms?.editCard && (
                                 <RectHoldingButton

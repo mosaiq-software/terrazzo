@@ -1,6 +1,5 @@
 import { Priority, StoryPoints } from '../../../constants';
 import { AssignmentId, BoardId, CardId, LabelId, ListId, TextBlockId, UserId } from '../../genericTypes';
-import { UserHeader } from '../../userTypes';
 
 export interface CardHeader {
     id: CardId;
@@ -20,7 +19,6 @@ export interface CardHeader {
 export interface Card extends CardHeader {
     labels: LabelId[];
     assignees: UserId[];
-    createdBy: UserHeader | undefined;
 }
 
 export interface CardAssignment {
