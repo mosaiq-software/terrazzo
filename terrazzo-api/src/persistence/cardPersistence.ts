@@ -89,6 +89,7 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
                     by: 1,
                     where: {
                         listId: currentListId,
+                        archived: false,
                         order: {
                             [Op.gt]: toPosition - 1,
                             [Op.lte]: currentPosition,
@@ -101,6 +102,7 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
                     by: 1,
                     where: {
                         listId: currentListId,
+                        archived: false,
                         order: {
                             [Op.gt]: currentPosition,
                             [Op.lte]: toPosition,
@@ -115,6 +117,7 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
                 by: 1,
                 where: {
                     listId: currentListId,
+                    archived: false,
                     order: {
                         [Op.gt]: currentPosition,
                     },
@@ -125,6 +128,7 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
                 by: 1,
                 where: {
                     listId: toListId,
+                    archived: false,
                     order: {
                         [Op.gt]: toPosition - 1,
                     },

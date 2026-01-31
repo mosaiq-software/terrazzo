@@ -73,6 +73,7 @@ export const moveListDb = async (listId: ListId, toPosition: number) => {
                 by: 1,
                 where: {
                     boardId,
+                    archived: false,
                     order: {
                         [Op.gt]: toPosition - 1,
                         [Op.lte]: currentPosition,
@@ -85,6 +86,7 @@ export const moveListDb = async (listId: ListId, toPosition: number) => {
                 by: 1,
                 where: {
                     boardId,
+                    archived: false,
                     order: {
                         [Op.gt]: currentPosition,
                         [Op.lte]: toPosition,
@@ -92,13 +94,6 @@ export const moveListDb = async (listId: ListId, toPosition: number) => {
                 },
                 transaction,
             });
-        } else {
-            console.warn('List moved to its own position', {
-                onBoardId: boardId,
-                listID: listId,
-                currentPosition,
-            });
-            return;
         }
 
         await ListModel.update({ order: toPosition }, { where: { id: listId }, transaction });
