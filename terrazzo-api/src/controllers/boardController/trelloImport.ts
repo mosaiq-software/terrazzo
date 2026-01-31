@@ -18,7 +18,7 @@ import {
 import { getApiUrl } from '@trz-api/utils/envUtils';
 import { extractMarkdownImagesFromText, replaceAllOccurrences } from '@trz-api/utils/textUtils';
 import { addAssigneeToCard } from '../cardAssignmentController';
-import { addCard, moveCardToList, setCardsLabels } from '../cardController';
+import { addCard, moveCard, setCardsLabels } from '../cardController';
 import { saveFileFromUrl } from '../fileController';
 import { addList, moveList } from '../listController';
 import {
@@ -168,7 +168,7 @@ const createCard = async (
             descriptionBlocks: allBlocks,
         }
     );
-    await moveCardToList(trzCard.id, trzListId, trelloCard.pos, { preventSync: true });
+    await moveCard(trzCard.id, trzListId, trelloCard.pos, { preventSync: true });
     const trzLabelIds = trelloCard.idLabels.map((trlLabelId) => labelMap[trlLabelId]);
     await setCardsLabels(trzCard.id, trzLabelIds, { preventSync: true });
     await processCardAssignments(trelloCard, userMap, trzCard.id);

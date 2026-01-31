@@ -1,6 +1,6 @@
 import { BoardId, CardHeader, CardId, ListId, TextBlockId } from '@mosaiq/terrazzo-common';
 import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
+import { DataTypes, Model, Op } from 'sequelize';
 
 class CardModel extends Model<CardHeader> {}
 CardModel.init(
@@ -60,7 +60,7 @@ export const updateCardDb = async (card: Partial<CardHeader>) => {
 };
 
 export const getCardsByListIdDownDb = async (listId: ListId) => {
-    const models = await CardModel.findAll({ where: { listId }, order: [['order', 'DESC']] });
+    const models = await CardModel.findAll({ where: { listId, archived: false }, order: [['order', 'DESC']] });
     return models.map((card) => card.toJSON());
 };
 
@@ -69,12 +69,70 @@ export const getCardsByDescriptionTextBlockIdDb = async (textBlockId: TextBlockI
     return models.map((card) => card.toJSON());
 };
 
-export const updateCardListDb = async (cardId: CardId, listId: ListId) => {
-    const [updated] = await CardModel.update({ listId }, { where: { id: cardId } });
-    return updated;
-};
-
-export const updateCardOrderDb = async (cardId: CardId, order: number) => {
-    const [updated] = await CardModel.update({ order }, { where: { id: cardId } });
-    return updated;
+export const moveCardDb = async (cardId: CardId, toPosition: number, toListId: ListId) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const cardModel = await CardModel.findByPk(cardId, { transaction });
+        if (!cardModel) {
+            throw new Error('Card not found ' + cardId);
+        }
+        const card = cardModel.toJSON();
+        const currentPosition = card.order;
+        const currentListId = card.listId;
+        if (toListId === currentListId) {
+            // Moving within the same list
+            if (toPosition < currentPosition) {
+                await CardModel.increment('order', {
+                    by: 1,
+                    where: {
+                        listId: currentListId,
+                        order: {
+                            [Op.gt]: toPosition - 1,
+                            [Op.lte]: currentPosition,
+                        },
+                    },
+                    transaction,
+                });
+            } else if (toPosition > currentPosition) {
+                await CardModel.decrement('order', {
+                    by: 1,
+                    where: {
+                        listId: currentListId,
+                        order: {
+                            [Op.gt]: currentPosition,
+                            [Op.lte]: toPosition,
+                        },
+                    },
+                    transaction,
+                });
+            }
+        } else {
+            // Moving to a different list
+            await CardModel.decrement('order', {
+                by: 1,
+                where: {
+                    listId: currentListId,
+                    order: {
+                        [Op.gt]: currentPosition,
+                    },
+                },
+                transaction,
+            });
+            await CardModel.increment('order', {
+                by: 1,
+                where: {
+                    listId: toListId,
+                    order: {
+                        [Op.gt]: toPosition - 1,
+                    },
+                },
+                transaction,
+            });
+        }
+        await CardModel.update({ order: toPosition, listId: toListId }, { where: { id: cardId }, transaction });
+        await transaction.commit();
+    } catch (e) {
+        await transaction.rollback();
+        throw e;
+    }
 };

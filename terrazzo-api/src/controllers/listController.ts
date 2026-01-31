@@ -1,53 +1,17 @@
-import { arrayMove, BoardId, CardId, List, ListHeader, ListId, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
+import { BoardId, CardId, ListHeader, ListId, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import { syncAddList, syncMoveList, syncUpdateListField } from '@trz-api/broadcasters';
-import { getAllCardsOfList, getCardIdsOnList } from '@trz-api/controllers/cardController';
+import { getCardIdsOnList } from '@trz-api/controllers/cardController';
 import {
     createListOnBoardDb,
+    getActiveListCountOnBoard,
+    getActiveListsByBoardIdOrderDb,
     getListByIdDb,
-    getListsByBoardIdOrderDb,
-    getNextListOrderDb,
+    moveListDb,
     updateListDb,
-    updateListOrderDb,
 } from '@trz-api/persistence/listPersistence';
 
-//Gets
-
-/**
- * Gets all lists of a board by board ID
- * Returns a promise of all lists with all their cards
- * @param boardID
- * @param archived
- */
-export async function getAllListsOfBoard(boardID: BoardId, archived: boolean) {
-    let listHeaders = await getListsByBoardIdOrderDb(boardID, archived);
-
-    if (listHeaders == null) {
-        return [];
-    }
-
-    listHeaders = listHeaders.filter((l) => !l.archived);
-
-    const lists: List[] = await Promise.all(
-        listHeaders.map(async (l) => {
-            return {
-                ...l,
-                cards: await getAllCardsOfList(l.id, false),
-            };
-        })
-    );
-
-    try {
-        return lists;
-    } catch (e) {
-        throw new Error('Failed to retrieve board' + e);
-    }
-}
-
-export async function getListAndCardIdsOnBoard(
-    boardID: BoardId,
-    archived: boolean
-): Promise<{ listId: ListId; cardIds: CardId[] }[]> {
-    const listHeaders = await getListsByBoardIdOrderDb(boardID, archived);
+export async function getListAndCardIdsOnBoard(boardID: BoardId): Promise<{ listId: ListId; cardIds: CardId[] }[]> {
+    const listHeaders = await getActiveListsByBoardIdOrderDb(boardID);
     if (listHeaders == null) {
         return [];
     }
@@ -89,7 +53,7 @@ export async function addList(list: Partial<ListHeader> & { boardId: BoardId }, 
             boardId: list.boardId,
             name: list.name || '',
             archived: list.archived || false,
-            order: await getNextListOrderDb(list.boardId),
+            order: await getActiveListCountOnBoard(list.boardId),
         };
         await createListOnBoardDb(newList);
         if (!options?.preventSync) {
@@ -131,17 +95,11 @@ export async function getBoardIDFromListID(listID: ListId) {
 interface MoveListOptions {
     preventSync?: boolean;
 }
-export async function moveList(listID: ListId, toPosition: number, onBoardId: BoardId, options?: MoveListOptions) {
+export async function moveList(listId: ListId, toPosition: number, onBoardId: BoardId, options?: MoveListOptions) {
     try {
-        const lists = await getListsByBoardIdOrderDb(onBoardId);
-        const index = lists.findIndex((l) => l.id === listID);
-        if (index === -1) {
-            throw new Error('List not found in board');
-        }
-        const movedLists = arrayMove(lists, index, toPosition);
-        await updateListOrderDb(movedLists);
+        await moveListDb(listId, toPosition);
         if (!options?.preventSync) {
-            await syncMoveList(listID, toPosition, onBoardId);
+            await syncMoveList(listId, toPosition, onBoardId);
         }
     } catch (error: any) {
         console.error(error);
