@@ -59,9 +59,8 @@ export const updateCardDb = async (card: Partial<CardHeader>) => {
     return updated;
 };
 
-export const getCardsByListIdDownDb = async (listId: ListId) => {
-    const models = await CardModel.findAll({ where: { listId, archived: false }, order: [['order', 'DESC']] });
-    return models.map((card) => card.toJSON());
+export const getCardCountOnListDb = async (listId: ListId) => {
+    return await CardModel.count({ where: { listId, archived: false } });
 };
 
 export const getCardsByDescriptionTextBlockIdDb = async (textBlockId: TextBlockId) => {
@@ -73,7 +72,7 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
     const transaction = await sequelize.transaction();
     try {
         if (toPosition === undefined) {
-            const cardCount = await CardModel.count({ where: { listId: toListId }, transaction });
+            const cardCount = await CardModel.count({ where: { listId: toListId, archived: false }, transaction });
             toPosition = cardCount;
         }
         const cardModel = await CardModel.findByPk(cardId, { transaction });

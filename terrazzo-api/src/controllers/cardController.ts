@@ -7,7 +7,7 @@ import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignment
 import {
     createCardOnListDb,
     getCardByIdDb,
-    getCardsByListIdDownDb,
+    getCardCountOnListDb,
     getCardsByListIdShortUpDb,
     moveCardDb,
     updateCardDb,
@@ -110,7 +110,7 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
         priority: card.priority || null,
         storyPoints: card.storyPoints || null,
         archived: card.archived || false,
-        order: card.order || (await getNextCardOrder(card.listId)),
+        order: card.order || (await getCardCountOnListDb(card.listId)),
         createdAt: card.createdAt || Date.now(),
         createdById: card.createdById || null,
         createdBy: card.createdById ? await getUserHeader(card.createdById) : undefined,
@@ -185,7 +185,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         assignees: existingCard.assignees,
         labels: existingCard.labels,
         archived: existingCard.archived,
-        order: await getNextCardOrder(list.id),
+        order: await getCardCountOnListDb(list.id),
         createdAt: Date.now(),
         createdById: createdById ?? null,
         createdBy: createdById ? await getUserHeader(createdById) : undefined,
@@ -237,11 +237,6 @@ export async function updateCardFromPartial(cardId: CardId, partial: Partial<Car
         throw new Error('Failed to sync updated card ' + e);
     }
 }
-
-export const getNextCardOrder = async (listId: ListId) => {
-    const cards = await getCardsByListIdDownDb(listId);
-    return cards.length;
-};
 
 export async function getListIDFromCardID(cardID: CardId) {
     const card = await getCardByIdDb(cardID);
