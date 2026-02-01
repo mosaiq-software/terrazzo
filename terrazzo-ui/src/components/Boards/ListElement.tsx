@@ -116,7 +116,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
     }
 
     async function onArchive() {
-        await updateListField(sockCtx, props.listId, { archived: true, order: -1 });
+        await updateListField(sockCtx, props.listId, { order: null });
     }
 
     function onBlur() {

@@ -11,7 +11,6 @@ ListModel.init(
         },
         boardId: DataTypes.STRING,
         name: DataTypes.STRING,
-        archived: DataTypes.BOOLEAN,
         order: {
             type: DataTypes.INTEGER,
             allowNull: true,
@@ -34,7 +33,9 @@ export const getActiveListsByBoardIdOrderDb = async (boardId: BoardId) => {
     const models = await ListModel.findAll({
         where: {
             boardId,
-            archived: false,
+            order: {
+                [Op.not]: null,
+            },
         },
         order: [['order', 'ASC']],
     });
@@ -42,7 +43,7 @@ export const getActiveListsByBoardIdOrderDb = async (boardId: BoardId) => {
 };
 
 export const getActiveListCountOnBoard = async (boardId: BoardId) => {
-    return await ListModel.count({ where: { boardId, archived: false } });
+    return await ListModel.count({ where: { boardId, order: { [Op.not]: null } } });
 };
 
 export const createListOnBoardDb = async (list: ListHeader) => {
@@ -79,8 +80,8 @@ export const moveListDb = async (listId: ListId, toPosition: number) => {
                 by: 1,
                 where: {
                     boardId,
-                    archived: false,
                     order: {
+                        [Op.not]: null,
                         [Op.gt]: toPosition - 1,
                         [Op.lte]: currentPosition,
                     },
@@ -92,8 +93,8 @@ export const moveListDb = async (listId: ListId, toPosition: number) => {
                 by: 1,
                 where: {
                     boardId,
-                    archived: false,
                     order: {
+                        [Op.not]: null,
                         [Op.gt]: currentPosition,
                         [Op.lte]: toPosition,
                     },

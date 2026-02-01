@@ -249,7 +249,7 @@ const BoardPage = (): React.JSX.Element => {
             if (!listToCardsMap.has(payload.id)) {
                 return;
             }
-            if (payload.archived) {
+            if (payload.order === null) {
                 listToCardsMap.delete(payload.id);
             }
         },
@@ -262,7 +262,7 @@ const BoardPage = (): React.JSX.Element => {
             if (!cardToListMap.has(payload.id)) {
                 return;
             }
-            if (!payload.archived) {
+            if (payload.order !== null) {
                 return;
             }
             const listId = cardToListMap.get(payload.id);

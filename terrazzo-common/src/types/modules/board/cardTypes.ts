@@ -1,4 +1,4 @@
-import { Priority, StoryPoints } from '../../../constants';
+import { Priority } from '../../../constants';
 import { AssignmentId, BoardId, CardId, LabelId, ListId, TextBlockId, UserId } from '../../genericTypes';
 
 export interface CardHeader {
@@ -8,8 +8,6 @@ export interface CardHeader {
     cardNumber: number;
     name: string;
     priority: Priority | null;
-    storyPoints: StoryPoints | null;
-    archived: boolean;
     order: number | null;
     descriptionTextBlockId: TextBlockId;
     createdAt: number;

@@ -5,7 +5,6 @@ export interface ListHeader {
     id: ListId;
     boardId: BoardId;
     name: string;
-    archived: boolean;
     order: number | null;
 }
 

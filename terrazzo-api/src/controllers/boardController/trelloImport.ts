@@ -72,7 +72,7 @@ const createLists = async (trzBoardId: BoardId, trelloLists: TrelloListType[]) =
             {
                 boardId: trzBoardId,
                 name: trelloListName,
-                archived: trelloList.closed,
+                order: trelloList.closed ? null : undefined,
             },
             {
                 preventSync: true,
@@ -156,7 +156,7 @@ const createCard = async (
         {
             listId: trzListId,
             name: trelloCard.name,
-            archived: trelloCard.closed,
+            order: trelloCard.closed ? null : undefined,
             createdById: trzCreatorId,
             createdAt: createdAt,
             cardNumber: trelloCard.idShort,

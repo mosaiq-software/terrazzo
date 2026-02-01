@@ -18,7 +18,7 @@
         "types:common": "cd terrazzo-common && npm run types",
         "common:prod": "concurrently \"cd terrazzo-api && npm run common:prod\" \"cd terrazzo-ui && npm run common:prod\"",
         "common:dev": "concurrently \"cd terrazzo-api && npm run common:dev\" \"cd terrazzo-ui && npm run common:dev\"",
-        "postinstall": "cd terrazzo-common && npm i && cd .. && concurrently \"cd terrazzo-api && npm i\" \"cd terrazzo-ui && npm i\"",
+        "postinstall": "concurrently \"cd terrazzo-common && npm i\" \"cd terrazzo-db && npm i\" \"cd terrazzo-api && npm i\" \"cd terrazzo-ui && npm i\"",
         "prepare": "husky",
         "before-push": "node ./scripts/before-push.mjs",
         "test:api": "cd terrazzo-api && npm run test",

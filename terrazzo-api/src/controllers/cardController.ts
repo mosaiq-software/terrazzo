@@ -6,9 +6,9 @@ import { getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersist
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
 import {
     createCardOnListDb,
+    getActiveCardsByListIdUpDb,
     getCardByIdDb,
     getCardCountOnListDb,
-    getCardsByListIdShortUpDb,
     moveCardDb,
     updateCardDb,
 } from '@trz-api/persistence/cardPersistence';
@@ -18,35 +18,9 @@ import { addAssigneeToCard } from './cardAssignmentController';
 import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
 
 export const MOVING_LIST_ORDER = -10000;
-//Gets
 
-/**
- * Gets all cards of a list by list ID
- * All cards are returned with all their labels, checklists, comments, and timesheet entries
- * Returns a promise of all cards in the list
- * @param listID
- * @param archived
- */
-export async function getAllCardsOfList(listID: ListId, archived: boolean) {
-    let cardHeaders = await getCardsByListIdShortUpDb(listID, archived);
-
-    if (cardHeaders == null) {
-        return [];
-    }
-
-    cardHeaders = cardHeaders.filter((c) => c.order != null);
-
-    const cards = await populateCards(cardHeaders);
-
-    try {
-        return cards;
-    } catch (e) {
-        throw new Error('Failed to retrieve board' + e);
-    }
-}
-
-export async function getCardIdsOnList(listID: ListId, archived: boolean): Promise<CardId[]> {
-    const cardHeaders = await getCardsByListIdShortUpDb(listID, archived);
+export async function getCardIdsOnList(listID: ListId): Promise<CardId[]> {
+    const cardHeaders = await getActiveCardsByListIdUpDb(listID);
     if (cardHeaders == null) {
         return [];
     }
@@ -98,12 +72,6 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
         throw new Error('Failed to create description text block');
     }
 
-    const archived = card.archived || false;
-    let order: number | null = null;
-    if (!archived) {
-        order = card.order || (await getCardCountOnListDb(card.listId));
-    }
-
     const cardUid = crypto.randomUUID();
     const newCard: Card = {
         id: cardUid,
@@ -113,9 +81,7 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
         name: card.name || '',
         descriptionTextBlockId: descriptionTextBlockId,
         priority: card.priority || null,
-        storyPoints: card.storyPoints || null,
-        archived: archived,
-        order: order,
+        order: card.order ?? (await getCardCountOnListDb(card.listId)),
         createdAt: card.createdAt || Date.now(),
         createdById: card.createdById || null,
         assignees: [],
@@ -185,10 +151,8 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         name: existingCard.name + ' (Copy)',
         descriptionTextBlockId: descriptionTextBlockId,
         priority: existingCard.priority,
-        storyPoints: existingCard.storyPoints,
         assignees: existingCard.assignees,
         labels: existingCard.labels,
-        archived: existingCard.archived,
         order: await getCardCountOnListDb(list.id),
         createdAt: Date.now(),
         createdById: createdById ?? null,
@@ -226,9 +190,6 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
 
 export async function updateCardFromPartial(cardId: CardId, partial: Partial<CardHeader>) {
     try {
-        if (partial.archived) {
-            partial.order = null;
-        }
         await updateCardDb({ id: cardId, ...partial });
     } catch (e: any) {
         throw new Error('Failed to update card ' + e);
@@ -272,7 +233,7 @@ export async function moveCard(cardId: CardId, toListId: ListId, toPosition?: nu
         if (!card) {
             throw new Error(`Card ${cardId} not found`);
         }
-        if (card.archived) {
+        if (card.order === null) {
             return;
         }
 

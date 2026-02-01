@@ -18,8 +18,6 @@ CardModel.init(
         name: DataTypes.STRING,
         descriptionTextBlockId: DataTypes.STRING,
         priority: DataTypes.INTEGER,
-        storyPoints: DataTypes.INTEGER,
-        archived: DataTypes.BOOLEAN,
         order: {
             type: DataTypes.INTEGER,
             allowNull: true,
@@ -35,20 +33,16 @@ export const getCardByIdDb = async (id: CardId) => {
     return model?.toJSON();
 };
 
-export const getCardsByListIdShortUpDb = async (listId: ListId, archived?: boolean) => {
-    const query: { listId: ListId; archived?: boolean } = { listId };
-    if (archived !== undefined) {
-        query.archived = archived;
-    }
+export const getActiveCardsByListIdUpDb = async (listId: ListId) => {
     const models = await CardModel.findAll({
-        where: query,
+        where: { listId, order: { [Op.not]: null } },
         order: [['order', 'ASC']],
     });
     return models.map((card) => card.toJSON());
 };
 
-export const getCardsByBoardIdDb = async (boardId: BoardId, options: Partial<CardHeader>) => {
-    const models = await CardModel.findAll({ where: { boardId, ...options } });
+export const getActiveCardsByBoardIdDb = async (boardId: BoardId) => {
+    const models = await CardModel.findAll({ where: { boardId, order: { [Op.not]: null } } });
     return models.map((card) => card.toJSON());
 };
 
@@ -63,7 +57,7 @@ export const updateCardDb = async (card: Partial<CardHeader>) => {
 };
 
 export const getCardCountOnListDb = async (listId: ListId) => {
-    return await CardModel.count({ where: { listId, archived: false } });
+    return await CardModel.count({ where: { listId, order: { [Op.not]: null } } });
 };
 
 export const getCardsByDescriptionTextBlockIdDb = async (textBlockId: TextBlockId) => {
@@ -75,7 +69,10 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
     const transaction = await sequelize.transaction();
     try {
         if (toPosition === undefined) {
-            const cardCount = await CardModel.count({ where: { listId: toListId, archived: false }, transaction });
+            const cardCount = await CardModel.count({
+                where: { listId: toListId, order: { [Op.not]: null } },
+                transaction,
+            });
             toPosition = cardCount;
         }
         const cardModel = await CardModel.findByPk(cardId, { transaction });
@@ -95,8 +92,8 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
                     by: 1,
                     where: {
                         listId: currentListId,
-                        archived: false,
                         order: {
+                            [Op.not]: null,
                             [Op.gt]: toPosition - 1,
                             [Op.lte]: currentPosition,
                         },
@@ -108,8 +105,8 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
                     by: 1,
                     where: {
                         listId: currentListId,
-                        archived: false,
                         order: {
+                            [Op.not]: null,
                             [Op.gt]: currentPosition,
                             [Op.lte]: toPosition,
                         },
@@ -123,8 +120,8 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
                 by: 1,
                 where: {
                     listId: currentListId,
-                    archived: false,
                     order: {
+                        [Op.not]: null,
                         [Op.gt]: currentPosition,
                     },
                 },
@@ -134,8 +131,8 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
                 by: 1,
                 where: {
                     listId: toListId,
-                    archived: false,
                     order: {
+                        [Op.not]: null,
                         [Op.gt]: toPosition - 1,
                     },
                 },

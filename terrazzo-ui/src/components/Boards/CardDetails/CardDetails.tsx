@@ -76,9 +76,9 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
             return;
         }
         if (archive) {
-            await updateCardField(sockCtx, card.id, { archived: archive, order: -1 });
+            await updateCardField(sockCtx, card.id, { order: null });
         } else {
-            await updateCardField(sockCtx, card.id, { archived: archive, order: 0 });
+            await updateCardField(sockCtx, card.id, { order: 0 });
         }
         onCloseModal(); //this wont run ever due to sockCtx.boardData being updated
     }
@@ -140,7 +140,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                 w="100%"
                                 gap="xs"
                             >
-                                {card.archived && (
+                                {card.order === null && (
                                     <Box
                                         bg={COLORS.semantic.warning}
                                         p="sm"
@@ -275,10 +275,10 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                                     height="40px"
                                     variant="outline"
                                     borderColor={COLORS.semantic.error}
-                                    onClick={() => onArchiveCard(!card.archived)}
+                                    onClick={() => onArchiveCard(card.order !== null)}
                                     leftSection={<FaArchive />}
                                 >
-                                    {card.archived ? 'Unarchive' : 'Archive'}
+                                    {card.order === null ? 'Unarchive' : 'Archive'}
                                 </RectHoldingButton>
                             )}
                         </Stack>

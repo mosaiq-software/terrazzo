@@ -164,11 +164,11 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
                         notify(NoteType.CARD_UPDATE_ERROR);
                         return;
                     }
-                    const archive = !card.archived;
+                    const archive = card.order !== null;
                     if (archive) {
-                        await updateCardField(sockCtx, card.id, { archived: archive, order: -1 });
+                        await updateCardField(sockCtx, card.id, { order: null });
                     } else {
-                        await updateCardField(sockCtx, card.id, { archived: archive, order: 0 });
+                        await updateCardField(sockCtx, card.id, { order: 0 });
                     }
                     props.onClose();
                 }}

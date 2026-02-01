@@ -19,7 +19,7 @@ export async function getListAndCardIdsOnBoard(boardID: BoardId): Promise<{ list
     for (const li of listHeaders) {
         const r = {
             listId: li.id,
-            cardIds: await getCardIdsOnList(li.id, false),
+            cardIds: await getCardIdsOnList(li.id),
         };
         res.push(r);
     }
@@ -48,17 +48,11 @@ interface AddListOptions {
 }
 export async function addList(list: Partial<ListHeader> & { boardId: BoardId }, options?: AddListOptions) {
     try {
-        const archived = list.archived || false;
-        let order: number | null = null;
-        if (!archived) {
-            order = list.order ?? (await getActiveListCountOnBoard(list.boardId));
-        }
         const newList: ListHeader = {
             id: crypto.randomUUID(),
             boardId: list.boardId,
             name: list.name || '',
-            archived: archived,
-            order: order,
+            order: list.order ?? (await getActiveListCountOnBoard(list.boardId)),
         };
         await createListOnBoardDb(newList);
         if (!options?.preventSync) {
@@ -72,9 +66,6 @@ export async function addList(list: Partial<ListHeader> & { boardId: BoardId }, 
 
 export async function updateListFromPartial(listId: ListId, partial: Partial<ListHeader>) {
     try {
-        if (partial.archived) {
-            partial.order = null;
-        }
         await updateListDb(listId, partial);
     } catch (e: any) {
         throw new Error('Failed to update list ' + e);
