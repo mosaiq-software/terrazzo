@@ -78,7 +78,6 @@ const createLists = async (trzBoardId: BoardId, trelloLists: TrelloListType[]) =
     const sortedLists = [...trelloLists].sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0));
     for (const [index, trelloList] of sortedLists.entries()) {
         const trelloListName = trelloList.name;
-        console.log(`Creating list: ${trelloListName} closed=${trelloList.closed}`);
         const trzList = await addList(
             {
                 boardId: trzBoardId,
