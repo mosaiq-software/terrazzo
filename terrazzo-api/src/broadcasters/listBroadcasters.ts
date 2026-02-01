@@ -39,7 +39,7 @@ export const syncUpdateListField = async (listId: ListId, updates: any, boardId:
     }
 };
 
-export const syncMoveList = async (listId: ListId, position: number, boardId: BoardId) => {
+export const syncMoveList = async (listId: ListId, position: number | null, boardId: BoardId) => {
     try {
         broadcast({
             event: ServerSE.MOVE_LIST,

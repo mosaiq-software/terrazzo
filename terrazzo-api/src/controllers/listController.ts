@@ -66,6 +66,10 @@ export async function addList(list: Partial<ListHeader> & { boardId: BoardId }, 
 
 export async function updateListFromPartial(listId: ListId, partial: Partial<ListHeader>) {
     try {
+        if (partial.order !== undefined) {
+            // Do not update order directly
+            delete partial.order;
+        }
         await updateListDb(listId, partial);
     } catch (e: any) {
         throw new Error('Failed to update list ' + e);
@@ -94,7 +98,12 @@ export async function getBoardIDFromListID(listID: ListId) {
 interface MoveListOptions {
     preventSync?: boolean;
 }
-export async function moveList(listId: ListId, toPosition: number, onBoardId: BoardId, options?: MoveListOptions) {
+export async function moveList(
+    listId: ListId,
+    toPosition: number | null,
+    onBoardId: BoardId,
+    options?: MoveListOptions
+) {
     try {
         await moveListDb(listId, toPosition);
         if (!options?.preventSync) {

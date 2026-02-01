@@ -190,6 +190,14 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
 
 export async function updateCardFromPartial(cardId: CardId, partial: Partial<CardHeader>) {
     try {
+        if (partial.order !== undefined) {
+            // Do not update order directly
+            delete partial.order;
+        }
+        if (partial.listId !== undefined) {
+            // Do not update listId directly
+            delete partial.listId;
+        }
         await updateCardDb({ id: cardId, ...partial });
     } catch (e: any) {
         throw new Error('Failed to update card ' + e);
@@ -227,16 +235,17 @@ interface MoveCardOptions {
 /*
  * Remove the card from its old list and move it to the new one at the position
  */
-export async function moveCard(cardId: CardId, toListId: ListId, toPosition?: number, options?: MoveCardOptions) {
+export async function moveCard(
+    cardId: CardId,
+    toListId: ListId,
+    toPosition?: number | null,
+    options?: MoveCardOptions
+) {
     try {
         const card = await getCardByIdDb(cardId);
         if (!card) {
             throw new Error(`Card ${cardId} not found`);
         }
-        if (card.order === null) {
-            return;
-        }
-
         await moveCardDb(cardId, toPosition, toListId);
 
         if (!options?.preventSync) {

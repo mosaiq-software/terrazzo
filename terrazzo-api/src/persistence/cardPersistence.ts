@@ -65,9 +65,16 @@ export const getCardsByDescriptionTextBlockIdDb = async (textBlockId: TextBlockI
     return models.map((card) => card.toJSON());
 };
 
-export const moveCardDb = async (cardId: CardId, toPosition: number | undefined, toListId: ListId) => {
+export const moveCardDb = async (cardId: CardId, toPosition: number | undefined | null, toListId: ListId) => {
     const transaction = await sequelize.transaction();
     try {
+        const cardModel = await CardModel.findByPk(cardId, { transaction });
+        if (!cardModel) {
+            throw new Error('Card not found ' + cardId);
+        }
+        const card = cardModel.toJSON();
+        const currentPosition = card.order;
+        const currentListId = card.listId;
         if (toPosition === undefined) {
             const cardCount = await CardModel.count({
                 where: { listId: toListId, order: { [Op.not]: null } },
@@ -75,19 +82,47 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
             });
             toPosition = cardCount;
         }
-        const cardModel = await CardModel.findByPk(cardId, { transaction });
-        if (!cardModel) {
-            throw new Error('Card not found ' + cardId);
+        if (toPosition !== null) {
+            const targetCount = await CardModel.count({
+                where: { listId: toListId, order: { [Op.not]: null } },
+                transaction,
+            });
+            const maxIndex =
+                toListId === currentListId && currentPosition !== null ? Math.max(targetCount - 1, 0) : targetCount;
+            toPosition = Math.min(Math.max(toPosition, 0), maxIndex);
         }
-        const card = cardModel.toJSON();
-        const currentPosition = card.order;
-        if (currentPosition === null || currentPosition === undefined) {
-            throw new Error('Card order is null ' + cardId);
-        }
-        const currentListId = card.listId;
         if (toListId === currentListId) {
             // Moving within the same list
-            if (toPosition < currentPosition) {
+            if (toPosition === null) {
+                if (currentPosition !== null) {
+                    // Archiving: shift everything after it up to close the gap
+                    await CardModel.decrement('order', {
+                        by: 1,
+                        where: {
+                            listId: currentListId,
+                            order: {
+                                [Op.not]: null,
+                                [Op.gt]: currentPosition,
+                            },
+                        },
+                        transaction,
+                    });
+                }
+            } else if (currentPosition === null) {
+                // Unarchiving into the list: make room at the target position
+                await CardModel.increment('order', {
+                    by: 1,
+                    where: {
+                        listId: currentListId,
+                        order: {
+                            [Op.not]: null,
+                            [Op.gte]: toPosition,
+                        },
+                    },
+                    transaction,
+                });
+            } else if (toPosition < currentPosition) {
+                // If moving up the list, shift everything between where it was and now is down
                 await CardModel.increment('order', {
                     by: 1,
                     where: {
@@ -101,6 +136,7 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
                     transaction,
                 });
             } else if (toPosition > currentPosition) {
+                // If moving down the list, shift everything between where it was and now is up
                 await CardModel.decrement('order', {
                     by: 1,
                     where: {
@@ -116,24 +152,30 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined,
             }
         } else {
             // Moving to a different list
-            await CardModel.decrement('order', {
-                by: 1,
-                where: {
-                    listId: currentListId,
-                    order: {
-                        [Op.not]: null,
-                        [Op.gt]: currentPosition,
+            if (toPosition === null) {
+                // We should not be moving to a new list and archiving at the same time
+                throw new Error('Cannot move card to a new list and archive at the same time ' + cardId);
+            }
+            if (currentPosition !== null) {
+                await CardModel.decrement('order', {
+                    by: 1,
+                    where: {
+                        listId: currentListId,
+                        order: {
+                            [Op.not]: null,
+                            [Op.gt]: currentPosition,
+                        },
                     },
-                },
-                transaction,
-            });
+                    transaction,
+                });
+            }
             await CardModel.increment('order', {
                 by: 1,
                 where: {
                     listId: toListId,
                     order: {
                         [Op.not]: null,
-                        [Op.gt]: toPosition - 1,
+                        [Op.gte]: toPosition,
                     },
                 },
                 transaction,
