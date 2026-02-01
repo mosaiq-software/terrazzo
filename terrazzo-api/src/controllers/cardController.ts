@@ -1,68 +1,26 @@
 import { Block } from '@blocknote/core';
-import {
-    Card,
-    CardHeader,
-    CardId,
-    LabelId,
-    ListId,
-    TextBlockId,
-    updateBaseFromPartial,
-    UserId,
-} from '@mosaiq/terrazzo-common';
+import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, UserId } from '@mosaiq/terrazzo-common';
 import { syncAddCard, syncMovedCard, syncUpdateCardField } from '@trz-api/broadcasters';
 import { syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
 import {
     createCardOnListDb,
+    getActiveCardsByListIdUpDb,
     getCardByIdDb,
-    getCardsByListIdDownDb,
-    getCardsByListIdShortUpDb,
+    getCardCountOnListDb,
+    moveCardDb,
     updateCardDb,
-    updateCardListDb,
-    updateCardOrderDb,
 } from '@trz-api/persistence/cardPersistence';
-import {
-    addLabelToCardDb,
-    deleteLabelsOnCardDb,
-    getLabelsOnCardDb,
-} from '@trz-api/persistence/labelAssignmentPersistence';
+import { getLabelsOnCardDb, setLabelsOnCardDb } from '@trz-api/persistence/labelAssignmentPersistence';
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
-import { getBoardIDFromListID } from './listController';
 import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
-import { getUserHeader } from './userController';
 
 export const MOVING_LIST_ORDER = -10000;
-//Gets
 
-/**
- * Gets all cards of a list by list ID
- * All cards are returned with all their labels, checklists, comments, and timesheet entries
- * Returns a promise of all cards in the list
- * @param listID
- * @param archived
- */
-export async function getAllCardsOfList(listID: ListId, archived: boolean) {
-    let cardHeaders = await getCardsByListIdShortUpDb(listID, archived);
-
-    if (cardHeaders == null) {
-        return [];
-    }
-
-    cardHeaders = cardHeaders.filter((c) => !c.archived);
-
-    const cards = await populateCards(cardHeaders);
-
-    try {
-        return cards;
-    } catch (e) {
-        throw new Error('Failed to retrieve board' + e);
-    }
-}
-
-export async function getCardIdsOnList(listID: ListId, archived: boolean): Promise<CardId[]> {
-    const cardHeaders = await getCardsByListIdShortUpDb(listID, archived);
+export async function getCardIdsOnList(listID: ListId): Promise<CardId[]> {
+    const cardHeaders = await getActiveCardsByListIdUpDb(listID);
     if (cardHeaders == null) {
         return [];
     }
@@ -123,12 +81,9 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
         name: card.name || '',
         descriptionTextBlockId: descriptionTextBlockId,
         priority: card.priority || null,
-        storyPoints: card.storyPoints || null,
-        archived: card.archived || false,
-        order: card.order || (await getNextCardOrder(card.listId)),
+        order: card.order !== undefined ? card.order : await getCardCountOnListDb(card.listId),
         createdAt: card.createdAt || Date.now(),
         createdById: card.createdById || null,
-        createdBy: card.createdById ? await getUserHeader(card.createdById) : undefined,
         assignees: [],
         labels: [],
     };
@@ -196,14 +151,11 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         name: existingCard.name + ' (Copy)',
         descriptionTextBlockId: descriptionTextBlockId,
         priority: existingCard.priority,
-        storyPoints: existingCard.storyPoints,
         assignees: existingCard.assignees,
         labels: existingCard.labels,
-        archived: existingCard.archived,
-        order: await getNextCardOrder(list.id),
+        order: await getCardCountOnListDb(list.id),
         createdAt: Date.now(),
         createdById: createdById ?? null,
-        createdBy: createdById ? await getUserHeader(createdById) : undefined,
     };
 
     try {
@@ -237,32 +189,29 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
 }
 
 export async function updateCardFromPartial(cardId: CardId, partial: Partial<CardHeader>) {
-    const updatingCard = await getCardByIdDb(cardId);
-    if (updatingCard == null) {
-        throw new Error('Card not found');
-    }
-
-    const updated = updateBaseFromPartial(updatingCard, partial);
     try {
-        await updateCardDb(updated);
+        if (partial.order !== undefined) {
+            // Do not update order directly
+            delete partial.order;
+        }
+        if (partial.listId !== undefined) {
+            // Do not update listId directly
+            delete partial.listId;
+        }
+        await updateCardDb({ id: cardId, ...partial });
     } catch (e: any) {
         throw new Error('Failed to update card ' + e);
     }
-
     try {
-        const boardId = await getBoardIDFromListID(updated.listId);
-        await syncUpdateCardField(updated, boardId);
+        const card = await getCardByIdDb(cardId);
+        if (!card) {
+            throw new Error('Card not found after update ' + cardId);
+        }
+        await syncUpdateCardField(card, card.boardId);
     } catch (e) {
         throw new Error('Failed to sync updated card ' + e);
     }
 }
-
-export const getNextCardOrder = async (listId: ListId) => {
-    const card = await getCardsByListIdDownDb(listId);
-    return card ? card.length + 1 : 1;
-};
-
-//Utils
 
 export async function getListIDFromCardID(cardID: CardId) {
     const card = await getCardByIdDb(cardID);
@@ -284,45 +233,24 @@ interface MoveCardOptions {
     preventSync?: boolean;
 }
 /*
-    Remove the card from its old list and move it to the new one at the position
-*/
-export async function moveCardToList(cardId: CardId, toListId: ListId, position?: number, options?: MoveCardOptions) {
+ * Remove the card from its old list and move it to the new one at the position
+ */
+export async function moveCard(
+    cardId: CardId,
+    toListId: ListId,
+    toPosition?: number | null,
+    options?: MoveCardOptions
+) {
     try {
         const card = await getCardByIdDb(cardId);
         if (!card) {
             throw new Error(`Card ${cardId} not found`);
         }
+        await moveCardDb(cardId, toPosition, toListId);
 
-        let currentListCards = await getCardsByListIdShortUpDb(card.listId);
-        currentListCards = currentListCards.filter((c) => c.id !== cardId);
-
-        let newListCards = currentListCards;
-        if (toListId !== card.listId) {
-            newListCards = await getCardsByListIdShortUpDb(toListId);
-        }
-
-        if (position !== undefined) {
-            newListCards.splice(position, 0, card);
-        } else {
-            newListCards.push(card);
-        }
-
-        const promises = [];
-        for (let i = 0; i < currentListCards.length; i++) {
-            currentListCards[i].order = i;
-            promises.push(updateCardOrderDb(currentListCards[i].id, i));
-        }
-        if (toListId !== card.listId) {
-            for (let i = 0; i < newListCards.length; i++) {
-                newListCards[i].order = i;
-                promises.push(updateCardOrderDb(newListCards[i].id, i));
-            }
-            promises.push(updateCardListDb(cardId, toListId));
-        }
-        await Promise.all(promises);
         if (!options?.preventSync) {
-            const boardId = await getBoardIDFromListID(toListId);
-            await syncMovedCard({ cardId, toList: toListId, position }, boardId);
+            const boardId = card.boardId;
+            await syncMovedCard({ cardId, toList: toListId, position: toPosition }, boardId);
         }
     } catch (error: any) {
         console.error(`Error moving card ${cardId} to list ${toListId}: ${error}`);
@@ -337,7 +265,6 @@ export const populateCards = async (cardHeaders: CardHeader[]): Promise<Card[]> 
                 ...c,
                 assignees: await getCardAssignmentsForCardDb(c.id),
                 labels: await getLabelsOnCardDb(c.id),
-                createdBy: c.createdById ? await getUserHeader(c.createdById) : undefined,
             };
             return cc;
         })
@@ -348,10 +275,7 @@ interface SetCardsLabelsOptions {
     preventSync?: boolean;
 }
 export const setCardsLabels = async (cardId: CardId, labelIds: LabelId[], options?: SetCardsLabelsOptions) => {
-    await deleteLabelsOnCardDb(cardId);
-    for (const labelId of labelIds) {
-        addLabelToCardDb(labelId, cardId);
-    }
+    await setLabelsOnCardDb(cardId, labelIds);
     if (!options?.preventSync) {
         const boardId = await getBoardIDFromCardID(cardId);
         await syncCardLabels(boardId, cardId, labelIds);

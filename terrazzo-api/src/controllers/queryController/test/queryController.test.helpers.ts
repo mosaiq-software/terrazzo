@@ -98,7 +98,7 @@ export const buildSearchDataSource = (data: {
             return [];
         },
         getBoardByIdDb: async (id) => boardMap.get(id),
-        getCardsByBoardIdDb: async (boardId) => cardsByBoard.get(boardId) ?? [],
+        getActiveCardsByBoardIdDb: async (boardId) => cardsByBoard.get(boardId) ?? [],
         getOrganizationMembershipsForOrgDb: async () => [],
         getDocumentByIdDb: async (id) => documentsById.get(id),
         getQueryableTextBlockContent: async (textBlockId) => textBlockContent.get(textBlockId) ?? '',

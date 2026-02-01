@@ -56,7 +56,7 @@ export const saveFileFromUrl = (fileUrl: string): UploadedFileId => {
                 console.error('Error downloading or saving file from URL:', {
                     fileUrl,
                     uid,
-                    error,
+                    // error,
                 });
                 return;
             }

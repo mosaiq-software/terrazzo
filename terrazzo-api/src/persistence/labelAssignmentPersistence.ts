@@ -29,15 +29,16 @@ export const deleteLabelingOnCardsByLabelIdDb = async (labelId: LabelId) => {
     return deleted;
 };
 
-export const deleteLabelsOnCardDb = async (cardId: CardId) => {
-    const deleted = await LabelAssignmentModel.destroy({ where: { cardId } });
-    return deleted;
-};
-
-export const addLabelToCardDb = async (labelId: LabelId, cardId: CardId) => {
-    const model = await LabelAssignmentModel.create({
-        labelId,
-        cardId,
-    });
-    return model.toJSON();
+export const setLabelsOnCardDb = async (cardId: CardId, labelIds: LabelId[]) => {
+    const transaction = await sequelize.transaction();
+    try {
+        await LabelAssignmentModel.destroy({ where: { cardId }, transaction });
+        for (const labelId of labelIds) {
+            await LabelAssignmentModel.create({ labelId, cardId }, { transaction });
+        }
+        await transaction.commit();
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
 };

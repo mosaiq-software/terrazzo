@@ -35,7 +35,7 @@ export const emitMoveCard = async (
     sockCtx: SocketContextType,
     cardId: CardId,
     toList: ListId,
-    position?: number
+    position?: number | null
 ): Promise<void> => {
     await sockCtx.emit(ClientSE.MOVE_CARD, { cardId, toList, position });
 };

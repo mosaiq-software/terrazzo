@@ -67,8 +67,8 @@ export interface ServerSEPayload {
 
     [ServerSE.MOUSE_MOVE]: { sid: SocketId; data: MouseRoomUserData };
     [ServerSE.USER_IDLE]: { sid: SocketId; idle: boolean };
-    [ServerSE.MOVE_LIST]: { listId: ListId; position: number };
-    [ServerSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number };
+    [ServerSE.MOVE_LIST]: { listId: ListId; position: number | null };
+    [ServerSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number | null };
 
     [ServerSE.ADD_LIST]: { boardId: BoardId; listId: ListId };
     [ServerSE.ADD_CARD]: { listId: ListId; cardId: CardId };

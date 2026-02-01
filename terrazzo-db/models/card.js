@@ -27,9 +27,10 @@ module.exports = (sequelize, DataTypes) => {
         name: DataTypes.STRING,
         descriptionTextBlockId: DataTypes.STRING,
         priority: DataTypes.INTEGER,
-        storyPoints: DataTypes.INTEGER,
-        archived: DataTypes.BOOLEAN,
-        order: DataTypes.INTEGER,
+        order: {
+            type: DataTypes.INTEGER,
+            allowNull: true
+        },
         createdById: DataTypes.STRING,
         createdAt: DataTypes.INTEGER
     }, {
