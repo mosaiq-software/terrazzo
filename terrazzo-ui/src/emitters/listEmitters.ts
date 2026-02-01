@@ -18,6 +18,10 @@ export const updateListField = async (sockCtx: SocketContextType, id: ListId, pa
     await sockCtx.emit(ClientSE.UPDATE_LIST_FIELD, { ...partial, id });
 };
 
-export const emitMoveList = async (sockCtx: SocketContextType, listId: ListId, position: number): Promise<void> => {
+export const emitMoveList = async (
+    sockCtx: SocketContextType,
+    listId: ListId,
+    position: number | null
+): Promise<void> => {
     await sockCtx.emit(ClientSE.MOVE_LIST, { listId, position });
 };

@@ -4,7 +4,7 @@ import { getHotkeyHandler, useClickOutside } from '@mantine/hooks';
 import { CardId, ListHeader, ListId, MAX_NAME_LENGTH, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { useSocket } from '@trz/contexts/socket-context';
-import { createCard, getListData, updateListField } from '@trz/emitters';
+import { createCard, emitMoveList, getListData, updateListField } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { BoardContext, useBoardMetadata } from '@trz/pages/BoardPage';
 import { LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
@@ -116,7 +116,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
     }
 
     async function onArchive() {
-        await updateListField(sockCtx, props.listId, { order: null });
+        await emitMoveList(sockCtx, props.listId, null);
     }
 
     function onBlur() {

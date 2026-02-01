@@ -19,7 +19,7 @@ import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { RectHoldingButton } from '@trz/components/UI/RectHoldingButton';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUserContext } from '@trz/contexts/user-context';
-import { updateCardAssignee, updateCardField } from '@trz/emitters';
+import { emitMoveCard, updateCardAssignee, updateCardField } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
 import { useUser } from '@trz/hooks/useUser';
@@ -76,9 +76,9 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
             return;
         }
         if (archive) {
-            await updateCardField(sockCtx, card.id, { order: null });
+            await emitMoveCard(sockCtx, card.id, card.listId, null);
         } else {
-            await updateCardField(sockCtx, card.id, { order: 0 });
+            await emitMoveCard(sockCtx, card.id, card.listId, 0);
         }
         onCloseModal(); //this wont run ever due to sockCtx.boardData being updated
     }
