@@ -81,7 +81,7 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
         name: card.name || '',
         descriptionTextBlockId: descriptionTextBlockId,
         priority: card.priority || null,
-        order: card.order ?? (await getCardCountOnListDb(card.listId)),
+        order: card.order !== undefined ? card.order : await getCardCountOnListDb(card.listId),
         createdAt: card.createdAt || Date.now(),
         createdById: card.createdById || null,
         assignees: [],

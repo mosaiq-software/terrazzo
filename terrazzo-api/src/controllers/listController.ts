@@ -52,7 +52,7 @@ export async function addList(list: Partial<ListHeader> & { boardId: BoardId }, 
             id: crypto.randomUUID(),
             boardId: list.boardId,
             name: list.name || '',
-            order: list.order ?? (await getActiveListCountOnBoard(list.boardId)),
+            order: list.order !== undefined ? list.order : await getActiveListCountOnBoard(list.boardId),
         };
         await createListOnBoardDb(newList);
         if (!options?.preventSync) {

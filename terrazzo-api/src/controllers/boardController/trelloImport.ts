@@ -13,6 +13,7 @@ import {
     TrelloListType,
     TrelloUserToTerrazzoUserMap,
     getFileUrl,
+    recordKeys,
     settlePromises,
 } from '@mosaiq/terrazzo-common';
 import { getApiUrl } from '@trz-api/utils/envUtils';
@@ -46,11 +47,20 @@ export const createTerrazzoBoardFromTrelloBoard = async (
         const labelMap = await createLabels(trzBoardId, trelloBoard.labels);
         const { cardCreatedDateMap } = getActionsData(trelloBoard);
         const cardChecklistsMap = getChecklistsForCards(trelloBoard.checklists);
+        const cardOrderMap = getCardOrderMap(trelloBoard.cards);
 
         // Run these in sequence to ensure order is preserved, and nothing gets rate limited.
         // Creating hundreds of cards in parallel on the same board can lead to issues.
         for (const trelloCard of trelloBoard.cards) {
-            await createCard(trelloCard, cardChecklistsMap, cardCreatedDateMap, listMap, labelMap, userMap);
+            await createCard(
+                trelloCard,
+                cardChecklistsMap,
+                cardCreatedDateMap,
+                listMap,
+                labelMap,
+                userMap,
+                cardOrderMap
+            );
         }
 
         return trzBoardId;
@@ -65,14 +75,15 @@ export const createTerrazzoBoardFromTrelloBoard = async (
  */
 const createLists = async (trzBoardId: BoardId, trelloLists: TrelloListType[]) => {
     const listMap: { [trl: string]: ListId } = {};
-    for (const trelloList of trelloLists) {
+    const sortedLists = [...trelloLists].sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0));
+    for (const [index, trelloList] of sortedLists.entries()) {
         const trelloListName = trelloList.name;
-
+        console.log(`Creating list: ${trelloListName} closed=${trelloList.closed}`);
         const trzList = await addList(
             {
                 boardId: trzBoardId,
                 name: trelloListName,
-                order: trelloList.closed ? null : undefined,
+                order: trelloList.closed ? null : index,
             },
             {
                 preventSync: true,
@@ -134,7 +145,8 @@ const createCard = async (
     cardCreatedDateMap: Record<string, Date>,
     listMap: Record<string, ListId>,
     labelMap: Record<string, LabelId>,
-    userMap: TrelloUserToTerrazzoUserMap
+    userMap: TrelloUserToTerrazzoUserMap,
+    cardOrderMap: Record<string, number>
 ) => {
     const descriptionBlocks = await processCardDescription(trelloCard.desc);
     const attachmentBlocks = await processExtraCardAttachments(trelloCard);
@@ -152,11 +164,12 @@ const createCard = async (
 
     const trzCreatorId = userMap[trelloCard.idMemberCreator];
     const createdAt = cardCreatedDateMap[trelloCard.id]?.getTime() || Date.now();
+    const orderIndex = cardOrderMap[trelloCard.id];
     const trzCard = await addCard(
         {
             listId: trzListId,
             name: trelloCard.name,
-            order: trelloCard.closed ? null : undefined,
+            order: trelloCard.closed ? null : orderIndex,
             createdById: trzCreatorId,
             createdAt: createdAt,
             cardNumber: trelloCard.idShort,
@@ -169,6 +182,30 @@ const createCard = async (
     const trzLabelIds = trelloCard.idLabels.map((trlLabelId) => labelMap[trlLabelId]);
     await setCardsLabels(trzCard.id, trzLabelIds, { preventSync: true });
     await processCardAssignments(trelloCard, userMap, trzCard.id);
+};
+
+/**
+ * Builds a map of Trello card ID to its order index within its list, based on Trello pos
+ */
+const getCardOrderMap = (trelloCards: TrelloCardType[]) => {
+    const cardOrderMap: Record<string, number> = {};
+    const byList: Record<string, TrelloCardType[]> = {};
+
+    for (const card of trelloCards) {
+        if (!byList[card.idList]) {
+            byList[card.idList] = [];
+        }
+        byList[card.idList].push(card);
+    }
+
+    for (const listId of recordKeys(byList)) {
+        const sorted = byList[listId].sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0));
+        sorted.forEach((card, index) => {
+            cardOrderMap[card.id] = index;
+        });
+    }
+
+    return cardOrderMap;
 };
 
 /**

@@ -3,6 +3,16 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
+        await queryInterface.changeColumn('Cards', 'order', {
+            type: Sequelize.INTEGER,
+            allowNull: true,
+        });
+
+        await queryInterface.changeColumn('Lists', 'order', {
+            type: Sequelize.INTEGER,
+            allowNull: true,
+        });
+
         // If a row has archived=true, set order to null
         await queryInterface.sequelize.transaction(async (transaction) => {
             await queryInterface.sequelize.query(`
