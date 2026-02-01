@@ -35,9 +35,14 @@ export const RingHoldingButton = (props: RingHoldingButtonProps) => {
         setClicked(false);
     };
 
-    const down = () => {
+       const down = (e: React.MouseEvent) => {
+        e.preventDefault();
         if (props.disabled) return;
-        setHolding(true);
+        if (e.shiftKey) {
+            onComplete();
+        } else {
+            setHolding(true);
+        }
     };
 
     const interval = useInterval(() => {
@@ -68,6 +73,7 @@ export const RingHoldingButton = (props: RingHoldingButtonProps) => {
                 onMouseDown={down}
                 onClick={(e) => {
                     if (e.shiftKey) {
+                        e.preventDefault()
                         onComplete();
                     }          
                 }}

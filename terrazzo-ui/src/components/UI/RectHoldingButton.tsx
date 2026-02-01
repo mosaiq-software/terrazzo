@@ -29,7 +29,7 @@ const DEFAULT_INCREMENT = 1000 / 60; // 60fps
 export const RectHoldingButton = (props: RectHoldingButtonProps) => {
     const [holding, setHolding] = useState<boolean>(false);
     const [progress, setProgress] = useState<number>(0);
-    const [clicked, setClicked] = useState<boolean>(false);    
+    const [clicked, setClicked] = useState<boolean>(false);
     const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
         width: typeof props.width === 'number' ? props.width : 100,
         height: typeof props.height === 'number' ? props.height : 50,
@@ -51,9 +51,14 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
         setClicked(false);
     };
 
-    const down = () => {
+    const down = (e: React.MouseEvent) => {
+        e.preventDefault();
         if (props.disabled) return;
-        setHolding(true);
+        if (e.shiftKey) {
+            onComplete();
+        } else {
+            setHolding(true);
+        }
     };
 
     const interval = useInterval(() => {
@@ -120,9 +125,7 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
                 onMouseUp={release}
                 onMouseDown={down}
                 onClick={(e) => {
-                    if (e.shiftKey) {
-                        onComplete();
-                    }
+                    e.preventDefault();
                 }}
                 disabled={props.disabled}
                 onMouseEnter={() => setHovered(true)}
