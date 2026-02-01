@@ -24,7 +24,8 @@
         "test:api": "cd terrazzo-api && npm run test",
         "test:ui": "cd terrazzo-ui && npm run test",
         "test:common": "cd terrazzo-common && npm run test",
-        "test": "npm run test:api && npm run test:ui && npm run test:common"
+        "test": "npm run test:api && npm run test:ui && npm run test:common",
+        "create-migration": "cd terrazzo-db && npm run create-migration"
     },
     "devDependencies": {
         "concurrently": "^9.1.0",

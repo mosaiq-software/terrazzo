@@ -60,6 +60,13 @@ export const getCardCountOnListDb = async (listId: ListId) => {
     return await CardModel.count({ where: { listId, order: { [Op.not]: null } } });
 };
 
+/**
+ * Gets the number of cards on a board, including archived cards.
+ */
+export const getTotalCardCountOnBoardDb = async (boardId: BoardId) => {
+    return await CardModel.count({ where: { boardId } });
+};
+
 export const getCardsByDescriptionTextBlockIdDb = async (textBlockId: TextBlockId) => {
     const models = await CardModel.findAll({ where: { descriptionTextBlockId: textBlockId } });
     return models.map((card) => card.toJSON());

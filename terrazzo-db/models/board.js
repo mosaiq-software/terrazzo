@@ -19,7 +19,6 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true
         },
         boardCode: DataTypes.STRING,
-        totalCards: DataTypes.INTEGER
     }, {
         sequelize,
         modelName: 'Board',
