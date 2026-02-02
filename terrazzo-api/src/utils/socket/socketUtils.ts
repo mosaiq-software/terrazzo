@@ -101,12 +101,12 @@ export const broadcast = async <T extends ServerSE>(options: BroadcasterOptions<
     for (const s of allSockets) {
         const socketData = getSocketData(s);
         try {
-            const payload = await buildPayload(socketData.user?.userId);
+            const payload = await buildPayload(socketData?.user?.userId);
             payloads.set(s.id, payload);
         } catch (e: any) {
             console.warn(`Skipping socket in broadcast`, {
                 socketId: s.id,
-                userId: socketData.user?.userId,
+                userId: socketData?.user?.userId,
                 event,
                 error: e.message,
                 stack: e.stack,
@@ -127,8 +127,8 @@ export const broadcast = async <T extends ServerSE>(options: BroadcasterOptions<
 /**
  * Gets the Terrazzo-specific data stored on the socket.
  */
-export const getSocketData = (socket: Socket) => {
-    return (socket as any).terrazzoSocketData as SocketData;
+export const getSocketData = (socket: Socket): SocketData | undefined => {
+    return (socket as any)?.terrazzoSocketData as SocketData | undefined;
 };
 
 /**
@@ -141,8 +141,8 @@ export const setSocketData = (socket: Socket, data: SocketData) => {
 /**
  * Gets the Terrazzo-specific data stored on the socket.
  */
-export const getYSocketData = (socket: Socket) => {
-    return (socket as any).terrazzoSocketData as YSocketData | undefined;
+export const getYSocketData = (socket: Socket): YSocketData | undefined => {
+    return (socket as any)?.terrazzoSocketData as YSocketData | undefined;
 };
 
 /**

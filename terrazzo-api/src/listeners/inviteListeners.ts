@@ -19,7 +19,7 @@ export const registerInviteListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to create invites for this organization');
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         const invite = await createInvite(data.orgId, data.maxUses, socketData.user.userId);
@@ -40,7 +40,7 @@ export const registerInviteListeners = (socket: Socket) => {
 
     subscribe(socket, ClientSE.USE_INVITE, async (data) => {
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         const success = await useInvite(data.inviteId, socketData.user.userId);
