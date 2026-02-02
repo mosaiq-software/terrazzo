@@ -35,7 +35,7 @@ export const RingHoldingButton = (props: RingHoldingButtonProps) => {
         setClicked(false);
     };
 
-       const down = (e: React.MouseEvent) => {
+    const down = (e: React.MouseEvent) => {
         e.preventDefault();
         if (props.disabled) return;
         if (e.shiftKey) {
@@ -72,10 +72,7 @@ export const RingHoldingButton = (props: RingHoldingButtonProps) => {
                 onMouseLeave={release}
                 onMouseDown={down}
                 onClick={(e) => {
-                    if (e.shiftKey) {
-                        e.preventDefault()
-                        onComplete();
-                    }          
+                    e.preventDefault();
                 }}
                 disabled={props.disabled}
             >
