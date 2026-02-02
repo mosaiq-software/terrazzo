@@ -13,7 +13,7 @@ import {
 } from '@dnd-kit/core';
 import { DragAbortEvent, DragCancelEvent, DragOverEvent } from '@dnd-kit/core/dist/types';
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { Container, Loader } from '@mantine/core';
+import { Loader } from '@mantine/core';
 import {
     arrayMoveInPlace,
     BoardId,
@@ -588,92 +588,84 @@ const BoardPage = (): React.JSX.Element => {
 
     return (
         // <Profiler onRender={onRender} id={"board"}>
-        <Container
-            h={`calc(100vh - ${uiCtx.navbarHeight}px)`}
-            fluid
-            maw="100%"
-            p="0"
-            bg={COLORS.background.medium}
+        <CollaborativeMouseTracker
+            boardId={boardId}
+            draggingObject={draggingObject}
+            disableTracking={viewOnly}
             style={{
+                maxWidth: '100%',
                 overflowX: 'scroll',
+                width: 'auto',
+                display: 'flex',
+                gap: '20px',
+                alignItems: 'flex-start',
+                justifyContent: 'flex-start',
+                flexWrap: 'nowrap',
+                padding: '20px',
+                background: COLORS.background.medium,
+                height: `calc(100vh - ${uiCtx.navbarHeight}px)`
             }}
         >
-            <CollaborativeMouseTracker
-                boardId={boardId}
-                draggingObject={draggingObject}
-                disableTracking={viewOnly}
-                style={{
-                    height: '95%',
-                    width: 'auto',
-                    display: 'flex',
-                    gap: '20px',
-                    alignItems: 'flex-start',
-                    justifyContent: 'flex-start',
-                    flexWrap: 'nowrap',
-                    padding: '20px',
-                }}
-            >
-                <BoardMetadataContext.Provider value={boardMetadata}>
-                    <DndContext
-                        sensors={sensors}
-                        collisionDetection={collisionDetectionStrategy}
-                        onDragEnd={handleDragEnd}
-                        onDragOver={handleDragOver}
-                        onDragStart={handleDragStart}
-                        onDragAbort={handleDragAbort}
-                        onDragCancel={handleDragCancel}
-                        measuring={{
-                            droppable: {
-                                strategy: MeasuringStrategy.Always,
-                            },
+            <BoardMetadataContext.Provider value={boardMetadata}>
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={collisionDetectionStrategy}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={handleDragOver}
+                    onDragStart={handleDragStart}
+                    onDragAbort={handleDragAbort}
+                    onDragCancel={handleDragCancel}
+                    measuring={{
+                        droppable: {
+                            strategy: MeasuringStrategy.Always,
+                        },
+                    }}
+                >
+                    <BoardContext.Provider
+                        value={{
+                            listToCardsMap,
                         }}
                     >
-                        <BoardContext.Provider
-                            value={{
-                                listToCardsMap,
-                            }}
+                        <SortableContext
+                            items={listKeys}
+                            strategy={horizontalListSortingStrategy}
+                            disabled={!userCanEditBoard}
                         >
-                            <SortableContext
-                                items={listKeys}
-                                strategy={horizontalListSortingStrategy}
-                                disabled={!userCanEditBoard}
-                            >
-                                {memoizedSortableLists}
-                            </SortableContext>
-                            {createPortal(
-                                <DragOverlay dropAnimation={boardDropAnimation}>
-                                    {activeObject
-                                        ? listToCardsMap.has(activeObject)
-                                            ? renderListDragOverlay(activeObject, boardData.boardCode ?? '#')
-                                            : renderCardDragOverlay(activeObject, boardData.boardCode ?? '#')
-                                        : null}
-                                </DragOverlay>,
-                                document.body
-                            )}
-                        </BoardContext.Provider>
-                    </DndContext>
-                    {!viewOnly && userCanEditBoard && (
-                        <CreateList
-                            onCreateList={async (title) => {
-                                try {
-                                    await createList(sockCtx, boardData.id, title);
-                                } catch (e) {
-                                    notify(NoteType.LIST_CREATION_ERROR, e);
-                                    return;
-                                }
-                            }}
-                        />
-                    )}
-                    {openedCard && (
-                        <CardDetails
-                            cardId={openedCard}
-                            onClose={closeModal}
-                            boardCode={boardData.boardCode}
-                        />
-                    )}
-                </BoardMetadataContext.Provider>
-            </CollaborativeMouseTracker>
-        </Container>
+                            {memoizedSortableLists}
+                        </SortableContext>
+                        {createPortal(
+                            <DragOverlay dropAnimation={boardDropAnimation}>
+                                {activeObject
+                                    ? listToCardsMap.has(activeObject)
+                                        ? renderListDragOverlay(activeObject, boardData.boardCode ?? '#')
+                                        : renderCardDragOverlay(activeObject, boardData.boardCode ?? '#')
+                                    : null}
+                            </DragOverlay>,
+                            document.body
+                        )}
+                    </BoardContext.Provider>
+                </DndContext>
+                {!viewOnly && userCanEditBoard && (
+                    <CreateList
+                        onCreateList={async (title) => {
+                            try {
+                                await createList(sockCtx, boardData.id, title);
+                            } catch (e) {
+                                notify(NoteType.LIST_CREATION_ERROR, e);
+                                return;
+                            }
+                        }}
+                    />
+                )}
+                {openedCard && (
+                    <CardDetails
+                        cardId={openedCard}
+                        onClose={closeModal}
+                        boardCode={boardData.boardCode}
+                    />
+                )}
+            </BoardMetadataContext.Provider>
+        </CollaborativeMouseTracker>
         // </Profiler>
     );
 };
