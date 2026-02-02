@@ -3,11 +3,11 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        queryInterface.removeColumn('Boards', 'totalCards');
+        await queryInterface.removeColumn('Boards', 'totalCards');
     },
 
     async down(queryInterface, Sequelize) {
-        queryInterface.addColumn('Boards', 'totalCards', {
+        await queryInterface.addColumn('Boards', 'totalCards', {
             type: Sequelize.INTEGER,
             allowNull: false,
             defaultValue: 0,
