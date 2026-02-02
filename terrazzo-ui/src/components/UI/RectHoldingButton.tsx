@@ -51,9 +51,14 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
         setClicked(false);
     };
 
-    const down = () => {
+    const down = (e: React.MouseEvent) => {
+        e.preventDefault();
         if (props.disabled) return;
-        setHolding(true);
+        if (e.shiftKey) {
+            onComplete();
+        } else {
+            setHolding(true);
+        }
     };
 
     const interval = useInterval(() => {
@@ -119,7 +124,9 @@ export const RectHoldingButton = (props: RectHoldingButtonProps) => {
             <UnstyledButton
                 onMouseUp={release}
                 onMouseDown={down}
-                onClick={(e) => e.preventDefault()}
+                onClick={(e) => {
+                    e.preventDefault();
+                }}
                 disabled={props.disabled}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => {

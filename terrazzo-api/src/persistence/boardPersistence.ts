@@ -5,7 +5,6 @@ import { DataTypes, Model } from 'sequelize';
 export interface BoardModelType {
     id: BoardId;
     boardCode: string;
-    totalCards: number;
 }
 class BoardModel extends Model<BoardModelType> {}
 BoardModel.init(
@@ -15,7 +14,6 @@ BoardModel.init(
             primaryKey: true,
         },
         boardCode: DataTypes.STRING,
-        totalCards: DataTypes.INTEGER,
     },
     { sequelize, timestamps: false, tableName: 'Boards' }
 );

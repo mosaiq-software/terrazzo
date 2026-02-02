@@ -3,6 +3,7 @@ import { syncBoardFields, syncDirectoryContents, syncParentsDirectoryContents } 
 import { syncBoardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { getListAndCardIdsOnBoard } from '@trz-api/controllers/listController';
 import { BoardModelType, createBoardDb, getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
+import { deleteLabelingOnCardsByLabelIdDb } from '@trz-api/persistence/labelAssignmentPersistence';
 import {
     createLabelOnBoardDb,
     deleteLabelDb,
@@ -11,7 +12,6 @@ import {
     updateLabelDb,
 } from '@trz-api/persistence/labelPersistence';
 import { createNewModule, getModuleById, updateModule } from '../moduleController';
-import { deleteLabelingOnCardsByLabelIdDb } from '@trz-api/persistence/labelAssignmentPersistence';
 
 export const getBoardHeader = async (boardID: BoardId): Promise<BoardHeader | undefined> => {
     const boardModel = await getBoardByIdDb(boardID);
@@ -32,7 +32,7 @@ export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefine
     if (!boardHeader) {
         return undefined;
     }
-    const lists = await getListAndCardIdsOnBoard(boardID, false);
+    const lists = await getListAndCardIdsOnBoard(boardID);
     const labels = await getLabelsByBoardIdDb(boardID);
 
     try {
@@ -59,7 +59,6 @@ export async function addBoard(name: string, boardCode: string, parentId: Direct
     const boardModel: BoardModelType = {
         id: boardModule.id,
         boardCode,
-        totalCards: 0,
     };
     await createBoardDb(boardModel);
     await syncDirectoryContents(parentId);

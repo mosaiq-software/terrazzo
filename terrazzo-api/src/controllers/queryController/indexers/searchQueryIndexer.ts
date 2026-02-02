@@ -89,7 +89,7 @@ const indexBoard = async (
             type: QueryableItem.Board,
         };
 
-        const cardsInBoard = await dataSource.getCardsByBoardIdDb(boardModule.id, { archived: false });
+        const cardsInBoard = await dataSource.getActiveCardsByBoardIdDb(boardModule.id);
         const cardIndexingPromises: Promise<QueryableDatapoint>[] = [];
         for (const card of cardsInBoard) {
             cardIndexingPromises.push(indexCard(dataSource, card, board.boardCode));

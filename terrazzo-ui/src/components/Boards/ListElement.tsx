@@ -1,10 +1,10 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button, CloseButton, Flex, FocusTrap, Group, Menu, Paper, Stack, TextInput } from '@mantine/core';
 import { getHotkeyHandler, useClickOutside } from '@mantine/hooks';
-import { CardId, ListHeader, ListId, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
+import { CardId, ListHeader, ListId, MAX_NAME_LENGTH, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { useSocket } from '@trz/contexts/socket-context';
-import { createCard, getListData, updateListField } from '@trz/emitters';
+import { createCard, emitMoveList, getListData, updateListField } from '@trz/emitters';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
 import { BoardContext, useBoardMetadata } from '@trz/pages/BoardPage';
 import { LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
@@ -90,8 +90,8 @@ function ListElement(props: ListElementProps): React.JSX.Element {
             return;
         }
 
-        if (cardTitle.length > 50) {
-            setError('Max 50 characters');
+        if (cardTitle.length > MAX_NAME_LENGTH) {
+            setError(`Max ${MAX_NAME_LENGTH} characters`);
             return;
         }
 
@@ -116,7 +116,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
     }
 
     async function onArchive() {
-        await updateListField(sockCtx, props.listId, { archived: true, order: -1 });
+        await emitMoveList(sockCtx, props.listId, null);
     }
 
     function onBlur() {
@@ -177,7 +177,12 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                     onChange={onTitleChange}
                     placeholder="Click to edit!"
                     type="title"
-                    titleProps={{ order: 6, c: COLORS.text.primary }}
+                    titleProps={{
+                        order: 6,
+                        fw: 600,
+                        c: COLORS.text.primary,
+                        lineClamp: 2,
+                    }}
                     style={{
                         width: '90%',
                     }}
@@ -250,6 +255,8 @@ function ListElement(props: ListElementProps): React.JSX.Element {
                                 onChange={(event) => setCardTitle(event.currentTarget.value)}
                                 error={error}
                                 p="5"
+                                autoFocus
+                                maxLength={MAX_NAME_LENGTH}
                             />
                         </FocusTrap>
                         <Flex

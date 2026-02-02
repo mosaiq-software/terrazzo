@@ -16,7 +16,7 @@ export const registerOrganizationListeners = (socket: Socket) => {
 
     subscribe(socket, ClientSE.CREATE_ORG, async (data) => {
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error(`User does not have permission to create an organization`);
         }
         const orgId = await addOrganization({ name: data.name, ownerId: socketData.user.userId });
@@ -28,7 +28,7 @@ export const registerOrganizationListeners = (socket: Socket) => {
             throw new Error(`User does not have permission to edit this organization`);
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         await updateOrganizationFromPartial(data.id, data, socketData.user.userId);
