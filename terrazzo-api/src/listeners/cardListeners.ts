@@ -32,7 +32,7 @@ export const registerCardListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to create cards on this board');
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         const card = await addCard({
@@ -49,7 +49,7 @@ export const registerCardListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to duplicate cards on this board');
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         const card = await duplicateCard(data.cardId, socketData.user.userId);
