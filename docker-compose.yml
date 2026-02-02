@@ -1,4 +1,18 @@
 services:
+    redis:
+        image: redis:8.4
+        restart: unless-stopped
+        ports:
+            - "${REDIS_PORT}:${REDIS_PORT}"
+        volumes:
+            - type: bind
+              source: ${VOLUME_PATH}/redis
+              target: /data
+              bind:
+                  create_host_path: true
+        env_file:
+            - .env
+        command: ["redis-server", "--appendonly", "yes"]
     common-job:
         build: ./terrazzo-common/
         restart: no
@@ -53,3 +67,6 @@ services:
                   create_host_path: true
         env_file:
             - .env
+
+volumes:
+    redis-data:

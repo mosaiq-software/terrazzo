@@ -5,6 +5,7 @@
         "start": "concurrently \"npm run build:common\" \"npm run start:api\" \"npm run start:ui\"",
         "start:api": "cd terrazzo-api && npm run start",
         "start:ui": "cd terrazzo-ui && npm run start",
+        "start:redis": "docker compose up redis",
         "build:common": "cd terrazzo-common && npm run build:watch",
         "migrate:db": "cd terrazzo-db && npm run migrate:up",
         "pretty": "prettier --write \"./**/*.{ts,tsx,json}\"",

@@ -2,11 +2,11 @@ import dotenv from 'dotenv';
 import { Sequelize } from 'sequelize';
 dotenv.config({ path: '../.env' });
 
-const localVolumePath = process.env.LOCAL_VOLUME_PATH || '';
+const volumePath = process.env.VOLUME_PATH || '';
 
 export const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: `${localVolumePath}/db/terrazzo.sqlite`,
+    storage: `${volumePath}/db/terrazzo.sqlite`,
     logging: process.env.DATABASE_LOGGING === 'true',
 });
 
