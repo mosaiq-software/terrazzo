@@ -35,6 +35,8 @@ services:
                 condition: service_completed_successfully
             db-migrate:
                 condition: service_completed_successfully
+            redis:
+                condition: service_started
         ports:
             - "${API_PORT}:${API_PORT}"
             - "${SOCKET_PORT}:${SOCKET_PORT}"
@@ -52,6 +54,8 @@ services:
               target: /db
               bind:
                   create_host_path: true
+        environment:
+            - REDIS_HOST=redis
         env_file:
             - .env
 

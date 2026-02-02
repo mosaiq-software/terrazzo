@@ -1,6 +1,8 @@
 import { BoardId, CardHeader, CardId, ListId, TextBlockId } from '@mosaiq/terrazzo-common';
+import { CacheManager } from '@trz-api/utils/cacheManager';
 import { sequelize } from '@trz-api/utils/dbHelper';
 import { DataTypes, Model, Op } from 'sequelize';
+import { cacheCard, getCachedCard, invalidateCardCache } from './cardCache';
 
 class CardModel extends Model<CardHeader> {}
 CardModel.init(
@@ -29,8 +31,16 @@ CardModel.init(
 );
 
 export const getCardByIdDb = async (id: CardId) => {
+    const cached = await getCachedCard(id);
+    if (cached) {
+        return cached;
+    }
     const model = await CardModel.findByPk(id);
-    return model?.toJSON();
+    const card = model?.toJSON();
+    if (card) {
+        await cacheCard(card);
+    }
+    return card;
 };
 
 export const getActiveCardsByListIdUpDb = async (listId: ListId) => {
@@ -48,11 +58,16 @@ export const getActiveCardsByBoardIdDb = async (boardId: BoardId) => {
 
 export const createCardOnListDb = async (card: CardHeader) => {
     const model = await CardModel.create({ ...card });
-    return model.toJSON();
+    const created = model.toJSON();
+    await cacheCard(created);
+    return created;
 };
 
 export const updateCardDb = async (card: Partial<CardHeader>) => {
     const [updated] = await CardModel.update({ ...card }, { where: { id: card.id } });
+    if (card.id) {
+        await invalidateCardCache(card.id);
+    }
     return updated;
 };
 
@@ -190,8 +205,11 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined 
         }
         await CardModel.update({ order: toPosition, listId: toListId }, { where: { id: cardId }, transaction });
         await transaction.commit();
+        await CacheManager.getInstance().del(cardCacheKey(cardId));
     } catch (e) {
         await transaction.rollback();
         throw e;
     }
 };
+
+const cardCacheKey = (cardId: CardId) => `card:${cardId}`;
