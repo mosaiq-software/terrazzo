@@ -59,7 +59,6 @@ export async function addBoard(name: string, boardCode: string, parentId: Direct
     const boardModel: BoardModelType = {
         id: boardModule.id,
         boardCode,
-        totalCards: 0,
     };
     await createBoardDb(boardModel);
     await syncDirectoryContents(parentId);

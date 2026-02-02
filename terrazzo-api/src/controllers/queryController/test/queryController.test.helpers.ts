@@ -56,7 +56,7 @@ export const buildSearchDataSource = (data: {
     const documentsById = new Map<DocumentId, DocumentModelType>();
 
     for (const board of boards) {
-        boardMap.set(board.id, { id: board.id, boardCode: board.code, totalCards: board.cards?.length ?? 0 });
+        boardMap.set(board.id, { id: board.id, boardCode: board.code });
         const cards = (board.cards ?? []).map((card, index) => {
             const descriptionTextBlockId = makeUid(`tb-card-${card.id}`);
             textBlockContent.set(descriptionTextBlockId, card.content ?? '');

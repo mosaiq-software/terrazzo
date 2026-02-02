@@ -2,13 +2,14 @@ import { Block } from '@blocknote/core';
 import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, UserId } from '@mosaiq/terrazzo-common';
 import { syncAddCard, syncMovedCard, syncUpdateCardField } from '@trz-api/broadcasters';
 import { syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
-import { getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
+import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
 import {
     createCardOnListDb,
     getActiveCardsByListIdUpDb,
     getCardByIdDb,
     getCardCountOnListDb,
+    getTotalCardCountOnBoardDb,
     moveCardDb,
     updateCardDb,
 } from '@trz-api/persistence/cardPersistence';
@@ -72,12 +73,14 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
         throw new Error('Failed to create description text block');
     }
 
+    const cardsOnBoard = await getTotalCardCountOnBoardDb(board.id);
+
     const cardUid = crypto.randomUUID();
     const newCard: Card = {
         id: cardUid,
         listId: card.listId,
         boardId: board.id,
-        cardNumber: card.cardNumber ?? board.totalCards + 1,
+        cardNumber: card.cardNumber ?? cardsOnBoard + 1,
         name: card.name || '',
         descriptionTextBlockId: descriptionTextBlockId,
         priority: card.priority || null,
@@ -90,7 +93,6 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
 
     try {
         await createCardOnListDb(newCard);
-        await updateBoardDb(board.id, { totalCards: board.totalCards + 1 });
     } catch (e) {
         throw new Error('Failed to save Card' + e);
     }
@@ -142,12 +144,14 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         throw new Error('Failed to create description text block ' + error.message);
     }
 
+    const cardsOnBoard = await getTotalCardCountOnBoardDb(board.id);
+
     const newCardId = crypto.randomUUID();
     const newCard: Card = {
         id: newCardId,
         listId: list.id,
         boardId: board.id,
-        cardNumber: board.totalCards + 1,
+        cardNumber: cardsOnBoard + 1,
         name: existingCard.name + ' (Copy)',
         descriptionTextBlockId: descriptionTextBlockId,
         priority: existingCard.priority,
@@ -160,7 +164,6 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
 
     try {
         await createCardOnListDb(newCard);
-        await updateBoardDb(board.id, { totalCards: board.totalCards + 1 });
     } catch (e) {
         throw new Error('Failed to save Card' + e);
     }
