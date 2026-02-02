@@ -1,11 +1,12 @@
-const dotenv = require('dotenv');
+import dotenv from 'dotenv';
+import { DbConfigs } from './dbTypes';
 dotenv.config({ path: '../.env' });
 
-const localVolumePath = process.env.LOCAL_VOLUME_PATH || '';
-const dbPath = `${localVolumePath}/db/terrazzo.sqlite`;
+const volumePath = process.env.VOLUME_PATH || '';
+const dbPath = `${volumePath}/db/terrazzo.sqlite`;
 const dbLogging = process.env.DATABASE_LOGGING === 'true';
 
-module.exports = {
+const configs: DbConfigs = {
     development: {
         dialect: 'sqlite',
         storage: dbPath,
@@ -19,3 +20,5 @@ module.exports = {
         dialectOptions: {},
     },
 };
+
+export default configs;
