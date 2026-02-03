@@ -102,7 +102,7 @@ export const PriorityButtons = (props: PriorityButtonsProps): React.JSX.Element 
                             </Button>
                         );
                     })}
-                    <Menu.Label>Card Priority</Menu.Label>
+                    <Menu.Label>Priority</Menu.Label>
                 </Flex>
             </Menu.Dropdown>
         </Menu>
