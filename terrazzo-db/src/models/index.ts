@@ -22,7 +22,7 @@ import { getRoleAssignmentModel } from './roleAssignmentModel';
 import { getRoleModel } from './roleModel';
 import { getTextBlockHistoryModel } from './textBlockHistoryModel';
 import { getTextBlockModel } from './textBlockModel';
-import { getUserModel } from './user';
+import { getUserModel } from './userModel';
 
 const env = process.env.TRZ_ENV || 'development';
 
