@@ -9,7 +9,7 @@ export interface DocumentModelType {
     lastModifiedByUserId: UserId;
 }
 
-export const DocumentModel = (sequelize: Sequelize): DbModel => {
+export const getDocumentModel = (sequelize: Sequelize): DbModel<DocumentModelType> => {
     class DocumentModel extends Model<DocumentModelType> {
         static associate(db: Db) {
             // define association here

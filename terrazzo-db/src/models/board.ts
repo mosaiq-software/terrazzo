@@ -7,7 +7,7 @@ export interface BoardModelType {
     boardCode: string;
 }
 
-export const BoardModel = (sequelize: Sequelize): DbModel => {
+export const getBoardModel = (sequelize: Sequelize): DbModel<BoardModelType> => {
     class BoardModel extends Model<BoardModelType> {
         static associate(db: Db) {
             // define association here

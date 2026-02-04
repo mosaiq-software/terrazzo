@@ -1,28 +1,27 @@
-import { recordKeys } from '@mosaiq/terrazzo-common';
 import process from 'node:process';
 import { Sequelize } from 'sequelize';
 import configs from '../config';
-import { Db, DbModel } from '../dbTypes';
-import { AuthSessionModel } from './authsession';
-import { BoardModel } from './board';
-import { CardModel } from './card';
-import { CardAssignmentModel } from './cardassignment';
-import { DirectoryModel } from './directory';
-import { DocumentModel } from './document';
-import { FileModel } from './file';
-import { InviteModel } from './invite';
-import { LabelModel } from './label';
-import { LabelAssignmentModel } from './labelassignment';
-import { LinkedAccountModel } from './linkedaccount';
-import { ListModel } from './list';
-import { ModuleModel } from './module';
-import { OrganizationModel } from './organization';
-import { OrganizationMembershipModel } from './organizationmembership';
-import { RoleModel } from './role';
-import { RoleAssignmentModel } from './roleassignment';
-import { TextBlockModel } from './textblock';
-import { TextBlockHistoryModel } from './textblockhistory';
-import { UserModel } from './user';
+import { Db } from '../dbTypes';
+import { getAuthSessionModel } from './authsession';
+import { getBoardModel } from './board';
+import { getCardModel } from './card';
+import { getCardAssignmentModel } from './cardassignment';
+import { getDirectoryModel } from './directory';
+import { getDocumentModel } from './document';
+import { getFileModel } from './file';
+import { getInviteModel } from './invite';
+import { getLabelModel } from './label';
+import { getLabelAssignmentModel } from './labelassignment';
+import { getLinkedAccountModel } from './linkedaccount';
+import { getListModel } from './list';
+import { getModuleModel } from './module';
+import { getOrganizationModel } from './organization';
+import { getOrganizationMembershipModel } from './organizationmembership';
+import { getRoleModel } from './role';
+import { getRoleAssignmentModel } from './roleassignment';
+import { getTextBlockModel } from './textblock';
+import { getTextBlockHistoryModel } from './textblockhistory';
+import { getUserModel } from './user';
 
 const env = process.env.TRZ_ENV || 'development';
 const volumePath = process.env.VOLUME_PATH || '';
@@ -47,40 +46,94 @@ sequelize
         console.error('Error connecting to database:', error);
     });
 
-const models: Record<string, DbModel> = {
-    AuthSession: AuthSessionModel(sequelize),
-    Board: BoardModel(sequelize),
-    Card: CardModel(sequelize),
-    CardAssignment: CardAssignmentModel(sequelize),
-    Directory: DirectoryModel(sequelize),
-    Document: DocumentModel(sequelize),
-    File: FileModel(sequelize),
-    Invite: InviteModel(sequelize),
-    Label: LabelModel(sequelize),
-    LabelAssignment: LabelAssignmentModel(sequelize),
-    LinkedAccount: LinkedAccountModel(sequelize),
-    List: ListModel(sequelize),
-    Module: ModuleModel(sequelize),
-    Organization: OrganizationModel(sequelize),
-    OrganizationMembership: OrganizationMembershipModel(sequelize),
-    Role: RoleModel(sequelize),
-    RoleAssignment: RoleAssignmentModel(sequelize),
-    TextBlock: TextBlockModel(sequelize),
-    TextBlockHistory: TextBlockHistoryModel(sequelize),
-    User: UserModel(sequelize),
-};
+const AuthSessionModel = getAuthSessionModel(sequelize);
+const BoardModel = getBoardModel(sequelize);
+const CardModel = getCardModel(sequelize);
+const CardAssignmentModel = getCardAssignmentModel(sequelize);
+const DirectoryModel = getDirectoryModel(sequelize);
+const DocumentModel = getDocumentModel(sequelize);
+const FileModel = getFileModel(sequelize);
+const InviteModel = getInviteModel(sequelize);
+const LabelModel = getLabelModel(sequelize);
+const LabelAssignmentModel = getLabelAssignmentModel(sequelize);
+const LinkedAccountModel = getLinkedAccountModel(sequelize);
+const ListModel = getListModel(sequelize);
+const ModuleModel = getModuleModel(sequelize);
+const OrganizationModel = getOrganizationModel(sequelize);
+const OrganizationMembershipModel = getOrganizationMembershipModel(sequelize);
+const RoleModel = getRoleModel(sequelize);
+const RoleAssignmentModel = getRoleAssignmentModel(sequelize);
+const TextBlockModel = getTextBlockModel(sequelize);
+const TextBlockHistoryModel = getTextBlockHistoryModel(sequelize);
+const UserModel = getUserModel(sequelize);
 
 const db: Db = {
     sequelize,
     Sequelize,
-    ...models,
+    AuthSessionModel,
+    BoardModel,
+    CardModel,
+    CardAssignmentModel,
+    DirectoryModel,
+    DocumentModel,
+    FileModel,
+    InviteModel,
+    LabelModel,
+    LabelAssignmentModel,
+    LinkedAccountModel,
+    ListModel,
+    ModuleModel,
+    OrganizationModel,
+    OrganizationMembershipModel,
+    RoleModel,
+    RoleAssignmentModel,
+    TextBlockModel,
+    TextBlockHistoryModel,
+    UserModel,
 };
 
-recordKeys(models).forEach((modelName) => {
-    const model = models[modelName];
-    if (model.associate) {
-        model.associate(db);
-    }
-});
+AuthSessionModel.associate?.(db);
+BoardModel.associate?.(db);
+CardModel.associate?.(db);
+CardAssignmentModel.associate?.(db);
+DirectoryModel.associate?.(db);
+DocumentModel.associate?.(db);
+FileModel.associate?.(db);
+InviteModel.associate?.(db);
+LabelModel.associate?.(db);
+LabelAssignmentModel.associate?.(db);
+LinkedAccountModel.associate?.(db);
+ListModel.associate?.(db);
+ModuleModel.associate?.(db);
+OrganizationModel.associate?.(db);
+OrganizationMembershipModel.associate?.(db);
+RoleModel.associate?.(db);
+RoleAssignmentModel.associate?.(db);
+TextBlockModel.associate?.(db);
+TextBlockHistoryModel.associate?.(db);
+UserModel.associate?.(db);
 
+export {
+    AuthSessionModel,
+    BoardModel,
+    CardAssignmentModel,
+    CardModel,
+    DirectoryModel,
+    DocumentModel,
+    FileModel,
+    InviteModel,
+    LabelAssignmentModel,
+    LabelModel,
+    LinkedAccountModel,
+    ListModel,
+    ModuleModel,
+    OrganizationMembershipModel,
+    OrganizationModel,
+    RoleAssignmentModel,
+    RoleModel,
+    sequelize,
+    TextBlockHistoryModel,
+    TextBlockModel,
+    UserModel,
+};
 export default db;

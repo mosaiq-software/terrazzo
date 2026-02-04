@@ -6,7 +6,7 @@ export interface DirectoryModelType {
     id: DirectoryId;
 }
 
-export const DirectoryModel = (sequelize: Sequelize): DbModel => {
+export const getDirectoryModel = (sequelize: Sequelize): DbModel<DirectoryModelType> => {
     class DirectoryModel extends Model<DirectoryModelType> {
         static associate(db: Db) {
             // define association here

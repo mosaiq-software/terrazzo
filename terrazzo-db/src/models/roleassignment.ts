@@ -8,7 +8,7 @@ export interface RoleAssignment {
     orgId: OrganizationId;
 }
 
-export const RoleAssignmentModel = (sequelize: Sequelize): DbModel => {
+export const getRoleAssignmentModel = (sequelize: Sequelize): DbModel<RoleAssignment> => {
     class RoleAssignmentModel extends Model<RoleAssignment> {
         static associate(db: Db) {
             // define association here

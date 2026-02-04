@@ -1,8 +1,11 @@
 {
-    "name": "terrazzo-db",
+    "name": "@mosaiq/terrazzo-db",
     "version": "0.0.0",
+    "main": "dist/models/index.js",
+    "types": "dist/models/index.d.ts",
     "scripts": {
         "build": "tsc",
+        "build:watch": "tsc --watch",
         "migrate:up": "npm run build && npx sequelize-cli db:migrate",
         "migrate:undo": "npm run build && npx sequelize-cli db:migrate:undo",
         "migrate:undo:all": "npm run build && npx sequelize-cli db:migrate:undo:all",

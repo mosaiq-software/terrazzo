@@ -1,19 +1,5 @@
-import { AuthSession, UserId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class AuthSessionModel extends Model<AuthSession> {}
-AuthSessionModel.init(
-    {
-        userId: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        authToken: DataTypes.STRING,
-        createdAt: DataTypes.BIGINT,
-    },
-    { sequelize, timestamps: false, tableName: 'AuthSessions' }
-);
+import { UserId } from '@mosaiq/terrazzo-common';
+import { AuthSessionModel } from '@mosaiq/terrazzo-db';
 
 export const getAuthSessionByUserIdDb = async (userId: UserId) => {
     const model = await AuthSessionModel.findByPk(userId);

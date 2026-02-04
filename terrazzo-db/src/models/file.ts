@@ -2,7 +2,7 @@ import { UploadedFile } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const FileModel = (sequelize: Sequelize): DbModel => {
+export const getFileModel = (sequelize: Sequelize): DbModel<UploadedFile> => {
     class FileModel extends Model<UploadedFile> {
         static associate(db: Db) {
             // define association here

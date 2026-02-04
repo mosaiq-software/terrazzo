@@ -2,7 +2,7 @@ import { Invite } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const InviteModel = (sequelize: Sequelize): DbModel => {
+export const getInviteModel = (sequelize: Sequelize): DbModel<Invite> => {
     class InviteModel extends Model<Invite> {
         static associate(db: Db) {
             // define association here

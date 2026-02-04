@@ -2,7 +2,7 @@ import { UserHeader } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const UserModel = (sequelize: Sequelize): DbModel => {
+export const getUserModel = (sequelize: Sequelize): DbModel<UserHeader> => {
     class UserModel extends Model<UserHeader> {
         static associate(db: Db) {
             // define association here
