@@ -1,22 +1,5 @@
 import { OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class OrgModel extends Model<OrganizationHeader> {}
-OrgModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        name: DataTypes.STRING,
-        createdAt: DataTypes.INTEGER,
-        logoUrl: DataTypes.STRING,
-        description: DataTypes.TEXT,
-        ownerId: DataTypes.STRING,
-    },
-    { sequelize, timestamps: false, tableName: 'Organizations' }
-);
+import { OrganizationModel as OrgModel } from '@mosaiq/terrazzo-db';
 
 export const getOrgByIdDb = async (id: OrganizationId) => {
     const model = await OrgModel.findByPk(id);

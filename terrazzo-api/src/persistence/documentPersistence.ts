@@ -1,6 +1,5 @@
 import { DocumentId, TextBlockId, UserId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
+import { DocumentModel } from '@mosaiq/terrazzo-db';
 
 export interface DocumentModelType {
     id: DocumentId;
@@ -8,19 +7,6 @@ export interface DocumentModelType {
     lastModifiedAt: number;
     lastModifiedByUserId: UserId;
 }
-class DocumentModel extends Model<DocumentModelType> {}
-DocumentModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        textBlockId: DataTypes.STRING,
-        lastModifiedAt: DataTypes.INTEGER,
-        lastModifiedByUserId: DataTypes.STRING,
-    },
-    { sequelize, timestamps: false, tableName: 'Documents' }
-);
 
 export const getDocumentByIdDb = async (id: DocumentId) => {
     const model = await DocumentModel.findByPk(id, {});

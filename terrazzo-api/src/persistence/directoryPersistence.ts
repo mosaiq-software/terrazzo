@@ -1,20 +1,9 @@
 import { DirectoryId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
+import { DirectoryModel } from '@mosaiq/terrazzo-db';
 
 export interface DirectoryModelType {
     id: DirectoryId;
 }
-class DirectoryModel extends Model<DirectoryModelType> {}
-DirectoryModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-    },
-    { sequelize, timestamps: false, tableName: 'Directories' }
-);
 
 export const getDirectoryByIdDb = async (id: DirectoryId) => {
     const model = await DirectoryModel.findByPk(id, {});

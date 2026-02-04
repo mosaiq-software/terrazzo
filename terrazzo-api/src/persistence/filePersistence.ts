@@ -1,22 +1,5 @@
 import { TextBlockId, UploadedFile } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class FileModel extends Model<UploadedFile> {}
-FileModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        base64: DataTypes.TEXT,
-        fileName: DataTypes.STRING,
-        mimeType: DataTypes.STRING,
-        createdAt: DataTypes.BIGINT,
-        createdByUserId: DataTypes.STRING,
-    },
-    { sequelize, timestamps: false, tableName: 'Files' }
-);
+import { FileModel } from '@mosaiq/terrazzo-db';
 
 export const getFileByIdDb = async (id: TextBlockId) => {
     const model = await FileModel.findByPk(id);

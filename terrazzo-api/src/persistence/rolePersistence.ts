@@ -1,22 +1,5 @@
 import { OrganizationId, Role, RoleId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class RoleModel extends Model<Role> {}
-RoleModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        orgId: DataTypes.STRING,
-        name: DataTypes.STRING,
-        color: DataTypes.STRING,
-        order: DataTypes.INTEGER,
-        defaultPermissions: DataTypes.JSON,
-    },
-    { sequelize, timestamps: false, tableName: 'Roles' }
-);
+import { RoleModel, sequelize } from '@mosaiq/terrazzo-db';
 
 export const getRoleByIdDb = async (id: RoleId) => {
     const model = await RoleModel.findByPk(id);

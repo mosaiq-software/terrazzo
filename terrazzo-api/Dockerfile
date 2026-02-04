@@ -7,6 +7,7 @@ COPY package*.json ./
 
 # Copy all packages
 COPY terrazzo-common ./terrazzo-common/
+COPY terrazzo-db ./terrazzo-db/
 COPY terrazzo-api ./terrazzo-api/
 
 # Install and build everything

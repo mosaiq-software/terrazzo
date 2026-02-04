@@ -1,32 +1,6 @@
 import { BoardId, CardHeader, CardId, ListId, TextBlockId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model, Op } from 'sequelize';
-
-class CardModel extends Model<CardHeader> {}
-CardModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        listId: {
-            type: DataTypes.STRING,
-            allowNull: true,
-        },
-        boardId: DataTypes.STRING,
-        cardNumber: DataTypes.INTEGER,
-        name: DataTypes.STRING,
-        descriptionTextBlockId: DataTypes.STRING,
-        priority: DataTypes.INTEGER,
-        order: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-        },
-        createdById: DataTypes.STRING,
-        createdAt: DataTypes.NUMBER,
-    },
-    { sequelize, timestamps: false, tableName: 'Cards' }
-);
+import { CardModel, sequelize } from '@mosaiq/terrazzo-db';
+import { Op } from 'sequelize';
 
 export const getCardByIdDb = async (id: CardId) => {
     const model = await CardModel.findByPk(id);
