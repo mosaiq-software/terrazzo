@@ -1,4 +1,4 @@
-import { BoardId, CardId, ListHeader, ListId, settlePromises } from '@mosaiq/terrazzo-common';
+import { BoardId, CardId, ListHeader, ListId } from '@mosaiq/terrazzo-common';
 import { syncAddList, syncMoveList, syncUpdateListField } from '@trz-api/broadcasters';
 import { getActiveCardIdsOnListDb } from '@trz-api/persistence/cardPersistence';
 import {
@@ -18,8 +18,8 @@ export async function getListAndCardIdsOnBoard(boardID: BoardId): Promise<{ list
             cardIds: await getActiveCardIdsOnListDb(li),
         };
     });
-    const { fulfilled } = await settlePromises(promises);
-    return fulfilled;
+    const res = await Promise.all(promises);
+    return res;
 }
 
 export async function getListRes(listId: ListId): Promise<ListHeader | undefined> {
