@@ -25,8 +25,8 @@ export const createCardOnListDb = async (card: CardHeader) => {
     return model.toJSON();
 };
 
-export const updateCardDb = async (card: Partial<CardHeader>) => {
-    const [updated] = await CardModel.update({ ...card }, { where: { id: card.id } });
+export const updateCardDb = async (cardId: CardId, card: Partial<CardHeader>) => {
+    const [updated] = await CardModel.update({ ...card }, { where: { id: cardId } });
     return updated;
 };
 
