@@ -27,7 +27,7 @@
         "types:api": "cd terrazzo-api && npm run types",
         "types:ui": "cd terrazzo-ui && npm run types",
         "types:common": "cd terrazzo-common && npm run types",
-        "postinstall": "test -d terrazzo-common && npm run build:common:once; test -d terrazzo-db && npm run build:db:once; exit 0",
+        "postinstall": "node ./scripts/postinstall.mjs",
         "prepare": "husky",
         "before-push": "node ./scripts/before-push.mjs",
         "test:api": "cd terrazzo-api && npm run test",
