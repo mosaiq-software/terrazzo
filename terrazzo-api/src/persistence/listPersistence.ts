@@ -9,7 +9,7 @@ export const getListByIdDb = async (id: ListId) => {
     });
 };
 
-export const getActiveListsByBoardIdOrderDb = async (boardId: BoardId) => {
+export const getActiveListIdsByBoardIdOrderDb = async (boardId: BoardId) => {
     return (
         (await getCached(CacheEntity.ListsInBoard, boardId, async () => {
             const models = await ListModel.findAll({
@@ -21,7 +21,7 @@ export const getActiveListsByBoardIdOrderDb = async (boardId: BoardId) => {
                 },
                 order: [['order', 'ASC']],
             });
-            return models.map((list) => list.toJSON());
+            return models.map((list) => list.toJSON().id);
         })) || []
     );
 };

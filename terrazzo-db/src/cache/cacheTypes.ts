@@ -1,4 +1,4 @@
-import { CardId } from '@mosaiq/terrazzo-common';
+import { CardId, ListId } from '@mosaiq/terrazzo-common';
 import type { BoardModelType } from '../models/boardModel';
 import type { CardModelType } from '../models/cardModel';
 import type { DirectoryModelType } from '../models/directoryModel';
@@ -55,7 +55,7 @@ export interface CacheEntityTypeMap {
 
     // Composite Models
     [CacheEntity.CardsInList]: CardId[];
-    [CacheEntity.ListsInBoard]: ListModelType[];
+    [CacheEntity.ListsInBoard]: ListId[];
 }
 
 /**
