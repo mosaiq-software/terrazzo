@@ -1,9 +1,13 @@
 services:
     common-job:
-        build: ./terrazzo-common/
+        build:
+            context: .
+            dockerfile: ./terrazzo-common/Dockerfile
         restart: no
     ui-job:
-        build: ./terrazzo-ui/
+        build:
+            context: .
+            dockerfile: ./terrazzo-ui/Dockerfile
         restart: no
         depends_on:
             common-job:
@@ -15,7 +19,9 @@ services:
         env_file:
             - .env
     api:
-        build: ./terrazzo-api/
+        build:
+            context: .
+            dockerfile: ./terrazzo-api/Dockerfile
         depends_on:
             common-job:
                 condition: service_completed_successfully
@@ -42,7 +48,9 @@ services:
             - .env
 
     db-migrate:
-        build: ./terrazzo-db/
+        build:
+            context: .
+            dockerfile: ./terrazzo-db/Dockerfile
         restart: "no"
         command: ["npm", "run", "migrate:up"]
         volumes:

@@ -1,5 +1,4 @@
-import { TextBlockResourceType, YjsEvent } from '@mosaiq/terrazzo-common';
-import { TextBlockId, UID } from '@mosaiq/terrazzo-common/types/genericTypes';
+import { TextBlockId, TextBlockResourceType, UID, YjsEvent } from '@mosaiq/terrazzo-common';
 import { Namespace, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';
 import * as Y from 'yjs';
