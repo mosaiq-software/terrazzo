@@ -2,8 +2,10 @@ import { Role } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const getRoleModel = (sequelize: Sequelize): DbModel<Role> => {
-    class RoleModel extends Model<Role> {
+export type RoleModelType = Role;
+
+export const getRoleModel = (sequelize: Sequelize): DbModel<RoleModelType> => {
+    class RoleModel extends Model<RoleModelType> {
         static associate(db: Db) {
             // define association here
         }

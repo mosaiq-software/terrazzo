@@ -1,6 +1,7 @@
-import type { CardHeader, ModuleHeader } from '@mosaiq/terrazzo-common';
 import type { BoardModelType } from '../models/boardModel';
-import { UserModelType } from '../models/userModel';
+import type { CardModelType } from '../models/cardModel';
+import type { ModuleModelType } from '../models/moduleModel';
+import type { UserModelType } from '../models/userModel';
 
 /**
  * Enum of all cacheable entity types.
@@ -21,8 +22,8 @@ export enum CacheEntity {
 export interface CacheEntityTypeMap {
     [CacheEntity.User]: UserModelType;
     [CacheEntity.Board]: BoardModelType;
-    [CacheEntity.Card]: CardHeader;
-    [CacheEntity.Module]: ModuleHeader;
+    [CacheEntity.Card]: CardModelType;
+    [CacheEntity.Module]: ModuleModelType;
 }
 
 /**

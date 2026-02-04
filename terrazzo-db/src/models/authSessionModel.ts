@@ -2,8 +2,10 @@ import { AuthSession } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const getAuthSessionModel = (sequelize: Sequelize): DbModel<AuthSession> => {
-    class AuthSessionModel extends Model<AuthSession> {
+export type AuthSessionModelType = AuthSession;
+
+export const getAuthSessionModel = (sequelize: Sequelize): DbModel<AuthSessionModelType> => {
+    class AuthSessionModel extends Model<AuthSessionModelType> {
         static associate(db: Db) {
             // define association here
         }

@@ -2,8 +2,10 @@ import { MembershipRecord } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const getOrganizationMembershipModel = (sequelize: Sequelize): DbModel<MembershipRecord> => {
-    class OrganizationMembershipModel extends Model<MembershipRecord> {
+export type OrganizationMembershipModelType = MembershipRecord;
+
+export const getOrganizationMembershipModel = (sequelize: Sequelize): DbModel<OrganizationMembershipModelType> => {
+    class OrganizationMembershipModel extends Model<OrganizationMembershipModelType> {
         static associate(db: Db) {
             // define association here
         }

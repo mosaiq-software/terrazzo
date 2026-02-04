@@ -2,14 +2,14 @@ import { OrganizationId, RoleId, UserId } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export interface RoleAssignment {
+export interface RoleAssignmentModelType {
     userId: UserId;
     roleId: RoleId;
     orgId: OrganizationId;
 }
 
-export const getRoleAssignmentModel = (sequelize: Sequelize): DbModel<RoleAssignment> => {
-    class RoleAssignmentModel extends Model<RoleAssignment> {
+export const getRoleAssignmentModel = (sequelize: Sequelize): DbModel<RoleAssignmentModelType> => {
+    class RoleAssignmentModel extends Model<RoleAssignmentModelType> {
         static associate(db: Db) {
             // define association here
         }
