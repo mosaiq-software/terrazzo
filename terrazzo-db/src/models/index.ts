@@ -1,7 +1,8 @@
+import { recordKeys } from '@mosaiq/terrazzo-common';
 import process from 'node:process';
 import { Sequelize } from 'sequelize';
 import configs from '../config';
-import { Db } from '../dbTypes';
+import { Db, DbModels } from '../dbTypes';
 import { getAuthSessionModel } from './authsession';
 import { getBoardModel } from './board';
 import { getCardModel } from './card';
@@ -67,9 +68,7 @@ const TextBlockModel = getTextBlockModel(sequelize);
 const TextBlockHistoryModel = getTextBlockHistoryModel(sequelize);
 const UserModel = getUserModel(sequelize);
 
-const db: Db = {
-    sequelize,
-    Sequelize,
+const dbModels: DbModels = {
     AuthSessionModel,
     BoardModel,
     CardModel,
@@ -92,26 +91,15 @@ const db: Db = {
     UserModel,
 };
 
-AuthSessionModel.associate?.(db);
-BoardModel.associate?.(db);
-CardModel.associate?.(db);
-CardAssignmentModel.associate?.(db);
-DirectoryModel.associate?.(db);
-DocumentModel.associate?.(db);
-FileModel.associate?.(db);
-InviteModel.associate?.(db);
-LabelModel.associate?.(db);
-LabelAssignmentModel.associate?.(db);
-LinkedAccountModel.associate?.(db);
-ListModel.associate?.(db);
-ModuleModel.associate?.(db);
-OrganizationModel.associate?.(db);
-OrganizationMembershipModel.associate?.(db);
-RoleModel.associate?.(db);
-RoleAssignmentModel.associate?.(db);
-TextBlockModel.associate?.(db);
-TextBlockHistoryModel.associate?.(db);
-UserModel.associate?.(db);
+const db: Db = {
+    sequelize,
+    Sequelize,
+    ...dbModels,
+};
+
+recordKeys(dbModels).forEach((modelName) => {
+    dbModels[modelName]?.associate?.(db);
+});
 
 export {
     AuthSessionModel,
@@ -131,7 +119,6 @@ export {
     OrganizationModel,
     RoleAssignmentModel,
     RoleModel,
-    sequelize,
     TextBlockHistoryModel,
     TextBlockModel,
     UserModel,
