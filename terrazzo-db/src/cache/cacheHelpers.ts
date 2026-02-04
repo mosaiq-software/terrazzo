@@ -12,9 +12,6 @@ import { CacheEntity, CacheEntityType } from './cacheTypes';
  * @param fallback - Function to execute if cache miss (typically a DB query)
  * @param ttl - Optional TTL in seconds (defaults to config value)
  * @returns The cached or freshly fetched value with proper typing
- *
- * @example
- * const user = await getCached(CacheEntity.User, userId, () => UserModel.findByPk(userId));
  */
 export const getCached = async <E extends CacheEntity>(
     entity: E,
@@ -65,9 +62,6 @@ export const getCached = async <E extends CacheEntity>(
  * @param id - Entity ID
  * @param value - Value to cache (will be JSON serialized)
  * @param ttl - Optional TTL in seconds (defaults to config value)
- *
- * @example
- * await setCache(CacheEntity.User, userId, userData);
  */
 export const setCache = async <E extends CacheEntity>(
     entity: E,
@@ -94,9 +88,6 @@ export const setCache = async <E extends CacheEntity>(
  *
  * @param entity - Entity type
  * @param id - Entity ID
- *
- * @example
- * await invalidateCache(CacheEntity.User, userId);
  */
 export const invalidateCache = async (entity: CacheEntity, id: string | number): Promise<void> => {
     const key = makeCacheKey(entity, id);
@@ -117,9 +108,6 @@ export const invalidateCache = async (entity: CacheEntity, id: string | number):
  *
  * @param entity - Entity type
  * @param pattern - Pattern to match (e.g., 'board:123:*')
- *
- * @example
- * await invalidatePattern(CacheEntity.Card, 'board:abc-def:*');
  */
 export const invalidatePattern = async (entity: CacheEntity, pattern: string = '*'): Promise<void> => {
     const keyPattern = makeCachePattern(entity, pattern);
@@ -156,9 +144,6 @@ export const invalidatePattern = async (entity: CacheEntity, pattern: string = '
  * @param fn - Function to wrap
  * @param ttl - Optional TTL
  * @returns Wrapped function result
- *
- * @example
- * const getUser = await withCache(CacheEntity.User, userId, () => UserModel.findByPk(userId));
  */
 export const withCache = async <E extends CacheEntity>(
     entity: E,
