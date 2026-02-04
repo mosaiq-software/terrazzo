@@ -1,9 +1,12 @@
 FROM node:20
 
-RUN apt-get update && apt-get install -y 
+WORKDIR /workspace
 
-COPY . /app
+# Copy workspace root and all packages
+COPY package*.json ./
+COPY terrazzo-common ./terrazzo-common/
 
-WORKDIR /app
+# Install all workspace dependencies
+RUN npm ci
 
-CMD ["npm", "run", "publish:prod"]
+# Build is handled by postinstall
