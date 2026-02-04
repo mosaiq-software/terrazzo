@@ -1,5 +1,5 @@
-import { existsSync } from 'fs';
 import { execSync } from 'child_process';
+import { existsSync } from 'fs';
 
 /**
  * Cross-platform postinstall script that builds terrazzo-common and terrazzo-db if they exist.
@@ -7,15 +7,15 @@ import { execSync } from 'child_process';
  */
 
 function buildIfExists(dir, command) {
-  if (existsSync(dir)) {
-    console.log(`Building ${dir}...`);
-    try {
-      execSync(command, { stdio: 'inherit' });
-    } catch (error) {
-      console.error(`Failed to build ${dir}:`, error.message);
-      // Continue execution even if build fails
+    if (existsSync(dir)) {
+        console.log(`Building ${dir}...`);
+        try {
+            execSync(command, { stdio: 'inherit' });
+        } catch (error) {
+            console.error(`Failed to build ${dir}:`, error.message);
+            // Continue execution even if build fails
+        }
     }
-  }
 }
 
 buildIfExists('terrazzo-common', 'npm run build:common:once');

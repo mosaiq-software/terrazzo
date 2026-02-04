@@ -25,18 +25,13 @@ import { getTextBlockModel } from './textBlockModel';
 import { getUserModel } from './user';
 
 const env = process.env.TRZ_ENV || 'development';
-const volumePath = process.env.VOLUME_PATH || '';
 
 const config = configs[env];
 if (!config) {
     throw new Error(`Database config for environment "${env}" was not found`);
 }
 
-const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: `${volumePath}/db/terrazzo.sqlite`,
-    logging: process.env.DATABASE_LOGGING === 'true',
-});
+const sequelize = new Sequelize({ ...config });
 
 sequelize
     .authenticate()
