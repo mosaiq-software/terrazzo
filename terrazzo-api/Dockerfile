@@ -1,11 +1,18 @@
 FROM node:20
 
-RUN apt-get update && apt-get install -y 
+WORKDIR /workspace
 
-COPY . /app
+# Copy workspace package files
+COPY package*.json ./
 
-WORKDIR /app
+# Copy all packages
+COPY terrazzo-common ./terrazzo-common/
+COPY terrazzo-db ./terrazzo-db/
+COPY terrazzo-api ./terrazzo-api/
 
-RUN npm install
+# Install and build everything
+RUN npm ci --include-workspace-root
 
-CMD ["npm", "run", "start:prod"]
+WORKDIR /workspace/terrazzo-api
+
+CMD ["npm", "run", "start"]

@@ -10,16 +10,12 @@
         "start": "vite --port 8080 --strictPort --host",
         "start:open": "vite --port 8080 --open --strictPort",
         "build": "tsc -b && vite build",
-        "build:prod": "npm ci && npm i @mosaiq/terrazzo-common@latest && npm run build && rm -rf /www/* && cp -r ./dist/* /www",
         "lint": "eslint .",
         "types": "tsc --noemit",
-        "update": "git fetch origin develop && git merge origin/develop",
-        "common:prod": "npm un @mosaiq/terrazzo-common && npm i @mosaiq/terrazzo-common@latest",
-        "common:dev": "npm un @mosaiq/terrazzo-common && npm i ../terrazzo-common/dist"
+        "update": "git fetch origin develop && git merge origin/develop"
     },
     "license": "UNLICENSED",
     "dependencies": {
-        "@ashwamegh/react-link-preview": "^1.0.1",
         "@blocknote/code-block": "^0.45.0",
         "@blocknote/core": "^0.45.0",
         "@blocknote/mantine": "^0.45.0",
@@ -35,14 +31,14 @@
         "@mantine/modals": "^8.3.4",
         "@mantine/notifications": "^8.3.4",
         "@microsoft/clarity": "^1.0.2",
-        "@mosaiq/terrazzo-common": "file:../terrazzo-common/dist",
+        "@mosaiq/terrazzo-common": "*",
         "dotenv": "^17.2.3",
         "fuse.js": "^7.1.0",
         "mantine-contextmenu": "^7.17.1",
         "node-vibrant": "^4.0.3",
         "query-string": "^9.1.1",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
         "react-icons": "^5.4.0",
         "react-router-dom": "^7.0.1",
         "socket.io-client": "^4.8.1",
@@ -53,8 +49,8 @@
     "devDependencies": {
         "@eslint/js": "^9.38.0",
         "@types/node": "^22.19.0",
-        "@types/react": "^18.3.18",
-        "@types/react-dom": "^18.3.5",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
         "@types/react-router": "^5.1.20",
         "@vitejs/plugin-react": "^5.1.0",
         "css-loader": "^7.1.2",
@@ -71,5 +67,9 @@
         "typescript-eslint": "^8.46.2",
         "vite": "^7.1.12",
         "vite-plugin-node-polyfills": "^0.24.0"
+    },
+    "overrides": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
     }
 }

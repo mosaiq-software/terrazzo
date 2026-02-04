@@ -1,19 +1,5 @@
 import { AssignmentId, CardAssignment, CardId, UserId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class CardAssignmentModel extends Model<CardAssignment> {}
-CardAssignmentModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        userId: DataTypes.STRING,
-        cardId: DataTypes.STRING,
-    },
-    { sequelize, timestamps: false, tableName: 'CardAssignments' }
-);
+import { CardAssignmentModel } from '@mosaiq/terrazzo-db';
 
 export const getCardAssignmentByIdDb = async (asnId: AssignmentId) => {
     const model = await CardAssignmentModel.findByPk(asnId);

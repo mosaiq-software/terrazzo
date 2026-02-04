@@ -52,7 +52,7 @@ const getModulePermissionsForUser = async (userId: UserId, moduleId: UID): Promi
     const orgRoles = await getRolesForOrg(module.orgId);
     const org = await getOrgByIdDb(module.orgId);
     const truePermissions = calculateTrueModulePermissionsInOrg(module.effectivePermissions, orgRoles);
-    const grantedFlags = evaluatePermissionForRoles(userRoles, truePermissions, org && org.ownerId === userId);
+    const grantedFlags = evaluatePermissionForRoles(userRoles, truePermissions, !!org && org.ownerId === userId);
     return grantedFlags;
 };
 
@@ -66,7 +66,7 @@ const getOrganizationPermissionsForUser = async (userId: UserId, orgId: Organiza
     const userRoles = await getRoleIdsForUserInOrgDb(userId, orgId);
     const orgRoles = await getRolesForOrg(orgId);
     const org = await getOrgByIdDb(orgId);
-    const grantedFlags = evaluateOrganizationPermissionForRoles(userRoles, orgRoles, org && org.ownerId === userId);
+    const grantedFlags = evaluateOrganizationPermissionForRoles(userRoles, orgRoles, !!org && org.ownerId === userId);
     return grantedFlags;
 };
 

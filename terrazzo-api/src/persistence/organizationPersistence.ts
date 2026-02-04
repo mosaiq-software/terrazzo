@@ -1,26 +1,11 @@
 import { OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class OrgModel extends Model<OrganizationHeader> {}
-OrgModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        name: DataTypes.STRING,
-        createdAt: DataTypes.INTEGER,
-        logoUrl: DataTypes.STRING,
-        description: DataTypes.TEXT,
-        ownerId: DataTypes.STRING,
-    },
-    { sequelize, timestamps: false, tableName: 'Organizations' }
-);
+import { CacheEntity, OrganizationModel as OrgModel, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
 
 export const getOrgByIdDb = async (id: OrganizationId) => {
-    const model = await OrgModel.findByPk(id);
-    return model?.toJSON();
+    return await getCached(CacheEntity.Organization, id, async () => {
+        const model = await OrgModel.findByPk(id);
+        return model?.toJSON();
+    });
 };
 
 export const createOrgDb = async (org: OrganizationHeader) => {
@@ -30,5 +15,6 @@ export const createOrgDb = async (org: OrganizationHeader) => {
 
 export const updateOrgDb = async (org: OrganizationHeader) => {
     const [updated] = await OrgModel.update({ ...org }, { where: { id: org.id } });
+    await invalidateCache(CacheEntity.Organization, org.id);
     return updated;
 };
