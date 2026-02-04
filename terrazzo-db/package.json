@@ -12,6 +12,7 @@
         "sequelize-cli": "^6.6.5"
     },
     "dependencies": {
+        "@mosaiq/terrazzo-common": "*",
         "dotenv": "^17.2.3",
         "sequelize": "^6.37.7",
         "sqlite3": "^5.1.7",
