@@ -1,6 +1,5 @@
 import { DocumentId } from '@mosaiq/terrazzo-common';
-import { CacheEntity, DocumentModel, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
-import { DocumentModelType } from '@mosaiq/terrazzo-db/dist/models/documentModel';
+import { CacheEntity, DocumentModel, DocumentModelType, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
 
 export const getDocumentByIdDb = async (id: DocumentId) => {
     return await getCached(CacheEntity.Document, id, async () => {

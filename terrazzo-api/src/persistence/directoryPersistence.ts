@@ -1,6 +1,5 @@
 import { DirectoryId } from '@mosaiq/terrazzo-common';
-import { CacheEntity, DirectoryModel, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
-import { DirectoryModelType } from '@mosaiq/terrazzo-db/dist/models/directoryModel';
+import { CacheEntity, DirectoryModel, DirectoryModelType, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
 
 export const getDirectoryByIdDb = async (id: DirectoryId) => {
     return await getCached(CacheEntity.Directory, id, async () => {

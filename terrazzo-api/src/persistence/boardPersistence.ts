@@ -1,6 +1,5 @@
 import { BoardId } from '@mosaiq/terrazzo-common';
-import { BoardModel, CacheEntity, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
-import { BoardModelType } from '@mosaiq/terrazzo-db/dist/models/boardModel';
+import { BoardModel, BoardModelType, CacheEntity, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
 
 export const getBoardsDb = async () => {
     const models = await BoardModel.findAll();
