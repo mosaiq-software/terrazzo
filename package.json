@@ -21,6 +21,7 @@
         "build:db": "cd terrazzo-db && npm run build:watch",
         "build:db:once": "cd terrazzo-db && npm run build",
         "migrate:db": "cd terrazzo-db && npm run migrate:up",
+        "reset:db": "node ./scripts/reset-db.mjs",
         "pretty": "prettier --write \"./**/*.{ts,tsx,json}\"",
         "lint": "npm run lint:api && npm run lint:ui && npm run lint:common",
         "lint:api": "cd terrazzo-api && npm run lint",
