@@ -11,9 +11,8 @@ import {
     UID0,
     UserId,
 } from '@mosaiq/terrazzo-common';
-import { BoardModelType } from '@trz-api/persistence/boardPersistence';
-import { DocumentModelType } from '@trz-api/persistence/documentPersistence';
 import { SearchQueryDataSource } from '../indexers/queryDataSources';
+import { BoardModelType, DocumentModelType } from '@mosaiq/terrazzo-db';
 
 export type TestCardConfig = { id: UID; name: string; number: number; content?: string };
 export type TestBoardConfig = { id: UID; name: string; code: string; cards?: TestCardConfig[] };

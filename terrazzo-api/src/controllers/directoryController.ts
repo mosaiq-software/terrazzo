@@ -1,14 +1,10 @@
 import { DirectoryHeader, DirectoryId, ModuleHeader, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common';
 import { syncDirectoryContents, syncDirectoryField } from '@trz-api/broadcasters';
-import {
-    createDirectoryDb,
-    DirectoryModelType,
-    getDirectoryByIdDb,
-    updateDirectoryDb,
-} from '@trz-api/persistence/directoryPersistence';
+import { createDirectoryDb, getDirectoryByIdDb, updateDirectoryDb } from '@trz-api/persistence/directoryPersistence';
 import { getModulesByParentIdDb } from '@trz-api/persistence/modulePersistence';
 import { userCanViewBoard, userCanViewDirectory, userCanViewDocument } from '@trz-api/utils/permissions';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
+import { DirectoryModelType } from '@mosaiq/terrazzo-db';
 
 export const getDirectory = async (id: DirectoryId): Promise<DirectoryHeader | undefined> => {
     const dirModule = await getModuleById(id);
