@@ -4,44 +4,25 @@ import { Sequelize } from 'sequelize';
 import configs from '../config';
 import { Db, DbModels } from '../dbTypes';
 import { getAuthSessionModel } from './authSessionModel';
-import type { BoardModelType } from './boardModel';
-import { getBoardModel } from './boardModel';
-import type { CardAssignmentModelType } from './cardAssignmentModel';
-import { getCardAssignmentModel } from './cardAssignmentModel';
-import type { CardModelType } from './cardModel';
-import { getCardModel } from './cardModel';
-import type { DirectoryModelType } from './directoryModel';
-import { getDirectoryModel } from './directoryModel';
-import type { DocumentModelType } from './documentModel';
-import { getDocumentModel } from './documentModel';
-import type { FileModelType } from './fileModel';
-import { getFileModel } from './fileModel';
-import type { InviteModelType } from './inviteModel';
-import { getInviteModel } from './inviteModel';
-import type { LabelAssignmentModelType } from './labelAssignmentModel';
-import { getLabelAssignmentModel } from './labelAssignmentModel';
-import type { LabelModelType } from './labelModel';
-import { getLabelModel } from './labelModel';
-import type { LinkedAccountModelType } from './linkedAccountModel';
-import { getLinkedAccountModel } from './linkedAccountModel';
-import type { ListModelType } from './listModel';
-import { getListModel } from './listModel';
-import type { ModuleModelType } from './moduleModel';
-import { getModuleModel } from './moduleModel';
-import type { OrganizationMembershipModelType } from './organizationMembershipModel';
-import { getOrganizationMembershipModel } from './organizationMembershipModel';
-import type { OrganizationModelType } from './organizationModel';
-import { getOrganizationModel } from './organizationModel';
-import type { RoleAssignmentModelType } from './roleAssignmentModel';
-import { getRoleAssignmentModel } from './roleAssignmentModel';
-import type { RoleModelType } from './roleModel';
-import { getRoleModel } from './roleModel';
-import type { TextBlockHistoryModelType } from './textBlockHistoryModel';
-import { getTextBlockHistoryModel } from './textBlockHistoryModel';
-import type { TextBlockModelType } from './textBlockModel';
-import { getTextBlockModel } from './textBlockModel';
-import type { UserModelType } from './userModel';
-import { getUserModel } from './userModel';
+import { BoardModelType, getBoardModel } from './boardModel';
+import { CardAssignmentModelType, getCardAssignmentModel } from './cardAssignmentModel';
+import { CardModelType, getCardModel } from './cardModel';
+import { DirectoryModelType, getDirectoryModel } from './directoryModel';
+import { DocumentModelType, getDocumentModel } from './documentModel';
+import { FileModelType, getFileModel } from './fileModel';
+import { getInviteModel, InviteModelType } from './inviteModel';
+import { getLabelAssignmentModel, LabelAssignmentModelType } from './labelAssignmentModel';
+import { getLabelModel, LabelModelType } from './labelModel';
+import { getLinkedAccountModel, LinkedAccountModelType } from './linkedAccountModel';
+import { getListModel, ListModelType } from './listModel';
+import { getModuleModel, ModuleModelType } from './moduleModel';
+import { getOrganizationMembershipModel, OrganizationMembershipModelType } from './organizationMembershipModel';
+import { getOrganizationModel, OrganizationModelType } from './organizationModel';
+import { getRoleAssignmentModel, RoleAssignmentModelType } from './roleAssignmentModel';
+import { getRoleModel, RoleModelType } from './roleModel';
+import { getTextBlockHistoryModel, TextBlockHistoryModelType } from './textBlockHistoryModel';
+import { getTextBlockModel, TextBlockModelType } from './textBlockModel';
+import { getUserModel, UserModelType } from './userModel';
 
 const env = process.env.TRZ_ENV || 'development';
 
@@ -118,43 +99,47 @@ recordKeys(dbModels).forEach((modelName) => {
 export {
     AuthSessionModel,
     BoardModel,
-    BoardModelType,
     CardAssignmentModel,
-    CardAssignmentModelType,
     CardModel,
-    CardModelType,
     DirectoryModel,
-    DirectoryModelType,
     DocumentModel,
-    DocumentModelType,
     FileModel,
-    FileModelType,
     InviteModel,
-    InviteModelType,
     LabelAssignmentModel,
-    LabelAssignmentModelType,
     LabelModel,
-    LabelModelType,
     LinkedAccountModel,
-    LinkedAccountModelType,
     ListModel,
-    ListModelType,
     ModuleModel,
-    ModuleModelType,
     OrganizationMembershipModel,
-    OrganizationMembershipModelType,
     OrganizationModel,
-    OrganizationModelType,
     RoleAssignmentModel,
-    RoleAssignmentModelType,
     RoleModel,
-    RoleModelType,
     sequelize,
     TextBlockHistoryModel,
-    TextBlockHistoryModelType,
     TextBlockModel,
-    TextBlockModelType,
     UserModel,
+};
+
+export type {
+    BoardModelType,
+    CardAssignmentModelType,
+    CardModelType,
+    DirectoryModelType,
+    DocumentModelType,
+    FileModelType,
+    InviteModelType,
+    LabelAssignmentModelType,
+    LabelModelType,
+    LinkedAccountModelType,
+    ListModelType,
+    ModuleModelType,
+    OrganizationMembershipModelType,
+    OrganizationModelType,
+    RoleAssignmentModelType,
+    RoleModelType,
+    TextBlockHistoryModelType,
+    TextBlockModelType,
     UserModelType,
 };
+
 export default db;
