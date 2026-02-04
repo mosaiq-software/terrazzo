@@ -1,11 +1,6 @@
 import { CardId, LabelId } from '@mosaiq/terrazzo-common';
 import { LabelAssignmentModel, sequelize } from '@mosaiq/terrazzo-db';
 
-interface LabelAssignment {
-    labelId: LabelId;
-    cardId: CardId;
-}
-
 export const getLabelsOnCardDb = async (cardId: CardId) => {
     const models = await LabelAssignmentModel.findAll({ where: { cardId } });
     return models.map((label) => label.toJSON().labelId);

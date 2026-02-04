@@ -1,10 +1,6 @@
 import { BoardId } from '@mosaiq/terrazzo-common';
-import { BoardModel } from '@mosaiq/terrazzo-db';
-
-export interface BoardModelType {
-    id: BoardId;
-    boardCode: string;
-}
+import { BoardModel, CacheEntity, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
+import { BoardModelType } from '@mosaiq/terrazzo-db/dist/models/boardModel';
 
 export const getBoardsDb = async () => {
     const models = await BoardModel.findAll();
@@ -12,8 +8,10 @@ export const getBoardsDb = async () => {
 };
 
 export const getBoardByIdDb = async (id: BoardId) => {
-    const model = await BoardModel.findByPk(id, {});
-    return model?.toJSON();
+    return await getCached(CacheEntity.Board, id, async () => {
+        const model = await BoardModel.findByPk(id);
+        return model?.toJSON();
+    });
 };
 
 export const createBoardDb = async (board: BoardModelType) => {
@@ -23,5 +21,6 @@ export const createBoardDb = async (board: BoardModelType) => {
 
 export const updateBoardDb = async (boardID: BoardId, board: Partial<BoardModelType>) => {
     const [updated] = await BoardModel.update({ ...board }, { where: { id: boardID } });
+    await invalidateCache(CacheEntity.Board, boardID);
     return updated;
 };

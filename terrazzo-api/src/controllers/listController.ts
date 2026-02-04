@@ -1,6 +1,6 @@
 import { BoardId, CardId, ListHeader, ListId } from '@mosaiq/terrazzo-common';
 import { syncAddList, syncMoveList, syncUpdateListField } from '@trz-api/broadcasters';
-import { getCardIdsOnList } from '@trz-api/controllers/cardController';
+import { getActiveCardIdsOnListDb } from '@trz-api/persistence/cardPersistence';
 import {
     createListOnBoardDb,
     getActiveListCountOnBoard,
@@ -19,7 +19,7 @@ export async function getListAndCardIdsOnBoard(boardID: BoardId): Promise<{ list
     for (const li of listHeaders) {
         const r = {
             listId: li.id,
-            cardIds: await getCardIdsOnList(li.id),
+            cardIds: await getActiveCardIdsOnListDb(li.id),
         };
         res.push(r);
     }

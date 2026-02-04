@@ -6,7 +6,6 @@ import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
 import {
     createCardOnListDb,
-    getActiveCardsByListIdUpDb,
     getCardByIdDb,
     getCardCountOnListDb,
     getTotalCardCountOnBoardDb,
@@ -17,16 +16,6 @@ import { getLabelsOnCardDb, setLabelsOnCardDb } from '@trz-api/persistence/label
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
 import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
-
-export const MOVING_LIST_ORDER = -10000;
-
-export async function getCardIdsOnList(listID: ListId): Promise<CardId[]> {
-    const cardHeaders = await getActiveCardsByListIdUpDb(listID);
-    if (cardHeaders == null) {
-        return [];
-    }
-    return cardHeaders.map((c) => c.id);
-}
 
 export async function getSingleFullCard(cardId: CardId): Promise<Card | undefined> {
     const cardHeader = await getCardByIdDb(cardId);

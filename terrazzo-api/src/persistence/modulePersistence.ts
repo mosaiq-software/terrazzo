@@ -1,9 +1,11 @@
 import { ModuleHeader, UID } from '@mosaiq/terrazzo-common';
-import { ModuleModel } from '@mosaiq/terrazzo-db';
+import { CacheEntity, ModuleModel, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
 
 export const getModuleByIdDb = async (id: UID) => {
-    const model = await ModuleModel.findByPk(id, {});
-    return model?.toJSON();
+    return await getCached(CacheEntity.Module, id, async () => {
+        const model = await ModuleModel.findByPk(id, {});
+        return model?.toJSON();
+    });
 };
 
 export const getModulesByParentIdDb = async (parentId: UID) => {
@@ -28,8 +30,15 @@ export const createModuleDb = async (module: ModuleHeader) => {
 };
 
 export const updateModuleDb = async (id: UID, module: Partial<ModuleHeader>) => {
-    const [updated] = await ModuleModel.update({ ...module }, { where: { id: id } });
+    const [updated] = await ModuleModel.update({ ...module }, { where: { id } });
+    await invalidateCache(CacheEntity.Module, id);
     return updated;
+};
+
+export const deleteModuleDb = async (id: UID) => {
+    const deleted = await ModuleModel.destroy({ where: { id } });
+    await invalidateCache(CacheEntity.Module, id);
+    return deleted;
 };
 
 export const getNextModuleOrderInParentDb = async (parentId: UID) => {
