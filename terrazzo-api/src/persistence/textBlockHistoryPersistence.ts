@@ -1,21 +1,5 @@
 import { TextBlockId, TextBlockSnapshot, UID } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class TextBlockHistoryModel extends Model<TextBlockSnapshot> {}
-TextBlockHistoryModel.init(
-    {
-        snapshotId: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        textBlockId: DataTypes.STRING,
-        timestamp: DataTypes.NUMBER,
-        content: DataTypes.TEXT,
-        tags: DataTypes.JSON,
-    },
-    { sequelize, timestamps: false, tableName: 'TextBlockHistories' }
-);
+import { TextBlockHistoryModel } from '@mosaiq/terrazzo-db';
 
 export const createTextBlockHistorySnapshotDb = async (snapshot: TextBlockSnapshot) => {
     const model = await TextBlockHistoryModel.create({ ...snapshot });

@@ -1,23 +1,6 @@
 import { BoardId, ListHeader, ListId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model, Op } from 'sequelize';
-
-class ListModel extends Model<ListHeader> {}
-ListModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        boardId: DataTypes.STRING,
-        name: DataTypes.STRING,
-        order: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-        },
-    },
-    { sequelize, timestamps: false, tableName: 'Lists' }
-);
+import { ListModel, sequelize } from '@mosaiq/terrazzo-db';
+import { Op } from 'sequelize';
 
 export const getListByIdDb = async (id: ListId) => {
     const model = await ListModel.findByPk(id);

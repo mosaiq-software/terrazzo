@@ -1,21 +1,6 @@
 import { UserHeader, UserId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model, Sequelize } from 'sequelize';
-
-class UserModel extends Model<UserHeader> {}
-UserModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        username: DataTypes.STRING,
-        firstName: DataTypes.STRING,
-        lastName: DataTypes.STRING,
-        profilePicture: DataTypes.STRING,
-    },
-    { sequelize, timestamps: false, tableName: 'Users' }
-);
+import { UserModel, sequelize } from '@mosaiq/terrazzo-db';
+import { Sequelize } from 'sequelize';
 
 export const getUserHeaderByIdDb = async (id: UserId) => {
     const model = await UserModel.findByPk(id);

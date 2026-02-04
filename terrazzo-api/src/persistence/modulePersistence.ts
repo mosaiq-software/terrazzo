@@ -1,27 +1,5 @@
 import { ModuleHeader, UID } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class ModuleModel extends Model<ModuleHeader> {}
-ModuleModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        parentId: DataTypes.STRING,
-        name: DataTypes.STRING,
-        type: DataTypes.STRING,
-        order: DataTypes.INTEGER,
-        archived: DataTypes.BOOLEAN,
-        createdAt: DataTypes.INTEGER,
-        orgId: DataTypes.STRING,
-        desiredPermissions: DataTypes.JSON,
-        effectivePermissions: DataTypes.JSON,
-        public: DataTypes.BOOLEAN,
-    },
-    { sequelize, timestamps: false, tableName: 'Modules' }
-);
+import { ModuleModel } from '@mosaiq/terrazzo-db';
 
 export const getModuleByIdDb = async (id: UID) => {
     const model = await ModuleModel.findByPk(id, {});

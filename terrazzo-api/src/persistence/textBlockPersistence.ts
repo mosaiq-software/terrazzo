@@ -1,21 +1,5 @@
 import { TextBlock, TextBlockId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class TextBlockModel extends Model<TextBlock> {}
-TextBlockModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        text: DataTypes.TEXT,
-        type: DataTypes.STRING,
-        trackHistory: DataTypes.BOOLEAN,
-        lastSnapshotAt: DataTypes.NUMBER,
-    },
-    { sequelize, timestamps: false, tableName: 'TextBlocks' }
-);
+import { TextBlockModel } from '@mosaiq/terrazzo-db';
 
 export const getTextBlockByIdDb = async (id: TextBlockId) => {
     const model = await TextBlockModel.findByPk(id);

@@ -1,20 +1,5 @@
-import { BoardId, CardId, Label, LabelId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class LabelModel extends Model<Label> {}
-LabelModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        boardId: DataTypes.STRING,
-        name: DataTypes.STRING,
-        color: DataTypes.STRING,
-    },
-    { sequelize, timestamps: false, tableName: 'Labels' }
-);
+import { BoardId, Label, LabelId } from '@mosaiq/terrazzo-common';
+import { LabelModel } from '@mosaiq/terrazzo-db';
 
 export const getLabelByIdDb = async (id: LabelId) => {
     const model = await LabelModel.findByPk(id);

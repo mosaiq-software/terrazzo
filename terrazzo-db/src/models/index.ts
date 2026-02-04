@@ -3,25 +3,25 @@ import process from 'node:process';
 import { Sequelize } from 'sequelize';
 import configs from '../config';
 import { Db, DbModels } from '../dbTypes';
-import { getAuthSessionModel } from './authsession';
+import { getAuthSessionModel } from './authSession';
 import { getBoardModel } from './board';
 import { getCardModel } from './card';
-import { getCardAssignmentModel } from './cardassignment';
+import { getCardAssignmentModel } from './cardAssignment';
 import { getDirectoryModel } from './directory';
 import { getDocumentModel } from './document';
 import { getFileModel } from './file';
 import { getInviteModel } from './invite';
 import { getLabelModel } from './label';
-import { getLabelAssignmentModel } from './labelassignment';
-import { getLinkedAccountModel } from './linkedaccount';
+import { getLabelAssignmentModel } from './labelAssignment';
+import { getLinkedAccountModel } from './linkedAccount';
 import { getListModel } from './list';
 import { getModuleModel } from './module';
 import { getOrganizationModel } from './organization';
-import { getOrganizationMembershipModel } from './organizationmembership';
+import { getOrganizationMembershipModel } from './organizationMembership';
 import { getRoleModel } from './role';
-import { getRoleAssignmentModel } from './roleassignment';
-import { getTextBlockModel } from './textblock';
-import { getTextBlockHistoryModel } from './textblockhistory';
+import { getRoleAssignmentModel } from './roleAssignment';
+import { getTextBlockModel } from './textBlock';
+import { getTextBlockHistoryModel } from './textBlockHistory';
 import { getUserModel } from './user';
 
 const env = process.env.TRZ_ENV || 'development';
@@ -119,6 +119,7 @@ export {
     OrganizationModel,
     RoleAssignmentModel,
     RoleModel,
+    sequelize,
     TextBlockHistoryModel,
     TextBlockModel,
     UserModel,
