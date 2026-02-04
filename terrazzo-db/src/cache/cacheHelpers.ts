@@ -1,4 +1,4 @@
-import { cacheConfig, getRedisClient } from './cacheClient';
+import { cacheConfig, getRedisClient } from './cacheClientManager';
 import { makeCacheKey, makeCachePattern } from './cacheKeys';
 import { CacheEntity, CacheEntityType } from './cacheTypes';
 
