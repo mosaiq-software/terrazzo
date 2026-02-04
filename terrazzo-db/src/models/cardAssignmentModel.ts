@@ -2,8 +2,10 @@ import { CardAssignment } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const getCardAssignmentModel = (sequelize: Sequelize): DbModel<CardAssignment> => {
-    class CardAssignmentModel extends Model<CardAssignment> {
+export type CardAssignmentModelType = CardAssignment;
+
+export const getCardAssignmentModel = (sequelize: Sequelize): DbModel<CardAssignmentModelType> => {
+    class CardAssignmentModel extends Model<CardAssignmentModelType> {
         static associate(db: Db) {
             // define association here
         }

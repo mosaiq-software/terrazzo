@@ -2,8 +2,10 @@ import { OrganizationHeader } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const getOrganizationModel = (sequelize: Sequelize): DbModel<OrganizationHeader> => {
-    class OrganizationModel extends Model<OrganizationHeader> {
+export type OrganizationModelType = OrganizationHeader;
+
+export const getOrganizationModel = (sequelize: Sequelize): DbModel<OrganizationModelType> => {
+    class OrganizationModel extends Model<OrganizationModelType> {
         static associate(db: Db) {
             // define association here
         }

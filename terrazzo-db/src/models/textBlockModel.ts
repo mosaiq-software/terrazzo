@@ -2,8 +2,10 @@ import { TextBlock } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const getTextBlockModel = (sequelize: Sequelize): DbModel<TextBlock> => {
-    class TextBlockModel extends Model<TextBlock> {
+export type TextBlockModelType = TextBlock;
+
+export const getTextBlockModel = (sequelize: Sequelize): DbModel<TextBlockModelType> => {
+    class TextBlockModel extends Model<TextBlockModelType> {
         static associate(db: Db) {
             // define association here
         }

@@ -2,8 +2,10 @@ import { ListHeader } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const getListModel = (sequelize: Sequelize): DbModel<ListHeader> => {
-    class ListModel extends Model<ListHeader> {
+export type ListModelType = ListHeader;
+
+export const getListModel = (sequelize: Sequelize): DbModel<ListModelType> => {
+    class ListModel extends Model<ListModelType> {
         static associate(db: Db) {
             // define association here
         }

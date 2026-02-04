@@ -2,8 +2,10 @@ import { Label } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const getLabelModel = (sequelize: Sequelize): DbModel<Label> => {
-    class LabelModel extends Model<Label> {
+export type LabelModelType = Label;
+
+export const getLabelModel = (sequelize: Sequelize): DbModel<LabelModelType> => {
+    class LabelModel extends Model<LabelModelType> {
         static associate(db: Db) {
             // define association here
         }

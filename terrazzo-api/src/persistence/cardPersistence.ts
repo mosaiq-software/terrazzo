@@ -1,18 +1,24 @@
-import { BoardId, CardHeader, CardId, ListId, TextBlockId } from '@mosaiq/terrazzo-common';
-import { CardModel, sequelize } from '@mosaiq/terrazzo-db';
+import { BoardId, CardHeader, CardId, ListId } from '@mosaiq/terrazzo-common';
+import { CacheEntity, CardModel, getCached, invalidateCache, sequelize } from '@mosaiq/terrazzo-db';
 import { Op } from 'sequelize';
 
 export const getCardByIdDb = async (id: CardId) => {
-    const model = await CardModel.findByPk(id);
-    return model?.toJSON();
+    return await getCached(CacheEntity.Card, id, async () => {
+        const model = await CardModel.findByPk(id);
+        return model?.toJSON();
+    });
 };
 
-export const getActiveCardsByListIdUpDb = async (listId: ListId) => {
-    const models = await CardModel.findAll({
-        where: { listId, order: { [Op.not]: null } },
-        order: [['order', 'ASC']],
-    });
-    return models.map((card) => card.toJSON());
+export const getActiveCardIdsOnListDb = async (listId: ListId) => {
+    return (
+        (await getCached(CacheEntity.CardsInList, listId, async () => {
+            const models = await CardModel.findAll({
+                where: { listId, order: { [Op.not]: null } },
+                order: [['order', 'ASC']],
+            });
+            return models.map((card) => card.toJSON().id);
+        })) || []
+    );
 };
 
 export const getActiveCardsByBoardIdDb = async (boardId: BoardId) => {
@@ -22,11 +28,17 @@ export const getActiveCardsByBoardIdDb = async (boardId: BoardId) => {
 
 export const createCardOnListDb = async (card: CardHeader) => {
     const model = await CardModel.create({ ...card });
+    await invalidateCache(CacheEntity.CardsInList, card.listId);
     return model.toJSON();
 };
 
-export const updateCardDb = async (card: Partial<CardHeader>) => {
-    const [updated] = await CardModel.update({ ...card }, { where: { id: card.id } });
+/**
+ * Updates a card in the database.
+ * Does NOT handle moving the card between lists or changing its order, and thus will not update caches related to those operations.
+ */
+export const updateCardDb = async (cardId: CardId, card: Partial<CardHeader>) => {
+    const [updated] = await CardModel.update({ ...card }, { where: { id: cardId } });
+    await invalidateCache(CacheEntity.Card, cardId);
     return updated;
 };
 
@@ -39,11 +51,6 @@ export const getCardCountOnListDb = async (listId: ListId) => {
  */
 export const getTotalCardCountOnBoardDb = async (boardId: BoardId) => {
     return await CardModel.count({ where: { boardId } });
-};
-
-export const getCardsByDescriptionTextBlockIdDb = async (textBlockId: TextBlockId) => {
-    const models = await CardModel.findAll({ where: { descriptionTextBlockId: textBlockId } });
-    return models.map((card) => card.toJSON());
 };
 
 export const moveCardDb = async (cardId: CardId, toPosition: number | undefined | null, toListId: ListId) => {
@@ -164,6 +171,9 @@ export const moveCardDb = async (cardId: CardId, toPosition: number | undefined 
         }
         await CardModel.update({ order: toPosition, listId: toListId }, { where: { id: cardId }, transaction });
         await transaction.commit();
+        await invalidateCache(CacheEntity.Card, cardId);
+        await invalidateCache(CacheEntity.CardsInList, currentListId);
+        await invalidateCache(CacheEntity.CardsInList, toListId);
     } catch (e) {
         await transaction.rollback();
         throw e;

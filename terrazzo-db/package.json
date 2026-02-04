@@ -1,8 +1,8 @@
 {
     "name": "@mosaiq/terrazzo-db",
     "version": "0.0.0",
-    "main": "dist/models/index.js",
-    "types": "dist/models/index.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
         "build": "tsc",
         "build:watch": "tsc --watch",
@@ -20,6 +20,7 @@
     "dependencies": {
         "@mosaiq/terrazzo-common": "*",
         "dotenv": "^17.2.3",
+        "redis": "^4.7.0",
         "sequelize": "^6.37.7",
         "sqlite3": "^5.1.7"
     }

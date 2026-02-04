@@ -4,25 +4,25 @@ import { Sequelize } from 'sequelize';
 import configs from '../config';
 import { Db, DbModels } from '../dbTypes';
 import { getAuthSessionModel } from './authSessionModel';
-import { getBoardModel } from './boardModel';
-import { getCardAssignmentModel } from './cardAssignmentModel';
-import { getCardModel } from './cardModel';
-import { getDirectoryModel } from './directoryModel';
-import { getDocumentModel } from './documentModel';
-import { getFileModel } from './fileModel';
-import { getInviteModel } from './inviteModel';
-import { getLabelAssignmentModel } from './labelAssignmentModel';
-import { getLabelModel } from './labelModel';
-import { getLinkedAccountModel } from './linkedAccountModel';
-import { getListModel } from './listModel';
-import { getModuleModel } from './moduleModel';
-import { getOrganizationMembershipModel } from './organizationMembershipModel';
-import { getOrganizationModel } from './organizationModel';
-import { getRoleAssignmentModel } from './roleAssignmentModel';
-import { getRoleModel } from './roleModel';
-import { getTextBlockHistoryModel } from './textBlockHistoryModel';
-import { getTextBlockModel } from './textBlockModel';
-import { getUserModel } from './user';
+import { BoardModelType, getBoardModel } from './boardModel';
+import { CardAssignmentModelType, getCardAssignmentModel } from './cardAssignmentModel';
+import { CardModelType, getCardModel } from './cardModel';
+import { DirectoryModelType, getDirectoryModel } from './directoryModel';
+import { DocumentModelType, getDocumentModel } from './documentModel';
+import { FileModelType, getFileModel } from './fileModel';
+import { getInviteModel, InviteModelType } from './inviteModel';
+import { getLabelAssignmentModel, LabelAssignmentModelType } from './labelAssignmentModel';
+import { getLabelModel, LabelModelType } from './labelModel';
+import { getLinkedAccountModel, LinkedAccountModelType } from './linkedAccountModel';
+import { getListModel, ListModelType } from './listModel';
+import { getModuleModel, ModuleModelType } from './moduleModel';
+import { getOrganizationMembershipModel, OrganizationMembershipModelType } from './organizationMembershipModel';
+import { getOrganizationModel, OrganizationModelType } from './organizationModel';
+import { getRoleAssignmentModel, RoleAssignmentModelType } from './roleAssignmentModel';
+import { getRoleModel, RoleModelType } from './roleModel';
+import { getTextBlockHistoryModel, TextBlockHistoryModelType } from './textBlockHistoryModel';
+import { getTextBlockModel, TextBlockModelType } from './textBlockModel';
+import { getUserModel, UserModelType } from './userModel';
 
 const env = process.env.TRZ_ENV || 'development';
 
@@ -119,4 +119,27 @@ export {
     TextBlockModel,
     UserModel,
 };
+
+export type {
+    BoardModelType,
+    CardAssignmentModelType,
+    CardModelType,
+    DirectoryModelType,
+    DocumentModelType,
+    FileModelType,
+    InviteModelType,
+    LabelAssignmentModelType,
+    LabelModelType,
+    LinkedAccountModelType,
+    ListModelType,
+    ModuleModelType,
+    OrganizationMembershipModelType,
+    OrganizationModelType,
+    RoleAssignmentModelType,
+    RoleModelType,
+    TextBlockHistoryModelType,
+    TextBlockModelType,
+    UserModelType,
+};
+
 export default db;

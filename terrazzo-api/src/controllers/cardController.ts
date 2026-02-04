@@ -6,7 +6,6 @@ import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
 import {
     createCardOnListDb,
-    getActiveCardsByListIdUpDb,
     getCardByIdDb,
     getCardCountOnListDb,
     getTotalCardCountOnBoardDb,
@@ -17,16 +16,6 @@ import { getLabelsOnCardDb, setLabelsOnCardDb } from '@trz-api/persistence/label
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
 import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
-
-export const MOVING_LIST_ORDER = -10000;
-
-export async function getCardIdsOnList(listID: ListId): Promise<CardId[]> {
-    const cardHeaders = await getActiveCardsByListIdUpDb(listID);
-    if (cardHeaders == null) {
-        return [];
-    }
-    return cardHeaders.map((c) => c.id);
-}
 
 export async function getSingleFullCard(cardId: CardId): Promise<Card | undefined> {
     const cardHeader = await getCardByIdDb(cardId);
@@ -113,21 +102,7 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
  * @param createdById Optional user ID of the user creating the duplicate
  */
 export async function duplicateCard(cardId: CardId, createdById?: UserId) {
-    const existingCardHeader = await getCardByIdDb(cardId);
-    if (!existingCardHeader) {
-        throw new Error('Card not found');
-    }
-
-    const list = await getListByIdDb(existingCardHeader.listId);
-    if (!list) {
-        throw new Error('List not found');
-    }
-    const board = await getBoardByIdDb(list.boardId);
-    if (!board) {
-        throw new Error('Board not found');
-    }
-
-    const existingCard = (await populateCards([existingCardHeader]))[0];
+    const existingCard = await getSingleFullCard(cardId);
     if (!existingCard) {
         throw new Error('Error populating existing card');
     }
@@ -144,20 +119,20 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         throw new Error('Failed to create description text block ' + error.message);
     }
 
-    const cardsOnBoard = await getTotalCardCountOnBoardDb(board.id);
+    const cardsOnBoard = await getTotalCardCountOnBoardDb(existingCard.boardId);
 
     const newCardId = crypto.randomUUID();
     const newCard: Card = {
         id: newCardId,
-        listId: list.id,
-        boardId: board.id,
+        listId: existingCard.listId,
+        boardId: existingCard.boardId,
         cardNumber: cardsOnBoard + 1,
         name: existingCard.name + ' (Copy)',
         descriptionTextBlockId: descriptionTextBlockId,
         priority: existingCard.priority,
         assignees: existingCard.assignees,
         labels: existingCard.labels,
-        order: await getCardCountOnListDb(list.id),
+        order: await getCardCountOnListDb(existingCard.listId),
         createdAt: Date.now(),
         createdById: createdById ?? null,
     };
@@ -183,7 +158,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     }
 
     try {
-        await syncAddCard(newCard, board.id);
+        await syncAddCard(newCard, existingCard.boardId);
     } catch (e) {
         throw new Error('Failed to sync new card ' + e);
     }
@@ -201,7 +176,7 @@ export async function updateCardFromPartial(cardId: CardId, partial: Partial<Car
             // Do not update listId directly
             delete partial.listId;
         }
-        await updateCardDb({ id: cardId, ...partial });
+        await updateCardDb(cardId, partial);
     } catch (e: any) {
         throw new Error('Failed to update card ' + e);
     }
@@ -267,7 +242,7 @@ export const populateCards = async (cardHeaders: CardHeader[]): Promise<Card[]> 
             const cc: Card = {
                 ...c,
                 assignees: await getCardAssignmentsForCardDb(c.id),
-                labels: await getLabelsOnCardDb(c.id),
+                labels: (await getLabelsOnCardDb(c.id)) || [],
             };
             return cc;
         })

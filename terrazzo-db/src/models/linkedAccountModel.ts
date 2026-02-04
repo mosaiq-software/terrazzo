@@ -2,8 +2,10 @@ import { LinkedAccount } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export const getLinkedAccountModel = (sequelize: Sequelize): DbModel<LinkedAccount> => {
-    class LinkedAccountModel extends Model<LinkedAccount> {
+export type LinkedAccountModelType = LinkedAccount;
+
+export const getLinkedAccountModel = (sequelize: Sequelize): DbModel<LinkedAccountModelType> => {
+    class LinkedAccountModel extends Model<LinkedAccountModelType> {
         static associate(db: Db) {
             // define association here
         }
