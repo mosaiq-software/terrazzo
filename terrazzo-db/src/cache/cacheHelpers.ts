@@ -25,6 +25,7 @@ export const getCached = async <E extends CacheEntity>(
         const client = await getRedisClient();
         if (!client) {
             // Cache unavailable, use fallback directly
+            console.debug(`Cache disabled, executing fallback for key ${key}`);
             return await fallback();
         }
 
@@ -32,6 +33,7 @@ export const getCached = async <E extends CacheEntity>(
         const cached = await client.get(key);
         if (cached !== null) {
             try {
+                console.debug(`Cache hit for key ${key}`);
                 return JSON.parse(cached) as CacheEntityType<E>;
             } catch (parseError) {
                 console.error(`Failed to parse cached value for key ${key}:`, parseError);
@@ -40,6 +42,7 @@ export const getCached = async <E extends CacheEntity>(
         }
 
         // Cache miss - execute fallback
+        console.debug(`Cache miss for key ${key}, executing fallback`);
         const value = await fallback();
 
         // Cache the result (including null to prevent repeated queries for non-existent records)
@@ -77,6 +80,7 @@ export const setCache = async <E extends CacheEntity>(
 
         const serialized = JSON.stringify(value);
         await client.setEx(key, ttl, serialized);
+        console.debug(`Cache set for key ${key} with TTL ${ttl} seconds`);
     } catch (error) {
         console.error(`Failed to set cache for key ${key}:`, error instanceof Error ? error.message : error);
     }
@@ -97,6 +101,7 @@ export const invalidateCache = async (entity: CacheEntity, id: string | number):
         if (!client) return;
 
         await client.del(key);
+        console.debug(`Invalidated cache for key ${key}`);
     } catch (error) {
         console.error(`Failed to invalidate cache for key ${key}:`, error instanceof Error ? error.message : error);
     }

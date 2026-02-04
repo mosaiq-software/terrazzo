@@ -46,13 +46,11 @@ export const getRedisClient = async (): Promise<RedisClient | null> => {
             socket: {
                 host: cacheConfig.host,
                 port: cacheConfig.port,
-                connectTimeout: 5000,
-                reconnectStrategy: (retries) => {
-                    if (retries > 3) {
-                        console.warn('Redis connection failed after 3 retries. Caching disabled.');
-                        return false; // Stop reconnecting
-                    }
-                    return Math.min(retries * 100, 3000);
+                connectTimeout: 1000,
+                reconnectStrategy: () => {
+                    // Don't reconnect - fail fast if Redis is unavailable
+                    console.warn('Redis connection failed. Caching disabled.');
+                    return false;
                 },
             },
         });
