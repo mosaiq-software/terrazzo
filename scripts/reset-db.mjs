@@ -7,7 +7,11 @@ import { resolve } from 'node:path';
 // Load environment variables
 dotenv.config({ path: resolve(process.cwd(), '.env') });
 
-const volumePath = process.env.VOLUME_PATH || '';
+const volumePath = process.env.VOLUME_PATH;
+if (!volumePath || volumePath.trim().length === 0) {
+    console.error('❌ VOLUME_PATH is not defined in the environment variables.');
+    process.exit(1);
+}
 const dbPath = resolve(process.cwd(), `${volumePath}/db/terrazzo.sqlite`);
 
 console.log('🗑️  Resetting database...');
