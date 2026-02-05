@@ -36,6 +36,7 @@ const UserCursor = (props: UserCursorProps) => {
                 size="xs"
                 ml={5}
                 bd={`1px solid ${COLORS.border}`}
+                autoContrast={true}
             >
                 {fullName(user)}
             </Badge>
