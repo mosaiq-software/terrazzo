@@ -7,7 +7,7 @@ This package manages the database layer for Terrazzo, including models, migratio
 Terrazzo DB uses [Sequelize](https://sequelize.org/) as the ORM with SQLite as the database. The package is structured to support:
 
 - **Models**: TypeScript model definitions with type safety
-- **Migrations**: Sequelize CLI-managed database migrations (JavaScript)
+- **Migrations**: Sequelize CLI-managed database migrations (only .js files, so be careful!)
 - **Cache**: Redis-based caching layer
 - **Seeders**: Development data seeding
 
@@ -133,7 +133,100 @@ After creating a model getter, add it to `src/models/index.ts`:
 - Export the model's type alongside others
 
 ## Caching
-The caching layer uses Redis to store frequently accessed data. Models can implement caching logic as needed, typically in the persistence layer of the API.
+
+The caching layer uses Redis to store frequently accessed data and reduce database load. Caching is implemented in the API's persistence layer, not directly in models.
+
+### Architecture
+
+The cache system is built on Redis with:
+- **Type-safe keys**: Defined cache entity types with automatic type inference
+- **Circuit breaker**: Automatic fallback when Redis is unavailable
+- **TTL management**: Configurable expiration times
+- **Pattern-based invalidation**: Bulk cache clearing for related entities
+
+### Cache Keys
+
+Cache keys follow a structured pattern for consistent access:
+
+**Model Keys** (single entities):
+```
+{entity}:{id}
+```
+**Composite Keys** (collections):
+```
+{entity}:{compositePattern}
+```
+### When to Use Caching
+> 99% of the time, only use caching in the API's persistence layer!
+
+**Use caching for:**
+- Frequently read entities (users, boards, cards)
+- Data that changes infrequently
+- Expensive queries or joins
+- Collection queries (cards in a list, lists in a board)
+
+**Do NOT cache:**
+- Data that changes very frequently
+- Large datasets or long lists of objects that won't fit in memory
+- Sensitive data requiring strict consistency
+- One-time queries
+
+### Model Keys vs Composite Keys
+
+**Model Keys**: Cache individual database records
+- Use `CacheEntity.User`, `CacheEntity.Board`, `CacheEntity.Card`, etc.
+- Store a single complete model object
+- Invalidated when the specific entity is updated or deleted
+
+**Composite Keys**: Cache collections of IDs or derived data
+- Use `CacheEntity.CardsInList`, `CacheEntity.ListsInBoard`, etc.
+- Store arrays of IDs or aggregated data
+- Invalidated when relationships change
+
+### Using the Cache
+- Use `getCached` to automatically fetch from cache or database
+- Use `setCache` after creating or updating entities
+- Use `invalidateCache` after updates or deletes
+- Use `invalidatePattern` to clear related entities
+
+### Adding New Cacheable Entities
+
+To make a new entity cacheable:
+
+1. **Add to `CacheEntity` enum** in `src/cache/cacheTypes.ts`:
+```typescript
+export enum CacheEntity {
+    // ...existing entities
+    NewEntity = 'newEntity',
+}
+```
+
+2. **Add type mapping** in `CacheEntityTypeMap`:
+```typescript
+export interface CacheEntityTypeMap {
+    // ...existing mappings
+    [CacheEntity.NewEntity]: NewEntityModelType;
+}
+```
+
+3. **Use in persistence layer**: Implement caching in the API's persistence functions. Make sure to handle cache set, get, and invalidation as needed!
+
+### Configuration
+
+Cache behavior is controlled via environment variables:
+
+- `REDIS_HOST`: Redis server hostname (default: `localhost`)
+- `REDIS_PORT`: Redis server port (default: `6379`)
+- `CACHE_ENABLED`: Enable caching (default: `true`)
+- `CACHE_TTL`: Default TTL in seconds (default: `3600` = 1 hour)
+
+### Cache Resilience
+
+The cache layer includes automatic fallback:
+- If Redis is unavailable, queries fall back to the database
+- No application errors when cache fails
+- Circuit breaker prevents repeated connection attempts
+- All operations are wrapped in try-catch for safety
 
 ## Development Workflow
 
