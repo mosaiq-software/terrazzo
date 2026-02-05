@@ -75,3 +75,11 @@ The frontend is built with React and TypeScript, providing a responsive and user
 
 6. Access the application:
     Open your web browser and navigate to `http://localhost:8080` to access the Terrazzo UI.
+
+## Best Practices
+1. **Modular Code**: Keep code modular and reusable. Use the `terrazzo-common` package for shared utilities and types.
+2. **Type Safety**: Leverage TypeScript's type system to ensure absolute type safety across the codebase. Never use type assertions (`as` keyword) or unsafe types (`any`, `unknown`).
+3. **Real-Time First**: Design features with real-time collaboration in mind. Use Socket.IO events for data synchronization.
+4. **Data integrity**: Always validate and sanitize data at both the API and UI layers to prevent inconsistencies and security vulnerabilities.
+5. **Testing**: Write unit tests for critical components and functionalities. Use the testing frameworks set up in the monorepo.
+6. **Documentation**: Keep documentation up-to-date. Use README files in each package to explain their purpose and usage.
