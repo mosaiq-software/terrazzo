@@ -1,17 +1,26 @@
 {
-    "name": "terrazzo-db",
+    "name": "@mosaiq/terrazzo-db",
     "version": "0.0.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
-        "migrate:up": "sequelize-cli db:migrate",
-        "migrate:undo": "sequelize-cli db:migrate:undo",
-        "migrate:undo:all": "sequelize-cli db:migrate:undo:all",
-        "seed:all": "sequelize-cli db:seed:all"
+        "build": "tsc",
+        "build:watch": "tsc --watch",
+        "migrate:up": "npm run build && npx sequelize-cli db:migrate",
+        "migrate:undo": "npm run build && npx sequelize-cli db:migrate:undo",
+        "migrate:undo:all": "npm run build && npx sequelize-cli db:migrate:undo:all",
+        "seed:all": "npm run build && npx sequelize-cli db:seed:all",
+        "create-migration": "npx sequelize-cli migration:generate --name"
     },
     "devDependencies": {
-        "sequelize-cli": "^6.6.5"
+        "@types/node": "^22.19.7",
+        "sequelize-cli": "^6.6.5",
+        "typescript": "^5.9.3"
     },
     "dependencies": {
+        "@mosaiq/terrazzo-common": "*",
         "dotenv": "^17.2.3",
+        "redis": "^4.7.0",
         "sequelize": "^6.37.7",
         "sqlite3": "^5.1.7"
     }

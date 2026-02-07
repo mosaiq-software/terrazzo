@@ -1,4 +1,4 @@
-import { UID, NonEmptyArray } from '../types/genericTypes';
+import { NonEmptyArray, UID } from '../types/genericTypes';
 import { RoomId, RoomSpecifier, RoomType } from '../types/socket/roomTypes';
 
 export const getRoomCode = (

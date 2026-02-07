@@ -100,8 +100,8 @@ export interface ClientSEPayload {
     [ClientSE.LEAVE_ROOM]: RoomId;
     [ClientSE.MOUSE_MOVE]: MouseRoomUserData;
     [ClientSE.USER_IDLE]: boolean;
-    [ClientSE.MOVE_LIST]: { listId: ListId; position: number };
-    [ClientSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number };
+    [ClientSE.MOVE_LIST]: { listId: ListId; position: number | null };
+    [ClientSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number | null };
     [ClientSE.LOGOUT]: undefined;
 
     [ClientSE.GET_USERS_ORGANIZATIONS]: UserId;
@@ -139,8 +139,8 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
     [ClientSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
     [ClientSE.UPDATE_BOARD_FIELD]: Partial<Board> & { id: BoardId };
-    [ClientSE.UPDATE_LIST_FIELD]: Partial<List> & { id: ListId };
-    [ClientSE.UPDATE_CARD_FIELD]: Partial<Card> & { id: CardId };
+    [ClientSE.UPDATE_LIST_FIELD]: Omit<Partial<List> & { id: ListId }, 'order'>;
+    [ClientSE.UPDATE_CARD_FIELD]: Omit<Partial<Card> & { id: CardId }, 'listId' | 'order'>;
     [ClientSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
     [ClientSE.UPDATE_BOARD_LABEL]: { boardId: BoardId; label: Label };
     [ClientSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };

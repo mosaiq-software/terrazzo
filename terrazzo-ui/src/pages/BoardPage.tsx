@@ -249,7 +249,7 @@ const BoardPage = (): React.JSX.Element => {
             if (!listToCardsMap.has(payload.id)) {
                 return;
             }
-            if (payload.archived) {
+            if (payload.order === null) {
                 listToCardsMap.delete(payload.id);
             }
         },
@@ -262,7 +262,7 @@ const BoardPage = (): React.JSX.Element => {
             if (!cardToListMap.has(payload.id)) {
                 return;
             }
-            if (!payload.archived) {
+            if (payload.order !== null) {
                 return;
             }
             const listId = cardToListMap.get(payload.id);
@@ -302,10 +302,18 @@ const BoardPage = (): React.JSX.Element => {
     }, [listKeys.join(), boardData?.boardCode]);
 
     const moveListToPos = useCallback(
-        (listId: ListId, position: number) => {
+        (listId: ListId, position: number | null) => {
             const list = listToCardsMap.get(listId);
             if (!list) {
                 console.error('List not found', listId);
+                return;
+            }
+
+            if (position === null) {
+                listToCardsMap.delete(listId);
+                for (const cardId of list) {
+                    cardToListMap.delete(cardId);
+                }
                 return;
             }
 
@@ -318,11 +326,11 @@ const BoardPage = (): React.JSX.Element => {
             arrayMoveInPlace(entries, index, position);
             setListMap(entries);
         },
-        [listToCardsMap]
+        [listToCardsMap, cardToListMap]
     );
 
     const moveCardToListAndPos = useCallback(
-        (cardId: CardId, toList: ListId, position?: number) => {
+        (cardId: CardId, toList: ListId, position?: number | null) => {
             const currentListId = cardToListMap.get(cardId);
             if (!currentListId) {
                 throw new Error('a Card not in any list');
@@ -332,6 +340,12 @@ const BoardPage = (): React.JSX.Element => {
                 throw new Error('a Current list not found');
             }
             currentListCards = currentListCards.filter((c) => c !== cardId);
+
+            if (position === null) {
+                listToCardsMap.set(currentListId, currentListCards);
+                cardToListMap.delete(cardId);
+                return;
+            }
 
             let newListCards = listToCardsMap.get(toList);
             if (currentListId === toList) {

@@ -12,7 +12,7 @@ export const registerMembershipListeners = (socket: Socket) => {
 
     subscribe(socket, ClientSE.DELETE_MEMBERSHIP, async (data) => {
         const socketData = getSocketData(socket);
-        if (!socketData.user) {
+        if (!socketData?.user) {
             throw new Error('User not authenticated');
         }
         const isLeavingSelf = socketData.user.userId === data.userId;

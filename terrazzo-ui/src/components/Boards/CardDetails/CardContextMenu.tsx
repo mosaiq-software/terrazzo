@@ -7,7 +7,13 @@ import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenu
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUserContext } from '@trz/contexts/user-context';
-import { createDuplicateCard, updateCardAssignee, updateCardField, updateCardsLabels } from '@trz/emitters';
+import {
+    createDuplicateCard,
+    emitMoveCard,
+    updateCardAssignee,
+    updateCardField,
+    updateCardsLabels,
+} from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
 import { COLORS } from '@trz/util/colors';
 import { getCardLink } from '@trz/util/linkUtils';
@@ -164,11 +170,11 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
                         notify(NoteType.CARD_UPDATE_ERROR);
                         return;
                     }
-                    const archive = !card.archived;
+                    const archive = card.order !== null;
                     if (archive) {
-                        await updateCardField(sockCtx, card.id, { archived: archive, order: -1 });
+                        await emitMoveCard(sockCtx, card.id, card.listId, null);
                     } else {
-                        await updateCardField(sockCtx, card.id, { archived: archive, order: 0 });
+                        await emitMoveCard(sockCtx, card.id, card.listId, 0);
                     }
                     props.onClose();
                 }}

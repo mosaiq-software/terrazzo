@@ -1,13 +1,9 @@
 import { DocumentHeader, DocumentId, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common';
 import { syncDirectoryContents, syncDocumentField } from '@trz-api/broadcasters';
-import {
-    createDocumentDb,
-    DocumentModelType,
-    getDocumentByIdDb,
-    updateDocumentDb,
-} from '@trz-api/persistence/documentPersistence';
+import { createDocumentDb, getDocumentByIdDb, updateDocumentDb } from '@trz-api/persistence/documentPersistence';
 import { createNewModule, getModuleById, updateModule } from './moduleController';
 import { createBlocknoteTextBlockWithBlocks } from './textBlockController/textBlockController';
+import { DocumentModelType } from '@mosaiq/terrazzo-db';
 
 export const createNewDocument = async (title: string, parentId: UID, createdByUserId: UserId) => {
     const docModule = await createNewModule(title, parentId, TrzModuleType.Document);

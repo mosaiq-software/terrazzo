@@ -31,7 +31,7 @@ export const registerUserListeners = (socket: Socket) => {
 
     subscribe(socket, ClientSE.LOGOUT, async () => {
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             return undefined;
         }
         await endAuthenticatedSession(socketData.user.userId);
@@ -41,7 +41,7 @@ export const registerUserListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.GET_USERNAME_AVAILABLE, async (data) => {
         const userWithUsername = await getUserHeaderByUsernameDb(data);
         const socketData = getSocketData(socket);
-        if (userWithUsername && userWithUsername.id !== socketData.user?.userId) {
+        if (userWithUsername && userWithUsername.id !== socketData?.user?.userId) {
             return false;
         }
         return true;

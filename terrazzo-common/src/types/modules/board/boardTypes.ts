@@ -5,7 +5,6 @@ import { List } from './listTypes';
 export interface BoardHeader extends ModuleHeader {
     type: TrzModuleType.Board;
     boardCode: string;
-    totalCards: number;
 }
 
 export interface Board extends BoardHeader {

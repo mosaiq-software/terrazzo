@@ -1,9 +1,13 @@
 services:
     common-job:
-        build: ./terrazzo-common/
+        build:
+            context: .
+            dockerfile: ./terrazzo-common/Dockerfile
         restart: no
     ui-job:
-        build: ./terrazzo-ui/
+        build:
+            context: .
+            dockerfile: ./terrazzo-ui/Dockerfile
         restart: no
         depends_on:
             common-job:
@@ -15,12 +19,16 @@ services:
         env_file:
             - .env
     api:
-        build: ./terrazzo-api/
+        build:
+            context: .
+            dockerfile: ./terrazzo-api/Dockerfile
         depends_on:
             common-job:
                 condition: service_completed_successfully
             db-migrate:
                 condition: service_completed_successfully
+            redis:
+                condition: service_healthy
         ports:
             - "${API_PORT}:${API_PORT}"
             - "${SOCKET_PORT}:${SOCKET_PORT}"
@@ -42,7 +50,9 @@ services:
             - .env
 
     db-migrate:
-        build: ./terrazzo-db/
+        build:
+            context: .
+            dockerfile: ./terrazzo-db/Dockerfile
         restart: "no"
         command: ["npm", "run", "migrate:up"]
         volumes:
@@ -53,3 +63,21 @@ services:
                   create_host_path: true
         env_file:
             - .env
+
+    redis:
+        image: redis:7-alpine
+        restart: always
+        ports:
+            - "${REDIS_PORT}:6379"
+        volumes:
+            - type: bind
+              source: ${VOLUME_PATH}/redis
+              target: /data
+              bind:
+                  create_host_path: true
+        command: redis-server --appendonly yes
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 3

@@ -38,7 +38,7 @@ export const registerRoleListeners = (socket: Socket) => {
             throw new Error('User does not have permission to edit roles in this organization');
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         await updateRole(data, socketData.user.userId);
@@ -54,7 +54,7 @@ export const registerRoleListeners = (socket: Socket) => {
             throw new Error('User does not have permission to delete roles in this organization');
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         await deleteRole(role, socketData.user.userId);
@@ -74,7 +74,7 @@ export const registerRoleListeners = (socket: Socket) => {
             throw new Error('User does not have permission to edit roles in this organization');
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         await setRolesForUserInOrg(data.userId, data.orgId, data.roleIds, socketData.user.userId);

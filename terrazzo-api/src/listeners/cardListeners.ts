@@ -5,7 +5,7 @@ import {
     duplicateCard,
     getBoardIDFromCardID,
     getSingleFullCard,
-    moveCardToList,
+    moveCard,
     updateCardFromPartial,
 } from '@trz-api/controllers/cardController';
 import { getBoardIDFromListID } from '@trz-api/controllers/listController';
@@ -32,7 +32,7 @@ export const registerCardListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to create cards on this board');
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         const card = await addCard({
@@ -49,7 +49,7 @@ export const registerCardListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to duplicate cards on this board');
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         const card = await duplicateCard(data.cardId, socketData.user.userId);
@@ -70,7 +70,7 @@ export const registerCardListeners = (socket: Socket) => {
         if (!(await userCanMoveCardsOnBoard(socket, boardId))) {
             throw new Error('Insufficient permissions to move cards on this board');
         }
-        await moveCardToList(data.cardId, data.toList, data.position);
+        await moveCard(data.cardId, data.toList, data.position);
         return undefined;
     });
 
