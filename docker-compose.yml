@@ -1,17 +1,9 @@
 services:
-    common-job:
-        build:
-            context: .
-            dockerfile: ./terrazzo-common/Dockerfile
-        restart: no
     ui-job:
         build:
             context: .
             dockerfile: ./terrazzo-ui/Dockerfile
         restart: no
-        depends_on:
-            common-job:
-                condition: service_completed_successfully
         volumes:
             - type: bind
               source: ${NSM_WWW_PATH}
@@ -23,8 +15,6 @@ services:
             context: .
             dockerfile: ./terrazzo-api/Dockerfile
         depends_on:
-            common-job:
-                condition: service_completed_successfully
             db-migrate:
                 condition: service_completed_successfully
             redis:
@@ -34,6 +24,9 @@ services:
             - "${SOCKET_PORT}:${SOCKET_PORT}"
             - "${SOCKET_ADMIN_PORT}:${SOCKET_ADMIN_PORT}"
         restart: always
+        networks:
+            - default
+            - cache
         healthcheck:
             test: ["CMD", "curl", "-f", "http://0.0.0.0:${API_PORT}/"]
             interval: 15s
@@ -67,8 +60,8 @@ services:
     redis:
         image: redis:7-alpine
         restart: always
-        ports:
-            - "${REDIS_PORT}:6379"
+        networks:
+            - cache
         volumes:
             - type: bind
               source: ${VOLUME_PATH}/redis
@@ -81,3 +74,7 @@ services:
             interval: 10s
             timeout: 5s
             retries: 3
+
+networks:
+    cache:
+        internal: true

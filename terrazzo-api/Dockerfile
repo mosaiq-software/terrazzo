@@ -4,6 +4,7 @@ WORKDIR /workspace
 
 # Copy workspace package files
 COPY package*.json ./
+COPY scripts ./scripts/
 
 # Copy all packages
 COPY terrazzo-common ./terrazzo-common/
