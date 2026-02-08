@@ -1,4 +1,4 @@
-import { GithubUserProfile } from '@mosaiq/terrazzo-common';
+import { GithubAuthResponse, GithubUserProfile } from '@mosaiq/terrazzo-common';
 import axios from 'axios';
 import queryString from 'query-string';
 
@@ -36,7 +36,14 @@ export async function getPrivateGitHubUserData(access_token: string): Promise<Gi
             },
         });
         console.log('Received GitHub user data', { data });
-        return data;
+        const reply: GithubAuthResponse = data;
+        const profile: GithubUserProfile = {
+            id: reply.id,
+            login: reply.login ?? `github-user-${reply.id}`,
+            avatar_url: reply.avatar_url ?? 'https://mosaiq.dev/assets/MosaiqLogoOutlined.png',
+            name: reply.name ?? reply.login ?? `github-user-${reply.id}`,
+        };
+        return profile;
     } catch (error) {
         console.error('Error fetching GitHub user data:', error);
         return null;
@@ -51,7 +58,14 @@ export async function getPublicGithubUserDataFromGithubUserId(githubId: string):
             method: 'get',
         });
         console.log('Received public GitHub user data', { data });
-        return data;
+        const reply: GithubAuthResponse = data;
+        const profile: GithubUserProfile = {
+            id: reply.id,
+            login: reply.login ?? `github-user-${reply.id}`,
+            avatar_url: reply.avatar_url ?? 'https://mosaiq.dev/assets/MosaiqLogoOutlined.png',
+            name: reply.name ?? reply.login ?? `github-user-${reply.id}`,
+        };
+        return profile;
     } catch (error) {
         console.error('Error fetching public GitHub user data:', error);
         return null;
