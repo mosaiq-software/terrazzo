@@ -215,10 +215,10 @@ export interface CacheEntityTypeMap {
 
 Cache behavior is controlled via environment variables:
 
-- `REDIS_HOST`: Redis server hostname (default: `localhost`)
-- `REDIS_PORT`: Redis server port (default: `6379`)
-- `CACHE_ENABLED`: Enable caching (default: `true`)
-- `CACHE_TTL`: Default TTL in seconds (default: `3600` = 1 hour)
+- Redis cache configuration is automatic (no environment variables).
+    - Inside Docker: connects to `redis:6379` via Docker DNS.
+    - Outside Docker (local dev): connects to `localhost:6379`.
+    - Cache is always enabled with a fixed TTL of 3600 seconds.
 
 ### Cache Resilience
 

@@ -1,5 +1,5 @@
-import process from 'node:process';
 import { createClient } from 'redis';
+import { isRunningInDocker } from '../utils';
 
 export type RedisClient = ReturnType<typeof createClient>;
 
@@ -11,6 +11,8 @@ interface CacheConfig {
 }
 
 const CONNECTION_FAILURE_COOLDOWN_MS = 1000 * 30;
+const DEFAULT_TTL_SECONDS = 3600;
+const REDIS_PORT = 6379;
 
 /**
  * Singleton Redis cache client manager.
@@ -25,10 +27,14 @@ class RedisCacheManager {
 
     private constructor() {
         this.config = {
-            host: process.env.REDIS_HOST || 'localhost',
-            port: parseInt(process.env.REDIS_PORT || '6379', 10),
-            enabled: process.env.CACHE_ENABLED !== 'false',
-            ttl: parseInt(process.env.CACHE_TTL || '3600', 10),
+            // No env vars: Redis is always enabled, with a fixed 1h TTL.
+            // Host selection:
+            // - inside Docker: use the compose service DNS name `redis`
+            // - outside Docker (local dev): use localhost to connect to a locally exposed Redis
+            host: isRunningInDocker() ? 'redis' : 'localhost',
+            port: REDIS_PORT,
+            enabled: true,
+            ttl: DEFAULT_TTL_SECONDS,
         };
     }
 
