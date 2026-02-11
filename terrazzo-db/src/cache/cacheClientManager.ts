@@ -1,5 +1,5 @@
-import fs from 'node:fs';
 import { createClient } from 'redis';
+import { isRunningInDocker } from '../utils';
 
 export type RedisClient = ReturnType<typeof createClient>;
 
@@ -13,14 +13,6 @@ interface CacheConfig {
 const CONNECTION_FAILURE_COOLDOWN_MS = 1000 * 30;
 const DEFAULT_TTL_SECONDS = 3600;
 const REDIS_PORT = 6379;
-
-const isRunningInDocker = (): boolean => {
-    try {
-        return fs.existsSync('/.dockerenv');
-    } catch {
-        return false;
-    }
-};
 
 /**
  * Singleton Redis cache client manager.

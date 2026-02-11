@@ -1,8 +1,9 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: '../.env' });
+import { isRunningInDocker } from './utils';
 
-const volumePath = process.env.VOLUME_PATH || '';
-const dbPath = `${volumePath}/db/terrazzo.sqlite`;
+const volumePath = (process.env.VOLUME_PATH || '').replace(/\/+$/, '');
+const localDbPath = `${volumePath}/db/terrazzo.sqlite`;
+const dockerDbPath = '/db/terrazzo.sqlite';
+const dbPath = isRunningInDocker() ? dockerDbPath : localDbPath;
 const dbLogging = process.env.DATABASE_LOGGING === 'true';
 
 const config = {
