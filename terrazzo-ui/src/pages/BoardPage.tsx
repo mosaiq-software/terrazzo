@@ -25,7 +25,7 @@ import {
     RoomType,
     ServerSE,
     UID,
-    updateBaseFromPartial,
+    updateBaseFromPartial
 } from '@mosaiq/terrazzo-common';
 import CardDetails from '@trz/components/Boards/CardDetails/CardDetails';
 import CreateList from '@trz/components/Boards/CreateList';
@@ -59,15 +59,21 @@ interface BoardContextType {
 export const BoardContext = createContext<BoardContextType | undefined>(undefined);
 
 interface BoardMetadataContextType {
-    labels: Label[];
-    id: BoardId;
-    permissions: {
-        viewBoard: boolean;
-        editBoard: boolean;
-        moveCards: boolean;
-        editCard: boolean;
-        createCard: boolean;
-    };
+  labels: Label[];
+  id: BoardId;
+  lists: {
+    listId: ListId;
+    cardIds: CardId[];
+    name?: string;
+    archived?: boolean;
+  }[];
+  permissions: {
+    viewBoard: boolean;
+    editBoard: boolean;
+    moveCards: boolean;
+    editCard: boolean;
+    createCard: boolean;
+  };
 }
 const BoardMetadataContext = createContext<BoardMetadataContextType | undefined>(undefined);
 export const useBoardMetadata = () => {
@@ -543,6 +549,12 @@ const BoardPage = (): React.JSX.Element => {
         return {
             labels: boardData.labels,
             id: boardData.id,
+            lists: boardData.lists.map((l) => ({
+            listId: l.listId,
+            cardIds: l.cardIds,
+            //name: l.name,             // new
+        //archived: l.archived,     // new
+})),
             permissions: {
                 viewBoard: !!userCanViewBoard,
                 editBoard: userCanEditBoard && !viewOnly,
