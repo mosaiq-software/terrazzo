@@ -2,12 +2,7 @@ import { BoardId, CardId, LabelId, ListId } from '../../genericTypes';
 import { ModuleHeader, TrzModuleType } from '../moduleTypes';
 import { List } from './listTypes';
 
-export interface BoardHeader extends ModuleHeader {
-    type: TrzModuleType.Board;
-    boardCode: string;
-}
-
-export interface Board extends BoardHeader {
+export interface Board extends ModuleHeader<TrzModuleType.Board> {
     lists: List[];
     labels: Label[];
 }

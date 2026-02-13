@@ -26,6 +26,7 @@ export const getModuleModel = (sequelize: Sequelize): DbModel<ModuleModelType> =
             desiredPermissions: DataTypes.JSON,
             effectivePermissions: DataTypes.JSON,
             public: DataTypes.BOOLEAN,
+            data: DataTypes.JSON,
         },
         { sequelize, timestamps: false, modelName: 'Module' }
     );

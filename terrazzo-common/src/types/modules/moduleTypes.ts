@@ -10,11 +10,24 @@ export enum TrzModuleType {
     Organization = 'organization',
 }
 
-export interface ModuleHeader {
+export interface ModuleDataMap {
+    [TrzModuleType.Directory]: {};
+    [TrzModuleType.Document]: {
+        textBlockId: string;
+        lastModifiedAt: number;
+        lastModifiedByUserId: string;
+    };
+    [TrzModuleType.Board]: {
+        boardCode: string;
+    };
+    [TrzModuleType.Organization]: never;
+}
+
+export interface ModuleHeader<T extends TrzModuleType = TrzModuleType> {
     id: UID;
     parentId: UID;
     name: string;
-    type: TrzModuleType;
+    type: T;
     order: number;
     archived: boolean;
     createdAt: number;
@@ -22,4 +35,5 @@ export interface ModuleHeader {
     desiredPermissions: ModulePermissions;
     effectivePermissions: ModulePermissions;
     public: boolean;
+    data: ModuleDataMap[T];
 }

@@ -22,10 +22,7 @@ export * from './types/permissions/roleTypes';
 export * from './types/modules/board/boardTypes';
 export * from './types/modules/board/cardTypes';
 export * from './types/modules/board/listTypes';
-export * from './types/modules/directoryTypes';
-export * from './types/modules/documentTypes';
 export * from './types/modules/moduleTypes';
-export * from './types/modules/trzModuleTypes';
 
 // Types - External
 export * from './types/externalTypes/apiTypes';
