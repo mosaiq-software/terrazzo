@@ -1,8 +1,5 @@
 import { CardId, ListId } from '@mosaiq/terrazzo-common';
-import type { BoardModelType } from '../models/boardModel';
 import type { CardModelType } from '../models/cardModel';
-import type { DirectoryModelType } from '../models/directoryModel';
-import type { DocumentModelType } from '../models/documentModel';
 import type { FileModelType } from '../models/fileModel';
 import type { ListModelType } from '../models/listModel';
 import type { ModuleModelType } from '../models/moduleModel';
@@ -18,10 +15,7 @@ import type { UserModelType } from '../models/userModel';
 export enum CacheEntity {
     // Simple Models
     User = 'user',
-    Board = 'board',
     Card = 'card',
-    Directory = 'directory',
-    Document = 'document',
     File = 'file',
     List = 'list',
     Module = 'module',
@@ -42,10 +36,7 @@ export enum CacheEntity {
 export interface CacheEntityTypeMap {
     // Simple Models
     [CacheEntity.User]: UserModelType;
-    [CacheEntity.Board]: BoardModelType;
     [CacheEntity.Card]: CardModelType;
-    [CacheEntity.Directory]: DirectoryModelType;
-    [CacheEntity.Document]: DocumentModelType;
     [CacheEntity.File]: FileModelType;
     [CacheEntity.List]: ListModelType;
     [CacheEntity.Module]: ModuleModelType;
