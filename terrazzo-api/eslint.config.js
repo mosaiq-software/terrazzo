@@ -30,6 +30,6 @@ export default [
         },
     },
     {
-        ignores: [".node_modules/*", "dist/*", "scripts/*", "admin-ui/*", "*.config.js", "*.config.ts"]
+        ignores: [".node_modules/*", "dist/*", "scripts/*", "*.config.js", "*.config.ts"]
     },
 ];

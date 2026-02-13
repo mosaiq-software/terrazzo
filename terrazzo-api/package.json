@@ -20,7 +20,6 @@
         "@blocknote/server-util": "^0.45.0",
         "@mosaiq/terrazzo-common": "*",
         "@mosaiq/terrazzo-db": "*",
-        "@socket.io/admin-ui": "^0.5.1",
         "axios": "^1.7.9",
         "cors": "^2.8.5",
         "diff": "^8.0.2",
@@ -28,11 +27,8 @@
         "express": "^4.21.1",
         "fuse.js": "^7.1.0",
         "query-string": "^9.1.1",
-        "sequelize": "^6.37.5",
         "socket.io": "^4.8.1",
-        "sqlite3": "^5.1.7",
         "tsx": "^4.19.2",
-        "typescript": "^5.6.3",
         "y-protocols": "^1.0.6",
         "yjs": "^13.6.27"
     },
@@ -46,6 +42,7 @@
         "eslint": "^9.21.0",
         "globals": "^16.0.0",
         "typescript-eslint": "^8.24.1",
+        "typescript": "^5.6.3",
         "vitest": "^4.0.16"
     }
 }

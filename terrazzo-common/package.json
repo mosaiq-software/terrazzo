@@ -16,14 +16,9 @@
         "test:watch": "echo \"No tests specified\" && exit 0",
         "test:coverage": "echo \"No tests specified\" && exit 0"
     },
-    "publishConfig": {
-        "registry": "https://registry.mosaiq.dev"
-    },
     "license": "UNLICENSED",
     "dependencies": {
-        "@blocknote/core": "^0.45.0",
-        "tsx": "^4.19.2",
-        "typescript": "^5.6.3"
+        "@blocknote/core": "^0.45.0"
     },
     "devDependencies": {
         "@eslint/js": "^9.21.0",
@@ -31,6 +26,8 @@
         "eslint": "^9.21.0",
         "globals": "^16.0.0",
         "tsc-alias": "^1.8.16",
+        "tsx": "^4.19.2",
+        "typescript": "^5.6.3",
         "typescript-eslint": "^8.24.1"
     }
 }

@@ -1,5 +1,4 @@
 import { ServerSE, ServerSocketIOEvent, UserId } from '@mosaiq/terrazzo-common';
-import { instrument } from '@socket.io/admin-ui';
 import * as socketListeners from '@trz-api/listeners';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -32,7 +31,7 @@ export class SocketManager {
         const httpServer = createServer();
         const ioEngine = new Server(httpServer, {
             cors: {
-                origin: [process.env.FRONTEND_URL + '', `https://api.terrazzo.mosaiq.dev/socketadmin`],
+                origin: [String(process.env.FRONTEND_URL)],
                 credentials: true,
             },
             connectionStateRecovery: {
@@ -40,11 +39,6 @@ export class SocketManager {
                 skipMiddlewares: true,
             },
             path: '/socket',
-        });
-
-        instrument(ioEngine, {
-            auth: false,
-            mode: 'production',
         });
 
         const yioEngine = new YSocketIO(ioEngine);

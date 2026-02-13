@@ -14,6 +14,7 @@ COPY terrazzo-ui ./terrazzo-ui/
 RUN npm ci --include-workspace-root
 
 WORKDIR /workspace/terrazzo-ui
-RUN npm run build
 
-CMD ["sh", "-c", "rm -rf /www/* && cp -r ./dist/* /www"]
+# Build at container runtime so env vars provided via docker-compose `env_file`
+# are available to Vite during build.
+CMD ["sh", "-c", "npm run build && rm -rf /www/* && cp -r ./dist/* /www"]
