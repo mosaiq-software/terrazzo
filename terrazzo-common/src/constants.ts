@@ -16,17 +16,6 @@ export enum Priority {
     HIGH = 3,
 }
 
-export enum StoryPoints {
-    ZERO = 0,
-    XXS = 1,
-    XS = 2,
-    S = 3,
-    M = 5,
-    L = 8,
-    XL = 13,
-    XXL = 21,
-}
-
 export const IMAGE_MIME_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'];
 export const VIDEO_MIME_TYPES = ['video/mp4', 'video/webm'];
 export const AUDIO_MIME_TYPES = ['audio/mpeg', 'audio/wav', 'audio/ogg'];

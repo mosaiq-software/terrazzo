@@ -10,7 +10,7 @@ export const registerDocumentListeners = (socket: Socket) => {
             throw new Error('User does not have permission to create a document in this module');
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         const document = await createNewDocument(data.title, data.parentId, socketData.user.userId);
@@ -30,7 +30,7 @@ export const registerDocumentListeners = (socket: Socket) => {
             throw new Error('User does not have permission to edit this document');
         }
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         const updatedDocument = await modifyDocument(data.id, data, socketData.user.userId);

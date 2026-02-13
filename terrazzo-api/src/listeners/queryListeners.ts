@@ -9,7 +9,7 @@ import { Socket } from 'socket.io';
 export const registerQueryListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.GET_SEARCH_RESULTS, async (data) => {
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         const results = await executeSearchQueryForUser(
@@ -23,7 +23,7 @@ export const registerQueryListeners = (socket: Socket) => {
 
     subscribe(socket, ClientSE.GET_SEARCH_TAGS, async (data) => {
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error('User not authenticated');
         }
         const results = await executeTagQueryForUser(

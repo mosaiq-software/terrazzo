@@ -1,37 +1,11 @@
-import { DocumentId, TextBlockId, UserId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-export interface DocumentModelType {
-    id: DocumentId;
-    textBlockId: TextBlockId;
-    lastModifiedAt: number;
-    lastModifiedByUserId: UserId;
-}
-class DocumentModel extends Model<DocumentModelType> {}
-DocumentModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        textBlockId: DataTypes.STRING,
-        lastModifiedAt: DataTypes.INTEGER,
-        lastModifiedByUserId: DataTypes.STRING,
-    },
-    { sequelize, timestamps: false, tableName: 'Documents' }
-);
+import { DocumentId } from '@mosaiq/terrazzo-common';
+import { CacheEntity, DocumentModel, DocumentModelType, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
 
 export const getDocumentByIdDb = async (id: DocumentId) => {
-    const model = await DocumentModel.findByPk(id, {});
-    return model?.toJSON();
-};
-
-export const getDocumentsByTextBlockIdDb = async (textBlockId: TextBlockId) => {
-    const models = await DocumentModel.findAll({
-        where: { textBlockId },
+    return await getCached(CacheEntity.Document, id, async () => {
+        const model = await DocumentModel.findByPk(id, {});
+        return model?.toJSON();
     });
-    return models.map((doc) => doc.toJSON());
 };
 
 export const createDocumentDb = async (document: DocumentModelType) => {
@@ -46,5 +20,6 @@ export const updateDocumentDb = async (id: DocumentId, document: Partial<Documen
         },
         { where: { id: id } }
     );
+    await invalidateCache(CacheEntity.Document, id);
     return updated;
 };

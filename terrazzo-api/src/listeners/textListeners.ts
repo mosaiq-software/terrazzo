@@ -11,7 +11,7 @@ export const registerTextListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS, async (data) => {
         const { resourceId, resourceType } = data;
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error(`User not authenticated`);
         }
         const authorizedTextBlockId = await checkCanUserEditTextBlock(socketData.user.userId, resourceId, resourceType);
@@ -25,7 +25,7 @@ export const registerTextListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.USE_TEXT_BLOCK_HISTORY_SNAPSHOT, async (data) => {
         const { snapshotId, resourceId, resourceType } = data;
         const socketData = getSocketData(socket);
-        if (!socketData.user?.userId) {
+        if (!socketData?.user?.userId) {
             throw new Error(`User not authenticated`);
         }
         const authorizedTextBlockId = await checkCanUserEditTextBlock(socketData.user.userId, resourceId, resourceType);

@@ -14,7 +14,6 @@ import {
 import { useFileUploader } from '@trz/hooks/useFileUploader';
 import { useRoom } from '@trz/hooks/useRoom';
 import { COLORS } from '@trz/util/colors';
-import { CollaborationOptions } from 'node_modules/@blocknote/core/types/src/extensions/Collaboration/Collaboration';
 import { useEffect, useMemo, useState } from 'react';
 import { SocketIOProvider } from 'y-socket.io';
 import * as Y from 'yjs';
@@ -68,7 +67,7 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
     }, []);
 
     const locale = en;
-    const collabOptions: CollaborationOptions | undefined =
+    const collabOptions =
         props.socketIOProvider && props.doc
             ? {
                   provider: props.socketIOProvider,
@@ -77,7 +76,7 @@ export const BaseBlockNoteEditor = (props: BaseEditorProps) => {
                       name: props.myName || 'Anonymous',
                       color: props.pfpColor || COLORS.text.primary,
                   },
-                  showCursorLabels: 'activity',
+                  showCursorLabels: 'activity' as const,
               }
             : undefined;
     const editor = useCreateBlockNote(

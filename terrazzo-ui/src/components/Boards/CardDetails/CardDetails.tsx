@@ -23,6 +23,7 @@ import { useUserContext } from '@trz/contexts/user-context';
 import { emitMoveCard, updateCardAssignee, updateCardField } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
+import { useUser } from '@trz/hooks/useUser';
 import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';
 import { COLORS } from '@trz/util/colors';
@@ -76,6 +77,7 @@ const handleMove = (toListId: ListId) => {
     const cardDetailsComboBox = useCombobox({
         onDropdownClose: () => cardDetailsComboBox.resetSelectedOption(),
     });
+    const createdByUser = useUser(card?.createdById ?? undefined);
 
     const onCloseModal = () => {
         props.onClose();
@@ -104,9 +106,9 @@ const handleMove = (toListId: ListId) => {
             return;
         }
         if (archive) {
-            await updateCardField(sockCtx, card.id, { archived: archive, order: -1 });
+            await emitMoveCard(sockCtx, card.id, card.listId, null);
         } else {
-            await updateCardField(sockCtx, card.id, { archived: archive, order: 0 });
+            await emitMoveCard(sockCtx, card.id, card.listId, 0);
         }
         onCloseModal(); //this wont run ever due to sockCtx.boardData being updated
     }
@@ -119,7 +121,7 @@ const handleMove = (toListId: ListId) => {
 
     if (!card) {
         return (
-            <Center>
+            <Center>x
                 <Stack align="center">
                     <Loader type="bars" />
                     <Text ta="center">Loading...</Text>
@@ -168,7 +170,7 @@ const handleMove = (toListId: ListId) => {
                                 w="100%"
                                 gap="xs"
                             >
-                                {card.archived && (
+                                {card.order === null && (
                                     <Box
                                         bg={COLORS.semantic.warning}
                                         p="sm"
@@ -324,7 +326,7 @@ const handleMove = (toListId: ListId) => {
                                 c={COLORS.text.secondary}
                                 fz="sm"
                             >
-                                Created at {niceDateWithTime(card.createdAt)} by {fullName(card.createdBy)}
+                                Created at {niceDateWithTime(card.createdAt)} by {fullName(createdByUser)}
                             </Text>
                             {perms?.editCard && (
                                 <RectHoldingButton
@@ -334,10 +336,10 @@ const handleMove = (toListId: ListId) => {
                                     height="40px"
                                     variant="outline"
                                     borderColor={COLORS.semantic.error}
-                                    onClick={() => onArchiveCard(!card.archived)}
+                                    onClick={() => onArchiveCard(card.order !== null)}
                                     leftSection={<FaArchive />}
                                 >
-                                    {card.archived ? 'Unarchive' : 'Archive'}
+                                    {card.order === null ? 'Unarchive' : 'Archive'}
                                 </RectHoldingButton>
                             )}
                         </Stack>

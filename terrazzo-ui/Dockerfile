@@ -1,9 +1,20 @@
 FROM node:20
 
-RUN apt-get update && apt-get install -y 
+WORKDIR /workspace
 
-COPY . /app
+# Copy workspace package files
+COPY package*.json ./
+COPY scripts ./scripts/
 
-WORKDIR /app
+# Copy all packages
+COPY terrazzo-common ./terrazzo-common/
+COPY terrazzo-ui ./terrazzo-ui/
 
-CMD ["npm", "run", "build:prod"]
+# Install and build everything
+RUN npm ci --include-workspace-root
+
+WORKDIR /workspace/terrazzo-ui
+
+# Build at container runtime so env vars provided via docker-compose `env_file`
+# are available to Vite during build.
+CMD ["sh", "-c", "npm run build && rm -rf /www/* && cp -r ./dist/* /www"]

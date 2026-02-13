@@ -1,29 +1,5 @@
 import { Invite, InviteId, OrganizationId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class InviteModel extends Model<Invite> {}
-InviteModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        forOrganizationId: DataTypes.STRING,
-        maxUses: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-        },
-        uses: DataTypes.INTEGER,
-        createdById: DataTypes.STRING,
-        createdAt: DataTypes.STRING,
-        revokedAt: {
-            type: DataTypes.STRING,
-            allowNull: true,
-        },
-    },
-    { sequelize, timestamps: false, tableName: 'Invites' }
-);
+import { InviteModel } from '@mosaiq/terrazzo-db';
 
 export const getInviteRecordByIdDb = async (id: InviteId) => {
     const model = await InviteModel.findByPk(id, {});
