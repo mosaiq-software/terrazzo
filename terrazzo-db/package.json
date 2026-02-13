@@ -14,14 +14,14 @@
     },
     "devDependencies": {
         "@types/node": "^22.19.7",
-        "sequelize-cli": "^6.6.5",
-        "typescript": "^5.9.3"
+        "sequelize-cli": "^6.6.5"
     },
     "dependencies": {
         "@mosaiq/terrazzo-common": "*",
         "dotenv": "^17.2.3",
         "redis": "^4.7.0",
         "sequelize": "^6.37.7",
-        "sqlite3": "^5.1.7"
+        "sqlite3": "^5.1.7",
+        "typescript": "^5.9.3"
     }
 }
