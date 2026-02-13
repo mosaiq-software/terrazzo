@@ -1,25 +1,12 @@
 import { UserHeader, UserId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model, Sequelize } from 'sequelize';
-
-class UserModel extends Model<UserHeader> {}
-UserModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        username: DataTypes.STRING,
-        firstName: DataTypes.STRING,
-        lastName: DataTypes.STRING,
-        profilePicture: DataTypes.STRING,
-    },
-    { sequelize, timestamps: false, tableName: 'Users' }
-);
+import { CacheEntity, UserModel, getCached, invalidateCache, sequelize } from '@mosaiq/terrazzo-db';
+import { Sequelize } from 'sequelize';
 
 export const getUserHeaderByIdDb = async (id: UserId) => {
-    const model = await UserModel.findByPk(id);
-    return model?.toJSON();
+    return getCached(CacheEntity.User, id, async () => {
+        const model = await UserModel.findByPk(id);
+        return model?.toJSON();
+    });
 };
 
 export const getUserHeaderByUsernameDb = async (username: string) => {
@@ -36,5 +23,6 @@ export const createUserHeaderDb = async (user: UserHeader) => {
 
 export const updateUserHeaderDb = async (user: Partial<UserHeader> & { id: UserId }) => {
     const [updated] = await UserModel.update({ ...user }, { where: { id: user.id } });
+    await invalidateCache(CacheEntity.User, user.id);
     return updated;
 };

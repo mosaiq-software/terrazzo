@@ -1,23 +1,5 @@
 import { CardId, LabelId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-interface LabelAssignment {
-    labelId: LabelId;
-    cardId: CardId;
-}
-class LabelAssignmentModel extends Model<LabelAssignment> {}
-LabelAssignmentModel.init(
-    {
-        labelId: { type: DataTypes.STRING, primaryKey: true },
-        cardId: { type: DataTypes.STRING, primaryKey: true },
-    },
-    {
-        sequelize,
-        timestamps: false,
-        tableName: 'LabelAssignments',
-    }
-);
+import { LabelAssignmentModel, sequelize } from '@mosaiq/terrazzo-db';
 
 export const getLabelsOnCardDb = async (cardId: CardId) => {
     const models = await LabelAssignmentModel.findAll({ where: { cardId } });

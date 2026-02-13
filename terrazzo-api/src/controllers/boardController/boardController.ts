@@ -1,8 +1,9 @@
 import { BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, TrzModuleType } from '@mosaiq/terrazzo-common';
+import { BoardModelType } from '@mosaiq/terrazzo-db';
 import { syncBoardFields, syncDirectoryContents, syncParentsDirectoryContents } from '@trz-api/broadcasters';
 import { syncBoardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { getListAndCardIdsOnBoard } from '@trz-api/controllers/listController';
-import { BoardModelType, createBoardDb, getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
+import { createBoardDb, getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
 import { deleteLabelingOnCardsByLabelIdDb } from '@trz-api/persistence/labelAssignmentPersistence';
 import {
     createLabelOnBoardDb,

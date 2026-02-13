@@ -1,25 +1,5 @@
 import { MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class OrganizationMembershipModel extends Model<MembershipRecord> {}
-OrganizationMembershipModel.init(
-    {
-        userId: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        orgId: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        joinedAt: {
-            type: DataTypes.BIGINT,
-            allowNull: false,
-        },
-    },
-    { sequelize, timestamps: false, tableName: 'OrganizationMemberships' }
-);
+import { OrganizationMembershipModel } from '@mosaiq/terrazzo-db';
 
 export const getOrganizationMembershipDb = async (userId: UserId, orgId: OrganizationId) => {
     const model = await OrganizationMembershipModel.findOne({ where: { userId, orgId } });

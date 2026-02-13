@@ -1,31 +1,11 @@
 import { ModuleHeader, UID } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class ModuleModel extends Model<ModuleHeader> {}
-ModuleModel.init(
-    {
-        id: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        parentId: DataTypes.STRING,
-        name: DataTypes.STRING,
-        type: DataTypes.STRING,
-        order: DataTypes.INTEGER,
-        archived: DataTypes.BOOLEAN,
-        createdAt: DataTypes.INTEGER,
-        orgId: DataTypes.STRING,
-        desiredPermissions: DataTypes.JSON,
-        effectivePermissions: DataTypes.JSON,
-        public: DataTypes.BOOLEAN,
-    },
-    { sequelize, timestamps: false, tableName: 'Modules' }
-);
+import { CacheEntity, ModuleModel, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
 
 export const getModuleByIdDb = async (id: UID) => {
-    const model = await ModuleModel.findByPk(id, {});
-    return model?.toJSON();
+    return await getCached(CacheEntity.Module, id, async () => {
+        const model = await ModuleModel.findByPk(id, {});
+        return model?.toJSON();
+    });
 };
 
 export const getModulesByParentIdDb = async (parentId: UID) => {
@@ -50,8 +30,15 @@ export const createModuleDb = async (module: ModuleHeader) => {
 };
 
 export const updateModuleDb = async (id: UID, module: Partial<ModuleHeader>) => {
-    const [updated] = await ModuleModel.update({ ...module }, { where: { id: id } });
+    const [updated] = await ModuleModel.update({ ...module }, { where: { id } });
+    await invalidateCache(CacheEntity.Module, id);
     return updated;
+};
+
+export const deleteModuleDb = async (id: UID) => {
+    const deleted = await ModuleModel.destroy({ where: { id } });
+    await invalidateCache(CacheEntity.Module, id);
+    return deleted;
 };
 
 export const getNextModuleOrderInParentDb = async (parentId: UID) => {

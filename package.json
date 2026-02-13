@@ -1,12 +1,28 @@
 {
     "name": "terrazzo",
+    "private": true,
+    "workspaces": [
+        "terrazzo-common",
+        "terrazzo-api",
+        "terrazzo-ui",
+        "terrazzo-db"
+    ],
     "repository": "https://github.com/mosaiq-software/terrazzo.git",
     "scripts": {
-        "start": "concurrently \"npm run build:common\" \"npm run start:api\" \"npm run start:ui\"",
+        "start": "concurrently \"npm run build-watch\" \"npm run start:api\" \"npm run start:ui\"",
         "start:api": "cd terrazzo-api && npm run start",
         "start:ui": "cd terrazzo-ui && npm run start",
+        "redis:start": "docker-compose -f docker-compose.dev.yml up -d",
+        "redis:stop": "docker-compose -f docker-compose.dev.yml down",
+        "redis:logs": "docker-compose -f docker-compose.dev.yml logs -f redis",
+        "build-watch": "concurrently \"npm run build:common\" \"npm run build:db\"",
         "build:common": "cd terrazzo-common && npm run build:watch",
+        "build:common:once": "cd terrazzo-common && npm run build",
+        "build:db": "cd terrazzo-db && npm run build:watch",
+        "build:db:once": "cd terrazzo-db && npm run build",
         "migrate:db": "cd terrazzo-db && npm run migrate:up",
+        "reset:db": "node ./scripts/reset-db.mjs",
+        "clean": "node ./scripts/clean.mjs",
         "pretty": "prettier --write \"./**/*.{ts,tsx,json}\"",
         "lint": "npm run lint:api && npm run lint:ui && npm run lint:common",
         "lint:api": "cd terrazzo-api && npm run lint",
@@ -16,9 +32,7 @@
         "types:api": "cd terrazzo-api && npm run types",
         "types:ui": "cd terrazzo-ui && npm run types",
         "types:common": "cd terrazzo-common && npm run types",
-        "common:prod": "concurrently \"cd terrazzo-api && npm run common:prod\" \"cd terrazzo-ui && npm run common:prod\"",
-        "common:dev": "concurrently \"cd terrazzo-api && npm run common:dev\" \"cd terrazzo-ui && npm run common:dev\"",
-        "postinstall": "concurrently \"cd terrazzo-common && npm i\" \"cd terrazzo-db && npm i\" \"cd terrazzo-api && npm i\" \"cd terrazzo-ui && npm i\"",
+        "postinstall": "node ./scripts/postinstall.mjs",
         "prepare": "husky",
         "before-push": "node ./scripts/before-push.mjs",
         "test:api": "cd terrazzo-api && npm run test",
@@ -31,5 +45,9 @@
         "concurrently": "^9.1.0",
         "husky": "^9.1.7",
         "prettier": "^3.5.3"
+    },
+    "overrides": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
     }
 }

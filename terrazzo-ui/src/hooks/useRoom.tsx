@@ -1,17 +1,16 @@
 import {
-    ClientSE,
     getRoomCode,
     RoomSpecifier,
     RoomType,
     ServerSE,
     SocketId,
     UID,
-    UserData,
+    UserData
 } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useSocketListener } from '@trz/hooks/useSocketListener';
-import { NoteType, notify } from '@trz/util/notifications';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useRoomListener } from '../contexts/room-listener-context';
 import { useMap } from './useMap';
 
 export function useRoom(
@@ -28,31 +27,31 @@ export function useRoom(
         []
     );
 
+    const [instanceId] = useState(crypto.randomUUID());
+    const roomListener = useRoomListener();
     useEffect(() => {
         if (!sockCtx.connected) {
             return;
         }
         if (roomId) {
-            sockCtx
-                .emit(ClientSE.JOIN_ROOM, getRoomCode(roomType, roomId, specifier))
-                .then((res) => {
-                    if (res && trackUsers) {
-                        setRoomUsers(res.map((r) => [r.sid, r]));
-                    }
-                })
-                .catch((e) => {
-                    notify(NoteType.SOCKET_ROOM_ERROR, [roomId, e]);
-                });
+            roomListener.subscribe(getRoomCode(roomType, roomId, specifier), instanceId).then(res => {
+                if (res && trackUsers) {
+                    setRoomUsers(res.map((r) => [r.sid, r]));
+                }
+            });
         }
 
         return () => {
             if (roomId) {
-                sockCtx.emit(ClientSE.LEAVE_ROOM, getRoomCode(roomType, roomId, specifier)).catch((e) => {
-                    notify(NoteType.SOCKET_ROOM_ERROR, [roomId, e]);
+                roomListener.unsubscribe(getRoomCode(roomType, roomId, specifier), instanceId).then(res => {
+                    if (trackUsers) { 
+                        setRoomUsers([]);
+                    }
                 });
             }
         };
     }, [roomId, sockCtx.connected, sockCtx.sid]);
+    
 
     useSocketListener(ServerSE.CLIENT_JOINED_ROOM, (payload) => {
         if (trackUsers) {

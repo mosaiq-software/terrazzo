@@ -1,30 +1,5 @@
 import { LinkedAccount, LinkedAccountProvider, UserId } from '@mosaiq/terrazzo-common';
-import { sequelize } from '@trz-api/utils/dbHelper';
-import { DataTypes, Model } from 'sequelize';
-
-class LinkedAccountModel extends Model<LinkedAccount> {}
-LinkedAccountModel.init(
-    {
-        provider: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        accountId: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        userId: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-        },
-        accountData: DataTypes.JSON,
-        privateAccountData: {
-            type: DataTypes.JSON,
-            allowNull: true,
-        },
-    },
-    { sequelize, timestamps: false, tableName: 'LinkedAccounts' }
-);
+import { LinkedAccountModel } from '@mosaiq/terrazzo-db';
 
 export const getLinkedAccountsForUserDb = async (userId: UserId) => {
     const models = await LinkedAccountModel.findAll({

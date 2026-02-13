@@ -76,7 +76,8 @@ export const createTerrazzoBoardFromTrelloBoard = async (
 const createLists = async (trzBoardId: BoardId, trelloLists: TrelloListType[]) => {
     const listMap: { [trl: string]: ListId } = {};
     const sortedLists = [...trelloLists].sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0));
-    for (const [index, trelloList] of sortedLists.entries()) {
+    let index = 0;
+    for (const trelloList of sortedLists.values()) {
         const trelloListName = trelloList.name;
         const trzList = await addList(
             {
@@ -89,6 +90,9 @@ const createLists = async (trzBoardId: BoardId, trelloLists: TrelloListType[]) =
             }
         );
         listMap[trelloList.id] = trzList.id;
+        if (!trelloList.closed) {
+            index++;
+        }
     }
     return listMap;
 };
@@ -145,7 +149,7 @@ const createCard = async (
     listMap: Record<string, ListId>,
     labelMap: Record<string, LabelId>,
     userMap: TrelloUserToTerrazzoUserMap,
-    cardOrderMap: Record<string, number>
+    cardOrderMap: Record<string, number | null>
 ) => {
     const descriptionBlocks = await processCardDescription(trelloCard.desc);
     const attachmentBlocks = await processExtraCardAttachments(trelloCard);
@@ -187,7 +191,7 @@ const createCard = async (
  * Builds a map of Trello card ID to its order index within its list, based on Trello pos
  */
 const getCardOrderMap = (trelloCards: TrelloCardType[]) => {
-    const cardOrderMap: Record<string, number> = {};
+    const cardOrderMap: Record<string, number | null> = {};
     const byList: Record<string, TrelloCardType[]> = {};
 
     for (const card of trelloCards) {
@@ -198,10 +202,14 @@ const getCardOrderMap = (trelloCards: TrelloCardType[]) => {
     }
 
     for (const listId of recordKeys(byList)) {
+        let index = 0;
         const sorted = byList[listId].sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0));
-        sorted.forEach((card, index) => {
-            cardOrderMap[card.id] = index;
-        });
+        for (const card of sorted) {
+            cardOrderMap[card.id] = card.closed ? null : index;
+            if (!card.closed) {
+                index++;
+            }
+        }
     }
 
     return cardOrderMap;

@@ -5,6 +5,13 @@ export enum LinkedAccountProvider {
     DEV = 'DEV',
 }
 
+export interface GithubAuthResponse {
+    id: string;
+    login: string | null;
+    avatar_url: string | null;
+    name: string | null;
+}
+
 export interface GithubUserProfile {
     id: string;
     login: string;
