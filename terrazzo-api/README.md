@@ -182,6 +182,3 @@ This is based off of y-socket.io but heavily modified for Terrazzo's custom arch
 5. **Type everything**: Leverage TypeScript for event payloads and responses
 6. **Handle errors**: Use try-catch blocks and provide meaningful error messages
 7. **Cache wisely**: Use caching for frequently read data, invalidate after writes
-
-## Socket.IO Admin UI
-The API includes the Socket.IO Admin UI for monitoring connections, though it is pretty much useless currently.
