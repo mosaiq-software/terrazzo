@@ -15,6 +15,10 @@ import { useNavigate } from 'react-router';
 import { useLocation } from 'react-router-dom';
 import { DirectoryListItemContextMenu } from './DirectoryListItemContextMenu';
 import { DirectoryListItemIcon } from './DirectoryListItemIcon';
+import EditableTextbox from '@trz/components/UI/EditableTextbox';
+import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
+import { updateBoardField, updateDocumentMetadata } from '@trz/emitters';
+import { useSocket } from '@trz/contexts/socket-context';
 
 interface DirectoryTreeItemProps {
     directoryListItem: ModuleHeader;
@@ -22,6 +26,7 @@ interface DirectoryTreeItemProps {
     addItem: (toParentId: UID, type: TrzModuleType) => Promise<void>;
 }
 export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
+    const sockCtx = useSocket();
     const navigate = useNavigate();
     const location = useLocation();
     const { showContextMenu } = useContextMenu();
@@ -79,6 +84,30 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
         navigate(url);
     };
 
+    const onDirectoryItemNameChange = async (value: string) => {
+        try {
+            switch (props.directoryListItem.type) {
+                case 'board':
+                    await updateBoardField(sockCtx, props.directoryListItem.id, {
+                        name: value,
+                    });
+                    break;
+                case 'directory':
+                    await updateDirectoryMetadata(sockCtx, props.directoryListItem.id, {
+                        name: value,
+                    });
+                    break;
+                case 'document':
+                    await updateDocumentMetadata(sockCtx, props.directoryListItem.id, {
+                        name: value,
+                    });
+                    break;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
     if (props.directoryListItem.archived) {
         return null;
     }
@@ -89,7 +118,6 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 align="center"
                 justify="space-between"
                 wrap="nowrap"
-                p="4"
                 w="100%"
                 gap={0}
                 px={0}
@@ -97,6 +125,8 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                 bg={selected ? COLORS.background.light : hovered ? COLORS.background.medium : COLORS.transparent}
                 style={{
                     cursor: 'pointer',
+                    borderRadius: '0.2rem',
+                    padding: '0.2rem',
                 }}
                 onContextMenuCapture={showContextMenu((close) => (
                     <DirectoryListItemContextMenu
@@ -115,7 +145,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                     collapsed={!!collapsed}
                     subItemsCount={contents?.length}
                 />
-                <Text
+                {/*<Text
                     c={COLORS.text.primary}
                     style={{
                         textWrap: 'nowrap',
@@ -125,7 +155,31 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                     }}
                 >
                     {props.directoryListItem.name}
-                </Text>
+                </Text>*/}
+                <EditableTextbox
+                    value={props.directoryListItem.name}
+                    onChange={onDirectoryItemNameChange}
+                    type="title"
+                    placeholder="Item name.."
+                    titleProps={{
+                        order: 5,
+                        textWrap: 'nowrap',
+                        fw: 400,
+                    }}
+                    inputProps={{
+                        bg: COLORS.transparent,
+                        variant: 'filled',
+                        size: 'xs',
+                        styles: {
+                            input: { fontSize: '1rem' },
+                        },
+                    }}
+                    style={{
+                        width: '100%',
+                        paddingLeft: '5px',
+                    }}
+                    doubleClick={true}
+                />
                 <Group
                     gap={0}
                     wrap="nowrap"
