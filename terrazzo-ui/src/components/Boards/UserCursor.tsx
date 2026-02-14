@@ -1,4 +1,4 @@
-import { Badge, Box } from '@mantine/core';
+import { Badge, Group } from '@mantine/core';
 import { fullName, Position, UserId } from '@mosaiq/terrazzo-common';
 import { useImageColor } from '@trz/hooks/useImageColor';
 import { useUser } from '@trz/hooks/useUser';
@@ -20,12 +20,14 @@ const UserCursor = (props: UserCursorProps) => {
     }
 
     return (
-        <Box
+        <Group
             style={{
                 position: 'absolute',
                 left: props.position.x,
                 top: props.position.y,
             }}
+            wrap='nowrap'
+            gap={0}
         >
             <GiArrowCursor
                 size={'1.25rem'}
@@ -36,11 +38,12 @@ const UserCursor = (props: UserCursorProps) => {
                 size="xs"
                 ml={5}
                 bd={`1px solid ${COLORS.border}`}
+                styles={{label: {overflow: 'visible'}}}
                 autoContrast={true}
             >
                 {fullName(user)}
             </Badge>
-        </Box>
+        </Group>
     );
 };
 
