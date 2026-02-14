@@ -85,6 +85,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     };
 
     const onDirectoryItemNameChange = async (value: string) => {
+        if (!value) return;
         try {
             switch (props.directoryListItem.type) {
                 case 'board':
@@ -165,6 +166,12 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                         order: 5,
                         textWrap: 'nowrap',
                         fw: 400,
+                        style: {
+                            width: 0,
+                            flexGrow: 1,
+                            textOverflow: 'ellipsis',
+                            overflow: 'hidden',
+                        },
                     }}
                     inputProps={{
                         bg: COLORS.transparent,
@@ -173,6 +180,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                         styles: {
                             input: { fontSize: '1rem' },
                         },
+                        required: true,
                     }}
                     style={{
                         width: '100%',
