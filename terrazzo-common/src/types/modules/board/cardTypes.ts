@@ -1,10 +1,10 @@
 import { Priority } from '../../../constants';
-import { AssignmentId, BoardId, CardId, LabelId, ListId, TextBlockId, UserId } from '../../genericTypes';
+import { AssignmentId, CardId, LabelId, ListId, ModuleId, TextBlockId, UserId } from '../../genericTypes';
 
 export interface CardHeader {
     id: CardId;
     listId: ListId;
-    boardId: BoardId;
+    boardId: ModuleId;
     cardNumber: number;
     name: string;
     priority: Priority | null;

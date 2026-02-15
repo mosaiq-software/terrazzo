@@ -1,4 +1,4 @@
-import { OrganizationId, UID } from '../genericTypes';
+import { ModuleId, OrganizationId } from '../genericTypes';
 import { ModulePermissions } from '../permissions/permissionTypes';
 
 export enum TrzModuleType {
@@ -23,9 +23,9 @@ export interface ModuleDataMap {
     [TrzModuleType.Organization]: never;
 }
 
-export interface ModuleHeader<T extends TrzModuleType = TrzModuleType> {
-    id: UID;
-    parentId: UID;
+export interface ModuleHeader<T extends TrzModuleType> {
+    id: ModuleId;
+    parentId: ModuleId;
     name: string;
     type: T;
     order: number;

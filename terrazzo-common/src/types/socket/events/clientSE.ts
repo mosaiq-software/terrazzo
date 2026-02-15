@@ -1,12 +1,10 @@
 import { TextBlockResourceType, TextBlockSnapshot } from '../../..';
 import {
-    BoardId,
     CardId,
-    DirectoryId,
-    DocumentId,
     InviteId,
     LabelId,
     ListId,
+    ModuleId,
     OrganizationId,
     RoleId,
     UID,
@@ -15,12 +13,10 @@ import {
 } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
-import { Board, BoardRes, Label } from '../../modules/board/boardTypes';
+import { Label } from '../../modules/board/boardTypes';
 import { Card } from '../../modules/board/cardTypes';
 import { List, ListHeader } from '../../modules/board/listTypes';
-import { DirectoryHeader } from '../../modules/directoryTypes';
-import { DocumentHeader } from '../../modules/documentTypes';
-import { ModuleHeader } from '../../modules/moduleTypes';
+import { ModuleDataMap, ModuleHeader, TrzModuleType } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
 import { QueryItem } from '../../queryTypes';
@@ -41,14 +37,10 @@ export enum ClientSE {
 
     GET_USERS_ORGANIZATIONS = 'GET_USERS_ORGANIZATIONS',
     GET_ORGANIZATION = 'GET_ORGANIZATION',
-    GET_BOARD = 'GET_BOARD',
     GET_LIST = 'GET_LIST',
     GET_CARD = 'GET_CARD',
     GET_SEARCH_RESULTS = 'GET_SEARCH_RESULTS',
     GET_SEARCH_TAGS = 'GET_SEARCH_TAGS',
-    GET_DOCUMENT = 'GET_DOCUMENT',
-    GET_DIRECTORY = 'GET_DIRECTORY',
-    GET_DIRECTORY_CONTENTS = 'GET_DIRECTORY_CONTENTS',
     GET_INVITES_FOR_ORG = 'GET_INVITES_FOR_ORG',
     GET_INVITE = 'GET_INVITE',
     GET_USER = 'GET_USER',
@@ -58,32 +50,29 @@ export enum ClientSE {
     GET_USERS_LINKED_ACCOUNTS = 'GET_USERS_LINKED_ACCOUNTS',
     GET_USERNAME_AVAILABLE = 'GET_USERNAME_AVAILABLE',
     GET_TEXT_BLOCK_HISTORY_SNAPSHOTS = 'GET_TEXT_BLOCK_HISTORY_SNAPSHOTS',
+    GET_MODULE = 'GET_MODULE',
+    GET_MODULE_CHILDREN = 'GET_MODULE_CHILDREN',
 
     CREATE_ORG = 'CREATE_ORG',
-    CREATE_BOARD = 'CREATE_BOARD',
     CREATE_LIST = 'CREATE_LIST',
     CREATE_CARD = 'CREATE_CARD',
     CREATE_BOARD_LABEL = 'CREATE_BOARD_LABEL',
     CREATE_DUPLICATE_CARD = 'CREATE_DUPLICATE_CARD',
-    CREATE_DOCUMENT = 'CREATE_DOCUMENT',
-    CREATE_DIRECTORY = 'CREATE_DIRECTORY',
     CREATE_INVITE = 'CREATE_INVITE',
     CREATE_ROLE = 'CREATE_ROLE',
     CREATE_FILE_UPLOAD = 'CREATE_FILE_UPLOAD',
+    CREATE_MODULE = 'CREATE_MODULE',
 
     UPDATE_USER_FIELD = 'UPDATE_USER_FIELD',
     UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
-    UPDATE_BOARD_FIELD = 'UPDATE_BOARD_FIELD',
     UPDATE_LIST_FIELD = 'UPDATE_LIST_FIELD',
     UPDATE_CARD_FIELD = 'UPDATE_CARD_FIELD',
     UPDATE_CARD_ASSIGNEE = 'UPDATE_CARD_ASSIGNEE',
     UPDATE_BOARD_LABEL = 'UPDATE_BOARD_LABEL',
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
-    UPDATE_DOCUMENT_FIELD = 'UPDATE_DOCUMENT_FIELD',
-    UPDATE_DIRECTORY_FIELD = 'UPDATE_DIRECTORY_FIELD',
-    UPDATE_DIRECTORY_CONTENTS = 'UPDATE_DIRECTORY_CONTENTS',
     UPDATE_ROLE = 'UPDATE_ROLE',
     UPDATE_ROLES_FOR_USER_IN_ORG = 'UPDATE_ROLES_FOR_USER_IN_ORG',
+    UPDATE_MODULE_FIELD = 'UPDATE_MODULE_FIELD',
 
     DELETE_BOARD_LABEL = 'DELETE_BOARD_LABEL',
     DELETE_INVITE = 'DELETE_INVITE',
@@ -106,14 +95,10 @@ export interface ClientSEPayload {
 
     [ClientSE.GET_USERS_ORGANIZATIONS]: UserId;
     [ClientSE.GET_ORGANIZATION]: OrganizationId;
-    [ClientSE.GET_BOARD]: BoardId;
     [ClientSE.GET_LIST]: ListId;
     [ClientSE.GET_CARD]: CardId;
     [ClientSE.GET_SEARCH_RESULTS]: { query: string; searchSessionId: string; orgId: OrganizationId };
     [ClientSE.GET_SEARCH_TAGS]: { query: string; searchSessionId: string; orgId: OrganizationId };
-    [ClientSE.GET_DOCUMENT]: DocumentId;
-    [ClientSE.GET_DIRECTORY]: DirectoryId;
-    [ClientSE.GET_DIRECTORY_CONTENTS]: DirectoryId;
     [ClientSE.GET_INVITES_FOR_ORG]: OrganizationId;
     [ClientSE.GET_INVITE]: InviteId;
     [ClientSE.GET_USER]: UserId;
@@ -123,34 +108,40 @@ export interface ClientSEPayload {
     [ClientSE.GET_USERS_LINKED_ACCOUNTS]: UserId;
     [ClientSE.GET_USERNAME_AVAILABLE]: string;
     [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: { resourceId: UID; resourceType: TextBlockResourceType };
+    [ClientSE.GET_MODULE]: ModuleId;
+    [ClientSE.GET_MODULE_CHILDREN]: ModuleId;
 
     [ClientSE.CREATE_ORG]: { name: string };
-    [ClientSE.CREATE_BOARD]: { name: string; boardCode: string; parentId: DirectoryId };
-    [ClientSE.CREATE_LIST]: { boardID: BoardId; listName: string };
+    [ClientSE.CREATE_LIST]: { boardID: ModuleId; listName: string };
     [ClientSE.CREATE_CARD]: { listID: ListId; cardName: string };
-    [ClientSE.CREATE_BOARD_LABEL]: { boardId: BoardId; name: string; color: string };
+    [ClientSE.CREATE_BOARD_LABEL]: { boardId: ModuleId; name: string; color: string };
     [ClientSE.CREATE_DUPLICATE_CARD]: { cardId: CardId };
-    [ClientSE.CREATE_DOCUMENT]: { title: string; parentId: UID };
-    [ClientSE.CREATE_DIRECTORY]: { name: string; parentId: DirectoryId };
     [ClientSE.CREATE_INVITE]: { orgId: OrganizationId; maxUses: number | null };
     [ClientSE.CREATE_ROLE]: { orgId: OrganizationId; name: string; color: string };
     [ClientSE.CREATE_FILE_UPLOAD]: { fileName: string; base64: string; mimeType: string };
+    [ClientSE.CREATE_MODULE]: {
+        name: string;
+        parentId: ModuleId;
+        type: TrzModuleType;
+        data: Partial<ModuleDataMap[TrzModuleType]>;
+    };
 
     [ClientSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
     [ClientSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
-    [ClientSE.UPDATE_BOARD_FIELD]: Partial<Board> & { id: BoardId };
     [ClientSE.UPDATE_LIST_FIELD]: Omit<Partial<List> & { id: ListId }, 'order'>;
     [ClientSE.UPDATE_CARD_FIELD]: Omit<Partial<Card> & { id: CardId }, 'listId' | 'order'>;
     [ClientSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
-    [ClientSE.UPDATE_BOARD_LABEL]: { boardId: BoardId; label: Label };
+    [ClientSE.UPDATE_BOARD_LABEL]: { boardId: ModuleId; label: Label };
     [ClientSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
-    [ClientSE.UPDATE_DOCUMENT_FIELD]: Partial<DocumentHeader> & { id: DocumentId };
-    [ClientSE.UPDATE_DIRECTORY_FIELD]: Partial<DirectoryHeader> & { id: DirectoryId };
-    [ClientSE.UPDATE_DIRECTORY_CONTENTS]: { directoryId: DirectoryId; contents: UID[] };
     [ClientSE.UPDATE_ROLE]: Role;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
+    [ClientSE.UPDATE_MODULE_FIELD]: {
+        moduleId: ModuleId;
+        type: TrzModuleType;
+        update: Partial<ModuleDataMap[TrzModuleType]>;
+    };
 
-    [ClientSE.DELETE_BOARD_LABEL]: { boardId: BoardId; labelId: LabelId };
+    [ClientSE.DELETE_BOARD_LABEL]: { boardId: ModuleId; labelId: LabelId };
     [ClientSE.DELETE_INVITE]: { inviteId: InviteId };
     [ClientSE.DELETE_MEMBERSHIP]: { userId: UserId; orgId: OrganizationId };
     [ClientSE.DELETE_ROLE]: { roleId: RoleId };
@@ -175,14 +166,10 @@ export interface ClientSEReplies {
 
     [ClientSE.GET_USERS_ORGANIZATIONS]: OrganizationHeader[];
     [ClientSE.GET_ORGANIZATION]: OrganizationHeader | undefined;
-    [ClientSE.GET_BOARD]: BoardRes | undefined;
     [ClientSE.GET_LIST]: ListHeader | undefined;
     [ClientSE.GET_CARD]: Card | undefined;
     [ClientSE.GET_SEARCH_RESULTS]: { results: QueryItem[] } | undefined;
     [ClientSE.GET_SEARCH_TAGS]: { results: QueryItem[] } | undefined;
-    [ClientSE.GET_DOCUMENT]: DocumentHeader | undefined;
-    [ClientSE.GET_DIRECTORY]: DirectoryHeader | undefined;
-    [ClientSE.GET_DIRECTORY_CONTENTS]: (ModuleHeader & { canAccess: boolean })[] | undefined;
     [ClientSE.GET_INVITES_FOR_ORG]: Invite[] | undefined;
     [ClientSE.GET_INVITE]: Invite | undefined;
     [ClientSE.GET_USER]: UserHeader | undefined;
@@ -192,32 +179,29 @@ export interface ClientSEReplies {
     [ClientSE.GET_USERS_LINKED_ACCOUNTS]: LinkedAccount[] | undefined;
     [ClientSE.GET_USERNAME_AVAILABLE]: boolean;
     [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: TextBlockSnapshot[] | undefined;
+    [ClientSE.GET_MODULE]: ModuleHeader<TrzModuleType> | undefined;
+    [ClientSE.GET_MODULE_CHILDREN]: ModuleHeader<TrzModuleType>[] | undefined;
 
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
-    [ClientSE.CREATE_BOARD]: BoardId | undefined;
     [ClientSE.CREATE_LIST]: ListId | undefined;
     [ClientSE.CREATE_CARD]: CardId | undefined;
     [ClientSE.CREATE_BOARD_LABEL]: LabelId | undefined;
     [ClientSE.CREATE_DUPLICATE_CARD]: CardId | undefined;
-    [ClientSE.CREATE_DOCUMENT]: DocumentHeader | undefined;
-    [ClientSE.CREATE_DIRECTORY]: DirectoryHeader | undefined;
     [ClientSE.CREATE_INVITE]: Invite | undefined;
     [ClientSE.CREATE_ROLE]: Role | undefined;
     [ClientSE.CREATE_FILE_UPLOAD]: UploadedFileId | undefined;
+    [ClientSE.CREATE_MODULE]: ModuleId | undefined;
 
     [ClientSE.UPDATE_USER_FIELD]: undefined;
     [ClientSE.UPDATE_ORG_FIELD]: undefined;
-    [ClientSE.UPDATE_BOARD_FIELD]: undefined;
     [ClientSE.UPDATE_LIST_FIELD]: undefined;
     [ClientSE.UPDATE_CARD_FIELD]: undefined;
     [ClientSE.UPDATE_CARD_ASSIGNEE]: undefined;
     [ClientSE.UPDATE_BOARD_LABEL]: undefined;
     [ClientSE.UPDATE_CARDS_LABELS]: undefined;
-    [ClientSE.UPDATE_DOCUMENT_FIELD]: undefined;
-    [ClientSE.UPDATE_DIRECTORY_FIELD]: undefined;
-    [ClientSE.UPDATE_DIRECTORY_CONTENTS]: undefined;
     [ClientSE.UPDATE_ROLE]: undefined;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: undefined;
+    [ClientSE.UPDATE_MODULE_FIELD]: undefined;
 
     [ClientSE.DELETE_BOARD_LABEL]: undefined;
     [ClientSE.DELETE_INVITE]: undefined;

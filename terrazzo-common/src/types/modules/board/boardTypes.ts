@@ -1,4 +1,4 @@
-import { BoardId, CardId, LabelId, ListId } from '../../genericTypes';
+import { CardId, LabelId, ListId, ModuleId } from '../../genericTypes';
 import { ModuleHeader, TrzModuleType } from '../moduleTypes';
 import { List } from './listTypes';
 
@@ -13,7 +13,7 @@ export interface BoardRes extends Omit<Board, 'lists'> {
 
 export interface Label {
     id: LabelId;
-    boardId: BoardId;
+    boardId: ModuleId;
     name: string;
     color: string;
 }

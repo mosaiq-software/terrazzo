@@ -1,5 +1,5 @@
 import { AuthProviderCallbackData, AuthSession, ExistingAuthToken } from '../authTypes';
-import { BoardId, UID, UploadedFileId } from '../genericTypes';
+import { ModuleId, UploadedFileId } from '../genericTypes';
 import { TrelloExportType, TrelloUserToTerrazzoUserMap } from './trelloTypes';
 
 /**
@@ -36,7 +36,7 @@ export const RestRequestMethod = {
 export interface RestRequestParams {
     [RestRoutes.INDEX]: {};
     [RestRoutes.USER_FAKE_DEV]: { username: string };
-    [RestRoutes.IMPORT_FROM_TRELLO]: { parentId: UID };
+    [RestRoutes.IMPORT_FROM_TRELLO]: { parentId: ModuleId };
     [RestRoutes.GET_FILE]: { fileId: UploadedFileId };
     [RestRoutes.UPLOAD_FILE]: {};
     [RestRoutes.AUTH_PROVIDER_CALLBACK]: {};
@@ -56,7 +56,7 @@ export interface RestRequestBody {
 export interface RestResponseTypes {
     [RestRoutes.INDEX]: string;
     [RestRoutes.USER_FAKE_DEV]: AuthSession;
-    [RestRoutes.IMPORT_FROM_TRELLO]: BoardId | undefined;
+    [RestRoutes.IMPORT_FROM_TRELLO]: ModuleId | undefined;
     [RestRoutes.GET_FILE]: Buffer<ArrayBuffer>;
     [RestRoutes.UPLOAD_FILE]: UploadedFileId;
     [RestRoutes.AUTH_PROVIDER_CALLBACK]: AuthSession | 'already-linked';

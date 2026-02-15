@@ -1,9 +1,9 @@
-import { BoardId, ListId } from '../../genericTypes';
+import { ListId, ModuleId } from '../../genericTypes';
 import { Card } from './cardTypes';
 
 export interface ListHeader {
     id: ListId;
-    boardId: BoardId;
+    boardId: ModuleId;
     name: string;
     order: number | null;
 }
