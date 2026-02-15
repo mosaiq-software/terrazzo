@@ -1,8 +1,8 @@
-import { ModuleHeader } from '@mosaiq/terrazzo-common';
+import { ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export type ModuleModelType = ModuleHeader;
+export type ModuleModelType = ModuleHeader<TrzModuleType>;
 
 export const getModuleModel = (sequelize: Sequelize): DbModel<ModuleModelType> => {
     class ModuleModel extends Model<ModuleModelType> {
