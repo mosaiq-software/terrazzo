@@ -6,14 +6,14 @@ import {
     moveList,
     updateListFromPartial,
 } from '@trz-api/controllers/listController';
-import { userCanEditBoard, userCanViewBoard } from '@trz-api/utils/permissions';
+import { userCanManageModule, userCanViewModule } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 
 export const registerListListeners = (socket: Socket) => {
     subscribe(socket, ClientSE.GET_LIST, async (data) => {
         const boardId = await getBoardIDFromListID(data);
-        if (!(await userCanViewBoard(socket, boardId))) {
+        if (!(await userCanViewModule(socket, boardId))) {
             throw new Error('Insufficient permissions to view this list');
         }
         const list = await getListRes(data);
@@ -24,7 +24,7 @@ export const registerListListeners = (socket: Socket) => {
     });
 
     subscribe(socket, ClientSE.CREATE_LIST, async (data) => {
-        if (!(await userCanEditBoard(socket, data.boardID))) {
+        if (!(await userCanManageModule(socket, data.boardID))) {
             throw new Error('Insufficient permissions to create lists for this board');
         }
         const list = await addList({ boardId: data.boardID, name: data.listName });
@@ -33,7 +33,7 @@ export const registerListListeners = (socket: Socket) => {
 
     subscribe(socket, ClientSE.UPDATE_LIST_FIELD, async (data) => {
         const boardId = await getBoardIDFromListID(data.id);
-        if (!(await userCanEditBoard(socket, boardId))) {
+        if (!(await userCanManageModule(socket, boardId))) {
             throw new Error('Insufficient permissions to update this list');
         }
         await updateListFromPartial(data.id, data);
@@ -42,7 +42,7 @@ export const registerListListeners = (socket: Socket) => {
 
     subscribe(socket, ClientSE.MOVE_LIST, async (data) => {
         const boardId = await getBoardIDFromListID(data.listId);
-        if (!(await userCanEditBoard(socket, boardId))) {
+        if (!(await userCanManageModule(socket, boardId))) {
             throw new Error('Insufficient permissions to move this list');
         }
         await moveList(data.listId, data.position, boardId);

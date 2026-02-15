@@ -1,22 +1,13 @@
-import { OrganizationId, UID } from '../genericTypes';
+import { ModuleId, OrganizationId } from '../genericTypes';
 import { PermissionFlag } from './permissionFlags';
 
 export enum PermissibleAction {
     AdministerOrg = 'AdministerOrg',
     EditRoles = 'EditRoles',
     AssignRoles = 'AssignRoles',
-    ViewBoard = 'ViewBoard',
-    EditBoard = 'EditBoard',
-    CreateBoard = 'CreateBoard',
-    MoveCards = 'MoveCards',
-    EditCard = 'EditCard',
-    CreateCard = 'CreateCard',
-    ViewDocument = 'ViewDocument',
-    EditDocument = 'EditDocument',
-    CreateDocument = 'CreateDocument',
-    ViewDirectory = 'ViewDirectory',
-    EditDirectory = 'EditDirectory',
-    CreateDirectory = 'CreateDirectory',
+    ViewModules = 'ViewModules',
+    ManageModules = 'ManageModules',
+    ManageCards = 'ManageCards',
 }
 
 export type PermissionRequirementGroup = PermissionFlag[][];
@@ -29,41 +20,16 @@ export const PermissibleActionRequirements: Record<PermissibleAction, Permission
         [PermissionFlag.EDIT_ROLES],
         [PermissionFlag.ASSIGN_ROLES],
     ],
-    [PermissibleAction.ViewBoard]: [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_BOARD]],
-    [PermissibleAction.EditBoard]: [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_BOARD]],
-    [PermissibleAction.CreateBoard]: [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.CREATE_BOARD]],
-    [PermissibleAction.MoveCards]: [
+    [PermissibleAction.ViewModules]: [
         [PermissionFlag.ADMINISTER_ORG],
-        [PermissionFlag.MOVE_CARDS],
-        [PermissionFlag.EDIT_BOARD],
+        [PermissionFlag.MANAGE_MODULES],
+        [PermissionFlag.VIEW_MODULES],
     ],
-    [PermissibleAction.EditCard]: [
+    [PermissibleAction.ManageModules]: [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.MANAGE_MODULES]],
+    [PermissibleAction.ManageCards]: [
         [PermissionFlag.ADMINISTER_ORG],
-        [PermissionFlag.EDIT_CARDS],
-        [PermissionFlag.EDIT_BOARD],
-    ],
-    [PermissibleAction.CreateCard]: [
-        [PermissionFlag.ADMINISTER_ORG],
-        [PermissionFlag.CREATE_CARDS],
-        [PermissionFlag.EDIT_BOARD],
-    ],
-    [PermissibleAction.ViewDocument]: [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.VIEW_DOCUMENT]],
-    [PermissibleAction.EditDocument]: [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.EDIT_DOCUMENT]],
-    [PermissibleAction.CreateDocument]: [[PermissionFlag.ADMINISTER_ORG], [PermissionFlag.CREATE_DOCUMENT]],
-    [PermissibleAction.ViewDirectory]: [
-        [PermissionFlag.ADMINISTER_ORG],
-        [PermissionFlag.VIEW_BOARD],
-        [PermissionFlag.VIEW_DOCUMENT],
-    ],
-    [PermissibleAction.EditDirectory]: [
-        [PermissionFlag.ADMINISTER_ORG],
-        [PermissionFlag.EDIT_BOARD],
-        [PermissionFlag.EDIT_DOCUMENT],
-    ],
-    [PermissibleAction.CreateDirectory]: [
-        [PermissionFlag.ADMINISTER_ORG],
-        [PermissionFlag.CREATE_BOARD],
-        [PermissionFlag.CREATE_DOCUMENT],
+        [PermissionFlag.MANAGE_MODULES],
+        [PermissionFlag.MANAGE_CARDS],
     ],
 };
 
@@ -74,6 +40,6 @@ export type FetchablePermissibleActionType = { action: PermissibleAction } & (
       }
     | {
           type: 'module';
-          moduleId: UID;
+          moduleId: ModuleId;
       }
 );

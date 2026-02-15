@@ -1,14 +1,14 @@
-import { BoardId, getRoomCode, ListHeader, ListId, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
-import { userCanViewBoard } from '@trz-api/utils/permissions';
+import { getRoomCode, ListHeader, ListId, ModuleId, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { userCanViewModule } from '@trz-api/utils/permissions';
 import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
-export const syncAddList = async (list: ListHeader, boardId: BoardId) => {
+export const syncAddList = async (list: ListHeader, boardId: ModuleId) => {
     try {
         broadcast({
             event: ServerSE.ADD_LIST,
             toRoomIds: [getRoomCode(RoomType.DATA, boardId)],
             buildPayload: async (userId) => {
-                if (!(await userCanViewBoard(userId, boardId))) {
+                if (!(await userCanViewModule(userId, boardId))) {
                     throw new Error('Insufficient permissions to view this list');
                 }
                 return {
@@ -22,13 +22,13 @@ export const syncAddList = async (list: ListHeader, boardId: BoardId) => {
     }
 };
 
-export const syncUpdateListField = async (listId: ListId, updates: any, boardId: BoardId) => {
+export const syncUpdateListField = async (listId: ListId, updates: any, boardId: ModuleId) => {
     try {
         broadcast({
             event: ServerSE.UPDATE_LIST_FIELD,
             toRoomIds: [getRoomCode(RoomType.DATA, boardId)],
             buildPayload: async (userId) => {
-                if (!(await userCanViewBoard(userId, boardId))) {
+                if (!(await userCanViewModule(userId, boardId))) {
                     throw new Error('Insufficient permissions to view this list');
                 }
                 return updates;
@@ -39,13 +39,13 @@ export const syncUpdateListField = async (listId: ListId, updates: any, boardId:
     }
 };
 
-export const syncMoveList = async (listId: ListId, position: number | null, boardId: BoardId) => {
+export const syncMoveList = async (listId: ListId, position: number | null, boardId: ModuleId) => {
     try {
         broadcast({
             event: ServerSE.MOVE_LIST,
             toRoomIds: [getRoomCode(RoomType.DATA, boardId)],
             buildPayload: async (userId) => {
-                if (!(await userCanViewBoard(userId, boardId))) {
+                if (!(await userCanViewModule(userId, boardId))) {
                     throw new Error('Insufficient permissions to view this list');
                 }
                 return { listId, position };

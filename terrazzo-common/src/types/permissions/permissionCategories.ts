@@ -1,7 +1,6 @@
 export enum PermissionFlagCategory {
     ORG_LEVEL = 'ORG_LEVEL',
-    BOARD_LEVEL = 'BOARD_LEVEL',
-    DOCUMENT_LEVEL = 'DOCUMENT_LEVEL',
+    MODULE_LEVEL = 'MODULE_LEVEL',
     OTHER = 'OTHER',
 }
 
@@ -13,11 +12,8 @@ export const PermissionFlagCategoryData: Record<PermissionFlagCategory, Permissi
     [PermissionFlagCategory.ORG_LEVEL]: {
         title: 'Organization Permissions',
     },
-    [PermissionFlagCategory.BOARD_LEVEL]: {
-        title: 'Board Permissions',
-    },
-    [PermissionFlagCategory.DOCUMENT_LEVEL]: {
-        title: 'Document Permissions',
+    [PermissionFlagCategory.MODULE_LEVEL]: {
+        title: 'Module Permissions',
     },
     [PermissionFlagCategory.OTHER]: {
         title: 'Miscellaneous Permissions',

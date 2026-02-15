@@ -1,18 +1,15 @@
 import {
-    BoardId,
     calculateTrueModulePermissionsInOrg,
-    DirectoryId,
-    DocumentId,
     evaluateOrganizationPermissionForRoles,
     evaluatePermissionForRoles,
     meetsRequirementsForPermissibleAction,
+    ModuleId,
     OrganizationId,
     PermissibleAction,
     PermissionFlag,
-    UID,
     UserId,
 } from '@mosaiq/terrazzo-common';
-import { getModuleById } from '@trz-api/controllers/moduleController';
+import { getUntypedModuleById } from '@trz-api/controllers/moduleController';
 import { getRolesForOrg } from '@trz-api/controllers/roleController';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
@@ -20,12 +17,14 @@ import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPer
 import { Socket } from 'socket.io';
 import { getSocketData } from './socket/socketUtils';
 
+type UserLike = UserId | Socket | undefined;
+
 /**
  * Helper to extract UserId from either a UserId or a Socket
  * @param user - The UserId or Socket to extract the UserId from.
  * @returns The extracted UserId.
  */
-const getUserId = (user: UserId | Socket | undefined): UserId | undefined => {
+const getUserId = (user: UserLike): UserId | undefined => {
     if (!user) {
         return undefined;
     }
@@ -42,8 +41,8 @@ const getUserId = (user: UserId | Socket | undefined): UserId | undefined => {
  * @param moduleId - The ID of the module.
  * @returns The list of PermissionFlags that are granted to the user on the module.
  */
-const getModulePermissionsForUser = async (userId: UserId, moduleId: UID): Promise<PermissionFlag[]> => {
-    const module = await getModuleById(moduleId);
+const getModulePermissionsForUser = async (userId: UserId, moduleId: ModuleId): Promise<PermissionFlag[]> => {
+    const module = await getUntypedModuleById(moduleId);
     if (!module) {
         const orgPerms = await getOrganizationPermissionsForUser(userId, moduleId);
         return orgPerms;
@@ -78,8 +77,8 @@ const getOrganizationPermissionsForUser = async (userId: UserId, orgId: Organiza
  * @returns Whether the user has the required permissions on the module.
  */
 export const userHasPermissionOnModule = async (
-    user: UserId | Socket | undefined,
-    moduleId: UID,
+    user: UserLike,
+    moduleId: ModuleId,
     permissibleAction: PermissibleAction
 ): Promise<boolean> => {
     const userId = getUserId(user);
@@ -98,7 +97,7 @@ export const userHasPermissionOnModule = async (
  * @returns Whether the user has the required permissions on the organization.
  */
 export const userHasPermissionsOnOrganization = async (
-    user: UserId | Socket | undefined,
+    user: UserLike,
     orgId: OrganizationId,
     permissibleAction: PermissibleAction
 ): Promise<boolean> => {
@@ -113,7 +112,7 @@ export const userHasPermissionsOnOrganization = async (
 // ====================== Specific Permission Checkers ======================
 
 export const userCanGetAndEditPersonalDataForUser = async (
-    requestingUser: UserId | Socket | undefined,
+    requestingUser: UserLike,
     targetUserId: UserId
 ): Promise<boolean> => {
     const requestingUserId = getUserId(requestingUser);
@@ -123,10 +122,7 @@ export const userCanGetAndEditPersonalDataForUser = async (
     return requestingUserId === targetUserId;
 };
 
-export const userCanViewOrganization = async (
-    user: UserId | Socket | undefined,
-    orgId: OrganizationId
-): Promise<boolean> => {
+export const userCanViewOrganization = async (user: UserLike, orgId: OrganizationId): Promise<boolean> => {
     const userId = getUserId(user);
     if (!userId) {
         return false;
@@ -135,102 +131,33 @@ export const userCanViewOrganization = async (
     return !!membershipRecord;
 };
 
-export const userCanAdministerOrganization = async (
-    user: UserId | Socket | undefined,
-    orgId: OrganizationId
-): Promise<boolean> => {
+export const userCanAdministerOrganization = async (user: UserLike, orgId: OrganizationId): Promise<boolean> => {
     return userHasPermissionsOnOrganization(user, orgId, PermissibleAction.AdministerOrg);
 };
 
-export const userCanEditRolesInOrganization = async (
-    user: UserId | Socket | undefined,
-    orgId: OrganizationId
-): Promise<boolean> => {
+export const userCanEditRolesInOrganization = async (user: UserLike, orgId: OrganizationId): Promise<boolean> => {
     return userHasPermissionsOnOrganization(user, orgId, PermissibleAction.EditRoles);
 };
 
-export const userCanAssignRolesInOrganization = async (
-    user: UserId | Socket | undefined,
-    orgId: OrganizationId
-): Promise<boolean> => {
+export const userCanAssignRolesInOrganization = async (user: UserLike, orgId: OrganizationId): Promise<boolean> => {
     return userHasPermissionsOnOrganization(user, orgId, PermissibleAction.AssignRoles);
 };
 
-export const userCanViewBoard = async (user: UserId | Socket | undefined, boardId: BoardId): Promise<boolean> => {
-    const board = await getModuleById(boardId);
-    if (!board) {
+export const userCanViewModule = async (user: UserLike, moduleId: ModuleId): Promise<boolean> => {
+    const module = await getUntypedModuleById(moduleId);
+    if (!module) {
         return false;
     }
-    if (board.public) {
+    if (module.public) {
         return true;
     }
-    return userHasPermissionOnModule(user, boardId, PermissibleAction.ViewBoard);
+    return userHasPermissionOnModule(user, moduleId, PermissibleAction.ViewModules);
 };
 
-export const userCanEditBoard = async (user: UserId | Socket | undefined, boardId: BoardId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, boardId, PermissibleAction.EditBoard);
+export const userCanManageModule = async (user: UserLike, moduleId: ModuleId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, moduleId, PermissibleAction.ManageModules);
 };
 
-export const userCanCreateBoard = async (user: UserId | Socket | undefined, boardId: BoardId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, boardId, PermissibleAction.CreateBoard);
-};
-
-export const userCanMoveCardsOnBoard = async (
-    user: UserId | Socket | undefined,
-    boardId: BoardId
-): Promise<boolean> => {
-    return userHasPermissionOnModule(user, boardId, PermissibleAction.MoveCards);
-};
-
-export const userCanEditCard = async (user: UserId | Socket | undefined, boardId: BoardId): Promise<boolean> => {
-    return userHasPermissionOnModule(user, boardId, PermissibleAction.EditCard);
-};
-
-export const userCanViewDocument = async (
-    user: UserId | Socket | undefined,
-    documentId: DocumentId
-): Promise<boolean> => {
-    const document = await getModuleById(documentId);
-    if (!document) {
-        return false;
-    }
-    if (document.public) {
-        return true;
-    }
-    return userHasPermissionOnModule(user, documentId, PermissibleAction.ViewDocument);
-};
-
-export const userCanEditDocument = async (
-    user: UserId | Socket | undefined,
-    documentId: DocumentId
-): Promise<boolean> => {
-    return userHasPermissionOnModule(user, documentId, PermissibleAction.EditDocument);
-};
-
-export const userCanCreateDocument = async (
-    user: UserId | Socket | undefined,
-    documentId: DocumentId
-): Promise<boolean> => {
-    return userHasPermissionOnModule(user, documentId, PermissibleAction.CreateDocument);
-};
-
-export const userCanViewDirectory = async (
-    user: UserId | Socket | undefined,
-    directoryId: DirectoryId
-): Promise<boolean> => {
-    return userHasPermissionOnModule(user, directoryId, PermissibleAction.ViewDirectory);
-};
-
-export const userCanEditDirectory = async (
-    user: UserId | Socket | undefined,
-    directoryId: DirectoryId
-): Promise<boolean> => {
-    return userHasPermissionOnModule(user, directoryId, PermissibleAction.EditDirectory);
-};
-
-export const userCanCreateDirectory = async (
-    user: UserId | Socket | undefined,
-    directoryId: DirectoryId
-): Promise<boolean> => {
-    return userHasPermissionOnModule(user, directoryId, PermissibleAction.CreateDirectory);
+export const userCanManageCards = async (user: UserLike, moduleId: ModuleId): Promise<boolean> => {
+    return userHasPermissionOnModule(user, moduleId, PermissibleAction.ManageCards);
 };

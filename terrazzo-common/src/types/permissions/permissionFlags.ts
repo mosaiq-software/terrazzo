@@ -6,18 +6,10 @@ export enum PermissionFlag {
     EDIT_ROLES = 'EDIT_ROLES',
     ASSIGN_ROLES = 'ASSIGN_ROLES',
 
-    // Board permissions
-    VIEW_BOARD = 'VIEW_BOARD',
-    EDIT_BOARD = 'EDIT_BOARD',
-    CREATE_BOARD = 'CREATE_BOARD',
-    MOVE_CARDS = 'MOVE_CARDS',
-    EDIT_CARDS = 'EDIT_CARDS',
-    CREATE_CARDS = 'CREATE_CARDS',
-
-    // Document permissions
-    VIEW_DOCUMENT = 'VIEW_DOCUMENT',
-    EDIT_DOCUMENT = 'EDIT_DOCUMENT',
-    CREATE_DOCUMENT = 'CREATE_DOCUMENT',
+    // Module permissions
+    VIEW_MODULES = 'VIEW_MODULES',
+    MANAGE_MODULES = 'MANAGE_MODULES',
+    MANAGE_CARDS = 'MANAGE_CARDS',
 }
 
 export interface PermissionFlagData {
@@ -47,61 +39,23 @@ export const PermissionFlagData: Record<PermissionFlag, PermissionFlagData> = {
         category: PermissionFlagCategory.ORG_LEVEL,
     },
 
-    // Board permissions
-    [PermissionFlag.VIEW_BOARD]: {
-        flag: PermissionFlag.VIEW_BOARD,
-        title: 'View Board',
-        description: 'View a board and its contents',
-        category: PermissionFlagCategory.BOARD_LEVEL,
+    // Module permissions
+    [PermissionFlag.VIEW_MODULES]: {
+        flag: PermissionFlag.VIEW_MODULES,
+        title: 'View Modules',
+        description: 'View modules and their contents',
+        category: PermissionFlagCategory.MODULE_LEVEL,
     },
-    [PermissionFlag.EDIT_BOARD]: {
-        flag: PermissionFlag.EDIT_BOARD,
-        title: 'Edit Board',
-        description: 'Edit a board and its lists',
-        category: PermissionFlagCategory.BOARD_LEVEL,
+    [PermissionFlag.MANAGE_MODULES]: {
+        flag: PermissionFlag.MANAGE_MODULES,
+        title: 'Manage Modules',
+        description: 'Create, edit, and archive modules',
+        category: PermissionFlagCategory.MODULE_LEVEL,
     },
-    [PermissionFlag.CREATE_BOARD]: {
-        flag: PermissionFlag.CREATE_BOARD,
-        title: 'Create Board',
-        description: 'Create new boards',
-        category: PermissionFlagCategory.BOARD_LEVEL,
-    },
-    [PermissionFlag.MOVE_CARDS]: {
-        flag: PermissionFlag.MOVE_CARDS,
-        title: 'Move Cards',
-        description: 'Move cards within a board',
-        category: PermissionFlagCategory.BOARD_LEVEL,
-    },
-    [PermissionFlag.EDIT_CARDS]: {
-        flag: PermissionFlag.EDIT_CARDS,
-        title: 'Edit Cards',
-        description: 'Edit any field of a card',
-        category: PermissionFlagCategory.BOARD_LEVEL,
-    },
-    [PermissionFlag.CREATE_CARDS]: {
-        flag: PermissionFlag.CREATE_CARDS,
-        title: 'Create Cards',
-        description: 'Create new cards on a board',
-        category: PermissionFlagCategory.BOARD_LEVEL,
-    },
-
-    // Document permissions
-    [PermissionFlag.VIEW_DOCUMENT]: {
-        flag: PermissionFlag.VIEW_DOCUMENT,
-        title: 'View Document',
-        description: 'View a document',
-        category: PermissionFlagCategory.DOCUMENT_LEVEL,
-    },
-    [PermissionFlag.EDIT_DOCUMENT]: {
-        flag: PermissionFlag.EDIT_DOCUMENT,
-        title: 'Edit Document',
-        description: 'Edit a document',
-        category: PermissionFlagCategory.DOCUMENT_LEVEL,
-    },
-    [PermissionFlag.CREATE_DOCUMENT]: {
-        flag: PermissionFlag.CREATE_DOCUMENT,
-        title: 'Create Document',
-        description: 'Create new documents',
-        category: PermissionFlagCategory.DOCUMENT_LEVEL,
+    [PermissionFlag.MANAGE_CARDS]: {
+        flag: PermissionFlag.MANAGE_CARDS,
+        title: 'Manage Cards',
+        description: 'Create, edit, move, and archive cards',
+        category: PermissionFlagCategory.MODULE_LEVEL,
     },
 };

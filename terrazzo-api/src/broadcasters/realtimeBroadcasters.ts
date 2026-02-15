@@ -1,6 +1,6 @@
 import {
-    BoardId,
     getRoomCode,
+    ModuleId,
     MouseRoomUserData,
     NonEmptyArray,
     RoomId,
@@ -35,7 +35,7 @@ export const syncUserLeftRoom = async (roomIds: NonEmptyArray<RoomId>, socketId:
     });
 };
 
-export const syncMouseMove = async (boardId: BoardId, sid: SocketId, mouseRoomData: MouseRoomUserData) => {
+export const syncMouseMove = async (boardId: ModuleId, sid: SocketId, mouseRoomData: MouseRoomUserData) => {
     broadcast({
         event: ServerSE.MOUSE_MOVE,
         toRoomIds: [getRoomCode(RoomType.MOUSE, boardId)],
@@ -46,7 +46,7 @@ export const syncMouseMove = async (boardId: BoardId, sid: SocketId, mouseRoomDa
     });
 };
 
-export const syncUserIdle = async (boardId: BoardId, sid: SocketId, idle: boolean) => {
+export const syncUserIdle = async (boardId: ModuleId, sid: SocketId, idle: boolean) => {
     broadcast({
         event: ServerSE.USER_IDLE,
         toRoomIds: [getRoomCode(RoomType.MOUSE, boardId)],
