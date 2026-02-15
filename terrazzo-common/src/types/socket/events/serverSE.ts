@@ -4,7 +4,7 @@ import { LinkedAccount } from '../../linkedAccountTypes';
 import { Label } from '../../modules/board/boardTypes';
 import { CardHeader } from '../../modules/board/cardTypes';
 import { ListHeader } from '../../modules/board/listTypes';
-import { ModuleHeader, TrzModuleType } from '../../modules/moduleTypes';
+import { ModuleHeader } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
 import { TextBlockSnapshot } from '../../textTypes';
@@ -72,7 +72,7 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
     [ServerSE.UPDATE_USERS_LINKED_ACCOUNTS]: { userId: UserId; linkedAccounts: LinkedAccount[] };
     [ServerSE.UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS]: { textBlockId: TextBlockId; snapshots: TextBlockSnapshot[] };
-    [ServerSE.UPDATE_MODULE_FIELD]: Partial<ModuleHeader<TrzModuleType>> & { id: ModuleId };
+    [ServerSE.UPDATE_MODULE_FIELD]: Partial<ModuleHeader> & { id: ModuleId };
     [ServerSE.UPDATE_MODULE_CHILDREN]: {
         moduleId: ModuleId;
         children: ModuleId[];

@@ -179,8 +179,8 @@ export interface ClientSEReplies {
     [ClientSE.GET_USERS_LINKED_ACCOUNTS]: LinkedAccount[] | undefined;
     [ClientSE.GET_USERNAME_AVAILABLE]: boolean;
     [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: TextBlockSnapshot[] | undefined;
-    [ClientSE.GET_MODULE]: ModuleHeader<TrzModuleType> | undefined;
-    [ClientSE.GET_MODULE_CHILDREN]: ModuleHeader<TrzModuleType>[] | undefined;
+    [ClientSE.GET_MODULE]: ModuleHeader | undefined;
+    [ClientSE.GET_MODULE_CHILDREN]: ModuleHeader[] | undefined;
 
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
     [ClientSE.CREATE_LIST]: ListId | undefined;

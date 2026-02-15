@@ -23,7 +23,7 @@ export interface ModuleDataMap {
     [TrzModuleType.Organization]: never;
 }
 
-export interface ModuleHeader<T extends TrzModuleType> {
+export interface ModuleHeader<T extends TrzModuleType = TrzModuleType> {
     id: ModuleId;
     parentId: ModuleId;
     name: string;

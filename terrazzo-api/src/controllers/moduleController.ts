@@ -53,7 +53,7 @@ export const createNewModule = async <T extends TrzModuleType>(
 /**
  * Type assertion helper to ensure a module is of the expected type. Throws if the type does not match.
  */
-export const isModuleType = <T extends TrzModuleType>(module: ModuleHeader<T>, type: T): module is ModuleHeader<T> => {
+export const isModuleType = <T extends TrzModuleType>(module: ModuleHeader, type: T): module is ModuleHeader<T> => {
     return module.type === type;
 };
 
@@ -75,15 +75,12 @@ export async function getModuleById<T extends TrzModuleType>(
     return module;
 }
 
-export async function getUntypedModuleById(
-    id: ModuleId
-): Promise<Omit<ModuleHeader<TrzModuleType>, 'data' | 'type'> | undefined> {
+export async function getUntypedModuleById(id: ModuleId): Promise<ModuleHeader | undefined> {
     const module = await getModuleByIdDb(id);
     if (!module) {
         return undefined;
     }
-    const { data, type, ...rest } = module;
-    return rest;
+    return module;
 }
 
 export const updateModule = async <T extends TrzModuleType>(

@@ -1,12 +1,4 @@
-import {
-    getRoomCode,
-    ModuleHeader,
-    ModuleId,
-    RoomSpecifier,
-    RoomType,
-    ServerSE,
-    TrzModuleType,
-} from '@mosaiq/terrazzo-common';
+import { getRoomCode, ModuleHeader, ModuleId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { getDirectoryContentsForUser } from '@trz-api/controllers/directoryController';
 import { getUntypedModuleById } from '@trz-api/controllers/moduleController';
 import { userCanViewDirectory } from '@trz-api/utils/permissions';
@@ -46,7 +38,7 @@ export const syncModuleChildren = async (moduleId: ModuleId) => {
     }
 };
 
-export const syncModuleField = async (module: ModuleHeader<TrzModuleType>) => {
+export const syncModuleField = async (module: ModuleHeader) => {
     await broadcast({
         event: ServerSE.UPDATE_MODULE_FIELD,
         toRoomIds: [getRoomCode(RoomType.DATA, module.id)],

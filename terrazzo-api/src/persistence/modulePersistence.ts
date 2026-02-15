@@ -16,10 +16,7 @@ export const getModulesByParentIdDb = async (parentId: ModuleId) => {
     return models.map((mdl) => mdl.toJSON());
 };
 
-export const getModulesByOrgIdDb = async (
-    orgId: OrganizationId,
-    options?: Partial<Omit<ModuleHeader<TrzModuleType>, 'data'>>
-) => {
+export const getModulesByOrgIdDb = async (orgId: OrganizationId, options?: Partial<Omit<ModuleHeader, 'data'>>) => {
     const models = await ModuleModel.findAll({
         where: { orgId, ...options },
         order: [['order', 'ASC']],
@@ -27,12 +24,12 @@ export const getModulesByOrgIdDb = async (
     return models.map((mdl) => mdl.toJSON());
 };
 
-export const createModuleDb = async (module: ModuleHeader<TrzModuleType>) => {
+export const createModuleDb = async (module: ModuleHeader) => {
     const model = await ModuleModel.create({ ...module });
     return model.toJSON();
 };
 
-export const updateModuleDb = async (id: ModuleId, module: Partial<ModuleHeader<TrzModuleType>>) => {
+export const updateModuleDb = async (id: ModuleId, module: Partial<ModuleHeader>) => {
     const [updated] = await ModuleModel.update({ ...module }, { where: { id } });
     await invalidateCache(CacheEntity.Module, id);
     return updated;
