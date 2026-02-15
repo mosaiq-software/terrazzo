@@ -1,9 +1,7 @@
-import { BoardHeader, BoardId, BoardRes, DirectoryId, Label, LabelId, TrzModuleType } from '@mosaiq/terrazzo-common';
-import { BoardModelType } from '@mosaiq/terrazzo-db';
+import { BoardRes, Label, LabelId, ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { syncBoardFields, syncDirectoryContents, syncParentsDirectoryContents } from '@trz-api/broadcasters';
 import { syncBoardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { getListAndCardIdsOnBoard } from '@trz-api/controllers/listController';
-import { createBoardDb, getBoardByIdDb, updateBoardDb } from '@trz-api/persistence/boardPersistence';
 import { deleteLabelingOnCardsByLabelIdDb } from '@trz-api/persistence/labelAssignmentPersistence';
 import {
     createLabelOnBoardDb,
@@ -14,22 +12,8 @@ import {
 } from '@trz-api/persistence/labelPersistence';
 import { createNewModule, getModuleById, updateModule } from '../moduleController';
 
-export const getBoardHeader = async (boardID: BoardId): Promise<BoardHeader | undefined> => {
-    const boardModel = await getBoardByIdDb(boardID);
-    const moduleModel = await getModuleById(boardID);
-    if (!boardModel || !moduleModel) {
-        return undefined;
-    }
-    const boardHeader: BoardHeader = {
-        ...moduleModel,
-        ...boardModel,
-        type: TrzModuleType.Board,
-    };
-    return boardHeader;
-};
-
 export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefined> {
-    const boardHeader = await getBoardHeader(boardID);
+    const boardHeader = await getModuleById(boardID, TrzModuleType.Board);
     if (!boardHeader) {
         return undefined;
     }
@@ -56,20 +40,16 @@ export async function getBoardRes(boardID: BoardId): Promise<BoardRes | undefine
  * @param boardCode
  */
 export async function addBoard(name: string, boardCode: string, parentId: DirectoryId) {
-    const boardModule = await createNewModule(name, parentId, TrzModuleType.Board);
-    const boardModel: BoardModelType = {
-        id: boardModule.id,
+    const boardModule = await createNewModule(name, parentId, TrzModuleType.Board, {
         boardCode,
-    };
-    await createBoardDb(boardModel);
+    });
     await syncDirectoryContents(parentId);
-    return boardModel.id;
+    return boardModule.id;
 }
 
-export async function updateBoardFromPartial(boardId: BoardId, partial: Partial<BoardHeader>) {
+export async function updateBoardFromPartial(boardId: BoardId, partial: Partial<ModuleHeader<TrzModuleType.Board>>) {
     try {
-        await updateBoardDb(boardId, partial);
-        await updateModule(boardId, partial);
+        await updateModule(boardId, TrzModuleType.Board, partial);
         await syncBoardFields(boardId);
         await syncParentsDirectoryContents(boardId);
     } catch (e: any) {
