@@ -19,8 +19,8 @@ export * from './types/permissions/permissionTypes';
 export * from './types/permissions/roleTypes';
 
 // Types - Modules
-export * from './types/modules/board/boardTypes';
 export * from './types/modules/board/cardTypes';
+export * from './types/modules/board/labelTypes';
 export * from './types/modules/board/listTypes';
 export * from './types/modules/moduleTypes';
 

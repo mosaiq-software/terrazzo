@@ -1,41 +1,9 @@
-import { DirectoryHeader, DirectoryId, ModuleHeader, TrzModuleType, UID, UserId } from '@mosaiq/terrazzo-common';
+import { DirectoryHeader, DirectoryId, ModuleHeader, TrzModuleType, UserId } from '@mosaiq/terrazzo-common';
 import { syncDirectoryContents, syncDirectoryField } from '@trz-api/broadcasters';
-import { createDirectoryDb, getDirectoryByIdDb, updateDirectoryDb } from '@trz-api/persistence/directoryPersistence';
+import { updateDirectoryDb } from '@trz-api/persistence/directoryPersistence';
 import { getModulesByParentIdDb } from '@trz-api/persistence/modulePersistence';
 import { userCanViewBoard, userCanViewDirectory, userCanViewDocument } from '@trz-api/utils/permissions';
-import { createNewModule, getModuleById, updateModule } from './moduleController';
-import { DirectoryModelType } from '@mosaiq/terrazzo-db';
-
-export const getDirectory = async (id: DirectoryId): Promise<DirectoryHeader | undefined> => {
-    const dirModule = await getModuleById(id);
-    const dirModel = await getDirectoryByIdDb(id);
-    if (!dirModule || !dirModel) {
-        return undefined;
-    }
-    const dirHeader: DirectoryHeader = {
-        ...dirModel,
-        ...dirModule,
-        type: TrzModuleType.Directory,
-    };
-    return dirHeader;
-};
-export const createDirectory = async (name: string, parentId: DirectoryId): Promise<DirectoryHeader> => {
-    const dirModule = await createNewModule(name, parentId, TrzModuleType.Directory);
-    const dirModel: DirectoryModelType = {
-        id: dirModule.id,
-    };
-    await createDirectoryDb(dirModel);
-    const dirHeader: DirectoryHeader = {
-        ...dirModel,
-        ...dirModule,
-        type: TrzModuleType.Directory,
-    };
-
-    // Update parent's directory contents
-    await syncDirectoryContents(dirHeader.parentId);
-
-    return dirHeader;
-};
+import { updateModule } from './moduleController';
 
 export const updateDirectory = async (id: DirectoryId, header: Partial<DirectoryHeader>) => {
     await updateDirectoryDb(id, header);
@@ -74,10 +42,4 @@ export const getDirectoryContentsForUser = async (
         })
     );
     return canAccessModules;
-};
-
-export const updateDirectoryContents = async (dirId: DirectoryId, moduleIds: UID[]) => {
-    await syncDirectoryContents(dirId);
-
-    throw new Error('updateDirectoryContents not implemented');
 };

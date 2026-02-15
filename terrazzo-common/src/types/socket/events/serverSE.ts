@@ -1,8 +1,8 @@
 import { CardId, LabelId, ListId, ModuleId, OrganizationId, RoleId, TextBlockId, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount } from '../../linkedAccountTypes';
-import { Label } from '../../modules/board/boardTypes';
 import { CardHeader } from '../../modules/board/cardTypes';
+import { Label } from '../../modules/board/labelTypes';
 import { ListHeader } from '../../modules/board/listTypes';
 import { ModuleHeader } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';

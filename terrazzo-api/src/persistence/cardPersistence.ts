@@ -1,4 +1,4 @@
-import { BoardId, CardHeader, CardId, ListId } from '@mosaiq/terrazzo-common';
+import { CardHeader, CardId, ListId, ModuleId } from '@mosaiq/terrazzo-common';
 import { CacheEntity, CardModel, getCached, invalidateCache, sequelize } from '@mosaiq/terrazzo-db';
 import { Op } from 'sequelize';
 
@@ -21,7 +21,7 @@ export const getActiveCardIdsOnListDb = async (listId: ListId) => {
     );
 };
 
-export const getActiveCardsByBoardIdDb = async (boardId: BoardId) => {
+export const getActiveCardsByBoardIdDb = async (boardId: ModuleId) => {
     const models = await CardModel.findAll({ where: { boardId, order: { [Op.not]: null } } });
     return models.map((card) => card.toJSON());
 };
@@ -49,7 +49,7 @@ export const getCardCountOnListDb = async (listId: ListId) => {
 /**
  * Gets the number of cards on a board, including archived cards.
  */
-export const getTotalCardCountOnBoardDb = async (boardId: BoardId) => {
+export const getTotalCardCountOnBoardDb = async (boardId: ModuleId) => {
     return await CardModel.count({ where: { boardId } });
 };
 

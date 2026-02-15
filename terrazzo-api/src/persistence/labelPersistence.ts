@@ -1,4 +1,4 @@
-import { BoardId, Label, LabelId } from '@mosaiq/terrazzo-common';
+import { Label, LabelId, ModuleId } from '@mosaiq/terrazzo-common';
 import { LabelModel } from '@mosaiq/terrazzo-db';
 
 export const getLabelByIdDb = async (id: LabelId) => {
@@ -6,12 +6,12 @@ export const getLabelByIdDb = async (id: LabelId) => {
     return model?.toJSON();
 };
 
-export const getLabelsByBoardIdDb = async (boardId: BoardId) => {
+export const getLabelsByBoardIdDb = async (boardId: ModuleId) => {
     const models = await LabelModel.findAll({ where: { boardId } });
     return models.map((label) => label.toJSON());
 };
 
-export const createLabelOnBoardDb = async (label: Label, boardId: BoardId) => {
+export const createLabelOnBoardDb = async (label: Label, boardId: ModuleId) => {
     const model = await LabelModel.create({
         id: label.id,
         boardId,
@@ -37,7 +37,7 @@ export const deleteLabelDb = async (id: LabelId) => {
     return deleted;
 };
 
-export const deleteLabelsByBoardIdDb = async (boardId: BoardId) => {
+export const deleteLabelsByBoardIdDb = async (boardId: ModuleId) => {
     const deleted = await LabelModel.destroy({ where: { boardId } });
     return deleted;
 };

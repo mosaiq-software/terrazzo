@@ -1,11 +1,14 @@
 import {
     calculateModuleEffectivePermissions,
-    ModuleDataMap,
+    CreateModuleData,
+    exhaustiveCheck,
+    ModuleData,
     ModuleHeader,
     ModuleId,
     ModulePermissions,
     TrzModuleType,
 } from '@mosaiq/terrazzo-common';
+import { syncModuleChildren } from '@trz-api/broadcasters';
 import {
     createModuleDb,
     getModuleByIdDb,
@@ -15,12 +18,47 @@ import {
     updateModuleDb,
 } from '@trz-api/persistence/modulePersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
+import { createBlocknoteTextBlockWithBlocks } from './textBlockController/textBlockController';
+
+const buildModuleData = async <T extends TrzModuleType>(
+    type: T,
+    initialData: CreateModuleData<T>
+): Promise<ModuleData<T>> => {
+    switch (type) {
+        case TrzModuleType.Directory: {
+            const data: ModuleData<TrzModuleType.Directory> = {};
+            return data;
+        }
+        case TrzModuleType.Document: {
+            const textBlock = await createBlocknoteTextBlockWithBlocks([]);
+            if (!textBlock) {
+                throw new Error('Failed to create main text block for document');
+            }
+            const data: ModuleData<TrzModuleType.Document> = {
+                textBlockId: textBlock.id,
+                lastModifiedAt: Date.now(),
+                lastModifiedByUserId: initialData.createdByUserId,
+            };
+            return data;
+        }
+        case TrzModuleType.Board: {
+            const data: ModuleData<TrzModuleType.Board> = {
+                boardCode: initialData.boardCode,
+            };
+            return data;
+        }
+        case TrzModuleType.Organization:
+            throw new Error('Cannot create organization module');
+        default:
+            exhaustiveCheck(type);
+    }
+};
 
 export const createNewModule = async <T extends TrzModuleType>(
     name: string,
     parentId: ModuleId,
     type: T,
-    initialData: ModuleDataMap[T]
+    initialData: CreateModuleData<T>
 ): Promise<ModuleHeader<T>> => {
     const parentModule = await getUntypedModuleById(parentId);
     let orgId = parentModule?.orgId;
@@ -32,6 +70,7 @@ export const createNewModule = async <T extends TrzModuleType>(
         orgId = org.id;
     }
     const nextOrder = await getNextModuleOrderInParentDb(parentId);
+    const moduleData = await buildModuleData(type, initialData);
     const newModule: ModuleHeader<T> = {
         id: crypto.randomUUID(),
         parentId,
@@ -44,9 +83,10 @@ export const createNewModule = async <T extends TrzModuleType>(
         desiredPermissions: {},
         effectivePermissions: {},
         public: false,
-        data: initialData,
+        data: moduleData,
     };
     await createModuleDb(newModule);
+    await syncModuleChildren(parentId);
     return newModule;
 };
 

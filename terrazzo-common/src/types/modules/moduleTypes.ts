@@ -1,4 +1,4 @@
-import { ModuleId, OrganizationId } from '../genericTypes';
+import { ModuleId, OrganizationId, TextBlockId, UserId } from '../genericTypes';
 import { ModulePermissions } from '../permissions/permissionTypes';
 
 export enum TrzModuleType {
@@ -10,18 +10,31 @@ export enum TrzModuleType {
     Organization = 'organization',
 }
 
-export interface ModuleDataMap {
+export interface CreateModuleDataMap {
     [TrzModuleType.Directory]: {};
     [TrzModuleType.Document]: {
-        textBlockId: string;
-        lastModifiedAt: number;
-        lastModifiedByUserId: string;
+        createdByUserId: UserId;
     };
     [TrzModuleType.Board]: {
         boardCode: string;
     };
     [TrzModuleType.Organization]: never;
 }
+export type CreateModuleData<T extends TrzModuleType> = CreateModuleDataMap[T];
+
+export interface ModuleDataMap {
+    [TrzModuleType.Directory]: {};
+    [TrzModuleType.Document]: {
+        textBlockId: TextBlockId;
+        lastModifiedAt: number;
+        lastModifiedByUserId: UserId;
+    };
+    [TrzModuleType.Board]: {
+        boardCode: string;
+    };
+    [TrzModuleType.Organization]: never;
+}
+export type ModuleData<T extends TrzModuleType> = ModuleDataMap[T];
 
 export interface ModuleHeader<T extends TrzModuleType = TrzModuleType> {
     id: ModuleId;
@@ -35,5 +48,5 @@ export interface ModuleHeader<T extends TrzModuleType = TrzModuleType> {
     desiredPermissions: ModulePermissions;
     effectivePermissions: ModulePermissions;
     public: boolean;
-    data: ModuleDataMap[T];
+    data: ModuleData<T>;
 }

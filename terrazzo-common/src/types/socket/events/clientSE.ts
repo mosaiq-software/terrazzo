@@ -13,8 +13,8 @@ import {
 } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
-import { Label } from '../../modules/board/boardTypes';
 import { Card } from '../../modules/board/cardTypes';
+import { Label } from '../../modules/board/labelTypes';
 import { List, ListHeader } from '../../modules/board/listTypes';
 import { ModuleDataMap, ModuleHeader, TrzModuleType } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';

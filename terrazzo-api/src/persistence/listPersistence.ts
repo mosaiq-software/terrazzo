@@ -1,4 +1,4 @@
-import { BoardId, ListHeader, ListId } from '@mosaiq/terrazzo-common';
+import { ListHeader, ListId, ModuleId } from '@mosaiq/terrazzo-common';
 import { CacheEntity, ListModel, getCached, invalidateCache, sequelize } from '@mosaiq/terrazzo-db';
 import { Op } from 'sequelize';
 
@@ -9,7 +9,7 @@ export const getListByIdDb = async (id: ListId) => {
     });
 };
 
-export const getActiveListIdsByBoardIdOrderDb = async (boardId: BoardId) => {
+export const getActiveListIdsByBoardIdOrderDb = async (boardId: ModuleId) => {
     return (
         (await getCached(CacheEntity.ListsInBoard, boardId, async () => {
             const models = await ListModel.findAll({
@@ -26,7 +26,7 @@ export const getActiveListIdsByBoardIdOrderDb = async (boardId: BoardId) => {
     );
 };
 
-export const getActiveListCountOnBoard = async (boardId: BoardId) => {
+export const getActiveListCountOnBoard = async (boardId: ModuleId) => {
     return await ListModel.count({ where: { boardId, order: { [Op.not]: null } } });
 };
 
