@@ -21,6 +21,14 @@ export interface CreateModuleDataMap {
     [TrzModuleType.Organization]: never;
 }
 export type CreateModuleData<T extends TrzModuleType> = CreateModuleDataMap[T];
+export type CreatableModuleType = Exclude<TrzModuleType, TrzModuleType.Organization>;
+export type CreateModuleDataArgs = {
+    [K in CreatableModuleType]: { type: K; initialData: CreateModuleData<K> };
+}[CreatableModuleType];
+
+export type UpdateModuleDataArgs = {
+    [K in CreatableModuleType]: { type: K; update: Partial<ModuleHeader<K>> };
+}[CreatableModuleType];
 
 export interface ModuleDataMap {
     [TrzModuleType.Directory]: {};

@@ -16,7 +16,7 @@ import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
 import { Card } from '../../modules/board/cardTypes';
 import { Label } from '../../modules/board/labelTypes';
 import { List, ListHeader } from '../../modules/board/listTypes';
-import { ModuleDataMap, ModuleHeader, TrzModuleType } from '../../modules/moduleTypes';
+import { CreateModuleDataArgs, ModuleHeader, UpdateModuleDataArgs } from '../../modules/moduleTypes';
 import { Member, OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
 import { QueryItem } from '../../queryTypes';
@@ -122,8 +122,7 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_MODULE]: {
         name: string;
         parentId: ModuleId;
-        type: TrzModuleType;
-        data: Partial<ModuleDataMap[TrzModuleType]>;
+        args: CreateModuleDataArgs;
     };
 
     [ClientSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
@@ -137,8 +136,7 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
     [ClientSE.UPDATE_MODULE_FIELD]: {
         moduleId: ModuleId;
-        type: TrzModuleType;
-        update: Partial<ModuleDataMap[TrzModuleType]>;
+        args: UpdateModuleDataArgs;
     };
 
     [ClientSE.DELETE_BOARD_LABEL]: { boardId: ModuleId; labelId: LabelId };

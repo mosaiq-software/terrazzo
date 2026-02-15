@@ -1,4 +1,4 @@
-import { BoardId, CardId, ListHeader, ListId } from '@mosaiq/terrazzo-common';
+import { CardId, ListHeader, ListId, ModuleId } from '@mosaiq/terrazzo-common';
 import { syncAddList, syncMoveList, syncUpdateListField } from '@trz-api/broadcasters';
 import { getActiveCardIdsOnListDb } from '@trz-api/persistence/cardPersistence';
 import {
@@ -10,7 +10,7 @@ import {
     updateListDb,
 } from '@trz-api/persistence/listPersistence';
 
-export async function getListAndCardIdsOnBoard(boardID: BoardId): Promise<{ listId: ListId; cardIds: CardId[] }[]> {
+export async function getListAndCardIdsOnBoard(boardID: ModuleId): Promise<{ listId: ListId; cardIds: CardId[] }[]> {
     const listIds = await getActiveListIdsByBoardIdOrderDb(boardID);
     const promises = listIds.map(async (li) => {
         return {
@@ -42,7 +42,7 @@ export async function getListRes(listId: ListId): Promise<ListHeader | undefined
 interface AddListOptions {
     preventSync?: boolean;
 }
-export async function addList(list: Partial<ListHeader> & { boardId: BoardId }, options?: AddListOptions) {
+export async function addList(list: Partial<ListHeader> & { boardId: ModuleId }, options?: AddListOptions) {
     try {
         const newList: ListHeader = {
             id: crypto.randomUUID(),
@@ -97,7 +97,7 @@ interface MoveListOptions {
 export async function moveList(
     listId: ListId,
     toPosition: number | null,
-    onBoardId: BoardId,
+    onBoardId: ModuleId,
     options?: MoveListOptions
 ) {
     try {

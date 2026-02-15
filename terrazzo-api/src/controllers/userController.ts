@@ -1,4 +1,10 @@
-import { generateUsernameDiscriminator, SYSTEM_USER_ID, UserHeader, UserId } from '@mosaiq/terrazzo-common';
+import {
+    generateUsernameDiscriminator,
+    SYSTEM_USER_ID,
+    TrzModuleType,
+    UserHeader,
+    UserId,
+} from '@mosaiq/terrazzo-common';
 import { syncUpdateUserField } from '@trz-api/broadcasters';
 import {
     createUserHeaderDb,
@@ -7,9 +13,9 @@ import {
     updateUserHeaderDb,
 } from '@trz-api/persistence/userPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
-import { addBoard } from './boardController/boardController';
 import { addCard } from './cardController';
 import { addList } from './listController';
+import { createNewModule } from './moduleController';
 import { addOrganization } from './organizationController';
 
 export async function checkUsernameTaken(username: string) {
@@ -60,10 +66,13 @@ const seedNewUserProfile = async (userId: UserId) => {
             logoUrl: user.profilePicture,
             ownerId: user.id,
         });
-        const personalBoardId = await addBoard('Task Tracking', '', personalOrgId);
-        const personalListTodo = await addList({ boardId: personalBoardId, name: 'To Do' });
-        const personalListDoing = await addList({ boardId: personalBoardId, name: 'Doing' });
-        const personalListDone = await addList({ boardId: personalBoardId, name: 'Done' });
+        // const personalBoardId = await addBoard('Task Tracking', '', personalOrgId);
+        const personalBoard = await createNewModule('Task Tracking', personalOrgId, TrzModuleType.Board, {
+            boardCode: '',
+        });
+        const personalListTodo = await addList({ boardId: personalBoard.id, name: 'To Do' });
+        const personalListDoing = await addList({ boardId: personalBoard.id, name: 'Doing' });
+        const personalListDone = await addList({ boardId: personalBoard.id, name: 'Done' });
         const cards = {
             '👓 Create a Terrazzo account': personalListDone.id,
             '🔎 Explore Terrazzo!': personalListDoing.id,

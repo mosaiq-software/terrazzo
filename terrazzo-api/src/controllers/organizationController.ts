@@ -57,10 +57,7 @@ export async function addOrganization(organization: Partial<OrganizationHeader> 
 
     // create default roles
     const adminRole = await createRole('Admin', '#D31757', newOrg.id, recordValues(PermissionFlag));
-    const guest = await createRole('Guest', '#2384CA', newOrg.id, [
-        PermissionFlag.VIEW_BOARD,
-        PermissionFlag.VIEW_DOCUMENT,
-    ]);
+    const guest = await createRole('Guest', '#2384CA', newOrg.id, [PermissionFlag.VIEW_MODULES]);
 
     // assign admin role to creator
     await setRoleIdsForUserInOrgDb(organization.ownerId, newOrg.id, [adminRole.id]);

@@ -1,7 +1,6 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { addBoard, updateBoardFromPartial } from '@trz-api/controllers/boardController/boardController';
-import { getUntypedModuleById } from '@trz-api/controllers/moduleController';
-import { userCanViewModule, userCanManageModule } from '@trz-api/utils/permissions';
+import { createNewModule, getUntypedModuleById, updateModule } from '@trz-api/controllers/moduleController';
+import { userCanManageModule, userCanViewModule } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 
@@ -18,15 +17,15 @@ export const registerBoardListeners = (socket: Socket) => {
         if (!(await userCanManageModule(socket, data.parentId))) {
             throw new Error('User does not have permission to create a module in this module');
         }
-        const moduleID = await addBoard(data.name, data.boardCode, data.parentId);
-        return moduleID;
+        const module = await createNewModule(data.name, data.parentId, data.args.type, data.args.initialData);
+        return module.id;
     });
 
     subscribe(socket, ClientSE.UPDATE_MODULE_FIELD, async (data) => {
-        if (!(await userCanManageModule(socket, data.id))) {
+        if (!(await userCanManageModule(socket, data.moduleId))) {
             throw new Error('User does not have permission to edit this module');
         }
-        await updateBoardFromPartial(data.id, data);
+        await updateModule(data.moduleId, data.args.type, data.args.update);
         return undefined;
     });
 };

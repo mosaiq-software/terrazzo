@@ -1,10 +1,9 @@
 import { Block } from '@blocknote/core';
 import {
-    BoardId,
     CardId,
-    DirectoryId,
     LabelId,
     ListId,
+    ModuleId,
     TrelloCardType,
     TrelloChecklistType,
     TrelloExportType,
@@ -12,22 +11,24 @@ import {
     TrelloLabelType,
     TrelloListType,
     TrelloUserToTerrazzoUserMap,
+    TrzModuleType,
     getFileUrl,
     recordKeys,
     settlePromises,
 } from '@mosaiq/terrazzo-common';
 import { getApiUrl } from '@trz-api/utils/envUtils';
 import { extractMarkdownImagesFromText, replaceAllOccurrences } from '@trz-api/utils/textUtils';
-import { addAssigneeToCard } from '../cardAssignmentController';
-import { addCard, setCardsLabels } from '../cardController';
-import { saveFileFromUrl } from '../fileController';
-import { addList } from '../listController';
+import { addAssigneeToCard } from '../controllers/cardAssignmentController';
+import { addCard, setCardsLabels } from '../controllers/cardController';
+import { saveFileFromUrl } from '../controllers/fileController';
+import { createBoardLabelSingle } from '../controllers/labelController';
+import { addList } from '../controllers/listController';
+import { createNewModule } from '../controllers/moduleController';
 import {
     getBlocknoteChecklistBlock,
     getBlocknoteMediaBlock,
     maybeParseMarkdownToBlocks,
-} from '../textBlockController/blocknoteUtils';
-import { addBoard, createBoardLabelSingle } from './boardController';
+} from '../controllers/textBlockController/blocknoteUtils';
 
 /**
  * Creates a Terrazzo board from a Trello board export
@@ -37,14 +38,16 @@ import { addBoard, createBoardLabelSingle } from './boardController';
  * @returns The created Terrazzo board ID, or undefined if creation failed
  */
 export const createTerrazzoBoardFromTrelloBoard = async (
-    onParentId: DirectoryId,
+    onParentId: ModuleId,
     trelloBoard: TrelloExportType,
     userMap: TrelloUserToTerrazzoUserMap
 ) => {
     try {
-        const trzBoardId = await addBoard(trelloBoard.name, '', onParentId);
-        const listMap = await createLists(trzBoardId, trelloBoard.lists);
-        const labelMap = await createLabels(trzBoardId, trelloBoard.labels);
+        const trzBoardModule = await createNewModule(trelloBoard.name, onParentId, TrzModuleType.Board, {
+            boardCode: '',
+        });
+        const listMap = await createLists(trzBoardModule.id, trelloBoard.lists);
+        const labelMap = await createLabels(trzBoardModule.id, trelloBoard.labels);
         const { cardCreatedDateMap } = getActionsData(trelloBoard);
         const cardChecklistsMap = getChecklistsForCards(trelloBoard.checklists);
         const cardOrderMap = getCardOrderMap(trelloBoard.cards);
@@ -63,7 +66,7 @@ export const createTerrazzoBoardFromTrelloBoard = async (
             );
         }
 
-        return trzBoardId;
+        return trzBoardModule.id;
     } catch (error: any) {
         console.error('Error importing from trello', error);
         return undefined;
@@ -73,7 +76,7 @@ export const createTerrazzoBoardFromTrelloBoard = async (
 /**
  * Creates Terrazzo lists from Trello lists
  */
-const createLists = async (trzBoardId: BoardId, trelloLists: TrelloListType[]) => {
+const createLists = async (trzBoardId: ModuleId, trelloLists: TrelloListType[]) => {
     const listMap: { [trl: string]: ListId } = {};
     const sortedLists = [...trelloLists].sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0));
     let index = 0;
@@ -100,7 +103,7 @@ const createLists = async (trzBoardId: BoardId, trelloLists: TrelloListType[]) =
 /**
  * Creates Terrazzo labels from Trello labels
  */
-const createLabels = async (trzBoardId: BoardId, trelloLabels: TrelloLabelType[]) => {
+const createLabels = async (trzBoardId: ModuleId, trelloLabels: TrelloLabelType[]) => {
     const labelMap: { [trl: string]: LabelId } = {};
     for (const trelloLabel of trelloLabels) {
         const color = TrelloLabelColorsMap[trelloLabel.color] || TrelloLabelColorsMap['black'];

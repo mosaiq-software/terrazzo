@@ -1,10 +1,6 @@
 import { ClientSE, ModuleId } from '@mosaiq/terrazzo-common';
-import {
-    createBoardLabel,
-    removeBoardLabel,
-    updateBoardLabels,
-} from '@trz-api/controllers/boardController/boardController';
 import { getBoardIDFromCardID, setCardsLabels } from '@trz-api/controllers/cardController';
+import { createBoardLabel, updateBoardLabels, removeBoardLabel } from '@trz-api/controllers/labelController';
 import { userCanManageModule } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';

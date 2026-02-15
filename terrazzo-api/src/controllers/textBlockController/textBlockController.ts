@@ -5,17 +5,18 @@ import {
     TextBlockId,
     TextBlockResourceType,
     TextBlockType,
+    TrzModuleType,
     UID,
     UserId,
 } from '@mosaiq/terrazzo-common';
 import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
-import { getDocumentByIdDb } from '@trz-api/persistence/documentPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
-import { userCanEditCard, userCanEditDocument } from '@trz-api/utils/permissions';
+import { userCanManageCards, userCanManageModule } from '@trz-api/utils/permissions';
 import { Document } from '@trz-api/utils/y-socket-io';
 import console from 'console';
 import { Doc, XmlText } from 'yjs';
 import { getBoardIDFromCardID } from '../cardController';
+import { getModuleById } from '../moduleController';
 import { BLOCKNOTE_EDITOR } from './blocknote';
 import { convertBlocknoteBlocksToPlaintext, maybeParseMarkdownToBlocks } from './blocknoteUtils';
 import { createTextBlockHistorySnapshot, HISTORY_SNAPSHOT_INTERVAL_MS } from './historySnapshots';
@@ -33,20 +34,20 @@ export const checkCanUserEditTextBlock = async (
                 return undefined;
             }
             const boardId = await getBoardIDFromCardID(card.id);
-            if (!(await userCanEditCard(userId, boardId))) {
+            if (!(await userCanManageCards(userId, boardId))) {
                 return undefined;
             }
             return card.descriptionTextBlockId;
         }
         case 'document': {
-            const document = await getDocumentByIdDb(resourceId);
+            const document = await getModuleById(resourceId, TrzModuleType.Document);
             if (!document) {
                 return undefined;
             }
-            if (!(await userCanEditDocument(userId, document.id))) {
+            if (!(await userCanManageModule(userId, document.id))) {
                 return undefined;
             }
-            return document.textBlockId;
+            return document.data.textBlockId;
         }
         default:
             return undefined;

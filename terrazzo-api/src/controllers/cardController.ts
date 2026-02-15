@@ -1,8 +1,7 @@
 import { Block } from '@blocknote/core';
-import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, UserId } from '@mosaiq/terrazzo-common';
+import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, TrzModuleType, UserId } from '@mosaiq/terrazzo-common';
 import { syncAddCard, syncMovedCard, syncUpdateCardField } from '@trz-api/broadcasters';
 import { syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
-import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
 import {
     createCardOnListDb,
@@ -15,6 +14,7 @@ import {
 import { getLabelsOnCardDb, setLabelsOnCardDb } from '@trz-api/persistence/labelAssignmentPersistence';
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
+import { getModuleById } from './moduleController';
 import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
 
 export async function getSingleFullCard(cardId: CardId): Promise<Card | undefined> {
@@ -43,10 +43,10 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
     //pull board from db with ID
     const updatingList = await getListByIdDb(card.listId);
     if (!updatingList) {
-        throw new Error('Board not found');
+        throw new Error('List not found');
     }
 
-    const board = await getBoardByIdDb(updatingList.boardId);
+    const board = await getModuleById(updatingList.boardId, TrzModuleType.Board);
     if (!board) {
         throw new Error('Board not found');
     }

@@ -1,6 +1,5 @@
 import { getRoomCode, ModuleHeader, ModuleId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
-import { getDirectoryContentsForUser } from '@trz-api/controllers/directoryController';
-import { getUntypedModuleById } from '@trz-api/controllers/moduleController';
+import { getModuleChildrenForUser, getUntypedModuleById } from '@trz-api/controllers/moduleController';
 import { userCanViewModule } from '@trz-api/utils/permissions';
 import { broadcast } from '@trz-api/utils/socket/socketUtils';
 
@@ -29,7 +28,7 @@ export const syncModuleChildren = async (moduleId: ModuleId) => {
                 if (!(await userCanViewModule(userId, moduleId))) {
                     throw new Error('Insufficient permissions to view this module and its children');
                 }
-                const children = await getDirectoryContentsForUser(moduleId, userId);
+                const children = await getModuleChildrenForUser(moduleId, userId);
                 return { moduleId, children: children.map((child) => child.id) };
             },
         });

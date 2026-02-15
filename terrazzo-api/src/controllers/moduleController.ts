@@ -1,12 +1,15 @@
 import {
     calculateModuleEffectivePermissions,
+    CreatableModuleType,
     CreateModuleData,
+    CreateModuleDataArgs,
     exhaustiveCheck,
     ModuleData,
     ModuleHeader,
     ModuleId,
     ModulePermissions,
     TrzModuleType,
+    UserId,
 } from '@mosaiq/terrazzo-common';
 import { syncModuleChildren } from '@trz-api/broadcasters';
 import {
@@ -18,13 +21,15 @@ import {
     updateModuleDb,
 } from '@trz-api/persistence/modulePersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
+import { userCanViewModule } from '@trz-api/utils/permissions';
 import { createBlocknoteTextBlockWithBlocks } from './textBlockController/textBlockController';
 
-const buildModuleData = async <T extends TrzModuleType>(
-    type: T,
-    initialData: CreateModuleData<T>
-): Promise<ModuleData<T>> => {
-    switch (type) {
+async function buildModuleData<T extends CreatableModuleType>(args: {
+    type: T;
+    initialData: CreateModuleData<T>;
+}): Promise<ModuleData<T>>;
+async function buildModuleData(args: CreateModuleDataArgs): Promise<ModuleData<CreatableModuleType>> {
+    switch (args.type) {
         case TrzModuleType.Directory: {
             const data: ModuleData<TrzModuleType.Directory> = {};
             return data;
@@ -37,24 +42,22 @@ const buildModuleData = async <T extends TrzModuleType>(
             const data: ModuleData<TrzModuleType.Document> = {
                 textBlockId: textBlock.id,
                 lastModifiedAt: Date.now(),
-                lastModifiedByUserId: initialData.createdByUserId,
+                lastModifiedByUserId: args.initialData.createdByUserId,
             };
             return data;
         }
         case TrzModuleType.Board: {
             const data: ModuleData<TrzModuleType.Board> = {
-                boardCode: initialData.boardCode,
+                boardCode: args.initialData.boardCode,
             };
             return data;
         }
-        case TrzModuleType.Organization:
-            throw new Error('Cannot create organization module');
         default:
-            exhaustiveCheck(type);
+            return exhaustiveCheck(args);
     }
-};
+}
 
-export const createNewModule = async <T extends TrzModuleType>(
+export const createNewModule = async <T extends CreatableModuleType>(
     name: string,
     parentId: ModuleId,
     type: T,
@@ -70,7 +73,7 @@ export const createNewModule = async <T extends TrzModuleType>(
         orgId = org.id;
     }
     const nextOrder = await getNextModuleOrderInParentDb(parentId);
-    const moduleData = await buildModuleData(type, initialData);
+    const moduleData = await buildModuleData({ type, initialData });
     const newModule: ModuleHeader<T> = {
         id: crypto.randomUUID(),
         parentId,
@@ -141,12 +144,9 @@ export const updateModule = async <T extends TrzModuleType>(
     if (data && Object.keys(data).length > 0) {
         await updateModuleDataDb(id, type, data);
     }
-
-    if (!desiredPermissions) {
-        return;
+    if (desiredPermissions) {
+        await updateModulePermissions(id, desiredPermissions);
     }
-    // handle permissions separately
-    await updateModulePermissions(id, desiredPermissions);
 };
 
 const updateModulePermissions = async (id: ModuleId, desiredPermissions: ModulePermissions): Promise<void> => {
@@ -179,4 +179,20 @@ const recursivelyUpdateModuleEffectivePermissions = async (
         });
         await recursivelyUpdateModuleEffectivePermissions(childModule.id, newEffectivePermissions);
     }
+};
+
+export const getModuleChildrenForUser = async (
+    moduleId: ModuleId,
+    userId: UserId
+): Promise<(ModuleHeader & { canAccess: boolean })[]> => {
+    const modules = await getModulesByParentIdDb(moduleId);
+    const canAccessModules: (ModuleHeader & { canAccess: boolean })[] = await Promise.all(
+        modules.map(async (mod) => {
+            return {
+                ...mod,
+                canAccess: await userCanViewModule(userId, mod.id),
+            };
+        })
+    );
+    return canAccessModules;
 };

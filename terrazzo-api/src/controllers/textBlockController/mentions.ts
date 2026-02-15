@@ -1,15 +1,15 @@
 import { createInlineContentSpec } from '@blocknote/core';
 import {
     QueryableItem,
+    TrzModuleType,
     UID,
     boardNameWithCode,
     cardNameWithBoardCodeAndNumber,
     exhaustiveCheck,
     fullNameWithUsername,
 } from '@mosaiq/terrazzo-common';
-import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
-import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
+import { getModuleById } from '../moduleController';
 import { getUserHeader } from '../userController';
 
 /**
@@ -109,17 +109,16 @@ export const retrieveMentionDisplayText = async (id: UID, type: QueryableItem): 
             if (!card) {
                 return undefined;
             }
-            const boardModule = await getBoardByIdDb(card.boardId);
-            return cardNameWithBoardCodeAndNumber(card.name, boardModule?.boardCode, card.cardNumber);
+            const boardModule = await getModuleById(card.boardId, TrzModuleType.Board);
+            return cardNameWithBoardCodeAndNumber(card.name, boardModule?.data.boardCode, card.cardNumber);
         }
         case QueryableItem.Document: {
-            const documentModule = await getModuleByIdDb(id);
+            const documentModule = await getModuleById(id, TrzModuleType.Document);
             return documentModule ? documentModule.name : ``;
         }
         case QueryableItem.Board: {
-            const boardModule = await getModuleByIdDb(id);
-            const board = await getBoardByIdDb(id);
-            return boardModule ? boardNameWithCode(boardModule.name, board?.boardCode) : undefined;
+            const boardModule = await getModuleById(id, TrzModuleType.Board);
+            return boardModule ? boardNameWithCode(boardModule.name, boardModule?.data.boardCode) : undefined;
         }
         default:
             exhaustiveCheck(type, `Unsupported mention type ${type}`);
