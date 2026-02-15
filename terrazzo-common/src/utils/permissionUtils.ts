@@ -1,5 +1,4 @@
 import { RoleId } from '../types/genericTypes';
-import { TrzModuleType } from '../types/modules/moduleTypes';
 import { PermissibleAction, PermissibleActionRequirements } from '../types/permissions/permissibleActions';
 import { PermissionFlag } from '../types/permissions/permissionFlags';
 import { ModulePermissions, OverridePermissions } from '../types/permissions/permissionTypes';
@@ -204,35 +203,6 @@ const mapRolesToPermissions = (roles: Role[]): Record<RoleId, PermissionFlag[]> 
         rolePermissions[role.id] = role.defaultPermissions;
     }
     return rolePermissions;
-};
-
-/**
- * Returns the permissible actions for a given module type.
- * (Used for handling module-level permissions in a generic way.)
- */
-export const modulePermissibleAction = (moduleType: TrzModuleType) => {
-    switch (moduleType) {
-        case TrzModuleType.Directory:
-            return {
-                view: PermissibleAction.ViewDirectory,
-                edit: PermissibleAction.EditDirectory,
-                create: PermissibleAction.CreateDirectory,
-            };
-        case TrzModuleType.Board:
-            return {
-                view: PermissibleAction.ViewBoard,
-                edit: PermissibleAction.EditBoard,
-                create: PermissibleAction.CreateBoard,
-            };
-        case TrzModuleType.Document:
-            return {
-                view: PermissibleAction.ViewDocument,
-                edit: PermissibleAction.EditDocument,
-                create: PermissibleAction.CreateDocument,
-            };
-        default:
-            throw new Error(`[modulePermissibleAction] Unsupported module type: ${moduleType}`);
-    }
 };
 
 /**
