@@ -1,16 +1,16 @@
-import { BoardId, CardId, ClientSE, Label, LabelId } from '@mosaiq/terrazzo-common';
+import { CardId, ClientSE, Label, LabelId, ModuleId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
 export const createBoardLabel = async (
     sockCtx: SocketContextType,
-    boardId: BoardId,
+    boardId: ModuleId,
     name: string,
     color: string
 ): Promise<LabelId | undefined> => {
     return await sockCtx.emit(ClientSE.CREATE_BOARD_LABEL, { boardId, name, color });
 };
 
-export const updateBoardLabel = async (sockCtx: SocketContextType, boardId: BoardId, label: Label) => {
+export const updateBoardLabel = async (sockCtx: SocketContextType, boardId: ModuleId, label: Label) => {
     await sockCtx.emit(ClientSE.UPDATE_BOARD_LABEL, { boardId, label });
 };
 
@@ -18,6 +18,6 @@ export const updateCardsLabels = async (sockCtx: SocketContextType, cardId: Card
     await sockCtx.emit(ClientSE.UPDATE_CARDS_LABELS, { cardId, labelIds });
 };
 
-export const deleteBoardLabel = async (sockCtx: SocketContextType, boardId: BoardId, labelId: LabelId) => {
+export const deleteBoardLabel = async (sockCtx: SocketContextType, boardId: ModuleId, labelId: LabelId) => {
     await sockCtx.emit(ClientSE.DELETE_BOARD_LABEL, { boardId, labelId });
 };

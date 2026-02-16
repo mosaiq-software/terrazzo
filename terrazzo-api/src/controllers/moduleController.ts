@@ -4,6 +4,7 @@ import {
     CreateModuleData,
     CreateModuleDataArgs,
     exhaustiveCheck,
+    isModuleType,
     ModuleData,
     ModuleHeader,
     ModuleId,
@@ -91,13 +92,6 @@ export const createNewModule = async <T extends CreatableModuleType>(
     await createModuleDb(newModule);
     await syncModuleChildren(parentId);
     return newModule;
-};
-
-/**
- * Type assertion helper to ensure a module is of the expected type. Throws if the type does not match.
- */
-export const isModuleType = <T extends TrzModuleType>(module: ModuleHeader, type: T): module is ModuleHeader<T> => {
-    return module.type === type;
 };
 
 /**

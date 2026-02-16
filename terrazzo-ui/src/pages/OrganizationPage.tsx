@@ -27,7 +27,7 @@ const OrganizationPage = (): React.JSX.Element => {
     const orgCtx = useOrg();
     const unsavedCtx = useUnsavedChanges();
     const userCanEditRoles = useOrgPermission(orgId, PermissibleAction.EditRoles);
-    const userCanEditRootDirectory = useOrgPermission(orgId, PermissibleAction.EditDirectory);
+    const userCanEditRootDirectory = useOrgPermission(orgId, PermissibleAction.ManageModules);
 
     setTitle(`${orgCtx.active?.name ?? 'Organization'} | Terrazzo`);
 

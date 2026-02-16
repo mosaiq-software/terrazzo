@@ -16,11 +16,10 @@ import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordin
 import { Loader } from '@mantine/core';
 import {
     arrayMoveInPlace,
-    BoardId,
-    BoardRes,
     CardId,
     Label,
     ListId,
+    ModuleId,
     PermissibleAction,
     RoomType,
     ServerSE,
@@ -60,7 +59,7 @@ export const BoardContext = createContext<BoardContextType | undefined>(undefine
 
 interface BoardMetadataContextType {
     labels: Label[];
-    id: BoardId;
+    id: ModuleId;
     permissions: {
         viewBoard: boolean;
         editBoard: boolean;
@@ -85,7 +84,7 @@ const BoardPage = (): React.JSX.Element => {
     const [openedCard, setOpenedCard] = useState<CardId | undefined>();
     const lastOverId = useRef<string | null>(null);
     const params = useParams();
-    const [boardId, setBoardId] = useState<BoardId>(params.boardId as BoardId);
+    const [boardId, setBoardId] = useState<ModuleId>(params.boardId as ModuleId);
     const cardId = params.cardId as CardId;
     const sockCtx = useSocket();
     const uiCtx = useUI();
@@ -93,16 +92,14 @@ const BoardPage = (): React.JSX.Element => {
     const [cardToListMap, setCardMap] = useMap<CardId, ListId>();
     const listKeys = Array.from(listToCardsMap.keys());
     useRoom(RoomType.DATA, boardId);
-    const userCanExplicitlyViewBoard = useModulePermission(boardData, PermissibleAction.ViewBoard);
+    const userCanExplicitlyViewBoard = useModulePermission(boardData, PermissibleAction.ViewModules);
     const viewOnly = !userCanExplicitlyViewBoard && boardData?.public;
     const userCanViewBoard = userCanExplicitlyViewBoard || boardData?.public;
-    const userCanEditBoard = useModulePermission(boardData, PermissibleAction.EditBoard);
-    const userCanMoveCards = useModulePermission(boardData, PermissibleAction.MoveCards);
-    const userCanEditCard = useModulePermission(boardData, PermissibleAction.EditCard);
-    const userCanCreateCard = useModulePermission(boardData, PermissibleAction.CreateCard);
+    const userCanManageBoard = useModulePermission(boardData, PermissibleAction.ManageModules);
+    const userCanManageCards = useModulePermission(boardData, PermissibleAction.ManageCards);
 
     useEffect(() => {
-        setBoardId(params.boardId as BoardId);
+        setBoardId(params.boardId as ModuleId);
     }, [params.boardId]);
 
     useEffect(() => {
@@ -559,13 +556,21 @@ const BoardPage = (): React.JSX.Element => {
             id: boardData.id,
             permissions: {
                 viewBoard: !!userCanViewBoard,
-                editBoard: userCanEditBoard && !viewOnly,
-                moveCards: userCanMoveCards && !viewOnly,
+                editBoard: userCanManageBoard && !viewOnly,
+                moveCards: userCanManageCards && !viewOnly,
                 editCard: userCanEditCard && !viewOnly,
                 createCard: userCanCreateCard && !viewOnly,
             },
         };
-    }, [boardData, userCanViewBoard, userCanEditBoard, userCanMoveCards, userCanEditCard, userCanCreateCard, viewOnly]);
+    }, [
+        boardData,
+        userCanViewBoard,
+        userCanManageBoard,
+        userCanManageCards,
+        userCanEditCard,
+        userCanCreateCard,
+        viewOnly,
+    ]);
 
     if ((!boardId && !cardId) || !boardData) {
         return (
@@ -617,7 +622,7 @@ const BoardPage = (): React.JSX.Element => {
                 flexWrap: 'nowrap',
                 padding: '20px',
                 background: COLORS.background.medium,
-                height: `calc(100vh - ${uiCtx.navbarHeight}px)`
+                height: `calc(100vh - ${uiCtx.navbarHeight}px)`,
             }}
         >
             <BoardMetadataContext.Provider value={boardMetadata}>
@@ -643,7 +648,7 @@ const BoardPage = (): React.JSX.Element => {
                         <SortableContext
                             items={listKeys}
                             strategy={horizontalListSortingStrategy}
-                            disabled={!userCanEditBoard}
+                            disabled={!userCanManageBoard}
                         >
                             {memoizedSortableLists}
                         </SortableContext>
@@ -659,7 +664,7 @@ const BoardPage = (): React.JSX.Element => {
                         )}
                     </BoardContext.Provider>
                 </DndContext>
-                {!viewOnly && userCanEditBoard && (
+                {!viewOnly && userCanManageBoard && (
                     <CreateList
                         onCreateList={async (title) => {
                             try {

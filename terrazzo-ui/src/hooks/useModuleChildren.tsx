@@ -1,17 +1,17 @@
-import { ModuleHeader, RoomSpecifier, RoomType, ServerSE, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
+import { ModuleId, RoomSpecifier, RoomType, ServerSE, TrzModuleType } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
-import { getDirectoryContents } from '@trz/emitters/directoryEmitters';
+import { getModuleChildren } from '@trz/emitters/moduleEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
 import { useRoom } from './useRoom';
 import { useSocketListener } from './useSocketListener';
 
-export const useDirectoryContents = (moduleId: UID | undefined, moduleType: TrzModuleType) => {
+export const useModuleChildren = <T extends TrzModuleType>(moduleId: ModuleId | undefined, moduleType: T) => {
     useRoom(RoomType.DATA, moduleId, RoomSpecifier.CONTENTS);
     const orgCtx = useOrg();
 
-    const [contents, setContents] = useState<(ModuleHeader & { canAccess: boolean })[] | undefined>(undefined);
+    const [children, setChildren] = useState<ModuleId[]>([]);
     const sockCtx = useSocket();
 
     useEffect(() => {
@@ -19,15 +19,12 @@ export const useDirectoryContents = (moduleId: UID | undefined, moduleType: TrzM
             if (!moduleId || !sockCtx.connected) {
                 return;
             }
-            if (![TrzModuleType.Directory, TrzModuleType.Organization].includes(moduleType)) {
-                return;
-            }
             try {
-                const res = await getDirectoryContents(sockCtx, moduleId);
+                const res = await getModuleChildren(sockCtx, moduleId);
                 if (!res) {
                     throw new Error('No contents found');
                 }
-                setContents(res);
+                setChildren(res);
             } catch (err) {
                 notify(NoteType.GENERIC_ERROR, err);
                 return;
@@ -37,15 +34,15 @@ export const useDirectoryContents = (moduleId: UID | undefined, moduleType: TrzM
     }, [moduleId, moduleType, sockCtx.connected, orgCtx.roles]);
 
     useSocketListener(
-        ServerSE.UPDATE_DIRECTORY_CONTENTS,
+        ServerSE.UPDATE_MODULE_CHILDREN,
         (payload) => {
-            if (payload.directoryId !== moduleId) {
+            if (payload.moduleId !== moduleId) {
                 return;
             }
-            setContents(payload.contents);
+            setChildren(payload.children);
         },
         [moduleId]
     );
 
-    return contents;
+    return children;
 };

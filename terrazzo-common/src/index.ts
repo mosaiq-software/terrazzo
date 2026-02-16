@@ -39,6 +39,7 @@ export * from './types/socket/socketTypes';
 export * from './utils/arrayUtils';
 export * from './utils/fileUtils';
 export * from './utils/inviteUtils';
+export * from './utils/moduleUtils';
 export * from './utils/permissionUtils';
 export * from './utils/socketUtils';
 export * from './utils/textUtils';

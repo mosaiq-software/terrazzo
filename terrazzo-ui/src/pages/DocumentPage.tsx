@@ -1,5 +1,5 @@
 import { Box, Group, Loader, ScrollArea, Stack, Text } from '@mantine/core';
-import { DocumentId, fullName, PermissibleAction, TextBlockResourceType } from '@mosaiq/terrazzo-common';
+import { fullName, ModuleId, PermissibleAction, TextBlockResourceType } from '@mosaiq/terrazzo-common';
 import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
@@ -20,12 +20,12 @@ const DocumentPage = (): React.JSX.Element => {
     const params = useParams();
     const sockCtx = useSocket();
     const uiCtx = useUI();
-    const docId = params.documentId as DocumentId | undefined;
+    const docId = params.documentId as ModuleId | undefined;
     const { document, lastEditor } = useDocument(docId, { fetchLastEditor: true });
-    const userCanExplicitlyViewDocument = useModulePermission(document, PermissibleAction.ViewDocument);
+    const userCanExplicitlyViewDocument = useModulePermission(document, PermissibleAction.ViewModules);
     const viewOnly = !userCanExplicitlyViewDocument && document?.public;
     const userCanViewDocument = userCanExplicitlyViewDocument || document?.public;
-    const userCanEditDocument = useModulePermission(document, PermissibleAction.EditDocument);
+    const userCanEditDocument = useModulePermission(document, PermissibleAction.ManageModules);
 
     useCatchSaveKey();
 
