@@ -7,7 +7,6 @@ import {
     Role,
     RoomType,
     ServerSE,
-    updateBaseFromPartial,
 } from '@mosaiq/terrazzo-common';
 import { createOrganization, getOrganizationData, getOrganizationsForUser } from '@trz/emitters';
 import { useOrgMembers } from '@trz/hooks/useOrgMembers';
@@ -97,7 +96,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                 setAllOrganizations((prev) =>
                     prev.map((org) => {
                         if (org.id === payload.id) {
-                            return updateBaseFromPartial(org, payload);
+                            return { ...org, ...payload };
                         }
                         return org;
                     })
@@ -108,7 +107,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                     if (!prev) {
                         return prev;
                     }
-                    return updateBaseFromPartial(prev, payload);
+                    return { ...prev, ...payload };
                 });
             }
         },

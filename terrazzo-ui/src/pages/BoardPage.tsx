@@ -24,7 +24,6 @@ import {
     RoomType,
     ServerSE,
     UID,
-    updateBaseFromPartial,
 } from '@mosaiq/terrazzo-common';
 import CardDetails from '@trz/components/Boards/CardDetails/CardDetails';
 import CreateList from '@trz/components/Boards/CreateList';
@@ -198,7 +197,7 @@ const BoardPage = (): React.JSX.Element => {
                 if (!prev) {
                     return prev;
                 }
-                return { ...updateBaseFromPartial(prev, payload as Partial<BoardRes>) };
+                return { ...prev, ...payload };
             });
         },
         [boardId, boardData]

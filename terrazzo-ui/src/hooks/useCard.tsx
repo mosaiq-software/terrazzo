@@ -1,4 +1,4 @@
-import { Card, CardId, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
+import { Card, CardId, ServerSE } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getCardData } from '@trz/emitters';
 import { CARD_CACHE_PREFIX } from '@trz/util/boardUtils';
@@ -52,7 +52,7 @@ export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean
                 if (!prev) {
                     return prev;
                 }
-                return { ...updateBaseFromPartial(prev, payload) };
+                return { ...prev, ...payload };
             });
         },
         [cardId]

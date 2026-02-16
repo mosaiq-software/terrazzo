@@ -1,4 +1,4 @@
-import { Label, ModuleId, RoomType, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
+import { Label, ModuleId, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getBoardData } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -27,22 +27,6 @@ export const useLabels = (moduleId?: ModuleId) => {
         };
         fetchLabels();
     }, [boardId, sockCtx.connected]);
-
-    useSocketListener<ServerSE.UPDATE_BOARD_FIELD>(
-        ServerSE.UPDATE_BOARD_FIELD,
-        (payload) => {
-            if (boardId !== payload.id) {
-                return;
-            }
-            setBoardData((prev) => {
-                if (!prev) {
-                    return prev;
-                }
-                return updateBaseFromPartial(prev, payload);
-            });
-        },
-        [boardId]
-    );
 
     useSocketListener<ServerSE.UPDATE_BOARD_LABELS>(
         ServerSE.UPDATE_BOARD_LABELS,

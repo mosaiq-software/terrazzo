@@ -1,7 +1,7 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button, CloseButton, Flex, FocusTrap, Group, Menu, Paper, Stack, TextInput } from '@mantine/core';
 import { getHotkeyHandler, useClickOutside } from '@mantine/hooks';
-import { CardId, ListHeader, ListId, MAX_NAME_LENGTH, ServerSE, updateBaseFromPartial } from '@mosaiq/terrazzo-common';
+import { CardId, ListHeader, ListId, MAX_NAME_LENGTH, ServerSE } from '@mosaiq/terrazzo-common';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createCard, emitMoveList, getListData, updateListField } from '@trz/emitters';
@@ -73,7 +73,7 @@ function ListElement(props: ListElementProps): React.JSX.Element {
             if (!prev) {
                 return prev;
             }
-            const updated = updateBaseFromPartial(prev, payload);
+            const updated = { ...prev, ...payload };
             if (payload.name) {
                 setListTitle(payload.name);
             }

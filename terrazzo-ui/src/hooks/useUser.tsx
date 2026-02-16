@@ -1,4 +1,4 @@
-import { RoomType, ServerSE, updateBaseFromPartial, UserHeader, UserId } from '@mosaiq/terrazzo-common';
+import { RoomType, ServerSE, UserHeader, UserId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getUserHeader } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -40,7 +40,7 @@ export const useUser = (userId?: UserId) => {
                 if (!prev) {
                     return prev;
                 }
-                return { ...updateBaseFromPartial(prev, payload) };
+                return { ...prev, ...payload };
             });
         },
         [userId]

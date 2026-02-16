@@ -4,7 +4,6 @@ import {
     OrganizationId,
     PermissionFlag,
     recordValues,
-    updateBaseFromPartial,
     UserId,
 } from '@mosaiq/terrazzo-common';
 import { syncUpdateOrgField } from '@trz-api/broadcasters';
@@ -96,7 +95,7 @@ export async function updateOrganizationFromPartial(
         }
     }
 
-    const updated = updateBaseFromPartial(updatingOrg, partial);
+    const updated = { ...updatingOrg, ...partial };
     await updateOrgDb(updated);
     await syncUpdateOrgField(orgId, { ...partial, id: orgId });
 }
