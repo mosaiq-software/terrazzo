@@ -1,5 +1,5 @@
 import { Block } from '@blocknote/core';
-import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, TrzModule, UserId } from '@mosaiq/terrazzo-common';
+import { CardHeader, CardId, LabelId, ListId, TextBlockId, TrzModule, UserId } from '@mosaiq/terrazzo-common';
 import { syncAddCard, syncMovedCard, syncUpdateCardField } from '@trz-api/broadcasters';
 import { syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
@@ -17,13 +17,12 @@ import { addAssigneeToCard } from './cardAssignmentController';
 import { getModuleById } from './moduleController';
 import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
 
-export async function getSingleFullCard(cardId: CardId): Promise<Card | undefined> {
+export async function getCard(cardId: CardId): Promise<CardHeader | undefined> {
     const cardHeader = await getCardByIdDb(cardId);
     if (!cardHeader) {
         throw new Error('Card not found');
     }
-    const card = ((await populateCards([cardHeader])) ?? [undefined])[0] ?? undefined;
-    return card;
+    return cardHeader;
 }
 
 //Creates
@@ -65,7 +64,7 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
     const cardsOnBoard = await getTotalCardCountOnBoardDb(board.id);
 
     const cardUid = crypto.randomUUID();
-    const newCard: Card = {
+    const newCard: CardHeader = {
         id: cardUid,
         listId: card.listId,
         boardId: board.id,
@@ -76,8 +75,6 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
         order: card.order !== undefined ? card.order : await getCardCountOnListDb(card.listId),
         createdAt: card.createdAt || Date.now(),
         createdById: card.createdById || null,
-        assignees: [],
-        labels: [],
     };
 
     try {
@@ -102,7 +99,7 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
  * @param createdById Optional user ID of the user creating the duplicate
  */
 export async function duplicateCard(cardId: CardId, createdById?: UserId) {
-    const existingCard = await getSingleFullCard(cardId);
+    const existingCard = await getCard(cardId);
     if (!existingCard) {
         throw new Error('Error populating existing card');
     }
@@ -122,7 +119,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     const cardsOnBoard = await getTotalCardCountOnBoardDb(existingCard.boardId);
 
     const newCardId = crypto.randomUUID();
-    const newCard: Card = {
+    const newCard: CardHeader = {
         id: newCardId,
         listId: existingCard.listId,
         boardId: existingCard.boardId,
@@ -130,8 +127,6 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
         name: existingCard.name + ' (Copy)',
         descriptionTextBlockId: descriptionTextBlockId,
         priority: existingCard.priority,
-        assignees: existingCard.assignees,
-        labels: existingCard.labels,
         order: await getCardCountOnListDb(existingCard.listId),
         createdAt: Date.now(),
         createdById: createdById ?? null,
@@ -144,7 +139,8 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     }
 
     try {
-        for (const assignee of existingCard.assignees) {
+        const assignees = await getCardAssignmentsForCardDb(existingCard.id);
+        for (const assignee of assignees) {
             await addAssigneeToCard(newCard.id, assignee);
         }
     } catch (error: any) {
@@ -152,7 +148,8 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     }
 
     try {
-        await setCardsLabels(newCard.id, existingCard.labels);
+        const labels = await getLabelsOnCardDb(existingCard.id);
+        await setCardsLabels(newCard.id, labels);
     } catch (error: any) {
         throw new Error('Failed to add labels to card ' + error.message);
     }
@@ -235,19 +232,6 @@ export async function moveCard(
         throw error;
     }
 }
-
-export const populateCards = async (cardHeaders: CardHeader[]): Promise<Card[]> => {
-    return await Promise.all(
-        cardHeaders.map(async (c: CardHeader) => {
-            const cc: Card = {
-                ...c,
-                assignees: await getCardAssignmentsForCardDb(c.id),
-                labels: (await getLabelsOnCardDb(c.id)) || [],
-            };
-            return cc;
-        })
-    );
-};
 
 interface SetCardsLabelsOptions {
     preventSync?: boolean;

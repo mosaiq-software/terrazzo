@@ -1,4 +1,4 @@
-import { Member, OrganizationId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { OrganizationId, RoomSpecifier, RoomType, ServerSE, UserId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getOrganizationMemberships } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -8,7 +8,7 @@ import { useSocketListener } from './useSocketListener';
 
 export const useOrgMembers = (orgId?: OrganizationId) => {
     useRoom(RoomType.DATA, orgId, RoomSpecifier.MEMBERSHIP);
-    const [members, setMembers] = useState<Member[]>([]);
+    const [members, setMembers] = useState<UserId[]>([]);
     const sockCtx = useSocket();
 
     useEffect(() => {
@@ -40,17 +40,6 @@ export const useOrgMembers = (orgId?: OrganizationId) => {
         },
         [orgId]
     );
-
-    useSocketListener(ServerSE.UPDATE_USER_FIELD, (payload) => {
-        setMembers((prevMembers) =>
-            prevMembers.map((mem) => {
-                if (mem.userId === payload.id) {
-                    return { ...mem, user: { ...mem.user, ...payload } };
-                }
-                return mem;
-            })
-        );
-    });
 
     return members;
 };

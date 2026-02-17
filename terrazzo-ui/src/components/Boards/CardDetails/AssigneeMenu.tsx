@@ -1,5 +1,5 @@
 import { Avatar, Button, Menu, Stack } from '@mantine/core';
-import { Card, fullName } from '@mosaiq/terrazzo-common';
+import { CardId, fullName, UserId } from '@mosaiq/terrazzo-common';
 import { AvatarRow } from '@trz/components/UI/AvatarRow';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
@@ -8,7 +8,8 @@ import { COLORS } from '@trz/util/colors';
 import { MdOutlineAddCircle } from 'react-icons/md';
 
 interface AssigneeMenuProps {
-    card: Card;
+    cardId: CardId;
+    assignees: UserId[];
     viewOnly?: boolean;
 }
 
@@ -29,7 +30,7 @@ export const AssigneeMenu = (props: AssigneeMenuProps) => {
             <Menu.Target>
                 {props.viewOnly ? (
                     <AvatarRow
-                        users={props.card.assignees}
+                        users={props.assignees}
                         maxUsers={3}
                         showProfilePopover
                         showTooltip
@@ -39,9 +40,9 @@ export const AssigneeMenu = (props: AssigneeMenuProps) => {
                         variant="subtle"
                         justify={'flex-start'}
                     >
-                        {props.card.assignees.length ? (
+                        {props.assignees.length ? (
                             <AvatarRow
-                                users={props.card.assignees}
+                                users={props.assignees}
                                 maxUsers={3}
                             />
                         ) : (
@@ -59,11 +60,11 @@ export const AssigneeMenu = (props: AssigneeMenuProps) => {
             >
                 <Menu.Label>Assignees</Menu.Label>
                 <Stack gap={1}>
-                    {orgCtx.members.map((memRec) => {
-                        const isMember = props.card.assignees.includes(memRec.user.id);
+                    {orgCtx.members.map((memberId) => {
+                        const isMember = props.assignees.includes(memberId);
                         return (
                             <Button
-                                key={memRec.user.id}
+                                key={memberId}
                                 bg={isMember ? COLORS.semantic.info : COLORS.transparent}
                                 ta="left"
                                 justify="start"
@@ -73,17 +74,17 @@ export const AssigneeMenu = (props: AssigneeMenuProps) => {
                                 }}
                                 leftSection={
                                     <Avatar
-                                        src={memRec.user.profilePicture}
+                                        src={memberId.user.profilePicture}
                                         size={24}
-                                        name={fullName(memRec.user)}
+                                        name={fullName(memberId.user)}
                                         color="initials"
                                     />
                                 }
                                 onClick={() => {
-                                    updateCardAssignee(sockCtx, props.card.id, memRec.user.id, !isMember);
+                                    updateCardAssignee(sockCtx, props.cardId, memberId, !isMember);
                                 }}
                             >
-                                {fullName(memRec.user)}
+                                {fullName(memberId.user)}
                             </Button>
                         );
                     })}

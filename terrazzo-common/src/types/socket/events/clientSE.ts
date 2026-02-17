@@ -1,4 +1,4 @@
-import { TextBlockResourceType, TextBlockSnapshot } from '../../..';
+import { CardHeader, TextBlockResourceType, TextBlockSnapshot } from '../../..';
 import {
     CardId,
     InviteId,
@@ -13,11 +13,10 @@ import {
 } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
-import { Card } from '../../modules/board/cardTypes';
 import { Label } from '../../modules/board/labelTypes';
-import { List, ListHeader } from '../../modules/board/listTypes';
+import { ListHeader } from '../../modules/board/listTypes';
 import { CreateModuleDataArgs, ModuleHeader, UpdateModuleDataArgs } from '../../modules/moduleTypes';
-import { Member, OrganizationHeader } from '../../organizationTypes';
+import { OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
 import { QueryItem } from '../../queryTypes';
 import { UserHeader } from '../../userTypes';
@@ -131,8 +130,8 @@ export interface ClientSEPayload {
 
     [ClientSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
     [ClientSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
-    [ClientSE.UPDATE_LIST_FIELD]: Omit<Partial<List> & { id: ListId }, 'order'>;
-    [ClientSE.UPDATE_CARD_FIELD]: Omit<Partial<Card> & { id: CardId }, 'listId' | 'order'>;
+    [ClientSE.UPDATE_LIST_FIELD]: Omit<Partial<ListHeader> & { id: ListId }, 'order'>;
+    [ClientSE.UPDATE_CARD_FIELD]: Omit<Partial<CardHeader> & { id: CardId }, 'listId' | 'order'>;
     [ClientSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
     [ClientSE.UPDATE_LABEL]: { label: Label };
     [ClientSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
@@ -169,13 +168,13 @@ export interface ClientSEReplies {
     [ClientSE.GET_USERS_ORGANIZATIONS]: OrganizationHeader[];
     [ClientSE.GET_ORGANIZATION]: OrganizationHeader | undefined;
     [ClientSE.GET_LIST]: ListHeader | undefined;
-    [ClientSE.GET_CARD]: Card | undefined;
+    [ClientSE.GET_CARD]: CardHeader | undefined;
     [ClientSE.GET_SEARCH_RESULTS]: { results: QueryItem[] } | undefined;
     [ClientSE.GET_SEARCH_TAGS]: { results: QueryItem[] } | undefined;
     [ClientSE.GET_INVITES_FOR_ORG]: Invite[] | undefined;
     [ClientSE.GET_INVITE]: Invite | undefined;
     [ClientSE.GET_USER]: UserHeader | undefined;
-    [ClientSE.GET_ORGANIZATION_MEMBERSHIPS]: Member[] | undefined;
+    [ClientSE.GET_ORGANIZATION_MEMBERSHIPS]: UserId[] | undefined;
     [ClientSE.GET_ROLES_FOR_ORG]: Role[] | undefined;
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: RoleId[] | undefined;
     [ClientSE.GET_USERS_LINKED_ACCOUNTS]: LinkedAccount[] | undefined;

@@ -1,5 +1,5 @@
 import { ActionIcon, Button, MantineSize, Menu, Pill, Stack, Tooltip } from '@mantine/core';
-import { Card, Label, LabelId } from '@mosaiq/terrazzo-common';
+import { Label, LabelId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardsLabels } from '@trz/emitters';
 import { useLabel } from '@trz/hooks/useLabel';
@@ -10,7 +10,6 @@ import { IoMdInformationCircleOutline } from 'react-icons/io';
 import { MdCheck, MdLabel, MdLabelOutline } from 'react-icons/md';
 
 interface LabelsMenuProps {
-    card: Card;
     viewOnly?: boolean;
 }
 

@@ -47,7 +47,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
         onDropdownClose: () => combobox.resetSelectedOption(),
     });
     const clipboard = useClipboard({ timeout: 500 });
-    const card = useCard(props.cardId, false, true);
+    const { card, assignees } = useCard(props.cardId, false, true);
     useCatchSaveKey();
     const boardMeta = useBoardMetadata();
     const perms = boardMeta?.permissions;
@@ -87,7 +87,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
         return null;
     }
 
-    const joinedCard = !!usr.userId && card?.assignees.includes(usr.userId);
+    const joinedCard = !!usr.userId && assignees.includes(usr.userId);
 
     if (!card) {
         return (

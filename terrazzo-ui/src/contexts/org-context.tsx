@@ -1,12 +1,12 @@
 import { useLocalStorage } from '@mantine/hooks';
 import {
     LocalStorageKey,
-    Member,
     OrganizationHeader,
     OrganizationId,
     Role,
     RoomType,
     ServerSE,
+    UserId,
 } from '@mosaiq/terrazzo-common';
 import { createOrganization, getOrganizationData, getOrganizationsForUser } from '@trz/emitters';
 import { useOrgMembers } from '@trz/hooks/useOrgMembers';
@@ -24,7 +24,7 @@ export type OrgContextType = {
     selectOrganization: (orgId: OrganizationId | null | undefined) => Promise<void>;
     selectAndGoToOrganization: (orgId: OrganizationId | null | undefined) => Promise<void>;
     allOrganizations: OrganizationHeader[];
-    members: Member[];
+    members: UserId[];
     roles: Role[];
     createOrganization: (orgName: string) => Promise<OrganizationHeader | undefined>;
 };
@@ -42,7 +42,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
         defaultValue: undefined,
     });
     useRoom(RoomType.DATA, selectedOrganization?.id);
-    const members = useOrgMembers(selectedOrganization?.id);
+    const memberIds = useOrgMembers(selectedOrganization?.id);
     const roles = useOrgRoles(userCtx.userId ? selectedOrganization?.id : undefined);
 
     useEffect(() => {
@@ -188,7 +188,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                 selectAndGoToOrganization,
                 allOrganizations,
                 createOrganization: createOrg,
-                members,
+                members: memberIds,
                 roles,
             }}
         >

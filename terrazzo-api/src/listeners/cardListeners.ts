@@ -4,7 +4,7 @@ import {
     addCard,
     duplicateCard,
     getBoardIDFromCardID,
-    getSingleFullCard,
+    getCard,
     moveCard,
     updateCardFromPartial,
 } from '@trz-api/controllers/cardController';
@@ -19,7 +19,7 @@ export const registerCardListeners = (socket: Socket) => {
         if (!(await userCanViewModule(socket, boardId))) {
             throw new Error('Insufficient permissions to view this card');
         }
-        const card = await getSingleFullCard(data);
+        const card = await getCard(data);
         if (!card) {
             throw new Error('Card not found ' + data);
         }

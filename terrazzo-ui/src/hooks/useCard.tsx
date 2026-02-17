@@ -6,14 +6,10 @@ import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
 import { useSocketListener } from './useSocketListener';
 
-export interface Card extends CardHeader {
-    labels: LabelId[];
-    assignees: UserId[];
-}
-
 export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean) => {
-    const [card, setCard] = useState<Card | undefined>(undefined);
-
+    const [cardHeader, setCardHeader] = useState<CardHeader | undefined>(undefined);
+    const [labels, setLabels] = useState<LabelId[]>([]);
+    const [assignees, setAssignees] = useState<UserId[]>([]);
     const sockCtx = useSocket();
 
     useEffect(() => {
@@ -23,16 +19,16 @@ export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean
                 return;
             }
             // Avoid redundant fetches
-            if (shouldFetch && card && card.id === cardId) {
+            if (shouldFetch && cardHeader && cardHeader.id === cardId) {
                 return;
             }
             try {
                 const cachedCardRes = sessionStorage.getItem(`${CARD_CACHE_PREFIX}${cardId}`);
                 if (cacheCard && cachedCardRes) {
-                    setCard(JSON.parse(cachedCardRes));
+                    setCardHeader(JSON.parse(cachedCardRes));
                 } else {
                     const cardRes = await getCardData(sockCtx, cardId);
-                    setCard(cardRes);
+                    setCardHeader(cardRes);
                     if (cardRes && cacheCard) {
                         sessionStorage.setItem(`${CARD_CACHE_PREFIX}${cardId}`, JSON.stringify(cardRes));
                     } else {
@@ -53,7 +49,7 @@ export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean
             if (payload.id !== cardId) {
                 return;
             }
-            setCard((prev) => {
+            setCardHeader((prev) => {
                 if (!prev) {
                     return prev;
                 }
@@ -69,13 +65,7 @@ export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean
             if (payload.cardId !== cardId) {
                 return;
             }
-            setCard((prev) => {
-                if (!prev) {
-                    return prev;
-                }
-                prev.labels = payload.labelIds;
-                return { ...prev };
-            });
+            setLabels(payload.labelIds);
         },
         [cardId]
     );
@@ -86,21 +76,21 @@ export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean
             if (payload.cardId !== cardId) {
                 return;
             }
-            setCard((prev) => {
+            setAssignees((prev) => {
                 if (!prev) {
                     return prev;
                 }
-                const assigned = prev.assignees.includes(payload.userId);
+                const assigned = prev.includes(payload.userId);
                 if (payload.assigned && !assigned) {
                     return {
                         ...prev,
-                        assignees: [...prev.assignees, payload.userId],
+                        assignees: [...prev, payload.userId],
                     };
                 }
                 if (!payload.assigned && assigned) {
                     return {
                         ...prev,
-                        assignees: prev.assignees.filter((a) => a !== payload.userId),
+                        assignees: prev.filter((a) => a !== payload.userId),
                     };
                 }
                 return prev;
@@ -109,5 +99,9 @@ export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean
         [cardId]
     );
 
-    return card;
+    return {
+        card: cardHeader,
+        labels,
+        assignees,
+    };
 };

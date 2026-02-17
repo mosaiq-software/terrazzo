@@ -5,7 +5,7 @@ import { CardHeader } from '../../modules/board/cardTypes';
 import { Label } from '../../modules/board/labelTypes';
 import { ListHeader } from '../../modules/board/listTypes';
 import { ModuleHeader } from '../../modules/moduleTypes';
-import { Member, OrganizationHeader } from '../../organizationTypes';
+import { OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
 import { TextBlockSnapshot } from '../../textTypes';
 import { UserHeader } from '../../userTypes';
@@ -68,7 +68,7 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_LABEL]: { label: Label };
     [ServerSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ServerSE.UPDATE_USERS_ORGANIZATIONS]: { userId: UserId; organizations: OrganizationHeader[] };
-    [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: { orgId: OrganizationId; members: Member[] };
+    [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: { orgId: OrganizationId; members: UserId[] };
     [ServerSE.UPDATE_ORGANIZATION_INVITES]: { orgId: OrganizationId; invites: Invite[] };
     [ServerSE.UPDATE_ORGANIZATION_ROLES]: { orgId: OrganizationId; roles: Role[] };
     [ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
