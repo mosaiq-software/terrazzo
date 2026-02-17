@@ -3,7 +3,7 @@ import { PermissibleAction, RoleId, UserId } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { setRoleIdsForUserInOrg } from '@trz/emitters/roleEmitters';
-import { useOrgPermission } from '@trz/hooks/usePermissions';
+import { useOrgPermission } from '@trz/hooks/data/usePermissions';
 import { useRoleForUserInOrg } from '@trz/hooks/useRolesForUserInOrg';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback } from 'react';

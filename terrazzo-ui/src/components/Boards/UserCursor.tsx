@@ -1,7 +1,7 @@
 import { Badge, Box } from '@mantine/core';
 import { fullName, Position, UserId } from '@mosaiq/terrazzo-common';
-import { useImageColor } from '@trz/hooks/useImageColor';
-import { useUser } from '@trz/hooks/useUser';
+import { useUser } from '@trz/hooks/data/useUser';
+import { useImageColor } from '@trz/hooks/util/useImageColor';
 import { COLORS } from '@trz/util/colors';
 import { GiArrowCursor } from 'react-icons/gi';
 

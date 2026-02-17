@@ -1,16 +1,8 @@
-import {
-    getRoomCode,
-    RoomSpecifier,
-    RoomType,
-    ServerSE,
-    SocketId,
-    UID,
-    UserData
-} from '@mosaiq/terrazzo-common';
+import { getRoomCode, RoomSpecifier, RoomType, ServerSE, SocketId, UID, UserData } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { useSocketListener } from '@trz/hooks/util/useSocketListener';
 import { useEffect, useMemo, useState } from 'react';
-import { useRoomListener } from '../contexts/room-listener-context';
+import { useRoomListener } from '../../contexts/room-listener-context';
 import { useMap } from './useMap';
 
 export function useRoom(
@@ -34,7 +26,7 @@ export function useRoom(
             return;
         }
         if (roomId) {
-            roomListener.subscribe(getRoomCode(roomType, roomId, specifier), instanceId).then(res => {
+            roomListener.subscribe(getRoomCode(roomType, roomId, specifier), instanceId).then((res) => {
                 if (res && trackUsers) {
                     setRoomUsers(res.map((r) => [r.sid, r]));
                 }
@@ -43,15 +35,14 @@ export function useRoom(
 
         return () => {
             if (roomId) {
-                roomListener.unsubscribe(getRoomCode(roomType, roomId, specifier), instanceId).then(res => {
-                    if (trackUsers) { 
+                roomListener.unsubscribe(getRoomCode(roomType, roomId, specifier), instanceId).then((res) => {
+                    if (trackUsers) {
                         setRoomUsers([]);
                     }
                 });
             }
         };
     }, [roomId, sockCtx.connected, sockCtx.sid]);
-    
 
     useSocketListener(ServerSE.CLIENT_JOINED_ROOM, (payload) => {
         if (trackUsers) {

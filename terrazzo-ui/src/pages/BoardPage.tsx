@@ -32,10 +32,10 @@ import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { createList, emitMoveCard, emitMoveList, getCardData, getListData } from '@trz/emitters';
-import { useMap } from '@trz/hooks/useMap';
-import { useModulePermission } from '@trz/hooks/usePermissions';
-import { useRoom } from '@trz/hooks/useRoom';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { useModulePermission } from '@trz/hooks/data/usePermissions';
+import { useSocketListener } from '@trz/hooks/util/useSocketListener';
+import { useMap } from '@trz/hooks/util/useMap';
+import { useRoom } from '@trz/hooks/util/useRoom';
 import { CARD_CACHE_PREFIX, getBoardNameWithCode, LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
 import { COLORS } from '@trz/util/colors';
 import {

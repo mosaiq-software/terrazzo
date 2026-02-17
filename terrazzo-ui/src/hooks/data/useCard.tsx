@@ -4,7 +4,7 @@ import { getCardData } from '@trz/emitters';
 import { CARD_CACHE_PREFIX } from '@trz/util/boardUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
-import { useSocketListener } from './useSocketListener';
+import { useSocketListener } from '../util/useSocketListener';
 
 export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean) => {
     const [cardHeader, setCardHeader] = useState<CardHeader | undefined>(undefined);

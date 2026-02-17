@@ -11,7 +11,7 @@ import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useUserContext } from '@trz/contexts/user-context';
-import { useOrgPermission } from '@trz/hooks/usePermissions';
+import { useOrgPermission } from '@trz/hooks/data/usePermissions';
 import { COLORS } from '@trz/util/colors';
 import { setTitle } from '@trz/util/tabUtils';
 import React from 'react';

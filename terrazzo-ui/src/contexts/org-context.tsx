@@ -11,8 +11,8 @@ import {
 import { createOrganization, getOrganizationData, getOrganizationsForUser } from '@trz/emitters';
 import { useOrgMembers } from '@trz/hooks/useOrgMembers';
 import { useOrgRoles } from '@trz/hooks/useOrgRoles';
-import { useRoom } from '@trz/hooks/useRoom';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { useRoom } from '@trz/hooks/util/useRoom';
+import { useSocketListener } from '@trz/hooks/util/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';

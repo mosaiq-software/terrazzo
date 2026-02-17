@@ -14,7 +14,7 @@ import {
     updateCardField,
     updateCardsLabels,
 } from '@trz/emitters';
-import { useCard } from '@trz/hooks/useCard';
+import { useCard } from '@trz/hooks/data/useCard';
 import { useLabels } from '@trz/hooks/useLabels';
 import { COLORS } from '@trz/util/colors';
 import { getCardLink } from '@trz/util/linkUtils';

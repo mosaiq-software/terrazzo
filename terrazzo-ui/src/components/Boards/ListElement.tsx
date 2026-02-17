@@ -5,7 +5,7 @@ import { CardId, ListHeader, ListId, MAX_NAME_LENGTH, ServerSE } from '@mosaiq/t
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createCard, emitMoveList, getListData, updateListField } from '@trz/emitters';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { useSocketListener } from '@trz/hooks/util/useSocketListener';
 import { BoardContext, useBoardMetadata } from '@trz/pages/BoardPage';
 import { LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
 import { COLORS } from '@trz/util/colors';

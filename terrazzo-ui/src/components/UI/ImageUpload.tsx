@@ -1,6 +1,6 @@
 import { Image } from '@mantine/core';
 import { useFileDialog, useHover } from '@mantine/hooks';
-import { useFileUploader } from '@trz/hooks/useFileUploader';
+import { useFileUploader } from '@trz/hooks/util/useFileUploader';
 import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import { MdUpload } from 'react-icons/md';

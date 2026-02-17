@@ -12,8 +12,8 @@ import {
 } from '@mosaiq/terrazzo-common';
 import UserCursor from '@trz/components/Boards/UserCursor';
 import { useSocket } from '@trz/contexts/socket-context';
-import { useRoom } from '@trz/hooks/useRoom';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { useRoom } from '@trz/hooks/util/useRoom';
+import { useSocketListener } from '@trz/hooks/util/useSocketListener';
 import { IDLE_TIMEOUT_MS, MOUSE_UPDATE_THROTTLE_MS } from '@trz/util/realtimeUtils';
 import { MouseEventHandler, UIEventHandler, useCallback, useEffect, useRef } from 'react';
 

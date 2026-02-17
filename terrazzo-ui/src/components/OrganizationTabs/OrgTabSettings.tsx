@@ -4,7 +4,7 @@ import { MAX_NAME_LENGTH, MembershipRecord, OrganizationHeader, PermissibleActio
 import { useSocket } from '@trz/contexts/socket-context';
 import { Savable, useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { removeUserFromOrg, updateOrgField } from '@trz/emitters';
-import { useOrgPermission } from '@trz/hooks/usePermissions';
+import { useOrgPermission } from '@trz/hooks/data/usePermissions';
 import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback, useMemo, useState } from 'react';

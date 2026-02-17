@@ -4,7 +4,7 @@ import { ModuleHeader, PermissibleAction, TrzModule, UID } from '@mosaiq/terrazz
 import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
 import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
 import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';
-import { useModulePermission, useOrgPermission } from '@trz/hooks/usePermissions';
+import { useModulePermission, useOrgPermission } from '@trz/hooks/data/usePermissions';
 import { COLORS } from '@trz/util/colors';
 import { useMemo } from 'react';
 import { MdAdd, MdSettings } from 'react-icons/md';

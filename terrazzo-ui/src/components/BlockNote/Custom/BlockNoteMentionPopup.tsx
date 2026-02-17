@@ -8,9 +8,9 @@ import {
 } from '@mosaiq/terrazzo-common';
 import { FullLoader } from '@trz/components/UI/LoadingWrapper';
 import { UserProfilePopup } from '@trz/components/UI/UserAvatar/UserProfilePopup';
-import { useCard } from '@trz/hooks/useCard';
+import { useCard } from '@trz/hooks/data/useCard';
+import { useUser } from '@trz/hooks/data/useUser';
 import { useModule } from '@trz/hooks/useModule';
-import { useUser } from '@trz/hooks/useUser';
 import { COLORS } from '@trz/util/colors';
 import { forAllClickEvents, noEventBubble } from '@trz/util/eventUtils';
 import { MdArrowForward } from 'react-icons/md';

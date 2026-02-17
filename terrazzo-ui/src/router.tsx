@@ -8,10 +8,10 @@ import UserSettingsPage from '@trz/pages/UserSettingsPage';
 import { Route, Routes } from 'react-router-dom';
 import AppLayout from './components/AppLayout/AppLayout';
 import { NotFound, PageErrors } from './components/UI/NotFound';
+import { useIsMobile } from './hooks/util/useIsMobile';
 import { GithubAuthHandler } from './pages/auth/GithubAuthHandler';
 import DocumentPage from './pages/DocumentPage';
 import InvitePage from './pages/InvitePage';
-import { useIsMobile } from './hooks/useIsMobile';
 
 const Router = () => {
     const isMobile = useIsMobile();

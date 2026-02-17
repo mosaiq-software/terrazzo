@@ -5,7 +5,7 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
 import { useUserContext } from '@trz/contexts/user-context';
 import { logoutUser } from '@trz/emitters';
-import { useUser } from '@trz/hooks/useUser';
+import { useUser } from '@trz/hooks/data/useUser';
 import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback } from 'react';

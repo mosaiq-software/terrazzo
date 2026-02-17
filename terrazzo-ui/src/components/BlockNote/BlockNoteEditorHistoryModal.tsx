@@ -17,8 +17,8 @@ import {
 import { TextBlockId, TextBlockResourceType, TextBlockSnapshot, UID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { restoreTextBlockSnapshot } from '@trz/emitters';
-import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
-import { useTextBlockHistorySnapshots } from '@trz/hooks/useTextBlockHistorySnapshots';
+import { useTextBlockHistorySnapshots } from '@trz/hooks/data/useTextBlockHistorySnapshots';
+import { useCatchSaveKey } from '@trz/hooks/util/useCatchSaveKey';
 import { COLORS } from '@trz/util/colors';
 import { getRandomColorFromString } from '@trz/util/colorUtils';
 import { niceDateWithTime } from '@trz/util/dateUtils';

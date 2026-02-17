@@ -1,5 +1,5 @@
 import { useUserContext } from '@trz/contexts/user-context';
-import { useUser } from './useUser';
+import { useUser } from '../data/useUser';
 
 export const useMe = () => {
     const userCtx = useUserContext();

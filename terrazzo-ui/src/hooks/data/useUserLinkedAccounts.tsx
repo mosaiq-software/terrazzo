@@ -3,8 +3,8 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { getLinkedAccountsForUser } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
-import { useRoom } from './useRoom';
-import { useSocketListener } from './useSocketListener';
+import { useRoom } from '../util/useRoom';
+import { useSocketListener } from '../util/useSocketListener';
 
 export const useUserLinkedAccounts = (userId?: UserId) => {
     useRoom(RoomType.DATA, userId);

@@ -3,9 +3,9 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { getLabel, getModuleLabels } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect } from 'react';
-import { useMap } from './useMap';
-import { useRoom } from './useRoom';
-import { useSocketListener } from './useSocketListener';
+import { useMap } from '../util/useMap';
+import { useRoom } from '../util/useRoom';
+import { useSocketListener } from '../util/useSocketListener';
 
 export const useLabels = (moduleId?: ModuleId) => {
     const [labels] = useMap<LabelId, Label | undefined>();

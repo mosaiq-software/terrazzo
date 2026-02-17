@@ -7,7 +7,7 @@ import { getCardNumber } from '@trz/util/boardUtils';
 import { COLORS } from '@trz/util/colors';
 import { useContextMenu } from 'mantine-contextmenu';
 import React from 'react';
-import { useCard } from '../../hooks/useCard';
+import { useCard } from '../../hooks/data/useCard';
 import { CardContextMenu } from './CardDetails/CardContextMenu';
 import { StaticLabelDisplay } from './CardDetails/LabelsMenu';
 import { PriorityChip } from './CardDetails/PriorityButtons';
