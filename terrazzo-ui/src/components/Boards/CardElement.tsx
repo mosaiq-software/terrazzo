@@ -9,7 +9,7 @@ import { useContextMenu } from 'mantine-contextmenu';
 import React from 'react';
 import { useCard } from '../../hooks/useCard';
 import { CardContextMenu } from './CardDetails/CardContextMenu';
-import { LabelDisplay } from './CardDetails/LabelsMenu';
+import { StaticLabelDisplay } from './CardDetails/LabelsMenu';
 import { PriorityChip } from './CardDetails/PriorityButtons';
 
 interface CardElementProps {
@@ -75,7 +75,7 @@ const CardElement = (props: CardElementProps) => {
         >
             {card && inViewport && (
                 <React.Fragment>
-                    <LabelDisplay
+                    <StaticLabelDisplay
                         labels={card.labels}
                         size="xs"
                     />

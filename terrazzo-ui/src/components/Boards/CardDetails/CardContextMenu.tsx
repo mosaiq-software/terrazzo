@@ -42,7 +42,7 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
     const orgCtx = useOrg();
     const card = useCard(props.cardId, false, true);
     const clipboard = useClipboard();
-    const labelIds = useLabels(card?.boardId);
+    const labels = useLabels(card?.boardId);
 
     if (!card) {
         return null;
@@ -50,12 +50,12 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
 
     return (
         <ContextMenuLayout>
-            {!!labelIds.length && (
+            {!!labels.length && (
                 <ContextMenuSelectorMenu
                     title={`Labels${card.labels.length > 0 ? ` (${card.labels.length})` : ''}`}
                     icon={<MdLabel size={16} />}
-                    items={labelIds.map((labelId) => ({
-                        id: labelId,
+                    items={labels.map((label) => ({
+                        id: label.id,
                         label: label.name,
                         color: label.color,
                         leftIcon: card.labels.includes(label.id) ? (

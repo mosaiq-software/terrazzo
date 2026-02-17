@@ -1,5 +1,5 @@
 import { ActionIcon, Button, MantineSize, Menu, Pill, Stack, Tooltip } from '@mantine/core';
-import { Card, LabelId } from '@mosaiq/terrazzo-common';
+import { Card, Label, LabelId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardsLabels } from '@trz/emitters';
 import { useLabel } from '@trz/hooks/useLabel';
@@ -16,7 +16,8 @@ interface LabelsMenuProps {
 
 export const LabelsMenu = (props: LabelsMenuProps) => {
     const sockCtx = useSocket();
-    const labelIds = useLabels(props.card.boardId);
+    const labels = useLabels(props.card.boardId);
+    const cardLabels = labels.filter((label) => props.card.labels.includes(label.id));
 
     return (
         <Menu
@@ -26,13 +27,13 @@ export const LabelsMenu = (props: LabelsMenuProps) => {
             closeOnClickOutside={true}
             trigger="hover"
             closeDelay={200}
-            opened={!labelIds.length ? false : undefined}
+            opened={!labels.length ? false : undefined}
         >
             <Menu.Target>
-                {labelIds.length ? (
+                {labels.length ? (
                     props.viewOnly ? (
-                        <LabelDisplay
-                            labels={props.card.labels}
+                        <StaticLabelDisplay
+                            labels={cardLabels}
                             size="sm"
                         />
                     ) : (
@@ -40,8 +41,8 @@ export const LabelsMenu = (props: LabelsMenuProps) => {
                             variant="subtle"
                             justify={'flex-start'}
                         >
-                            <LabelDisplay
-                                labels={props.card.labels}
+                            <StaticLabelDisplay
+                                labels={cardLabels}
                                 showAdd
                                 size="sm"
                             />
@@ -69,17 +70,17 @@ export const LabelsMenu = (props: LabelsMenuProps) => {
             >
                 <Menu.Label>Labels</Menu.Label>
                 <Stack gap={1}>
-                    {labelIds.map((labelId) => (
+                    {labels.map((label) => (
                         <ClickableLabel
-                            key={labelId}
-                            labelId={labelId}
-                            selected={props.card.labels.includes(labelId)}
+                            key={label.id}
+                            labelId={label.id}
+                            selected={props.card.labels.includes(label.id)}
                             onClick={async () => {
                                 const labels = props.card.labels;
-                                if (labels.includes(labelId)) {
-                                    labels.splice(labels.indexOf(labelId), 1);
+                                if (labels.includes(label.id)) {
+                                    labels.splice(labels.indexOf(label.id), 1);
                                 } else {
-                                    labels.push(labelId);
+                                    labels.push(label.id);
                                 }
                                 await updateCardsLabels(sockCtx, props.card.id, labels);
                             }}
@@ -92,17 +93,17 @@ export const LabelsMenu = (props: LabelsMenuProps) => {
 };
 
 interface LabelDisplayProps {
-    labels: LabelId[];
+    labels: Label[];
     showAdd?: boolean;
     size?: MantineSize;
 }
-export const LabelDisplay = (props: LabelDisplayProps) => {
+export const StaticLabelDisplay = (props: LabelDisplayProps) => {
     return (
         <Pill.Group>
-            {props.labels.map((labelId) => (
-                <Label
-                    key={labelId}
-                    labelId={labelId}
+            {props.labels.map((label) => (
+                <StaticLabel
+                    key={label.id}
+                    labelId={label.id}
                 />
             ))}
             {props.showAdd && !props.labels.length && (
@@ -118,7 +119,7 @@ export const LabelDisplay = (props: LabelDisplayProps) => {
 interface LabelProps {
     labelId: LabelId;
 }
-export const Label = (props: LabelProps) => {
+export const StaticLabel = (props: LabelProps) => {
     const label = useLabel(props.labelId);
     if (!label) return null;
     const textColor = colorIsDarkAdvanced(label.color) ? COLORS.text.primary : COLORS.background.dark;

@@ -225,7 +225,6 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             />
                             <LabelsMenu
                                 card={card}
-                                boardLabels={boardMeta.labels}
                                 viewOnly={!perms.editCard}
                             />
                             <AssigneeMenu
