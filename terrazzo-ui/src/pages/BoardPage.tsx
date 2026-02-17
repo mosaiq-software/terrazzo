@@ -17,7 +17,6 @@ import { Loader } from '@mantine/core';
 import {
     arrayMoveInPlace,
     CardId,
-    Label,
     ListId,
     ModuleId,
     PermissibleAction,
@@ -57,7 +56,6 @@ interface BoardContextType {
 export const BoardContext = createContext<BoardContextType | undefined>(undefined);
 
 interface BoardMetadataContextType {
-    labels: Label[];
     id: ModuleId;
     permissions: {
         viewBoard: boolean;
@@ -551,7 +549,6 @@ const BoardPage = (): React.JSX.Element => {
             return undefined;
         }
         return {
-            labels: boardData.labels,
             id: boardData.id,
             permissions: {
                 viewBoard: !!userCanViewBoard,

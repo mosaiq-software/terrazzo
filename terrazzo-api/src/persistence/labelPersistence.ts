@@ -6,9 +6,9 @@ export const getLabelByIdDb = async (id: LabelId) => {
     return model?.toJSON();
 };
 
-export const getLabelsByBoardIdDb = async (boardId: ModuleId) => {
+export const getLabelIdsByBoardIdDb = async (boardId: ModuleId) => {
     const models = await LabelModel.findAll({ where: { boardId } });
-    return models.map((label) => label.toJSON());
+    return models.map((label) => label.toJSON().id);
 };
 
 export const createLabelOnBoardDb = async (label: Label, boardId: ModuleId) => {

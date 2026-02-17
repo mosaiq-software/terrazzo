@@ -149,7 +149,7 @@ All events are strongly typed using the `@mosaiq/terrazzo-common` package:
 Each event has a defined payload type and response type, ensuring type safety across the stack.
 
 Client events will typically have the form of an input payload and expect a response payload - similar to a standard API request/response cycle.
-Server events are typically one-way notifications sent to clients without expecting a response, though, a response is *technically* possible.
+Server events are one-way notifications sent to clients without expecting a response
 
 ### Connection Flow
 

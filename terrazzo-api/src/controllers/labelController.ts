@@ -1,59 +1,56 @@
 import { Label, LabelId, ModuleId } from '@mosaiq/terrazzo-common';
-import { syncBoardLabels } from '@trz-api/broadcasters/labelBroadcaster';
+import { syncLabel, syncModuleLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { deleteLabelingOnCardsByLabelIdDb } from '@trz-api/persistence/labelAssignmentPersistence';
 import {
     createLabelOnBoardDb,
     deleteLabelDb,
     getLabelByIdDb,
-    getLabelsByBoardIdDb,
+    getLabelIdsByBoardIdDb,
     updateLabelDb,
 } from '@trz-api/persistence/labelPersistence';
 
-export async function createBoardLabel(boardId: ModuleId, name: string, color: string): Promise<LabelId> {
+export const getLabelIdsOnModule = async (moduleId: ModuleId): Promise<LabelId[]> => {
+    const labels = await getLabelIdsByBoardIdDb(moduleId);
+    return labels;
+};
+
+export async function createBoardLabel(moduleId: ModuleId, name: string, color: string): Promise<LabelId> {
     const label: Label = {
         name,
         color,
-        boardId,
+        boardId: moduleId,
         id: crypto.randomUUID(),
     };
-    await createLabelOnBoardDb(label, boardId);
+    await createLabelOnBoardDb(label, moduleId);
 
     // Sync updated labels to clients
-    const labels = await getLabelsByBoardIdDb(boardId);
-    await syncBoardLabels(boardId, labels);
+    await syncModuleLabels(moduleId);
 
     return label.id;
 }
 
-export async function createBoardLabelSingle(boardId: ModuleId, name: string, color: string): Promise<LabelId> {
-    const label: Label = {
-        name,
-        color,
-        boardId,
-        id: crypto.randomUUID(),
-    };
-    await createLabelOnBoardDb(label, boardId);
-    return label.id;
-}
-
-export async function removeBoardLabel(boardId: ModuleId, labelId: LabelId) {
+export async function removeBoardLabel(moduleId: ModuleId, labelId: LabelId) {
     await deleteLabelDb(labelId);
     await deleteLabelingOnCardsByLabelIdDb(labelId);
 
     // Sync updated labels to clients
-    const labels = await getLabelsByBoardIdDb(boardId);
-    await syncBoardLabels(boardId, labels);
+    await syncModuleLabels(moduleId);
 }
 
-export async function updateBoardLabels(boardId: ModuleId, updatedLabel: Label) {
+export async function updateBoardLabels(updatedLabel: Label) {
     const label = await getLabelByIdDb(updatedLabel.id);
     if (!label) {
         throw new Error('Label does not exist');
     }
-
     await updateLabelDb(updatedLabel);
-
     // Sync updated labels to clients
-    const labels = await getLabelsByBoardIdDb(boardId);
-    await syncBoardLabels(boardId, labels);
+    await syncLabel(updatedLabel.id);
 }
+
+export const getLabelsModule = async (labelId: LabelId): Promise<ModuleId> => {
+    const label = await getLabelByIdDb(labelId);
+    if (!label) {
+        throw new Error('Label not found');
+    }
+    return label.boardId;
+};

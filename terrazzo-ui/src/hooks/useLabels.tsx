@@ -1,15 +1,15 @@
-import { Label, ModuleId, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { LabelId, ModuleId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
-import { getBoardData } from '@trz/emitters';
+import { getModuleLabels } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
 import { useRoom } from './useRoom';
 import { useSocketListener } from './useSocketListener';
 
 export const useLabels = (moduleId?: ModuleId) => {
-    const [labels, setLabels] = useState<Label[]>([]);
+    const [labelIds, setLabelIds] = useState<LabelId[]>([]);
     const sockCtx = useSocket();
-    useRoom(RoomType.DATA, moduleId);
+    useRoom(RoomType.DATA, moduleId, RoomSpecifier.LABELS);
 
     useEffect(() => {
         const fetchLabels = async () => {
@@ -17,8 +17,8 @@ export const useLabels = (moduleId?: ModuleId) => {
                 return;
             }
             try {
-                const boardRes = await getBoardData(sockCtx, moduleId);
-                setLabels(boardRes?.labels ?? []);
+                const labelIds = await getModuleLabels(sockCtx, moduleId);
+                setLabelIds(labelIds ?? []);
             } catch (err) {
                 notify(NoteType.BOARD_DATA_ERROR, err);
                 return;
@@ -27,16 +27,16 @@ export const useLabels = (moduleId?: ModuleId) => {
         fetchLabels();
     }, [moduleId, sockCtx.connected]);
 
-    useSocketListener<ServerSE.UPDATE_BOARD_LABELS>(
-        ServerSE.UPDATE_BOARD_LABELS,
+    useSocketListener(
+        ServerSE.UPDATE_MODULE_LABELS,
         (payload) => {
-            if (moduleId !== payload.boardId) {
+            if (moduleId !== payload.moduleId) {
                 return;
             }
-            setLabels(payload.labels);
+            setLabelIds(payload.labels);
         },
         [moduleId]
     );
 
-    return labels;
+    return labelIds;
 };

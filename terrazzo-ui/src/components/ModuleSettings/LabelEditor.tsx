@@ -1,7 +1,7 @@
 import { ActionIcon, ColorInput, Group, Stack, Text, TextInput, Tooltip } from '@mantine/core';
 import { Label, ModuleId, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
-import { createBoardLabel, deleteBoardLabel, updateBoardLabel } from '@trz/emitters';
+import { createLabel, deleteLabel, updateLabel } from '@trz/emitters';
 import { COLORS } from '@trz/util/colors';
 import { colorIsDarkAdvanced, generateRandomColor } from '@trz/util/colorUtils';
 import { useState } from 'react';
@@ -28,10 +28,10 @@ export const LabelEditor = (props: LabelEditorProps) => {
             return;
         }
         if (editingLabel.id === TEMPORARY_ID) {
-            createBoardLabel(sockCtx, props.boardId, editingLabel.name, editingLabel.color);
+            createLabel(sockCtx, props.boardId, editingLabel.name, editingLabel.color);
             onCreateNewLabel();
         } else {
-            updateBoardLabel(sockCtx, props.boardId, editingLabel);
+            updateLabel(sockCtx, editingLabel);
         }
     };
 
@@ -127,7 +127,7 @@ export const LabelEditor = (props: LabelEditorProps) => {
                             color={COLORS.semantic.error}
                             onClick={async () => {
                                 setEditingLabel(undefined);
-                                deleteBoardLabel(sockCtx, props.boardId, editingLabel.id);
+                                deleteLabel(sockCtx, editingLabel.id);
                             }}
                             disabled={props.disableEditing}
                         >

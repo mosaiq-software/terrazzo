@@ -32,7 +32,8 @@ export enum ServerSE {
     UPDATE_LIST_FIELD = 'UPDATE_LIST_FIELD',
     UPDATE_CARD_FIELD = 'UPDATE_CARD_FIELD',
     UPDATE_CARD_ASSIGNEE = 'UPDATE_CARD_ASSIGNEE',
-    UPDATE_BOARD_LABELS = 'UPDATE_BOARD_LABELS',
+    UPDATE_MODULE_LABELS = 'UPDATE_MODULE_LABELS',
+    UPDATE_LABEL = 'UPDATE_LABEL',
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
     UPDATE_USERS_ORGANIZATIONS = 'UPDATE_USERS_ORGANIZATIONS',
     UPDATE_ORGANIZATION_MEMBERSHIPS = 'UPDATE_ORGANIZATION_MEMBERSHIPS',
@@ -63,7 +64,8 @@ export interface ServerSEPayload {
     [ServerSE.UPDATE_LIST_FIELD]: Partial<ListHeader> & { id: ListId };
     [ServerSE.UPDATE_CARD_FIELD]: Partial<CardHeader> & { id: CardId };
     [ServerSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
-    [ServerSE.UPDATE_BOARD_LABELS]: { boardId: ModuleId; labels: Label[] };
+    [ServerSE.UPDATE_MODULE_LABELS]: { moduleId: ModuleId; labels: LabelId[] };
+    [ServerSE.UPDATE_LABEL]: { label: Label };
     [ServerSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ServerSE.UPDATE_USERS_ORGANIZATIONS]: { userId: UserId; organizations: OrganizationHeader[] };
     [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: { orgId: OrganizationId; members: Member[] };
@@ -78,35 +80,5 @@ export interface ServerSEPayload {
         children: ModuleId[];
     };
 }
-export interface ServerSEReplies {
-    // Server to Client req - Client to Server callback
-    [ServerSE.READY]: void;
-    [ServerSE.CLIENT_JOINED_ROOM]: void;
-    [ServerSE.CLIENT_LEFT_ROOM]: void;
 
-    [ServerSE.MOVE_LIST]: void;
-    [ServerSE.MOVE_CARD]: void;
-    [ServerSE.MOUSE_MOVE]: void;
-    [ServerSE.USER_IDLE]: void;
-
-    [ServerSE.ADD_LIST]: void;
-    [ServerSE.ADD_CARD]: void;
-
-    [ServerSE.UPDATE_USER_FIELD]: void;
-    [ServerSE.UPDATE_ORG_FIELD]: void;
-    [ServerSE.UPDATE_LIST_FIELD]: void;
-    [ServerSE.UPDATE_CARD_FIELD]: void;
-    [ServerSE.UPDATE_CARD_ASSIGNEE]: void;
-    [ServerSE.UPDATE_BOARD_LABELS]: void;
-    [ServerSE.UPDATE_CARDS_LABELS]: void;
-    [ServerSE.UPDATE_USERS_ORGANIZATIONS]: void;
-    [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: void;
-    [ServerSE.UPDATE_ORGANIZATION_INVITES]: void;
-    [ServerSE.UPDATE_ORGANIZATION_ROLES]: void;
-    [ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG]: void;
-    [ServerSE.UPDATE_USERS_LINKED_ACCOUNTS]: void;
-    [ServerSE.UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS]: void;
-    [ServerSE.UPDATE_MODULE_FIELD]: void;
-    [ServerSE.UPDATE_MODULE_CHILDREN]: void;
-}
-export type ServerSEReply<T extends ServerSE> = (payload: ServerSEReplies[T], error?: string) => void;
+export type ServerSEReply = (payload: void, error?: string) => void;

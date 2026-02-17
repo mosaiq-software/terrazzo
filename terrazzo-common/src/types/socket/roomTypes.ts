@@ -27,6 +27,8 @@ export enum RoomSpecifier {
     ROLE_ASSIGNMENTS = 'role_assignments',
     /** Directory contents */
     CONTENTS = 'contents',
+    /** Labels */
+    LABELS = 'labels',
 }
 
 export type RoomId = `${RoomType}@${string}` | null;

@@ -52,11 +52,13 @@ export enum ClientSE {
     GET_TEXT_BLOCK_HISTORY_SNAPSHOTS = 'GET_TEXT_BLOCK_HISTORY_SNAPSHOTS',
     GET_MODULE = 'GET_MODULE',
     GET_MODULE_CHILDREN = 'GET_MODULE_CHILDREN',
+    GET_MODULE_LABELS = 'GET_MODULE_LABELS',
+    GET_LABEL = 'GET_LABEL',
 
     CREATE_ORG = 'CREATE_ORG',
     CREATE_LIST = 'CREATE_LIST',
     CREATE_CARD = 'CREATE_CARD',
-    CREATE_BOARD_LABEL = 'CREATE_BOARD_LABEL',
+    CREATE_LABEL = 'CREATE_LABEL',
     CREATE_DUPLICATE_CARD = 'CREATE_DUPLICATE_CARD',
     CREATE_INVITE = 'CREATE_INVITE',
     CREATE_ROLE = 'CREATE_ROLE',
@@ -68,13 +70,13 @@ export enum ClientSE {
     UPDATE_LIST_FIELD = 'UPDATE_LIST_FIELD',
     UPDATE_CARD_FIELD = 'UPDATE_CARD_FIELD',
     UPDATE_CARD_ASSIGNEE = 'UPDATE_CARD_ASSIGNEE',
-    UPDATE_BOARD_LABEL = 'UPDATE_BOARD_LABEL',
+    UPDATE_LABEL = 'UPDATE_LABEL',
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
     UPDATE_ROLE = 'UPDATE_ROLE',
     UPDATE_ROLES_FOR_USER_IN_ORG = 'UPDATE_ROLES_FOR_USER_IN_ORG',
     UPDATE_MODULE_FIELD = 'UPDATE_MODULE_FIELD',
 
-    DELETE_BOARD_LABEL = 'DELETE_BOARD_LABEL',
+    DELETE_LABEL = 'DELETE_LABEL',
     DELETE_INVITE = 'DELETE_INVITE',
     DELETE_MEMBERSHIP = 'DELETE_MEMBERSHIP',
     DELETE_ROLE = 'DELETE_ROLE',
@@ -110,11 +112,13 @@ export interface ClientSEPayload {
     [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: { resourceId: UID; resourceType: TextBlockResourceType };
     [ClientSE.GET_MODULE]: ModuleId;
     [ClientSE.GET_MODULE_CHILDREN]: ModuleId;
+    [ClientSE.GET_MODULE_LABELS]: ModuleId;
+    [ClientSE.GET_LABEL]: LabelId;
 
     [ClientSE.CREATE_ORG]: { name: string };
     [ClientSE.CREATE_LIST]: { boardID: ModuleId; listName: string };
     [ClientSE.CREATE_CARD]: { listID: ListId; cardName: string };
-    [ClientSE.CREATE_BOARD_LABEL]: { boardId: ModuleId; name: string; color: string };
+    [ClientSE.CREATE_LABEL]: { moduleId: ModuleId; name: string; color: string };
     [ClientSE.CREATE_DUPLICATE_CARD]: { cardId: CardId };
     [ClientSE.CREATE_INVITE]: { orgId: OrganizationId; maxUses: number | null };
     [ClientSE.CREATE_ROLE]: { orgId: OrganizationId; name: string; color: string };
@@ -130,7 +134,7 @@ export interface ClientSEPayload {
     [ClientSE.UPDATE_LIST_FIELD]: Omit<Partial<List> & { id: ListId }, 'order'>;
     [ClientSE.UPDATE_CARD_FIELD]: Omit<Partial<Card> & { id: CardId }, 'listId' | 'order'>;
     [ClientSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
-    [ClientSE.UPDATE_BOARD_LABEL]: { boardId: ModuleId; label: Label };
+    [ClientSE.UPDATE_LABEL]: { label: Label };
     [ClientSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
     [ClientSE.UPDATE_ROLE]: Role;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
@@ -139,7 +143,7 @@ export interface ClientSEPayload {
         args: UpdateModuleDataArgs;
     };
 
-    [ClientSE.DELETE_BOARD_LABEL]: { boardId: ModuleId; labelId: LabelId };
+    [ClientSE.DELETE_LABEL]: { labelId: LabelId };
     [ClientSE.DELETE_INVITE]: { inviteId: InviteId };
     [ClientSE.DELETE_MEMBERSHIP]: { userId: UserId; orgId: OrganizationId };
     [ClientSE.DELETE_ROLE]: { roleId: RoleId };
@@ -179,11 +183,13 @@ export interface ClientSEReplies {
     [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: TextBlockSnapshot[] | undefined;
     [ClientSE.GET_MODULE]: ModuleHeader | undefined;
     [ClientSE.GET_MODULE_CHILDREN]: ModuleId[] | undefined;
+    [ClientSE.GET_MODULE_LABELS]: LabelId[] | undefined;
+    [ClientSE.GET_LABEL]: Label | undefined;
 
     [ClientSE.CREATE_ORG]: OrganizationId | undefined;
     [ClientSE.CREATE_LIST]: ListId | undefined;
     [ClientSE.CREATE_CARD]: CardId | undefined;
-    [ClientSE.CREATE_BOARD_LABEL]: LabelId | undefined;
+    [ClientSE.CREATE_LABEL]: LabelId | undefined;
     [ClientSE.CREATE_DUPLICATE_CARD]: CardId | undefined;
     [ClientSE.CREATE_INVITE]: Invite | undefined;
     [ClientSE.CREATE_ROLE]: Role | undefined;
@@ -195,13 +201,13 @@ export interface ClientSEReplies {
     [ClientSE.UPDATE_LIST_FIELD]: undefined;
     [ClientSE.UPDATE_CARD_FIELD]: undefined;
     [ClientSE.UPDATE_CARD_ASSIGNEE]: undefined;
-    [ClientSE.UPDATE_BOARD_LABEL]: undefined;
+    [ClientSE.UPDATE_LABEL]: undefined;
     [ClientSE.UPDATE_CARDS_LABELS]: undefined;
     [ClientSE.UPDATE_ROLE]: undefined;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: undefined;
     [ClientSE.UPDATE_MODULE_FIELD]: undefined;
 
-    [ClientSE.DELETE_BOARD_LABEL]: undefined;
+    [ClientSE.DELETE_LABEL]: undefined;
     [ClientSE.DELETE_INVITE]: undefined;
     [ClientSE.DELETE_MEMBERSHIP]: undefined;
     [ClientSE.DELETE_ROLE]: undefined;

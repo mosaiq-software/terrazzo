@@ -21,7 +21,7 @@ import { extractMarkdownImagesFromText, replaceAllOccurrences } from '@trz-api/u
 import { addAssigneeToCard } from '../controllers/cardAssignmentController';
 import { addCard, setCardsLabels } from '../controllers/cardController';
 import { saveFileFromUrl } from '../controllers/fileController';
-import { createBoardLabelSingle } from '../controllers/labelController';
+import { createBoardLabel } from '../controllers/labelController';
 import { addList } from '../controllers/listController';
 import { createNewModule } from '../controllers/moduleController';
 import {
@@ -107,7 +107,7 @@ const createLabels = async (trzBoardId: ModuleId, trelloLabels: TrelloLabelType[
     const labelMap: { [trl: string]: LabelId } = {};
     for (const trelloLabel of trelloLabels) {
         const color = TrelloLabelColorsMap[trelloLabel.color] || TrelloLabelColorsMap['black'];
-        const labelId = await createBoardLabelSingle(trzBoardId, trelloLabel.name, color);
+        const labelId = await createBoardLabel(trzBoardId, trelloLabel.name, color);
         labelMap[trelloLabel.id] = labelId;
     }
     return labelMap;

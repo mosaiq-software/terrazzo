@@ -68,7 +68,6 @@ const CardElement = (props: CardElementProps) => {
                           <CardContextMenu
                               cardId={props.cardId}
                               onClose={close}
-                              boardLabels={boardMeta.labels}
                           />
                       ))
                     : undefined
@@ -79,7 +78,6 @@ const CardElement = (props: CardElementProps) => {
                     <LabelDisplay
                         labels={card.labels}
                         size="xs"
-                        boardLabels={boardMeta.labels}
                     />
                     <Text
                         lineClamp={7}

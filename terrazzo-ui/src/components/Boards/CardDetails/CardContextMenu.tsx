@@ -1,6 +1,6 @@
 import { Avatar, Divider } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { CardId, fullName, Label, Priority } from '@mosaiq/terrazzo-common';
+import { CardId, fullName, Priority } from '@mosaiq/terrazzo-common';
 import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
 import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
 import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';
@@ -15,6 +15,7 @@ import {
     updateCardsLabels,
 } from '@trz/emitters';
 import { useCard } from '@trz/hooks/useCard';
+import { useLabels } from '@trz/hooks/useLabels';
 import { COLORS } from '@trz/util/colors';
 import { getCardLink } from '@trz/util/linkUtils';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -34,7 +35,6 @@ import { priorityColors, PriorityIcons } from './PriorityButtons';
 interface CardContextMenuProps {
     cardId: CardId;
     onClose: () => void;
-    boardLabels: Label[];
 }
 export const CardContextMenu = (props: CardContextMenuProps) => {
     const sockCtx = useSocket();
@@ -42,6 +42,7 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
     const orgCtx = useOrg();
     const card = useCard(props.cardId, false, true);
     const clipboard = useClipboard();
+    const labelIds = useLabels(card?.boardId);
 
     if (!card) {
         return null;
@@ -49,12 +50,12 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
 
     return (
         <ContextMenuLayout>
-            {!!props.boardLabels.length && (
+            {!!labelIds.length && (
                 <ContextMenuSelectorMenu
                     title={`Labels${card.labels.length > 0 ? ` (${card.labels.length})` : ''}`}
                     icon={<MdLabel size={16} />}
-                    items={props.boardLabels.map((label) => ({
-                        id: label.id,
+                    items={labelIds.map((labelId) => ({
+                        id: labelId,
                         label: label.name,
                         color: label.color,
                         leftIcon: card.labels.includes(label.id) ? (
