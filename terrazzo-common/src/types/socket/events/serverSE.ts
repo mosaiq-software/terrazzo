@@ -1,4 +1,15 @@
-import { CardId, LabelId, ListId, ModuleId, OrganizationId, RoleId, TextBlockId, UserId } from '../../genericTypes';
+import { CollectionSourceData, ObjectSourceData } from '../../dataSource/dataSourceTypes';
+import {
+    CardId,
+    LabelId,
+    ListId,
+    ModuleId,
+    OrganizationId,
+    RoleId,
+    TextBlockId,
+    UID,
+    UserId,
+} from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount } from '../../linkedAccountTypes';
 import { CardHeader } from '../../modules/board/cardTypes';
@@ -44,6 +55,10 @@ export enum ServerSE {
     UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS = 'UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS',
     UPDATE_MODULE_FIELD = 'UPDATE_MODULE_FIELD',
     UPDATE_MODULE_CHILDREN = 'UPDATE_MODULE_CHILDREN',
+
+    OBJECT_SOURCE_UPDATE = 'OBJECT_SOURCE_UPDATE',
+    COLLECTION_SOURCE_ADD = 'COLLECTION_SOURCE_ADD',
+    COLLECTION_SOURCE_REMOVE = 'COLLECTION_SOURCE_REMOVE',
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -79,6 +94,10 @@ export interface ServerSEPayload {
         moduleId: ModuleId;
         children: ModuleId[];
     };
+
+    [ServerSE.OBJECT_SOURCE_UPDATE]: ObjectSourceData;
+    [ServerSE.COLLECTION_SOURCE_ADD]: { id: UID; data: CollectionSourceData };
+    [ServerSE.COLLECTION_SOURCE_REMOVE]: { id: UID; data: CollectionSourceData };
 }
 
 export type ServerSEReply = (payload: void, error?: string) => void;

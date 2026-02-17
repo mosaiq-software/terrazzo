@@ -1,0 +1,44 @@
+import { UID } from '../genericTypes';
+import { CollectionSource, CollectionSourceDataMap } from './collectionSources';
+import { ObjectSource, ObjectSourcesMap } from './objectSources';
+
+type CreateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['create'];
+type UpdateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['update'];
+type ObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['data'];
+
+export type CreateObjectSourceData = {
+    [T in ObjectSource]: {
+        type: T;
+        data: CreateObjectSourceDataInstance<T>;
+    };
+}[ObjectSource];
+
+export type UpdateObjectSourceData = {
+    [T in ObjectSource]: {
+        type: T;
+        data: UpdateObjectSourceDataInstance<T>;
+    };
+}[ObjectSource];
+
+export type ObjectSourceData = {
+    [T in ObjectSource]: {
+        type: T;
+        data: ObjectSourceDataInstance<T>;
+    };
+}[ObjectSource];
+
+export type CollectionSourceData = {
+    [T in CollectionSource]: CollectionSourceDataMap[T];
+}[CollectionSource];
+
+export interface ObjectSourceHandler<T extends ObjectSource> {
+    create: (data: CreateObjectSourceDataInstance<T>) => Promise<void>;
+    update: (id: UID, data: Partial<UpdateObjectSourceDataInstance<T>>) => Promise<void>;
+    read: (id: UID) => Promise<ObjectSourceDataInstance<T> | undefined>;
+}
+
+export interface CollectionSourceHandler<T extends CollectionSource> {
+    read: (parentId: UID) => Promise<CollectionSourceDataMap[T] | undefined>;
+    add: (parentId: UID, itemId: UID) => Promise<void>;
+    remove: (parentId: UID, itemId: UID) => Promise<void>;
+}

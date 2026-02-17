@@ -1,5 +1,12 @@
 import { CardHeader, TextBlockResourceType, TextBlockSnapshot } from '../../..';
 import {
+    CollectionSource,
+    CollectionSourceData,
+    CreateObjectSourceData,
+    ObjectSource,
+    ObjectSourceData,
+} from '../../dataSource/dataSourceTypes';
+import {
     CardId,
     InviteId,
     LabelId,
@@ -83,6 +90,13 @@ export enum ClientSE {
 
     USE_INVITE = 'USE_INVITE',
     USE_TEXT_BLOCK_HISTORY_SNAPSHOT = 'USE_TEXT_BLOCK_HISTORY_SNAPSHOT',
+
+    READ_OBJECT_SOURCE = 'READ_OBJECT_SOURCE',
+    CREATE_OBJECT_SOURCE = 'CREATE_OBJECT_SOURCE',
+    UPDATE_OBJECT_SOURCE = 'UPDATE_OBJECT_SOURCE',
+    READ_COLLECTION_SOURCE = 'READ_COLLECTION_SOURCE',
+    ADD_TO_COLLECTION_SOURCE = 'ADD_TO_COLLECTION_SOURCE',
+    REMOVE_FROM_COLLECTION_SOURCE = 'REMOVE_FROM_COLLECTION_SOURCE',
 }
 export interface ClientSEPayload {
     // Client to Server
@@ -154,6 +168,13 @@ export interface ClientSEPayload {
         resourceId: UID;
         resourceType: TextBlockResourceType;
     };
+
+    [ClientSE.READ_OBJECT_SOURCE]: { source: ObjectSource; id: UID };
+    [ClientSE.CREATE_OBJECT_SOURCE]: { data: CreateObjectSourceData };
+    [ClientSE.UPDATE_OBJECT_SOURCE]: { source: ObjectSource; id: UID; data: Partial<ObjectSourceData> };
+    [ClientSE.READ_COLLECTION_SOURCE]: { source: CollectionSource; id: UID };
+    [ClientSE.ADD_TO_COLLECTION_SOURCE]: { source: CollectionSource; id: UID; itemId: UID };
+    [ClientSE.REMOVE_FROM_COLLECTION_SOURCE]: { source: CollectionSource; id: UID; itemId: UID };
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
@@ -214,5 +235,12 @@ export interface ClientSEReplies {
 
     [ClientSE.USE_INVITE]: boolean;
     [ClientSE.USE_TEXT_BLOCK_HISTORY_SNAPSHOT]: boolean;
+
+    [ClientSE.READ_OBJECT_SOURCE]: ObjectSourceData | undefined;
+    [ClientSE.CREATE_OBJECT_SOURCE]: undefined;
+    [ClientSE.UPDATE_OBJECT_SOURCE]: undefined;
+    [ClientSE.READ_COLLECTION_SOURCE]: CollectionSourceData | undefined;
+    [ClientSE.ADD_TO_COLLECTION_SOURCE]: undefined;
+    [ClientSE.REMOVE_FROM_COLLECTION_SOURCE]: undefined;
 }
 export type ClientSEReply<T extends ClientSE> = (payload: ClientSEReplies[T], error?: string) => void;
