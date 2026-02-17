@@ -1,4 +1,4 @@
-import { TextBlockId, UID, UploadedFileId, UserId } from './genericTypes';
+import { TextBlockId, TextBlockSnapshotId, UploadedFileId, UserId } from './genericTypes';
 
 export enum TextBlockType {
     PlainText = 'PlainText',
@@ -19,7 +19,7 @@ export interface TextBlock {
 }
 
 export interface TextBlockSnapshot {
-    snapshotId: UID;
+    snapshotId: TextBlockSnapshotId;
     textBlockId: TextBlockId;
     timestamp: number;
     /** Full content of the text block at this snapshot */

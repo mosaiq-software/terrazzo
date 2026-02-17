@@ -3,6 +3,9 @@ export * from './constants';
 
 // Types - Generic
 export * from './types/authTypes';
+export * from './types/dataSource/collectionSources';
+export * from './types/dataSource/dataSourceTypes';
+export * from './types/dataSource/objectSources';
 export * from './types/genericTypes';
 export * from './types/inviteTypes';
 export * from './types/linkedAccountTypes';

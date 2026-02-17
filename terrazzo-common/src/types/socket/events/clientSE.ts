@@ -1,10 +1,9 @@
-import { CardHeader, TextBlockResourceType, TextBlockSnapshot } from '../../..';
+import { CardHeader, CollectionSource, ObjectSource, TextBlockResourceType, TextBlockSnapshot } from '../../..';
 import {
-    CollectionSource,
     CollectionSourceData,
     CreateObjectSourceData,
-    ObjectSource,
     ObjectSourceData,
+    UpdateObjectSourceData,
 } from '../../dataSource/dataSourceTypes';
 import {
     CardId,
@@ -171,7 +170,7 @@ export interface ClientSEPayload {
 
     [ClientSE.READ_OBJECT_SOURCE]: { source: ObjectSource; id: UID };
     [ClientSE.CREATE_OBJECT_SOURCE]: { data: CreateObjectSourceData };
-    [ClientSE.UPDATE_OBJECT_SOURCE]: { source: ObjectSource; id: UID; data: Partial<ObjectSourceData> };
+    [ClientSE.UPDATE_OBJECT_SOURCE]: { id: UID; data: UpdateObjectSourceData };
     [ClientSE.READ_COLLECTION_SOURCE]: { source: CollectionSource; id: UID };
     [ClientSE.ADD_TO_COLLECTION_SOURCE]: { source: CollectionSource; id: UID; itemId: UID };
     [ClientSE.REMOVE_FROM_COLLECTION_SOURCE]: { source: CollectionSource; id: UID; itemId: UID };

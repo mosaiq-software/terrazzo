@@ -7,6 +7,7 @@ export type ListId = UID;
 export type CardId = UID;
 export type UserId = UID;
 export type TextBlockId = UID;
+export type TextBlockSnapshotId = UID;
 export type LabelId = UID;
 export type InviteId = UID;
 export type AssignmentId = UID;

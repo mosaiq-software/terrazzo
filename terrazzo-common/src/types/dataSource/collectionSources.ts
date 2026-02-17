@@ -1,9 +1,29 @@
-import { UID } from '../genericTypes';
+import { LabelId } from '../genericTypes';
 
 export enum CollectionSource {
-    LabelAssignments = 'LabelAssignments',
+    Labels = 'Labels',
+    // UserAssignments = 'UserAssignments',
+    // LabelAssignments = 'LabelAssignments',
+    // LinkedAccounts = 'LinkedAccounts',
+    // OrganizationMemberships = 'OrganizationMemberships',
+    // OrganizationInvites = 'OrganizationInvites',
+    // OrganizationRoles = 'OrganizationRoles',
+    // RoleAssignments = 'RoleAssignments',
+    // TextBlockHistorySnapshots = 'TextBlockHistorySnapshots',
+    // BoardLists = 'BoardLists',
+    // ListCards = 'ListCards',
 }
 
 export interface CollectionSourceDataMap {
-    [CollectionSource.LabelAssignments]: UID[];
+    [CollectionSource.Labels]: LabelId[];
+    // [CollectionSource.UserAssignments]: UserId[];
+    // [CollectionSource.LabelAssignments]: LabelId[];
+    // [CollectionSource.LinkedAccounts]: LinkedAccount[];
+    // [CollectionSource.OrganizationMemberships]: UserId[];
+    // [CollectionSource.OrganizationInvites]: InviteId[];
+    // [CollectionSource.OrganizationRoles]: RoleId[];
+    // [CollectionSource.RoleAssignments]: RoleId[];
+    // [CollectionSource.TextBlockHistorySnapshots]: TextBlockSnapshotId[];
+    // [CollectionSource.BoardLists]: ListId[];
+    // [CollectionSource.ListCards]: CardId[];
 }

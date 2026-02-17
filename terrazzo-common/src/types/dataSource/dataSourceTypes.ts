@@ -2,9 +2,9 @@ import { UID } from '../genericTypes';
 import { CollectionSource, CollectionSourceDataMap } from './collectionSources';
 import { ObjectSource, ObjectSourcesMap } from './objectSources';
 
-type CreateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['create'];
-type UpdateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['update'];
-type ObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['data'];
+export type CreateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['create'];
+export type UpdateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['update'];
+export type ObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['data'];
 
 export type CreateObjectSourceData = {
     [T in ObjectSource]: {
