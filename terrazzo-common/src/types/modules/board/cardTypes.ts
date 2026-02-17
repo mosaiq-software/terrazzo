@@ -1,5 +1,5 @@
 import { Priority } from '../../../constants';
-import { AssignmentId, CardId, LabelId, ListId, ModuleId, TextBlockId, UserId } from '../../genericTypes';
+import { AssignmentId, CardId, ListId, ModuleId, TextBlockId, UserId } from '../../genericTypes';
 
 export interface CardHeader {
     id: CardId;
@@ -12,11 +12,6 @@ export interface CardHeader {
     descriptionTextBlockId: TextBlockId;
     createdAt: number;
     createdById: UserId | null;
-}
-
-export interface Card extends CardHeader {
-    labels: LabelId[];
-    assignees: UserId[];
 }
 
 export interface CardAssignment {

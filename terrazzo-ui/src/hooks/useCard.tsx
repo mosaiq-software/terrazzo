@@ -1,10 +1,15 @@
-import { Card, CardId, ServerSE } from '@mosaiq/terrazzo-common';
+import { CardHeader, CardId, LabelId, ServerSE, UserId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getCardData } from '@trz/emitters';
 import { CARD_CACHE_PREFIX } from '@trz/util/boardUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
 import { useSocketListener } from './useSocketListener';
+
+export interface Card extends CardHeader {
+    labels: LabelId[];
+    assignees: UserId[];
+}
 
 export const useCard = (cardId: CardId, cacheCard: boolean, shouldFetch: boolean) => {
     const [card, setCard] = useState<Card | undefined>(undefined);
