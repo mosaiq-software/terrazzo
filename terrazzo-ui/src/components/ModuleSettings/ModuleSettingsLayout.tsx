@@ -1,5 +1,5 @@
 import { Alert, Box, Button, CopyButton, Group, Stack, Switch, Text, TextInput, Tooltip } from '@mantine/core';
-import { MAX_NAME_LENGTH, ModuleHeader } from '@mosaiq/terrazzo-common';
+import { MAX_NAME_LENGTH, ModuleHeader, TrzModule } from '@mosaiq/terrazzo-common';
 import { COLORS } from '@trz/util/colors';
 import { getModulePublicUrl } from '@trz/util/moduleUtils';
 import { toTitleCase } from '@trz/util/textUtils';
@@ -8,15 +8,15 @@ import { MdLink } from 'react-icons/md';
 import { RectHoldingButton } from '../UI/RectHoldingButton';
 import { PermissionsEditor } from './PermissionsEditor/PermissionsEditor';
 
-interface ModuleSettingsLayoutProps {
-    moduleHeader: ModuleHeader;
-    onSave: (edits: Partial<Omit<ModuleHeader, 'type'>>) => void;
+interface ModuleSettingsLayoutProps<T extends TrzModule> {
+    moduleHeader: ModuleHeader<T>;
+    onSave: (edits: Partial<Omit<ModuleHeader<T>, 'type'>>) => void;
     onClose: () => void;
     children?: React.ReactNode;
     disabled?: boolean;
 }
 
-export const ModuleSettingsLayout = (props: ModuleSettingsLayoutProps) => {
+export const ModuleSettingsLayout = <T extends TrzModule>(props: ModuleSettingsLayoutProps<T>) => {
     const [editedTitle, setEditedTitle] = useState<string>(props.moduleHeader.name);
     useEffect(() => {
         setEditedTitle(props.moduleHeader.name);

@@ -1,14 +1,15 @@
 import { Box, Group, Loader, ScrollArea, Stack, Text } from '@mantine/core';
-import { fullName, ModuleId, PermissibleAction, TextBlockResourceType } from '@mosaiq/terrazzo-common';
+import { fullName, ModuleId, PermissibleAction, TextBlockResourceType, TrzModule } from '@mosaiq/terrazzo-common';
 import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
-import { updateDocumentMetadata } from '@trz/emitters';
+import { updateModuleField } from '@trz/emitters';
 import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
-import { useDocument } from '@trz/hooks/useDocument';
+import { useModule } from '@trz/hooks/useModule';
 import { useModulePermission } from '@trz/hooks/usePermissions';
+import { useUser } from '@trz/hooks/useUser';
 import { COLORS } from '@trz/util/colors';
 import { niceDateWithTime } from '@trz/util/dateUtils';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -21,7 +22,8 @@ const DocumentPage = (): React.JSX.Element => {
     const sockCtx = useSocket();
     const uiCtx = useUI();
     const docId = params.documentId as ModuleId | undefined;
-    const { document, lastEditor } = useDocument(docId, { fetchLastEditor: true });
+    const document = useModule(docId, TrzModule.Document);
+    const lastEditor = useUser(document?.data.lastModifiedByUserId);
     const userCanExplicitlyViewDocument = useModulePermission(document, PermissibleAction.ViewModules);
     const viewOnly = !userCanExplicitlyViewDocument && document?.public;
     const userCanViewDocument = userCanExplicitlyViewDocument || document?.public;
@@ -60,7 +62,12 @@ const DocumentPage = (): React.JSX.Element => {
             if (!document) {
                 throw new Error('Document not loaded');
             }
-            updateDocumentMetadata(sockCtx, document.id, { name: value });
+            updateModuleField(sockCtx, document.id, {
+                type: TrzModule.Document,
+                update: {
+                    name: value,
+                },
+            });
         } catch (e) {
             notify(NoteType.DOC_UPDATE_ERROR, e);
             return;
@@ -112,7 +119,7 @@ const DocumentPage = (): React.JSX.Element => {
                             />
                         </Group>
                         <BlockNoteEditor
-                            textBlockId={document.textBlockId}
+                            textBlockId={document.data.textBlockId}
                             placeholder="Start writing your document or hit '/' for commands..."
                             viewOnly={!userCanEditDocument}
                             resourceType={TextBlockResourceType.Document}

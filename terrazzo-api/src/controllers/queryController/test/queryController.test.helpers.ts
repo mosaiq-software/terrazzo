@@ -5,7 +5,7 @@ import {
     ModuleId,
     OrganizationId,
     TextBlockId,
-    TrzModuleType,
+    TrzModule,
     UID,
     UID0,
     UserId,
@@ -26,12 +26,12 @@ const buildBoardModuleHeader = (
     name: string,
     id: UID,
     boardCode: string
-): ModuleHeader<TrzModuleType.Board> => {
+): ModuleHeader<TrzModule.Board> => {
     return {
         id,
         parentId: makeUid('root'),
         name,
-        type: TrzModuleType.Board,
+        type: TrzModule.Board,
         order: 0,
         archived: false,
         createdAt: fixedTimestamp(),
@@ -50,12 +50,12 @@ const buildDocumentModuleHeader = (
     name: string,
     id: UID,
     textBlockId: TextBlockId
-): ModuleHeader<TrzModuleType.Document> => {
+): ModuleHeader<TrzModule.Document> => {
     return {
         id,
         parentId: makeUid('root'),
         name,
-        type: TrzModuleType.Document,
+        type: TrzModule.Document,
         order: 0,
         archived: false,
         createdAt: fixedTimestamp(),

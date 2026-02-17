@@ -1,7 +1,7 @@
 import { Container, Text } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { ContextModalProps } from '@mantine/modals';
-import { ModuleHeader, TrzModuleType } from '@mosaiq/terrazzo-common';
+import { ModuleHeader, TrzModule } from '@mosaiq/terrazzo-common';
 import { ModuleSettingsBoard } from './ModuleSettingBoard';
 import { ModuleSettingsDirectory } from './ModuleSettingDirectory';
 import { ModuleSettingsDocument } from './ModuleSettingDocument';
@@ -17,7 +17,7 @@ const ModuleSettings = (props: ContextModalProps<ModuleSettingsGenericProps>) =>
 
     let Settings: React.ReactNode | null = null;
     switch (props.innerProps.moduleHeader.type) {
-        case TrzModuleType.Directory:
+        case TrzModule.Directory:
             Settings = (
                 <ModuleSettingsDirectory
                     directoryId={props.innerProps.moduleHeader.id}
@@ -25,7 +25,7 @@ const ModuleSettings = (props: ContextModalProps<ModuleSettingsGenericProps>) =>
                 />
             );
             break;
-        case TrzModuleType.Document:
+        case TrzModule.Document:
             Settings = (
                 <ModuleSettingsDocument
                     documentId={props.innerProps.moduleHeader.id}
@@ -33,7 +33,7 @@ const ModuleSettings = (props: ContextModalProps<ModuleSettingsGenericProps>) =>
                 />
             );
             break;
-        case TrzModuleType.Board:
+        case TrzModule.Board:
             Settings = (
                 <ModuleSettingsBoard
                     boardId={props.innerProps.moduleHeader.id}

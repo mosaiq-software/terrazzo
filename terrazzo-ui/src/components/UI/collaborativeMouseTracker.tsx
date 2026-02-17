@@ -1,10 +1,10 @@
 import { Box, MantineStyleProp } from '@mantine/core';
 import { useIdle, useThrottledCallback } from '@mantine/hooks';
 import {
-    BoardId,
     CardId,
     ClientSE,
     ListId,
+    ModuleId,
     Position,
     RoomSpecifier,
     RoomType,
@@ -18,7 +18,7 @@ import { IDLE_TIMEOUT_MS, MOUSE_UPDATE_THROTTLE_MS } from '@trz/util/realtimeUti
 import { MouseEventHandler, UIEventHandler, useCallback, useEffect, useRef } from 'react';
 
 interface CollaborativeMouseTrackerProps {
-    boardId: BoardId;
+    moduleId: ModuleId;
     style?: MantineStyleProp;
     children?: any;
     draggingObject: {
@@ -32,7 +32,7 @@ const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
     const sockCtx = useSocket();
     const [roomUsers, setRoomUsersState] = useRoom(
         RoomType.MOUSE,
-        props.disableTracking ? undefined : props.boardId,
+        props.disableTracking ? undefined : props.moduleId,
         RoomSpecifier.DEFAULT,
         true
     );
@@ -70,7 +70,7 @@ const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
             pos,
             draggingList: props.draggingObject.list,
             draggingCard: props.draggingObject.card,
-            contextId: props.boardId,
+            contextId: props.moduleId,
         });
     }, MOUSE_UPDATE_THROTTLE_MS);
 
@@ -84,16 +84,26 @@ const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
         [sockCtx]
     );
 
-    const latestMouseCoordinates = useRef<{x: number, y: number}>({x: 0, y: 0});
+    const latestMouseCoordinates = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
     const handleMoveMouse: MouseEventHandler<HTMLDivElement> = useCallback(
         (event) => {
             if (!ref.current || Array.from(roomUsers.keys()).length === 0 || props.disableTracking) {
                 return;
             }
             const rect = event.currentTarget.getBoundingClientRect();
-            latestMouseCoordinates.current = {x: event.pageX, y: event.pageY};
-            const x = Math.max(0, Math.round(event.pageX - rect.left - (window.pageXOffset || window.scrollX || -event.currentTarget.scrollLeft)));
-            const y = Math.max(0, Math.round(event.pageY - rect.top - (window.pageYOffset || window.scrollY || -event.currentTarget.scrollTop)));
+            latestMouseCoordinates.current = { x: event.pageX, y: event.pageY };
+            const x = Math.max(
+                0,
+                Math.round(
+                    event.pageX - rect.left - (window.pageXOffset || window.scrollX || -event.currentTarget.scrollLeft)
+                )
+            );
+            const y = Math.max(
+                0,
+                Math.round(
+                    event.pageY - rect.top - (window.pageYOffset || window.scrollY || -event.currentTarget.scrollTop)
+                )
+            );
             moveMouse({ x: x, y: y });
         },
         [sockCtx, ref.current]
@@ -101,13 +111,26 @@ const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
 
     const handleScroll: UIEventHandler<HTMLDivElement> = useCallback(
         (event) => {
-            
             if (!ref.current || Array.from(roomUsers.keys()).length === 0 || props.disableTracking) {
                 return;
             }
             const rect = event.currentTarget.getBoundingClientRect();
-            const x = Math.max(0, Math.round(latestMouseCoordinates.current.x - rect.left - (window.pageXOffset || window.scrollX || -event.currentTarget.scrollLeft)));
-            const y = Math.max(0, Math.round(latestMouseCoordinates.current.y - rect.top - (window.pageYOffset || window.scrollY || -event.currentTarget.scrollTop)));
+            const x = Math.max(
+                0,
+                Math.round(
+                    latestMouseCoordinates.current.x -
+                        rect.left -
+                        (window.pageXOffset || window.scrollX || -event.currentTarget.scrollLeft)
+                )
+            );
+            const y = Math.max(
+                0,
+                Math.round(
+                    latestMouseCoordinates.current.y -
+                        rect.top -
+                        (window.pageYOffset || window.scrollY || -event.currentTarget.scrollTop)
+                )
+            );
             moveMouse({ x: x, y: y });
         },
         [sockCtx, ref.current]
@@ -115,8 +138,8 @@ const CollaborativeMouseTracker = (props: CollaborativeMouseTrackerProps) => {
 
     return (
         <Box
-            id='mousetracker'
-            style={{position: 'relative', ...props.style}}
+            id="mousetracker"
+            style={{ position: 'relative', ...props.style }}
             ref={ref}
             onMouseMove={handleMoveMouse}
             onScroll={handleScroll}

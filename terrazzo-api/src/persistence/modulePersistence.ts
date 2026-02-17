@@ -1,4 +1,4 @@
-import { ModuleDataMap, ModuleHeader, ModuleId, OrganizationId, TrzModuleType } from '@mosaiq/terrazzo-common';
+import { ModuleDataMap, ModuleHeader, ModuleId, OrganizationId, TrzModule } from '@mosaiq/terrazzo-common';
 import { CacheEntity, ModuleModel, getCached, invalidateCache, sequelize } from '@mosaiq/terrazzo-db';
 
 export const getModuleByIdDb = async (id: ModuleId) => {
@@ -53,7 +53,7 @@ export const getNextModuleOrderInParentDb = async (parentId: ModuleId) => {
     return module.order + 1;
 };
 
-export const updateModuleDataDb = async <T extends TrzModuleType>(id: ModuleId, type: T, data: ModuleDataMap[T]) => {
+export const updateModuleDataDb = async <T extends TrzModule>(id: ModuleId, type: T, data: ModuleDataMap[T]) => {
     const transaction = await sequelize.transaction();
     try {
         const moduleModel = await ModuleModel.findByPk(id, { transaction });

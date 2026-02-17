@@ -1,14 +1,14 @@
-import { BoardId, ClientSE, ListHeader, ListId } from '@mosaiq/terrazzo-common';
+import { ClientSE, ListHeader, ListId, ModuleId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
-export const getListData = async (sockCtx: SocketContextType, listId: BoardId): Promise<ListHeader | undefined> => {
+export const getListData = async (sockCtx: SocketContextType, listId: ListId): Promise<ListHeader | undefined> => {
     const list = await sockCtx.emit(ClientSE.GET_LIST, listId);
     return list;
 };
 
 export const createList = async (
     sockCtx: SocketContextType,
-    boardID: BoardId,
+    boardID: ModuleId,
     listName: string
 ): Promise<ListId | undefined> => {
     return await sockCtx.emit(ClientSE.CREATE_LIST, { boardID, listName });

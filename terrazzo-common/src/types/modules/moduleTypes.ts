@@ -1,7 +1,7 @@
 import { ModuleId, OrganizationId, TextBlockId, UserId } from '../genericTypes';
 import { ModulePermissions } from '../permissions/permissionTypes';
 
-export enum TrzModuleType {
+export enum TrzModule {
     Directory = 'directory',
     Document = 'document',
     Board = 'board',
@@ -11,40 +11,40 @@ export enum TrzModuleType {
 }
 
 export interface CreateModuleDataMap {
-    [TrzModuleType.Directory]: {};
-    [TrzModuleType.Document]: {
+    [TrzModule.Directory]: {};
+    [TrzModule.Document]: {
         createdByUserId: UserId;
     };
-    [TrzModuleType.Board]: {
+    [TrzModule.Board]: {
         boardCode: string;
     };
-    [TrzModuleType.Organization]: never;
+    [TrzModule.Organization]: never;
 }
-export type CreateModuleData<T extends TrzModuleType> = CreateModuleDataMap[T];
-export type CreatableModuleType = Exclude<TrzModuleType, TrzModuleType.Organization>;
+export type CreateModuleData<T extends TrzModule> = CreateModuleDataMap[T];
+export type ModuleType = Exclude<TrzModule, TrzModule.Organization>;
 export type CreateModuleDataArgs = {
-    [K in CreatableModuleType]: { type: K; initialData: CreateModuleData<K> };
-}[CreatableModuleType];
+    [K in ModuleType]: { type: K; initialData: CreateModuleData<K> };
+}[ModuleType];
 
 export type UpdateModuleDataArgs = {
-    [K in CreatableModuleType]: { type: K; update: Partial<ModuleHeader<K>> };
-}[CreatableModuleType];
+    [K in ModuleType]: { type: K; update: Partial<ModuleHeader<K>> };
+}[ModuleType];
 
 export interface ModuleDataMap {
-    [TrzModuleType.Directory]: {};
-    [TrzModuleType.Document]: {
+    [TrzModule.Directory]: {};
+    [TrzModule.Document]: {
         textBlockId: TextBlockId;
         lastModifiedAt: number;
         lastModifiedByUserId: UserId;
     };
-    [TrzModuleType.Board]: {
+    [TrzModule.Board]: {
         boardCode: string;
     };
-    [TrzModuleType.Organization]: never;
+    [TrzModule.Organization]: never;
 }
-export type ModuleData<T extends TrzModuleType> = ModuleDataMap[T];
+export type ModuleData<T extends TrzModule> = ModuleDataMap[T];
 
-export interface ModuleHeader<T extends TrzModuleType = TrzModuleType> {
+export interface ModuleHeader<T extends TrzModule = TrzModule> {
     id: ModuleId;
     parentId: ModuleId;
     name: string;

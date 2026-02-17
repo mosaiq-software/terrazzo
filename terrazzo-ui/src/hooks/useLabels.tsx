@@ -17,27 +17,26 @@ export const useLabels = (moduleId?: ModuleId) => {
                 return;
             }
             try {
-                const boardRes = await getBoardData(sockCtx, boardId);
+                const boardRes = await getBoardData(sockCtx, moduleId);
                 setLabels(boardRes?.labels ?? []);
-                setBoardData(boardRes);
             } catch (err) {
                 notify(NoteType.BOARD_DATA_ERROR, err);
                 return;
             }
         };
         fetchLabels();
-    }, [boardId, sockCtx.connected]);
+    }, [moduleId, sockCtx.connected]);
 
     useSocketListener<ServerSE.UPDATE_BOARD_LABELS>(
         ServerSE.UPDATE_BOARD_LABELS,
         (payload) => {
-            if (boardId !== payload.boardId) {
+            if (moduleId !== payload.boardId) {
                 return;
             }
             setLabels(payload.labels);
         },
-        [boardId]
+        [moduleId]
     );
 
-    return { boardData, boardLabels: labels };
+    return labels;
 };

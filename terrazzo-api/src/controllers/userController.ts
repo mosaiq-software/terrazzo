@@ -1,10 +1,4 @@
-import {
-    generateUsernameDiscriminator,
-    SYSTEM_USER_ID,
-    TrzModuleType,
-    UserHeader,
-    UserId,
-} from '@mosaiq/terrazzo-common';
+import { generateUsernameDiscriminator, SYSTEM_USER_ID, TrzModule, UserHeader, UserId } from '@mosaiq/terrazzo-common';
 import { syncUpdateUserField } from '@trz-api/broadcasters';
 import {
     createUserHeaderDb,
@@ -67,7 +61,7 @@ const seedNewUserProfile = async (userId: UserId) => {
             ownerId: user.id,
         });
         // const personalBoardId = await addBoard('Task Tracking', '', personalOrgId);
-        const personalBoard = await createNewModule('Task Tracking', personalOrgId, TrzModuleType.Board, {
+        const personalBoard = await createNewModule('Task Tracking', personalOrgId, TrzModule.Board, {
             boardCode: '',
         });
         const personalListTodo = await addList({ boardId: personalBoard.id, name: 'To Do' });

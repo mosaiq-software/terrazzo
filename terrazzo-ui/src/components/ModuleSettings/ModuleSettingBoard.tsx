@@ -1,8 +1,9 @@
 import { Fieldset, Loader, TextInput } from '@mantine/core';
-import { BoardHeader, BoardId, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { ModuleHeader, ModuleId, PermissibleAction, TrzModule } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
-import { updateBoardField } from '@trz/emitters';
-import { useBoard } from '@trz/hooks/useBoard';
+import { updateModuleField } from '@trz/emitters';
+import { useLabels } from '@trz/hooks/useLabels';
+import { useModule } from '@trz/hooks/useModule';
 import { useModulePermission } from '@trz/hooks/usePermissions';
 import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -12,28 +13,32 @@ import { LabelEditor } from './LabelEditor';
 import { ModuleSettingsLayout } from './ModuleSettingsLayout';
 
 interface ModuleSettingsBoardProps {
-    boardId: BoardId;
+    boardId: ModuleId;
     onClose: () => void;
 }
 
 export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
     const sockCtx = useSocket();
-    const { boardData, boardLabels } = useBoard(props.boardId);
-    const userCanViewBoard = useModulePermission(boardData, PermissibleAction.ViewBoard);
-    const userCanEditBoard = useModulePermission(boardData, PermissibleAction.EditBoard);
+    const boardData = useModule(props.boardId, TrzModule.Board);
+    const boardLabels = useLabels(props.boardId);
+    const userCanViewBoard = useModulePermission(boardData, PermissibleAction.ViewModules);
+    const userCanEditBoard = useModulePermission(boardData, PermissibleAction.ManageModules);
     const [editedBoardCode, setEditedBoardCode] = useState<string>('');
     useEffect(() => {
-        if (boardData?.boardCode) {
-            setEditedBoardCode(boardData.boardCode);
+        if (boardData?.data.boardCode) {
+            setEditedBoardCode(boardData.data.boardCode);
         }
-    }, [boardData?.boardCode]);
+    }, [boardData?.data.boardCode]);
 
-    const onSave = async (edits: Partial<BoardHeader>) => {
+    const onSave = async (edits: Partial<ModuleHeader<TrzModule.Board>>) => {
         try {
             if (!userCanEditBoard) {
                 throw new Error('You do not have permission to edit this board.');
             }
-            await updateBoardField(sockCtx, props.boardId, { ...edits });
+            await updateModuleField(sockCtx, props.boardId, {
+                type: TrzModule.Board,
+                update: edits,
+            });
         } catch (e) {
             notify(NoteType.BOARD_DATA_ERROR, e);
         }
@@ -53,7 +58,7 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
     }
 
     return (
-        <ModuleSettingsLayout
+        <ModuleSettingsLayout<TrzModule.Board>
             moduleHeader={{
                 ...boardData,
             }}
@@ -73,8 +78,8 @@ export const ModuleSettingsBoard = (props: ModuleSettingsBoardProps) => {
                     setEditedBoardCode(e.currentTarget.value);
                 }}
                 onBlur={() => {
-                    if (editedBoardCode !== boardData.boardCode) {
-                        onSave({ boardCode: editedBoardCode });
+                    if (editedBoardCode !== boardData.data.boardCode) {
+                        onSave({ data: { boardCode: editedBoardCode } });
                     }
                 }}
                 disabled={!userCanEditBoard}

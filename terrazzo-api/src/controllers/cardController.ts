@@ -1,5 +1,5 @@
 import { Block } from '@blocknote/core';
-import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, TrzModuleType, UserId } from '@mosaiq/terrazzo-common';
+import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, TrzModule, UserId } from '@mosaiq/terrazzo-common';
 import { syncAddCard, syncMovedCard, syncUpdateCardField } from '@trz-api/broadcasters';
 import { syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
@@ -46,7 +46,7 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
         throw new Error('List not found');
     }
 
-    const board = await getModuleById(updatingList.boardId, TrzModuleType.Board);
+    const board = await getModuleById(updatingList.boardId, TrzModule.Board);
     if (!board) {
         throw new Error('Board not found');
     }

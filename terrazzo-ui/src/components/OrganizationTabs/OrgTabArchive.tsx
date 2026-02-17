@@ -1,22 +1,21 @@
 import { Box, Fieldset, Stack } from '@mantine/core';
-import { OrganizationId, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
+import { ModuleType, OrganizationId, UID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
-import { updateBoardField, updateDocumentMetadata } from '@trz/emitters';
-import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
-import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
+import { updateModuleField } from '@trz/emitters';
+import { useModuleChildren } from '@trz/hooks/useModuleChildren';
+import { COLORS } from '@trz/util/colors';
 import { ModuleIcon } from '@trz/util/moduleUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useMemo } from 'react';
 import { ActionRow } from '../UI/ActionRow';
-import { COLORS } from '@trz/util/colors';
 
 interface OrgTabArchiveProps {
     orgId: OrganizationId;
 }
 export const OrgTabArchive = (props: OrgTabArchiveProps) => {
     const sockCtx = useSocket();
-    const contents = useDirectoryContents(props.orgId, TrzModuleType.Organization);
+    const contents = useModuleChildren(props.orgId);
     const archivedSubitems = useMemo(() => {
         if (!contents) {
             return [];
@@ -24,21 +23,12 @@ export const OrgTabArchive = (props: OrgTabArchiveProps) => {
         return contents.filter((item) => item.archived && item.canAccess);
     }, [contents]);
 
-    const onUnarchiveSubitem = async (itemId: UID, itemType: TrzModuleType) => {
+    const onUnarchiveSubitem = async (itemId: UID, itemType: ModuleType) => {
         try {
-            switch (itemType) {
-                case TrzModuleType.Directory:
-                    await updateDirectoryMetadata(sockCtx, itemId, { archived: false });
-                    break;
-                case TrzModuleType.Document:
-                    await updateDocumentMetadata(sockCtx, itemId, { archived: false });
-                    break;
-                case TrzModuleType.Board:
-                    await updateBoardField(sockCtx, itemId, { archived: false });
-                    break;
-                default:
-                    throw new Error('Unsupported module type');
-            }
+            await updateModuleField(sockCtx, itemId, {
+                type: itemType,
+                update: { archived: false },
+            });
             notify(NoteType.CHANGES_SAVED);
         } catch (e) {
             notify(NoteType.DOC_UPDATE_ERROR, e);

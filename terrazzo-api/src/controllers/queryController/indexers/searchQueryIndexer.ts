@@ -7,7 +7,7 @@ import {
     QueryableDatapoint,
     QueryableItem,
     settlePromises,
-    TrzModuleType,
+    TrzModule,
     UserId,
 } from '@mosaiq/terrazzo-common';
 import {
@@ -28,18 +28,18 @@ export const buildSearchIndex = async (
 ): Promise<QueryableDatapoint[]> => {
     const queryableData: QueryableDatapoint[] = [];
 
-    const allBoardsInOrg = await dataSource.getModulesByOrgIdDb(orgId, { type: TrzModuleType.Board, archived: false });
+    const allBoardsInOrg = await dataSource.getModulesByOrgIdDb(orgId, { type: TrzModule.Board, archived: false });
     const boardsInOrg = allBoardsInOrg.filter(
-        (mod): mod is ModuleHeader<TrzModuleType.Board> => mod.type === TrzModuleType.Board
+        (mod): mod is ModuleHeader<TrzModule.Board> => mod.type === TrzModule.Board
     );
     const boardIndexingPromises = boardsInOrg.map((boardModule) => indexBoard(dataSource, boardModule));
 
     const allDocumentsInOrg = await dataSource.getModulesByOrgIdDb(orgId, {
-        type: TrzModuleType.Document,
+        type: TrzModule.Document,
         archived: false,
     });
     const documentsInOrg = allDocumentsInOrg.filter(
-        (mod): mod is ModuleHeader<TrzModuleType.Document> => mod.type === TrzModuleType.Document
+        (mod): mod is ModuleHeader<TrzModule.Document> => mod.type === TrzModule.Document
     );
     const documentIndexingPromises = documentsInOrg.map((documentModule) => indexDocument(dataSource, documentModule));
 
@@ -53,7 +53,7 @@ export const buildSearchIndex = async (
 
 const indexDocument = async (
     dataSource: SearchQueryDataSource,
-    documentModule: ModuleHeader<TrzModuleType.Document>
+    documentModule: ModuleHeader<TrzModule.Document>
 ): Promise<QueryableDatapoint[]> => {
     try {
         const textBlockContent = await dataSource.getQueryableTextBlockContent(documentModule.data.textBlockId);
@@ -75,7 +75,7 @@ const indexDocument = async (
 
 const indexBoard = async (
     dataSource: SearchQueryDataSource,
-    boardModule: ModuleHeader<TrzModuleType.Board>
+    boardModule: ModuleHeader<TrzModule.Board>
 ): Promise<QueryableDatapoint[]> => {
     try {
         const boardCode = boardModule.data.boardCode;

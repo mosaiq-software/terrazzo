@@ -1,5 +1,5 @@
 import { ActionIcon, ColorInput, Group, Stack, Text, TextInput, Tooltip } from '@mantine/core';
-import { BoardId, Label, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
+import { Label, ModuleId, TEMPORARY_ID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createBoardLabel, deleteBoardLabel, updateBoardLabel } from '@trz/emitters';
 import { COLORS } from '@trz/util/colors';
@@ -10,7 +10,7 @@ import { RingHoldingButton } from '../UI/RingHoldingButton';
 
 interface LabelEditorProps {
     labels: Label[];
-    boardId: BoardId;
+    boardId: ModuleId;
     disableEditing?: boolean;
 }
 

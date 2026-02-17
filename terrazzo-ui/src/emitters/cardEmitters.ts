@@ -1,8 +1,8 @@
-import { BoardId, Card, CardHeader, CardId, ClientSE, ListId, UserId } from '@mosaiq/terrazzo-common';
+import { Card, CardHeader, CardId, ClientSE, ListId, UserId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
-export const getCardData = async (sockCtx: SocketContextType, cardId: BoardId): Promise<Card | undefined> => {
-    const card = await sockCtx.emit<ClientSE.GET_CARD>(ClientSE.GET_CARD, cardId);
+export const getCardData = async (sockCtx: SocketContextType, cardId: CardId): Promise<Card | undefined> => {
+    const card = await sockCtx.emit(ClientSE.GET_CARD, cardId);
     return card;
 };
 

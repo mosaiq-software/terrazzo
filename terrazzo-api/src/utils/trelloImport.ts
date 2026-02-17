@@ -11,7 +11,7 @@ import {
     TrelloLabelType,
     TrelloListType,
     TrelloUserToTerrazzoUserMap,
-    TrzModuleType,
+    TrzModule,
     getFileUrl,
     recordKeys,
     settlePromises,
@@ -43,7 +43,7 @@ export const createTerrazzoBoardFromTrelloBoard = async (
     userMap: TrelloUserToTerrazzoUserMap
 ) => {
     try {
-        const trzBoardModule = await createNewModule(trelloBoard.name, onParentId, TrzModuleType.Board, {
+        const trzBoardModule = await createNewModule(trelloBoard.name, onParentId, TrzModule.Board, {
             boardCode: '',
         });
         const listMap = await createLists(trzBoardModule.id, trelloBoard.lists);

@@ -5,7 +5,7 @@ import {
     TextBlockId,
     TextBlockResourceType,
     TextBlockType,
-    TrzModuleType,
+    TrzModule,
     UID,
     UserId,
 } from '@mosaiq/terrazzo-common';
@@ -40,7 +40,7 @@ export const checkCanUserEditTextBlock = async (
             return card.descriptionTextBlockId;
         }
         case 'document': {
-            const document = await getModuleById(resourceId, TrzModuleType.Document);
+            const document = await getModuleById(resourceId, TrzModule.Document);
             if (!document) {
                 return undefined;
             }

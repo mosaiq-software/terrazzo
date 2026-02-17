@@ -4,12 +4,12 @@ import {
     isModuleType,
     ModuleHeader,
     ModuleId,
-    TrzModuleType,
+    TrzModule,
     UpdateModuleDataArgs,
 } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
-export const getModule = async <T extends TrzModuleType>(
+export const getModule = async <T extends TrzModule>(
     sockCtx: SocketContextType,
     moduleId: ModuleId,
     expectedType: T

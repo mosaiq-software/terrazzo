@@ -1,7 +1,7 @@
 import { createInlineContentSpec } from '@blocknote/core';
 import {
     QueryableItem,
-    TrzModuleType,
+    TrzModule,
     UID,
     boardNameWithCode,
     cardNameWithBoardCodeAndNumber,
@@ -109,15 +109,15 @@ export const retrieveMentionDisplayText = async (id: UID, type: QueryableItem): 
             if (!card) {
                 return undefined;
             }
-            const boardModule = await getModuleById(card.boardId, TrzModuleType.Board);
+            const boardModule = await getModuleById(card.boardId, TrzModule.Board);
             return cardNameWithBoardCodeAndNumber(card.name, boardModule?.data.boardCode, card.cardNumber);
         }
         case QueryableItem.Document: {
-            const documentModule = await getModuleById(id, TrzModuleType.Document);
+            const documentModule = await getModuleById(id, TrzModule.Document);
             return documentModule ? documentModule.name : ``;
         }
         case QueryableItem.Board: {
-            const boardModule = await getModuleById(id, TrzModuleType.Board);
+            const boardModule = await getModuleById(id, TrzModule.Board);
             return boardModule ? boardNameWithCode(boardModule.name, boardModule?.data.boardCode) : undefined;
         }
         default:

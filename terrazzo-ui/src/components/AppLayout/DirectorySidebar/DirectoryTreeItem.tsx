@@ -1,9 +1,9 @@
 import { ActionIcon, Box, Collapse, Group, Menu, Text } from '@mantine/core';
 import { useHover, useLocalStorage } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { ModuleHeader, PermissibleAction, TrzModuleType, UID, withIf } from '@mosaiq/terrazzo-common';
+import { ModuleHeader, PermissibleAction, TrzModule, UID } from '@mosaiq/terrazzo-common';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
-import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
+import { useModuleChildren } from '@trz/hooks/useModuleChildren';
 import { useModulePermission } from '@trz/hooks/usePermissions';
 import { COLORS } from '@trz/util/colors';
 import { captureAllEvents, completelyCaptureEvent } from '@trz/util/eventUtils';
@@ -19,7 +19,7 @@ import { DirectoryListItemIcon } from './DirectoryListItemIcon';
 interface DirectoryTreeItemProps {
     directoryListItem: ModuleHeader;
     visible: boolean;
-    addItem: (toParentId: UID, type: TrzModuleType) => Promise<void>;
+    addItem: (toParentId: UID, type: TrzModule) => Promise<void>;
 }
 export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     const navigate = useNavigate();
@@ -28,10 +28,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
     const { hovered, ref: hoverRef } = useHover();
     const [actionMenu, setActionMenu] = useState<'add' | undefined>(undefined);
     const unsavedCtx = useUnsavedChanges();
-    const contents = useDirectoryContents(
-        props.visible ? props.directoryListItem.id : undefined,
-        props.directoryListItem.type
-    );
+    const contents = useModuleChildren(props.visible ? props.directoryListItem.id : undefined);
     const [collapsed, setCollapsed, deleteCollapsed] = useLocalStorage<boolean | undefined>({
         key: `directory-tree-item-collapsed-${props.directoryListItem.id}`,
         defaultValue: undefined,
@@ -39,38 +36,26 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
 
     const selected = location.pathname.includes(props.directoryListItem.id);
 
-    const userCanCreateBoards = useModulePermission(props.directoryListItem, PermissibleAction.CreateBoard);
-    const userCanCreateDocuments = useModulePermission(props.directoryListItem, PermissibleAction.CreateDocument);
-    const userCanCreateDirectories = useModulePermission(props.directoryListItem, PermissibleAction.CreateDirectory);
+    const userCanManageModules = useModulePermission(props.directoryListItem, PermissibleAction.ManageModules);
 
-    const userCanEditBoard = useModulePermission(props.directoryListItem, PermissibleAction.EditBoard);
-    const userCanEditDocument = useModulePermission(props.directoryListItem, PermissibleAction.EditDocument);
-    const userCanEditDirectory = useModulePermission(props.directoryListItem, PermissibleAction.EditDirectory);
-
-    const creationMenuItems: { id: TrzModuleType; label: string }[] = useMemo(() => {
-        const items: { id: TrzModuleType; label: string }[] = [
-            ...withIf({ id: TrzModuleType.Directory, label: 'Directory' }, userCanCreateDirectories),
-            ...withIf({ id: TrzModuleType.Board, label: 'Board' }, userCanCreateBoards),
-            ...withIf({ id: TrzModuleType.Document, label: 'Document' }, userCanCreateDocuments),
-        ];
+    const creationMenuItems: { id: TrzModule; label: string }[] = useMemo(() => {
+        const items: { id: TrzModule; label: string }[] = [];
+        if (userCanManageModules) {
+            items.push({ id: TrzModule.Directory, label: 'Directory' });
+            items.push({ id: TrzModule.Board, label: 'Board' });
+            items.push({ id: TrzModule.Document, label: 'Document' });
+        }
         return items;
-    }, [userCanCreateBoards, userCanCreateDocuments, userCanCreateDirectories]);
+    }, [userCanManageModules]);
 
-    const showCreateOptions = creationMenuItems.length > 0 && props.directoryListItem.type === TrzModuleType.Directory;
-    const showEditOptions =
-        !!props.directoryListItem &&
-        ((userCanEditBoard && props.directoryListItem.type === TrzModuleType.Board) ||
-            (userCanEditDocument && props.directoryListItem.type === TrzModuleType.Document) ||
-            (userCanEditDirectory && props.directoryListItem.type === TrzModuleType.Directory));
+    const showCreateOptions = creationMenuItems.length > 0;
+    const showEditOptions = userCanManageModules;
 
     const handleClick = async () => {
-        if (props.directoryListItem.type === TrzModuleType.Directory) {
-            if (collapsed) {
-                deleteCollapsed();
-            } else {
-                setCollapsed(true);
-            }
-            return;
+        if (collapsed) {
+            deleteCollapsed();
+        } else {
+            setCollapsed(true);
         }
         if (await unsavedCtx.confirmKeepUnsavedChanges()) {
             return;
@@ -104,7 +89,7 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                         moduleHeader={props.directoryListItem}
                         parentId={props.directoryListItem.id}
                         parentName={props.directoryListItem.name}
-                        allowAddItem={props.directoryListItem.type === TrzModuleType.Directory}
+                        allowAddItem={props.directoryListItem.type === TrzModule.Directory}
                         addItem={props.addItem}
                     />
                 ))}
@@ -200,9 +185,6 @@ export const DirectoryTreeItem = (props: DirectoryTreeItemProps) => {
                         }}
                     >
                         {contents?.map((subItem) => {
-                            if (subItem.type !== TrzModuleType.Directory && !subItem.canAccess) {
-                                return null;
-                            }
                             return (
                                 <DirectoryTreeItem
                                     key={subItem.id}

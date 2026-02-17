@@ -1,4 +1,4 @@
-import { ModuleId, RoomSpecifier, RoomType, ServerSE, TrzModuleType } from '@mosaiq/terrazzo-common';
+import { ModuleId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { getModuleChildren } from '@trz/emitters/moduleEmitters';
@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { useRoom } from './useRoom';
 import { useSocketListener } from './useSocketListener';
 
-export const useModuleChildren = <T extends TrzModuleType>(moduleId: ModuleId | undefined, moduleType: T) => {
+export const useModuleChildren = (moduleId: ModuleId | undefined) => {
     useRoom(RoomType.DATA, moduleId, RoomSpecifier.CONTENTS);
     const orgCtx = useOrg();
 
@@ -31,7 +31,7 @@ export const useModuleChildren = <T extends TrzModuleType>(moduleId: ModuleId | 
             }
         };
         fetchDirectoryContents();
-    }, [moduleId, moduleType, sockCtx.connected, orgCtx.roles]);
+    }, [moduleId, sockCtx.connected, orgCtx.roles]);
 
     useSocketListener(
         ServerSE.UPDATE_MODULE_CHILDREN,

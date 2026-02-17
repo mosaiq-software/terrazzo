@@ -32,7 +32,7 @@ import CollaborativeMouseTracker from '@trz/components/UI/collaborativeMouseTrac
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
-import { createList, emitMoveCard, emitMoveList, getBoardData, getCardData, getListData } from '@trz/emitters';
+import { createList, emitMoveCard, emitMoveList, getCardData, getListData } from '@trz/emitters';
 import { useMap } from '@trz/hooks/useMap';
 import { useModulePermission } from '@trz/hooks/usePermissions';
 import { useRoom } from '@trz/hooks/useRoom';
@@ -607,7 +607,7 @@ const BoardPage = (): React.JSX.Element => {
     return (
         // <Profiler onRender={onRender} id={"board"}>
         <CollaborativeMouseTracker
-            boardId={boardId}
+            moduleId={boardId}
             draggingObject={draggingObject}
             disableTracking={viewOnly}
             style={{

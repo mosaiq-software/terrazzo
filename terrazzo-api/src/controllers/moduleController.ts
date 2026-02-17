@@ -1,6 +1,5 @@
 import {
     calculateModuleEffectivePermissions,
-    CreatableModuleType,
     CreateModuleData,
     CreateModuleDataArgs,
     exhaustiveCheck,
@@ -9,7 +8,8 @@ import {
     ModuleHeader,
     ModuleId,
     ModulePermissions,
-    TrzModuleType,
+    ModuleType,
+    TrzModule,
     UserId,
 } from '@mosaiq/terrazzo-common';
 import { syncModuleChildren } from '@trz-api/broadcasters';
@@ -25,30 +25,30 @@ import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { userCanViewModule } from '@trz-api/utils/permissions';
 import { createBlocknoteTextBlockWithBlocks } from './textBlockController/textBlockController';
 
-async function buildModuleData<T extends CreatableModuleType>(args: {
+async function buildModuleData<T extends ModuleType>(args: {
     type: T;
     initialData: CreateModuleData<T>;
 }): Promise<ModuleData<T>>;
-async function buildModuleData(args: CreateModuleDataArgs): Promise<ModuleData<CreatableModuleType>> {
+async function buildModuleData(args: CreateModuleDataArgs): Promise<ModuleData<ModuleType>> {
     switch (args.type) {
-        case TrzModuleType.Directory: {
-            const data: ModuleData<TrzModuleType.Directory> = {};
+        case TrzModule.Directory: {
+            const data: ModuleData<TrzModule.Directory> = {};
             return data;
         }
-        case TrzModuleType.Document: {
+        case TrzModule.Document: {
             const textBlock = await createBlocknoteTextBlockWithBlocks([]);
             if (!textBlock) {
                 throw new Error('Failed to create main text block for document');
             }
-            const data: ModuleData<TrzModuleType.Document> = {
+            const data: ModuleData<TrzModule.Document> = {
                 textBlockId: textBlock.id,
                 lastModifiedAt: Date.now(),
                 lastModifiedByUserId: args.initialData.createdByUserId,
             };
             return data;
         }
-        case TrzModuleType.Board: {
-            const data: ModuleData<TrzModuleType.Board> = {
+        case TrzModule.Board: {
+            const data: ModuleData<TrzModule.Board> = {
                 boardCode: args.initialData.boardCode,
             };
             return data;
@@ -58,7 +58,7 @@ async function buildModuleData(args: CreateModuleDataArgs): Promise<ModuleData<C
     }
 }
 
-export const createNewModule = async <T extends CreatableModuleType>(
+export const createNewModule = async <T extends ModuleType>(
     name: string,
     parentId: ModuleId,
     type: T,
@@ -98,7 +98,7 @@ export const createNewModule = async <T extends CreatableModuleType>(
  * Retrieves a module by ID and asserts it is of the expected type. Throws if the type does not match.
  * @throws Error if the module is not of the expected type
  */
-export async function getModuleById<T extends TrzModuleType>(
+export async function getModuleById<T extends TrzModule>(
     id: ModuleId,
     expectedType: T
 ): Promise<ModuleHeader<T> | undefined> {
@@ -120,7 +120,7 @@ export async function getUntypedModuleById(id: ModuleId): Promise<ModuleHeader |
     return module;
 }
 
-export const updateModule = async <T extends TrzModuleType>(
+export const updateModule = async <T extends TrzModule>(
     id: ModuleId,
     type: T,
     partial: Partial<ModuleHeader<T>>

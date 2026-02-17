@@ -9,7 +9,7 @@ import {
     QueryableDatapoint,
     QueryableItem,
     settlePromises,
-    TrzModuleType,
+    TrzModule,
     UserId,
 } from '@mosaiq/terrazzo-common';
 import {
@@ -34,14 +34,14 @@ export const buildTagIndex = async (
 ): Promise<QueryableDatapoint[]> => {
     const queryableData: QueryableDatapoint[] = [];
 
-    const allBoardsInOrg = await dataSource.getModulesByOrgIdDb(orgId, { type: TrzModuleType.Board, archived: false });
+    const allBoardsInOrg = await dataSource.getModulesByOrgIdDb(orgId, { type: TrzModule.Board, archived: false });
     const boardsInOrg = allBoardsInOrg.filter(
-        (mod): mod is ModuleHeader<TrzModuleType.Board> => mod.type === TrzModuleType.Board
+        (mod): mod is ModuleHeader<TrzModule.Board> => mod.type === TrzModule.Board
     );
     const boardIndexingPromises = boardsInOrg.map((boardModule) => indexBoard(dataSource, boardModule));
 
     const allDocumentsInOrg = await dataSource.getModulesByOrgIdDb(orgId, {
-        type: TrzModuleType.Document,
+        type: TrzModule.Document,
         archived: false,
     });
     const documentIndexingPromises = allDocumentsInOrg.map((documentModule) =>
@@ -83,7 +83,7 @@ const indexDocument = async (
 
 const indexBoard = async (
     dataSource: TagsQueryDataSource,
-    boardModule: ModuleHeader<TrzModuleType.Board>
+    boardModule: ModuleHeader<TrzModule.Board>
 ): Promise<QueryableDatapoint[]> => {
     try {
         const boardCode = boardModule.data.boardCode;
