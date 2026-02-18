@@ -1,8 +1,8 @@
 import { CardHeader, CollectionSource, ObjectSource, TextBlockResourceType, TextBlockSnapshot } from '../../..';
 import {
-    CollectionSourceData,
+    CollectionSourceDataInstance,
     CreateObjectSourceData,
-    ObjectSourceData,
+    ObjectSourceDataInstance,
     UpdateObjectSourceData,
 } from '../../dataSource/dataSourceTypes';
 import {
@@ -172,8 +172,8 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_OBJECT_SOURCE]: { data: CreateObjectSourceData };
     [ClientSE.UPDATE_OBJECT_SOURCE]: { id: UID; data: UpdateObjectSourceData };
     [ClientSE.READ_COLLECTION_SOURCE]: { source: CollectionSource; id: UID };
-    [ClientSE.ADD_TO_COLLECTION_SOURCE]: { source: CollectionSource; id: UID; itemId: UID };
-    [ClientSE.REMOVE_FROM_COLLECTION_SOURCE]: { source: CollectionSource; id: UID; itemId: UID };
+    [ClientSE.ADD_TO_COLLECTION_SOURCE]: { source: CollectionSource; collectionId: UID; itemIds: UID[] };
+    [ClientSE.REMOVE_FROM_COLLECTION_SOURCE]: { source: CollectionSource; collectionId: UID; itemIds: UID[] };
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
@@ -235,10 +235,10 @@ export interface ClientSEReplies {
     [ClientSE.USE_INVITE]: boolean;
     [ClientSE.USE_TEXT_BLOCK_HISTORY_SNAPSHOT]: boolean;
 
-    [ClientSE.READ_OBJECT_SOURCE]: ObjectSourceData | undefined;
+    [ClientSE.READ_OBJECT_SOURCE]: ObjectSourceDataInstance<ObjectSource> | undefined;
     [ClientSE.CREATE_OBJECT_SOURCE]: undefined;
     [ClientSE.UPDATE_OBJECT_SOURCE]: undefined;
-    [ClientSE.READ_COLLECTION_SOURCE]: CollectionSourceData | undefined;
+    [ClientSE.READ_COLLECTION_SOURCE]: CollectionSourceDataInstance<CollectionSource> | undefined;
     [ClientSE.ADD_TO_COLLECTION_SOURCE]: undefined;
     [ClientSE.REMOVE_FROM_COLLECTION_SOURCE]: undefined;
 }

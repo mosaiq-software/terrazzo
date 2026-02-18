@@ -1,4 +1,5 @@
 import { UID } from '../genericTypes';
+import { CreateInvite, Invite, UpdateInvite } from '../inviteTypes';
 import { CreateLabel, Label, UpdateLabel } from '../modules/board/labelTypes';
 
 interface BaseObjectSource {
@@ -7,8 +8,8 @@ interface BaseObjectSource {
 
 export enum ObjectSource {
     Label = 'Label',
+    Invite = 'Invite',
     // Card = 'Card',
-    // Invite = 'Invite',
     // List = 'List',
     // Module = 'Module',
     // Organization = 'Organization',
@@ -23,5 +24,10 @@ export interface ObjectSourcesMap {
         create: CreateLabel;
         update: UpdateLabel;
         data: Label;
+    };
+    [ObjectSource.Invite]: {
+        create: CreateInvite;
+        update: UpdateInvite;
+        data: Invite;
     };
 }

@@ -11,6 +11,8 @@ export enum RoomType {
     DATA = 'DATA',
     /** For collaborative text editing */
     TEXT = 'TEXT',
+    /** For data source updates */
+    SOURCE = 'SOURCE',
 }
 export enum RoomSpecifier {
     /** Unspecified data type */

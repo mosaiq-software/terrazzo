@@ -57,8 +57,7 @@ export enum ServerSE {
     UPDATE_MODULE_CHILDREN = 'UPDATE_MODULE_CHILDREN',
 
     OBJECT_SOURCE_UPDATE = 'OBJECT_SOURCE_UPDATE',
-    COLLECTION_SOURCE_ADD = 'COLLECTION_SOURCE_ADD',
-    COLLECTION_SOURCE_REMOVE = 'COLLECTION_SOURCE_REMOVE',
+    COLLECTION_SOURCE_UPDATE = 'COLLECTION_SOURCE_UPDATE',
 }
 export interface ServerSEPayload {
     // Server to Client
@@ -96,8 +95,7 @@ export interface ServerSEPayload {
     };
 
     [ServerSE.OBJECT_SOURCE_UPDATE]: ObjectSourceData;
-    [ServerSE.COLLECTION_SOURCE_ADD]: { id: UID; data: CollectionSourceData };
-    [ServerSE.COLLECTION_SOURCE_REMOVE]: { id: UID; data: CollectionSourceData };
+    [ServerSE.COLLECTION_SOURCE_UPDATE]: { id: UID; data: CollectionSourceData };
 }
 
 export type ServerSEReply = (payload: void, error?: string) => void;

@@ -5,6 +5,7 @@ import { ObjectSource, ObjectSourcesMap } from './objectSources';
 export type CreateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['create'];
 export type UpdateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['update'];
 export type ObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['data'];
+export type CollectionSourceDataInstance<T extends CollectionSource> = CollectionSourceDataMap[T];
 
 export type CreateObjectSourceData = {
     [T in ObjectSource]: {
@@ -39,6 +40,6 @@ export interface ObjectSourceHandler<T extends ObjectSource> {
 
 export interface CollectionSourceHandler<T extends CollectionSource> {
     read: (parentId: UID) => Promise<CollectionSourceDataMap[T] | undefined>;
-    add: (parentId: UID, itemId: UID) => Promise<void>;
-    remove: (parentId: UID, itemId: UID) => Promise<void>;
+    add: (parentId: UID, itemIds: UID[]) => Promise<void>;
+    remove: (parentId: UID, itemIds: UID[]) => Promise<void>;
 }

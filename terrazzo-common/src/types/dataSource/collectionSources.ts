@@ -2,8 +2,8 @@ import { LabelId } from '../genericTypes';
 
 export enum CollectionSource {
     Labels = 'Labels',
+    LabelAssignments = 'LabelAssignments',
     // UserAssignments = 'UserAssignments',
-    // LabelAssignments = 'LabelAssignments',
     // LinkedAccounts = 'LinkedAccounts',
     // OrganizationMemberships = 'OrganizationMemberships',
     // OrganizationInvites = 'OrganizationInvites',
@@ -16,8 +16,8 @@ export enum CollectionSource {
 
 export interface CollectionSourceDataMap {
     [CollectionSource.Labels]: LabelId[];
+    [CollectionSource.LabelAssignments]: LabelId[];
     // [CollectionSource.UserAssignments]: UserId[];
-    // [CollectionSource.LabelAssignments]: LabelId[];
     // [CollectionSource.LinkedAccounts]: LinkedAccount[];
     // [CollectionSource.OrganizationMemberships]: UserId[];
     // [CollectionSource.OrganizationInvites]: InviteId[];
