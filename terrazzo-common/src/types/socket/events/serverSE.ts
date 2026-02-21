@@ -1,15 +1,5 @@
-import { CollectionSourceData, ObjectSourceData } from '../../dataSource/dataSourceTypes';
-import {
-    CardId,
-    LabelId,
-    ListId,
-    ModuleId,
-    OrganizationId,
-    RoleId,
-    TextBlockId,
-    UID,
-    UserId,
-} from '../../genericTypes';
+import { CollectionSourceUpdateData, ObjectSourceData } from '../../dataSource/dataSourceTypes';
+import { CardId, LabelId, ListId, ModuleId, OrganizationId, RoleId, TextBlockId, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount } from '../../linkedAccountTypes';
 import { CardHeader } from '../../modules/board/cardTypes';
@@ -95,7 +85,7 @@ export interface ServerSEPayload {
     };
 
     [ServerSE.OBJECT_SOURCE_UPDATE]: ObjectSourceData;
-    [ServerSE.COLLECTION_SOURCE_UPDATE]: { id: UID; data: CollectionSourceData };
+    [ServerSE.COLLECTION_SOURCE_UPDATE]: CollectionSourceUpdateData;
 }
 
 export type ServerSEReply = (payload: void, error?: string) => void;

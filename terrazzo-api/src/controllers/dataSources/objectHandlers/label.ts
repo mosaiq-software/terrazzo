@@ -14,7 +14,11 @@ export const labelHandler: ObjectSourceHandler<ObjectSource.Label> = {
         );
     },
     update: async (id, data) => {
-        await updateLabelDb(id, data);
+        const existing = await getLabelByIdDb(id);
+        if (!existing) {
+            throw new Error(`Label with id ${id} not found`);
+        }
+        await updateLabelDb({ ...existing, ...data, id });
     },
     read: async (id) => {
         return await getLabelByIdDb(id);

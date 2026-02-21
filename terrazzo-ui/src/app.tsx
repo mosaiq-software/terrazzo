@@ -6,6 +6,7 @@ import { Notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
 import { CreateBoardModal } from '@trz/components/Modals/CreateBoard';
 import { CreateOrganizationModal } from '@trz/components/Modals/CreateOrganization';
+import { DataSourceStoreProvider } from '@trz/contexts/data-source-store-context';
 import { SocketProvider } from '@trz/contexts/socket-context';
 import { UserProvider } from '@trz/contexts/user-context';
 import { ContextMenuProvider } from 'mantine-contextmenu';
@@ -46,19 +47,21 @@ const App = () => {
                 <UserProvider>
                     <SocketProvider>
                         <RoomListenerProvider>
-                            <UiProvider>
-                                <OrgProvider>
-                                    <PermissionProvider>
-                                        <UnsavedChangesProvider>
-                                            <ModalsProvider modals={modals}>
-                                                <ContextMenuProvider>
-                                                    <Router />
-                                                </ContextMenuProvider>
-                                            </ModalsProvider>
-                                        </UnsavedChangesProvider>
-                                    </PermissionProvider>
-                                </OrgProvider>
-                            </UiProvider>
+                            <DataSourceStoreProvider>
+                                <UiProvider>
+                                    <OrgProvider>
+                                        <PermissionProvider>
+                                            <UnsavedChangesProvider>
+                                                <ModalsProvider modals={modals}>
+                                                    <ContextMenuProvider>
+                                                        <Router />
+                                                    </ContextMenuProvider>
+                                                </ModalsProvider>
+                                            </UnsavedChangesProvider>
+                                        </PermissionProvider>
+                                    </OrgProvider>
+                                </UiProvider>
+                            </DataSourceStoreProvider>
                         </RoomListenerProvider>
                     </SocketProvider>
                 </UserProvider>

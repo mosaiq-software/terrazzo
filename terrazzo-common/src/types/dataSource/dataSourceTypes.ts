@@ -21,12 +21,30 @@ export type UpdateObjectSourceData = {
     };
 }[ObjectSource];
 
-export type ObjectSourceData = {
+type ObjectSourceDataPayloadMap = {
     [T in ObjectSource]: {
         type: T;
         data: ObjectSourceDataInstance<T>;
     };
-}[ObjectSource];
+};
+
+export type ObjectSourceData = ObjectSourceDataPayloadMap[ObjectSource];
+export type ObjectSourceDataPayload<T extends ObjectSource> = T extends ObjectSource
+    ? ObjectSourceDataPayloadMap[T]
+    : never;
+
+type CollectionSourceUpdatePayloadMap = {
+    [T in CollectionSource]: {
+        id: UID;
+        type: T;
+        data: CollectionSourceDataInstance<T>;
+    };
+};
+
+export type CollectionSourceUpdateData = CollectionSourceUpdatePayloadMap[CollectionSource];
+export type CollectionSourceUpdatePayload<T extends CollectionSource> = T extends CollectionSource
+    ? CollectionSourceUpdatePayloadMap[T]
+    : never;
 
 export type CollectionSourceData = {
     [T in CollectionSource]: CollectionSourceDataMap[T];
