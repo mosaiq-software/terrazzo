@@ -15,9 +15,21 @@ interface EditableTextboxProps {
     style?: CSSProperties;
     showEditIcon?: boolean;
     readonly?: boolean;
+    doubleClick?: boolean;
 }
 const EditableTextbox = (props: EditableTextboxProps) => {
-    const { value, onChange, placeholder, type, titleProps, textProps, inputProps, style, readonly: viewOnly } = props;
+    const {
+        value,
+        onChange,
+        placeholder,
+        type,
+        titleProps,
+        textProps,
+        inputProps,
+        style,
+        doubleClick,
+        readonly: viewOnly,
+    } = props;
     const [editingValue, setEditingValue] = React.useState<string | null>(null);
 
     const onSaveChanges = () => {
@@ -47,7 +59,8 @@ const EditableTextbox = (props: EditableTextboxProps) => {
 
     return (
         <div
-            onClick={onEdit}
+            onClick={doubleClick ? undefined : onEdit}
+            onDoubleClick={doubleClick ? onEdit : undefined}
             style={style}
         >
             {editingValue !== null && (

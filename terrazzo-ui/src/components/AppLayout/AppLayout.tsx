@@ -79,7 +79,8 @@ const AppLayout = () => {
         >
             {!isPublicAccessMode && (
                 <Stack
-                    px="15px"
+                    w={260}
+                    px="0.5rem"
                     bg={COLORS.background.dark}
                     h="100vh"
                     pt={10}
