@@ -1,5 +1,5 @@
 import { Block } from '@blocknote/core';
-import { CardHeader, CardId, LabelId, ListId, TextBlockId, TrzModule, UserId } from '@mosaiq/terrazzo-common';
+import { Card, CardId, LabelId, ListId, TextBlockId, TrzModule, UserId } from '@mosaiq/terrazzo-common';
 import { syncAddCard, syncMovedCard, syncUpdateCardField } from '@trz-api/broadcasters';
 import { syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
@@ -18,7 +18,7 @@ import { getBoardIDFromCardID } from './cardQueries';
 import { getModuleById } from './moduleQueries';
 import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
 
-export async function getCard(cardId: CardId): Promise<CardHeader | undefined> {
+export async function getCard(cardId: CardId): Promise<Card | undefined> {
     const cardHeader = await getCardByIdDb(cardId);
     if (!cardHeader) {
         throw new Error('Card not found');
@@ -39,7 +39,7 @@ interface CreateCardOptions {
  * @param listID
  * @param cardName
  */
-export async function addCard(card: Partial<CardHeader> & { listId: ListId }, options?: CreateCardOptions) {
+export async function addCard(card: Partial<Card> & { listId: ListId }, options?: CreateCardOptions) {
     //pull board from db with ID
     const updatingList = await getListByIdDb(card.listId);
     if (!updatingList) {
@@ -65,7 +65,7 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
     const cardsOnBoard = await getTotalCardCountOnBoardDb(board.id);
 
     const cardUid = crypto.randomUUID();
-    const newCard: CardHeader = {
+    const newCard: Card = {
         id: cardUid,
         listId: card.listId,
         boardId: board.id,
@@ -120,7 +120,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     const cardsOnBoard = await getTotalCardCountOnBoardDb(existingCard.boardId);
 
     const newCardId = crypto.randomUUID();
-    const newCard: CardHeader = {
+    const newCard: Card = {
         id: newCardId,
         listId: existingCard.listId,
         boardId: existingCard.boardId,
@@ -164,7 +164,7 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     return newCard;
 }
 
-export async function updateCardFromPartial(cardId: CardId, partial: Partial<CardHeader>) {
+export async function updateCardFromPartial(cardId: CardId, partial: Partial<Card>) {
     try {
         if (partial.order !== undefined) {
             // Do not update order directly

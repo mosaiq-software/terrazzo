@@ -1,8 +1,8 @@
-import { ListHeader } from '@mosaiq/terrazzo-common';
+import { List } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export type ListModelType = ListHeader;
+export type ListModelType = List;
 
 export const getListModel = (sequelize: Sequelize): DbModel<ListModelType> => {
     class ListModel extends Model<ListModelType> {

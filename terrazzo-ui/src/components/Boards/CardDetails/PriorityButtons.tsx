@@ -1,5 +1,5 @@
 import { Button, Center, Flex, Menu } from '@mantine/core';
-import { CardHeader, Priority } from '@mosaiq/terrazzo-common';
+import { Card, Priority } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardField } from '@trz/emitters';
 import { COLORS } from '@trz/util/colors';
@@ -30,7 +30,7 @@ export const prioNames = {
 };
 
 interface PriorityButtonsProps {
-    card: CardHeader;
+    card: Card;
     viewOnly?: boolean;
 }
 export const PriorityButtons = (props: PriorityButtonsProps): React.JSX.Element => {

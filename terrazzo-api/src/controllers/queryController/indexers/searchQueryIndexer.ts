@@ -1,6 +1,6 @@
 import {
     boardNameWithCode,
-    CardHeader,
+    Card,
     cardNameWithBoardCodeAndNumber,
     ModuleHeader,
     OrganizationId,
@@ -105,7 +105,7 @@ const indexBoard = async (
 
 const indexCard = async (
     dataSource: SearchQueryDataSource,
-    card: CardHeader,
+    card: Card,
     boardCode: string
 ): Promise<QueryableDatapoint> => {
     try {

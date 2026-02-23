@@ -1,5 +1,18 @@
 import { OrganizationId, URL, UserId } from './genericTypes';
 
+export interface CreateOrganizationHeader {
+    name: string;
+    logoUrl: URL;
+    description: string;
+}
+
+export interface UpdateOrganizationHeader {
+    name?: string;
+    logoUrl?: URL;
+    description?: string;
+    ownerId?: UserId;
+}
+
 export interface OrganizationHeader {
     id: OrganizationId;
     name: string;
@@ -7,10 +20,4 @@ export interface OrganizationHeader {
     logoUrl: URL;
     description: string;
     ownerId: UserId;
-}
-
-export interface MembershipRecord {
-    userId: UserId;
-    orgId: OrganizationId;
-    joinedAt: number;
 }

@@ -1,4 +1,4 @@
-import { CardId, ListHeader, ListId, ModuleId } from '@mosaiq/terrazzo-common';
+import { CardId, List, ListId, ModuleId } from '@mosaiq/terrazzo-common';
 import { syncAddList, syncMoveList, syncUpdateListField } from '@trz-api/broadcasters';
 import { getActiveCardIdsOnListDb } from '@trz-api/persistence/cardPersistence';
 import {
@@ -22,7 +22,7 @@ export async function getListAndCardIdsOnBoard(boardID: ModuleId): Promise<{ lis
     return res;
 }
 
-export async function getListRes(listId: ListId): Promise<ListHeader | undefined> {
+export async function getListRes(listId: ListId): Promise<List | undefined> {
     const listHeader = await getListByIdDb(listId);
     if (listHeader == null) {
         throw new Error('List not found');
@@ -42,9 +42,9 @@ export async function getListRes(listId: ListId): Promise<ListHeader | undefined
 interface AddListOptions {
     preventSync?: boolean;
 }
-export async function addList(list: Partial<ListHeader> & { boardId: ModuleId }, options?: AddListOptions) {
+export async function addList(list: Partial<List> & { boardId: ModuleId }, options?: AddListOptions) {
     try {
-        const newList: ListHeader = {
+        const newList: List = {
             id: crypto.randomUUID(),
             boardId: list.boardId,
             name: list.name || '',
@@ -60,7 +60,7 @@ export async function addList(list: Partial<ListHeader> & { boardId: ModuleId },
     }
 }
 
-export async function updateListFromPartial(listId: ListId, partial: Partial<ListHeader>) {
+export async function updateListFromPartial(listId: ListId, partial: Partial<List>) {
     try {
         if (partial.order !== undefined) {
             // Do not update order directly

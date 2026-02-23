@@ -44,6 +44,23 @@ export interface ModuleDataMap {
 }
 export type ModuleData<T extends TrzModule> = ModuleDataMap[T];
 
+export interface CreateModuleHeader<T extends TrzModule = TrzModule> {
+    parentId: ModuleId;
+    name: string;
+    type: T;
+    order: number;
+    data: ModuleData<T>;
+}
+
+export interface UpdateModuleHeader<T extends TrzModule = TrzModule> {
+    name?: string;
+    archived?: boolean;
+    desiredPermissions?: ModulePermissions;
+    effectivePermissions?: ModulePermissions;
+    public?: boolean;
+    data?: ModuleData<T>;
+}
+
 export interface ModuleHeader<T extends TrzModule = TrzModule> {
     id: ModuleId;
     parentId: ModuleId;

@@ -1,6 +1,6 @@
 import {
     boardNameWithCode,
-    CardHeader,
+    Card,
     cardNameWithBoardCodeAndNumber,
     fullName,
     fullNameWithUsername,
@@ -113,7 +113,7 @@ const indexBoard = async (
 
 const indexCard = async (
     dataSource: TagsQueryDataSource,
-    card: CardHeader,
+    card: Card,
     boardCode: string
 ): Promise<QueryableDatapoint> => {
     try {

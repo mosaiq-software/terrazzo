@@ -1,7 +1,7 @@
-import { CardHeader, CardId, ClientSE, ListId, UserId } from '@mosaiq/terrazzo-common';
+import { Card, CardId, ClientSE, ListId, UserId } from '@mosaiq/terrazzo-common';
 import { SocketContextType } from '@trz/contexts/socket-context';
 
-export const getCardData = async (sockCtx: SocketContextType, cardId: CardId): Promise<CardHeader | undefined> => {
+export const getCardData = async (sockCtx: SocketContextType, cardId: CardId): Promise<Card | undefined> => {
     const card = await sockCtx.emit(ClientSE.GET_CARD, cardId);
     return card;
 };
@@ -18,7 +18,7 @@ export const createDuplicateCard = async (sockCtx: SocketContextType, cardId: Ca
     return await sockCtx.emit(ClientSE.CREATE_DUPLICATE_CARD, { cardId });
 };
 
-export const updateCardField = async (sockCtx: SocketContextType, id: CardId, partial: Partial<CardHeader>) => {
+export const updateCardField = async (sockCtx: SocketContextType, id: CardId, partial: Partial<Card>) => {
     await sockCtx.emit(ClientSE.UPDATE_CARD_FIELD, { ...partial, id });
 };
 

@@ -1,4 +1,4 @@
-import { TextBlockId, TextBlockSnapshotId, UploadedFileId, UserId } from './genericTypes';
+import { TextBlockId } from './genericTypes';
 
 export enum TextBlockType {
     PlainText = 'PlainText',
@@ -10,28 +10,21 @@ export enum TextBlockResourceType {
     Document = 'document',
 }
 
+export interface CreateTextBlock {
+    text: string;
+    type: TextBlockType;
+    trackHistory: boolean;
+}
+
+export interface UpdateTextBlock {
+    text?: string;
+    lastSnapshotAt?: number;
+}
+
 export interface TextBlock {
     id: TextBlockId;
     text: string;
     type: TextBlockType;
     trackHistory: boolean;
     lastSnapshotAt?: number;
-}
-
-export interface TextBlockSnapshot {
-    snapshotId: TextBlockSnapshotId;
-    textBlockId: TextBlockId;
-    timestamp: number;
-    /** Full content of the text block at this snapshot */
-    content: string;
-    tags?: string[];
-}
-
-export interface UploadedFile {
-    id: UploadedFileId;
-    base64: string;
-    fileName: string;
-    mimeType: string;
-    createdAt: number;
-    createdByUserId: UserId;
 }

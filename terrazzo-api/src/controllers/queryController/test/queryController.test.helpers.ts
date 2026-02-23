@@ -1,5 +1,5 @@
 import {
-    CardHeader,
+    Card,
     fixedTimestamp,
     ModuleHeader,
     ModuleId,
@@ -80,7 +80,7 @@ export const buildSearchDataSource = (data: {
 
     const textBlockContent = new Map<TextBlockId, string>();
     const moduleMap = new Map<ModuleId, ModuleHeader>();
-    const cardsByBoard = new Map<ModuleId, CardHeader[]>();
+    const cardsByBoard = new Map<ModuleId, Card[]>();
 
     const boardModules = boards.map((board) => buildBoardModuleHeader(orgId, board.name, board.id, board.code));
     const documentModules = documents.map((doc) => {

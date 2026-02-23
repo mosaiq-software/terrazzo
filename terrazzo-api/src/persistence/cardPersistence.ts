@@ -1,4 +1,4 @@
-import { CardHeader, CardId, ListId, ModuleId } from '@mosaiq/terrazzo-common';
+import { Card, CardId, ListId, ModuleId } from '@mosaiq/terrazzo-common';
 import { CacheEntity, CardModel, getCached, invalidateCache, sequelize } from '@mosaiq/terrazzo-db';
 import { Op } from 'sequelize';
 
@@ -26,7 +26,7 @@ export const getActiveCardsByBoardIdDb = async (boardId: ModuleId) => {
     return models.map((card) => card.toJSON());
 };
 
-export const createCardOnListDb = async (card: CardHeader) => {
+export const createCardOnListDb = async (card: Card) => {
     const model = await CardModel.create({ ...card });
     await invalidateCache(CacheEntity.CardsInList, card.listId);
     return model.toJSON();
@@ -36,7 +36,7 @@ export const createCardOnListDb = async (card: CardHeader) => {
  * Updates a card in the database.
  * Does NOT handle moving the card between lists or changing its order, and thus will not update caches related to those operations.
  */
-export const updateCardDb = async (cardId: CardId, card: Partial<CardHeader>) => {
+export const updateCardDb = async (cardId: CardId, card: Partial<Card>) => {
     const [updated] = await CardModel.update({ ...card }, { where: { id: cardId } });
     await invalidateCache(CacheEntity.Card, cardId);
     return updated;

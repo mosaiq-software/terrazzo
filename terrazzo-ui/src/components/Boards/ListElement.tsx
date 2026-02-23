@@ -1,7 +1,7 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button, CloseButton, Flex, FocusTrap, Group, Menu, Paper, Stack, TextInput } from '@mantine/core';
 import { getHotkeyHandler, useClickOutside } from '@mantine/hooks';
-import { CardId, ListHeader, ListId, MAX_NAME_LENGTH, ServerSE } from '@mosaiq/terrazzo-common';
+import { CardId, List, ListId, MAX_NAME_LENGTH, ServerSE } from '@mosaiq/terrazzo-common';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createCard, emitMoveList, getListData, updateListField } from '@trz/emitters';
@@ -26,7 +26,7 @@ interface ListElementProps {
     onClickCard: (card: CardId) => void;
 }
 function ListElement(props: ListElementProps): React.JSX.Element {
-    const [list, setList] = useState<ListHeader | undefined>(undefined);
+    const [list, setList] = useState<List | undefined>(undefined);
     const [listTitle, setListTitle] = useState('');
     const [cardNameInputVisible, setCardNameInputVisible] = useState(false);
     const [error, setError] = useState('');

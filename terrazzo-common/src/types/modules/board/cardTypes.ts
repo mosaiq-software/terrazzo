@@ -1,7 +1,20 @@
 import { Priority } from '../../../constants';
-import { AssignmentId, CardId, ListId, ModuleId, TextBlockId, UserId } from '../../genericTypes';
+import { CardId, ListId, ModuleId, TextBlockId, UserId } from '../../genericTypes';
 
-export interface CardHeader {
+export interface CreateCard {
+    id: CardId;
+    listId: ListId;
+    name: string;
+    priority?: Priority;
+    order?: number;
+}
+
+export interface UpdateCard {
+    name?: string;
+    priority?: Priority;
+}
+
+export interface Card {
     id: CardId;
     listId: ListId;
     boardId: ModuleId;
@@ -12,10 +25,4 @@ export interface CardHeader {
     descriptionTextBlockId: TextBlockId;
     createdAt: number;
     createdById: UserId | null;
-}
-
-export interface CardAssignment {
-    id: AssignmentId;
-    userId: UserId;
-    cardId: CardId;
 }

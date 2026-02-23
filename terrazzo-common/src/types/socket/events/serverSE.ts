@@ -2,9 +2,9 @@ import { CollectionSourceData, ObjectSourceData } from '../../dataSource/dataSou
 import { CardId, LabelId, ListId, ModuleId, OrganizationId, RoleId, TextBlockId, UserId } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount } from '../../linkedAccountTypes';
-import { CardHeader } from '../../modules/board/cardTypes';
+import { Card } from '../../modules/board/cardTypes';
 import { Label } from '../../modules/board/labelTypes';
-import { ListHeader } from '../../modules/board/listTypes';
+import { List } from '../../modules/board/listTypes';
 import { ModuleHeader } from '../../modules/moduleTypes';
 import { OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
@@ -65,8 +65,8 @@ export interface ServerSEPayload {
 
     [ServerSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
     [ServerSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
-    [ServerSE.UPDATE_LIST_FIELD]: Partial<ListHeader> & { id: ListId };
-    [ServerSE.UPDATE_CARD_FIELD]: Partial<CardHeader> & { id: CardId };
+    [ServerSE.UPDATE_LIST_FIELD]: Partial<List> & { id: ListId };
+    [ServerSE.UPDATE_CARD_FIELD]: Partial<Card> & { id: CardId };
     [ServerSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
     [ServerSE.UPDATE_MODULE_LABELS]: { moduleId: ModuleId; labels: LabelId[] };
     [ServerSE.UPDATE_LABEL]: { label: Label };

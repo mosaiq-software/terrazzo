@@ -1,4 +1,4 @@
-import { ListHeader, ListId, ModuleId } from '@mosaiq/terrazzo-common';
+import { List, ListId, ModuleId } from '@mosaiq/terrazzo-common';
 import { CacheEntity, ListModel, getCached, invalidateCache, sequelize } from '@mosaiq/terrazzo-db';
 import { Op } from 'sequelize';
 
@@ -30,7 +30,7 @@ export const getActiveListCountOnBoard = async (boardId: ModuleId) => {
     return await ListModel.count({ where: { boardId, order: { [Op.not]: null } } });
 };
 
-export const createListOnBoardDb = async (list: ListHeader) => {
+export const createListOnBoardDb = async (list: List) => {
     const model = await ListModel.create({ ...list });
     await invalidateCache(CacheEntity.ListsInBoard, list.boardId);
     return model.toJSON();
@@ -40,7 +40,7 @@ export const createListOnBoardDb = async (list: ListHeader) => {
  * Updates a list in the database.
  * Does NOT handle moving the list or changing its order, and thus will not update caches related to those operations.
  */
-export const updateListDb = async (id: ListId, update: Partial<ListHeader>) => {
+export const updateListDb = async (id: ListId, update: Partial<List>) => {
     const [updated] = await ListModel.update({ ...update }, { where: { id: id } });
     await invalidateCache(CacheEntity.List, id);
     return updated;

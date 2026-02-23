@@ -20,9 +20,9 @@ import {
 } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
-import { CardHeader } from '../../modules/board/cardTypes';
+import { Card } from '../../modules/board/cardTypes';
 import { Label } from '../../modules/board/labelTypes';
-import { ListHeader } from '../../modules/board/listTypes';
+import { List } from '../../modules/board/listTypes';
 import { CreateModuleDataArgs, ModuleHeader, UpdateModuleDataArgs } from '../../modules/moduleTypes';
 import { OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
@@ -146,8 +146,8 @@ export interface ClientSEPayload {
 
     [ClientSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
     [ClientSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
-    [ClientSE.UPDATE_LIST_FIELD]: Omit<Partial<ListHeader> & { id: ListId }, 'order'>;
-    [ClientSE.UPDATE_CARD_FIELD]: Omit<Partial<CardHeader> & { id: CardId }, 'listId' | 'order'>;
+    [ClientSE.UPDATE_LIST_FIELD]: Omit<Partial<List> & { id: ListId }, 'order'>;
+    [ClientSE.UPDATE_CARD_FIELD]: Omit<Partial<Card> & { id: CardId }, 'listId' | 'order'>;
     [ClientSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
     [ClientSE.UPDATE_LABEL]: { label: Label };
     [ClientSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
@@ -190,8 +190,8 @@ export interface ClientSEReplies {
 
     [ClientSE.GET_USERS_ORGANIZATIONS]: OrganizationHeader[];
     [ClientSE.GET_ORGANIZATION]: OrganizationHeader | undefined;
-    [ClientSE.GET_LIST]: ListHeader | undefined;
-    [ClientSE.GET_CARD]: CardHeader | undefined;
+    [ClientSE.GET_LIST]: List | undefined;
+    [ClientSE.GET_CARD]: Card | undefined;
     [ClientSE.GET_SEARCH_RESULTS]: { results: QueryItem[] } | undefined;
     [ClientSE.GET_SEARCH_TAGS]: { results: QueryItem[] } | undefined;
     [ClientSE.GET_INVITES_FOR_ORG]: Invite[] | undefined;
