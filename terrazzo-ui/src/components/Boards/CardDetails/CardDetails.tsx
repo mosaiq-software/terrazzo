@@ -132,7 +132,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
             >
                 <Modal.Header
                     p="0"
-                    bg={COLORS.background.light}
+                    bg={COLORS.background.medium}
                 >
                     <Modal.Title w={'100%'}>
                         <Group justify="space-between">

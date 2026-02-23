@@ -87,10 +87,10 @@ export const BlockNoteEditorHistoryModal = (props: BlockNoteEditorHistoryModalPr
                 blur={3}
             />
             <Modal.Content
-                bg={COLORS.background.medium}
+                bg={COLORS.background.light}
                 c={COLORS.text.primary}
             >
-                <Modal.Header bg={COLORS.background.dark}>
+                <Modal.Header bg={COLORS.background.medium}>
                     <Modal.Title w={'100%'}>
                         <Group justify="space-between">
                             <Text
@@ -238,10 +238,10 @@ const SnapshotItem = (props: SnapshotItemProps) => {
                     <RectHoldingButton
                         variant="outline"
                         durationMs={2000}
-                        borderColor={COLORS.semantic.warning}
+                        borderColor={COLORS.semantic.info}
                         onClick={props.onRestore}
                     >
-                        Restore
+                        Hold to Restore
                     </RectHoldingButton>
                 </Box>
             )}
