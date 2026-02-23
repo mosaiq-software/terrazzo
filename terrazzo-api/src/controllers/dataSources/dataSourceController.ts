@@ -1,6 +1,6 @@
 import {
     CollectionSource,
-    CollectionSourceDataInstance,
+    CollectionSourceDataPayload,
     CreateObjectSourceData,
     ObjectSource,
     ObjectSourceDataPayload,
@@ -25,9 +25,17 @@ export const readObjectSource = async <T extends ObjectSource>(
 export const readCollectionSource = async <T extends CollectionSource>(
     collectionId: UID,
     type: T
-): Promise<CollectionSourceDataInstance<T> | undefined> => {
+): Promise<CollectionSourceDataPayload<T> | undefined> => {
     const handler = getCollectionHandler(type);
-    return await handler.read(collectionId);
+    const data = await handler.read(collectionId);
+    if (!data) {
+        return undefined;
+    }
+    return {
+        id: collectionId,
+        type,
+        data,
+    } as CollectionSourceDataPayload<T>;
 };
 
 export const createObjectSource = async (create: CreateObjectSourceData): Promise<void> => {

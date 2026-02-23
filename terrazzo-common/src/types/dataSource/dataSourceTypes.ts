@@ -39,12 +39,8 @@ type CollectionSourceUpdatePayloadMap = {
     };
 };
 
-export type CollectionSourceUpdatePayload<T extends CollectionSource> = CollectionSourceUpdatePayloadMap[T];
-export type CollectionSourceUpdateData = CollectionSourceUpdatePayload<CollectionSource>;
-
-export type CollectionSourceData = {
-    [T in CollectionSource]: CollectionSourceDataMap[T];
-}[CollectionSource];
+export type CollectionSourceDataPayload<T extends CollectionSource> = CollectionSourceUpdatePayloadMap[T];
+export type CollectionSourceData = CollectionSourceDataPayload<CollectionSource>;
 
 export interface ObjectSourceHandler<T extends ObjectSource> {
     create: (data: CreateObjectSourceDataInstance<T>) => Promise<void>;
