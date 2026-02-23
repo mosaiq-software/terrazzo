@@ -40,7 +40,7 @@
         "test:common": "cd terrazzo-common && npm run test",
         "test": "npm run test:api && npm run test:ui && npm run test:common",
         "create-migration": "cd terrazzo-db && npm run create-migration",
-        "circular-deps": "dpdm --no-warning --no-tree ./terrazzo-api/src/**/*.ts"
+        "circular-deps": "dpdm --no-warning --no-tree ./terrazzo-api/src/**/*.ts ./terrazzo-common/src/**/*.ts ./terrazzo-db/src/**/*.ts ./terrazzo-ui/src/**/*.{ts,tsx}"
     },
     "devDependencies": {
         "concurrently": "^9.1.0",
