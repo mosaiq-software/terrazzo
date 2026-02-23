@@ -1,4 +1,4 @@
-import { getModuleById } from '@trz-api/controllers/moduleController';
+import { getModuleById } from '@trz-api/controllers/moduleQueries';
 import { getTextBlocksAsPlaintext } from '@trz-api/controllers/textBlockController/textBlockController';
 import { getUserHeader } from '@trz-api/controllers/userController';
 import { getActiveCardsByBoardIdDb } from '@trz-api/persistence/cardPersistence';

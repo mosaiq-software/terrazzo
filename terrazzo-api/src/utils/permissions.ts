@@ -9,7 +9,7 @@ import {
     PermissionFlag,
     UserId,
 } from '@mosaiq/terrazzo-common';
-import { getUntypedModuleById } from '@trz-api/controllers/moduleController';
+import { getUntypedModuleById } from '@trz-api/controllers/moduleQueries';
 import { getRolesForOrg } from '@trz-api/controllers/roleController';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';

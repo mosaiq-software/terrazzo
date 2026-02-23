@@ -41,9 +41,9 @@ import {
 } from '@mosaiq/terrazzo-common';
 import {
     checkCanUserEditTextBlock,
-    loadTextBlockEncodedData,
     storeTextBlockEncodedData,
 } from '@trz-api/controllers/textBlockController/textBlockController';
+import { loadTextBlockEncodedData } from '@trz-api/controllers/textBlockController/textBlockDocumentCodec';
 import { Observable } from 'lib0/observable';
 import { Namespace, Server, Socket } from 'socket.io';
 import * as AwarenessProtocol from 'y-protocols/awareness';

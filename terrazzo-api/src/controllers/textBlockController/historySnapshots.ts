@@ -8,7 +8,7 @@ import {
 } from '@trz-api/persistence/textBlockHistoryPersistence';
 import { getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { SocketManager } from '@trz-api/utils/socket/socketManager';
-import { loadTextBlockEncodedData } from './textBlockController';
+import { loadTextBlockEncodedData } from './textBlockDocumentCodec';
 
 export const HISTORY_SNAPSHOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 

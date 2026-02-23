@@ -9,7 +9,7 @@ import {
     updateRoleDb,
 } from '@trz-api/persistence/rolePersistence';
 import { SocketManager } from '@trz-api/utils/socket/socketManager';
-import { userIsOrgOwner } from './organizationController';
+import { userIsOrgOwner } from './organizationAccess';
 
 export const getRolesForOrg = async (orgId: OrganizationId) => {
     return await getRolesByOrgIdDb(orgId);

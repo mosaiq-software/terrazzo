@@ -1,5 +1,6 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { getBoardIDFromCardID, setCardsLabels } from '@trz-api/controllers/cardController';
+import { setCardsLabels } from '@trz-api/controllers/cardController';
+import { getBoardIDFromCardID } from '@trz-api/controllers/cardQueries';
 import {
     createBoardLabel,
     getLabelIdsOnModule,

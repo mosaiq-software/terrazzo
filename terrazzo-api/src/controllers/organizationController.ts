@@ -9,12 +9,11 @@ import {
 import { syncUpdateOrgField } from '@trz-api/broadcasters';
 import {
     createOrganizationMembershipDb,
-    getOrganizationMembershipDb,
 } from '@trz-api/persistence/organizationMembershipPersistence';
 import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
+import { userIsOrgOwner, userIsValidMemberOfOrg } from './organizationAccess';
 import { createRole } from './roleController';
-import { getUserHeader } from './userController';
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
@@ -63,15 +62,6 @@ export async function addOrganization(organization: Partial<OrganizationHeader> 
 
     return newOrg.id;
 }
-export const userIsValidMemberOfOrg = async (userId: UserId, orgId: OrganizationId): Promise<boolean> => {
-    const userHeader = await getUserHeader(userId);
-    if (!userHeader) {
-        return false;
-    }
-    const orgMembership = await getOrganizationMembershipDb(userId, orgId);
-    return !!orgMembership;
-};
-
 export async function updateOrganizationFromPartial(
     orgId: OrganizationId,
     partial: Partial<OrganizationHeader>,
@@ -99,11 +89,3 @@ export async function updateOrganizationFromPartial(
     await updateOrgDb(updated);
     await syncUpdateOrgField(orgId, { ...partial, id: orgId });
 }
-
-export const userIsOrgOwner = async (userId: UserId, orgId: OrganizationId): Promise<boolean> => {
-    const orgHeader = await getOrgByIdDb(orgId);
-    if (!orgHeader) {
-        return false;
-    }
-    return orgHeader.ownerId === userId;
-};

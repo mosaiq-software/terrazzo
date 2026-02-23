@@ -9,7 +9,7 @@ import {
 } from '@trz-api/persistence/organizationMembershipPersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
-import { userIsOrgOwner } from './organizationController';
+import { userIsOrgOwner } from './organizationAccess';
 
 export const getMembersInOrg = async (orgId: OrganizationId): Promise<UserId[]> => {
     const org = await getOrgByIdDb(orgId);

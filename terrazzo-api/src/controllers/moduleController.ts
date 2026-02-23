@@ -3,7 +3,6 @@ import {
     CreateModuleData,
     CreateModuleDataArgs,
     exhaustiveCheck,
-    isModuleType,
     ModuleData,
     ModuleHeader,
     ModuleId,
@@ -23,6 +22,7 @@ import {
 } from '@trz-api/persistence/modulePersistence';
 import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { userCanViewModule } from '@trz-api/utils/permissions';
+import { getUntypedModuleById } from './moduleQueries';
 import { createBlocknoteTextBlockWithBlocks } from './textBlockController/textBlockController';
 
 async function buildModuleData<T extends ModuleType>(args: {
@@ -93,32 +93,6 @@ export const createNewModule = async <T extends ModuleType>(
     await syncModuleChildren(parentId);
     return newModule;
 };
-
-/**
- * Retrieves a module by ID and asserts it is of the expected type. Throws if the type does not match.
- * @throws Error if the module is not of the expected type
- */
-export async function getModuleById<T extends TrzModule>(
-    id: ModuleId,
-    expectedType: T
-): Promise<ModuleHeader<T> | undefined> {
-    const module = await getModuleByIdDb(id);
-    if (!module) {
-        return undefined;
-    }
-    if (!isModuleType(module, expectedType)) {
-        throw new Error(`Module with id ${id} is not of type ${expectedType}`);
-    }
-    return module;
-}
-
-export async function getUntypedModuleById(id: ModuleId): Promise<ModuleHeader | undefined> {
-    const module = await getModuleByIdDb(id);
-    if (!module) {
-        return undefined;
-    }
-    return module;
-}
 
 export const updateModule = async <T extends TrzModule>(
     id: ModuleId,

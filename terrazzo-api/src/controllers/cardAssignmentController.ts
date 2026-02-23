@@ -5,7 +5,7 @@ import {
     deleteCardAssignmentRecordDb,
     getCardAssignmentRecordsForUserOnCardDb,
 } from '@trz-api/persistence/cardAssignmentPersistence';
-import { getBoardIDFromCardID } from './cardController';
+import { getBoardIDFromCardID } from './cardQueries';
 
 interface AddAssigneeToCardOptions {
     preventSync?: boolean;

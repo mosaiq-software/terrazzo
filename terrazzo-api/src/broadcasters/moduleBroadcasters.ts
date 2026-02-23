@@ -1,5 +1,6 @@
 import { getRoomCode, ModuleHeader, ModuleId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
-import { getModuleChildrenForUser, getUntypedModuleById } from '@trz-api/controllers/moduleController';
+import { getModuleChildrenForUser } from '@trz-api/controllers/moduleController';
+import { getUntypedModuleById } from '@trz-api/controllers/moduleQueries';
 import { userCanViewModule } from '@trz-api/utils/permissions';
 import { broadcast } from '@trz-api/utils/socket/socketActions';
 

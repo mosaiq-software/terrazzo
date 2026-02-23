@@ -14,7 +14,8 @@ import {
 import { getLabelsOnCardDb, setLabelsOnCardDb } from '@trz-api/persistence/labelAssignmentPersistence';
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
-import { getModuleById } from './moduleController';
+import { getBoardIDFromCardID } from './cardQueries';
+import { getModuleById } from './moduleQueries';
 import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
 
 export async function getCard(cardId: CardId): Promise<CardHeader | undefined> {
@@ -186,22 +187,6 @@ export async function updateCardFromPartial(cardId: CardId, partial: Partial<Car
     } catch (e) {
         throw new Error('Failed to sync updated card ' + e);
     }
-}
-
-export async function getListIDFromCardID(cardID: CardId) {
-    const card = await getCardByIdDb(cardID);
-    if (card == null) {
-        throw new Error('Card not found');
-    }
-    return card.listId;
-}
-
-export async function getBoardIDFromCardID(cardID: CardId) {
-    const card = await getCardByIdDb(cardID);
-    if (card == null || !card.boardId) {
-        throw new Error('Card not found');
-    }
-    return card.boardId;
 }
 
 interface MoveCardOptions {
