@@ -3,14 +3,14 @@ import { ModuleHeader, ModuleId, PermissibleAction, TrzModule } from '@mosaiq/te
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateModuleField } from '@trz/emitters';
 import { useModulePermission } from '@trz/hooks/data/usePermissions';
-import { useLabels } from '@trz/hooks/useLabels';
-import { useModule } from '@trz/hooks/useModule';
 import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
 import { NotFound } from '../UI/NotFound';
 import { LabelEditor } from './LabelEditor';
 import { ModuleSettingsLayout } from './ModuleSettingsLayout';
+import { useLabels } from '@trz/hooks/data/useLabels';
+import { useModule } from '@trz/hooks/data/useModule';
 
 interface ModuleSettingsBoardProps {
     boardId: ModuleId;

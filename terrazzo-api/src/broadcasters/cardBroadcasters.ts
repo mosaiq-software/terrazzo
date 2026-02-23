@@ -1,6 +1,6 @@
 import { CardHeader, getRoomCode, ModuleId, RoomType, ServerSE, ServerSEPayload } from '@mosaiq/terrazzo-common';
 import { userCanViewModule } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socket/socketUtils';
+import { broadcast } from '@trz-api/utils/socket/socketActions';
 
 export const syncAddCard = async (card: CardHeader, onBoardId: ModuleId) => {
     await broadcast({

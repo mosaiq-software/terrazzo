@@ -1,5 +1,5 @@
 import { Box, Tabs } from '@mantine/core';
-import { Member, MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { MembershipRecord, OrganizationHeader, PermissibleAction } from '@mosaiq/terrazzo-common';
 import { useOrgPermission } from '@trz/hooks/data/usePermissions';
 import { COLORS } from '@trz/util/colors';
 import { MdOutlineMailOutline, MdOutlinePerson } from 'react-icons/md';

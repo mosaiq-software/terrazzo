@@ -6,7 +6,6 @@ import { Notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
 import { CreateBoardModal } from '@trz/components/Modals/CreateBoard';
 import { CreateOrganizationModal } from '@trz/components/Modals/CreateOrganization';
-import { DataSourceStoreProvider } from '@trz/contexts/data-source-store-context';
 import { SocketProvider } from '@trz/contexts/socket-context';
 import { UserProvider } from '@trz/contexts/user-context';
 import { ContextMenuProvider } from 'mantine-contextmenu';
@@ -17,6 +16,7 @@ import { LinkGithubAccountModal } from './components/Modals/AccountLinking/LinkG
 import { JoinOrganizationModal } from './components/Modals/JoinOrganization';
 import { TransferOrganizationModal } from './components/Modals/TransferOrganization';
 import { ModuleSettingsModal } from './components/ModuleSettings/ModuleSettingsModal';
+import { DataSourcesProvider } from './contexts/data-source-store-context';
 import { OrgProvider } from './contexts/org-context';
 import { PermissionProvider } from './contexts/permission-context';
 import { RoomListenerProvider } from './contexts/room-listener-context';
@@ -47,7 +47,7 @@ const App = () => {
                 <UserProvider>
                     <SocketProvider>
                         <RoomListenerProvider>
-                            <DataSourceStoreProvider>
+                            <DataSourcesProvider>
                                 <UiProvider>
                                     <OrgProvider>
                                         <PermissionProvider>
@@ -61,7 +61,7 @@ const App = () => {
                                         </PermissionProvider>
                                     </OrgProvider>
                                 </UiProvider>
-                            </DataSourceStoreProvider>
+                            </DataSourcesProvider>
                         </RoomListenerProvider>
                     </SocketProvider>
                 </UserProvider>

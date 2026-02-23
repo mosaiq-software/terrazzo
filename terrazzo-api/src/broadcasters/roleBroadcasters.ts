@@ -1,7 +1,7 @@
 import { getRoomCode, OrganizationId, Role, RoomSpecifier, RoomType, ServerSE, UserId } from '@mosaiq/terrazzo-common';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { userCanViewOrganization } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socket/socketUtils';
+import { broadcast } from '@trz-api/utils/socket/socketActions';
 
 export const syncRolesForUserInOrg = async (userId: UserId, orgId: OrganizationId) => {
     try {

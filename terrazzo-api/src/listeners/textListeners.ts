@@ -4,7 +4,8 @@ import {
     restoreTextBlockSnapshot,
 } from '@trz-api/controllers/textBlockController/historySnapshots';
 import { checkCanUserEditTextBlock } from '@trz-api/controllers/textBlockController/textBlockController';
-import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
+import { subscribe } from '@trz-api/utils/socket/socketActions';
+import { getSocketData } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 
 export const registerTextListeners = (socket: Socket) => {

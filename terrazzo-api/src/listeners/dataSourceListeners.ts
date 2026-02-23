@@ -7,7 +7,7 @@ import {
     removeFromCollectionSource,
     updateObjectSource,
 } from '@trz-api/controllers/dataSources/dataSourceController';
-import { subscribe } from '@trz-api/utils/socket/socketUtils';
+import { subscribe } from '@trz-api/utils/socket/socketActions';
 import { Socket } from 'socket.io';
 
 export const registerDataSourceListeners = (socket: Socket) => {

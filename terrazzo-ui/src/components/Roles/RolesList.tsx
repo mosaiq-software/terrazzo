@@ -4,11 +4,11 @@ import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { setRoleIdsForUserInOrg } from '@trz/emitters/roleEmitters';
 import { useOrgPermission } from '@trz/hooks/data/usePermissions';
-import { useRoleForUserInOrg } from '@trz/hooks/useRolesForUserInOrg';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useCallback } from 'react';
 import { RolesListAddMenu } from './RolesListAddMenu';
 import { RoleTag } from './RoleTag';
+import { useRoleForUserInOrg } from '@trz/hooks/data/useRolesForUserInOrg';
 
 interface RolesListProps {
     userId: UserId;

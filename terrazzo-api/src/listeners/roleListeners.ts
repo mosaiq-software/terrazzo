@@ -13,7 +13,8 @@ import {
     userCanEditRolesInOrganization,
     userCanViewOrganization,
 } from '@trz-api/utils/permissions';
-import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
+import { subscribe } from '@trz-api/utils/socket/socketActions';
+import { getSocketData } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 
 export const registerRoleListeners = (socket: Socket) => {

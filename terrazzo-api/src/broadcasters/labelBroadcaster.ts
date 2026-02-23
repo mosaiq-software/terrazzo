@@ -2,7 +2,7 @@ import { CardId, getRoomCode, LabelId, ModuleId, RoomSpecifier, RoomType, Server
 import { getLabelIdsOnModule } from '@trz-api/controllers/labelController';
 import { getLabelByIdDb } from '@trz-api/persistence/labelPersistence';
 import { userCanViewModule } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socket/socketUtils';
+import { broadcast } from '@trz-api/utils/socket/socketActions';
 
 export const syncModuleLabels = async (moduleId: ModuleId) => {
     const labelIds = await getLabelIdsOnModule(moduleId);

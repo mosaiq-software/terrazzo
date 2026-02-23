@@ -1,6 +1,7 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
 import { syncMouseMove, syncUserIdle } from '@trz-api/broadcasters';
-import { getSocketData, joinRoom, leaveRoom, setSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
+import { joinRoom, leaveRoom, subscribe } from '@trz-api/utils/socket/socketActions';
+import { getSocketData, setSocketData } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 
 export const registerCustomSocketEvents = (socket: Socket) => {

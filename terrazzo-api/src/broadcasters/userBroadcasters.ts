@@ -1,7 +1,7 @@
 import { getRoomCode, RoomType, ServerSE, UserHeader, UserId } from '@mosaiq/terrazzo-common';
 import { getOrgsForUser } from '@trz-api/controllers/membershipController';
 import { userCanGetAndEditPersonalDataForUser } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socket/socketUtils';
+import { broadcast } from '@trz-api/utils/socket/socketActions';
 
 /**
  * Syncs the organizations for a user by broadcasting the updated list to the user's personal room.

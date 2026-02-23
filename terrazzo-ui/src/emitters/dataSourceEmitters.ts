@@ -15,10 +15,17 @@ export const readObjectSource = async <T extends ObjectSource>(
     objectId: UID,
     type: T
 ): Promise<ObjectSourceDataInstance<T> | undefined> => {
-    return await sockCtx.emit(ClientSE.READ_OBJECT_SOURCE, {
+    const data = await sockCtx.emit(ClientSE.READ_OBJECT_SOURCE, {
         id: objectId,
         source: type,
     });
+    if (!data) {
+        return undefined;
+    }
+    if (data.type !== type) {
+        throw new Error(`Received object source data of type ${data.type} but expected type ${type}`);
+    }
+    return data.data;
 };
 
 export const createObjectSource = async (sockCtx: SocketContextType, data: CreateObjectSourceData): Promise<void> => {

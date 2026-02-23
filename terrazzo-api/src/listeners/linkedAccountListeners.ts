@@ -1,7 +1,7 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
 import { getLinkedAccountsForUser, removeLinkedAccountFromUser } from '@trz-api/controllers/linkedAccountController';
 import { userCanGetAndEditPersonalDataForUser } from '@trz-api/utils/permissions';
-import { subscribe } from '@trz-api/utils/socket/socketUtils';
+import { subscribe } from '@trz-api/utils/socket/socketActions';
 import { Socket } from 'socket.io';
 
 export const registerLinkedAccountListeners = (socket: Socket) => {

@@ -28,10 +28,8 @@ type ObjectSourceDataPayloadMap = {
     };
 };
 
-export type ObjectSourceData = ObjectSourceDataPayloadMap[ObjectSource];
-export type ObjectSourceDataPayload<T extends ObjectSource> = T extends ObjectSource
-    ? ObjectSourceDataPayloadMap[T]
-    : never;
+export type ObjectSourceDataPayload<T extends ObjectSource> = ObjectSourceDataPayloadMap[T];
+export type ObjectSourceData = ObjectSourceDataPayload<ObjectSource>;
 
 type CollectionSourceUpdatePayloadMap = {
     [T in CollectionSource]: {
@@ -41,10 +39,8 @@ type CollectionSourceUpdatePayloadMap = {
     };
 };
 
-export type CollectionSourceUpdateData = CollectionSourceUpdatePayloadMap[CollectionSource];
-export type CollectionSourceUpdatePayload<T extends CollectionSource> = T extends CollectionSource
-    ? CollectionSourceUpdatePayloadMap[T]
-    : never;
+export type CollectionSourceUpdatePayload<T extends CollectionSource> = CollectionSourceUpdatePayloadMap[T];
+export type CollectionSourceUpdateData = CollectionSourceUpdatePayload<CollectionSource>;
 
 export type CollectionSourceData = {
     [T in CollectionSource]: CollectionSourceDataMap[T];
@@ -61,3 +57,11 @@ export interface CollectionSourceHandler<T extends CollectionSource> {
     add: (parentId: UID, itemIds: UID[]) => Promise<void>;
     remove: (parentId: UID, itemIds: UID[]) => Promise<void>;
 }
+
+export type ObjectSourceController = {
+    [T in ObjectSource]: ObjectSourceHandler<T>;
+};
+
+export type CollectionSourceController = {
+    [T in CollectionSource]: CollectionSourceHandler<T>;
+};

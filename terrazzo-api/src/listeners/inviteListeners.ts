@@ -2,7 +2,8 @@ import { ClientSE } from '@mosaiq/terrazzo-common';
 import { createInvite, deleteInvite, getAllInvitesForOrg, useInvite } from '@trz-api/controllers/inviteController';
 import { getInviteRecordByIdDb } from '@trz-api/persistence/invitePersistence';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
-import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
+import { subscribe } from '@trz-api/utils/socket/socketActions';
+import { getSocketData } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 
 export const registerInviteListeners = (socket: Socket) => {

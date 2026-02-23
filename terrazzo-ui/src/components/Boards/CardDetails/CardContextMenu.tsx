@@ -15,7 +15,6 @@ import {
     updateCardsLabels,
 } from '@trz/emitters';
 import { useCard } from '@trz/hooks/data/useCard';
-import { useLabels } from '@trz/hooks/useLabels';
 import { COLORS } from '@trz/util/colors';
 import { getCardLink } from '@trz/util/linkUtils';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -31,6 +30,7 @@ import {
     MdRadioButtonChecked,
 } from 'react-icons/md';
 import { priorityColors, PriorityIcons } from './PriorityButtons';
+import { useLabels } from '@trz/hooks/data/useLabels';
 
 interface CardContextMenuProps {
     cardId: CardId;

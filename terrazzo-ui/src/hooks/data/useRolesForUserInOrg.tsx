@@ -4,8 +4,8 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { getRoleIdsForUserInOrg } from '@trz/emitters/roleEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useMemo, useState } from 'react';
-import { useRoom } from './useRoom';
-import { useSocketListener } from './useSocketListener';
+import { useRoom } from '../util/useRoom';
+import { useSocketListener } from '../util/useSocketListener';
 
 export const useRoleForUserInOrg = (userId: UserId | undefined, orgId: OrganizationId | undefined) => {
     const roomKey = orgId && userId ? `${orgId}_${userId}` : undefined;

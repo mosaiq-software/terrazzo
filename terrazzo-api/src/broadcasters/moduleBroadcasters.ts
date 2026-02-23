@@ -1,7 +1,7 @@
 import { getRoomCode, ModuleHeader, ModuleId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { getModuleChildrenForUser, getUntypedModuleById } from '@trz-api/controllers/moduleController';
 import { userCanViewModule } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socket/socketUtils';
+import { broadcast } from '@trz-api/utils/socket/socketActions';
 
 export const syncParentsModuleChildren = async (childId: ModuleId) => {
     try {

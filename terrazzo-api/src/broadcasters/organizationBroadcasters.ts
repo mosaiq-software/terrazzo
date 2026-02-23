@@ -1,6 +1,6 @@
 import { getRoomCode, OrganizationHeader, OrganizationId, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { userCanViewOrganization } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socket/socketUtils';
+import { broadcast } from '@trz-api/utils/socket/socketActions';
 
 export const syncUpdateOrgField = async (
     orgId: OrganizationId,

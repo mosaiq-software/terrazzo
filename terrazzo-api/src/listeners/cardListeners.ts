@@ -10,7 +10,8 @@ import {
 } from '@trz-api/controllers/cardController';
 import { getBoardIDFromListID } from '@trz-api/controllers/listController';
 import { userCanManageCards, userCanViewModule } from '@trz-api/utils/permissions';
-import { getSocketData, subscribe } from '@trz-api/utils/socket/socketUtils';
+import { subscribe } from '@trz-api/utils/socket/socketActions';
+import { getSocketData } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
 
 export const registerCardListeners = (socket: Socket) => {

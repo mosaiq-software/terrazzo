@@ -9,7 +9,7 @@ import {
     SocketId,
     UserData,
 } from '@mosaiq/terrazzo-common';
-import { broadcast } from '@trz-api/utils/socket/socketUtils';
+import { broadcast } from '@trz-api/utils/socket/socketActions';
 
 export const syncUserJoinedRoom = async (roomId: RoomId, userData: UserData) => {
     // broadcast(socket, ServerSE.CLIENT_JOINED_ROOM, { ...socketData.user, sid: socket.id }, [room]);

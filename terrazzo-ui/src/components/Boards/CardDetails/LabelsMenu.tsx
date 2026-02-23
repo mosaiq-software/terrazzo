@@ -1,22 +1,22 @@
 import { ActionIcon, Button, MantineSize, Menu, Pill, Stack, Tooltip } from '@mantine/core';
-import { Label, LabelId } from '@mosaiq/terrazzo-common';
+import { LabelId, ModuleId } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateCardsLabels } from '@trz/emitters';
-import { useLabel } from '@trz/hooks/useLabel';
-import { useLabels } from '@trz/hooks/useLabels';
+import { useLabel } from '@trz/hooks/data/useLabel';
+import { useLabels } from '@trz/hooks/data/useLabels';
 import { COLORS } from '@trz/util/colors';
 import { colorIsDarkAdvanced } from '@trz/util/colorUtils';
 import { IoMdInformationCircleOutline } from 'react-icons/io';
 import { MdCheck, MdLabel, MdLabelOutline } from 'react-icons/md';
 
 interface LabelsMenuProps {
+    moduleId: ModuleId;
     viewOnly?: boolean;
 }
 
 export const LabelsMenu = (props: LabelsMenuProps) => {
     const sockCtx = useSocket();
-    const labels = useLabels(props.card.boardId);
-    const cardLabels = labels.filter((label) => props.card.labels.includes(label.id));
+    const labels = useLabels(props.moduleId);
 
     return (
         <Menu
@@ -92,17 +92,17 @@ export const LabelsMenu = (props: LabelsMenuProps) => {
 };
 
 interface LabelDisplayProps {
-    labels: Label[];
+    labels: LabelId[];
     showAdd?: boolean;
     size?: MantineSize;
 }
 export const StaticLabelDisplay = (props: LabelDisplayProps) => {
     return (
         <Pill.Group>
-            {props.labels.map((label) => (
+            {props.labels.map((labelId) => (
                 <StaticLabel
-                    key={label.id}
-                    labelId={label.id}
+                    key={labelId}
+                    labelId={labelId}
                 />
             ))}
             {props.showAdd && !props.labels.length && (

@@ -1,52 +1,110 @@
-import { useStatelessMap } from '@trz/hooks/useStatelessMap';
-import React, { createContext, useContext, useEffect } from 'react';
+import { getRoomCode, ObjectSource, ObjectSourceDataInstance, RoomType, ServerSE, UID } from '@mosaiq/terrazzo-common';
+import { readObjectSource } from '@trz/emitters';
+import { useSocketListener } from '@trz/hooks/util/useSocketListener';
+import { useStatelessMap } from '@trz/hooks/util/useStatelessMap';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useRoomListener } from './room-listener-context';
+import { useSocket } from './socket-context';
+
+type InstanceId = UID;
+
+interface Subscriber<T extends ObjectSource = ObjectSource> {
+    instanceId: InstanceId;
+    objectId: UID;
+    source: T;
+    callback: (data: ObjectSourceDataInstance<T> | undefined) => void;
+}
+
+type ObjectSourceKey = `${ObjectSource}:${UID}`;
 
 export type DataSourcesContextType = {
-    subscribe: (id: string, callback: (data: string) => void) => void;
-    unsubscribe: (id: string) => void;
+    subscribeObject: (sub: Subscriber) => Promise<void>;
+    unsubscribeObject: (instanceId: InstanceId) => void;
 };
 
 const DataSourcesContext = createContext<DataSourcesContextType | undefined>(undefined);
 
-interface Subscriber {
-    id: string;
-    callback: (data: string) => void;
-}
-
 const DataSourcesProvider: React.FC<any> = ({ children }) => {
-    const [subscribers, setSubscribers] = useStatelessMap<string, Subscriber>();
+    const sockCtx = useSocket();
+    const roomCtx = useRoomListener();
+    const [objectSources] = useStatelessMap<ObjectSourceKey, ObjectSourceDataInstance<ObjectSource> | undefined>();
+    const [objectSubscribers] = useStatelessMap<ObjectSourceKey, Set<InstanceId>>();
+    const [instanceSubscribers] = useStatelessMap<InstanceId, Subscriber>();
 
-    useEffect(() => {
-        // Every 3 seconds, send a message to a random subscriber
-        const interval = setInterval(() => {
-            const subscriberIds = Array.from(subscribers.keys());
-            console.log('Attempting to send message to subscribers:', subscriberIds);
-            if (subscriberIds.length === 0) return;
-            const randomId = subscriberIds[Math.floor(Math.random() * subscriberIds.length)];
-            const subscriber = subscribers.get(randomId);
-            if (subscriber) {
-                console.log(`Sending message to subscriber ${subscriber.id}`);
-                subscriber.callback(`Hello ${new Date().getTime().toString().slice(-5)}`);
+    useSocketListener(ServerSE.OBJECT_SOURCE_UPDATE, (payload) => {
+        const key: ObjectSourceKey = `${payload.type}:${payload.data.id}`;
+        objectSources.set(key, payload.data);
+        const subscribers = objectSubscribers.get(key);
+        if (!subscribers) {
+            return;
+        }
+        for (const instanceId of subscribers) {
+            const sub = instanceSubscribers.get(instanceId);
+            if (sub) {
+                sub.callback(payload.data);
             }
-        }, 3000);
-        return () => clearInterval(interval);
-    }, [subscribers]);
+        }
+    });
 
-    const subscribe = (id: string, callback: (data: string) => void) => {
-        console.log(`Subscribing ${id}`);
-        subscribers.set(id, { id, callback });
-    };
+    const subscribeObject = useCallback(
+        async (sub: Subscriber) => {
+            // Verify that everything needed to subscribe is present
+            if (!sockCtx.connected) {
+                console.warn('Socket not connected, cannot subscribe to object source');
+                return;
+            }
+            if (instanceSubscribers.has(sub.instanceId)) {
+                console.error(`Subscriber with instanceId ${sub.instanceId} already exists.`);
+                throw new Error(`Subscriber with instanceId ${sub.instanceId} already exists.`);
+            }
 
-    const unsubscribe = (id: string) => {
-        console.log(`Unsubscribing ${id}`);
-        subscribers.delete(id);
-    };
+            // Add subscriber to the map with a callback that filters for updates to this specific object source
+            instanceSubscribers.set(sub.instanceId, sub);
+
+            // Send over the initial data if we have it, otherwise fetch it and then send it
+            const key: ObjectSourceKey = `${sub.source}:${sub.objectId}`;
+            if (!objectSources.has(key)) {
+                try {
+                    const data = await readObjectSource(sockCtx, sub.objectId, sub.source);
+                    objectSources.set(key, data);
+                } catch (e) {
+                    console.error(`Failed to initialize object source ${sub.source} with id ${sub.objectId}:`, e);
+                }
+            }
+            const existingData = objectSources.get(key);
+            sub.callback(existingData);
+
+            // Subscribe to the room to receive updates on this client
+            const roomId = getRoomCode(RoomType.SOURCE, sub.objectId, sub.source);
+            roomCtx.subscribe(roomId, sub.instanceId);
+        },
+        [instanceSubscribers, objectSources, sockCtx]
+    );
+
+    const unsubscribeObject = useCallback(
+        (instanceId: InstanceId) => {
+            // Remove subscriber from the map
+            const sub = instanceSubscribers.get(instanceId);
+            if (!sub) {
+                return;
+            }
+            sub.callback(undefined);
+            instanceSubscribers.delete(instanceId);
+
+            // Unsubscribe from the room to stop receiving updates on this client
+            const roomId = getRoomCode(RoomType.SOURCE, sub.objectId, sub.source);
+            roomCtx.unsubscribe(roomId, instanceId);
+
+            // If this was the last subscriber for this object source, we can clean up the old data
+        },
+        [instanceSubscribers]
+    );
 
     return (
         <DataSourcesContext.Provider
             value={{
-                subscribe,
-                unsubscribe,
+                subscribeObject,
+                unsubscribeObject,
             }}
         >
             {children}
@@ -62,51 +120,23 @@ const useDataSources = () => {
     return context;
 };
 
-const useDataSourcesSubscribe = () => {
-    const id = React.useId();
-    const [lastMessage, setLastMessage] = React.useState<string>('');
-    // Dont need force update if a state update is triggered when a message is received, which will cause a re-render.
-    // const forceUpdate = useForceUpdate();
-    const { subscribe, unsubscribe } = useDataSources();
+const useObjectSource = <T extends ObjectSource>(objectId: UID, source: T): ObjectSourceDataInstance<T> | undefined => {
+    const { subscribeObject, unsubscribeObject } = useDataSources();
+    const [instanceId] = useState<InstanceId>(crypto.randomUUID());
+    const [sourceData, setSourceData] = useState<ObjectSourceDataInstance<T> | undefined>(undefined);
 
-    console.log(`Setting up subscriber ${id}`);
-    // Create a callback function that will be called when a message is sent to this subscriber. When received, force an update to re-render this component.
-    const callback = (data: string) => {
-        console.log(`Subscriber ${id} received:`, data);
-        setLastMessage(data);
-        // forceUpdate();
-    };
+    const callback = useCallback((data: ObjectSourceDataInstance<T> | undefined) => {
+        setSourceData(data);
+    }, []);
 
-    // Subscribe to the context when the component mounts, and unsubscribe when it unmounts
     useEffect(() => {
-        subscribe(id, callback);
+        subscribeObject({ instanceId, objectId, source, callback });
         return () => {
-            unsubscribe(id);
+            unsubscribeObject(instanceId);
         };
-    }, [id, subscribe, unsubscribe]);
+    }, [instanceId, subscribeObject, unsubscribeObject]);
 
-    return { lastMessage, id };
+    return sourceData;
 };
 
-const TestDummy = () => {
-    const { lastMessage, id } = useDataSourcesSubscribe();
-    console.log(`Rendering subscriber ${id}`);
-    return (
-        <div>
-            Subscriber {lastMessage}. Last updated at {new Date().getTime().toString().slice(-5)}.
-        </div>
-    );
-};
-
-export const TestGrounds = () => {
-    const n = 5; // Number of subscribers
-    return (
-        <DataSourcesProvider>
-            {Array.from({ length: n }, (_, i) => (
-                <TestDummy key={i} />
-            ))}
-        </DataSourcesProvider>
-    );
-};
-
-// export { DataSourcesProvider, useDataSources };
+export { DataSourcesProvider, useDataSources, useObjectSource };

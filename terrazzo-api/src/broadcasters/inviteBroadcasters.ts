@@ -2,7 +2,7 @@ import { getRoomCode, InviteId, OrganizationId, RoomSpecifier, RoomType, ServerS
 import { getAllInvitesForOrg } from '@trz-api/controllers/inviteController';
 import { getInviteRecordByIdDb } from '@trz-api/persistence/invitePersistence';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socket/socketUtils';
+import { broadcast } from '@trz-api/utils/socket/socketActions';
 
 export const syncOrgInvitesFromInviteId = async (inviteId: InviteId) => {
     try {

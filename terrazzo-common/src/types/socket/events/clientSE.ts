@@ -1,10 +1,11 @@
-import { CardHeader, CollectionSource, ObjectSource, TextBlockResourceType, TextBlockSnapshot } from '../../..';
+import { CollectionSource } from '../../dataSource/collectionSources';
 import {
     CollectionSourceDataInstance,
     CreateObjectSourceData,
-    ObjectSourceDataInstance,
+    ObjectSourceData,
     UpdateObjectSourceData,
 } from '../../dataSource/dataSourceTypes';
+import { ObjectSource } from '../../dataSource/objectSources';
 import {
     CardId,
     InviteId,
@@ -19,12 +20,14 @@ import {
 } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
+import { CardHeader } from '../../modules/board/cardTypes';
 import { Label } from '../../modules/board/labelTypes';
 import { ListHeader } from '../../modules/board/listTypes';
 import { CreateModuleDataArgs, ModuleHeader, UpdateModuleDataArgs } from '../../modules/moduleTypes';
 import { OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
 import { QueryItem } from '../../queryTypes';
+import { TextBlockResourceType, TextBlockSnapshot } from '../../textTypes';
 import { UserHeader } from '../../userTypes';
 import { MouseRoomUserData, RoomId } from '../roomTypes';
 import { UserData } from '../socketTypes';
@@ -235,7 +238,7 @@ export interface ClientSEReplies {
     [ClientSE.USE_INVITE]: boolean;
     [ClientSE.USE_TEXT_BLOCK_HISTORY_SNAPSHOT]: boolean;
 
-    [ClientSE.READ_OBJECT_SOURCE]: ObjectSourceDataInstance<ObjectSource> | undefined;
+    [ClientSE.READ_OBJECT_SOURCE]: ObjectSourceData | undefined;
     [ClientSE.CREATE_OBJECT_SOURCE]: undefined;
     [ClientSE.UPDATE_OBJECT_SOURCE]: undefined;
     [ClientSE.READ_COLLECTION_SOURCE]: CollectionSourceDataInstance<CollectionSource> | undefined;

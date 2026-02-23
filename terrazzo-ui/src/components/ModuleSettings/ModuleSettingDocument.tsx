@@ -3,10 +3,10 @@ import { ModuleHeader, ModuleId, PermissibleAction, TrzModule } from '@mosaiq/te
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateModuleField } from '@trz/emitters';
 import { useModulePermission } from '@trz/hooks/data/usePermissions';
-import { useModule } from '@trz/hooks/useModule';
 import { NoteType, notify } from '@trz/util/notifications';
 import { NotFound } from '../UI/NotFound';
 import { ModuleSettingsLayout } from './ModuleSettingsLayout';
+import { useModule } from '@trz/hooks/data/useModule';
 
 interface ModuleSettingsDocumentProps {
     documentId: ModuleId;

@@ -9,7 +9,7 @@ import {
 } from '@trz-api/controllers/labelController';
 import { getLabelByIdDb } from '@trz-api/persistence/labelPersistence';
 import { userCanManageCards, userCanManageModule, userCanViewModule } from '@trz-api/utils/permissions';
-import { subscribe } from '@trz-api/utils/socket/socketUtils';
+import { subscribe } from '@trz-api/utils/socket/socketActions';
 import { Socket } from 'socket.io';
 
 export const registerLabelListeners = (socket: Socket) => {

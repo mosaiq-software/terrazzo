@@ -3,7 +3,6 @@ import { useClipboard } from '@mantine/hooks';
 import { Invite, isInviteExpired, OrganizationHeader } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { createInvite, deleteInvite } from '@trz/emitters';
-import { useOrgInvites } from '@trz/hooks/useOrgInvites';
 import { COLORS } from '@trz/util/colors';
 import { getInviteLink } from '@trz/util/linkUtils';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -12,6 +11,7 @@ import { HiDotsVertical } from 'react-icons/hi';
 import { IoChevronDown } from 'react-icons/io5';
 import { InfinityChar } from '../../UI/InfinityChar';
 import { InviteRow } from './InviteRow';
+import { useOrgInvites } from '@trz/hooks/data/useOrgInvites';
 
 interface InvitesPanelProps {
     orgData: OrganizationHeader;

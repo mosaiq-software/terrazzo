@@ -3,8 +3,8 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { getRolesForOrg } from '@trz/emitters/roleEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
-import { useRoom } from './useRoom';
-import { useSocketListener } from './useSocketListener';
+import { useRoom } from '../util/useRoom';
+import { useSocketListener } from '../util/useSocketListener';
 
 export const useOrgRoles = (orgId?: OrganizationId) => {
     useRoom(RoomType.DATA, orgId, RoomSpecifier.ROLES);

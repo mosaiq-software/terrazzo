@@ -1,7 +1,7 @@
 import { getRoomCode, OrganizationId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { getMembersInOrg } from '@trz-api/controllers/membershipController';
 import { userCanViewOrganization } from '@trz-api/utils/permissions';
-import { broadcast } from '@trz-api/utils/socket/socketUtils';
+import { broadcast } from '@trz-api/utils/socket/socketActions';
 
 /**
  * Syncs the members in an organization by broadcasting the updated list to all members in the org's membership room.

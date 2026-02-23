@@ -1,5 +1,5 @@
 import { BLOCKNOTE_FRAGMENT_ID, exhaustiveCheck, TextBlockType } from '@mosaiq/terrazzo-common';
-import { Document } from '@trz-api/utils/y-socket-io';
+import { Document } from '@trz-api/utils/y-socket-io/document';
 import { XmlText } from 'yjs';
 import { BLOCKNOTE_EDITOR } from './blocknote';
 

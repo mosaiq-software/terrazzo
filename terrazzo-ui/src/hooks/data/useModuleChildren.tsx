@@ -4,8 +4,8 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { getModuleChildren } from '@trz/emitters/moduleEmitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
-import { useRoom } from './useRoom';
-import { useSocketListener } from './useSocketListener';
+import { useRoom } from '../util/useRoom';
+import { useSocketListener } from '../util/useSocketListener';
 
 export const useModuleChildren = (moduleId: ModuleId | undefined) => {
     useRoom(RoomType.DATA, moduleId, RoomSpecifier.CONTENTS);

@@ -1,10 +1,12 @@
-import { ActionIcon, Box, Collapse, Group, Menu, Text } from '@mantine/core';
+import { ActionIcon, Box, Collapse, Group, Menu } from '@mantine/core';
 import { useHover, useLocalStorage } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { ModuleHeader, PermissibleAction, TrzModule, UID } from '@mosaiq/terrazzo-common';
+import EditableTextbox from '@trz/components/UI/EditableTextbox';
+import { useSocket } from '@trz/contexts/socket-context';
 import { useUnsavedChanges } from '@trz/contexts/unsaved-changes-context';
+import { useModuleChildren } from '@trz/hooks/data/useModuleChildren';
 import { useModulePermission } from '@trz/hooks/data/usePermissions';
-import { useModuleChildren } from '@trz/hooks/useModuleChildren';
 import { COLORS } from '@trz/util/colors';
 import { captureAllEvents, completelyCaptureEvent } from '@trz/util/eventUtils';
 import { getModuleRelativeUrl } from '@trz/util/moduleUtils';
@@ -15,10 +17,6 @@ import { useNavigate } from 'react-router';
 import { useLocation } from 'react-router-dom';
 import { DirectoryListItemContextMenu } from './DirectoryListItemContextMenu';
 import { DirectoryListItemIcon } from './DirectoryListItemIcon';
-import EditableTextbox from '@trz/components/UI/EditableTextbox';
-import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
-import { updateBoardField, updateDocumentMetadata } from '@trz/emitters';
-import { useSocket } from '@trz/contexts/socket-context';
 
 interface DirectoryTreeItemProps {
     directoryListItem: ModuleHeader;

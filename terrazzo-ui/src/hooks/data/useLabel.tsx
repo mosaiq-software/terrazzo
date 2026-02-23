@@ -3,8 +3,8 @@ import { useSocket } from '@trz/contexts/socket-context';
 import { getLabel } from '@trz/emitters';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useEffect, useState } from 'react';
-import { useRoom } from './useRoom';
-import { useSocketListener } from './useSocketListener';
+import { useRoom } from '../util/useRoom';
+import { useSocketListener } from '../util/useSocketListener';
 
 export const useLabel = (labelId?: LabelId) => {
     const [label, setLabel] = useState<Label | undefined>(undefined);

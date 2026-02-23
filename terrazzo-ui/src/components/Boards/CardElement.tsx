@@ -21,7 +21,7 @@ interface CardElementProps {
 }
 const CardElement = (props: CardElementProps) => {
     const { ref: viewportRef, inViewport } = useInViewport();
-    const card = useCard(props.cardId, props.dragging || props.isOverlay, inViewport);
+    const { card, labels, assignees } = useCard(props.cardId, props.dragging || props.isOverlay, inViewport);
     const { showContextMenu } = useContextMenu();
     const boardMeta = useBoardMetadata();
     const { editCard } = boardMeta.permissions;
@@ -76,7 +76,7 @@ const CardElement = (props: CardElementProps) => {
             {card && inViewport && (
                 <React.Fragment>
                     <StaticLabelDisplay
-                        labels={card.labels}
+                        labels={labels}
                         size="xs"
                     />
                     <Text
@@ -106,7 +106,7 @@ const CardElement = (props: CardElementProps) => {
                         style={{ flexDirection: 'row-reverse' }}
                     >
                         <AvatarRow
-                            users={card.assignees}
+                            users={assignees}
                             maxUsers={3}
                             showProfilePopover={!props.dragging && !props.isOverlay}
                             showTooltip={!props.dragging && !props.isOverlay}

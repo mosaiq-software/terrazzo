@@ -2,13 +2,13 @@ import { Box, Fieldset, Stack } from '@mantine/core';
 import { ModuleType, OrganizationId, UID } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
 import { updateModuleField } from '@trz/emitters';
-import { useModuleChildren } from '@trz/hooks/useModuleChildren';
 import { COLORS } from '@trz/util/colors';
 import { ModuleIcon } from '@trz/util/moduleUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useMemo } from 'react';
 import { ActionRow } from '../UI/ActionRow';
+import { useModuleChildren } from '@trz/hooks/data/useModuleChildren';
 
 interface OrgTabArchiveProps {
     orgId: OrganizationId;

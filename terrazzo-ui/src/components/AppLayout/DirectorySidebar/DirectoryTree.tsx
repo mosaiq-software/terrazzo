@@ -1,7 +1,7 @@
 import { Button, Group, Menu, Stack } from '@mantine/core';
 import { OrganizationId, PermissibleAction, TrzModule, UID } from '@mosaiq/terrazzo-common';
+import { useModuleChildren } from '@trz/hooks/data/useModuleChildren';
 import { useOrgPermission } from '@trz/hooks/data/usePermissions';
-import { useModuleChildren } from '@trz/hooks/useModuleChildren';
 import { useMemo } from 'react';
 import { MdAdd } from 'react-icons/md';
 import { DirectoryTreeItem } from './DirectoryTreeItem';

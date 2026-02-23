@@ -28,7 +28,7 @@ export const AvatarRow = (props: AvatarRowProps) => {
             const list: UserHeader[] = [];
             for (const uObj of props.users) {
                 if (typeof uObj === 'string') {
-                    let user = orgCtx.members.find((m) => m.user.id === uObj)?.user;
+                    let user = orgCtx.members.find((userId) => userId === uObj)?.user;
                     if (!user) {
                         user = await getUserHeader(sockCtx, uObj);
                     }

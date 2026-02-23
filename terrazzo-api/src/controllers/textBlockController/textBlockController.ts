@@ -12,7 +12,7 @@ import {
 import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
 import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { userCanManageCards, userCanManageModule } from '@trz-api/utils/permissions';
-import { Document } from '@trz-api/utils/y-socket-io';
+import { Document } from '@trz-api/utils/y-socket-io/document';
 import console from 'console';
 import { Doc, XmlText } from 'yjs';
 import { getBoardIDFromCardID } from '../cardController';

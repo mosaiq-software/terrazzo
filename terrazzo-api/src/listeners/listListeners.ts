@@ -7,7 +7,7 @@ import {
     updateListFromPartial,
 } from '@trz-api/controllers/listController';
 import { userCanManageModule, userCanViewModule } from '@trz-api/utils/permissions';
-import { subscribe } from '@trz-api/utils/socket/socketUtils';
+import { subscribe } from '@trz-api/utils/socket/socketActions';
 import { Socket } from 'socket.io';
 
 export const registerListListeners = (socket: Socket) => {
