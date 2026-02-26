@@ -7,8 +7,8 @@ import {
     updateUserHeaderDb,
 } from '@trz-api/persistence/userPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
-import { addCard } from './cardController';
-import { addList } from './listController';
+import { cardHandler } from './dataSources/objectHandlers/card';
+import { listHandler } from './dataSources/objectHandlers/list';
 import { createNewModule } from './moduleController';
 import { addOrganization } from './organizationController';
 
@@ -64,18 +64,18 @@ const seedNewUserProfile = async (userId: UserId) => {
         const personalBoard = await createNewModule('Task Tracking', personalOrgId, TrzModule.Board, {
             boardCode: '',
         });
-        const personalListTodo = await addList({ boardId: personalBoard.id, name: 'To Do' });
-        const personalListDoing = await addList({ boardId: personalBoard.id, name: 'Doing' });
-        const personalListDone = await addList({ boardId: personalBoard.id, name: 'Done' });
+        const personalListTodoId = await listHandler.create({ boardId: personalBoard.id, name: 'To Do' });
+        const personalListDoingId = await listHandler.create({ boardId: personalBoard.id, name: 'Doing' });
+        const personalListDoneId = await listHandler.create({ boardId: personalBoard.id, name: 'Done' });
         const cards = {
-            '👓 Create a Terrazzo account': personalListDone.id,
-            '🔎 Explore Terrazzo!': personalListDoing.id,
-            '📃 Add a card to a list': personalListTodo.id,
-            '🧱 Start my own project': personalListTodo.id,
-            '😀 Invite some friends': personalListTodo.id,
+            '👓 Create a Terrazzo account': personalListDoneId,
+            '🔎 Explore Terrazzo!': personalListDoingId,
+            '📃 Add a card to a list': personalListTodoId,
+            '🧱 Start my own project': personalListTodoId,
+            '😀 Invite some friends': personalListTodoId,
         };
         for (const [cardName, listId] of Object.entries(cards)) {
-            await addCard({
+            await cardHandler.create({
                 listId: listId,
                 name: cardName,
                 createdById: SYSTEM_USER_ID,

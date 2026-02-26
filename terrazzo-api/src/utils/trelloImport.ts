@@ -21,9 +21,9 @@ import { getApiUrl } from '@trz-api/utils/envUtils';
 import { extractMarkdownImagesFromText, replaceAllOccurrences } from '@trz-api/utils/textUtils';
 import { addAssigneeToCard } from '../controllers/cardAssignmentController';
 import { setCardsLabels } from '../controllers/cardController';
+import { listHandler } from '../controllers/dataSources/objectHandlers/list';
 import { saveFileFromUrl } from '../controllers/fileController';
 import { createBoardLabel } from '../controllers/labelController';
-import { addList } from '../controllers/listController';
 import { createNewModule } from '../controllers/moduleController';
 import {
     getBlocknoteChecklistBlock,
@@ -83,17 +83,17 @@ const createLists = async (trzBoardId: ModuleId, trelloLists: TrelloListType[]) 
     let index = 0;
     for (const trelloList of sortedLists.values()) {
         const trelloListName = trelloList.name;
-        const trzList = await addList(
+        const listId = await listHandler.create(
             {
                 boardId: trzBoardId,
                 name: trelloListName,
-                order: trelloList.closed ? null : index,
+                order: trelloList.closed ? undefined : index,
             },
             {
                 preventSync: true,
             }
         );
-        listMap[trelloList.id] = trzList.id;
+        listMap[trelloList.id] = listId;
         if (!trelloList.closed) {
             index++;
         }

@@ -1,11 +1,6 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import {
-    addList,
-    getBoardIDFromListID,
-    getListRes,
-    moveList,
-    updateListFromPartial,
-} from '@trz-api/controllers/listController';
+import { listHandler } from '@trz-api/controllers/dataSources/objectHandlers/list';
+import { getBoardIDFromListID, moveList } from '@trz-api/controllers/listController';
 import { userCanManageModule, userCanViewModule } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socket/socketActions';
 import { Socket } from 'socket.io';
@@ -16,7 +11,7 @@ export const registerListListeners = (socket: Socket) => {
         if (!(await userCanViewModule(socket, boardId))) {
             throw new Error('Insufficient permissions to view this list');
         }
-        const list = await getListRes(data);
+        const list = await listHandler.read(data);
         if (!list) {
             throw new Error('List not found ' + data);
         }
@@ -27,8 +22,7 @@ export const registerListListeners = (socket: Socket) => {
         if (!(await userCanManageModule(socket, data.boardID))) {
             throw new Error('Insufficient permissions to create lists for this board');
         }
-        const list = await addList({ boardId: data.boardID, name: data.listName });
-        return list.id;
+        return await listHandler.create({ boardId: data.boardID, name: data.listName });
     });
 
     subscribe(socket, ClientSE.UPDATE_LIST_FIELD, async (data) => {
@@ -36,7 +30,7 @@ export const registerListListeners = (socket: Socket) => {
         if (!(await userCanManageModule(socket, boardId))) {
             throw new Error('Insufficient permissions to update this list');
         }
-        await updateListFromPartial(data.id, data);
+        await listHandler.update(data.id, data);
         return undefined;
     });
 
