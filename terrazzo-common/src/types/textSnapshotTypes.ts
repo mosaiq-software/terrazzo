@@ -2,9 +2,14 @@ import { TextBlockId, TextBlockSnapshotId } from './genericTypes';
 
 export interface CreateTextBlockSnapshot {
     textBlockId: TextBlockId;
+    content: string;
+    tags?: string[];
 }
 
-export interface UpdateTextBlockSnapshot {}
+export interface UpdateTextBlockSnapshot {
+    content?: string;
+    tags?: string[];
+}
 
 export interface TextBlockSnapshot {
     snapshotId: TextBlockSnapshotId;

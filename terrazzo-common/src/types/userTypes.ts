@@ -1,6 +1,11 @@
 import { URL, UserId } from './genericTypes';
 
-export interface CreateUserHeader {}
+export interface CreateUserHeader {
+    username: string;
+    firstName: string;
+    lastName: string;
+    profilePicture?: URL;
+}
 
 export interface UpdateUserHeader {
     username?: string;

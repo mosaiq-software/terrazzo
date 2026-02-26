@@ -2,8 +2,9 @@ import { OrganizationId, URL, UserId } from './genericTypes';
 
 export interface CreateOrganizationHeader {
     name: string;
-    logoUrl: URL;
-    description: string;
+    ownerId: UserId;
+    logoUrl?: URL;
+    description?: string;
 }
 
 export interface UpdateOrganizationHeader {

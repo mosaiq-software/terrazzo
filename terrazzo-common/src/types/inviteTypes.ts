@@ -8,6 +8,7 @@ export interface CreateInvite {
 
 export interface UpdateInvite {
     maxUses?: number | null;
+    uses?: number;
     revokedAt?: number | null;
 }
 

@@ -1,6 +1,6 @@
 import { CollectionSource } from '../../dataSource/collectionSources';
 import {
-    CollectionSourceDataInstance,
+    CollectionSourceData,
     CreateObjectSourceData,
     ObjectSourceData,
     UpdateObjectSourceData,
@@ -242,7 +242,7 @@ export interface ClientSEReplies {
     [ClientSE.READ_OBJECT_SOURCE]: ObjectSourceData | undefined;
     [ClientSE.CREATE_OBJECT_SOURCE]: undefined;
     [ClientSE.UPDATE_OBJECT_SOURCE]: undefined;
-    [ClientSE.READ_COLLECTION_SOURCE]: CollectionSourceDataInstance<CollectionSource> | undefined;
+    [ClientSE.READ_COLLECTION_SOURCE]: CollectionSourceData | undefined;
     [ClientSE.ADD_TO_COLLECTION_SOURCE]: undefined;
     [ClientSE.REMOVE_FROM_COLLECTION_SOURCE]: undefined;
 }

@@ -15,7 +15,7 @@ export interface CreateCard {
 
 export interface UpdateCard {
     name?: string;
-    priority?: Priority;
+    priority?: Priority | null;
 }
 
 export interface Card {

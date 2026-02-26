@@ -8,7 +8,7 @@ import { List } from '../../modules/board/listTypes';
 import { ModuleHeader } from '../../modules/moduleTypes';
 import { OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
-import { TextBlockSnapshot } from '../../textTypes';
+import { TextBlockSnapshot } from '../../textSnapshotTypes';
 import { UserHeader } from '../../userTypes';
 import { MouseRoomUserData } from '../roomTypes';
 import { SocketId, UserData } from '../socketTypes';

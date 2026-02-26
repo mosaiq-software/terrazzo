@@ -5,7 +5,8 @@ export interface CreateRole {
     orgId: OrganizationId;
     name: string;
     color: string;
-    order: number;
+    order?: number;
+    defaultPermissions?: PermissionFlag[];
 }
 
 export interface UpdateRole {

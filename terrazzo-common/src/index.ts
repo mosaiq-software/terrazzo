@@ -9,9 +9,12 @@ export * from './types/dataSource/objectSources';
 export * from './types/genericTypes';
 export * from './types/inviteTypes';
 export * from './types/linkedAccountTypes';
+export * from './types/organizationMembershipTypes';
 export * from './types/organizationTypes';
 export * from './types/queryTypes';
+export * from './types/textSnapshotTypes';
 export * from './types/textTypes';
+export * from './types/uploadedFileTypes';
 export * from './types/userTypes';
 
 // Types - Permissions
@@ -22,6 +25,7 @@ export * from './types/permissions/permissionTypes';
 export * from './types/permissions/roleTypes';
 
 // Types - Modules
+export * from './types/modules/board/cardAssignmentTypes';
 export * from './types/modules/board/cardTypes';
 export * from './types/modules/board/labelTypes';
 export * from './types/modules/board/listTypes';
