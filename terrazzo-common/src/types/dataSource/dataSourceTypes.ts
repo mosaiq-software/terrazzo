@@ -42,16 +42,35 @@ type CollectionSourceUpdatePayloadMap = {
 export type CollectionSourceDataPayload<T extends CollectionSource> = CollectionSourceUpdatePayloadMap[T];
 export type CollectionSourceData = CollectionSourceDataPayload<CollectionSource>;
 
+export interface ObjectSourceCreateOptions {
+    preventSync?: boolean;
+}
+export interface ObjectSourceUpdateOptions {
+    preventSync?: boolean;
+}
+export interface ObjectSourceReadOptions {}
+
 export interface ObjectSourceHandler<T extends ObjectSource> {
-    create: (data: CreateObjectSourceDataInstance<T>) => Promise<void>;
-    update: (id: UID, data: Partial<UpdateObjectSourceDataInstance<T>>) => Promise<void>;
-    read: (id: UID) => Promise<ObjectSourceDataInstance<T> | undefined>;
+    create: (data: CreateObjectSourceDataInstance<T>, options?: ObjectSourceCreateOptions) => Promise<UID>;
+    update: (
+        id: UID,
+        data: Partial<UpdateObjectSourceDataInstance<T>>,
+        options?: ObjectSourceUpdateOptions
+    ) => Promise<void>;
+    read: (id: UID, options?: ObjectSourceReadOptions) => Promise<ObjectSourceDataInstance<T> | undefined>;
 }
 
+export interface CollectionSourceReadOptions {}
+export interface CollectionSourceAddOptions {
+    preventSync?: boolean;
+}
+export interface CollectionSourceRemoveOptions {
+    preventSync?: boolean;
+}
 export interface CollectionSourceHandler<T extends CollectionSource> {
-    read: (parentId: UID) => Promise<CollectionSourceDataMap[T] | undefined>;
-    add: (parentId: UID, itemIds: UID[]) => Promise<void>;
-    remove: (parentId: UID, itemIds: UID[]) => Promise<void>;
+    read: (parentId: UID, options?: CollectionSourceReadOptions) => Promise<CollectionSourceDataMap[T] | undefined>;
+    add: (parentId: UID, itemIds: UID[], options?: CollectionSourceAddOptions) => Promise<void>;
+    remove: (parentId: UID, itemIds: UID[], options?: CollectionSourceRemoveOptions) => Promise<void>;
 }
 
 export type ObjectSourceController = {

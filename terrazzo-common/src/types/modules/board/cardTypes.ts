@@ -1,12 +1,16 @@
+import { Block } from '@blocknote/core';
 import { Priority } from '../../../constants';
 import { CardId, ListId, ModuleId, TextBlockId, UserId } from '../../genericTypes';
 
 export interface CreateCard {
-    id: CardId;
     listId: ListId;
     name: string;
+    cardNumber?: number;
     priority?: Priority;
     order?: number;
+    descriptionBlocks?: Block[];
+    createdAt?: number;
+    createdById?: UserId;
 }
 
 export interface UpdateCard {

@@ -1,8 +1,8 @@
 import { CardId } from '@mosaiq/terrazzo-common';
-import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
+import { cardHandler } from './dataSources/objectHandlers/card';
 
 export async function getListIDFromCardID(cardID: CardId) {
-    const card = await getCardByIdDb(cardID);
+    const card = await cardHandler.read(cardID);
     if (card == null) {
         throw new Error('Card not found');
     }
@@ -10,7 +10,7 @@ export async function getListIDFromCardID(cardID: CardId) {
 }
 
 export async function getBoardIDFromCardID(cardID: CardId) {
-    const card = await getCardByIdDb(cardID);
+    const card = await cardHandler.read(cardID);
     if (card == null || !card.boardId) {
         throw new Error('Card not found');
     }

@@ -16,10 +16,11 @@ import {
     recordKeys,
     settlePromises,
 } from '@mosaiq/terrazzo-common';
+import { cardHandler } from '@trz-api/controllers/dataSources/objectHandlers/card';
 import { getApiUrl } from '@trz-api/utils/envUtils';
 import { extractMarkdownImagesFromText, replaceAllOccurrences } from '@trz-api/utils/textUtils';
 import { addAssigneeToCard } from '../controllers/cardAssignmentController';
-import { addCard, setCardsLabels } from '../controllers/cardController';
+import { setCardsLabels } from '../controllers/cardController';
 import { saveFileFromUrl } from '../controllers/fileController';
 import { createBoardLabel } from '../controllers/labelController';
 import { addList } from '../controllers/listController';
@@ -171,23 +172,23 @@ const createCard = async (
     const trzCreatorId = userMap[trelloCard.idMemberCreator];
     const createdAt = cardCreatedDateMap[trelloCard.id]?.getTime() || Date.now();
     const orderIndex = cardOrderMap[trelloCard.id];
-    const trzCard = await addCard(
+    const trzCardId = await cardHandler.create(
         {
             listId: trzListId,
             name: trelloCard.name,
-            order: trelloCard.closed ? null : orderIndex,
+            order: trelloCard.closed ? undefined : (orderIndex ?? undefined),
             createdById: trzCreatorId,
             createdAt: createdAt,
             cardNumber: trelloCard.idShort,
+            descriptionBlocks: allBlocks,
         },
         {
             preventSync: true,
-            descriptionBlocks: allBlocks,
         }
     );
     const trzLabelIds = trelloCard.idLabels.map((trlLabelId) => labelMap[trlLabelId]);
-    await setCardsLabels(trzCard.id, trzLabelIds, { preventSync: true });
-    await processCardAssignments(trelloCard, userMap, trzCard.id);
+    await setCardsLabels(trzCardId, trzLabelIds, { preventSync: true });
+    await processCardAssignments(trelloCard, userMap, trzCardId);
 };
 
 /**

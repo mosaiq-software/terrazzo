@@ -1,11 +1,11 @@
-import { ObjectSource, ObjectSourceHandler } from '@mosaiq/terrazzo-common';
+import { ObjectSource, ObjectSourceCreateOptions } from '@mosaiq/terrazzo-common';
 import {
     createInviteRecordDb,
     getInviteRecordByIdDb,
     updateInviteRecordDb,
 } from '@trz-api/persistence/invitePersistence';
 
-export const inviteHandler: ObjectSourceHandler<ObjectSource.Invite> = {
+export const inviteHandler: ObjectSourceCreateOptions<ObjectSource.Invite> = {
     create: async (data) => {
         await createInviteRecordDb({
             id: crypto.randomUUID(),

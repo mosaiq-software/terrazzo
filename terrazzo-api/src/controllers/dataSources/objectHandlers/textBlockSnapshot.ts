@@ -1,6 +1,6 @@
-import { ObjectSource, ObjectSourceHandler } from '@mosaiq/terrazzo-common';
+import { ObjectSource, ObjectSourceCreateOptions } from '@mosaiq/terrazzo-common';
 
-export const textBlockSnapshotHandler: ObjectSourceHandler<ObjectSource.TextBlockSnapshot> = {
+export const textBlockSnapshotHandler: ObjectSourceCreateOptions<ObjectSource.TextBlockSnapshot> = {
     create: async (data) => {
         void data;
         return;

@@ -1,7 +1,7 @@
-import { ObjectSource, ObjectSourceHandler } from '@mosaiq/terrazzo-common';
+import { ObjectSource, ObjectSourceCreateOptions } from '@mosaiq/terrazzo-common';
 import { createLabelOnBoardDb, getLabelByIdDb, updateLabelDb } from '@trz-api/persistence/labelPersistence';
 
-export const labelHandler: ObjectSourceHandler<ObjectSource.Label> = {
+export const labelHandler: ObjectSourceCreateOptions<ObjectSource.Label> = {
     create: async (data) => {
         await createLabelOnBoardDb(
             {

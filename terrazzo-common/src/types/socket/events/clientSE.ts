@@ -27,7 +27,8 @@ import { CreateModuleDataArgs, ModuleHeader, UpdateModuleDataArgs } from '../../
 import { OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
 import { QueryItem } from '../../queryTypes';
-import { TextBlockResourceType, TextBlockSnapshot } from '../../textTypes';
+import { TextBlockSnapshot } from '../../textSnapshotTypes';
+import { TextBlockResourceType } from '../../textTypes';
 import { UserHeader } from '../../userTypes';
 import { MouseRoomUserData, RoomId } from '../roomTypes';
 import { UserData } from '../socketTypes';

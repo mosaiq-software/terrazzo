@@ -1,6 +1,6 @@
-import { ObjectSource, ObjectSourceHandler } from '@mosaiq/terrazzo-common';
+import { ObjectSource, ObjectSourceCreateOptions } from '@mosaiq/terrazzo-common';
 
-export const listHandler: ObjectSourceHandler<ObjectSource.List> = {
+export const listHandler: ObjectSourceCreateOptions<ObjectSource.List> = {
     create: async (data) => {
         void data;
         return;
