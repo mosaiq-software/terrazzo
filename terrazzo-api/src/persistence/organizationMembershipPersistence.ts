@@ -43,3 +43,8 @@ export const removeMembersFromOrgDb = async (orgId: OrganizationId, userIds: Use
         where: { orgId, userId: { [Op.in]: userIds } },
     });
 };
+
+export const getOrgIdsByUserIdDb = async (userId: UserId): Promise<OrganizationId[]> => {
+    const models = await OrganizationMembershipModel.findAll({ attributes: ['orgId'], where: { userId } });
+    return models.map((m) => m.toJSON().orgId);
+};

@@ -16,6 +16,7 @@ import { labelsCollectionHandler } from './collectionHandlers/labels';
 import { listsCollectionHandler } from './collectionHandlers/lists';
 import { modulesCollectionHandler } from './collectionHandlers/modules';
 import { organizationMembersCollectionHandler } from './collectionHandlers/organizationMembers';
+import { organizationsCollectionHandler } from './collectionHandlers/organizations';
 import { roleAssignmentsCollectionHandler } from './collectionHandlers/roleAssignments';
 import { rolesCollectionHandler } from './collectionHandlers/roles';
 import { textBlockSnapshotsCollectionHandler } from './collectionHandlers/textBlockSnapshots';
@@ -62,6 +63,7 @@ const collectionSourceController: CollectionSourceController = {
     [CollectionSource.Modules]: modulesCollectionHandler,
     [CollectionSource.Roles]: rolesCollectionHandler,
     [CollectionSource.TextBlockSnapshots]: textBlockSnapshotsCollectionHandler,
+    [CollectionSource.Organizations]: organizationsCollectionHandler,
     [CollectionSource.CardAssignees]: cardAssigneesCollectionHandler,
     [CollectionSource.LabelAssignments]: labelAssignmentsCollectionHandler,
     [CollectionSource.OrganizationMembers]: organizationMembersCollectionHandler,
