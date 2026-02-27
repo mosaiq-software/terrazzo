@@ -1,11 +1,9 @@
 import { ModuleDataMap, ModuleHeader, ModuleId, OrganizationId, TrzModule } from '@mosaiq/terrazzo-common';
-import { CacheEntity, ModuleModel, getCached, invalidateCache, sequelize } from '@mosaiq/terrazzo-db';
+import { ModuleModel, sequelize } from '@mosaiq/terrazzo-db';
 
 export const getModuleByIdDb = async (id: ModuleId) => {
-    return await getCached(CacheEntity.Module, id, async () => {
-        const model = await ModuleModel.findByPk(id, {});
-        return model?.toJSON();
-    });
+    const model = await ModuleModel.findByPk(id, {});
+    return model?.toJSON();
 };
 
 export const getModulesByParentIdDb = async (parentId: ModuleId) => {
@@ -40,7 +38,6 @@ export const createModuleDb = async (module: ModuleHeader) => {
 
 export const updateModuleDb = async (id: ModuleId, module: Partial<ModuleHeader>) => {
     const [updated] = await ModuleModel.update({ ...module }, { where: { id } });
-    await invalidateCache(CacheEntity.Module, id);
     return updated;
 };
 
@@ -69,7 +66,6 @@ export const updateModuleDataDb = async <T extends TrzModule>(id: ModuleId, type
         }
         const newData = { ...module.data, ...data };
         await moduleModel.update({ data: newData }, { transaction });
-        await invalidateCache(CacheEntity.Module, id);
         await transaction.commit();
     } catch (error) {
         await transaction.rollback();

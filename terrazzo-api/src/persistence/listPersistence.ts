@@ -1,29 +1,23 @@
 import { List, ListId, ModuleId } from '@mosaiq/terrazzo-common';
-import { CacheEntity, ListModel, getCached, invalidateCache, sequelize } from '@mosaiq/terrazzo-db';
+import { ListModel, sequelize } from '@mosaiq/terrazzo-db';
 import { Op } from 'sequelize';
 
 export const getListByIdDb = async (id: ListId) => {
-    return await getCached(CacheEntity.List, id, async () => {
-        const model = await ListModel.findByPk(id);
-        return model?.toJSON();
-    });
+    const model = await ListModel.findByPk(id);
+    return model?.toJSON();
 };
 
 export const getActiveListIdsByBoardIdOrderDb = async (boardId: ModuleId) => {
-    return (
-        (await getCached(CacheEntity.ListsInBoard, boardId, async () => {
-            const models = await ListModel.findAll({
-                where: {
-                    boardId,
-                    order: {
-                        [Op.not]: null,
-                    },
-                },
-                order: [['order', 'ASC']],
-            });
-            return models.map((list) => list.toJSON().id);
-        })) || []
-    );
+    const models = await ListModel.findAll({
+        where: {
+            boardId,
+            order: {
+                [Op.not]: null,
+            },
+        },
+        order: [['order', 'ASC']],
+    });
+    return models.map((list) => list.toJSON().id);
 };
 
 export const getActiveListCountOnBoard = async (boardId: ModuleId) => {
@@ -32,7 +26,6 @@ export const getActiveListCountOnBoard = async (boardId: ModuleId) => {
 
 export const createListOnBoardDb = async (list: List) => {
     const model = await ListModel.create({ ...list });
-    await invalidateCache(CacheEntity.ListsInBoard, list.boardId);
     return model.toJSON();
 };
 
@@ -42,7 +35,6 @@ export const createListOnBoardDb = async (list: List) => {
  */
 export const updateListDb = async (id: ListId, update: Partial<List>) => {
     const [updated] = await ListModel.update({ ...update }, { where: { id: id } });
-    await invalidateCache(CacheEntity.List, id);
     return updated;
 };
 
@@ -127,8 +119,6 @@ export const moveListDb = async (listId: ListId, toPosition: number | null) => {
 
         await ListModel.update({ order: toPosition }, { where: { id: listId }, transaction });
         await transaction.commit();
-        await invalidateCache(CacheEntity.List, listId);
-        await invalidateCache(CacheEntity.ListsInBoard, boardId);
     } catch (e) {
         await transaction.rollback();
         throw e;

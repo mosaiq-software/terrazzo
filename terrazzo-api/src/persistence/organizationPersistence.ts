@@ -1,11 +1,9 @@
 import { OrganizationHeader, OrganizationId } from '@mosaiq/terrazzo-common';
-import { CacheEntity, OrganizationModel as OrgModel, getCached, invalidateCache } from '@mosaiq/terrazzo-db';
+import { OrganizationModel as OrgModel } from '@mosaiq/terrazzo-db';
 
 export const getOrgByIdDb = async (id: OrganizationId) => {
-    return await getCached(CacheEntity.Organization, id, async () => {
-        const model = await OrgModel.findByPk(id);
-        return model?.toJSON();
-    });
+    const model = await OrgModel.findByPk(id);
+    return model?.toJSON();
 };
 
 export const createOrgDb = async (org: OrganizationHeader) => {
@@ -15,6 +13,5 @@ export const createOrgDb = async (org: OrganizationHeader) => {
 
 export const updateOrgDb = async (id: OrganizationId, update: Partial<OrganizationHeader>) => {
     const [updated] = await OrgModel.update({ ...update }, { where: { id } });
-    await invalidateCache(CacheEntity.Organization, id);
     return updated;
 };
