@@ -116,9 +116,13 @@ export interface ClientSEPayload {
     [ClientSE.READ_OBJECT_SOURCE]: { source: ObjectSource; id: UID };
     [ClientSE.CREATE_OBJECT_SOURCE]: { data: CreateObjectSourceData };
     [ClientSE.UPDATE_OBJECT_SOURCE]: { id: UID; data: UpdateObjectSourceData };
-    [ClientSE.READ_COLLECTION_SOURCE]: { source: CollectionSource; id: UID };
-    [ClientSE.ADD_TO_COLLECTION_SOURCE]: { source: EditableCollectionSource; collectionId: UID; itemIds: UID[] };
-    [ClientSE.REMOVE_FROM_COLLECTION_SOURCE]: { source: EditableCollectionSource; collectionId: UID; itemIds: UID[] };
+    [ClientSE.READ_COLLECTION_SOURCE]: { source: CollectionSource; id: string };
+    [ClientSE.ADD_TO_COLLECTION_SOURCE]: { source: EditableCollectionSource; collectionId: string; itemIds: UID[] };
+    [ClientSE.REMOVE_FROM_COLLECTION_SOURCE]: {
+        source: EditableCollectionSource;
+        collectionId: string;
+        itemIds: UID[];
+    };
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback

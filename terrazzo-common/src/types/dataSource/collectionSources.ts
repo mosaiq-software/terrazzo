@@ -1,4 +1,14 @@
-import { CardId, InviteId, LabelId, ListId, ModuleId, RoleId, TextBlockSnapshotId, UserId } from '../genericTypes';
+import {
+    CardId,
+    CompoundUID,
+    InviteId,
+    LabelId,
+    ListId,
+    ModuleId,
+    RoleId,
+    TextBlockSnapshotId,
+    UserId,
+} from '../genericTypes';
 
 export enum CollectionSource {
     // Read only sources
@@ -64,5 +74,6 @@ export interface CollectionSourceDataMap {
     [CollectionSource.RoleAssignments]: {
         of: RoleId;
         editable: true;
+        key: CompoundUID;
     };
 }

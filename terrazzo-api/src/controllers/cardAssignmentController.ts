@@ -1,9 +1,9 @@
 import { CardId, UserId } from '@mosaiq/terrazzo-common';
 import { syncUpdateCardAssignee } from '@trz-api/broadcasters';
 import {
+    cardAssignmentExistsDb,
     createCardAssignmentRecordDb,
     deleteCardAssignmentRecordDb,
-    getCardAssignmentRecordsForUserOnCardDb,
 } from '@trz-api/persistence/cardAssignmentPersistence';
 import { getBoardIDFromCardID } from './cardQueries';
 
@@ -11,8 +11,8 @@ interface AddAssigneeToCardOptions {
     preventSync?: boolean;
 }
 export const addAssigneeToCard = async (cardId: CardId, userId: UserId, options?: AddAssigneeToCardOptions) => {
-    const existingAssignment = await getCardAssignmentRecordsForUserOnCardDb(userId, cardId);
-    if (existingAssignment?.length) {
+    const exists = await cardAssignmentExistsDb(userId, cardId);
+    if (exists) {
         return;
     }
     await createCardAssignmentRecordDb(userId, cardId);
@@ -31,10 +31,7 @@ export const removeAssigneeFromCard = async (
     userId: UserId,
     options?: RemoveAssigneeFromCardOptions
 ) => {
-    const existingAssignment = await getCardAssignmentRecordsForUserOnCardDb(userId, cardId);
-    if (existingAssignment?.length) {
-        await deleteCardAssignmentRecordDb(existingAssignment[0].id);
-    }
+    await deleteCardAssignmentRecordDb(userId, cardId);
 
     if (!options?.preventSync) {
         const boardId = await getBoardIDFromCardID(cardId);

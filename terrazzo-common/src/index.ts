@@ -25,7 +25,6 @@ export * from './types/permissions/permissionTypes';
 export * from './types/permissions/roleTypes';
 
 // Types - Modules
-export * from './types/modules/board/cardAssignmentTypes';
 export * from './types/modules/board/cardTypes';
 export * from './types/modules/board/labelTypes';
 export * from './types/modules/board/listTypes';
@@ -45,6 +44,7 @@ export * from './types/socket/socketTypes';
 // Utils
 export * from './utils/arrayUtils';
 export * from './utils/fileUtils';
+export * from './utils/idUtils';
 export * from './utils/inviteUtils';
 export * from './utils/moduleUtils';
 export * from './utils/permissionUtils';

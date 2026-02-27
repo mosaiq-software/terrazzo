@@ -1,4 +1,4 @@
-import { ClientSE } from '@mosaiq/terrazzo-common';
+import { ClientSE, CollectionSourceKey } from '@mosaiq/terrazzo-common';
 import {
     addToCollectionSource,
     createObjectSource,
@@ -26,16 +26,19 @@ export const registerDataSourceListeners = (socket: Socket) => {
     });
 
     subscribe(socket, ClientSE.READ_COLLECTION_SOURCE, async (data) => {
-        return await readCollectionSource(data.id, data.source);
+        const key = data.id as CollectionSourceKey<typeof data.source>;
+        return await readCollectionSource(key, data.source);
     });
 
     subscribe(socket, ClientSE.ADD_TO_COLLECTION_SOURCE, async (data) => {
-        await addToCollectionSource(data.collectionId, data.itemIds, data.source);
+        const key = data.collectionId as CollectionSourceKey<typeof data.source>;
+        await addToCollectionSource(key, data.itemIds, data.source);
         return undefined;
     });
 
     subscribe(socket, ClientSE.REMOVE_FROM_COLLECTION_SOURCE, async (data) => {
-        await removeFromCollectionSource(data.collectionId, data.itemIds, data.source);
+        const key = data.collectionId as CollectionSourceKey<typeof data.source>;
+        await removeFromCollectionSource(key, data.itemIds, data.source);
         return undefined;
     });
 };

@@ -1,14 +1,18 @@
 import { CollectionSource, CollectionSourceHandler } from '@mosaiq/terrazzo-common';
+import {
+    addCardAssignmentsForUserDb,
+    getCardAssignmentsForUserDb,
+    removeCardAssignmentsForUserDb,
+} from '@trz-api/persistence/cardAssignmentPersistence';
 
-// TODO: Implement CardAssignees editable collection handler
 export const cardAssigneesCollectionHandler: CollectionSourceHandler<CollectionSource.CardAssignees> = {
-    read: async () => {
-        throw new Error('CardAssignees collection handler not implemented');
+    read: async (parentId) => {
+        return await getCardAssignmentsForUserDb(parentId);
     },
-    add: async () => {
-        throw new Error('CardAssignees collection handler not implemented');
+    add: async (parentId, itemIds) => {
+        await addCardAssignmentsForUserDb(parentId, itemIds);
     },
-    remove: async () => {
-        throw new Error('CardAssignees collection handler not implemented');
+    remove: async (parentId, itemIds) => {
+        await removeCardAssignmentsForUserDb(parentId, itemIds);
     },
 };

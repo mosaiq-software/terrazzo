@@ -1,14 +1,23 @@
-import { CollectionSource, CollectionSourceHandler } from '@mosaiq/terrazzo-common';
+import { CollectionSource, CollectionSourceHandler, parseCompoundKey, RoleId } from '@mosaiq/terrazzo-common';
+import { getRoleIdsForUserInOrgDb, setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 
-// TODO: Implement RoleAssignments editable collection handler
 export const roleAssignmentsCollectionHandler: CollectionSourceHandler<CollectionSource.RoleAssignments> = {
-    read: async () => {
-        throw new Error('RoleAssignments collection handler not implemented');
+    read: async (parentId) => {
+        const { a: userId, b: orgId } = parseCompoundKey(parentId);
+        return await getRoleIdsForUserInOrgDb(userId, orgId);
     },
-    add: async () => {
-        throw new Error('RoleAssignments collection handler not implemented');
+    add: async (parentId, itemIds) => {
+        const { a: userId, b: orgId } = parseCompoundKey(parentId);
+        const current = await getRoleIdsForUserInOrgDb(userId, orgId);
+        const next = new Set<RoleId>(current);
+        for (const id of itemIds) next.add(id);
+        await setRoleIdsForUserInOrgDb(userId, orgId, Array.from(next));
     },
-    remove: async () => {
-        throw new Error('RoleAssignments collection handler not implemented');
+    remove: async (parentId, itemIds) => {
+        const { a: userId, b: orgId } = parseCompoundKey(parentId);
+        const current = await getRoleIdsForUserInOrgDb(userId, orgId);
+        const remove = new Set<RoleId>(itemIds);
+        const next = current.filter((id) => !remove.has(id));
+        await setRoleIdsForUserInOrgDb(userId, orgId, next);
     },
 };

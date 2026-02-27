@@ -1,6 +1,7 @@
 import {
     CollectionSource,
     CollectionSourceDataPayload,
+    CollectionSourceKey,
     CollectionSourceOf,
     CreateObjectSourceData,
     EditableCollectionSource,
@@ -25,7 +26,7 @@ export const readObjectSource = async <T extends ObjectSource>(
 };
 
 export const readCollectionSource = async <T extends CollectionSource>(
-    collectionId: UID,
+    collectionId: CollectionSourceKey<T>,
     type: T
 ): Promise<CollectionSourceDataPayload<T> | undefined> => {
     const handler = getCollectionHandler(type);
@@ -62,7 +63,7 @@ export const updateObjectSource = async (objectId: UID, update: UpdateObjectSour
 };
 
 export const addToCollectionSource = async <T extends EditableCollectionSource>(
-    collectionId: UID,
+    collectionId: CollectionSourceKey<T>,
     itemIds: CollectionSourceOf<T>[],
     type: T
 ): Promise<void> => {
@@ -77,7 +78,7 @@ export const addToCollectionSource = async <T extends EditableCollectionSource>(
 };
 
 export const removeFromCollectionSource = async <T extends EditableCollectionSource>(
-    collectionId: UID,
+    collectionId: CollectionSourceKey<T>,
     itemIds: CollectionSourceOf<T>[],
     type: T
 ): Promise<void> => {

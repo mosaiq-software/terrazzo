@@ -1,4 +1,12 @@
-import { CollectionSource, getRoomCode, ObjectSource, RoomType, ServerSE, UID } from '@mosaiq/terrazzo-common';
+import {
+    CollectionSource,
+    CollectionSourceKey,
+    getRoomCode,
+    ObjectSource,
+    RoomType,
+    ServerSE,
+    UID,
+} from '@mosaiq/terrazzo-common';
 import { readCollectionSource, readObjectSource } from '@trz-api/controllers/dataSources/dataSourceController';
 import { broadcast } from '@trz-api/utils/socket/socketActions';
 
@@ -24,7 +32,7 @@ export const syncObjectSource = async <T extends ObjectSource>(sourceId: UID, ty
     }
 };
 
-export const syncCollectionSource = async <T extends CollectionSource>(sourceId: UID, type: T) => {
+export const syncCollectionSource = async <T extends CollectionSource>(sourceId: CollectionSourceKey<T>, type: T) => {
     try {
         const source = await readCollectionSource(sourceId, type);
         if (!source) {

@@ -6,6 +6,12 @@ export type CreateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourc
 export type UpdateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['update'];
 export type ObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['data'];
 export type CollectionSourceOf<T extends CollectionSource> = CollectionSourceDataMap[T]['of'];
+
+type CollectionSourceKeyMap = {
+    [T in CollectionSource]: CollectionSourceDataMap[T] extends { key: infer K } ? K : UID;
+};
+export type CollectionSourceKey<T extends CollectionSource> = CollectionSourceKeyMap[T];
+
 export type CollectionSourceDataInstance<T extends CollectionSource> = CollectionSourceOf<T>[];
 
 export type EditableCollectionSource = {
@@ -38,7 +44,7 @@ export type ObjectSourceData = ObjectSourceDataPayload<ObjectSource>;
 
 type CollectionSourceUpdatePayloadMap = {
     [T in CollectionSource]: {
-        id: UID;
+        id: CollectionSourceKey<T>;
         type: T;
         data: CollectionSourceDataInstance<T>;
     };
@@ -74,12 +80,20 @@ export interface CollectionSourceRemoveOptions {
 }
 
 export interface CollectionSourceReadHandler<T extends CollectionSource> {
-    read: (parentId: UID, options?: CollectionSourceReadOptions) => Promise<CollectionSourceOf<T>[]>;
+    read: (parentId: CollectionSourceKey<T>, options?: CollectionSourceReadOptions) => Promise<CollectionSourceOf<T>[]>;
 }
 
 export interface CollectionSourceEditableHandler<T extends CollectionSource> extends CollectionSourceReadHandler<T> {
-    add: (parentId: UID, itemIds: CollectionSourceOf<T>[], options?: CollectionSourceAddOptions) => Promise<void>;
-    remove: (parentId: UID, itemIds: CollectionSourceOf<T>[], options?: CollectionSourceRemoveOptions) => Promise<void>;
+    add: (
+        parentId: CollectionSourceKey<T>,
+        itemIds: CollectionSourceOf<T>[],
+        options?: CollectionSourceAddOptions
+    ) => Promise<void>;
+    remove: (
+        parentId: CollectionSourceKey<T>,
+        itemIds: CollectionSourceOf<T>[],
+        options?: CollectionSourceRemoveOptions
+    ) => Promise<void>;
 }
 
 export type CollectionSourceHandler<T extends CollectionSource> = CollectionSourceDataMap[T]['editable'] extends true
