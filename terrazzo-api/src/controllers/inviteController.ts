@@ -1,5 +1,5 @@
 import { Invite, InviteId, isInviteExpired, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
-import { syncMembersInOrg, syncOrgInvites, syncOrgInvitesFromInviteId } from '@trz-api/broadcasters';
+import { syncMembersInOrg, syncOrgInvites } from '@trz-api/broadcasters';
 import { getAllInviteRecordsForOrganizationDb } from '@trz-api/persistence/invitePersistence';
 import { getOrganizationMembershipsForUserDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { inviteHandler } from './dataSources/objectHandlers/invite';
@@ -7,31 +7,6 @@ import { createMembershipIfDoesntExist } from './membershipController';
 
 export const getAllInvitesForOrg = async (orgId: OrganizationId): Promise<Invite[]> => {
     return await getAllInviteRecordsForOrganizationDb(orgId);
-};
-
-export const createInvite = async (orgId: OrganizationId, maxUses: number | null, createdById: UserId) => {
-    const inviteId = await inviteHandler.create(
-        {
-            forOrganizationId: orgId,
-            maxUses: maxUses,
-            createdById: createdById,
-        },
-        { preventSync: true }
-    );
-
-    const invite = await inviteHandler.read(inviteId);
-    if (!invite) {
-        throw new Error('Failed to read created invite');
-    }
-
-    await syncOrgInvitesFromInviteId(inviteId);
-
-    return invite;
-};
-
-export const deleteInvite = async (inviteId: InviteId): Promise<void> => {
-    await inviteHandler.update(inviteId, { revokedAt: Date.now() }, { preventSync: true });
-    await syncOrgInvitesFromInviteId(inviteId);
 };
 
 export const useInvite = async (inviteId: InviteId, userId: UserId): Promise<boolean> => {

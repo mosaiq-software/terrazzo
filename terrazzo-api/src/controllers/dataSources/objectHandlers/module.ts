@@ -1,8 +1,9 @@
-import { calculateModuleEffectivePermissions, ModuleHeader, ObjectSource, UID } from '@mosaiq/terrazzo-common';
+import { calculateModuleEffectivePermissions, ModuleHeader, ObjectSource } from '@mosaiq/terrazzo-common';
+import { buildModuleData, recursivelyUpdateModuleEffectivePermissions } from '@trz-api/controllers/moduleController';
 import {
     createModuleDb,
     getModuleByIdDb,
-    getModulesByParentIdDb,
+    getNextModuleOrderInParentDb,
     updateModuleDataDb,
     updateModuleDb,
 } from '@trz-api/persistence/modulePersistence';
@@ -22,19 +23,22 @@ export const moduleHandler = objectSourceHandlers(ObjectSource.Module, {
             orgId = org.id;
         }
 
+        const order = data.order ?? (await getNextModuleOrderInParentDb(data.parentId));
+        const moduleData = data.data ?? (await buildModuleData({ type: data.type, initialData: data }));
+
         const newModule: ModuleHeader = {
             id: crypto.randomUUID(),
             parentId: data.parentId,
             name: data.name,
             type: data.type,
             orgId,
-            order: data.order,
+            order: order,
             archived: false,
             createdAt: Date.now(),
             desiredPermissions: {},
             effectivePermissions: {},
             public: false,
-            data: data.data,
+            data: moduleData,
         };
         await createModuleDb(newModule);
         return newModule.id;
@@ -75,20 +79,3 @@ export const moduleHandler = objectSourceHandlers(ObjectSource.Module, {
         return (await getModuleByIdDb(id)) || undefined;
     },
 });
-
-const recursivelyUpdateModuleEffectivePermissions = async (
-    id: UID,
-    parentEffectivePermissions: Record<string, any>
-): Promise<void> => {
-    const childModules = await getModulesByParentIdDb(id);
-    for (const childModule of childModules) {
-        const newEffectivePermissions = calculateModuleEffectivePermissions(
-            parentEffectivePermissions,
-            childModule.desiredPermissions
-        );
-        await updateModuleDb(childModule.id, {
-            effectivePermissions: newEffectivePermissions,
-        });
-        await recursivelyUpdateModuleEffectivePermissions(childModule.id, newEffectivePermissions);
-    }
-};

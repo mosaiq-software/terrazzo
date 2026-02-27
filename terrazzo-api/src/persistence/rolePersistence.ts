@@ -24,12 +24,6 @@ export const updateRoleDb = async (id: RoleId, update: Partial<Role>) => {
     return updated;
 };
 
-export const deleteRoleDb = async (id: RoleId) => {
-    const deleted = await RoleModel.destroy({ where: { id } });
-    await invalidateCache(CacheEntity.Role, id);
-    return deleted;
-};
-
 export const getNextRoleOrderDb = async (orgId: OrganizationId) => {
     const maxOrderRole = await RoleModel.findOne({
         where: { orgId },

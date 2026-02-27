@@ -19,8 +19,8 @@ import { getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccoun
 import { generateAuthToken } from '@trz-api/utils/authUtils';
 import { isDev } from '@trz-api/utils/envUtils';
 import { getGithubAccessTokenFromCode, getPrivateGitHubUserData } from '@trz-api/utils/githubUtils';
+import { userHandler } from './dataSources/objectHandlers/user';
 import { addLinkedAccountToUser, updateLinkedAccountForUser } from './linkedAccountController';
-import { createNewUser } from './userController';
 
 const EXPIRE_AUTH_SESSIONS_AFTER_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 
@@ -172,8 +172,12 @@ const handleGithubAuth = async (
         if (!userId) {
             // Create new user if no existing auth provided
             const { firstName, lastName } = breakNames(githubData.name);
-            const newUser = await createNewUser(githubData.login, firstName, lastName, githubData.avatar_url);
-            userId = newUser.id;
+            userId = await userHandler.create({
+                username: githubData.login,
+                firstName,
+                lastName,
+                profilePicture: githubData.avatar_url,
+            });
         }
 
         linkedAccount = await addLinkedAccountToUser({

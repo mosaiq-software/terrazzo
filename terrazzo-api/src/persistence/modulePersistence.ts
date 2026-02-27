@@ -35,12 +35,6 @@ export const updateModuleDb = async (id: ModuleId, module: Partial<ModuleHeader>
     return updated;
 };
 
-export const deleteModuleDb = async (id: ModuleId) => {
-    const deleted = await ModuleModel.destroy({ where: { id } });
-    await invalidateCache(CacheEntity.Module, id);
-    return deleted;
-};
-
 export const getNextModuleOrderInParentDb = async (parentId: ModuleId) => {
     const maxOrderModule = await ModuleModel.findOne({
         where: { parentId },

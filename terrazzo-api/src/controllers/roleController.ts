@@ -1,55 +1,12 @@
-import { getMaxUserRole, OrganizationId, PermissionFlag, Role, RoleId, UserId } from '@mosaiq/terrazzo-common';
-import { syncRolesForUserInOrg, syncUpdateOrganizationRoles } from '@trz-api/broadcasters';
+import { getMaxUserRole, OrganizationId, Role, RoleId, UserId } from '@mosaiq/terrazzo-common';
+import { syncRolesForUserInOrg } from '@trz-api/broadcasters';
 import { getRoleIdsForUserInOrgDb, setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
-import { deleteRoleDb, getRolesByOrgIdDb } from '@trz-api/persistence/rolePersistence';
+import { getRolesByOrgIdDb } from '@trz-api/persistence/rolePersistence';
 import { SocketManager } from '@trz-api/utils/socket/socketManager';
-import { roleHandler } from './dataSources/objectHandlers/role';
 import { userIsOrgOwner } from './organizationAccess';
 
 export const getRolesForOrg = async (orgId: OrganizationId) => {
     return await getRolesByOrgIdDb(orgId);
-};
-
-export const createRole = async (
-    name: string,
-    color: string,
-    orgId: OrganizationId,
-    defaultPermissions: PermissionFlag[] = []
-) => {
-    const roleId = await roleHandler.create(
-        {
-            name,
-            color,
-            orgId,
-            defaultPermissions,
-        },
-        { preventSync: true }
-    );
-
-    const role = await roleHandler.read(roleId);
-    if (!role) {
-        throw new Error('Failed to read created role');
-    }
-
-    // sync new role to all clients in the org
-    const roles = await getRolesForOrg(orgId);
-    await syncUpdateOrganizationRoles(orgId, roles);
-
-    return role;
-};
-
-export const updateRole = async (role: Role, updatedBy: UserId) => {
-    const userRoles = await getUserRolesInOrg(updatedBy, role.orgId);
-    const maxUserRole = getMaxUserRole(userRoles);
-    const userIsOwner = await userIsOrgOwner(updatedBy, role.orgId);
-    if (!roleACanManageRoleB(maxUserRole, role, userIsOwner)) {
-        throw new Error('User cannot update a role with equal or higher order than their maximum role');
-    }
-
-    await roleHandler.update(role.id, role, { preventSync: true });
-
-    const roles = await getRolesForOrg(role.orgId);
-    await syncUpdateOrganizationRoles(role.orgId, roles);
 };
 
 export const getUserRolesInOrg = async (userId: UserId, orgId: OrganizationId): Promise<Role[]> => {
@@ -60,20 +17,6 @@ export const getUserRolesInOrg = async (userId: UserId, orgId: OrganizationId): 
 export const getSpecificRolesInOrg = async (roleIds: RoleId[], orgId: OrganizationId): Promise<Role[]> => {
     const allRoles = await getRolesByOrgIdDb(orgId);
     return allRoles.filter((role) => roleIds.includes(role.id));
-};
-
-export const deleteRole = async (role: Role, deletedBy: UserId) => {
-    const userRoles = await getUserRolesInOrg(deletedBy, role.orgId);
-    const maxUserRole = getMaxUserRole(userRoles);
-    const userIsOwner = await userIsOrgOwner(deletedBy, role.orgId);
-    if (!roleACanManageRoleB(maxUserRole, role, userIsOwner)) {
-        throw new Error('User cannot delete a role with equal or higher order than their maximum role');
-    }
-
-    await deleteRoleDb(role.id);
-
-    const roles = await getRolesForOrg(role.orgId);
-    await syncUpdateOrganizationRoles(role.orgId, roles);
 };
 
 export const validateUserCanAssignRoles = async (

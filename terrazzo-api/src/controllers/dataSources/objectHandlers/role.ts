@@ -22,6 +22,13 @@ export const roleHandler = objectSourceHandlers(ObjectSource.Role, {
         return role.id;
     },
     update: async (id, data) => {
+        // const userRoles = await getUserRolesInOrg(updatedBy, role.orgId);
+        // const maxUserRole = getMaxUserRole(userRoles);
+        // const userIsOwner = await userIsOrgOwner(updatedBy, role.orgId);
+        // if (!roleACanManageRoleB(maxUserRole, role, userIsOwner)) {
+        //     throw new Error('User cannot update a role with equal or higher order than their maximum role');
+        // }
+
         await updateRoleDb(id, data);
     },
     read: async (id) => {

@@ -18,9 +18,3 @@ export const writeFileDb = async (id: UploadedFileId, base64: string, fileName: 
     await invalidateCache(CacheEntity.File, id);
     return updated;
 };
-
-export const deleteFileDb = async (id: UploadedFileId) => {
-    const deleted = await FileModel.destroy({ where: { id } });
-    await invalidateCache(CacheEntity.File, id);
-    return deleted;
-};

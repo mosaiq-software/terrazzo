@@ -1,26 +1,27 @@
 import {
+    calculateModuleEffectivePermissions,
     CreateModuleData,
     CreateModuleDataArgs,
     exhaustiveCheck,
     ModuleData,
     ModuleHeader,
     ModuleId,
+    ModulePermissions,
     ModuleType,
     TextBlockType,
     TrzModule,
+    UID,
     UserId,
 } from '@mosaiq/terrazzo-common';
-import { syncModuleChildren } from '@trz-api/broadcasters';
-import { getModulesByParentIdDb, getNextModuleOrderInParentDb } from '@trz-api/persistence/modulePersistence';
+import { getModulesByParentIdDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
 import { userCanViewModule } from '@trz-api/utils/permissions';
-import { moduleHandler } from './dataSources/objectHandlers/module';
 import { textBlockHandler } from './dataSources/objectHandlers/textBlock';
 
-async function buildModuleData<T extends ModuleType>(args: {
+export async function buildModuleData<T extends ModuleType>(args: {
     type: T;
     initialData: CreateModuleData<T>;
 }): Promise<ModuleData<T>>;
-async function buildModuleData(args: CreateModuleDataArgs): Promise<ModuleData<ModuleType>> {
+export async function buildModuleData(args: CreateModuleDataArgs): Promise<ModuleData<ModuleType>> {
     switch (args.type) {
         case TrzModule.Directory: {
             const data: ModuleData<TrzModule.Directory> = {};
@@ -53,39 +54,6 @@ async function buildModuleData(args: CreateModuleDataArgs): Promise<ModuleData<M
     }
 }
 
-export const createNewModule = async <T extends ModuleType>(
-    name: string,
-    parentId: ModuleId,
-    type: T,
-    initialData: CreateModuleData<T>
-): Promise<ModuleHeader<T>> => {
-    const nextOrder = await getNextModuleOrderInParentDb(parentId);
-    const moduleData = await buildModuleData({ type, initialData });
-    const moduleId = await moduleHandler.create({
-        parentId,
-        name,
-        type,
-        order: nextOrder,
-        data: moduleData,
-    });
-
-    const newModule = await moduleHandler.read(moduleId);
-    if (!newModule) {
-        throw new Error('Failed to read created module');
-    }
-
-    await syncModuleChildren(parentId);
-    return newModule as ModuleHeader<T>;
-};
-
-export const updateModule = async <T extends TrzModule>(
-    id: ModuleId,
-    _type: T,
-    partial: Partial<ModuleHeader<T>>
-): Promise<void> => {
-    await moduleHandler.update(id, partial, { preventSync: true });
-};
-
 export const getModuleChildrenForUser = async (
     moduleId: ModuleId,
     userId: UserId
@@ -100,4 +68,21 @@ export const getModuleChildrenForUser = async (
         })
     );
     return canAccessModules;
+};
+
+export const recursivelyUpdateModuleEffectivePermissions = async (
+    id: UID,
+    parentEffectivePermissions: ModulePermissions
+): Promise<void> => {
+    const childModules = await getModulesByParentIdDb(id);
+    for (const childModule of childModules) {
+        const newEffectivePermissions = calculateModuleEffectivePermissions(
+            parentEffectivePermissions,
+            childModule.desiredPermissions
+        );
+        await updateModuleDb(childModule.id, {
+            effectivePermissions: newEffectivePermissions,
+        });
+        await recursivelyUpdateModuleEffectivePermissions(childModule.id, newEffectivePermissions);
+    }
 };

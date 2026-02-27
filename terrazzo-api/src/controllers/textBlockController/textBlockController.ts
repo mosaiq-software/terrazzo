@@ -18,7 +18,6 @@ import { moduleHandler } from '../dataSources/objectHandlers/module';
 import { textBlockHandler } from '../dataSources/objectHandlers/textBlock';
 import { convertBlocknoteBlocksToPlaintext, maybeParseMarkdownToBlocks } from './blocknoteUtils';
 import { createTextBlockHistorySnapshot, HISTORY_SNAPSHOT_INTERVAL_MS } from './historySnapshots';
-import { loadTextBlockEncodedData } from './textBlockDocumentCodec';
 import { getContentFromDoc } from './yjsUtils';
 
 export const checkCanUserEditTextBlock = async (
@@ -79,8 +78,6 @@ export const storeTextBlockEncodedData = async (doc: Document, forceSnapshot?: b
         throw error;
     }
 };
-
-export { loadTextBlockEncodedData };
 
 export const createBlocknoteTextBlockWithBlocks = async (blocks: Block[]) => {
     try {

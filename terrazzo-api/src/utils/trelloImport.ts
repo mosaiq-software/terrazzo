@@ -17,14 +17,14 @@ import {
     settlePromises,
 } from '@mosaiq/terrazzo-common';
 import { cardHandler } from '@trz-api/controllers/dataSources/objectHandlers/card';
+import { labelHandler } from '@trz-api/controllers/dataSources/objectHandlers/label';
+import { moduleHandler } from '@trz-api/controllers/dataSources/objectHandlers/module';
 import { getApiUrl } from '@trz-api/utils/envUtils';
 import { extractMarkdownImagesFromText, replaceAllOccurrences } from '@trz-api/utils/textUtils';
 import { addAssigneeToCard } from '../controllers/cardAssignmentController';
 import { setCardsLabels } from '../controllers/cardController';
 import { listHandler } from '../controllers/dataSources/objectHandlers/list';
 import { saveFileFromUrl } from '../controllers/fileController';
-import { createBoardLabel } from '../controllers/labelController';
-import { createNewModule } from '../controllers/moduleController';
 import {
     getBlocknoteChecklistBlock,
     getBlocknoteMediaBlock,
@@ -44,11 +44,16 @@ export const createTerrazzoBoardFromTrelloBoard = async (
     userMap: TrelloUserToTerrazzoUserMap
 ) => {
     try {
-        const trzBoardModule = await createNewModule(trelloBoard.name, onParentId, TrzModule.Board, {
-            boardCode: '',
+        const trzBoardModuleId = await moduleHandler.create({
+            name: trelloBoard.name,
+            parentId: onParentId,
+            type: TrzModule.Board,
+            data: {
+                boardCode: '',
+            },
         });
-        const listMap = await createLists(trzBoardModule.id, trelloBoard.lists);
-        const labelMap = await createLabels(trzBoardModule.id, trelloBoard.labels);
+        const listMap = await createLists(trzBoardModuleId, trelloBoard.lists);
+        const labelMap = await createLabels(trzBoardModuleId, trelloBoard.labels);
         const { cardCreatedDateMap } = getActionsData(trelloBoard);
         const cardChecklistsMap = getChecklistsForCards(trelloBoard.checklists);
         const cardOrderMap = getCardOrderMap(trelloBoard.cards);
@@ -67,7 +72,7 @@ export const createTerrazzoBoardFromTrelloBoard = async (
             );
         }
 
-        return trzBoardModule.id;
+        return trzBoardModuleId;
     } catch (error: any) {
         console.error('Error importing from trello', error);
         return undefined;
@@ -108,7 +113,11 @@ const createLabels = async (trzBoardId: ModuleId, trelloLabels: TrelloLabelType[
     const labelMap: { [trl: string]: LabelId } = {};
     for (const trelloLabel of trelloLabels) {
         const color = TrelloLabelColorsMap[trelloLabel.color] || TrelloLabelColorsMap['black'];
-        const labelId = await createBoardLabel(trzBoardId, trelloLabel.name, color);
+        const labelId = await labelHandler.create({
+            boardId: trzBoardId,
+            name: trelloLabel.name,
+            color,
+        });
         labelMap[trelloLabel.id] = labelId;
     }
     return labelMap;

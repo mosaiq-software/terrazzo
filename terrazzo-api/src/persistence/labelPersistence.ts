@@ -25,13 +25,3 @@ export const updateLabelDb = async (id: LabelId, update: Partial<Label>) => {
     const [updated] = await LabelModel.update({ ...update }, { where: { id } });
     return updated;
 };
-
-export const deleteLabelDb = async (id: LabelId) => {
-    const deleted = await LabelModel.destroy({ where: { id } });
-    return deleted;
-};
-
-export const deleteLabelsByBoardIdDb = async (boardId: ModuleId) => {
-    const deleted = await LabelModel.destroy({ where: { boardId } });
-    return deleted;
-};

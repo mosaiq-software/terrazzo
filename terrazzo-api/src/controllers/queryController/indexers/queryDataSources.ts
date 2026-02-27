@@ -1,6 +1,6 @@
+import { userHandler } from '@trz-api/controllers/dataSources/objectHandlers/user';
 import { getModuleById } from '@trz-api/controllers/moduleQueries';
 import { getTextBlocksAsPlaintext } from '@trz-api/controllers/textBlockController/textBlockController';
-import { getUserHeader } from '@trz-api/controllers/userController';
 import { getActiveCardsByBoardIdDb } from '@trz-api/persistence/cardPersistence';
 import { getModulesByOrgIdDb } from '@trz-api/persistence/modulePersistence';
 import { getOrganizationMembershipsForOrgDb } from '@trz-api/persistence/organizationMembershipPersistence';
@@ -30,7 +30,7 @@ export interface TagsQueryDataSource {
     getModuleById: typeof getModuleById;
     getActiveCardsByBoardIdDb: typeof getActiveCardsByBoardIdDb;
     getOrganizationMembershipsForOrgDb: typeof getOrganizationMembershipsForOrgDb;
-    getUserHeader: typeof getUserHeader;
+    userHandler: typeof userHandler;
 }
 
 export const defaultTagsQueryDataSource: TagsQueryDataSource = {
@@ -38,5 +38,5 @@ export const defaultTagsQueryDataSource: TagsQueryDataSource = {
     getModuleById: getModuleById,
     getActiveCardsByBoardIdDb: getActiveCardsByBoardIdDb,
     getOrganizationMembershipsForOrgDb: getOrganizationMembershipsForOrgDb,
-    getUserHeader: getUserHeader,
+    userHandler: userHandler,
 };

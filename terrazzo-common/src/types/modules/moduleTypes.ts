@@ -9,6 +9,7 @@ export enum TrzModule {
     /** Technically an org is just a top-level module, but we should never use it as one */
     Organization = 'organization',
 }
+export type ModuleType = Exclude<TrzModule, TrzModule.Organization>;
 
 export interface CreateModuleDataMap {
     [TrzModule.Directory]: {};
@@ -21,7 +22,6 @@ export interface CreateModuleDataMap {
     [TrzModule.Organization]: never;
 }
 export type CreateModuleData<T extends TrzModule> = CreateModuleDataMap[T];
-export type ModuleType = Exclude<TrzModule, TrzModule.Organization>;
 export type CreateModuleDataArgs = {
     [K in ModuleType]: { type: K; initialData: CreateModuleData<K> };
 }[ModuleType];
@@ -44,15 +44,15 @@ export interface ModuleDataMap {
 }
 export type ModuleData<T extends TrzModule> = ModuleDataMap[T];
 
-export interface CreateModuleHeader<T extends TrzModule = TrzModule> {
+export interface CreateModuleHeader<T extends ModuleType = ModuleType> {
     parentId: ModuleId;
     name: string;
     type: T;
-    order: number;
+    order?: number;
     data: ModuleData<T>;
 }
 
-export interface UpdateModuleHeader<T extends TrzModule = TrzModule> {
+export interface UpdateModuleHeader<T extends ModuleType = ModuleType> {
     name?: string;
     archived?: boolean;
     desiredPermissions?: ModulePermissions;
@@ -61,7 +61,7 @@ export interface UpdateModuleHeader<T extends TrzModule = TrzModule> {
     data?: ModuleData<T>;
 }
 
-export interface ModuleHeader<T extends TrzModule = TrzModule> {
+export interface ModuleHeader<T extends ModuleType = ModuleType> {
     id: ModuleId;
     parentId: ModuleId;
     name: string;
