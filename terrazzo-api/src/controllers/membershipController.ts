@@ -1,5 +1,4 @@
 import { MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
-import { syncMembersInOrg, syncUsersOrgs } from '@trz-api/broadcasters';
 import {
     createOrganizationMembershipDb,
     deleteOrganizationMembershipDb,

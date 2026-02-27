@@ -1,5 +1,4 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { addAssigneeToCard, removeAssigneeFromCard } from '@trz-api/controllers/cardAssignmentController';
 import { duplicateCard, moveCard } from '@trz-api/controllers/cardController';
 import { getBoardIDFromCardID } from '@trz-api/controllers/cardQueries';
 import { getBoardIDFromListID } from '@trz-api/controllers/listController';
@@ -28,20 +27,6 @@ export const registerCardListeners = (socket: Socket) => {
             throw new Error('Insufficient permissions to move cards on this board');
         }
         await moveCard(data.cardId, data.toList, data.position);
-        return undefined;
-    });
-
-    subscribe(socket, ClientSE.UPDATE_CARD_ASSIGNEE, async (data) => {
-        const boardId = await getBoardIDFromCardID(data.cardId);
-        if (!(await userCanManageCards(socket, boardId))) {
-            throw new Error('Insufficient permissions to update assignees for this card');
-        }
-
-        if (data.assigned) {
-            await addAssigneeToCard(data.cardId, data.userId);
-        } else {
-            await removeAssigneeFromCard(data.cardId, data.userId);
-        }
         return undefined;
     });
 };

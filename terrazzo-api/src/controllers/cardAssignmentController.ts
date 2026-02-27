@@ -1,5 +1,4 @@
 import { CardId, UserId } from '@mosaiq/terrazzo-common';
-import { syncUpdateCardAssignee } from '@trz-api/broadcasters';
 import {
     cardAssignmentExistsDb,
     createCardAssignmentRecordDb,

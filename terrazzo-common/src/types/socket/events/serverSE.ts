@@ -1,10 +1,6 @@
 import { CollectionSourceData, ObjectSourceData } from '../../dataSource/dataSourceTypes';
-import { CardId, LabelId, ListId, ModuleId, OrganizationId, RoleId, TextBlockId, UserId } from '../../genericTypes';
-import { Invite } from '../../inviteTypes';
+import { CardId, ListId, UserId } from '../../genericTypes';
 import { LinkedAccount } from '../../linkedAccountTypes';
-import { OrganizationHeader } from '../../organizationTypes';
-import { Role } from '../../permissions/roleTypes';
-import { TextBlockSnapshot } from '../../textSnapshotTypes';
 import { MouseRoomUserData } from '../roomTypes';
 import { SocketId, UserData } from '../socketTypes';
 
@@ -20,17 +16,7 @@ export enum ServerSE {
     MOVE_LIST = 'MOVE_LIST',
     MOVE_CARD = 'MOVE_CARD',
 
-    UPDATE_CARD_ASSIGNEE = 'UPDATE_CARD_ASSIGNEE',
-    UPDATE_MODULE_LABELS = 'UPDATE_MODULE_LABELS',
-    UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
-    UPDATE_USERS_ORGANIZATIONS = 'UPDATE_USERS_ORGANIZATIONS',
-    UPDATE_ORGANIZATION_MEMBERSHIPS = 'UPDATE_ORGANIZATION_MEMBERSHIPS',
-    UPDATE_ORGANIZATION_INVITES = 'UPDATE_ORGANIZATION_INVITES',
-    UPDATE_ORGANIZATION_ROLES = 'UPDATE_ORGANIZATION_ROLES',
-    UPDATE_ROLES_FOR_USER_IN_ORG = 'UPDATE_ROLES_FOR_USER_IN_ORG',
     UPDATE_USERS_LINKED_ACCOUNTS = 'UPDATE_USERS_LINKED_ACCOUNTS',
-    UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS = 'UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS',
-    UPDATE_MODULE_CHILDREN = 'UPDATE_MODULE_CHILDREN',
 
     OBJECT_SOURCE_UPDATE = 'OBJECT_SOURCE_UPDATE',
     COLLECTION_SOURCE_UPDATE = 'COLLECTION_SOURCE_UPDATE',
@@ -46,20 +32,7 @@ export interface ServerSEPayload {
     [ServerSE.MOVE_LIST]: { listId: ListId; position: number | null };
     [ServerSE.MOVE_CARD]: { cardId: CardId; toList: ListId; position?: number | null };
 
-    [ServerSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
-    [ServerSE.UPDATE_MODULE_LABELS]: { moduleId: ModuleId; labels: LabelId[] };
-    [ServerSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
-    [ServerSE.UPDATE_USERS_ORGANIZATIONS]: { userId: UserId; organizations: OrganizationHeader[] };
-    [ServerSE.UPDATE_ORGANIZATION_MEMBERSHIPS]: { orgId: OrganizationId; members: UserId[] };
-    [ServerSE.UPDATE_ORGANIZATION_INVITES]: { orgId: OrganizationId; invites: Invite[] };
-    [ServerSE.UPDATE_ORGANIZATION_ROLES]: { orgId: OrganizationId; roles: Role[] };
-    [ServerSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
     [ServerSE.UPDATE_USERS_LINKED_ACCOUNTS]: { userId: UserId; linkedAccounts: LinkedAccount[] };
-    [ServerSE.UPDATE_TEXT_BLOCK_HISTORY_SNAPSHOTS]: { textBlockId: TextBlockId; snapshots: TextBlockSnapshot[] };
-    [ServerSE.UPDATE_MODULE_CHILDREN]: {
-        moduleId: ModuleId;
-        children: ModuleId[];
-    };
 
     [ServerSE.OBJECT_SOURCE_UPDATE]: ObjectSourceData;
     [ServerSE.COLLECTION_SOURCE_UPDATE]: CollectionSourceData;
