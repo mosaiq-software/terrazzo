@@ -1,4 +1,5 @@
-import { Invite, ObjectSource } from '@mosaiq/terrazzo-common';
+import { CollectionSource, Invite, ObjectSource } from '@mosaiq/terrazzo-common';
+import { syncCollectionSource } from '@trz-api/broadcasters';
 import {
     createInviteRecordDb,
     getInviteRecordByIdDb,
@@ -7,7 +8,7 @@ import {
 import { objectSourceHandlers } from '../dataSourceWrapper';
 
 export const inviteHandler = objectSourceHandlers(ObjectSource.Invite, {
-    create: async (data) => {
+    create: async (data, options) => {
         const invite: Invite = {
             id: crypto.randomUUID(),
             forOrganizationId: data.forOrganizationId,
@@ -18,6 +19,16 @@ export const inviteHandler = objectSourceHandlers(ObjectSource.Invite, {
             revokedAt: null,
         };
         await createInviteRecordDb(invite);
+        if (!options?.preventSync) {
+            try {
+                await syncCollectionSource(data.forOrganizationId, CollectionSource.Invites);
+            } catch (e) {
+                console.error(`Failed to sync new invite collection source`, {
+                    organizationId: data.forOrganizationId,
+                    error: e,
+                });
+            }
+        }
         return invite.id;
     },
     update: async (id, data) => {

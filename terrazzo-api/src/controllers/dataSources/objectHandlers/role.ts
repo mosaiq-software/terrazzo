@@ -1,4 +1,4 @@
-import { ObjectSource, Role } from '@mosaiq/terrazzo-common';
+import { CollectionSource, ObjectSource, Role } from '@mosaiq/terrazzo-common';
 import {
     createRoleOnOrgDb,
     getNextRoleOrderDb,
@@ -6,9 +6,10 @@ import {
     updateRoleDb,
 } from '@trz-api/persistence/rolePersistence';
 import { objectSourceHandlers } from '../dataSourceWrapper';
+import { syncCollectionSource } from '@trz-api/broadcasters';
 
 export const roleHandler = objectSourceHandlers(ObjectSource.Role, {
-    create: async (data) => {
+    create: async (data, options) => {
         const order = data.order ?? (await getNextRoleOrderDb(data.orgId));
         const role: Role = {
             id: crypto.randomUUID(),
@@ -19,6 +20,18 @@ export const roleHandler = objectSourceHandlers(ObjectSource.Role, {
             defaultPermissions: data.defaultPermissions ?? [],
         };
         await createRoleOnOrgDb(role);
+
+        if (!options?.preventSync) {
+            try {
+                await syncCollectionSource(data.orgId, CollectionSource.Roles);
+            } catch (e) {
+                console.error(`Failed to sync new role collection source`, {
+                    orgId: data.orgId,
+                    error: e,
+                });
+            }
+        }
+
         return role.id;
     },
     update: async (id, data) => {

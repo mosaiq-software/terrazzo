@@ -1,4 +1,10 @@
-import { calculateModuleEffectivePermissions, ModuleHeader, ObjectSource } from '@mosaiq/terrazzo-common';
+import {
+    calculateModuleEffectivePermissions,
+    CollectionSource,
+    ModuleHeader,
+    ObjectSource,
+} from '@mosaiq/terrazzo-common';
+import { syncCollectionSource } from '@trz-api/broadcasters';
 import { buildModuleData, recursivelyUpdateModuleEffectivePermissions } from '@trz-api/controllers/moduleController';
 import {
     createModuleDb,
@@ -11,7 +17,7 @@ import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { objectSourceHandlers } from '../dataSourceWrapper';
 
 export const moduleHandler = objectSourceHandlers(ObjectSource.Module, {
-    create: async (data) => {
+    create: async (data, options) => {
         // Resolve orgId from parent
         const parentModule = await getModuleByIdDb(data.parentId);
         let orgId = parentModule?.orgId;
@@ -41,6 +47,18 @@ export const moduleHandler = objectSourceHandlers(ObjectSource.Module, {
             data: moduleData,
         };
         await createModuleDb(newModule);
+
+        if (!options?.preventSync) {
+            try {
+                await syncCollectionSource(data.parentId, CollectionSource.Modules);
+            } catch (e) {
+                console.error(`Failed to sync new module collection source`, {
+                    moduleId: newModule.id,
+                    error: e,
+                });
+            }
+        }
+
         return newModule.id;
     },
     update: async (id, data) => {

@@ -1,4 +1,5 @@
-import { Card, ObjectSource, TextBlockId, TrzModule } from '@mosaiq/terrazzo-common';
+import { Card, CollectionSource, ObjectSource, TextBlockId, TrzModule } from '@mosaiq/terrazzo-common';
+import { syncCollectionSource } from '@trz-api/broadcasters';
 import { getModuleById } from '@trz-api/controllers/moduleQueries';
 import { createBlocknoteTextBlockWithBlocks } from '@trz-api/controllers/textBlockController/textBlockController';
 import {
@@ -12,7 +13,7 @@ import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { objectSourceHandlers } from '../dataSourceWrapper';
 
 export const cardHandler = objectSourceHandlers(ObjectSource.Card, {
-    create: async (data) => {
+    create: async (data, options) => {
         const list = await getListByIdDb(data.listId);
         if (!list) {
             throw new Error('List not found');
@@ -54,6 +55,13 @@ export const cardHandler = objectSourceHandlers(ObjectSource.Card, {
             await createCardOnListDb(newCard);
         } catch (e) {
             throw new Error('Failed to save Card' + e);
+        }
+        if (!options?.preventSync) {
+            try {
+                await syncCollectionSource(list.id, CollectionSource.Cards);
+            } catch (error) {
+                console.error('Failed to sync collection source', error);
+            }
         }
         return newCard.id;
     },
