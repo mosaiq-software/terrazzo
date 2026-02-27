@@ -10,7 +10,8 @@
         "migrate:undo": "npm run build && npx sequelize-cli db:migrate:undo",
         "migrate:undo:all": "npm run build && npx sequelize-cli db:migrate:undo:all",
         "seed:all": "npm run build && npx sequelize-cli db:seed:all",
-        "create-migration": "npx sequelize-cli migration:generate --name"
+        "create-migration": "npx sequelize-cli migration:generate --name",
+        "types": "tsc --noEmit"
     },
     "devDependencies": {
         "@types/node": "^22.19.7",

@@ -14,6 +14,15 @@ export const getAllInviteRecordsForOrganizationDb = async (orgId: OrganizationId
     return models.map((inv) => inv.toJSON());
 };
 
+export const getInviteIdsByOrganizationDb = async (orgId: OrganizationId): Promise<InviteId[]> => {
+    const models = await InviteModel.findAll({
+        attributes: ['id'],
+        where: { forOrganizationId: orgId },
+        order: [['createdAt', 'DESC']],
+    });
+    return models.map((inv) => inv.toJSON().id);
+};
+
 export const createInviteRecordDb = async (invite: Invite) => {
     const model = await InviteModel.create({ ...invite });
     return model.toJSON();

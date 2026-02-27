@@ -2,7 +2,7 @@ import { ServerSE, ServerSocketIOEvent, UserId } from '@mosaiq/terrazzo-common';
 import * as socketListeners from '@trz-api/listeners';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { YSocketIO } from '../y-socket-io';
+import { YSocketIO } from '../y-socket-io/y-socket-io';
 import { registerEngineSocketEvents } from './socketEngineHandlers';
 import { initializeSocketData, loginSocket, setSocketData } from './socketUtils';
 

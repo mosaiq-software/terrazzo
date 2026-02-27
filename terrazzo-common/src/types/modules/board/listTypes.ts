@@ -1,13 +1,18 @@
-import { BoardId, ListId } from '../../genericTypes';
-import { Card } from './cardTypes';
+import { ListId, ModuleId } from '../../genericTypes';
 
-export interface ListHeader {
-    id: ListId;
-    boardId: BoardId;
+export interface CreateList {
+    boardId: ModuleId;
     name: string;
-    order: number | null;
+    order?: number;
 }
 
-export interface List extends ListHeader {
-    cards: Card[];
+export interface UpdateList {
+    name?: string;
+}
+
+export interface List {
+    id: ListId;
+    boardId: ModuleId;
+    name: string;
+    order: number | null;
 }

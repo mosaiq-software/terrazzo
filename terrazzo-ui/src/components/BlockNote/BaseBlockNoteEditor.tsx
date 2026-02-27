@@ -11,8 +11,8 @@ import {
     UID,
     UserId,
 } from '@mosaiq/terrazzo-common';
-import { useFileUploader } from '@trz/hooks/useFileUploader';
-import { useRoom } from '@trz/hooks/useRoom';
+import { useFileUploader } from '@trz/hooks/util/useFileUploader';
+import { useRoom } from '@trz/hooks/util/useRoom';
 import { COLORS } from '@trz/util/colors';
 import { useEffect, useMemo, useState } from 'react';
 import { SocketIOProvider } from 'y-socket.io';

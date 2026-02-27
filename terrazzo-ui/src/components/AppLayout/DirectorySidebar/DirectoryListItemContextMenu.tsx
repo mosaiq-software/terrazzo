@@ -1,10 +1,10 @@
 import { Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { ModuleHeader, PermissibleAction, TrzModuleType, UID } from '@mosaiq/terrazzo-common';
+import { ModuleHeader, PermissibleAction, TrzModule, UID } from '@mosaiq/terrazzo-common';
 import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
 import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
 import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';
-import { useModulePermission, useOrgPermission } from '@trz/hooks/usePermissions';
+import { useModulePermission, useOrgPermission } from '@trz/hooks/data/usePermissions';
 import { COLORS } from '@trz/util/colors';
 import { useMemo } from 'react';
 import { MdAdd, MdSettings } from 'react-icons/md';
@@ -16,46 +16,25 @@ interface DirectoryListItemContextMenuProps {
     allowAddItem?: boolean;
     isRoot?: boolean;
     onClose: () => void;
-    addItem: (toParentId: UID, type: TrzModuleType) => Promise<void>;
+    addItem: (toParentId: UID, type: TrzModule) => Promise<void>;
 }
 export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenuProps) => {
-    const userCanCreateBoards = useModulePermission(props.moduleHeader, PermissibleAction.CreateBoard);
-    const userCanCreateDocuments = useModulePermission(props.moduleHeader, PermissibleAction.CreateDocument);
-    const userCanCreateDirectories = useModulePermission(props.moduleHeader, PermissibleAction.CreateDirectory);
+    const userCanManageModules = useModulePermission(props.moduleHeader, PermissibleAction.ManageModules);
 
-    const userCanCreateBoardsOrg = useOrgPermission(
+    const userCanManageModulesOrg = useOrgPermission(
         props.isRoot ? props.parentId : undefined,
-        PermissibleAction.CreateBoard
-    );
-    const userCanCreateDocumentsOrg = useOrgPermission(
-        props.isRoot ? props.parentId : undefined,
-        PermissibleAction.CreateDocument
-    );
-    const userCanCreateDirectoriesOrg = useOrgPermission(
-        props.isRoot ? props.parentId : undefined,
-        PermissibleAction.CreateDirectory
+        PermissibleAction.ManageModules
     );
 
-    const creationMenuItems: { id: TrzModuleType; label: string }[] = useMemo(() => {
-        const items: { id: TrzModuleType; label: string }[] = [];
-        if (userCanCreateDirectories || (props.isRoot && userCanCreateDirectoriesOrg)) {
-            items.push({ id: TrzModuleType.Directory, label: 'Directory' });
-        }
-        if (userCanCreateBoards || (props.isRoot && userCanCreateBoardsOrg)) {
-            items.push({ id: TrzModuleType.Board, label: 'Board' });
-        }
-        if (userCanCreateDocuments || (props.isRoot && userCanCreateDocumentsOrg)) {
-            items.push({ id: TrzModuleType.Document, label: 'Document' });
+    const creationMenuItems: { id: TrzModule; label: string }[] = useMemo(() => {
+        const items: { id: TrzModule; label: string }[] = [];
+        if (userCanManageModules || (props.isRoot && userCanManageModulesOrg)) {
+            items.push({ id: TrzModule.Directory, label: 'Directory' });
+            items.push({ id: TrzModule.Board, label: 'Board' });
+            items.push({ id: TrzModule.Document, label: 'Document' });
         }
         return items;
-    }, [
-        userCanCreateBoards,
-        userCanCreateDocuments,
-        userCanCreateDirectories,
-        userCanCreateBoardsOrg,
-        userCanCreateDocumentsOrg,
-        userCanCreateDirectoriesOrg,
-    ]);
+    }, [userCanManageModules, userCanManageModulesOrg]);
 
     const showCreateOptions = creationMenuItems.length > 0;
     const showEditOptions = !!props.moduleHeader;
@@ -67,7 +46,7 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
                     title="Add New..."
                     icon={<MdAdd size={16} />}
                     items={creationMenuItems}
-                    onSelect={(selected: TrzModuleType) => {
+                    onSelect={(selected: TrzModule) => {
                         props.addItem(props.parentId, selected);
                         props.onClose();
                     }}
@@ -95,13 +74,13 @@ export const DirectoryListItemContextMenu = (props: DirectoryListItemContextMenu
     );
 };
 
-const getSettingsTitle = (moduleType: TrzModuleType) => {
+const getSettingsTitle = (moduleType: TrzModule) => {
     switch (moduleType) {
-        case TrzModuleType.Board:
+        case TrzModule.Board:
             return 'Board Settings';
-        case TrzModuleType.Document:
+        case TrzModule.Document:
             return 'Document Settings';
-        case TrzModuleType.Directory:
+        case TrzModule.Directory:
             return 'Directory Settings';
         default:
             return 'Module Settings';

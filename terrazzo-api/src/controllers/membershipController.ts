@@ -1,5 +1,4 @@
-import { Member, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
-import { syncMembersInOrg, syncUsersOrgs } from '@trz-api/broadcasters';
+import { MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
 import {
     createOrganizationMembershipDb,
     deleteOrganizationMembershipDb,
@@ -7,42 +6,24 @@ import {
     getOrganizationMembershipsForOrgDb,
     getOrganizationMembershipsForUserDb,
 } from '@trz-api/persistence/organizationMembershipPersistence';
-import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
-import { userIsOrgOwner } from './organizationController';
-import { getUserHeader } from './userController';
+import { organizationHandler } from './dataSources/objectHandlers/organization';
+import { userIsOrgOwner } from './organizationAccess';
 
-export const getMembersInOrg = async (orgId: OrganizationId) => {
-    const org = await getOrgByIdDb(orgId);
+export const getMembersInOrg = async (orgId: OrganizationId): Promise<UserId[]> => {
+    const org = await organizationHandler.read(orgId);
     if (org == null) {
         throw new Error('Org not found');
     }
     const records = await getOrganizationMembershipsForOrgDb(orgId);
-    const members = await populateMemberships(records);
-    return members;
-};
-
-const populateMemberships = async (records: MembershipRecord[]) => {
-    const memberPromises = records.map(async (r) => {
-        const user = await getUserHeader(r.userId);
-        if (!user) {
-            return undefined;
-        }
-        const member: Member = {
-            user: user,
-            ...r,
-        };
-        return member;
-    });
-    const membersWithUndefined = await Promise.all(memberPromises);
-    const members = membersWithUndefined.filter((m) => !!m);
+    const members = records.map((r) => r.userId);
     return members;
 };
 
 export const getOrgsForUser = async (userId: UserId) => {
     const records = await getOrganizationMembershipsForUserDb(userId);
     const orgIds = records.map((r) => r.orgId);
-    const orgs = await Promise.all(orgIds.map(async (id) => await getOrgByIdDb(id)));
+    const orgs = await Promise.all(orgIds.map(async (id) => await organizationHandler.read(id)));
     return orgs.filter((o) => !!o);
 };
 

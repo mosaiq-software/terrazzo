@@ -1,4 +1,4 @@
-import { TextBlockId, TextBlockSnapshot, UID } from '@mosaiq/terrazzo-common';
+import { TextBlockId, TextBlockSnapshot, TextBlockSnapshotId, UID } from '@mosaiq/terrazzo-common';
 import { TextBlockHistoryModel } from '@mosaiq/terrazzo-db';
 
 export const createTextBlockHistorySnapshotDb = async (snapshot: TextBlockSnapshot) => {
@@ -14,6 +14,22 @@ export const getTextBlockHistorySnapshotDb = async (snapshotId: UID) => {
 export const getTextBlockHistorySnapshotsForTextBlockDb = async (textBlockId: TextBlockId) => {
     const models = await TextBlockHistoryModel.findAll({ where: { textBlockId }, order: [['timestamp', 'DESC']] });
     return models.map((model) => model.toJSON());
+};
+
+export const getTextBlockSnapshotIdsByTextBlockIdDb = async (
+    textBlockId: TextBlockId
+): Promise<TextBlockSnapshotId[]> => {
+    const models = await TextBlockHistoryModel.findAll({
+        attributes: ['snapshotId'],
+        where: { textBlockId },
+        order: [['timestamp', 'DESC']],
+    });
+    return models.map((model) => model.toJSON().snapshotId);
+};
+
+export const updateTextBlockHistorySnapshotDb = async (snapshotId: UID, update: Partial<TextBlockSnapshot>) => {
+    const [updated] = await TextBlockHistoryModel.update({ ...update }, { where: { snapshotId } });
+    return updated;
 };
 
 export const deleteTextBlockHistorySnapshotDb = async (snapshotId: UID) => {

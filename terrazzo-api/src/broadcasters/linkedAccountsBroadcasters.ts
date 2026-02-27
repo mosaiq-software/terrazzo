@@ -1,6 +1,6 @@
 import { getRoomCode, RoomType, ServerSE, UserId } from '@mosaiq/terrazzo-common';
 import { getLinkedAccountsForUser } from '@trz-api/controllers/linkedAccountController';
-import { broadcast } from '@trz-api/utils/socket/socketUtils';
+import { broadcast } from '@trz-api/utils/socket/socketActions';
 
 /**
  * Syncs the linked accounts for a user by broadcasting the updated list to the user's personal and data rooms.

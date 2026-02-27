@@ -1,6 +1,6 @@
 import { Box, Divider, Group, Stack, Text, Title } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { TrzModuleType, UID } from '@mosaiq/terrazzo-common';
+import { TrzModule, UID } from '@mosaiq/terrazzo-common';
 import TerrazzoLogo from '@trz/assets//terrazzo-logo.svg?react';
 import { DirectoryListItemContextMenu } from '@trz/components/AppLayout/DirectorySidebar/DirectoryListItemContextMenu';
 import { DirectoryTree } from '@trz/components/AppLayout/DirectorySidebar/DirectoryTree';
@@ -11,8 +11,7 @@ import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
 import { useUserContext } from '@trz/contexts/user-context';
-import { createDocument } from '@trz/emitters';
-import { createDirectory } from '@trz/emitters/directoryEmitters';
+import { createModule } from '@trz/emitters';
 import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
 import { useContextMenu } from 'mantine-contextmenu';
@@ -28,19 +27,27 @@ const AppLayout = () => {
     const isPublicAccessMode = !userCtx.userId;
 
     const addItem = useCallback(
-        async (toParentId: UID, type: TrzModuleType) => {
-            if (!toParentId || !type) {
+        async (toParentId: UID, type: TrzModule) => {
+            if (!toParentId || !type || !userCtx.userId) {
                 return;
             }
             try {
                 switch (type) {
-                    case TrzModuleType.Directory:
-                        await createDirectory(sockCtx, 'New Directory', toParentId);
+                    case TrzModule.Directory:
+                        await createModule(sockCtx, 'New Directory', toParentId, {
+                            type: TrzModule.Directory,
+                            initialData: {},
+                        });
                         return;
-                    case TrzModuleType.Document:
-                        await createDocument(sockCtx, 'New Document', toParentId);
+                    case TrzModule.Document:
+                        await createModule(sockCtx, 'New Document', toParentId, {
+                            type: TrzModule.Document,
+                            initialData: {
+                                createdByUserId: userCtx.userId,
+                            },
+                        });
                         return;
-                    case TrzModuleType.Board:
+                    case TrzModule.Board:
                         modals.openContextModal({
                             modal: 'board',
                             title: 'Create New Board',
@@ -56,7 +63,7 @@ const AppLayout = () => {
                 return;
             }
         },
-        [sockCtx]
+        [sockCtx, userCtx.userId]
     );
 
     return (

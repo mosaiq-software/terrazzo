@@ -1,4 +1,4 @@
-import { BoardId, Label, LabelId } from '@mosaiq/terrazzo-common';
+import { Label, LabelId, ModuleId } from '@mosaiq/terrazzo-common';
 import { LabelModel } from '@mosaiq/terrazzo-db';
 
 export const getLabelByIdDb = async (id: LabelId) => {
@@ -6,12 +6,12 @@ export const getLabelByIdDb = async (id: LabelId) => {
     return model?.toJSON();
 };
 
-export const getLabelsByBoardIdDb = async (boardId: BoardId) => {
-    const models = await LabelModel.findAll({ where: { boardId } });
-    return models.map((label) => label.toJSON());
+export const getLabelIdsByBoardIdDb = async (boardId: ModuleId) => {
+    const models = await LabelModel.findAll({ attributes: ['id'], where: { boardId } });
+    return models.map((label) => label.toJSON().id);
 };
 
-export const createLabelOnBoardDb = async (label: Label, boardId: BoardId) => {
+export const createLabelOnBoardDb = async (label: Label, boardId: ModuleId) => {
     const model = await LabelModel.create({
         id: label.id,
         boardId,
@@ -21,23 +21,7 @@ export const createLabelOnBoardDb = async (label: Label, boardId: BoardId) => {
     return model.toJSON();
 };
 
-export const updateLabelDb = async (label: Label) => {
-    const [updated] = await LabelModel.update(
-        {
-            name: label.name,
-            color: label.color,
-        },
-        { where: { id: label.id } }
-    );
+export const updateLabelDb = async (id: LabelId, update: Partial<Label>) => {
+    const [updated] = await LabelModel.update({ ...update }, { where: { id } });
     return updated;
-};
-
-export const deleteLabelDb = async (id: LabelId) => {
-    const deleted = await LabelModel.destroy({ where: { id } });
-    return deleted;
-};
-
-export const deleteLabelsByBoardIdDb = async (boardId: BoardId) => {
-    const deleted = await LabelModel.destroy({ where: { boardId } });
-    return deleted;
 };

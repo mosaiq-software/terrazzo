@@ -1,99 +1,13 @@
-import { Block } from '@blocknote/core';
-import { Card, CardHeader, CardId, LabelId, ListId, TextBlockId, UserId } from '@mosaiq/terrazzo-common';
-import { syncAddCard, syncMovedCard, syncUpdateCardField } from '@trz-api/broadcasters';
+import { CardId, LabelId, ListId, UserId } from '@mosaiq/terrazzo-common';
+import { syncMovedCard } from '@trz-api/broadcasters';
 import { syncCardLabels } from '@trz-api/broadcasters/labelBroadcaster';
-import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
 import { getCardAssignmentsForCardDb } from '@trz-api/persistence/cardAssignmentPersistence';
-import {
-    createCardOnListDb,
-    getCardByIdDb,
-    getCardCountOnListDb,
-    getTotalCardCountOnBoardDb,
-    moveCardDb,
-    updateCardDb,
-} from '@trz-api/persistence/cardPersistence';
+import { moveCardDb } from '@trz-api/persistence/cardPersistence';
 import { getLabelsOnCardDb, setLabelsOnCardDb } from '@trz-api/persistence/labelAssignmentPersistence';
-import { getListByIdDb } from '@trz-api/persistence/listPersistence';
 import { addAssigneeToCard } from './cardAssignmentController';
-import { createBlocknoteTextBlockWithBlocks, getTextBlockAsBlocks } from './textBlockController/textBlockController';
-
-export async function getSingleFullCard(cardId: CardId): Promise<Card | undefined> {
-    const cardHeader = await getCardByIdDb(cardId);
-    if (!cardHeader) {
-        throw new Error('Card not found');
-    }
-    const card = ((await populateCards([cardHeader])) ?? [undefined])[0] ?? undefined;
-    return card;
-}
-
-//Creates
-
-interface CreateCardOptions {
-    preventSync?: boolean;
-    descriptionBlocks?: Block[];
-}
-/**
- * Adds an empty card to an existing list via the list ID
- * You must pass in the list ID and the card name
- * Returns the ID of the new card
- * @param listID
- * @param cardName
- */
-export async function addCard(card: Partial<CardHeader> & { listId: ListId }, options?: CreateCardOptions) {
-    //pull board from db with ID
-    const updatingList = await getListByIdDb(card.listId);
-    if (!updatingList) {
-        throw new Error('Board not found');
-    }
-
-    const board = await getBoardByIdDb(updatingList.boardId);
-    if (!board) {
-        throw new Error('Board not found');
-    }
-
-    let descriptionTextBlockId: TextBlockId;
-    try {
-        const descBlock = await createBlocknoteTextBlockWithBlocks(options?.descriptionBlocks ?? []);
-        if (!descBlock) {
-            throw new Error('Failed to create description text block');
-        }
-        descriptionTextBlockId = descBlock.id;
-    } catch (error: any) {
-        throw new Error('Failed to create description text block');
-    }
-
-    const cardsOnBoard = await getTotalCardCountOnBoardDb(board.id);
-
-    const cardUid = crypto.randomUUID();
-    const newCard: Card = {
-        id: cardUid,
-        listId: card.listId,
-        boardId: board.id,
-        cardNumber: card.cardNumber ?? cardsOnBoard + 1,
-        name: card.name || '',
-        descriptionTextBlockId: descriptionTextBlockId,
-        priority: card.priority || null,
-        order: card.order !== undefined ? card.order : await getCardCountOnListDb(card.listId),
-        createdAt: card.createdAt || Date.now(),
-        createdById: card.createdById || null,
-        assignees: [],
-        labels: [],
-    };
-
-    try {
-        await createCardOnListDb(newCard);
-    } catch (e) {
-        throw new Error('Failed to save Card' + e);
-    }
-    if (!options?.preventSync) {
-        try {
-            await syncAddCard(newCard, board.id);
-        } catch (e) {
-            throw new Error('Failed to sync Card' + e);
-        }
-    }
-    return newCard;
-}
+import { getBoardIDFromCardID } from './cardQueries';
+import { cardHandler } from './dataSources/objectHandlers/card';
+import { getTextBlockAsBlocks } from './textBlockController/textBlockController';
 
 /**
  * Duplicates a card including its description, assignments, and labels
@@ -101,110 +15,39 @@ export async function addCard(card: Partial<CardHeader> & { listId: ListId }, op
  * @param cardId The ID of the card to duplicate
  * @param createdById Optional user ID of the user creating the duplicate
  */
-export async function duplicateCard(cardId: CardId, createdById?: UserId) {
-    const existingCard = await getSingleFullCard(cardId);
+export async function duplicateCard(cardId: CardId, createdById?: UserId): Promise<CardId> {
+    const existingCard = await cardHandler.read(cardId);
     if (!existingCard) {
         throw new Error('Error populating existing card');
     }
 
-    let descriptionTextBlockId: TextBlockId;
-    try {
-        const currentBlocks = await getTextBlockAsBlocks(existingCard.descriptionTextBlockId);
-        const descBlock = await createBlocknoteTextBlockWithBlocks(currentBlocks ?? []);
-        if (!descBlock) {
-            throw new Error('Failed to create description text block');
-        }
-        descriptionTextBlockId = descBlock.id;
-    } catch (error: any) {
-        throw new Error('Failed to create description text block ' + error.message);
-    }
-
-    const cardsOnBoard = await getTotalCardCountOnBoardDb(existingCard.boardId);
-
-    const newCardId = crypto.randomUUID();
-    const newCard: Card = {
-        id: newCardId,
+    const currentBlocks = await getTextBlockAsBlocks(existingCard.descriptionTextBlockId);
+    const newCardId = await cardHandler.create({
         listId: existingCard.listId,
-        boardId: existingCard.boardId,
-        cardNumber: cardsOnBoard + 1,
         name: existingCard.name + ' (Copy)',
-        descriptionTextBlockId: descriptionTextBlockId,
-        priority: existingCard.priority,
-        assignees: existingCard.assignees,
-        labels: existingCard.labels,
-        order: await getCardCountOnListDb(existingCard.listId),
+        descriptionBlocks: currentBlocks,
+        priority: existingCard.priority ?? undefined,
         createdAt: Date.now(),
-        createdById: createdById ?? null,
-    };
+        createdById: createdById ?? undefined,
+    });
 
     try {
-        await createCardOnListDb(newCard);
-    } catch (e) {
-        throw new Error('Failed to save Card' + e);
-    }
-
-    try {
-        for (const assignee of existingCard.assignees) {
-            await addAssigneeToCard(newCard.id, assignee);
+        const assignees = await getCardAssignmentsForCardDb(existingCard.id);
+        for (const assignee of assignees) {
+            await addAssigneeToCard(newCardId, assignee);
         }
     } catch (error: any) {
         throw new Error('Failed to add assignees to card ' + error.message);
     }
 
     try {
-        await setCardsLabels(newCard.id, existingCard.labels);
+        const labels = await getLabelsOnCardDb(existingCard.id);
+        await setCardsLabels(newCardId, labels);
     } catch (error: any) {
         throw new Error('Failed to add labels to card ' + error.message);
     }
 
-    try {
-        await syncAddCard(newCard, existingCard.boardId);
-    } catch (e) {
-        throw new Error('Failed to sync new card ' + e);
-    }
-
-    return newCard;
-}
-
-export async function updateCardFromPartial(cardId: CardId, partial: Partial<CardHeader>) {
-    try {
-        if (partial.order !== undefined) {
-            // Do not update order directly
-            delete partial.order;
-        }
-        if (partial.listId !== undefined) {
-            // Do not update listId directly
-            delete partial.listId;
-        }
-        await updateCardDb(cardId, partial);
-    } catch (e: any) {
-        throw new Error('Failed to update card ' + e);
-    }
-    try {
-        const card = await getCardByIdDb(cardId);
-        if (!card) {
-            throw new Error('Card not found after update ' + cardId);
-        }
-        await syncUpdateCardField(card, card.boardId);
-    } catch (e) {
-        throw new Error('Failed to sync updated card ' + e);
-    }
-}
-
-export async function getListIDFromCardID(cardID: CardId) {
-    const card = await getCardByIdDb(cardID);
-    if (card == null) {
-        throw new Error('Card not found');
-    }
-    return card.listId;
-}
-
-export async function getBoardIDFromCardID(cardID: CardId) {
-    const card = await getCardByIdDb(cardID);
-    if (card == null || !card.boardId) {
-        throw new Error('Card not found');
-    }
-    return card.boardId;
+    return newCardId;
 }
 
 interface MoveCardOptions {
@@ -220,7 +63,7 @@ export async function moveCard(
     options?: MoveCardOptions
 ) {
     try {
-        const card = await getCardByIdDb(cardId);
+        const card = await cardHandler.read(cardId);
         if (!card) {
             throw new Error(`Card ${cardId} not found`);
         }
@@ -235,19 +78,6 @@ export async function moveCard(
         throw error;
     }
 }
-
-export const populateCards = async (cardHeaders: CardHeader[]): Promise<Card[]> => {
-    return await Promise.all(
-        cardHeaders.map(async (c: CardHeader) => {
-            const cc: Card = {
-                ...c,
-                assignees: await getCardAssignmentsForCardDb(c.id),
-                labels: (await getLabelsOnCardDb(c.id)) || [],
-            };
-            return cc;
-        })
-    );
-};
 
 interface SetCardsLabelsOptions {
     preventSync?: boolean;

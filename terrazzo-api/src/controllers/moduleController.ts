@@ -1,85 +1,76 @@
 import {
     calculateModuleEffectivePermissions,
+    CreateModuleData,
+    CreateModuleDataArgs,
+    exhaustiveCheck,
+    ModuleData,
     ModuleHeader,
+    ModuleId,
     ModulePermissions,
-    TrzModuleType,
+    ModuleType,
+    TextBlockType,
+    TrzModule,
     UID,
+    UserId,
 } from '@mosaiq/terrazzo-common';
-import {
-    createModuleDb,
-    getModuleByIdDb,
-    getModulesByParentIdDb,
-    getNextModuleOrderInParentDb,
-    updateModuleDb,
-} from '@trz-api/persistence/modulePersistence';
-import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
+import { getModulesByParentIdDb, updateModuleDb } from '@trz-api/persistence/modulePersistence';
+import { userCanViewModule } from '@trz-api/utils/permissions';
+import { textBlockHandler } from './dataSources/objectHandlers/textBlock';
 
-export const createNewModule = async (name: string, parentId: UID, type: TrzModuleType): Promise<ModuleHeader> => {
-    const parentModule = await getModuleById(parentId);
-    let orgId = parentModule?.orgId;
-    if (!orgId) {
-        const org = await getOrgByIdDb(parentId);
-        if (!org) {
-            throw new Error('Parent module or organization not found');
+export async function buildModuleData<T extends ModuleType>(args: {
+    type: T;
+    initialData: CreateModuleData<T>;
+}): Promise<ModuleData<T>>;
+export async function buildModuleData(args: CreateModuleDataArgs): Promise<ModuleData<ModuleType>> {
+    switch (args.type) {
+        case TrzModule.Directory: {
+            const data: ModuleData<TrzModule.Directory> = {};
+            return data;
         }
-        orgId = org.id;
+        case TrzModule.Document: {
+            const textBlockId = await textBlockHandler.create({
+                text: JSON.stringify([]),
+                type: TextBlockType.BlockNote,
+                trackHistory: true,
+            });
+            if (!textBlockId) {
+                throw new Error('Failed to create main text block for document');
+            }
+            const data: ModuleData<TrzModule.Document> = {
+                textBlockId: textBlockId,
+                lastModifiedAt: Date.now(),
+                lastModifiedByUserId: args.initialData.createdByUserId,
+            };
+            return data;
+        }
+        case TrzModule.Board: {
+            const data: ModuleData<TrzModule.Board> = {
+                boardCode: args.initialData.boardCode,
+            };
+            return data;
+        }
+        default:
+            return exhaustiveCheck(args);
     }
-    const nextOrder = await getNextModuleOrderInParentDb(parentId);
-    const newModule: ModuleHeader = {
-        id: crypto.randomUUID(),
-        parentId,
-        name,
-        type,
-        orgId,
-        order: nextOrder,
-        archived: false,
-        createdAt: Date.now(),
-        desiredPermissions: {},
-        effectivePermissions: {},
-        public: false,
-    };
-    await createModuleDb(newModule);
-    return newModule;
+}
+
+export const getModuleChildrenForUser = async (
+    moduleId: ModuleId,
+    userId: UserId
+): Promise<(ModuleHeader & { canAccess: boolean })[]> => {
+    const modules = await getModulesByParentIdDb(moduleId);
+    const canAccessModules: (ModuleHeader & { canAccess: boolean })[] = await Promise.all(
+        modules.map(async (mod) => {
+            return {
+                ...mod,
+                canAccess: await userCanViewModule(userId, mod.id),
+            };
+        })
+    );
+    return canAccessModules;
 };
 
-export const getModuleById = async (id: UID): Promise<ModuleHeader | undefined> => {
-    const module = await getModuleByIdDb(id);
-    if (!module) {
-        return undefined;
-    }
-    return module;
-};
-
-export const updateModule = async (id: UID, partial: Partial<ModuleHeader>): Promise<void> => {
-    const desiredPermissions = partial.desiredPermissions;
-    // handle simple fields
-    delete partial.desiredPermissions;
-    delete partial.effectivePermissions;
-    await updateModuleDb(id, partial);
-
-    if (!desiredPermissions) {
-        return;
-    }
-    // handle permissions separately
-    await updateModulePermissions(id, desiredPermissions);
-};
-
-const updateModulePermissions = async (id: UID, desiredPermissions: ModulePermissions): Promise<void> => {
-    const module = await getModuleByIdDb(id);
-    if (!module) {
-        throw new Error('Module not found');
-    }
-    const parentModule = await getModuleByIdDb(module.parentId);
-    const parentEffectivePermissions = parentModule?.effectivePermissions;
-    const newEffectivePermissions = calculateModuleEffectivePermissions(parentEffectivePermissions, desiredPermissions);
-    await updateModuleDb(id, {
-        desiredPermissions,
-        effectivePermissions: newEffectivePermissions,
-    });
-    await recursivelyUpdateModuleEffectivePermissions(id, newEffectivePermissions);
-};
-
-const recursivelyUpdateModuleEffectivePermissions = async (
+export const recursivelyUpdateModuleEffectivePermissions = async (
     id: UID,
     parentEffectivePermissions: ModulePermissions
 ): Promise<void> => {

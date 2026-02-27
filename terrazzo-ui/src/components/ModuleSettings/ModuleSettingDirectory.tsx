@@ -1,30 +1,29 @@
 import { Fieldset, Loader, Stack } from '@mantine/core';
-import { DirectoryHeader, DirectoryId, PermissibleAction, TrzModuleType, UID, withIf } from '@mosaiq/terrazzo-common';
+import { ModuleHeader, ModuleId, ModuleType, PermissibleAction, TrzModule, withIf } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
-import { updateBoardField, updateDocumentMetadata } from '@trz/emitters';
-import { updateDirectoryMetadata } from '@trz/emitters/directoryEmitters';
-import { useDirectory } from '@trz/hooks/useDirectory';
-import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
-import { useModulePermission } from '@trz/hooks/usePermissions';
+import { updateModuleField } from '@trz/emitters';
+import { useModulePermission } from '@trz/hooks/data/usePermissions';
+import { useModule } from '@trz/hooks/useModule';
+import { useModuleChildren } from '@trz/hooks/useModuleChildren';
+import { ModuleIcon } from '@trz/util/moduleUtils';
 import { NoteType, notify } from '@trz/util/notifications';
 import { toTitleCase } from '@trz/util/textUtils';
 import { useMemo } from 'react';
 import { ActionRow } from '../UI/ActionRow';
 import { NotFound } from '../UI/NotFound';
 import { ModuleSettingsLayout } from './ModuleSettingsLayout';
-import { ModuleIcon } from '@trz/util/moduleUtils';
 
 interface ModuleSettingsDirectoryProps {
-    directoryId: DirectoryId;
+    directoryId: ModuleId;
     onClose: () => void;
 }
 
 export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => {
     const sockCtx = useSocket();
-    const directory = useDirectory(props.directoryId);
-    const userCanViewDirectory = useModulePermission(directory, PermissibleAction.ViewDirectory);
-    const userCanEditDirectory = useModulePermission(directory, PermissibleAction.EditDirectory);
-    const contents = useDirectoryContents(props.directoryId, TrzModuleType.Directory);
+    const directory = useModule(props.directoryId, TrzModule.Directory);
+    const userCanViewDirectory = useModulePermission(directory, PermissibleAction.ViewModules);
+    const userCanEditDirectory = useModulePermission(directory, PermissibleAction.ManageModules);
+    const contents = useModuleChildren(props.directoryId);
 
     const archivedSubitems = useMemo(() => {
         if (!contents) {
@@ -33,35 +32,29 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
         return contents.filter((item) => item.archived);
     }, [contents]);
 
-    const onSave = async (edits: Partial<DirectoryHeader>) => {
+    const onSave = async (edits: Partial<ModuleHeader<TrzModule.Directory>>) => {
         try {
             if (!userCanEditDirectory) {
                 throw new Error('You do not have permission to edit this directory.');
             }
-            await updateDirectoryMetadata(sockCtx, props.directoryId, { ...edits });
+            await updateModuleField(sockCtx, props.directoryId, {
+                type: TrzModule.Directory,
+                update: edits,
+            });
         } catch (e) {
             notify(NoteType.DOC_UPDATE_ERROR, e);
         }
     };
 
-    const onUnarchiveSubitem = async (itemId: UID, itemType: TrzModuleType) => {
+    const onUnarchiveSubitem = async (itemId: ModuleId, itemType: ModuleType) => {
         try {
             if (!userCanEditDirectory) {
                 throw new Error('You do not have permission to edit this directory.');
             }
-            switch (itemType) {
-                case TrzModuleType.Directory:
-                    await updateDirectoryMetadata(sockCtx, itemId, { archived: false });
-                    break;
-                case TrzModuleType.Document:
-                    await updateDocumentMetadata(sockCtx, itemId, { archived: false });
-                    break;
-                case TrzModuleType.Board:
-                    await updateBoardField(sockCtx, itemId, { archived: false });
-                    break;
-                default:
-                    throw new Error('Unsupported module type');
-            }
+            await updateModuleField(sockCtx, itemId, {
+                type: itemType,
+                update: { archived: false },
+            });
             notify(NoteType.CHANGES_SAVED);
         } catch (e) {
             notify(NoteType.DOC_UPDATE_ERROR, e);
@@ -82,7 +75,7 @@ export const ModuleSettingsDirectory = (props: ModuleSettingsDirectoryProps) => 
     }
 
     return (
-        <ModuleSettingsLayout
+        <ModuleSettingsLayout<TrzModule.Directory>
             moduleHeader={{
                 ...directory,
             }}

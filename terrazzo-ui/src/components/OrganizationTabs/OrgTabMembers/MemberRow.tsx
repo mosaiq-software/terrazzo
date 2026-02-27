@@ -1,5 +1,5 @@
 import { Center, Tooltip } from '@mantine/core';
-import { fullName, Member, MembershipRecord, withIf } from '@mosaiq/terrazzo-common';
+import { fullName, MembershipRecord, withIf } from '@mosaiq/terrazzo-common';
 import { COLORS } from '@trz/util/colors';
 import { MdPersonRemove, MdStar } from 'react-icons/md';
 import { RolesList } from '../../Roles/RolesList';

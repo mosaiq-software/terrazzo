@@ -1,8 +1,11 @@
-import { CardAssignment } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
+import { UserId, CardId } from '@mosaiq/terrazzo-common';
 
-export type CardAssignmentModelType = CardAssignment;
+export type CardAssignmentModelType = {
+    userId: UserId;
+    cardId: CardId;
+};
 
 export const getCardAssignmentModel = (sequelize: Sequelize): DbModel<CardAssignmentModelType> => {
     class CardAssignmentModel extends Model<CardAssignmentModelType> {
@@ -12,12 +15,14 @@ export const getCardAssignmentModel = (sequelize: Sequelize): DbModel<CardAssign
     }
     CardAssignmentModel.init(
         {
-            id: {
+            userId: {
                 type: DataTypes.STRING,
                 primaryKey: true,
             },
-            userId: DataTypes.STRING,
-            cardId: DataTypes.STRING,
+            cardId: {
+                type: DataTypes.STRING,
+                primaryKey: true,
+            },
         },
         { sequelize, timestamps: false, modelName: 'CardAssignment' }
     );

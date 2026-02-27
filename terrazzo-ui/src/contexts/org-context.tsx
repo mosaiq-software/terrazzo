@@ -1,31 +1,30 @@
 import { useLocalStorage } from '@mantine/hooks';
 import {
     LocalStorageKey,
-    Member,
     OrganizationHeader,
     OrganizationId,
     Role,
     RoomType,
     ServerSE,
-    updateBaseFromPartial,
+    UserId,
 } from '@mosaiq/terrazzo-common';
 import { createOrganization, getOrganizationData, getOrganizationsForUser } from '@trz/emitters';
-import { useOrgMembers } from '@trz/hooks/useOrgMembers';
-import { useOrgRoles } from '@trz/hooks/useOrgRoles';
-import { useRoom } from '@trz/hooks/useRoom';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { useRoom } from '@trz/hooks/util/useRoom';
+import { useSocketListener } from '@trz/hooks/util/useSocketListener';
 import { NoteType, notify } from '@trz/util/notifications';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useSocket } from './socket-context';
 import { useUserContext } from './user-context';
+import { useOrgMembers } from '@trz/hooks/data/useOrgMembers';
+import { useOrgRoles } from '@trz/hooks/data/useOrgRoles';
 
 export type OrgContextType = {
     active: OrganizationHeader | undefined;
     selectOrganization: (orgId: OrganizationId | null | undefined) => Promise<void>;
     selectAndGoToOrganization: (orgId: OrganizationId | null | undefined) => Promise<void>;
     allOrganizations: OrganizationHeader[];
-    members: Member[];
+    members: UserId[];
     roles: Role[];
     createOrganization: (orgName: string) => Promise<OrganizationHeader | undefined>;
 };
@@ -43,7 +42,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
         defaultValue: undefined,
     });
     useRoom(RoomType.DATA, selectedOrganization?.id);
-    const members = useOrgMembers(selectedOrganization?.id);
+    const memberIds = useOrgMembers(selectedOrganization?.id);
     const roles = useOrgRoles(userCtx.userId ? selectedOrganization?.id : undefined);
 
     useEffect(() => {
@@ -97,7 +96,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                 setAllOrganizations((prev) =>
                     prev.map((org) => {
                         if (org.id === payload.id) {
-                            return updateBaseFromPartial(org, payload);
+                            return { ...org, ...payload };
                         }
                         return org;
                     })
@@ -108,7 +107,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                     if (!prev) {
                         return prev;
                     }
-                    return updateBaseFromPartial(prev, payload);
+                    return { ...prev, ...payload };
                 });
             }
         },
@@ -189,7 +188,7 @@ const OrgProvider: React.FC<any> = ({ children }) => {
                 selectAndGoToOrganization,
                 allOrganizations,
                 createOrganization: createOrg,
-                members,
+                members: memberIds,
                 roles,
             }}
         >

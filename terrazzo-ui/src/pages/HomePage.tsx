@@ -14,7 +14,7 @@ import {
 import { modals } from '@mantine/modals';
 import { useOrg } from '@trz/contexts/org-context';
 import { useUI } from '@trz/contexts/ui-context';
-import { useMe } from '@trz/hooks/useMe';
+import { useMe } from '@trz/hooks/util/useMe';
 import { COLORS } from '@trz/util/colors';
 import { setTitle } from '@trz/util/tabUtils';
 import React, { useEffect } from 'react';

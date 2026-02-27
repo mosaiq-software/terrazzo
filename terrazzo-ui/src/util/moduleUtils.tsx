@@ -1,25 +1,25 @@
-import { TrzModuleType, UID } from '@mosaiq/terrazzo-common';
+import { TrzModule, UID } from '@mosaiq/terrazzo-common';
 import { IconType } from 'react-icons';
 import { IoDocumentOutline } from 'react-icons/io5';
 import { MdFolder, MdOutlineViewKanban } from 'react-icons/md';
 
-export const getModuleRelativeUrl = (moduleType: TrzModuleType, moduleId: UID): string => {
+export const getModuleRelativeUrl = (moduleType: TrzModule, moduleId: UID): string => {
     switch (moduleType) {
-        case TrzModuleType.Document:
+        case TrzModule.Document:
             return `/doc/${moduleId}`;
-        case TrzModuleType.Board:
+        case TrzModule.Board:
             return `/board/${moduleId}`;
         default:
             return '/';
     }
 };
 
-export const getModulePublicUrl = (moduleType: TrzModuleType, moduleId: UID): string => {
+export const getModulePublicUrl = (moduleType: TrzModule, moduleId: UID): string => {
     const baseUrl = window.location.origin;
     switch (moduleType) {
-        case TrzModuleType.Document:
+        case TrzModule.Document:
             return `${baseUrl}/doc/${moduleId}`;
-        case TrzModuleType.Board:
+        case TrzModule.Board:
             return `${baseUrl}/board/${moduleId}`;
         default:
             return baseUrl;
@@ -27,15 +27,15 @@ export const getModulePublicUrl = (moduleType: TrzModuleType, moduleId: UID): st
 };
 
 interface ModuleIconProps {
-    moduleType: TrzModuleType;
+    moduleType: TrzModule;
 }
 export const ModuleIcon = (props: ModuleIconProps): IconType | undefined => {
     switch (props.moduleType) {
-        case TrzModuleType.Directory:
+        case TrzModule.Directory:
             return MdFolder;
-        case TrzModuleType.Document:
+        case TrzModule.Document:
             return IoDocumentOutline;
-        case TrzModuleType.Board:
+        case TrzModule.Board:
             return MdOutlineViewKanban;
     }
 };

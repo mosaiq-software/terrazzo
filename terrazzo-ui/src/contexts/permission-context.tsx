@@ -9,10 +9,10 @@ import {
     Role,
     RoleId,
 } from '@mosaiq/terrazzo-common';
-import { useRoleForUserInOrg } from '@trz/hooks/useRolesForUserInOrg';
 import React, { createContext, useContext } from 'react';
 import { useOrg } from './org-context';
 import { useUserContext } from './user-context';
+import { useRoleForUserInOrg } from '@trz/hooks/data/useRolesForUserInOrg';
 
 export type PermissionContextType = {
     checkOrgPermission: (action: PermissibleAction) => Promise<boolean>;

@@ -1,31 +1,29 @@
 import { Button, Group, Menu, Stack } from '@mantine/core';
-import { OrganizationId, PermissibleAction, TrzModuleType, UID, withIf } from '@mosaiq/terrazzo-common';
-import { useDirectoryContents } from '@trz/hooks/useDirectoryContents';
-import { useOrgPermission } from '@trz/hooks/usePermissions';
+import { OrganizationId, PermissibleAction, TrzModule, UID } from '@mosaiq/terrazzo-common';
+import { useModuleChildren } from '@trz/hooks/data/useModuleChildren';
+import { useOrgPermission } from '@trz/hooks/data/usePermissions';
 import { useMemo } from 'react';
 import { MdAdd } from 'react-icons/md';
 import { DirectoryTreeItem } from './DirectoryTreeItem';
 
 interface DirectoryTreeProps {
     orgId: OrganizationId | undefined;
-    addItem: (toParentId: UID, type: TrzModuleType) => Promise<void>;
+    addItem: (toParentId: UID, type: TrzModule) => Promise<void>;
 }
 export const DirectoryTree = (props: DirectoryTreeProps) => {
-    const contents = useDirectoryContents(props.orgId, TrzModuleType.Organization);
+    const contents = useModuleChildren(props.orgId);
 
-    const userCanCreateBoardsOrg = useOrgPermission(props.orgId, PermissibleAction.CreateBoard);
-    const userCanCreateDocumentsOrg = useOrgPermission(props.orgId, PermissibleAction.CreateDocument);
-    const userCanCreateDirectoriesOrg = useOrgPermission(props.orgId, PermissibleAction.CreateDirectory);
+    const userCanManageModulesOrg = useOrgPermission(props.orgId, PermissibleAction.ManageModules);
 
-    const creationMenuItems: { id: TrzModuleType; label: string }[] = useMemo(() => {
-        const items: { id: TrzModuleType; label: string }[] = [
-            ...withIf({ id: TrzModuleType.Directory, label: 'Directory' }, userCanCreateDirectoriesOrg),
-            ...withIf({ id: TrzModuleType.Board, label: 'Board' }, userCanCreateBoardsOrg),
-            ...withIf({ id: TrzModuleType.Document, label: 'Document' }, userCanCreateDocumentsOrg),
-        ];
+    const creationMenuItems: { id: TrzModule; label: string }[] = useMemo(() => {
+        const items: { id: TrzModule; label: string }[] = [];
+        if (userCanManageModulesOrg) {
+            items.push({ id: TrzModule.Directory, label: 'Directory' });
+            items.push({ id: TrzModule.Board, label: 'Board' });
+            items.push({ id: TrzModule.Document, label: 'Document' });
+        }
         return items;
-    }, [userCanCreateBoardsOrg, userCanCreateDocumentsOrg, userCanCreateDirectoriesOrg]);
-    const showCreateOptions = creationMenuItems.length > 0;
+    }, [userCanManageModulesOrg]);
 
     if (!props.orgId || !contents) {
         return null;
@@ -37,9 +35,6 @@ export const DirectoryTree = (props: DirectoryTreeProps) => {
             p={0}
         >
             {contents.map((item) => {
-                if (item.type !== TrzModuleType.Directory && !item.canAccess) {
-                    return null;
-                }
                 return (
                     <DirectoryTreeItem
                         key={item.id}
@@ -54,7 +49,7 @@ export const DirectoryTree = (props: DirectoryTreeProps) => {
                 justify="center"
                 py="lg"
             >
-                {showCreateOptions && (
+                {creationMenuItems.length > 0 && (
                     <Menu
                         withArrow
                         shadow="md"

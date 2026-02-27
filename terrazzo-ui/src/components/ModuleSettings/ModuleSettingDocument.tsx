@@ -1,30 +1,33 @@
 import { Loader } from '@mantine/core';
-import { DocumentHeader, DocumentId, PermissibleAction } from '@mosaiq/terrazzo-common';
+import { ModuleHeader, ModuleId, PermissibleAction, TrzModule } from '@mosaiq/terrazzo-common';
 import { useSocket } from '@trz/contexts/socket-context';
-import { updateDocumentMetadata } from '@trz/emitters';
-import { useDocument } from '@trz/hooks/useDocument';
-import { useModulePermission } from '@trz/hooks/usePermissions';
+import { updateModuleField } from '@trz/emitters';
+import { useModulePermission } from '@trz/hooks/data/usePermissions';
 import { NoteType, notify } from '@trz/util/notifications';
 import { NotFound } from '../UI/NotFound';
 import { ModuleSettingsLayout } from './ModuleSettingsLayout';
+import { useModule } from '@trz/hooks/data/useModule';
 
 interface ModuleSettingsDocumentProps {
-    documentId: DocumentId;
+    documentId: ModuleId;
     onClose: () => void;
 }
 
 export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
     const sockCtx = useSocket();
-    const { document } = useDocument(props.documentId);
-    const userCanViewDocument = useModulePermission(document, PermissibleAction.ViewDocument);
-    const userCanEditDocument = useModulePermission(document, PermissibleAction.EditDocument);
+    const document = useModule(props.documentId, TrzModule.Document);
+    const userCanViewDocument = useModulePermission(document, PermissibleAction.ViewModules);
+    const userCanEditDocument = useModulePermission(document, PermissibleAction.ManageModules);
 
-    const onSave = async (edits: Partial<DocumentHeader>) => {
+    const onSave = async (edits: Partial<ModuleHeader<TrzModule.Document>>) => {
         try {
             if (!userCanEditDocument) {
                 throw new Error('You do not have permission to edit this document.');
             }
-            await updateDocumentMetadata(sockCtx, props.documentId, { ...edits });
+            await updateModuleField(sockCtx, props.documentId, {
+                type: TrzModule.Document,
+                update: edits,
+            });
         } catch (e) {
             notify(NoteType.DOC_UPDATE_ERROR, e);
         }
@@ -44,7 +47,7 @@ export const ModuleSettingsDocument = (props: ModuleSettingsDocumentProps) => {
     }
 
     return (
-        <ModuleSettingsLayout
+        <ModuleSettingsLayout<TrzModule.Document>
             moduleHeader={{
                 ...document,
             }}

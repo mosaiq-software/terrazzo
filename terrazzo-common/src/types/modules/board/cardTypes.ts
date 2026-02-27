@@ -1,10 +1,27 @@
+import { Block } from '@blocknote/core';
 import { Priority } from '../../../constants';
-import { AssignmentId, BoardId, CardId, LabelId, ListId, TextBlockId, UserId } from '../../genericTypes';
+import { CardId, ListId, ModuleId, TextBlockId, UserId } from '../../genericTypes';
 
-export interface CardHeader {
+export interface CreateCard {
+    listId: ListId;
+    name: string;
+    cardNumber?: number;
+    priority?: Priority;
+    order?: number;
+    descriptionBlocks?: Block[];
+    createdAt?: number;
+    createdById?: UserId;
+}
+
+export interface UpdateCard {
+    name?: string;
+    priority?: Priority | null;
+}
+
+export interface Card {
     id: CardId;
     listId: ListId;
-    boardId: BoardId;
+    boardId: ModuleId;
     cardNumber: number;
     name: string;
     priority: Priority | null;
@@ -12,15 +29,4 @@ export interface CardHeader {
     descriptionTextBlockId: TextBlockId;
     createdAt: number;
     createdById: UserId | null;
-}
-
-export interface Card extends CardHeader {
-    labels: LabelId[];
-    assignees: UserId[];
-}
-
-export interface CardAssignment {
-    id: AssignmentId;
-    userId: UserId;
-    cardId: CardId;
 }

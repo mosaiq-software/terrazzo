@@ -1,6 +1,6 @@
 import {
     boardNameWithCode,
-    CardHeader,
+    Card,
     cardNameWithBoardCodeAndNumber,
     fullName,
     fullNameWithUsername,
@@ -9,7 +9,7 @@ import {
     QueryableDatapoint,
     QueryableItem,
     settlePromises,
-    TrzModuleType,
+    TrzModule,
     UserId,
 } from '@mosaiq/terrazzo-common';
 import {
@@ -34,11 +34,14 @@ export const buildTagIndex = async (
 ): Promise<QueryableDatapoint[]> => {
     const queryableData: QueryableDatapoint[] = [];
 
-    const allBoardsInOrg = await dataSource.getModulesByOrgIdDb(orgId, { type: TrzModuleType.Board, archived: false });
-    const boardIndexingPromises = allBoardsInOrg.map((boardModule) => indexBoard(dataSource, boardModule));
+    const allBoardsInOrg = await dataSource.getModulesByOrgIdDb(orgId, { type: TrzModule.Board, archived: false });
+    const boardsInOrg = allBoardsInOrg.filter(
+        (mod): mod is ModuleHeader<TrzModule.Board> => mod.type === TrzModule.Board
+    );
+    const boardIndexingPromises = boardsInOrg.map((boardModule) => indexBoard(dataSource, boardModule));
 
     const allDocumentsInOrg = await dataSource.getModulesByOrgIdDb(orgId, {
-        type: TrzModuleType.Document,
+        type: TrzModule.Document,
         archived: false,
     });
     const documentIndexingPromises = allDocumentsInOrg.map((documentModule) =>
@@ -80,24 +83,21 @@ const indexDocument = async (
 
 const indexBoard = async (
     dataSource: TagsQueryDataSource,
-    boardModule: ModuleHeader
+    boardModule: ModuleHeader<TrzModule.Board>
 ): Promise<QueryableDatapoint[]> => {
     try {
-        const board = await dataSource.getBoardByIdDb(boardModule.id);
-        if (!board) {
-            throw new Error('Board not found');
-        }
+        const boardCode = boardModule.data.boardCode;
         const boardQueryable: QueryableDatapoint = {
-            display: boardNameWithCode(boardModule.name, board.boardCode),
-            content: buildBoardNameVariants(boardModule.name, board.boardCode),
-            id: board.id,
+            display: boardNameWithCode(boardModule.name, boardCode),
+            content: buildBoardNameVariants(boardModule.name, boardCode),
+            id: boardModule.id,
             type: QueryableItem.Board,
         };
 
         const cardsInBoard = await dataSource.getActiveCardsByBoardIdDb(boardModule.id);
         const cardIndexingPromises: Promise<QueryableDatapoint>[] = [];
         for (const card of cardsInBoard) {
-            cardIndexingPromises.push(indexCard(dataSource, card, board.boardCode));
+            cardIndexingPromises.push(indexCard(dataSource, card, boardCode));
         }
         const { fulfilled } = await settlePromises(cardIndexingPromises);
 
@@ -113,7 +113,7 @@ const indexBoard = async (
 
 const indexCard = async (
     dataSource: TagsQueryDataSource,
-    card: CardHeader,
+    card: Card,
     boardCode: string
 ): Promise<QueryableDatapoint> => {
     try {
@@ -135,7 +135,7 @@ const indexCard = async (
 
 const indexUser = async (dataSource: TagsQueryDataSource, userId: UserId): Promise<QueryableDatapoint[]> => {
     try {
-        const user = await dataSource.getUserHeader(userId);
+        const user = await dataSource.userHandler.read(userId);
         if (!user) {
             throw new Error('User not found');
         }

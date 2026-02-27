@@ -20,9 +20,9 @@ import { RectHoldingButton } from '@trz/components/UI/RectHoldingButton';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUserContext } from '@trz/contexts/user-context';
 import { emitMoveCard, updateCardAssignee, updateCardField } from '@trz/emitters';
-import { useCard } from '@trz/hooks/useCard';
-import { useCatchSaveKey } from '@trz/hooks/useCatchSaveKey';
-import { useUser } from '@trz/hooks/useUser';
+import { useCard } from '@trz/hooks/data/useCard';
+import { useUser } from '@trz/hooks/data/useUser';
+import { useCatchSaveKey } from '@trz/hooks/util/useCatchSaveKey';
 import { useBoardMetadata } from '@trz/pages/BoardPage';
 import { getCardNumber } from '@trz/util/boardUtils';
 import { COLORS } from '@trz/util/colors';
@@ -47,7 +47,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
         onDropdownClose: () => combobox.resetSelectedOption(),
     });
     const clipboard = useClipboard({ timeout: 500 });
-    const card = useCard(props.cardId, false, true);
+    const { card, assignees } = useCard(props.cardId, false, true);
     useCatchSaveKey();
     const boardMeta = useBoardMetadata();
     const perms = boardMeta?.permissions;
@@ -87,7 +87,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
         return null;
     }
 
-    const joinedCard = !!usr.userId && card?.assignees.includes(usr.userId);
+    const joinedCard = !!usr.userId && assignees.includes(usr.userId);
 
     if (!card) {
         return (
@@ -225,7 +225,6 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                             />
                             <LabelsMenu
                                 card={card}
-                                boardLabels={boardMeta.labels}
                                 viewOnly={!perms.editCard}
                             />
                             <AssigneeMenu

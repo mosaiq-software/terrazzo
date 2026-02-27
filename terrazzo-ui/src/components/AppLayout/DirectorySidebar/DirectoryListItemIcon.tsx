@@ -1,15 +1,15 @@
-import { TrzModuleType } from '@mosaiq/terrazzo-common';
+import { TrzModule } from '@mosaiq/terrazzo-common';
 import { COLORS } from '@trz/util/colors';
 import { ModuleIcon } from '@trz/util/moduleUtils';
 import { FaChevronDown } from 'react-icons/fa';
 
 interface DirectoryListItemIconProps {
-    moduleType: TrzModuleType;
+    moduleType: TrzModule;
     collapsed?: boolean;
     subItemsCount?: number;
 }
 export const DirectoryListItemIcon = (props: DirectoryListItemIconProps) => {
-    if (props.moduleType === TrzModuleType.Directory) {
+    if (props.moduleType === TrzModule.Directory) {
         if (!props.subItemsCount) {
             return <></>;
         }

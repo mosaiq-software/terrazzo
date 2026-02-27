@@ -1,16 +1,25 @@
 import { createInlineContentSpec } from '@blocknote/core';
 import {
     QueryableItem,
+    SYSTEM_USER_ID,
+    TrzModule,
     UID,
     boardNameWithCode,
     cardNameWithBoardCodeAndNumber,
     exhaustiveCheck,
     fullNameWithUsername,
 } from '@mosaiq/terrazzo-common';
-import { getBoardByIdDb } from '@trz-api/persistence/boardPersistence';
-import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
-import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
-import { getUserHeader } from '../userController';
+import { cardHandler } from '../dataSources/objectHandlers/card';
+import { userHandler } from '../dataSources/objectHandlers/user';
+import { getModuleById } from '../moduleQueries';
+
+const SYSTEM_USER_HEADER = {
+    id: SYSTEM_USER_ID,
+    username: 'system',
+    firstName: 'System',
+    lastName: 'User',
+    profilePicture: '',
+};
 
 /**
  * Random string that is extremely unlikely to appear in normal text.
@@ -101,25 +110,24 @@ export const BlockNoteMention = createInlineContentSpec(
 export const retrieveMentionDisplayText = async (id: UID, type: QueryableItem): Promise<string | undefined> => {
     switch (type) {
         case QueryableItem.User: {
-            const userHeader = await getUserHeader(id);
+            const userHeader = id === SYSTEM_USER_ID ? SYSTEM_USER_HEADER : await userHandler.read(id);
             return userHeader ? fullNameWithUsername(userHeader) : undefined;
         }
         case QueryableItem.Card: {
-            const card = await getCardByIdDb(id);
+            const card = await cardHandler.read(id);
             if (!card) {
                 return undefined;
             }
-            const boardModule = await getBoardByIdDb(card.boardId);
-            return cardNameWithBoardCodeAndNumber(card.name, boardModule?.boardCode, card.cardNumber);
+            const boardModule = await getModuleById(card.boardId, TrzModule.Board);
+            return cardNameWithBoardCodeAndNumber(card.name, boardModule?.data.boardCode, card.cardNumber);
         }
         case QueryableItem.Document: {
-            const documentModule = await getModuleByIdDb(id);
+            const documentModule = await getModuleById(id, TrzModule.Document);
             return documentModule ? documentModule.name : ``;
         }
         case QueryableItem.Board: {
-            const boardModule = await getModuleByIdDb(id);
-            const board = await getBoardByIdDb(id);
-            return boardModule ? boardNameWithCode(boardModule.name, board?.boardCode) : undefined;
+            const boardModule = await getModuleById(id, TrzModule.Board);
+            return boardModule ? boardNameWithCode(boardModule.name, boardModule?.data.boardCode) : undefined;
         }
         default:
             exhaustiveCheck(type, `Unsupported mention type ${type}`);

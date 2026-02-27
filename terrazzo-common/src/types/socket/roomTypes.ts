@@ -11,6 +11,8 @@ export enum RoomType {
     DATA = 'DATA',
     /** For collaborative text editing */
     TEXT = 'TEXT',
+    /** For data source updates */
+    SOURCE = 'SOURCE',
 }
 export enum RoomSpecifier {
     /** Unspecified data type */
@@ -27,6 +29,8 @@ export enum RoomSpecifier {
     ROLE_ASSIGNMENTS = 'role_assignments',
     /** Directory contents */
     CONTENTS = 'contents',
+    /** Labels */
+    LABELS = 'labels',
 }
 
 export type RoomId = `${RoomType}@${string}` | null;

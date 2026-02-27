@@ -1,11 +1,16 @@
 import { ActionIcon, Group, Menu, Stack, Text } from '@mantine/core';
-import { boardNameWithCode, cardNameWithBoardCodeAndNumber, QueryableItem, UID } from '@mosaiq/terrazzo-common';
+import {
+    boardNameWithCode,
+    cardNameWithBoardCodeAndNumber,
+    QueryableItem,
+    TrzModule,
+    UID,
+} from '@mosaiq/terrazzo-common';
 import { FullLoader } from '@trz/components/UI/LoadingWrapper';
 import { UserProfilePopup } from '@trz/components/UI/UserAvatar/UserProfilePopup';
-import { useBoard } from '@trz/hooks/useBoard';
-import { useCard } from '@trz/hooks/useCard';
-import { useDocument } from '@trz/hooks/useDocument';
-import { useUser } from '@trz/hooks/useUser';
+import { useCard } from '@trz/hooks/data/useCard';
+import { useModule } from '@trz/hooks/data/useModule';
+import { useUser } from '@trz/hooks/data/useUser';
 import { COLORS } from '@trz/util/colors';
 import { forAllClickEvents, noEventBubble } from '@trz/util/eventUtils';
 import { MdArrowForward } from 'react-icons/md';
@@ -81,9 +86,9 @@ const UserMentionPopup = (props: DelegatedBlockNoteMentionWithPopupProps) => {
 };
 
 const BoardMentionPopup = (props: DelegatedBlockNoteMentionWithPopupProps) => {
-    const { boardData } = useBoard(props.id);
+    const boardData = useModule(props.id, TrzModule.Board);
     const navigate = useNavigate();
-    const title = boardData ? boardNameWithCode(boardData.name, boardData.boardCode) : 'Loading...';
+    const title = boardData ? boardNameWithCode(boardData.name, boardData.data.boardCode) : 'Loading...';
 
     return (
         <Mention title={title}>
@@ -110,10 +115,10 @@ const BoardMentionPopup = (props: DelegatedBlockNoteMentionWithPopupProps) => {
 
 const CardMentionPopup = (props: DelegatedBlockNoteMentionWithPopupProps) => {
     const card = useCard(props.id, false, true);
-    const { boardData } = useBoard(card?.boardId);
+    const boardData = useModule(card?.boardId, TrzModule.Board);
     const navigate = useNavigate();
     const title = card
-        ? cardNameWithBoardCodeAndNumber(card.name, boardData?.boardCode, card.cardNumber)
+        ? cardNameWithBoardCodeAndNumber(card.name, boardData?.data.boardCode, card.cardNumber)
         : 'Loading...';
     return (
         <Mention title={title}>
@@ -139,7 +144,7 @@ const CardMentionPopup = (props: DelegatedBlockNoteMentionWithPopupProps) => {
 };
 
 const DocumentMentionPopup = (props: DelegatedBlockNoteMentionWithPopupProps) => {
-    const { document } = useDocument(props.id);
+    const document = useModule(props.id, TrzModule.Document);
     const navigate = useNavigate();
     const title = document ? document.name : 'Loading...';
 

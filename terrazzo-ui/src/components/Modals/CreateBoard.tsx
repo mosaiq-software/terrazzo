@@ -5,11 +5,12 @@ import {
     RestRoutes,
     TrelloExportType,
     TrelloUserToTerrazzoUserMap,
+    TrzModule,
     UID,
 } from '@mosaiq/terrazzo-common';
 import { useOrg } from '@trz/contexts/org-context';
 import { useSocket } from '@trz/contexts/socket-context';
-import { createBoard } from '@trz/emitters';
+import { createModule } from '@trz/emitters';
 import { callTrzApi } from '@trz/util/apiUtils';
 import { COLORS } from '@trz/util/colors';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -77,7 +78,13 @@ const CreateBoard = (props: ContextModalProps<{ parentId: UID }>): React.JSX.Ele
             return;
         }
         try {
-            const board = await createBoard(sockCtx, boardName, boardAbbreviation, props.innerProps.parentId);
+            // const board = await createBoard(sockCtx, boardName, boardAbbreviation, props.innerProps.parentId);
+            const board = await createModule(sockCtx, boardName, props.innerProps.parentId, {
+                type: TrzModule.Board,
+                initialData: {
+                    boardCode: boardAbbreviation,
+                },
+            });
             setBoardName('');
             setBoardAbbreviation('');
             navigate(`/board/${board}`);

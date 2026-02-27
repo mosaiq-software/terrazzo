@@ -11,12 +11,12 @@ import {
     signInWithExistingAuth,
     startAuthenticatedSession,
 } from '@trz-api/controllers/authController';
-import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/controllers/boardController/trelloImport';
 import { createFile, getFile } from '@trz-api/controllers/fileController';
 import { addLinkedAccountToUser } from '@trz-api/controllers/linkedAccountController';
 import { DEV_upsertFakeUser } from '@trz-api/controllers/userController';
 import { getLinkedAccountForProviderDb } from '@trz-api/persistence/linkedAccountPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
+import { createTerrazzoBoardFromTrelloBoard } from '@trz-api/utils/trelloImport';
 import express from 'express';
 
 const router = express.Router();

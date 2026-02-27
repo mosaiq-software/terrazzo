@@ -16,16 +16,13 @@ import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordin
 import { Loader } from '@mantine/core';
 import {
     arrayMoveInPlace,
-    BoardId,
-    BoardRes,
     CardId,
-    Label,
     ListId,
+    ModuleId,
     PermissibleAction,
     RoomType,
     ServerSE,
     UID,
-    updateBaseFromPartial,
 } from '@mosaiq/terrazzo-common';
 import CardDetails from '@trz/components/Boards/CardDetails/CardDetails';
 import CreateList from '@trz/components/Boards/CreateList';
@@ -34,11 +31,11 @@ import CollaborativeMouseTracker from '@trz/components/UI/collaborativeMouseTrac
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
 import { useSocket } from '@trz/contexts/socket-context';
 import { useUI } from '@trz/contexts/ui-context';
-import { createList, emitMoveCard, emitMoveList, getBoardData, getCardData, getListData } from '@trz/emitters';
-import { useMap } from '@trz/hooks/useMap';
-import { useModulePermission } from '@trz/hooks/usePermissions';
-import { useRoom } from '@trz/hooks/useRoom';
-import { useSocketListener } from '@trz/hooks/useSocketListener';
+import { createList, emitMoveCard, emitMoveList, getCardData, getListData } from '@trz/emitters';
+import { useModulePermission } from '@trz/hooks/data/usePermissions';
+import { useSocketListener } from '@trz/hooks/util/useSocketListener';
+import { useMap } from '@trz/hooks/util/useMap';
+import { useRoom } from '@trz/hooks/util/useRoom';
 import { CARD_CACHE_PREFIX, getBoardNameWithCode, LIST_CACHE_PREFIX } from '@trz/util/boardUtils';
 import { COLORS } from '@trz/util/colors';
 import {
@@ -59,8 +56,7 @@ interface BoardContextType {
 export const BoardContext = createContext<BoardContextType | undefined>(undefined);
 
 interface BoardMetadataContextType {
-    labels: Label[];
-    id: BoardId;
+    id: ModuleId;
     permissions: {
         viewBoard: boolean;
         editBoard: boolean;
@@ -85,7 +81,7 @@ const BoardPage = (): React.JSX.Element => {
     const [openedCard, setOpenedCard] = useState<CardId | undefined>();
     const lastOverId = useRef<string | null>(null);
     const params = useParams();
-    const [boardId, setBoardId] = useState<BoardId>(params.boardId as BoardId);
+    const [boardId, setBoardId] = useState<ModuleId>(params.boardId as ModuleId);
     const cardId = params.cardId as CardId;
     const sockCtx = useSocket();
     const uiCtx = useUI();
@@ -93,16 +89,14 @@ const BoardPage = (): React.JSX.Element => {
     const [cardToListMap, setCardMap] = useMap<CardId, ListId>();
     const listKeys = Array.from(listToCardsMap.keys());
     useRoom(RoomType.DATA, boardId);
-    const userCanExplicitlyViewBoard = useModulePermission(boardData, PermissibleAction.ViewBoard);
+    const userCanExplicitlyViewBoard = useModulePermission(boardData, PermissibleAction.ViewModules);
     const viewOnly = !userCanExplicitlyViewBoard && boardData?.public;
     const userCanViewBoard = userCanExplicitlyViewBoard || boardData?.public;
-    const userCanEditBoard = useModulePermission(boardData, PermissibleAction.EditBoard);
-    const userCanMoveCards = useModulePermission(boardData, PermissibleAction.MoveCards);
-    const userCanEditCard = useModulePermission(boardData, PermissibleAction.EditCard);
-    const userCanCreateCard = useModulePermission(boardData, PermissibleAction.CreateCard);
+    const userCanManageBoard = useModulePermission(boardData, PermissibleAction.ManageModules);
+    const userCanManageCards = useModulePermission(boardData, PermissibleAction.ManageCards);
 
     useEffect(() => {
-        setBoardId(params.boardId as BoardId);
+        setBoardId(params.boardId as ModuleId);
     }, [params.boardId]);
 
     useEffect(() => {
@@ -201,7 +195,7 @@ const BoardPage = (): React.JSX.Element => {
                 if (!prev) {
                     return prev;
                 }
-                return { ...updateBaseFromPartial(prev, payload as Partial<BoardRes>) };
+                return { ...prev, ...payload };
             });
         },
         [boardId, boardData]
@@ -555,17 +549,24 @@ const BoardPage = (): React.JSX.Element => {
             return undefined;
         }
         return {
-            labels: boardData.labels,
             id: boardData.id,
             permissions: {
                 viewBoard: !!userCanViewBoard,
-                editBoard: userCanEditBoard && !viewOnly,
-                moveCards: userCanMoveCards && !viewOnly,
+                editBoard: userCanManageBoard && !viewOnly,
+                moveCards: userCanManageCards && !viewOnly,
                 editCard: userCanEditCard && !viewOnly,
                 createCard: userCanCreateCard && !viewOnly,
             },
         };
-    }, [boardData, userCanViewBoard, userCanEditBoard, userCanMoveCards, userCanEditCard, userCanCreateCard, viewOnly]);
+    }, [
+        boardData,
+        userCanViewBoard,
+        userCanManageBoard,
+        userCanManageCards,
+        userCanEditCard,
+        userCanCreateCard,
+        viewOnly,
+    ]);
 
     if ((!boardId && !cardId) || !boardData) {
         return (
@@ -603,7 +604,7 @@ const BoardPage = (): React.JSX.Element => {
     return (
         // <Profiler onRender={onRender} id={"board"}>
         <CollaborativeMouseTracker
-            boardId={boardId}
+            moduleId={boardId}
             draggingObject={draggingObject}
             disableTracking={viewOnly}
             style={{
@@ -617,7 +618,7 @@ const BoardPage = (): React.JSX.Element => {
                 flexWrap: 'nowrap',
                 padding: '20px',
                 background: COLORS.background.medium,
-                height: `calc(100vh - ${uiCtx.navbarHeight}px)`
+                height: `calc(100vh - ${uiCtx.navbarHeight}px)`,
             }}
         >
             <BoardMetadataContext.Provider value={boardMetadata}>
@@ -643,7 +644,7 @@ const BoardPage = (): React.JSX.Element => {
                         <SortableContext
                             items={listKeys}
                             strategy={horizontalListSortingStrategy}
-                            disabled={!userCanEditBoard}
+                            disabled={!userCanManageBoard}
                         >
                             {memoizedSortableLists}
                         </SortableContext>
@@ -659,7 +660,7 @@ const BoardPage = (): React.JSX.Element => {
                         )}
                     </BoardContext.Provider>
                 </DndContext>
-                {!viewOnly && userCanEditBoard && (
+                {!viewOnly && userCanManageBoard && (
                     <CreateList
                         onCreateList={async (title) => {
                             try {

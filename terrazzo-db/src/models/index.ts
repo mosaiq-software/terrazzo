@@ -4,11 +4,8 @@ import { Sequelize } from 'sequelize';
 import configs from '../config';
 import { Db, DbModels } from '../dbTypes';
 import { getAuthSessionModel } from './authSessionModel';
-import { BoardModelType, getBoardModel } from './boardModel';
 import { CardAssignmentModelType, getCardAssignmentModel } from './cardAssignmentModel';
 import { CardModelType, getCardModel } from './cardModel';
-import { DirectoryModelType, getDirectoryModel } from './directoryModel';
-import { DocumentModelType, getDocumentModel } from './documentModel';
 import { FileModelType, getFileModel } from './fileModel';
 import { getInviteModel, InviteModelType } from './inviteModel';
 import { getLabelAssignmentModel, LabelAssignmentModelType } from './labelAssignmentModel';
@@ -43,11 +40,8 @@ sequelize
     });
 
 const AuthSessionModel = getAuthSessionModel(sequelize);
-const BoardModel = getBoardModel(sequelize);
 const CardModel = getCardModel(sequelize);
 const CardAssignmentModel = getCardAssignmentModel(sequelize);
-const DirectoryModel = getDirectoryModel(sequelize);
-const DocumentModel = getDocumentModel(sequelize);
 const FileModel = getFileModel(sequelize);
 const InviteModel = getInviteModel(sequelize);
 const LabelModel = getLabelModel(sequelize);
@@ -65,11 +59,8 @@ const UserModel = getUserModel(sequelize);
 
 const dbModels: DbModels = {
     AuthSessionModel,
-    BoardModel,
     CardModel,
     CardAssignmentModel,
-    DirectoryModel,
-    DocumentModel,
     FileModel,
     InviteModel,
     LabelModel,
@@ -98,11 +89,8 @@ recordKeys(dbModels).forEach((modelName) => {
 
 export {
     AuthSessionModel,
-    BoardModel,
     CardAssignmentModel,
     CardModel,
-    DirectoryModel,
-    DocumentModel,
     FileModel,
     InviteModel,
     LabelAssignmentModel,
@@ -121,11 +109,8 @@ export {
 };
 
 export type {
-    BoardModelType,
     CardAssignmentModelType,
     CardModelType,
-    DirectoryModelType,
-    DocumentModelType,
     FileModelType,
     InviteModelType,
     LabelAssignmentModelType,

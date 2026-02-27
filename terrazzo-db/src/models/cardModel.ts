@@ -1,8 +1,8 @@
-import { CardHeader } from '@mosaiq/terrazzo-common';
+import { Card } from '@mosaiq/terrazzo-common';
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import { Db, DbModel } from '../dbTypes';
 
-export type CardModelType = CardHeader;
+export type CardModelType = Card;
 
 export const getCardModel = (sequelize: Sequelize): DbModel<CardModelType> => {
     class CardModel extends Model<CardModelType> {

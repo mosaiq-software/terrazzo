@@ -1,6 +1,6 @@
 import { Avatar, Divider } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { CardId, fullName, Label, Priority } from '@mosaiq/terrazzo-common';
+import { CardId, fullName, Priority } from '@mosaiq/terrazzo-common';
 import { ContextMenuButton } from '@trz/components/ContextMenu/ContextMenuButton';
 import { ContextMenuLayout } from '@trz/components/ContextMenu/ContextMenuLayout';
 import { ContextMenuSelectorMenu } from '@trz/components/ContextMenu/ContextMenuSelectorMenu';
@@ -14,7 +14,7 @@ import {
     updateCardField,
     updateCardsLabels,
 } from '@trz/emitters';
-import { useCard } from '@trz/hooks/useCard';
+import { useCard } from '@trz/hooks/data/useCard';
 import { COLORS } from '@trz/util/colors';
 import { getCardLink } from '@trz/util/linkUtils';
 import { NoteType, notify } from '@trz/util/notifications';
@@ -30,11 +30,11 @@ import {
     MdRadioButtonChecked,
 } from 'react-icons/md';
 import { priorityColors, PriorityIcons } from './PriorityButtons';
+import { useLabels } from '@trz/hooks/data/useLabels';
 
 interface CardContextMenuProps {
     cardId: CardId;
     onClose: () => void;
-    boardLabels: Label[];
 }
 export const CardContextMenu = (props: CardContextMenuProps) => {
     const sockCtx = useSocket();
@@ -42,6 +42,7 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
     const orgCtx = useOrg();
     const card = useCard(props.cardId, false, true);
     const clipboard = useClipboard();
+    const labels = useLabels(card?.boardId);
 
     if (!card) {
         return null;
@@ -49,11 +50,11 @@ export const CardContextMenu = (props: CardContextMenuProps) => {
 
     return (
         <ContextMenuLayout>
-            {!!props.boardLabels.length && (
+            {!!labels.length && (
                 <ContextMenuSelectorMenu
                     title={`Labels${card.labels.length > 0 ? ` (${card.labels.length})` : ''}`}
                     icon={<MdLabel size={16} />}
-                    items={props.boardLabels.map((label) => ({
+                    items={labels.map((label) => ({
                         id: label.id,
                         label: label.name,
                         color: label.color,

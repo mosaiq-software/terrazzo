@@ -7,9 +7,9 @@ import { getCardNumber } from '@trz/util/boardUtils';
 import { COLORS } from '@trz/util/colors';
 import { useContextMenu } from 'mantine-contextmenu';
 import React from 'react';
-import { useCard } from '../../hooks/useCard';
+import { useCard } from '../../hooks/data/useCard';
 import { CardContextMenu } from './CardDetails/CardContextMenu';
-import { LabelDisplay } from './CardDetails/LabelsMenu';
+import { StaticLabelDisplay } from './CardDetails/LabelsMenu';
 import { PriorityChip } from './CardDetails/PriorityButtons';
 
 interface CardElementProps {
@@ -21,7 +21,7 @@ interface CardElementProps {
 }
 const CardElement = (props: CardElementProps) => {
     const { ref: viewportRef, inViewport } = useInViewport();
-    const card = useCard(props.cardId, props.dragging || props.isOverlay, inViewport);
+    const { card, labels, assignees } = useCard(props.cardId, props.dragging || props.isOverlay, inViewport);
     const { showContextMenu } = useContextMenu();
     const boardMeta = useBoardMetadata();
     const { editCard } = boardMeta.permissions;
@@ -68,7 +68,6 @@ const CardElement = (props: CardElementProps) => {
                           <CardContextMenu
                               cardId={props.cardId}
                               onClose={close}
-                              boardLabels={boardMeta.labels}
                           />
                       ))
                     : undefined
@@ -76,10 +75,9 @@ const CardElement = (props: CardElementProps) => {
         >
             {card && inViewport && (
                 <React.Fragment>
-                    <LabelDisplay
-                        labels={card.labels}
+                    <StaticLabelDisplay
+                        labels={labels}
                         size="xs"
-                        boardLabels={boardMeta.labels}
                     />
                     <Text
                         lineClamp={7}
@@ -108,7 +106,7 @@ const CardElement = (props: CardElementProps) => {
                         style={{ flexDirection: 'row-reverse' }}
                     >
                         <AvatarRow
-                            users={card.assignees}
+                            users={assignees}
                             maxUsers={3}
                             showProfilePopover={!props.dragging && !props.isOverlay}
                             showTooltip={!props.dragging && !props.isOverlay}

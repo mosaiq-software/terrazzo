@@ -1,13 +1,13 @@
 import {
     boardNameWithCode,
-    CardHeader,
+    Card,
     cardNameWithBoardCodeAndNumber,
     ModuleHeader,
     OrganizationId,
     QueryableDatapoint,
     QueryableItem,
     settlePromises,
-    TrzModuleType,
+    TrzModule,
     UserId,
 } from '@mosaiq/terrazzo-common';
 import {
@@ -28,16 +28,20 @@ export const buildSearchIndex = async (
 ): Promise<QueryableDatapoint[]> => {
     const queryableData: QueryableDatapoint[] = [];
 
-    const allBoardsInOrg = await dataSource.getModulesByOrgIdDb(orgId, { type: TrzModuleType.Board, archived: false });
-    const boardIndexingPromises = allBoardsInOrg.map((boardModule) => indexBoard(dataSource, boardModule));
+    const allBoardsInOrg = await dataSource.getModulesByOrgIdDb(orgId, { type: TrzModule.Board, archived: false });
+    const boardsInOrg = allBoardsInOrg.filter(
+        (mod): mod is ModuleHeader<TrzModule.Board> => mod.type === TrzModule.Board
+    );
+    const boardIndexingPromises = boardsInOrg.map((boardModule) => indexBoard(dataSource, boardModule));
 
     const allDocumentsInOrg = await dataSource.getModulesByOrgIdDb(orgId, {
-        type: TrzModuleType.Document,
+        type: TrzModule.Document,
         archived: false,
     });
-    const documentIndexingPromises = allDocumentsInOrg.map((documentModule) =>
-        indexDocument(dataSource, documentModule)
+    const documentsInOrg = allDocumentsInOrg.filter(
+        (mod): mod is ModuleHeader<TrzModule.Document> => mod.type === TrzModule.Document
     );
+    const documentIndexingPromises = documentsInOrg.map((documentModule) => indexDocument(dataSource, documentModule));
 
     const allIndexingPromises = [...boardIndexingPromises, ...documentIndexingPromises];
     const { fulfilled } = await settlePromises(allIndexingPromises);
@@ -49,18 +53,14 @@ export const buildSearchIndex = async (
 
 const indexDocument = async (
     dataSource: SearchQueryDataSource,
-    documentModule: ModuleHeader
+    documentModule: ModuleHeader<TrzModule.Document>
 ): Promise<QueryableDatapoint[]> => {
     try {
-        const document = await dataSource.getDocumentByIdDb(documentModule.id);
-        if (!document) {
-            throw new Error('Document not found');
-        }
-        const textBlockContent = await dataSource.getQueryableTextBlockContent(document.textBlockId);
+        const textBlockContent = await dataSource.getQueryableTextBlockContent(documentModule.data.textBlockId);
         const documentQueryable: QueryableDatapoint = {
             display: documentModule.name,
             content: buildDocumentNameAndContentVariants(documentModule.name, textBlockContent),
-            id: document.id,
+            id: documentModule.id,
             type: QueryableItem.Document,
         };
         return [documentQueryable];
@@ -75,24 +75,21 @@ const indexDocument = async (
 
 const indexBoard = async (
     dataSource: SearchQueryDataSource,
-    boardModule: ModuleHeader
+    boardModule: ModuleHeader<TrzModule.Board>
 ): Promise<QueryableDatapoint[]> => {
     try {
-        const board = await dataSource.getBoardByIdDb(boardModule.id);
-        if (!board) {
-            throw new Error('Board not found');
-        }
+        const boardCode = boardModule.data.boardCode;
         const boardQueryable: QueryableDatapoint = {
-            display: boardNameWithCode(boardModule.name, board.boardCode),
-            content: buildBoardNameVariants(boardModule.name, board.boardCode),
-            id: board.id,
+            display: boardNameWithCode(boardModule.name, boardCode),
+            content: buildBoardNameVariants(boardModule.name, boardCode),
+            id: boardModule.id,
             type: QueryableItem.Board,
         };
 
         const cardsInBoard = await dataSource.getActiveCardsByBoardIdDb(boardModule.id);
         const cardIndexingPromises: Promise<QueryableDatapoint>[] = [];
         for (const card of cardsInBoard) {
-            cardIndexingPromises.push(indexCard(dataSource, card, board.boardCode));
+            cardIndexingPromises.push(indexCard(dataSource, card, boardCode));
         }
         const { fulfilled } = await settlePromises(cardIndexingPromises);
 
@@ -108,7 +105,7 @@ const indexBoard = async (
 
 const indexCard = async (
     dataSource: SearchQueryDataSource,
-    card: CardHeader,
+    card: Card,
     boardCode: string
 ): Promise<QueryableDatapoint> => {
     try {

@@ -3,12 +3,18 @@ export * from './constants';
 
 // Types - Generic
 export * from './types/authTypes';
+export * from './types/dataSource/collectionSources';
+export * from './types/dataSource/dataSourceTypes';
+export * from './types/dataSource/objectSources';
 export * from './types/genericTypes';
 export * from './types/inviteTypes';
 export * from './types/linkedAccountTypes';
+export * from './types/organizationMembershipTypes';
 export * from './types/organizationTypes';
 export * from './types/queryTypes';
+export * from './types/textSnapshotTypes';
 export * from './types/textTypes';
+export * from './types/uploadedFileTypes';
 export * from './types/userTypes';
 
 // Types - Permissions
@@ -19,13 +25,10 @@ export * from './types/permissions/permissionTypes';
 export * from './types/permissions/roleTypes';
 
 // Types - Modules
-export * from './types/modules/board/boardTypes';
 export * from './types/modules/board/cardTypes';
+export * from './types/modules/board/labelTypes';
 export * from './types/modules/board/listTypes';
-export * from './types/modules/directoryTypes';
-export * from './types/modules/documentTypes';
 export * from './types/modules/moduleTypes';
-export * from './types/modules/trzModuleTypes';
 
 // Types - External
 export * from './types/externalTypes/apiTypes';
@@ -41,7 +44,9 @@ export * from './types/socket/socketTypes';
 // Utils
 export * from './utils/arrayUtils';
 export * from './utils/fileUtils';
+export * from './utils/idUtils';
 export * from './utils/inviteUtils';
+export * from './utils/moduleUtils';
 export * from './utils/permissionUtils';
 export * from './utils/socketUtils';
 export * from './utils/textUtils';

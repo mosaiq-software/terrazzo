@@ -16,6 +16,7 @@ import { LinkGithubAccountModal } from './components/Modals/AccountLinking/LinkG
 import { JoinOrganizationModal } from './components/Modals/JoinOrganization';
 import { TransferOrganizationModal } from './components/Modals/TransferOrganization';
 import { ModuleSettingsModal } from './components/ModuleSettings/ModuleSettingsModal';
+import { DataSourcesProvider } from './contexts/data-source-context';
 import { OrgProvider } from './contexts/org-context';
 import { PermissionProvider } from './contexts/permission-context';
 import { RoomListenerProvider } from './contexts/room-listener-context';
@@ -46,19 +47,21 @@ const App = () => {
                 <UserProvider>
                     <SocketProvider>
                         <RoomListenerProvider>
-                            <UiProvider>
-                                <OrgProvider>
-                                    <PermissionProvider>
-                                        <UnsavedChangesProvider>
-                                            <ModalsProvider modals={modals}>
-                                                <ContextMenuProvider>
-                                                    <Router />
-                                                </ContextMenuProvider>
-                                            </ModalsProvider>
-                                        </UnsavedChangesProvider>
-                                    </PermissionProvider>
-                                </OrgProvider>
-                            </UiProvider>
+                            <DataSourcesProvider>
+                                <UiProvider>
+                                    <OrgProvider>
+                                        <PermissionProvider>
+                                            <UnsavedChangesProvider>
+                                                <ModalsProvider modals={modals}>
+                                                    <ContextMenuProvider>
+                                                        <Router />
+                                                    </ContextMenuProvider>
+                                                </ModalsProvider>
+                                            </UnsavedChangesProvider>
+                                        </PermissionProvider>
+                                    </OrgProvider>
+                                </UiProvider>
+                            </DataSourcesProvider>
                         </RoomListenerProvider>
                     </SocketProvider>
                 </UserProvider>
