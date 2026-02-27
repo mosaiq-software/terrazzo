@@ -1,7 +1,8 @@
-import { CollectionSource, CollectionSourceHandler, parseCompoundKey, RoleId } from '@mosaiq/terrazzo-common';
+import { CollectionSource, parseCompoundKey, RoleId } from '@mosaiq/terrazzo-common';
 import { getRoleIdsForUserInOrgDb, setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
+import { collectionSourceEditableHandlers } from '../dataSourceWrapper';
 
-export const roleAssignmentsCollectionHandler: CollectionSourceHandler<CollectionSource.RoleAssignments> = {
+export const roleAssignmentsCollectionHandler = collectionSourceEditableHandlers(CollectionSource.RoleAssignments, {
     read: async (parentId) => {
         const { a: userId, b: orgId } = parseCompoundKey(parentId);
         return await getRoleIdsForUserInOrgDb(userId, orgId);
@@ -20,4 +21,4 @@ export const roleAssignmentsCollectionHandler: CollectionSourceHandler<Collectio
         const next = current.filter((id) => !remove.has(id));
         await setRoleIdsForUserInOrgDb(userId, orgId, next);
     },
-};
+});

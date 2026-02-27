@@ -1,5 +1,12 @@
-import { ObjectSource, ObjectSourceHandler } from '@mosaiq/terrazzo-common';
-import { syncObjectSource } from '@trz-api/broadcasters';
+import {
+    CollectionSource,
+    CollectionSourceEditableHandler,
+    CollectionSourceReadHandler,
+    EditableCollectionSource,
+    ObjectSource,
+    ObjectSourceHandler,
+} from '@mosaiq/terrazzo-common';
+import { syncCollectionSource, syncObjectSource } from '@trz-api/broadcasters';
 
 export const objectSourceHandlers = <T extends ObjectSource>(
     type: T,
@@ -58,6 +65,92 @@ export const objectSourceHandlers = <T extends ObjectSource>(
             } catch (e) {
                 console.error(`Error in read handler for object source`, {
                     id,
+                    type,
+                    error: e,
+                });
+                throw e;
+            }
+        },
+    };
+};
+
+export const collectionSourceReadHandlers = <T extends CollectionSource>(
+    type: T,
+    handler: CollectionSourceReadHandler<T>
+): CollectionSourceReadHandler<T> => {
+    return {
+        read: async (parentId, options) => {
+            try {
+                return await handler.read(parentId, options);
+            } catch (e) {
+                console.error(`Error in read handler for collection source`, {
+                    parentId,
+                    type,
+                    error: e,
+                });
+                throw e;
+            }
+        },
+    };
+};
+
+export const collectionSourceEditableHandlers = <T extends EditableCollectionSource>(
+    type: T,
+    handler: CollectionSourceEditableHandler<T>
+): CollectionSourceEditableHandler<T> => {
+    return {
+        read: async (parentId, options) => {
+            try {
+                return await handler.read(parentId, options);
+            } catch (e) {
+                console.error(`Error in read handler for collection source`, {
+                    parentId,
+                    type,
+                    error: e,
+                });
+                throw e;
+            }
+        },
+        add: async (parentId, itemIds, options) => {
+            try {
+                await handler.add(parentId, itemIds, options);
+                if (!options?.preventSync) {
+                    try {
+                        await syncCollectionSource(parentId, type);
+                    } catch (e) {
+                        console.error(`Failed to sync collection source after add`, {
+                            parentId,
+                            type,
+                            error: e,
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error(`Error in add handler for collection source`, {
+                    parentId,
+                    type,
+                    error: e,
+                });
+                throw e;
+            }
+        },
+        remove: async (parentId, itemIds, options) => {
+            try {
+                await handler.remove(parentId, itemIds, options);
+                if (!options?.preventSync) {
+                    try {
+                        await syncCollectionSource(parentId, type);
+                    } catch (e) {
+                        console.error(`Failed to sync collection source after remove`, {
+                            parentId,
+                            type,
+                            error: e,
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error(`Error in remove handler for collection source`, {
+                    parentId,
                     type,
                     error: e,
                 });

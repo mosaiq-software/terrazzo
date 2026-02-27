@@ -1,7 +1,8 @@
-import { CollectionSource, CollectionSourceHandler, LabelId } from '@mosaiq/terrazzo-common';
+import { CollectionSource, LabelId } from '@mosaiq/terrazzo-common';
 import { getLabelsOnCardDb, setLabelsOnCardDb } from '@trz-api/persistence/labelAssignmentPersistence';
+import { collectionSourceEditableHandlers } from '../dataSourceWrapper';
 
-export const labelAssignmentsCollectionHandler: CollectionSourceHandler<CollectionSource.LabelAssignments> = {
+export const labelAssignmentsCollectionHandler = collectionSourceEditableHandlers(CollectionSource.LabelAssignments, {
     read: async (parentId) => {
         return await getLabelsOnCardDb(parentId);
     },
@@ -17,4 +18,4 @@ export const labelAssignmentsCollectionHandler: CollectionSourceHandler<Collecti
         const next = current.filter((id) => !remove.has(id));
         await setLabelsOnCardDb(parentId, next);
     },
-};
+});

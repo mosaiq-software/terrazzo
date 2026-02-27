@@ -1,8 +1,9 @@
-import { CollectionSource, CollectionSourceHandler } from '@mosaiq/terrazzo-common';
+import { CollectionSource } from '@mosaiq/terrazzo-common';
 import { getTextBlockSnapshotIdsByTextBlockIdDb } from '@trz-api/persistence/textBlockHistoryPersistence';
+import { collectionSourceReadHandlers } from '../dataSourceWrapper';
 
-export const textBlockSnapshotsCollectionHandler: CollectionSourceHandler<CollectionSource.TextBlockSnapshots> = {
+export const textBlockSnapshotsCollectionHandler = collectionSourceReadHandlers(CollectionSource.TextBlockSnapshots, {
     read: async (parentId) => {
         return await getTextBlockSnapshotIdsByTextBlockIdDb(parentId);
     },
-};
+});

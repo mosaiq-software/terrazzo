@@ -1,11 +1,12 @@
-import { CollectionSource, CollectionSourceHandler } from '@mosaiq/terrazzo-common';
+import { CollectionSource } from '@mosaiq/terrazzo-common';
 import {
     addCardAssignmentsForUserDb,
     getCardAssignmentsForUserDb,
     removeCardAssignmentsForUserDb,
 } from '@trz-api/persistence/cardAssignmentPersistence';
+import { collectionSourceEditableHandlers } from '../dataSourceWrapper';
 
-export const cardAssigneesCollectionHandler: CollectionSourceHandler<CollectionSource.CardAssignees> = {
+export const cardAssigneesCollectionHandler = collectionSourceEditableHandlers(CollectionSource.CardAssignees, {
     read: async (parentId) => {
         return await getCardAssignmentsForUserDb(parentId);
     },
@@ -15,4 +16,4 @@ export const cardAssigneesCollectionHandler: CollectionSourceHandler<CollectionS
     remove: async (parentId, itemIds) => {
         await removeCardAssignmentsForUserDb(parentId, itemIds);
     },
-};
+});
