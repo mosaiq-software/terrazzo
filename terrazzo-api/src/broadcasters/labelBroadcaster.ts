@@ -1,5 +1,4 @@
 import { CardId, getRoomCode, LabelId, ModuleId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
-import { labelHandler } from '@trz-api/controllers/dataSources/objectHandlers/label';
 import { getLabelIdsOnModule } from '@trz-api/controllers/labelController';
 import { userCanViewModule } from '@trz-api/utils/permissions';
 import { broadcast } from '@trz-api/utils/socket/socketActions';
@@ -17,23 +16,6 @@ export const syncModuleLabels = async (moduleId: ModuleId) => {
                 moduleId,
                 labels: labelIds,
             };
-        },
-    });
-};
-
-export const syncLabel = async (labelId: LabelId) => {
-    const label = await labelHandler.read(labelId);
-    if (!label) {
-        throw new Error('Label not found');
-    }
-    await broadcast({
-        event: ServerSE.UPDATE_LABEL,
-        toRoomIds: [getRoomCode(RoomType.DATA, label.boardId, RoomSpecifier.LABELS)],
-        buildPayload: async (userId) => {
-            if (!(await userCanViewModule(userId, label.boardId))) {
-                throw new Error('Insufficient permissions to view labels for this board');
-            }
-            return { label };
         },
     });
 };

@@ -1,5 +1,4 @@
 import { generateUsernameDiscriminator, SYSTEM_USER_ID, TrzModule, UserHeader, UserId } from '@mosaiq/terrazzo-common';
-import { syncUpdateUserField } from '@trz-api/broadcasters';
 import { getUserHeaderByUsernameDb } from '@trz-api/persistence/userPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
 import { cardHandler } from './dataSources/objectHandlers/card';
@@ -110,7 +109,6 @@ export const updateUserData = async (userData: Partial<UserHeader> & { id: UserI
     }
 
     await userHandler.update(userData.id, userData, { preventSync: true });
-    await syncUpdateUserField(userData.id, userData);
 };
 
 export const DEV_upsertFakeUser = async (username: string): Promise<UserHeader> => {

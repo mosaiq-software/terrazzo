@@ -5,8 +5,6 @@ export * from './labelListeners';
 export * from './linkedAccountListeners';
 export * from './listListeners';
 export * from './membershipListeners';
-export * from './moduleListeners';
-export * from './organizationListeners';
 export * from './queryListeners';
 export * from './realtimeListeners';
 export * from './roleListeners';

@@ -1,4 +1,4 @@
-import { getRoomCode, ModuleHeader, ModuleId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { getRoomCode, ModuleId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
 import { getModuleChildrenForUser } from '@trz-api/controllers/moduleController';
 import { getUntypedModuleById } from '@trz-api/controllers/moduleQueries';
 import { userCanViewModule } from '@trz-api/utils/permissions';
@@ -36,17 +36,4 @@ export const syncModuleChildren = async (moduleId: ModuleId) => {
     } catch (error: any) {
         console.error('Error syncing module children', error);
     }
-};
-
-export const syncModuleField = async (module: ModuleHeader) => {
-    await broadcast({
-        event: ServerSE.UPDATE_MODULE_FIELD,
-        toRoomIds: [getRoomCode(RoomType.DATA, module.id)],
-        buildPayload: async (userId) => {
-            if (!(await userCanViewModule(userId, module.id))) {
-                throw new Error('Insufficient permissions to view this module');
-            }
-            return module;
-        },
-    });
 };

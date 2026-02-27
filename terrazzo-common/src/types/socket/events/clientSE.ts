@@ -20,16 +20,11 @@ import {
 } from '../../genericTypes';
 import { Invite } from '../../inviteTypes';
 import { LinkedAccount, LinkedAccountProvider } from '../../linkedAccountTypes';
-import { Card } from '../../modules/board/cardTypes';
-import { Label } from '../../modules/board/labelTypes';
-import { List } from '../../modules/board/listTypes';
-import { CreateModuleDataArgs, ModuleHeader, UpdateModuleDataArgs } from '../../modules/moduleTypes';
 import { OrganizationHeader } from '../../organizationTypes';
 import { Role } from '../../permissions/roleTypes';
 import { QueryItem } from '../../queryTypes';
 import { TextBlockSnapshot } from '../../textSnapshotTypes';
 import { TextBlockResourceType } from '../../textTypes';
-import { UserHeader } from '../../userTypes';
 import { MouseRoomUserData, RoomId } from '../roomTypes';
 import { UserData } from '../socketTypes';
 
@@ -45,50 +40,26 @@ export enum ClientSE {
     LOGOUT = 'LOGOUT',
 
     GET_USERS_ORGANIZATIONS = 'GET_USERS_ORGANIZATIONS',
-    GET_ORGANIZATION = 'GET_ORGANIZATION',
-    GET_LIST = 'GET_LIST',
-    GET_CARD = 'GET_CARD',
     GET_SEARCH_RESULTS = 'GET_SEARCH_RESULTS',
     GET_SEARCH_TAGS = 'GET_SEARCH_TAGS',
     GET_INVITES_FOR_ORG = 'GET_INVITES_FOR_ORG',
-    GET_INVITE = 'GET_INVITE',
-    GET_USER = 'GET_USER',
     GET_ORGANIZATION_MEMBERSHIPS = 'GET_ORGANIZATION_MEMBERSHIPS',
     GET_ROLES_FOR_ORG = 'GET_ROLES_FOR_ORG',
     GET_ROLES_FOR_USER_IN_ORG = 'GET_ROLES_FOR_USER_IN_ORG',
     GET_USERS_LINKED_ACCOUNTS = 'GET_USERS_LINKED_ACCOUNTS',
     GET_USERNAME_AVAILABLE = 'GET_USERNAME_AVAILABLE',
     GET_TEXT_BLOCK_HISTORY_SNAPSHOTS = 'GET_TEXT_BLOCK_HISTORY_SNAPSHOTS',
-    GET_MODULE = 'GET_MODULE',
     GET_MODULE_CHILDREN = 'GET_MODULE_CHILDREN',
     GET_MODULE_LABELS = 'GET_MODULE_LABELS',
-    GET_LABEL = 'GET_LABEL',
 
-    CREATE_ORG = 'CREATE_ORG',
-    CREATE_LIST = 'CREATE_LIST',
-    CREATE_CARD = 'CREATE_CARD',
-    CREATE_LABEL = 'CREATE_LABEL',
     CREATE_DUPLICATE_CARD = 'CREATE_DUPLICATE_CARD',
-    CREATE_INVITE = 'CREATE_INVITE',
-    CREATE_ROLE = 'CREATE_ROLE',
     CREATE_FILE_UPLOAD = 'CREATE_FILE_UPLOAD',
-    CREATE_MODULE = 'CREATE_MODULE',
 
-    UPDATE_USER_FIELD = 'UPDATE_USER_FIELD',
-    UPDATE_ORG_FIELD = 'UPDATE_ORG_FIELD',
-    UPDATE_LIST_FIELD = 'UPDATE_LIST_FIELD',
-    UPDATE_CARD_FIELD = 'UPDATE_CARD_FIELD',
     UPDATE_CARD_ASSIGNEE = 'UPDATE_CARD_ASSIGNEE',
-    UPDATE_LABEL = 'UPDATE_LABEL',
     UPDATE_CARDS_LABELS = 'UPDATE_CARDS_LABELS',
-    UPDATE_ROLE = 'UPDATE_ROLE',
     UPDATE_ROLES_FOR_USER_IN_ORG = 'UPDATE_ROLES_FOR_USER_IN_ORG',
-    UPDATE_MODULE_FIELD = 'UPDATE_MODULE_FIELD',
 
-    DELETE_LABEL = 'DELETE_LABEL',
-    DELETE_INVITE = 'DELETE_INVITE',
     DELETE_MEMBERSHIP = 'DELETE_MEMBERSHIP',
-    DELETE_ROLE = 'DELETE_ROLE',
     DELETE_USER_LINKED_ACCOUNT = 'DELETE_USER_LINKED_ACCOUNT',
 
     USE_INVITE = 'USE_INVITE',
@@ -112,57 +83,26 @@ export interface ClientSEPayload {
     [ClientSE.LOGOUT]: undefined;
 
     [ClientSE.GET_USERS_ORGANIZATIONS]: UserId;
-    [ClientSE.GET_ORGANIZATION]: OrganizationId;
-    [ClientSE.GET_LIST]: ListId;
-    [ClientSE.GET_CARD]: CardId;
     [ClientSE.GET_SEARCH_RESULTS]: { query: string; searchSessionId: string; orgId: OrganizationId };
     [ClientSE.GET_SEARCH_TAGS]: { query: string; searchSessionId: string; orgId: OrganizationId };
     [ClientSE.GET_INVITES_FOR_ORG]: OrganizationId;
-    [ClientSE.GET_INVITE]: InviteId;
-    [ClientSE.GET_USER]: UserId;
     [ClientSE.GET_ORGANIZATION_MEMBERSHIPS]: OrganizationId;
     [ClientSE.GET_ROLES_FOR_ORG]: OrganizationId;
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId };
     [ClientSE.GET_USERS_LINKED_ACCOUNTS]: UserId;
     [ClientSE.GET_USERNAME_AVAILABLE]: string;
     [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: { resourceId: UID; resourceType: TextBlockResourceType };
-    [ClientSE.GET_MODULE]: ModuleId;
     [ClientSE.GET_MODULE_CHILDREN]: ModuleId;
     [ClientSE.GET_MODULE_LABELS]: ModuleId;
-    [ClientSE.GET_LABEL]: LabelId;
 
-    [ClientSE.CREATE_ORG]: { name: string };
-    [ClientSE.CREATE_LIST]: { boardID: ModuleId; listName: string };
-    [ClientSE.CREATE_CARD]: { listID: ListId; cardName: string };
-    [ClientSE.CREATE_LABEL]: { moduleId: ModuleId; name: string; color: string };
     [ClientSE.CREATE_DUPLICATE_CARD]: { cardId: CardId };
-    [ClientSE.CREATE_INVITE]: { orgId: OrganizationId; maxUses: number | null };
-    [ClientSE.CREATE_ROLE]: { orgId: OrganizationId; name: string; color: string };
     [ClientSE.CREATE_FILE_UPLOAD]: { fileName: string; base64: string; mimeType: string };
-    [ClientSE.CREATE_MODULE]: {
-        name: string;
-        parentId: ModuleId;
-        args: CreateModuleDataArgs;
-    };
 
-    [ClientSE.UPDATE_USER_FIELD]: Partial<UserHeader> & { id: UserId };
-    [ClientSE.UPDATE_ORG_FIELD]: Partial<OrganizationHeader> & { id: OrganizationId };
-    [ClientSE.UPDATE_LIST_FIELD]: Omit<Partial<List> & { id: ListId }, 'order'>;
-    [ClientSE.UPDATE_CARD_FIELD]: Omit<Partial<Card> & { id: CardId }, 'listId' | 'order'>;
     [ClientSE.UPDATE_CARD_ASSIGNEE]: { cardId: CardId; userId: UserId; assigned: boolean };
-    [ClientSE.UPDATE_LABEL]: { label: Label };
     [ClientSE.UPDATE_CARDS_LABELS]: { cardId: CardId; labelIds: LabelId[] };
-    [ClientSE.UPDATE_ROLE]: Role;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: { userId: UserId; orgId: OrganizationId; roleIds: RoleId[] };
-    [ClientSE.UPDATE_MODULE_FIELD]: {
-        moduleId: ModuleId;
-        args: UpdateModuleDataArgs;
-    };
 
-    [ClientSE.DELETE_LABEL]: { labelId: LabelId };
-    [ClientSE.DELETE_INVITE]: { inviteId: InviteId };
     [ClientSE.DELETE_MEMBERSHIP]: { userId: UserId; orgId: OrganizationId };
-    [ClientSE.DELETE_ROLE]: { roleId: RoleId };
     [ClientSE.DELETE_USER_LINKED_ACCOUNT]: { userId: UserId; provider: LinkedAccountProvider; accountId: string };
 
     [ClientSE.USE_INVITE]: { inviteId: InviteId };
@@ -190,50 +130,26 @@ export interface ClientSEReplies {
     [ClientSE.LOGOUT]: undefined;
 
     [ClientSE.GET_USERS_ORGANIZATIONS]: OrganizationHeader[];
-    [ClientSE.GET_ORGANIZATION]: OrganizationHeader | undefined;
-    [ClientSE.GET_LIST]: List | undefined;
-    [ClientSE.GET_CARD]: Card | undefined;
     [ClientSE.GET_SEARCH_RESULTS]: { results: QueryItem[] } | undefined;
     [ClientSE.GET_SEARCH_TAGS]: { results: QueryItem[] } | undefined;
     [ClientSE.GET_INVITES_FOR_ORG]: Invite[] | undefined;
-    [ClientSE.GET_INVITE]: Invite | undefined;
-    [ClientSE.GET_USER]: UserHeader | undefined;
     [ClientSE.GET_ORGANIZATION_MEMBERSHIPS]: UserId[] | undefined;
     [ClientSE.GET_ROLES_FOR_ORG]: Role[] | undefined;
     [ClientSE.GET_ROLES_FOR_USER_IN_ORG]: RoleId[] | undefined;
     [ClientSE.GET_USERS_LINKED_ACCOUNTS]: LinkedAccount[] | undefined;
     [ClientSE.GET_USERNAME_AVAILABLE]: boolean;
     [ClientSE.GET_TEXT_BLOCK_HISTORY_SNAPSHOTS]: TextBlockSnapshot[] | undefined;
-    [ClientSE.GET_MODULE]: ModuleHeader | undefined;
     [ClientSE.GET_MODULE_CHILDREN]: ModuleId[] | undefined;
     [ClientSE.GET_MODULE_LABELS]: LabelId[] | undefined;
-    [ClientSE.GET_LABEL]: Label | undefined;
 
-    [ClientSE.CREATE_ORG]: OrganizationId | undefined;
-    [ClientSE.CREATE_LIST]: ListId | undefined;
-    [ClientSE.CREATE_CARD]: CardId | undefined;
-    [ClientSE.CREATE_LABEL]: LabelId | undefined;
     [ClientSE.CREATE_DUPLICATE_CARD]: CardId | undefined;
-    [ClientSE.CREATE_INVITE]: Invite | undefined;
-    [ClientSE.CREATE_ROLE]: Role | undefined;
     [ClientSE.CREATE_FILE_UPLOAD]: UploadedFileId | undefined;
-    [ClientSE.CREATE_MODULE]: ModuleId | undefined;
 
-    [ClientSE.UPDATE_USER_FIELD]: undefined;
-    [ClientSE.UPDATE_ORG_FIELD]: undefined;
-    [ClientSE.UPDATE_LIST_FIELD]: undefined;
-    [ClientSE.UPDATE_CARD_FIELD]: undefined;
     [ClientSE.UPDATE_CARD_ASSIGNEE]: undefined;
-    [ClientSE.UPDATE_LABEL]: undefined;
     [ClientSE.UPDATE_CARDS_LABELS]: undefined;
-    [ClientSE.UPDATE_ROLE]: undefined;
     [ClientSE.UPDATE_ROLES_FOR_USER_IN_ORG]: undefined;
-    [ClientSE.UPDATE_MODULE_FIELD]: undefined;
 
-    [ClientSE.DELETE_LABEL]: undefined;
-    [ClientSE.DELETE_INVITE]: undefined;
     [ClientSE.DELETE_MEMBERSHIP]: undefined;
-    [ClientSE.DELETE_ROLE]: undefined;
     [ClientSE.DELETE_USER_LINKED_ACCOUNT]: undefined;
 
     [ClientSE.USE_INVITE]: boolean;

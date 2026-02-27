@@ -1,18 +1,7 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
-import { roleHandler } from '@trz-api/controllers/dataSources/objectHandlers/role';
-import {
-    createRole,
-    deleteRole,
-    getRolesForOrg,
-    setRolesForUserInOrg,
-    updateRole,
-} from '@trz-api/controllers/roleController';
+import { getRolesForOrg, setRolesForUserInOrg } from '@trz-api/controllers/roleController';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
-import {
-    userCanAssignRolesInOrganization,
-    userCanEditRolesInOrganization,
-    userCanViewOrganization,
-} from '@trz-api/utils/permissions';
+import { userCanAssignRolesInOrganization, userCanViewOrganization } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socket/socketActions';
 import { getSocketData } from '@trz-api/utils/socket/socketUtils';
 import { Socket } from 'socket.io';
@@ -24,42 +13,6 @@ export const registerRoleListeners = (socket: Socket) => {
         }
         const roles = await getRolesForOrg(data);
         return roles;
-    });
-
-    subscribe(socket, ClientSE.CREATE_ROLE, async (data) => {
-        if (!(await userCanEditRolesInOrganization(socket, data.orgId))) {
-            throw new Error('User does not have permission to create roles in this organization');
-        }
-        const newRole = await createRole(data.name, data.color, data.orgId);
-        return newRole;
-    });
-
-    subscribe(socket, ClientSE.UPDATE_ROLE, async (data) => {
-        if (!(await userCanEditRolesInOrganization(socket, data.orgId))) {
-            throw new Error('User does not have permission to edit roles in this organization');
-        }
-        const socketData = getSocketData(socket);
-        if (!socketData?.user?.userId) {
-            throw new Error('User not authenticated');
-        }
-        await updateRole(data, socketData.user.userId);
-        return undefined;
-    });
-
-    subscribe(socket, ClientSE.DELETE_ROLE, async (data) => {
-        const role = await roleHandler.read(data.roleId);
-        if (!role) {
-            throw new Error(`Role with ID ${data.roleId} not found`);
-        }
-        if (!(await userCanEditRolesInOrganization(socket, role.orgId))) {
-            throw new Error('User does not have permission to delete roles in this organization');
-        }
-        const socketData = getSocketData(socket);
-        if (!socketData?.user?.userId) {
-            throw new Error('User not authenticated');
-        }
-        await deleteRole(role, socketData.user.userId);
-        return undefined;
     });
 
     subscribe(socket, ClientSE.GET_ROLES_FOR_USER_IN_ORG, async (data) => {

@@ -1,5 +1,5 @@
 import { Label, LabelId, ModuleId } from '@mosaiq/terrazzo-common';
-import { syncLabel, syncModuleLabels } from '@trz-api/broadcasters/labelBroadcaster';
+import { syncModuleLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { deleteLabelingOnCardsByLabelIdDb } from '@trz-api/persistence/labelAssignmentPersistence';
 import { deleteLabelDb, getLabelIdsByBoardIdDb } from '@trz-api/persistence/labelPersistence';
 import { labelHandler } from './dataSources/objectHandlers/label';
@@ -39,8 +39,6 @@ export async function updateBoardLabels(updatedLabel: Label) {
         throw new Error('Label does not exist');
     }
     await labelHandler.update(updatedLabel.id, updatedLabel, { preventSync: true });
-    // Sync updated labels to clients
-    await syncLabel(updatedLabel.id);
 }
 
 export const getLabelsModule = async (labelId: LabelId): Promise<ModuleId> => {

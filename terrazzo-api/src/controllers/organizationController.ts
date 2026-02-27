@@ -6,7 +6,6 @@ import {
     recordValues,
     UserId,
 } from '@mosaiq/terrazzo-common';
-import { syncUpdateOrgField } from '@trz-api/broadcasters';
 import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { organizationHandler } from './dataSources/objectHandlers/organization';
@@ -84,5 +83,4 @@ export async function updateOrganizationFromPartial(
     }
 
     await organizationHandler.update(orgId, partial, { preventSync: true });
-    await syncUpdateOrgField(orgId, { ...partial, id: orgId });
 }
