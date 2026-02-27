@@ -1,6 +1,7 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
 import { setCardsLabels } from '@trz-api/controllers/cardController';
 import { getBoardIDFromCardID } from '@trz-api/controllers/cardQueries';
+import { labelHandler } from '@trz-api/controllers/dataSources/objectHandlers/label';
 import {
     createBoardLabel,
     getLabelIdsOnModule,
@@ -8,7 +9,6 @@ import {
     removeBoardLabel,
     updateBoardLabels,
 } from '@trz-api/controllers/labelController';
-import { getLabelByIdDb } from '@trz-api/persistence/labelPersistence';
 import { userCanManageCards, userCanManageModule, userCanViewModule } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socket/socketActions';
 import { Socket } from 'socket.io';
@@ -23,7 +23,7 @@ export const registerLabelListeners = (socket: Socket) => {
     });
 
     subscribe(socket, ClientSE.GET_LABEL, async (data) => {
-        const label = await getLabelByIdDb(data);
+        const label = await labelHandler.read(data);
         if (!label) {
             throw new Error('Label not found');
         }

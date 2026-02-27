@@ -1,13 +1,14 @@
-import { ObjectSource, ObjectSourceCreateOptions } from '@mosaiq/terrazzo-common';
+import { Invite, ObjectSource } from '@mosaiq/terrazzo-common';
 import {
     createInviteRecordDb,
     getInviteRecordByIdDb,
     updateInviteRecordDb,
 } from '@trz-api/persistence/invitePersistence';
+import { objectSourceHandlers } from '../dataSourceWrapper';
 
-export const inviteHandler: ObjectSourceCreateOptions<ObjectSource.Invite> = {
+export const inviteHandler = objectSourceHandlers(ObjectSource.Invite, {
     create: async (data) => {
-        await createInviteRecordDb({
+        const invite: Invite = {
             id: crypto.randomUUID(),
             forOrganizationId: data.forOrganizationId,
             maxUses: data.maxUses,
@@ -15,12 +16,14 @@ export const inviteHandler: ObjectSourceCreateOptions<ObjectSource.Invite> = {
             createdById: data.createdById,
             createdAt: Date.now(),
             revokedAt: null,
-        });
+        };
+        await createInviteRecordDb(invite);
+        return invite.id;
     },
     update: async (id, data) => {
         await updateInviteRecordDb({ id, ...data });
     },
     read: async (id) => {
-        return await getInviteRecordByIdDb(id);
+        return (await getInviteRecordByIdDb(id)) || undefined;
     },
-};
+});

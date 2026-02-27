@@ -21,8 +21,8 @@ export const createUserHeaderDb = async (user: UserHeader) => {
     return model?.toJSON();
 };
 
-export const updateUserHeaderDb = async (user: Partial<UserHeader> & { id: UserId }) => {
-    const [updated] = await UserModel.update({ ...user }, { where: { id: user.id } });
-    await invalidateCache(CacheEntity.User, user.id);
+export const updateUserHeaderDb = async (id: UserId, user: Partial<UserHeader>) => {
+    const [updated] = await UserModel.update({ ...user }, { where: { id } });
+    await invalidateCache(CacheEntity.User, id);
     return updated;
 };

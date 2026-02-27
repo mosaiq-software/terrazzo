@@ -9,10 +9,10 @@ import {
     PermissionFlag,
     UserId,
 } from '@mosaiq/terrazzo-common';
+import { organizationHandler } from '@trz-api/controllers/dataSources/objectHandlers/organization';
 import { getUntypedModuleById } from '@trz-api/controllers/moduleQueries';
 import { getRolesForOrg } from '@trz-api/controllers/roleController';
 import { getOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
-import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
 import { Socket } from 'socket.io';
 import { getSocketData } from './socket/socketUtils';
@@ -49,7 +49,7 @@ const getModulePermissionsForUser = async (userId: UserId, moduleId: ModuleId): 
     }
     const userRoles = await getRoleIdsForUserInOrgDb(userId, module.orgId);
     const orgRoles = await getRolesForOrg(module.orgId);
-    const org = await getOrgByIdDb(module.orgId);
+    const org = await organizationHandler.read(module.orgId);
     const truePermissions = calculateTrueModulePermissionsInOrg(module.effectivePermissions, orgRoles);
     const grantedFlags = evaluatePermissionForRoles(userRoles, truePermissions, !!org && org.ownerId === userId);
     return grantedFlags;
@@ -64,7 +64,7 @@ const getModulePermissionsForUser = async (userId: UserId, moduleId: ModuleId): 
 const getOrganizationPermissionsForUser = async (userId: UserId, orgId: OrganizationId): Promise<PermissionFlag[]> => {
     const userRoles = await getRoleIdsForUserInOrgDb(userId, orgId);
     const orgRoles = await getRolesForOrg(orgId);
-    const org = await getOrgByIdDb(orgId);
+    const org = await organizationHandler.read(orgId);
     const grantedFlags = evaluateOrganizationPermissionForRoles(userRoles, orgRoles, !!org && org.ownerId === userId);
     return grantedFlags;
 };

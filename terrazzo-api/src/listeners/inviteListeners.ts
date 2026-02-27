@@ -1,6 +1,6 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
+import { inviteHandler } from '@trz-api/controllers/dataSources/objectHandlers/invite';
 import { createInvite, deleteInvite, getAllInvitesForOrg, useInvite } from '@trz-api/controllers/inviteController';
-import { getInviteRecordByIdDb } from '@trz-api/persistence/invitePersistence';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
 import { subscribe } from '@trz-api/utils/socket/socketActions';
 import { getSocketData } from '@trz-api/utils/socket/socketUtils';
@@ -28,7 +28,7 @@ export const registerInviteListeners = (socket: Socket) => {
     });
 
     subscribe(socket, ClientSE.DELETE_INVITE, async (data) => {
-        const invite = await getInviteRecordByIdDb(data.inviteId);
+        const invite = await inviteHandler.read(data.inviteId);
         if (!invite) {
             throw new Error('Invite not found');
         }
@@ -49,7 +49,7 @@ export const registerInviteListeners = (socket: Socket) => {
     });
 
     subscribe(socket, ClientSE.GET_INVITE, async (data) => {
-        const invite = await getInviteRecordByIdDb(data);
+        const invite = await inviteHandler.read(data);
         return invite;
     });
 };

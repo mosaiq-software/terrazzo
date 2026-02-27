@@ -21,14 +21,8 @@ export const createLabelOnBoardDb = async (label: Label, boardId: ModuleId) => {
     return model.toJSON();
 };
 
-export const updateLabelDb = async (label: Label) => {
-    const [updated] = await LabelModel.update(
-        {
-            name: label.name,
-            color: label.color,
-        },
-        { where: { id: label.id } }
-    );
+export const updateLabelDb = async (id: LabelId, update: Partial<Label>) => {
+    const [updated] = await LabelModel.update({ ...update }, { where: { id } });
     return updated;
 };
 

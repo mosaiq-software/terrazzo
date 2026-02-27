@@ -7,12 +7,12 @@ import {
     getOrganizationMembershipsForOrgDb,
     getOrganizationMembershipsForUserDb,
 } from '@trz-api/persistence/organizationMembershipPersistence';
-import { getOrgByIdDb } from '@trz-api/persistence/organizationPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
+import { organizationHandler } from './dataSources/objectHandlers/organization';
 import { userIsOrgOwner } from './organizationAccess';
 
 export const getMembersInOrg = async (orgId: OrganizationId): Promise<UserId[]> => {
-    const org = await getOrgByIdDb(orgId);
+    const org = await organizationHandler.read(orgId);
     if (org == null) {
         throw new Error('Org not found');
     }
@@ -24,7 +24,7 @@ export const getMembersInOrg = async (orgId: OrganizationId): Promise<UserId[]> 
 export const getOrgsForUser = async (userId: UserId) => {
     const records = await getOrganizationMembershipsForUserDb(userId);
     const orgIds = records.map((r) => r.orgId);
-    const orgs = await Promise.all(orgIds.map(async (id) => await getOrgByIdDb(id)));
+    const orgs = await Promise.all(orgIds.map(async (id) => await organizationHandler.read(id)));
     return orgs.filter((o) => !!o);
 };
 

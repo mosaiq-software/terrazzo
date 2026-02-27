@@ -1,6 +1,6 @@
 import { CardId, getRoomCode, LabelId, ModuleId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { labelHandler } from '@trz-api/controllers/dataSources/objectHandlers/label';
 import { getLabelIdsOnModule } from '@trz-api/controllers/labelController';
-import { getLabelByIdDb } from '@trz-api/persistence/labelPersistence';
 import { userCanViewModule } from '@trz-api/utils/permissions';
 import { broadcast } from '@trz-api/utils/socket/socketActions';
 
@@ -22,7 +22,7 @@ export const syncModuleLabels = async (moduleId: ModuleId) => {
 };
 
 export const syncLabel = async (labelId: LabelId) => {
-    const label = await getLabelByIdDb(labelId);
+    const label = await labelHandler.read(labelId);
     if (!label) {
         throw new Error('Label not found');
     }

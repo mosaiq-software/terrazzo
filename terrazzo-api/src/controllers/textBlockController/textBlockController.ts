@@ -9,13 +9,13 @@ import {
     UID,
     UserId,
 } from '@mosaiq/terrazzo-common';
-import { getCardByIdDb } from '@trz-api/persistence/cardPersistence';
-import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
-import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { userCanManageCards, userCanManageModule } from '@trz-api/utils/permissions';
 import { Document } from '@trz-api/utils/y-socket-io/document';
 import console from 'console';
 import { getBoardIDFromCardID } from '../cardQueries';
+import { cardHandler } from '../dataSources/objectHandlers/card';
+import { moduleHandler } from '../dataSources/objectHandlers/module';
+import { textBlockHandler } from '../dataSources/objectHandlers/textBlock';
 import { convertBlocknoteBlocksToPlaintext, maybeParseMarkdownToBlocks } from './blocknoteUtils';
 import { createTextBlockHistorySnapshot, HISTORY_SNAPSHOT_INTERVAL_MS } from './historySnapshots';
 import { loadTextBlockEncodedData } from './textBlockDocumentCodec';
@@ -28,7 +28,7 @@ export const checkCanUserEditTextBlock = async (
 ): Promise<TextBlockId | undefined> => {
     switch (resourceType) {
         case 'card': {
-            const card = await getCardByIdDb(resourceId);
+            const card = await cardHandler.read(resourceId);
             if (!card) {
                 return undefined;
             }
@@ -39,7 +39,7 @@ export const checkCanUserEditTextBlock = async (
             return card.descriptionTextBlockId;
         }
         case 'document': {
-            const module = await getModuleByIdDb(resourceId);
+            const module = await moduleHandler.read(resourceId);
             if (!module || !isModuleType(module, TrzModule.Document)) {
                 return undefined;
             }
@@ -56,7 +56,7 @@ export const checkCanUserEditTextBlock = async (
 export const storeTextBlockEncodedData = async (doc: Document, forceSnapshot?: boolean): Promise<void> => {
     const { textBlockId, resourceId, resourceType } = doc;
     try {
-        const textBlock = await getTextBlockByIdDb(textBlockId);
+        const textBlock = await textBlockHandler.read(textBlockId);
         if (!textBlock) {
             throw new Error(`Text block ${textBlockId} not found`);
         }
@@ -69,10 +69,10 @@ export const storeTextBlockEncodedData = async (doc: Document, forceSnapshot?: b
                 now - textBlock.lastSnapshotAt >= HISTORY_SNAPSHOT_INTERVAL_MS) ||
                 forceSnapshot)
         ) {
-            await updateTextBlockDb(textBlockId, { text: content, lastSnapshotAt: now });
+            await textBlockHandler.update(textBlockId, { text: content, lastSnapshotAt: now }, { preventSync: true });
             await createTextBlockHistorySnapshot(textBlockId, resourceId, resourceType, content);
         } else {
-            await updateTextBlockDb(textBlockId, { text: content });
+            await textBlockHandler.update(textBlockId, { text: content }, { preventSync: true });
         }
     } catch (error: any) {
         console.error('Unable to save text block ' + textBlockId + ' : ' + error.message);
@@ -85,13 +85,16 @@ export { loadTextBlockEncodedData };
 export const createBlocknoteTextBlockWithBlocks = async (blocks: Block[]) => {
     try {
         const blocksJsonString = JSON.stringify(blocks);
-        const tb = await createTextBlockDb({
-            id: crypto.randomUUID(),
-            text: blocksJsonString,
-            type: TextBlockType.BlockNote,
-            trackHistory: true,
-        });
-        return tb;
+        const textBlockId = await textBlockHandler.create(
+            {
+                text: blocksJsonString,
+                type: TextBlockType.BlockNote,
+                trackHistory: true,
+            },
+            { preventSync: true }
+        );
+        const tb = await textBlockHandler.read(textBlockId);
+        return tb || null;
     } catch (e: any) {
         console.error(`Unable to create text block`, e);
         return null;
@@ -102,13 +105,16 @@ export const createBlocknoteTextBlockWithMarkdown = async (markdownText?: string
     try {
         const blocks = await maybeParseMarkdownToBlocks(markdownText);
         const blocksJsonString = JSON.stringify(blocks);
-        const tb = await createTextBlockDb({
-            id: crypto.randomUUID(),
-            text: blocksJsonString,
-            type: TextBlockType.BlockNote,
-            trackHistory: true,
-        });
-        return tb;
+        const textBlockId = await textBlockHandler.create(
+            {
+                text: blocksJsonString,
+                type: TextBlockType.BlockNote,
+                trackHistory: true,
+            },
+            { preventSync: true }
+        );
+        const tb = await textBlockHandler.read(textBlockId);
+        return tb || null;
     } catch (e: any) {
         console.error(`Unable to create text block`, e);
         return null;
@@ -117,13 +123,16 @@ export const createBlocknoteTextBlockWithMarkdown = async (markdownText?: string
 
 export const createPlainTextBlock = async (plainText: string) => {
     try {
-        const tb = await createTextBlockDb({
-            id: crypto.randomUUID(),
-            text: plainText,
-            type: TextBlockType.PlainText,
-            trackHistory: true,
-        });
-        return tb;
+        const textBlockId = await textBlockHandler.create(
+            {
+                text: plainText,
+                type: TextBlockType.PlainText,
+                trackHistory: true,
+            },
+            { preventSync: true }
+        );
+        const tb = await textBlockHandler.read(textBlockId);
+        return tb || null;
     } catch (e: any) {
         console.error(`Unable to create text block`, e);
         return null;
@@ -137,7 +146,7 @@ export const createPlainTextBlock = async (plainText: string) => {
  */
 export const getTextBlocksAsPlaintext = async (textBlockId: TextBlockId): Promise<string> => {
     try {
-        const textBlock = await getTextBlockByIdDb(textBlockId);
+        const textBlock = await textBlockHandler.read(textBlockId);
         if (!textBlock) {
             throw new Error(`Text block ${textBlockId} not found`);
         }
@@ -170,7 +179,7 @@ export const getTextBlocksAsPlaintext = async (textBlockId: TextBlockId): Promis
  */
 export const getTextBlockAsBlocks = async (textBlockId: TextBlockId): Promise<Block[] | undefined> => {
     try {
-        const textBlock = await getTextBlockByIdDb(textBlockId);
+        const textBlock = await textBlockHandler.read(textBlockId);
         if (!textBlock) {
             throw new Error(`Text block ${textBlockId} not found`);
         }

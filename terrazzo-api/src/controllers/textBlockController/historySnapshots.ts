@@ -1,13 +1,12 @@
 import { TextBlockId, TextBlockResourceType, TextBlockSnapshot, TextBlockType, UID } from '@mosaiq/terrazzo-common';
 import { syncTextHistorySnapshots } from '@trz-api/broadcasters/textBroadcasters';
 import {
-    createTextBlockHistorySnapshotDb,
     deleteTextBlockHistorySnapshotDb,
-    getTextBlockHistorySnapshotDb,
     getTextBlockHistorySnapshotsForTextBlockDb,
 } from '@trz-api/persistence/textBlockHistoryPersistence';
-import { getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
 import { SocketManager } from '@trz-api/utils/socket/socketManager';
+import { textBlockHandler } from '../dataSources/objectHandlers/textBlock';
+import { textBlockSnapshotHandler } from '../dataSources/objectHandlers/textBlockSnapshot';
 import { loadTextBlockEncodedData } from './textBlockDocumentCodec';
 
 export const HISTORY_SNAPSHOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
@@ -19,14 +18,11 @@ export const createTextBlockHistorySnapshot = async (
     content: string,
     tags?: string[]
 ): Promise<void> => {
-    const snapshot: TextBlockSnapshot = {
-        snapshotId: crypto.randomUUID(),
+    await textBlockSnapshotHandler.create({
         textBlockId: textBlockId,
-        timestamp: Date.now(),
         content,
         tags,
-    };
-    await createTextBlockHistorySnapshotDb(snapshot);
+    });
     await reduceSnapshotsForTextBlock(textBlockId);
     await syncTextHistorySnapshots(textBlockId, resourceId, resourceType);
 };
@@ -181,7 +177,7 @@ export const determineSnapshotsToDelete = (
  */
 const reduceSnapshotsForTextBlock = async (textBlockId: TextBlockId) => {
     try {
-        const textBlock = await getTextBlockByIdDb(textBlockId);
+        const textBlock = await textBlockHandler.read(textBlockId);
         if (!textBlock) {
             throw new Error(`Text block ${textBlockId} not found`);
         }
@@ -211,16 +207,16 @@ export const restoreTextBlockSnapshot = async (
     resourceType: TextBlockResourceType
 ): Promise<void> => {
     try {
-        const snapshot = await getTextBlockHistorySnapshotDb(snapshotId);
+        const snapshot = await textBlockSnapshotHandler.read(snapshotId);
         if (!snapshot) {
             throw new Error(`Snapshot ${snapshotId} not found`);
         }
-        const textBlock = await getTextBlockByIdDb(snapshot.textBlockId);
+        const textBlock = await textBlockHandler.read(snapshot.textBlockId);
         if (!textBlock) {
             throw new Error(`Text block ${snapshot.textBlockId} not found`);
         }
         await createTextBlockHistorySnapshot(textBlock.id, resourceId, resourceType, textBlock.text, ['Pre-Restore']);
-        await updateTextBlockDb(textBlock.id, { text: snapshot.content });
+        await textBlockHandler.update(textBlock.id, { text: snapshot.content }, { preventSync: true });
         await createTextBlockHistorySnapshot(textBlock.id, resourceId, resourceType, snapshot.content, ['Restored']);
         const ydoc = await loadTextBlockEncodedData(textBlock.id);
         if (!ydoc) {

@@ -1,14 +1,10 @@
 import { generateUsernameDiscriminator, SYSTEM_USER_ID, TrzModule, UserHeader, UserId } from '@mosaiq/terrazzo-common';
 import { syncUpdateUserField } from '@trz-api/broadcasters';
-import {
-    createUserHeaderDb,
-    getUserHeaderByIdDb,
-    getUserHeaderByUsernameDb,
-    updateUserHeaderDb,
-} from '@trz-api/persistence/userPersistence';
+import { getUserHeaderByUsernameDb } from '@trz-api/persistence/userPersistence';
 import { isDev } from '@trz-api/utils/envUtils';
 import { cardHandler } from './dataSources/objectHandlers/card';
 import { listHandler } from './dataSources/objectHandlers/list';
+import { userHandler } from './dataSources/objectHandlers/user';
 import { createNewModule } from './moduleController';
 import { addOrganization } from './organizationController';
 
@@ -28,18 +24,16 @@ export async function createNewUser(username: string, firstName: string, lastNam
         throw new Error('Failed to generate unique username');
     }
 
-    const newUser: UserHeader = {
-        id: crypto.randomUUID(),
+    const userId = await userHandler.create({
         username: `${username}${discriminator}`,
         firstName: firstName,
         lastName: lastName,
         profilePicture: profilePicture,
-    };
+    });
 
-    try {
-        await createUserHeaderDb(newUser);
-    } catch (e) {
-        throw new Error('Failed to create user' + e);
+    const newUser = await userHandler.read(userId);
+    if (!newUser) {
+        throw new Error('Failed to read created user');
     }
 
     await seedNewUserProfile(newUser.id);
@@ -98,7 +92,7 @@ export const getUserHeader = async (userId: UserId) => {
     if (userId === SYSTEM_USER_ID) {
         return SYSTEM_USER_HEADER;
     }
-    const user = await getUserHeaderByIdDb(userId);
+    const user = await userHandler.read(userId);
     if (!user) {
         throw new Error('No user found');
     }
@@ -115,7 +109,7 @@ export const updateUserData = async (userData: Partial<UserHeader> & { id: UserI
         }
     }
 
-    await updateUserHeaderDb(userData);
+    await userHandler.update(userData.id, userData, { preventSync: true });
     await syncUpdateUserField(userData.id, userData);
 };
 

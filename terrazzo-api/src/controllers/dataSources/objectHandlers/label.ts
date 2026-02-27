@@ -1,26 +1,22 @@
-import { ObjectSource, ObjectSourceCreateOptions } from '@mosaiq/terrazzo-common';
+import { Label, ObjectSource } from '@mosaiq/terrazzo-common';
 import { createLabelOnBoardDb, getLabelByIdDb, updateLabelDb } from '@trz-api/persistence/labelPersistence';
+import { objectSourceHandlers } from '../dataSourceWrapper';
 
-export const labelHandler: ObjectSourceCreateOptions<ObjectSource.Label> = {
+export const labelHandler = objectSourceHandlers(ObjectSource.Label, {
     create: async (data) => {
-        await createLabelOnBoardDb(
-            {
-                id: crypto.randomUUID(),
-                boardId: data.boardId,
-                name: data.name,
-                color: data.color,
-            },
-            data.boardId
-        );
+        const label: Label = {
+            id: crypto.randomUUID(),
+            boardId: data.boardId,
+            name: data.name,
+            color: data.color,
+        };
+        await createLabelOnBoardDb(label, data.boardId);
+        return label.id;
     },
     update: async (id, data) => {
-        const existing = await getLabelByIdDb(id);
-        if (!existing) {
-            throw new Error(`Label with id ${id} not found`);
-        }
-        await updateLabelDb({ ...existing, ...data, id });
+        await updateLabelDb(id, data);
     },
     read: async (id) => {
-        return await getLabelByIdDb(id);
+        return (await getLabelByIdDb(id)) || undefined;
     },
-};
+});

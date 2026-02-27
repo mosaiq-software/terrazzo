@@ -1,17 +1,22 @@
-import { ObjectSource, ObjectSourceCreateOptions } from '@mosaiq/terrazzo-common';
+import { ObjectSource, TextBlock } from '@mosaiq/terrazzo-common';
+import { createTextBlockDb, getTextBlockByIdDb, updateTextBlockDb } from '@trz-api/persistence/textBlockPersistence';
+import { objectSourceHandlers } from '../dataSourceWrapper';
 
-export const textBlockHandler: ObjectSourceCreateOptions<ObjectSource.TextBlock> = {
+export const textBlockHandler = objectSourceHandlers(ObjectSource.TextBlock, {
     create: async (data) => {
-        void data;
-        return;
+        const textBlock: TextBlock = {
+            id: crypto.randomUUID(),
+            text: data.text,
+            type: data.type,
+            trackHistory: data.trackHistory,
+        };
+        await createTextBlockDb(textBlock);
+        return textBlock.id;
     },
     update: async (id, data) => {
-        void id;
-        void data;
-        return;
+        await updateTextBlockDb(id, data);
     },
     read: async (id) => {
-        void id;
-        return undefined;
+        return (await getTextBlockByIdDb(id)) || undefined;
     },
-};
+});

@@ -16,6 +16,11 @@ export const getTextBlockHistorySnapshotsForTextBlockDb = async (textBlockId: Te
     return models.map((model) => model.toJSON());
 };
 
+export const updateTextBlockHistorySnapshotDb = async (snapshotId: UID, update: Partial<TextBlockSnapshot>) => {
+    const [updated] = await TextBlockHistoryModel.update({ ...update }, { where: { snapshotId } });
+    return updated;
+};
+
 export const deleteTextBlockHistorySnapshotDb = async (snapshotId: UID) => {
     const deleted = await TextBlockHistoryModel.destroy({ where: { snapshotId } });
     return deleted;

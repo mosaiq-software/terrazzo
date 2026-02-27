@@ -15,7 +15,7 @@ import { getTextBlockAsBlocks } from './textBlockController/textBlockController'
  * @param cardId The ID of the card to duplicate
  * @param createdById Optional user ID of the user creating the duplicate
  */
-export async function duplicateCard(cardId: CardId, createdById?: UserId) {
+export async function duplicateCard(cardId: CardId, createdById?: UserId): Promise<CardId> {
     const existingCard = await cardHandler.read(cardId);
     if (!existingCard) {
         throw new Error('Error populating existing card');
@@ -46,6 +46,8 @@ export async function duplicateCard(cardId: CardId, createdById?: UserId) {
     } catch (error: any) {
         throw new Error('Failed to add labels to card ' + error.message);
     }
+
+    return newCardId;
 }
 
 interface MoveCardOptions {

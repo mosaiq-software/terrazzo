@@ -1,4 +1,5 @@
 import { ClientSE } from '@mosaiq/terrazzo-common';
+import { roleHandler } from '@trz-api/controllers/dataSources/objectHandlers/role';
 import {
     createRole,
     deleteRole,
@@ -7,7 +8,6 @@ import {
     updateRole,
 } from '@trz-api/controllers/roleController';
 import { getRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
-import { getRoleByIdDb } from '@trz-api/persistence/rolePersistence';
 import {
     userCanAssignRolesInOrganization,
     userCanEditRolesInOrganization,
@@ -47,7 +47,7 @@ export const registerRoleListeners = (socket: Socket) => {
     });
 
     subscribe(socket, ClientSE.DELETE_ROLE, async (data) => {
-        const role = await getRoleByIdDb(data.roleId);
+        const role = await roleHandler.read(data.roleId);
         if (!role) {
             throw new Error(`Role with ID ${data.roleId} not found`);
         }

@@ -18,9 +18,9 @@ export const createRoleOnOrgDb = async (role: Role) => {
     return model.toJSON();
 };
 
-export const updateRoleDb = async (role: Partial<Role> & { id: RoleId }) => {
-    const [updated] = await RoleModel.update({ ...role }, { where: { id: role.id } });
-    await invalidateCache(CacheEntity.Role, role.id);
+export const updateRoleDb = async (id: RoleId, update: Partial<Role>) => {
+    const [updated] = await RoleModel.update({ ...update }, { where: { id } });
+    await invalidateCache(CacheEntity.Role, id);
     return updated;
 };
 

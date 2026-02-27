@@ -13,8 +13,8 @@ export const createOrgDb = async (org: OrganizationHeader) => {
     return model.toJSON();
 };
 
-export const updateOrgDb = async (org: OrganizationHeader) => {
-    const [updated] = await OrgModel.update({ ...org }, { where: { id: org.id } });
-    await invalidateCache(CacheEntity.Organization, org.id);
+export const updateOrgDb = async (id: OrganizationId, update: Partial<OrganizationHeader>) => {
+    const [updated] = await OrgModel.update({ ...update }, { where: { id } });
+    await invalidateCache(CacheEntity.Organization, id);
     return updated;
 };

@@ -7,7 +7,6 @@ export interface CreateTextBlockSnapshot {
 }
 
 export interface UpdateTextBlockSnapshot {
-    content?: string;
     tags?: string[];
 }
 

@@ -1,12 +1,12 @@
 import { getRoomCode, InviteId, OrganizationId, RoomSpecifier, RoomType, ServerSE } from '@mosaiq/terrazzo-common';
+import { inviteHandler } from '@trz-api/controllers/dataSources/objectHandlers/invite';
 import { getAllInvitesForOrg } from '@trz-api/controllers/inviteController';
-import { getInviteRecordByIdDb } from '@trz-api/persistence/invitePersistence';
 import { userCanAdministerOrganization } from '@trz-api/utils/permissions';
 import { broadcast } from '@trz-api/utils/socket/socketActions';
 
 export const syncOrgInvitesFromInviteId = async (inviteId: InviteId) => {
     try {
-        const inviteRecord = await getInviteRecordByIdDb(inviteId);
+        const inviteRecord = await inviteHandler.read(inviteId);
         if (!inviteRecord) {
             throw new Error('Invite not found for syncing org invites');
         }

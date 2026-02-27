@@ -1,5 +1,5 @@
 import { ModuleHeader, ModuleId, TrzModule, isModuleType } from '@mosaiq/terrazzo-common';
-import { getModuleByIdDb } from '@trz-api/persistence/modulePersistence';
+import { moduleHandler } from './dataSources/objectHandlers/module';
 
 /**
  * Retrieves a module by ID and asserts it is of the expected type. Throws if the type does not match.
@@ -9,7 +9,7 @@ export async function getModuleById<T extends TrzModule>(
     id: ModuleId,
     expectedType: T
 ): Promise<ModuleHeader<T> | undefined> {
-    const module = await getModuleByIdDb(id);
+    const module = await moduleHandler.read(id);
     if (!module) {
         return undefined;
     }
@@ -20,7 +20,7 @@ export async function getModuleById<T extends TrzModule>(
 }
 
 export async function getUntypedModuleById(id: ModuleId): Promise<ModuleHeader | undefined> {
-    const module = await getModuleByIdDb(id);
+    const module = await moduleHandler.read(id);
     if (!module) {
         return undefined;
     }

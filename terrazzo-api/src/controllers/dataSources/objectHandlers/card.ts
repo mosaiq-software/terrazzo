@@ -1,5 +1,4 @@
-import { Card, ObjectSource, ObjectSourceHandler, TextBlockId, TrzModule } from '@mosaiq/terrazzo-common';
-import { syncAddCard, syncUpdateCardField } from '@trz-api/broadcasters';
+import { Card, ObjectSource, TextBlockId, TrzModule } from '@mosaiq/terrazzo-common';
 import { getModuleById } from '@trz-api/controllers/moduleQueries';
 import { createBlocknoteTextBlockWithBlocks } from '@trz-api/controllers/textBlockController/textBlockController';
 import {
@@ -10,9 +9,10 @@ import {
     updateCardDb,
 } from '@trz-api/persistence/cardPersistence';
 import { getListByIdDb } from '@trz-api/persistence/listPersistence';
+import { objectSourceHandlers } from '../dataSourceWrapper';
 
-export const cardHandler: ObjectSourceHandler<ObjectSource.Card> = {
-    create: async (data, options) => {
+export const cardHandler = objectSourceHandlers(ObjectSource.Card, {
+    create: async (data) => {
         const list = await getListByIdDb(data.listId);
         if (!list) {
             throw new Error('List not found');
@@ -55,34 +55,12 @@ export const cardHandler: ObjectSourceHandler<ObjectSource.Card> = {
         } catch (e) {
             throw new Error('Failed to save Card' + e);
         }
-        if (!options?.preventSync) {
-            try {
-                await syncAddCard(newCard, board.id);
-            } catch (e) {
-                throw new Error('Failed to sync Card' + e);
-            }
-        }
         return newCard.id;
     },
     update: async (id, data, options) => {
-        try {
-            await updateCardDb(id, data);
-        } catch (e: any) {
-            throw new Error('Failed to update card ' + e);
-        }
-        if (!options?.preventSync) {
-            try {
-                const card = await getCardByIdDb(id);
-                if (!card) {
-                    throw new Error('Card not found after update ' + id);
-                }
-                await syncUpdateCardField(card, card.boardId);
-            } catch (e) {
-                throw new Error('Failed to sync updated card ' + e);
-            }
-        }
+        await updateCardDb(id, data);
     },
     read: async (id) => {
         return (await getCardByIdDb(id)) || undefined;
     },
-};
+});

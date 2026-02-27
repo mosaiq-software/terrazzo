@@ -1,14 +1,9 @@
 import { getMaxUserRole, OrganizationId, PermissionFlag, Role, RoleId, UserId } from '@mosaiq/terrazzo-common';
 import { syncRolesForUserInOrg, syncUpdateOrganizationRoles } from '@trz-api/broadcasters';
 import { getRoleIdsForUserInOrgDb, setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
-import {
-    createRoleOnOrgDb,
-    deleteRoleDb,
-    getNextRoleOrderDb,
-    getRolesByOrgIdDb,
-    updateRoleDb,
-} from '@trz-api/persistence/rolePersistence';
+import { deleteRoleDb, getRolesByOrgIdDb } from '@trz-api/persistence/rolePersistence';
 import { SocketManager } from '@trz-api/utils/socket/socketManager';
+import { roleHandler } from './dataSources/objectHandlers/role';
 import { userIsOrgOwner } from './organizationAccess';
 
 export const getRolesForOrg = async (orgId: OrganizationId) => {
@@ -21,16 +16,20 @@ export const createRole = async (
     orgId: OrganizationId,
     defaultPermissions: PermissionFlag[] = []
 ) => {
-    const nextOrder = await getNextRoleOrderDb(orgId);
-    const role: Role = {
-        id: crypto.randomUUID(),
-        name,
-        color,
-        orgId,
-        order: nextOrder,
-        defaultPermissions: defaultPermissions,
-    };
-    await createRoleOnOrgDb(role);
+    const roleId = await roleHandler.create(
+        {
+            name,
+            color,
+            orgId,
+            defaultPermissions,
+        },
+        { preventSync: true }
+    );
+
+    const role = await roleHandler.read(roleId);
+    if (!role) {
+        throw new Error('Failed to read created role');
+    }
 
     // sync new role to all clients in the org
     const roles = await getRolesForOrg(orgId);
@@ -47,7 +46,7 @@ export const updateRole = async (role: Role, updatedBy: UserId) => {
         throw new Error('User cannot update a role with equal or higher order than their maximum role');
     }
 
-    await updateRoleDb(role);
+    await roleHandler.update(role.id, role, { preventSync: true });
 
     const roles = await getRolesForOrg(role.orgId);
     await syncUpdateOrganizationRoles(role.orgId, roles);

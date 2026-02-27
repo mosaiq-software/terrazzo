@@ -7,17 +7,15 @@ import {
     UserId,
 } from '@mosaiq/terrazzo-common';
 import { syncUpdateOrgField } from '@trz-api/broadcasters';
-import {
-    createOrganizationMembershipDb,
-} from '@trz-api/persistence/organizationMembershipPersistence';
-import { createOrgDb, getOrgByIdDb, updateOrgDb } from '@trz-api/persistence/organizationPersistence';
+import { createOrganizationMembershipDb } from '@trz-api/persistence/organizationMembershipPersistence';
 import { setRoleIdsForUserInOrgDb } from '@trz-api/persistence/roleAssignmentPersistence';
-import { userIsOrgOwner, userIsValidMemberOfOrg } from './organizationAccess';
+import { organizationHandler } from './dataSources/objectHandlers/organization';
+import { userIsValidMemberOfOrg } from './organizationAccess';
 import { createRole } from './roleController';
 
 export async function getOrganizationPreview(orgId: OrganizationId) {
     try {
-        const orgHeader = await getOrgByIdDb(orgId);
+        const orgHeader = await organizationHandler.read(orgId);
         if (!orgHeader) {
             throw new Error('No Org found with id ' + orgId);
         }
@@ -34,40 +32,40 @@ export async function addOrganization(organization: Partial<OrganizationHeader> 
         throw new Error(`Name must be 1 - ${MAX_NAME_LENGTH} characters`);
     }
 
-    // Create the organization record
-    const newOrg: OrganizationHeader = {
-        id: crypto.randomUUID(),
-        name,
-        createdAt: organization.createdAt || Date.now(),
-        logoUrl: organization.logoUrl || '',
-        description: organization.description || '',
-        ownerId: organization.ownerId,
-    };
-    await createOrgDb(newOrg);
+    // Create the organization record via handler
+    const orgId = await organizationHandler.create(
+        {
+            name,
+            logoUrl: organization.logoUrl || '',
+            description: organization.description || '',
+            ownerId: organization.ownerId,
+        },
+        { preventSync: true }
+    );
 
     // Assign membership to creator
     const orgMembershipRecord = {
-        orgId: newOrg.id,
+        orgId: orgId,
         userId: organization.ownerId,
         joinedAt: Date.now(),
     };
     await createOrganizationMembershipDb(orgMembershipRecord);
 
     // create default roles
-    const adminRole = await createRole('Admin', '#D31757', newOrg.id, recordValues(PermissionFlag));
-    const guest = await createRole('Guest', '#2384CA', newOrg.id, [PermissionFlag.VIEW_MODULES]);
+    const adminRole = await createRole('Admin', '#D31757', orgId, recordValues(PermissionFlag));
+    const guest = await createRole('Guest', '#2384CA', orgId, [PermissionFlag.VIEW_MODULES]);
 
     // assign admin role to creator
-    await setRoleIdsForUserInOrgDb(organization.ownerId, newOrg.id, [adminRole.id]);
+    await setRoleIdsForUserInOrgDb(organization.ownerId, orgId, [adminRole.id]);
 
-    return newOrg.id;
+    return orgId;
 }
 export async function updateOrganizationFromPartial(
     orgId: OrganizationId,
     partial: Partial<OrganizationHeader>,
     updatedBy?: UserId
 ) {
-    const updatingOrg = await getOrgByIdDb(orgId);
+    const updatingOrg = await organizationHandler.read(orgId);
     if (updatingOrg == null) {
         throw new Error('Org not found');
     }
@@ -85,7 +83,6 @@ export async function updateOrganizationFromPartial(
         }
     }
 
-    const updated = { ...updatingOrg, ...partial };
-    await updateOrgDb(updated);
+    await organizationHandler.update(orgId, partial, { preventSync: true });
     await syncUpdateOrgField(orgId, { ...partial, id: orgId });
 }

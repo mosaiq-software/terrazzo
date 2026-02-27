@@ -9,8 +9,8 @@ import {
     exhaustiveCheck,
     fullNameWithUsername,
 } from '@mosaiq/terrazzo-common';
-import { getUserHeaderByIdDb } from '@trz-api/persistence/userPersistence';
 import { cardHandler } from '../dataSources/objectHandlers/card';
+import { userHandler } from '../dataSources/objectHandlers/user';
 import { getModuleById } from '../moduleQueries';
 
 const SYSTEM_USER_HEADER = {
@@ -110,7 +110,7 @@ export const BlockNoteMention = createInlineContentSpec(
 export const retrieveMentionDisplayText = async (id: UID, type: QueryableItem): Promise<string | undefined> => {
     switch (type) {
         case QueryableItem.User: {
-            const userHeader = id === SYSTEM_USER_ID ? SYSTEM_USER_HEADER : await getUserHeaderByIdDb(id);
+            const userHeader = id === SYSTEM_USER_ID ? SYSTEM_USER_HEADER : await userHandler.read(id);
             return userHeader ? fullNameWithUsername(userHeader) : undefined;
         }
         case QueryableItem.Card: {

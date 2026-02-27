@@ -1,13 +1,13 @@
 import { Block } from '@blocknote/core';
 import { BLOCKNOTE_FRAGMENT_ID, TextBlockId, TextBlockType, exhaustiveCheck } from '@mosaiq/terrazzo-common';
-import { getTextBlockByIdDb } from '@trz-api/persistence/textBlockPersistence';
 import { Doc, XmlText } from 'yjs';
+import { textBlockHandler } from '../dataSources/objectHandlers/textBlock';
 import { BLOCKNOTE_EDITOR } from './blocknote';
 import { maybeParseMarkdownToBlocks } from './blocknoteUtils';
 
 export const loadTextBlockEncodedData = async (textBlockId: TextBlockId): Promise<Doc | null> => {
     try {
-        const textBlock = await getTextBlockByIdDb(textBlockId);
+        const textBlock = await textBlockHandler.read(textBlockId);
         if (!textBlock) {
             throw new Error(`Text block ${textBlockId} not found`);
         }

@@ -1,13 +1,8 @@
 import { Label, LabelId, ModuleId } from '@mosaiq/terrazzo-common';
 import { syncLabel, syncModuleLabels } from '@trz-api/broadcasters/labelBroadcaster';
 import { deleteLabelingOnCardsByLabelIdDb } from '@trz-api/persistence/labelAssignmentPersistence';
-import {
-    createLabelOnBoardDb,
-    deleteLabelDb,
-    getLabelByIdDb,
-    getLabelIdsByBoardIdDb,
-    updateLabelDb,
-} from '@trz-api/persistence/labelPersistence';
+import { deleteLabelDb, getLabelIdsByBoardIdDb } from '@trz-api/persistence/labelPersistence';
+import { labelHandler } from './dataSources/objectHandlers/label';
 
 export const getLabelIdsOnModule = async (moduleId: ModuleId): Promise<LabelId[]> => {
     const labels = await getLabelIdsByBoardIdDb(moduleId);
@@ -15,18 +10,19 @@ export const getLabelIdsOnModule = async (moduleId: ModuleId): Promise<LabelId[]
 };
 
 export async function createBoardLabel(moduleId: ModuleId, name: string, color: string): Promise<LabelId> {
-    const label: Label = {
-        name,
-        color,
-        boardId: moduleId,
-        id: crypto.randomUUID(),
-    };
-    await createLabelOnBoardDb(label, moduleId);
+    const labelId = await labelHandler.create(
+        {
+            boardId: moduleId,
+            name,
+            color,
+        },
+        { preventSync: true }
+    );
 
     // Sync updated labels to clients
     await syncModuleLabels(moduleId);
 
-    return label.id;
+    return labelId;
 }
 
 export async function removeBoardLabel(moduleId: ModuleId, labelId: LabelId) {
@@ -38,17 +34,17 @@ export async function removeBoardLabel(moduleId: ModuleId, labelId: LabelId) {
 }
 
 export async function updateBoardLabels(updatedLabel: Label) {
-    const label = await getLabelByIdDb(updatedLabel.id);
+    const label = await labelHandler.read(updatedLabel.id);
     if (!label) {
         throw new Error('Label does not exist');
     }
-    await updateLabelDb(updatedLabel);
+    await labelHandler.update(updatedLabel.id, updatedLabel, { preventSync: true });
     // Sync updated labels to clients
     await syncLabel(updatedLabel.id);
 }
 
 export const getLabelsModule = async (labelId: LabelId): Promise<ModuleId> => {
-    const label = await getLabelByIdDb(labelId);
+    const label = await labelHandler.read(labelId);
     if (!label) {
         throw new Error('Label not found');
     }
