@@ -1,8 +1,8 @@
-import { Invite, InviteId, isInviteExpired, MembershipRecord, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
+import { Invite, InviteId, isInviteExpired, OrganizationId, UserId } from '@mosaiq/terrazzo-common';
 import { getAllInviteRecordsForOrganizationDb } from '@trz-api/persistence/invitePersistence';
-import { getOrganizationMembershipsForUserDb } from '@trz-api/persistence/organizationMembershipPersistence';
+import { organizationMembersCollectionHandler } from './dataSources/collectionHandlers/organizationMembers';
+import { organizationsCollectionHandler } from './dataSources/collectionHandlers/organizations';
 import { inviteHandler } from './dataSources/objectHandlers/invite';
-import { createMembershipIfDoesntExist } from './membershipController';
 
 export const getAllInvitesForOrg = async (orgId: OrganizationId): Promise<Invite[]> => {
     return await getAllInviteRecordsForOrganizationDb(orgId);
@@ -20,24 +20,14 @@ export const useInvite = async (inviteId: InviteId, userId: UserId): Promise<boo
         }
 
         // check if the user is already a member of the organization, if so, do not add them again but dont fail
-        const usersMemberships = await getOrganizationMembershipsForUserDb(userId);
-        if (usersMemberships.find((m) => m.orgId === invite.forOrganizationId)) {
+        const userOrgs = await organizationsCollectionHandler.read(userId);
+        if (userOrgs.includes(invite.forOrganizationId)) {
             console.warn('User is already a member of the organization:', userId, invite.forOrganizationId);
             return true;
         }
 
-        await inviteHandler.update(inviteId, { uses: invite.uses + 1 }, { preventSync: true });
-
-        const membershipRecord: MembershipRecord = {
-            userId: userId,
-            orgId: invite.forOrganizationId,
-            joinedAt: Date.now(),
-        };
-        await createMembershipIfDoesntExist(membershipRecord);
-
-        // Sync updates
-        await syncOrgInvites(invite.forOrganizationId);
-        await syncMembersInOrg(invite.forOrganizationId);
+        await inviteHandler.update(inviteId, { uses: invite.uses + 1 });
+        await organizationMembersCollectionHandler.add(invite.forOrganizationId, [userId]);
         return true;
     } catch (e) {
         console.error(e);
