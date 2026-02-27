@@ -3,6 +3,7 @@ import {
     CollectionSource,
     CollectionSourceDataInstance,
     CreateObjectSourceData,
+    EditableCollectionSource,
     ObjectSource,
     ObjectSourceDataInstance,
     UID,
@@ -55,7 +56,7 @@ export const addToCollectionSource = async (
     sockCtx: SocketContextType,
     collectionId: UID,
     itemIds: UID[],
-    type: CollectionSource
+    type: EditableCollectionSource
 ): Promise<void> => {
     await sockCtx.emit(ClientSE.ADD_TO_COLLECTION_SOURCE, {
         collectionId,
@@ -68,7 +69,7 @@ export const removeFromCollectionSource = async (
     sockCtx: SocketContextType,
     collectionId: UID,
     itemIds: UID[],
-    type: CollectionSource
+    type: EditableCollectionSource
 ): Promise<void> => {
     await sockCtx.emit(ClientSE.REMOVE_FROM_COLLECTION_SOURCE, {
         collectionId,

@@ -1,14 +1,16 @@
 import {
     CollectionSource,
     CollectionSourceDataPayload,
+    CollectionSourceOf,
     CreateObjectSourceData,
+    EditableCollectionSource,
     ObjectSource,
     ObjectSourceDataPayload,
     UID,
     UpdateObjectSourceData,
 } from '@mosaiq/terrazzo-common';
 import { syncCollectionSource, syncObjectSource } from '@trz-api/broadcasters';
-import { getCollectionHandler, getObjectHandler } from './dataSourceRegistry';
+import { getCollectionHandler, getEditableCollectionHandler, getObjectHandler } from './dataSourceRegistry';
 
 export const readObjectSource = async <T extends ObjectSource>(
     objectId: UID,
@@ -59,13 +61,13 @@ export const updateObjectSource = async (objectId: UID, update: UpdateObjectSour
     }
 };
 
-export const addToCollectionSource = async (
+export const addToCollectionSource = async <T extends EditableCollectionSource>(
     collectionId: UID,
-    itemIds: UID[],
-    type: CollectionSource
+    itemIds: CollectionSourceOf<T>[],
+    type: T
 ): Promise<void> => {
     try {
-        const handler = getCollectionHandler(type);
+        const handler = getEditableCollectionHandler(type);
         await handler.add(collectionId, itemIds);
         await syncCollectionSource(collectionId, type);
     } catch (err) {
@@ -74,13 +76,13 @@ export const addToCollectionSource = async (
     }
 };
 
-export const removeFromCollectionSource = async (
+export const removeFromCollectionSource = async <T extends EditableCollectionSource>(
     collectionId: UID,
-    itemIds: UID[],
-    type: CollectionSource
+    itemIds: CollectionSourceOf<T>[],
+    type: T
 ): Promise<void> => {
     try {
-        const handler = getCollectionHandler(type);
+        const handler = getEditableCollectionHandler(type);
         await handler.remove(collectionId, itemIds);
         await syncCollectionSource(collectionId, type);
     } catch (err) {

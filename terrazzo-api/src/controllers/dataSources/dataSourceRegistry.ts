@@ -1,7 +1,9 @@
 import {
     CollectionSource,
     CollectionSourceController,
+    CollectionSourceEditableHandler,
     CollectionSourceHandler,
+    EditableCollectionSource,
     ObjectSource,
     ObjectSourceController,
     ObjectSourceHandler,
@@ -43,4 +45,10 @@ export const getObjectHandler = <T extends ObjectSource>(type: T): ObjectSourceH
 
 export const getCollectionHandler = <T extends CollectionSource>(type: T): CollectionSourceHandler<T> => {
     return collectionSourceController[type];
+};
+
+export const getEditableCollectionHandler = <T extends EditableCollectionSource>(
+    type: T
+): CollectionSourceEditableHandler<T> => {
+    return collectionSourceController[type] as CollectionSourceEditableHandler<T>; // This cast is necessary because the controller is typed with the more general CollectionSourceHandler, but we know that for EditableCollectionSources, it will actually be a CollectionSourceEditableHandler.
 };

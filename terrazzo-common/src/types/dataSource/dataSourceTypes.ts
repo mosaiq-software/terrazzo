@@ -5,7 +5,12 @@ import { ObjectSource, ObjectSourcesMap } from './objectSources';
 export type CreateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['create'];
 export type UpdateObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['update'];
 export type ObjectSourceDataInstance<T extends ObjectSource> = ObjectSourcesMap[T]['data'];
-export type CollectionSourceDataInstance<T extends CollectionSource> = CollectionSourceDataMap[T];
+export type CollectionSourceOf<T extends CollectionSource> = CollectionSourceDataMap[T]['of'];
+export type CollectionSourceDataInstance<T extends CollectionSource> = CollectionSourceOf<T>[];
+
+export type EditableCollectionSource = {
+    [T in CollectionSource]: CollectionSourceDataMap[T]['editable'] extends true ? T : never;
+}[CollectionSource];
 
 export type CreateObjectSourceData = {
     [T in ObjectSource]: {
@@ -67,11 +72,19 @@ export interface CollectionSourceAddOptions {
 export interface CollectionSourceRemoveOptions {
     preventSync?: boolean;
 }
-export interface CollectionSourceHandler<T extends CollectionSource> {
-    read: (parentId: UID, options?: CollectionSourceReadOptions) => Promise<CollectionSourceDataMap[T] | undefined>;
-    add: (parentId: UID, itemIds: UID[], options?: CollectionSourceAddOptions) => Promise<void>;
-    remove: (parentId: UID, itemIds: UID[], options?: CollectionSourceRemoveOptions) => Promise<void>;
+
+export interface CollectionSourceReadHandler<T extends CollectionSource> {
+    read: (parentId: UID, options?: CollectionSourceReadOptions) => Promise<CollectionSourceOf<T>[]>;
 }
+
+export interface CollectionSourceEditableHandler<T extends CollectionSource> extends CollectionSourceReadHandler<T> {
+    add: (parentId: UID, itemIds: CollectionSourceOf<T>[], options?: CollectionSourceAddOptions) => Promise<void>;
+    remove: (parentId: UID, itemIds: CollectionSourceOf<T>[], options?: CollectionSourceRemoveOptions) => Promise<void>;
+}
+
+export type CollectionSourceHandler<T extends CollectionSource> = CollectionSourceDataMap[T]['editable'] extends true
+    ? CollectionSourceEditableHandler<T>
+    : CollectionSourceReadHandler<T>;
 
 export type ObjectSourceController = {
     [T in ObjectSource]: ObjectSourceHandler<T>;

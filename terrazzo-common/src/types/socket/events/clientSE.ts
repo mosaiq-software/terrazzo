@@ -2,6 +2,7 @@ import { CollectionSource } from '../../dataSource/collectionSources';
 import {
     CollectionSourceData,
     CreateObjectSourceData,
+    EditableCollectionSource,
     ObjectSourceData,
     UpdateObjectSourceData,
 } from '../../dataSource/dataSourceTypes';
@@ -116,8 +117,8 @@ export interface ClientSEPayload {
     [ClientSE.CREATE_OBJECT_SOURCE]: { data: CreateObjectSourceData };
     [ClientSE.UPDATE_OBJECT_SOURCE]: { id: UID; data: UpdateObjectSourceData };
     [ClientSE.READ_COLLECTION_SOURCE]: { source: CollectionSource; id: UID };
-    [ClientSE.ADD_TO_COLLECTION_SOURCE]: { source: CollectionSource; collectionId: UID; itemIds: UID[] };
-    [ClientSE.REMOVE_FROM_COLLECTION_SOURCE]: { source: CollectionSource; collectionId: UID; itemIds: UID[] };
+    [ClientSE.ADD_TO_COLLECTION_SOURCE]: { source: EditableCollectionSource; collectionId: UID; itemIds: UID[] };
+    [ClientSE.REMOVE_FROM_COLLECTION_SOURCE]: { source: EditableCollectionSource; collectionId: UID; itemIds: UID[] };
 }
 export interface ClientSEReplies {
     // Client to Server req - Server to Client callback
