@@ -24,10 +24,10 @@ export const getModulesByOrgIdDb = async (orgId: OrganizationId, options?: Parti
     return models.map((mdl) => mdl.toJSON());
 };
 
-export const getModuleIdsByOrgIdDb = async (orgId: OrganizationId): Promise<ModuleId[]> => {
+export const getModuleIdsByParentIdDb = async (parentId: ModuleId): Promise<ModuleId[]> => {
     const models = await ModuleModel.findAll({
         attributes: ['id'],
-        where: { orgId },
+        where: { parentId },
         order: [['order', 'ASC']],
     });
     return models.map((mdl) => mdl.toJSON().id);
