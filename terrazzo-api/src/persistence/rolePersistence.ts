@@ -13,6 +13,11 @@ export const getRolesByOrgIdDb = async (orgId: OrganizationId) => {
     return models.map((role) => role.toJSON());
 };
 
+export const getRoleIdsByOrgIdDb = async (orgId: OrganizationId): Promise<RoleId[]> => {
+    const models = await RoleModel.findAll({ attributes: ['id'], where: { orgId }, order: [['order', 'ASC']] });
+    return models.map((role) => role.toJSON().id);
+};
+
 export const createRoleOnOrgDb = async (role: Role) => {
     const model = await RoleModel.create({ ...role });
     return model.toJSON();

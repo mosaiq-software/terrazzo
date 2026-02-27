@@ -8,8 +8,17 @@ import {
     ObjectSourceController,
     ObjectSourceHandler,
 } from '@mosaiq/terrazzo-common';
+import { cardAssigneesCollectionHandler } from './collectionHandlers/cardAssignees';
+import { cardsCollectionHandler } from './collectionHandlers/cards';
+import { invitesCollectionHandler } from './collectionHandlers/invites';
 import { labelAssignmentsCollectionHandler } from './collectionHandlers/labelAssignments';
 import { labelsCollectionHandler } from './collectionHandlers/labels';
+import { listsCollectionHandler } from './collectionHandlers/lists';
+import { modulesCollectionHandler } from './collectionHandlers/modules';
+import { organizationMembersCollectionHandler } from './collectionHandlers/organizationMembers';
+import { roleAssignmentsCollectionHandler } from './collectionHandlers/roleAssignments';
+import { rolesCollectionHandler } from './collectionHandlers/roles';
+import { textBlockSnapshotsCollectionHandler } from './collectionHandlers/textBlockSnapshots';
 import { cardHandler } from './objectHandlers/card';
 import { inviteHandler } from './objectHandlers/invite';
 import { labelHandler } from './objectHandlers/label';
@@ -34,9 +43,29 @@ const objectSourceController: ObjectSourceController = {
     [ObjectSource.User]: userHandler,
 };
 
-const collectionSourceController: CollectionSourceController = {
-    [CollectionSource.Labels]: labelsCollectionHandler,
+type EditableCollectionSourceHandlers = {
+    [T in EditableCollectionSource]: CollectionSourceEditableHandler<T>;
+};
+
+const editableCollectionHandlers: EditableCollectionSourceHandlers = {
+    [CollectionSource.CardAssignees]: cardAssigneesCollectionHandler,
     [CollectionSource.LabelAssignments]: labelAssignmentsCollectionHandler,
+    [CollectionSource.OrganizationMembers]: organizationMembersCollectionHandler,
+    [CollectionSource.RoleAssignments]: roleAssignmentsCollectionHandler,
+};
+
+const collectionSourceController: CollectionSourceController = {
+    [CollectionSource.Cards]: cardsCollectionHandler,
+    [CollectionSource.Lists]: listsCollectionHandler,
+    [CollectionSource.Labels]: labelsCollectionHandler,
+    [CollectionSource.Invites]: invitesCollectionHandler,
+    [CollectionSource.Modules]: modulesCollectionHandler,
+    [CollectionSource.Roles]: rolesCollectionHandler,
+    [CollectionSource.TextBlockSnapshots]: textBlockSnapshotsCollectionHandler,
+    [CollectionSource.CardAssignees]: cardAssigneesCollectionHandler,
+    [CollectionSource.LabelAssignments]: labelAssignmentsCollectionHandler,
+    [CollectionSource.OrganizationMembers]: organizationMembersCollectionHandler,
+    [CollectionSource.RoleAssignments]: roleAssignmentsCollectionHandler,
 };
 
 export const getObjectHandler = <T extends ObjectSource>(type: T): ObjectSourceHandler<T> => {
@@ -50,5 +79,5 @@ export const getCollectionHandler = <T extends CollectionSource>(type: T): Colle
 export const getEditableCollectionHandler = <T extends EditableCollectionSource>(
     type: T
 ): CollectionSourceEditableHandler<T> => {
-    return collectionSourceController[type] as CollectionSourceEditableHandler<T>; // This cast is necessary because the controller is typed with the more general CollectionSourceHandler, but we know that for EditableCollectionSources, it will actually be a CollectionSourceEditableHandler.
+    return editableCollectionHandlers[type];
 };

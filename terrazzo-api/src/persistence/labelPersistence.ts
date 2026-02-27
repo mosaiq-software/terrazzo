@@ -7,7 +7,7 @@ export const getLabelByIdDb = async (id: LabelId) => {
 };
 
 export const getLabelIdsByBoardIdDb = async (boardId: ModuleId) => {
-    const models = await LabelModel.findAll({ where: { boardId } });
+    const models = await LabelModel.findAll({ attributes: ['id'], where: { boardId } });
     return models.map((label) => label.toJSON().id);
 };
 
