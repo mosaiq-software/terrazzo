@@ -3,6 +3,7 @@ import {
     Box,
     Button,
     Center,
+    Combobox,
     Group,
     Loader,
     Modal,
@@ -12,7 +13,7 @@ import {
     useCombobox,
 } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { CardId, fullName, TextBlockResourceType } from '@mosaiq/terrazzo-common';
+import { CardId, fullName, ListId, TextBlockResourceType } from '@mosaiq/terrazzo-common';
 import { BlockNoteEditor } from '@trz/components/BlockNote/BlockNoteEditor';
 import EditableTextbox from '@trz/components/UI/EditableTextbox';
 import { NotFound, PageErrors } from '@trz/components/UI/NotFound';
@@ -28,7 +29,7 @@ import { getCardNumber } from '@trz/util/boardUtils';
 import { COLORS } from '@trz/util/colors';
 import { niceDateWithTime } from '@trz/util/dateUtils';
 import { NoteType, notify } from '@trz/util/notifications';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FaArchive, FaUserMinus, FaUserPlus } from 'react-icons/fa';
 import { MdFileCopy } from 'react-icons/md';
 import { AssigneeMenu } from './AssigneeMenu';
@@ -51,11 +52,40 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
     useCatchSaveKey();
     const boardMeta = useBoardMetadata();
     const perms = boardMeta?.permissions;
+    
+const currentListId = useMemo(() => {
+  return boardMeta?.lists.find(list =>
+    list.cardIds.includes(props.cardId)
+  )?.listId;
+}, [boardMeta?.lists, props.cardId]);
+
+   
+const listOptions = useMemo(() => {
+  return boardMeta?.lists.map(list => ({
+    value: list.listId,
+    label: list.listId, // or maybe get from a map later
+  })) ?? [];
+}, [boardMeta?.lists]);
+
+
+
+const handleMove = (toListId: ListId) => {
+  if (!boardMeta?.permissions.moveCards || toListId === currentListId) return;
+  emitMoveCard(sockCtx, props.cardId, toListId, undefined); // to end of list
+};
+
+    const cardDetailsComboBox = useCombobox({
+        onDropdownClose: () => cardDetailsComboBox.resetSelectedOption(),
+    });
     const createdByUser = useUser(card?.createdById ?? undefined);
 
     const onCloseModal = () => {
         props.onClose();
     };
+
+    alert('test');
+    useBoardMetadata(); //force board metadata to load so that permissions are correct when the modal is opened
+
 
     async function onTitleChange(value: string) {
         if (!card) {
@@ -91,7 +121,7 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
 
     if (!card) {
         return (
-            <Center>
+            <Center>x
                 <Stack align="center">
                     <Loader type="bars" />
                     <Text ta="center">Loading...</Text>
@@ -219,6 +249,37 @@ const CardDetails = (props: CardDetailsProps): React.JSX.Element | null => {
                         gap={'lg'}
                     >
                         <Group>
+                            <Combobox
+    store={combobox}
+    onOptionSubmit={(val) => {
+      handleMove(val as ListId);
+      combobox.closeDropdown();
+    }}
+  >
+    <Combobox.Target>
+      <Button
+        variant="light"
+        onClick={() => combobox.toggleDropdown()}
+      >
+        Move to:{' '}
+        {listOptions.find(opt => opt.value === currentListId)?.label}
+      </Button>
+    </Combobox.Target>
+
+    <Combobox.Dropdown>
+      <Combobox.Options>
+        {listOptions.map(option => (
+          <Combobox.Option
+            key={option.value}
+            value={option.value}
+            active={option.value === currentListId}
+          >
+            {option.label}
+          </Combobox.Option>
+        ))}
+      </Combobox.Options>
+    </Combobox.Dropdown>
+  </Combobox>
                             <PriorityButtons
                                 card={card}
                                 viewOnly={!perms.editCard}
